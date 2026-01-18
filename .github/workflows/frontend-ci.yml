@@ -11,7 +11,8 @@ on:
       - 'frontend/**'
 
 jobs:
-  build:
+  frontend:
+    name: Frontend CI
     runs-on: ubuntu-latest
 
     steps:
