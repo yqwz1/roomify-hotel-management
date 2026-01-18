@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: roomify-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: roomify
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: roomify_user
+      MYSQL_PASSWORD: roomify_pass
+    ports:
+      - "3307:3306"  # Changed from 3306:3306 to 3307:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - roomify-network
+
+networks:
+  roomify-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
