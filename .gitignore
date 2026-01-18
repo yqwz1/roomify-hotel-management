@@ -1,0 +1,15 @@
+# General
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Secrets
+.env
+.env.*
+
+# Logs
+*.log
