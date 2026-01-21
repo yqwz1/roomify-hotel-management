@@ -1,4 +1,4 @@
-package com.roomify.api;
+package com.roomify.backend.api;
 
 import java.time.Instant;
 import java.util.Map;
