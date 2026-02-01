@@ -7,6 +7,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class JwtUtils {
@@ -30,7 +31,7 @@ public class JwtUtils {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_MS))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
