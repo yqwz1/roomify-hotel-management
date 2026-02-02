@@ -11,10 +11,23 @@ public class AuditService {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
+    public void logLoginAttempt(String email, String ip, boolean success) {
 
-    public void logEvent(String email, String status, String ip) {
-        AuditLog log = new AuditLog(email, "LOGIN_ATTEMPT", status, ip);
+        String status = success ? "SUCCESS" : "FAILURE";
+
+        AuditLog log = new AuditLog(
+                email,
+                "LOGIN_ATTEMPT",
+                status,
+                ip
+        );
+
         auditLogRepository.save(log);
-        System.out.println("Audit Log saved for: " + email + " | Status: " + status);
+
+        System.out.println(
+                "Audit Log saved | Email: " + email +
+                " | Status: " + status +
+                " | IP: " + ip
+        );
     }
 }
