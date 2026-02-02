@@ -16,7 +16,7 @@ A full-stack hotel management application built with React (Frontend) and Spring
 - Spring Boot 3.2
 - Java 17
 - Maven
-- MySQL 8.0
+- PostgreSQL 16
 
 ### DevOps
 - Docker & Docker Compose
@@ -39,18 +39,18 @@ git clone
 cd roomify-hotel-management
 ```
 
-### 2. Database Setup (MySQL with Docker)
+### 2. Database Setup (PostgreSQL with Docker)
 
-Start the MySQL container:
+Start the PostgreSQL container:
 ```bash
 docker-compose up -d
 ```
 
 This will create:
-- MySQL database: `roomify`
+- PostgreSQL database: `roomify`
 - Username: `roomify_user`
 - Password: `roomify_pass`
-- Port: `3306`
+- Port: `5432`
 
 Verify the container is running:
 ```bash
@@ -128,7 +128,7 @@ spring.application.name=roomify-backend
 server.port=8080
 
 # Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/roomify
+spring.datasource.url=jdbc:postgresql://localhost:5432/roomify
 spring.datasource.username=roomify_user
 spring.datasource.password=roomify_pass
 spring.jpa.hibernate.ddl-auto=update
@@ -140,6 +140,13 @@ spring.jpa.show-sql=true
 Create `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:8080/api
+```
+
+### Optional root .env
+
+Copy `.env.example` to `.env` and adjust if needed:
+```bash
+cp .env.example .env
 ```
 
 ## 🧪 Running Tests
@@ -189,7 +196,7 @@ npm run preview
 ### Database Connection Issues
 
 1. Ensure Docker is running
-2. Check if MySQL container is up: `docker ps`
+2. Check if PostgreSQL container is up: `docker ps`
 3. Verify credentials in `application.properties`
 4. Try restarting the container: `docker-compose restart`
 
