@@ -10,6 +10,7 @@
  * @param {string} password - User password
  * @returns {Promise<Object>} JWT response object matching backend DTO structure
  */
+/*
 const mockLogin = (email, password) => {
     return new Promise((resolve, reject) => {
         // Simulate network delay
@@ -43,10 +44,12 @@ const mockLogin = (email, password) => {
         }, 1000); // 1 second delay
     });
 };
+*/
 
-// REAL IMPLEMENTATION (Commented out - uncomment when backend is ready)
-// import axios from 'axios';
-// import api from './api';
+
+
+import api from './api';
+
 
 /**
  * Real login function using Axios to communicate with backend
@@ -54,37 +57,44 @@ const mockLogin = (email, password) => {
  * @param {string} password - User password
  * @returns {Promise<Object>} JWT response object from backend
  */
-// const login = async (email, password) => {
-//   try {
-//     const response = await api.post('/api/auth/login', {
-//       email,
-//       password
-//     });
-//     
-//     // Backend should return JwtResponse DTO:
-//     // {
-//     //   token: string,
-//     //   type: string (e.g., "Bearer"),
-//     //   id: number,
-//     //   username: string,
-//     //   email: string,
-//     //   roles: string[] (e.g., ["ROLE_MANAGER", "ROLE_STAFF"])
-//     // }
-//     return response.data;
-//   } catch (error) {
-//     // Handle error response from backend
-//     if (error.response && error.response.data && error.response.data.message) {
-//       throw new Error(error.response.data.message);
-//     }
-//     throw new Error('Login failed. Please check your credentials and try again.');
-//   }
-// };
+const login = async (email, password) => {
+    try {
+        const response = await api.post('/auth/login', {
+            email,
+            password
+        });
+
+        // Backend should return JwtResponse DTO:
+        // {
+        //   token: string,
+        //   type: string (e.g., "Bearer"),
+        //   id: number,
+        //   username: string,
+        //   email: string,
+        //   roles: string[] (e.g., ["ROLE_MANAGER", "ROLE_STAFF"])
+        // }
+        return response.data;
+    } catch (error) {
+        // Handle error response from backend
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        // Fallback error message (or backend strictly returns string body)
+        if (error.response && error.response.data && typeof error.response.data === 'string') {
+            throw new Error(error.response.data);
+        }
+        throw new Error('Login failed. Please check your credentials and try again.');
+    }
+};
+
 
 /**
  * Login function - currently uses mock implementation
  * Switch to real implementation by uncommenting above and removing mock
  */
-export const login = mockLogin;
+// export const login = mockLogin;
+export { login };
+
 
 /**
  * Logout function - clears authentication data
