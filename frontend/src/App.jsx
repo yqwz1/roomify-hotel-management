@@ -5,16 +5,18 @@ import Rooms from './pages/Rooms'
 import Bookings from './pages/Bookings'
 import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
+import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
 import PrivateRoute from './components/PrivateRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 
 /**
  * Navigation component - shows/hides links based on authentication status
  */
 const Navigation = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, hasRole } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -33,9 +35,6 @@ const Navigation = () => {
                 <Link to="/" className="text-gray-700 hover:text-blue-600 px-3 py-2">
                   Home
                 </Link>
-                <Link to="/rooms" className="text-gray-700 hover:text-blue-600 px-3 py-2">
-                  Rooms
-                </Link>
                 <Link to="/bookings" className="text-gray-700 hover:text-blue-600 px-3 py-2">
                   Bookings
                 </Link>
@@ -48,6 +47,13 @@ const Navigation = () => {
               </>
             ) : (
               <>
+                {/* Show Rooms link ONLY if user is a Manager */}
+                {hasRole('ROLE_MANAGER') && (
+                  <Link to="/rooms" className="text-gray-700 hover:text-blue-600 px-3 py-2">
+                    Rooms
+                  </Link>
+                )}
+
                 <span className="text-gray-700 text-sm">
                   Welcome, <span className="font-semibold">{user?.username}</span>
                 </span>
@@ -77,9 +83,19 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/rooms" element={<Rooms />} />
         <Route path="/bookings" element={<Bookings />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/rooms"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+              <Rooms />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Dashboard Routes with Role-Based Access */}
         <Route

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { login as loginService, logout as logoutService, getStoredToken, getStoredUser, storeAuthData } from '../services/authService';
 import PropTypes from 'prop-types';
+import { jwtDecode } from 'jwt-decode';
 
 // Create Auth Context
 const AuthContext = createContext(null);
@@ -35,10 +36,21 @@ export const AuthProvider = ({ children }) => {
                 const storedToken = getStoredToken();
                 const storedUser = getStoredUser();
 
-                if (storedToken && storedUser) {
-                    setToken(storedToken);
-                    setUser(storedUser);
-                    setIsAuthenticated(true);
+                if (storedToken) {
+                    // Decode token to check expiration
+                    const decoded = jwtDecode(storedToken);
+                    const currentTime = Date.now() / 1000;
+
+                    if (decoded.exp < currentTime) {
+                        // Token expired
+                        console.warn('Token expired, logging out');
+                        logoutService();
+                    } else if (storedUser) {
+                        // Token valid
+                        setToken(storedToken);
+                        setUser(storedUser);
+                        setIsAuthenticated(true);
+                    }
                 }
             } catch (error) {
                 console.error('Error initializing auth:', error);
