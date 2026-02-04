@@ -1,4 +1,4 @@
-package com.roomify.backend.user;
+package com.roomify.backend.entity;
 
 public enum Role {
     MANAGER,

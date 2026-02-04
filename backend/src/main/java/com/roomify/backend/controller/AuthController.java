@@ -24,8 +24,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest request,
-            HttpServletRequest httpRequest
-    ) {
+            HttpServletRequest httpRequest) {
 
         String ipAddress = httpRequest.getRemoteAddr();
 
@@ -33,27 +32,24 @@ public class AuthController {
         if ("admin@roomify.com".equals(request.getEmail())
                 && "password123".equals(request.getPassword())) {
 
-            //  Successful login audit
+            // Successful login audit
             auditService.logLoginAttempt(
-                request.getEmail(),
-                ipAddress,
-                true
-            );
+                    request.getEmail(),
+                    ipAddress,
+                    true);
 
             return ResponseEntity.ok(new JwtResponse(
-                "fake-jwt-token",
-                1L,
-                "Admin",
-                "admin@roomify.com",
-                List.of("ROLE_MANAGER")
-            ));
+                    "fake-jwt-token",
+                    1L,
+                    "Admin",
+                    "admin@roomify.com",
+                    List.of("ROLE_MANAGER")));
         }
         // Failed login audit
         auditService.logLoginAttempt(
-            request.getEmail(),
-            ipAddress,
-            false
-        );
+                request.getEmail(),
+                ipAddress,
+                false);
 
         return ResponseEntity.badRequest().body("Error: Wrong email or password");
     }

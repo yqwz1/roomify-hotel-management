@@ -1,4 +1,4 @@
-package com.roomify.backend.user;
+package com.roomify.backend.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,7 +6,10 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository 
+import com.roomify.backend.entity.Role;
+import com.roomify.backend.entity.User;
+
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
