@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthProvider'
 import Home from './pages/Home'
 import Rooms from './pages/Rooms'

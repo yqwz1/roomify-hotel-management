@@ -1,5 +1,3 @@
-import api from './api';
-
 /**
  * Room Service
  * Handles API calls related to rooms

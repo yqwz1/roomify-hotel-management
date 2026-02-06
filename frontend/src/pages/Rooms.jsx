@@ -12,6 +12,7 @@ export default function Rooms() {
         const data = await getRooms();
         setRooms(data);
       } catch (err) {
+        console.error('Failed to load rooms:', err);
         setError('Failed to load rooms');
       } finally {
         setLoading(false);
