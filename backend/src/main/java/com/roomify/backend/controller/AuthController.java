@@ -13,48 +13,50 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuditService auditService;
+        @Autowired
+        private com.roomify.backend.service.AuditService auditService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletRequest httpRequest
-    ) {
+        @Autowired
+        private com.roomify.backend.config.JwtUtils jwtUtils;
 
-        String ipAddress = httpRequest.getRemoteAddr();
+        @PostMapping("/login")
+        public ResponseEntity<?> login(
+                        @Valid @RequestBody LoginRequest request,
+                        HttpServletRequest httpRequest) {
 
-        // Temporary mock authentication
-        if ("admin@roomify.com".equals(request.getEmail())
-                && "password123".equals(request.getPassword())) {
+                String ipAddress = httpRequest.getRemoteAddr();
 
-            //  Successful login audit
-            auditService.logLoginAttempt(
-                request.getEmail(),
-                ipAddress,
-                true
-            );
+                // Temporary mock authentication (password check only)
+                // In real app, check DB.
+                if ("admin@roomify.com".equals(request.getEmail())
+                                && "password123".equals(request.getPassword())) {
 
-            return ResponseEntity.ok(new JwtResponse(
-                "fake-jwt-token",
-                1L,
-                "Admin",
-                "admin@roomify.com",
-                List.of("ROLE_MANAGER")
-            ));
+                        // Generate REAL token
+                        String token = jwtUtils.generateToken(request.getEmail(), "ROLE_MANAGER");
+
+                        // Successful login audit
+                        auditService.logLoginAttempt(
+                                        request.getEmail(),
+                                        ipAddress,
+                                        true);
+
+                        return ResponseEntity.ok(new JwtResponse(
+                                        token,
+                                        1L,
+                                        "Admin",
+                                        "admin@roomify.com",
+                                        List.of("ROLE_MANAGER")));
+                }
+                // Failed login audit
+                auditService.logLoginAttempt(
+                                request.getEmail(),
+                                ipAddress,
+                                false);
+
+                return ResponseEntity.badRequest().body("Error: Wrong email or password");
         }
-        // Failed login audit
-        auditService.logLoginAttempt(
-            request.getEmail(),
-            ipAddress,
-            false
-        );
-
-        return ResponseEntity.badRequest().body("Error: Wrong email or password");
-    }
 }
