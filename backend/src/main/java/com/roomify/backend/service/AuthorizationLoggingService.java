@@ -19,8 +19,7 @@ public class AuthorizationLoggingService {
 
     public AuthorizationLoggingService(
             ObjectMapper objectMapper,
-            AuditLogRepository auditLogRepository
-    ) {
+            AuditLogRepository auditLogRepository) {
         this.objectMapper = objectMapper;
         this.auditLogRepository = auditLogRepository;
     }
@@ -42,9 +41,7 @@ public class AuthorizationLoggingService {
                             entry.getEmail(),
                             entry.getResource() + "." + entry.getMethod(),
                             entry.isAuthorized() ? "AUTHORIZED" : "DENIED",
-                            "N/A"
-                    )
-            );
+                            "N/A"));
 
         } catch (JsonProcessingException e) {
             logger.error("Failed to serialize authorization log entry", e);
