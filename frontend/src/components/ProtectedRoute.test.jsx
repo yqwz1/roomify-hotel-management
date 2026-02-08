@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import { AuthProvider } from '../context/AuthProvider';
 
 // Mock the useAuth hook directly since we want to control the return values precisely
 const mockUseAuth = vi.fn();

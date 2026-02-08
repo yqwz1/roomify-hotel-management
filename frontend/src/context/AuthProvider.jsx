@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { login as loginService, logout as logoutService, getStoredToken, getStoredUser, storeAuthData } from '../services/authService';
 import PropTypes from 'prop-types';
