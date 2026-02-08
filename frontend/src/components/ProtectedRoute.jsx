@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center">
+        return <div className="min-h-screen flex items-center justify-center" role="status" aria-label="Loading">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>;
     }

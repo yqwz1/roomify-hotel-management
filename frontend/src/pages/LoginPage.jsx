@@ -136,7 +136,7 @@ const LoginPage = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="w-full max-w-md shadow-lg">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center" role="heading" aria-level="1">Sign in</CardTitle>
                     <CardDescription className="text-center">
                         Enter your email and password to access your account
                     </CardDescription>
@@ -152,7 +152,7 @@ const LoginPage = () => {
                         </Alert>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
@@ -188,7 +188,7 @@ const LoginPage = () => {
                         <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
                                     Signing in...
                                 </>
                             ) : (
