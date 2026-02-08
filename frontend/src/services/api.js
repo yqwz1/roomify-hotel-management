@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -24,6 +24,12 @@ api.interceptors.request.use(
   }
 )
 
+let logoutCallback = null;
+
+export const setupInterceptors = (logoutFn) => {
+  logoutCallback = logoutFn;
+};
+
 // Response interceptor (for handling errors globally)
 api.interceptors.response.use(
   (response) => {
@@ -33,7 +39,10 @@ api.interceptors.response.use(
     // Handle errors globally
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      console.error('Unauthorized access')
+      console.error('Unauthorized access - Redirecting to login')
+      if (logoutCallback) {
+        logoutCallback();
+      }
     }
     return Promise.reject(error)
   }

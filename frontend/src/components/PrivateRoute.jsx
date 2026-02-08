@@ -37,19 +37,8 @@ const PrivateRoute = ({ children, allowedRoles = null }) => {
         const hasRequiredRole = user?.roles?.some(role => allowedRoles.includes(role));
 
         if (!hasRequiredRole) {
-            // Redirect to appropriate dashboard based on user's actual role
-            const userRole = user?.roles?.[0];
-
-            switch (userRole) {
-                case 'ROLE_MANAGER':
-                    return <Navigate to="/manager/dashboard" replace />;
-                case 'ROLE_STAFF':
-                    return <Navigate to="/staff/dashboard" replace />;
-                case 'ROLE_GUEST':
-                    return <Navigate to="/guest/dashboard" replace />;
-                default:
-                    return <Navigate to="/login" replace />;
-            }
+            // Redirect to unauthorized page instead of guessing a dashboard
+            return <Navigate to="/unauthorized" replace />;
         }
     }
 
