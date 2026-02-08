@@ -45,15 +45,16 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void missingTokenAllowsRequestToProceed() throws Exception {
+    void missingTokenReturnsUnauthorized() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/protected");
         MockHttpServletResponse response = new MockHttpServletResponse();
         jakarta.servlet.FilterChain chain = Mockito.mock(jakarta.servlet.FilterChain.class);
 
         filter.doFilter(request, response, chain);
 
-        assertEquals(200, response.getStatus());
-        verify(chain).doFilter(any(), any());
+        assertEquals(401, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Missing token"));
+        verify(chain, never()).doFilter(any(), any());
     }
 
     @Test
