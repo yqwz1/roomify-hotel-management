@@ -17,6 +17,9 @@ cd backend
 ```
 *Wait for "Started RoomifyBackendApplication"*
 
+> [!IMPORTANT]
+> To stop the backend, press **Ctrl+C** in the terminal. Do not just close the window.
+
 ## 3. Start the Frontend
 Open a **new** terminal window, navigate to the `frontend` folder, and run:
 ```bash
@@ -25,4 +28,16 @@ npm run dev
 ```
 
 ## 4. Access the App
-Open your browser to: [http://localhost:3000](http://localhost:3000)
+Open your browser to: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## Troubleshooting
+
+### "Port 8080 was already in use"
+If you see this error, it means the backend is already running in the background. Run this command to stop it:
+
+```bash
+lsof -ti:8080 | xargs kill -9
+```
+Then try running the backend again.
