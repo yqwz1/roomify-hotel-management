@@ -10,14 +10,10 @@ const mockUseAuth = vi.fn().mockReturnValue({
     user: null
 });
 
-vi.mock('../context/AuthProvider', async () => {
-    const actual = await vi.importActual('../context/AuthProvider');
-    return {
-        ...actual,
-        useAuth: () => mockUseAuth(),
-        AuthProvider: ({ children }) => <div>{children}</div> // Mock provider to just render children
-    };
-});
+vi.mock('../context/AuthProvider', () => ({
+    useAuth: () => mockUseAuth(),
+    AuthProvider: ({ children }) => <div>{children}</div> // Mock provider to just render children
+}));
 
 describe('ProtectedRoute', () => {
     // Helper to render component wrapped in router

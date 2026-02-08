@@ -15,6 +15,18 @@ vi.mock('../services/authService', () => ({
     storeAuthData: vi.fn()
 }));
 
+vi.mock('../services/api', () => ({
+    setupInterceptors: vi.fn(),
+    default: {
+        post: vi.fn(),
+        get: vi.fn(),
+        interceptors: {
+            request: { use: vi.fn() },
+            response: { use: vi.fn() }
+        }
+    }
+}));
+
 
 
 // Mock useNavigate

@@ -12,65 +12,7 @@ import GuestDashboard from './pages/GuestDashboard'
 import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 
-/**
- * Navigation component - shows/hides links based on authentication status
- */
-const Navigation = () => {
-  const { isAuthenticated, user, logout, hasRole } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  return (
-    <nav className="bg-white shadow-md">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-xl font-bold text-blue-600">
-            Roomify
-          </Link>
-          <div className="flex items-center space-x-4">
-            {!isAuthenticated ? (
-              <>
-                <Link to="/" className="text-gray-700 hover:text-blue-600 px-3 py-2">
-                  Home
-                </Link>
-                <Link to="/bookings" className="text-gray-700 hover:text-blue-600 px-3 py-2">
-                  Bookings
-                </Link>
-                <Link
-                  to="/login"
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-                >
-                  Login
-                </Link>
-              </>
-            ) : (
-              <>
-                {/* Show Rooms link ONLY if user is a Manager */}
-                {hasRole('ROLE_MANAGER') && (
-                  <Link to="/rooms" className="text-gray-700 hover:text-blue-600 px-3 py-2">
-                    Rooms
-                  </Link>
-                )}
-
-                <span className="text-gray-700 text-sm">
-                  Welcome, <span className="font-semibold">{user?.username}</span>
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
+import Layout from './components/Layout';
 
 /**
  * AppContent component - handles routing logic
@@ -78,21 +20,19 @@ const Navigation = () => {
 const AppContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/bookings" element={<Bookings />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />
+        <Route path="/bookings" element={<Layout showSidebar={false}><Bookings /></Layout>} />
+        <Route path="/login" element={<Layout showSidebar={false}><LoginPage /></Layout>} />
+        <Route path="/unauthorized" element={<Layout showSidebar={false}><Unauthorized /></Layout>} />
 
         {/* Protected Routes */}
         <Route
           path="/rooms"
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
-              <Rooms />
+              <Layout showSidebar={true}><Rooms /></Layout>
             </ProtectedRoute>
           }
         />
@@ -102,7 +42,7 @@ const AppContent = () => {
           path="/manager/dashboard"
           element={
             <PrivateRoute allowedRoles={['ROLE_MANAGER']}>
-              <ManagerDashboard />
+              <Layout showSidebar={true}><ManagerDashboard /></Layout>
             </PrivateRoute>
           }
         />
@@ -110,7 +50,7 @@ const AppContent = () => {
           path="/staff/dashboard"
           element={
             <PrivateRoute allowedRoles={['ROLE_STAFF']}>
-              <StaffDashboard />
+              <Layout showSidebar={true}><StaffDashboard /></Layout>
             </PrivateRoute>
           }
         />
@@ -118,13 +58,13 @@ const AppContent = () => {
           path="/guest/dashboard"
           element={
             <PrivateRoute allowedRoles={['ROLE_GUEST']}>
-              <GuestDashboard />
+              <Layout showSidebar={true}><GuestDashboard /></Layout>
             </PrivateRoute>
           }
         />
 
         {/* Fallback for unknown routes */}
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<Layout showSidebar={false}><NotFound /></Layout>} />
       </Routes>
     </div>
   );
