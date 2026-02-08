@@ -7,7 +7,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
 
     if (loading) {
-        return <div className="p-8 text-center">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>;
     }
 
     if (!isAuthenticated) {
@@ -17,7 +19,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
     if (allowedRoles && allowedRoles.length > 0) {
         // Check if user has at least one of the allowed roles
-        const hasPermission = user?.roles?.some(role => allowedRoles.includes(role));
+        // We use user.roles which is now guaranteed to be populated from the JWT in AuthProvider
+        const userRoles = user?.roles || [];
+        const hasPermission = userRoles.some(role => allowedRoles.includes(role));
 
         if (!hasPermission) {
             return <Navigate to="/unauthorized" replace />;

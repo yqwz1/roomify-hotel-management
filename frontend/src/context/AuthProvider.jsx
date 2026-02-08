@@ -37,8 +37,17 @@ export const AuthProvider = ({ children }) => {
                 const storedUser = getStoredUser();
 
                 if (storedToken) {
-                    // Decode token to check expiration
-                    const decoded = jwtDecode(storedToken);
+                    // 1. Decode token to check expiration & get roles
+                    let decoded;
+                    try {
+                        decoded = jwtDecode(storedToken);
+                    } catch (e) {
+                        console.error("Invalid token format", e);
+                        logoutService();
+                        setLoading(false);
+                        return;
+                    }
+
                     const currentTime = Date.now() / 1000;
 
                     if (decoded.exp < currentTime) {
@@ -47,8 +56,20 @@ export const AuthProvider = ({ children }) => {
                         logoutService();
                     } else if (storedUser) {
                         // Token valid
+                        // Ensure we have roles from the token, not just storedUser
+                        // The token is the source of truth for permissions
+                        const userWithRoles = {
+                            ...storedUser,
+                            roles: decoded.roles || decoded.role || [] // Adjust based on JWT structure
+                        };
+
+                        // Handle case where roles might be a single string in JWT
+                        if (typeof userWithRoles.roles === 'string') {
+                            userWithRoles.roles = [userWithRoles.roles];
+                        }
+
                         setToken(storedToken);
-                        setUser(storedUser);
+                        setUser(userWithRoles);
                         setIsAuthenticated(true);
                     }
                 }
@@ -75,17 +96,27 @@ export const AuthProvider = ({ children }) => {
         try {
             setLoading(true);
 
-            // Call login service (mock or real)
+            // Call login service (real backend)
             const response = await loginService(email, password);
 
             // Extract data from response
-            const { token: jwtToken, type, id, username, email: userEmail, roles } = response;
+            const { token: jwtToken, type, id, username, email: userEmail } = response;
+
+            // Decode the token to get the REAL roles
+            const decoded = jwtDecode(jwtToken);
+            console.log("Decoded JWT:", decoded);
+
+            let roles = decoded.roles || decoded.role || [];
+            // Handle case where roles might be a single string in JWT
+            if (typeof roles === 'string') {
+                roles = [roles];
+            }
 
             const userData = {
                 id,
                 username,
                 email: userEmail,
-                roles,
+                roles, // Use roles from JWT
                 tokenType: type
             };
 
