@@ -3,7 +3,7 @@ package com.roomify.backend.controller;
 import com.roomify.backend.dto.JwtResponse;
 import com.roomify.backend.dto.LoginRequest;
 import com.roomify.backend.service.AuditService;
-
+import com.roomify.backend.config.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -18,10 +18,10 @@ import java.util.List;
 public class AuthController {
 
         @Autowired
-        private com.roomify.backend.service.AuditService auditService;
+        private AuditService auditService;
 
         @Autowired
-        private com.roomify.backend.config.JwtUtils jwtUtils;
+        private JwtUtils jwtUtils;
 
         @PostMapping("/login")
         public ResponseEntity<?> login(
@@ -29,20 +29,19 @@ public class AuthController {
                         HttpServletRequest httpRequest) {
 
                 String ipAddress = httpRequest.getRemoteAddr();
+                String target = request.getEmail(); // الحساب اللي حاول يسجل دخول
 
-                // Temporary mock authentication (password check only)
-                // In real app, check DB.
+                // Mock authentication
                 if ("admin@roomify.com".equals(request.getEmail())
                                 && "password123".equals(request.getPassword())) {
 
-                        // Generate REAL token
                         String token = jwtUtils.generateToken(request.getEmail(), "ROLE_MANAGER");
 
-                        // Successful login audit
-                        auditService.logLoginAttempt(
-                                        request.getEmail(),
-                                        ipAddress,
-                                        true);
+                        // Success login audit
+                        auditService.log(
+                                        "LOGIN_SUCCESS",
+                                        target,
+                                        "{\"ip\":\"" + ipAddress + "\"}");
 
                         return ResponseEntity.ok(new JwtResponse(
                                         token,
@@ -51,11 +50,12 @@ public class AuthController {
                                         "admin@roomify.com",
                                         List.of("ROLE_MANAGER")));
                 }
+
                 // Failed login audit
-                auditService.logLoginAttempt(
-                                request.getEmail(),
-                                ipAddress,
-                                false);
+                auditService.log(
+                                "LOGIN_FAILURE",
+                                target,
+                                "{\"ip\":\"" + ipAddress + "\"}");
 
                 return ResponseEntity.badRequest().body("Error: Wrong email or password");
         }
