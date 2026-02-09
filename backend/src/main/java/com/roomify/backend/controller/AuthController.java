@@ -1,5 +1,6 @@
 package com.roomify.backend.controller;
 
+import com.roomify.backend.dto.ApiError;
 import com.roomify.backend.dto.JwtResponse;
 import com.roomify.backend.dto.LoginRequest;
 import com.roomify.backend.dto.TokenRefreshRequest;
@@ -18,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -64,12 +64,19 @@ public class AuthController {
                                 ipAddress,
                                 false);
 
-                return ResponseEntity.badRequest().body("Error: Wrong email or password");
+                ApiError error = new ApiError(
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                "Wrong email or password",
+                                httpRequest.getRequestURI()
+                );
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
 
         @PostMapping("/refresh")
         public ResponseEntity<?> refresh(
-                        @Valid @RequestBody TokenRefreshRequest request) {
+                        @Valid @RequestBody TokenRefreshRequest request,
+                        HttpServletRequest httpRequest) {
                 String token = request.getToken();
                 try {
                         Claims claims = jwtUtils.parseClaims(token);
@@ -77,23 +84,43 @@ public class AuthController {
                         String role = claims.get("role", String.class);
 
                         if (email == null || email.isBlank()) {
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                                .body(Map.of("error", "Invalid token subject"));
+                                ApiError error = new ApiError(
+                                                HttpStatus.UNAUTHORIZED.value(),
+                                                "Unauthorized",
+                                                "Invalid token subject",
+                                                httpRequest.getRequestURI()
+                                );
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                         }
 
                         if (role == null || role.isBlank()) {
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                                .body(Map.of("error", "Invalid token role"));
+                                ApiError error = new ApiError(
+                                                HttpStatus.UNAUTHORIZED.value(),
+                                                "Unauthorized",
+                                                "Invalid token role",
+                                                httpRequest.getRequestURI()
+                                );
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                         }
 
                         String newToken = jwtUtils.generateToken(email, role);
                         return ResponseEntity.ok(new TokenRefreshResponse(newToken));
                 } catch (ExpiredJwtException e) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(Map.of("error", "Token expired"));
+                        ApiError error = new ApiError(
+                                        HttpStatus.UNAUTHORIZED.value(),
+                                        "Unauthorized",
+                                        "Token expired",
+                                        httpRequest.getRequestURI()
+                        );
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                 } catch (JwtException | IllegalArgumentException e) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(Map.of("error", "Invalid token"));
+                        ApiError error = new ApiError(
+                                        HttpStatus.UNAUTHORIZED.value(),
+                                        "Unauthorized",
+                                        "Invalid token",
+                                        httpRequest.getRequestURI()
+                        );
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                 }
         }
 }

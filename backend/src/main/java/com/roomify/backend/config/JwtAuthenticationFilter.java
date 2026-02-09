@@ -1,5 +1,7 @@
 package com.roomify.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roomify.backend.dto.ApiError;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -25,9 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtUtils jwtUtils;
+    private final ObjectMapper objectMapper;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, ObjectMapper objectMapper) {
         this.jwtUtils = jwtUtils;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -51,13 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String header = request.getHeader(AUTH_HEADER);
         if (header == null || !header.startsWith(BEARER_PREFIX)) {
-            respondUnauthorized(response, "Missing token");
+            respondUnauthorized(response, "Missing token", request.getRequestURI());
             return;
         }
 
         String token = header.substring(BEARER_PREFIX.length()).trim();
         if (token.isEmpty()) {
-            respondUnauthorized(response, "Missing token");
+            respondUnauthorized(response, "Missing token", request.getRequestURI());
             return;
         }
 
@@ -67,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = claims.get("role", String.class);
 
             if (email == null || email.isBlank()) {
-                respondUnauthorized(response, "Invalid token subject");
+                respondUnauthorized(response, "Invalid token subject", request.getRequestURI());
                 return;
             }
 
@@ -82,16 +86,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            respondUnauthorized(response, "Token expired");
+            respondUnauthorized(response, "Token expired", request.getRequestURI());
         } catch (JwtException | IllegalArgumentException e) {
-            respondUnauthorized(response, "Invalid token");
+            respondUnauthorized(response, "Invalid token", request.getRequestURI());
         }
     }
 
-    private void respondUnauthorized(HttpServletResponse response, String message) throws IOException {
+    private void respondUnauthorized(HttpServletResponse response, String message, String path) throws IOException {
+        ApiError error = new ApiError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Unauthorized",
+                message,
+                path
+        );
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write("{\"error\":\"" + message + "\"}");
+        response.getWriter().write(objectMapper.writeValueAsString(error));
     }
 }

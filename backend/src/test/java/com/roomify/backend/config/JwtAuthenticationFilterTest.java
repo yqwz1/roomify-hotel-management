@@ -12,6 +12,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class JwtAuthenticationFilterTest {
         jwtUtils = new JwtUtils();
         ReflectionTestUtils.setField(jwtUtils, "secretKey", SECRET);
         ReflectionTestUtils.setField(jwtUtils, "jwtExpiration", 3600000L);
-        filter = new JwtAuthenticationFilter(jwtUtils);
+        filter = new JwtAuthenticationFilter(jwtUtils, new ObjectMapper());
         SecurityContextHolder.clearContext();
     }
 

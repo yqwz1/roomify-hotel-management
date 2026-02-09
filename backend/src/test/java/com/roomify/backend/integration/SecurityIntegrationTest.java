@@ -130,7 +130,8 @@ class SecurityIntegrationTest {
     void missingTokenReturnsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/test/manager/summary"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Missing token"));
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Missing token"));
     }
 
     @Test
@@ -138,7 +139,8 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/test/manager/summary")
                         .header("Authorization", "Bearer not.a.jwt"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid token"));
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Invalid token"));
     }
 
     @Test
@@ -155,7 +157,8 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/test/manager/summary")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid token"));
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Invalid token"));
     }
 
     @Test
@@ -172,7 +175,8 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/test/manager/summary")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Token expired"));
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Token expired"));
     }
 
     @Test
@@ -206,6 +210,7 @@ class SecurityIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid token"));
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Invalid token"));
     }
 }
