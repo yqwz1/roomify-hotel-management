@@ -1,0 +1,3 @@
+ALTER TABLE users
+ADD COLUMN failed_attempts INT NOT NULL DEFAULT 0,
+ADD COLUMN lock_until TIMESTAMP NULL;
