@@ -107,4 +107,30 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiError> handleDuplicateResource(
+            DuplicateResourceException ex,
+            HttpServletRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(CannotDeleteException.class)
+    public ResponseEntity<ApiError> handleCannotDelete(
+            CannotDeleteException ex,
+            HttpServletRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 }
