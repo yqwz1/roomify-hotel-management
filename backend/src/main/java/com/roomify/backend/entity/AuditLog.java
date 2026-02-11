@@ -3,6 +3,10 @@ package com.roomify.backend.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a single audit log record stored in the database.
+ * Each record tracks who did what, on which target, and when.
+ */
 @Entity
 @Table(name = "audit_logs")
 public class AuditLog {
@@ -11,33 +15,74 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    // The user responsible for the action (usually email from JWT)
+    @Column(nullable = true)
+    private String actor;
+
+    // The type of action performed (e.g., LOGIN, CREATE_ROOM, DELETE_BOOKING)
+    @Column(nullable = false)
     private String action;
-    private String status; 
-    private String ipAddress;
-    
+
+    // The object or resource affected by the action
+    private String target;
+
+    // Extra details stored as text (can be JSON format if needed)
+    @Column(columnDefinition = "TEXT")
+    private String metadata;
+
+    // Time when the action happened (automatically set once)
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp;
 
-    public AuditLog() {}
-
-    public AuditLog(String email, String action, String status, String ipAddress) {
-        this.email = email;
-        this.action = action;
-        this.status = status;
-        this.ipAddress = ipAddress;
+    public AuditLog() {
         this.timestamp = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getIpAddress() { return ipAddress; }
-    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
-    public LocalDateTime getTimestamp() { return timestamp; }
+    public AuditLog(String actor, String action, String target, String metadata) {
+        this.actor = actor;
+        this.action = action;
+        this.target = target;
+        this.metadata = metadata;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 }
