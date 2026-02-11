@@ -13,6 +13,7 @@ export default function Sidebar() {
   if (hasRole('ROLE_MANAGER')) {
     menuItems.push(
       { path: '/manager/dashboard', label: 'Dashboard', icon: '📊' },
+      { path: '/room-types', label: 'Room Types', icon: '🏷️' },
       { path: '/rooms', label: 'Manage Rooms', icon: '🏨' },
       { path: '/bookings', label: 'All Bookings', icon: '📅' },
       { path: '/guests', label: 'Guest List', icon: '👥' },

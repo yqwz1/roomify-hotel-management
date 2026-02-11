@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthProvider'
 import Home from './pages/Home'
 import Rooms from './pages/Rooms'
+import RoomTypes from './pages/RoomTypes'
 import Bookings from './pages/Bookings'
 import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
@@ -28,6 +29,15 @@ const AppContent = () => {
         <Route path="/unauthorized" element={<Layout showSidebar={false}><Unauthorized /></Layout>} />
 
         {/* Protected Routes */}
+        <Route
+          path="/room-types"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+              <Layout showSidebar={true}><RoomTypes /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/rooms"
           element={
