@@ -65,6 +65,7 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
     public boolean isActive() { return isActive; }
+    public Staff getStaff() { return staff; }
 
     // Setters 
     public void setEmail(String email) {
