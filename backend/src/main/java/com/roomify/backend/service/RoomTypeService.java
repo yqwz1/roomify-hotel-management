@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 public class RoomTypeService {
 
     private final RoomTypeRepository roomTypeRepository;
+    private final AuditService auditService; // 🔹 Audit service added
 
-    public RoomTypeService(RoomTypeRepository roomTypeRepository) {
+    public RoomTypeService(RoomTypeRepository roomTypeRepository, AuditService auditService) {
         this.roomTypeRepository = roomTypeRepository;
+        this.auditService = auditService;
     }
 
     /**
@@ -36,11 +38,16 @@ public class RoomTypeService {
                 request.getBasePrice(),
                 request.getMaxGuests(),
                 request.getAmenities(),
-                request.getDescription()
-        );
+                request.getDescription());
 
         // Save to repository
         RoomType saved = roomTypeRepository.save(roomType);
+
+        // 🔹 Audit log
+        auditService.log(
+                "CREATE_ROOM_TYPE",
+                "RoomType#" + saved.getId(),
+                "name=" + saved.getName());
 
         // Return response DTO
         return toResponse(saved);
@@ -88,6 +95,12 @@ public class RoomTypeService {
         // Save updated entity
         RoomType updated = roomTypeRepository.save(existing);
 
+        // 🔹 Audit log
+        auditService.log(
+                "UPDATE_ROOM_TYPE",
+                "RoomType#" + updated.getId(),
+                "name=" + updated.getName());
+
         // Return response DTO
         return toResponse(updated);
     }
@@ -98,16 +111,20 @@ public class RoomTypeService {
      */
     public void delete(Long id) {
         // Check if exists
-        if (!roomTypeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Room type not found with id: " + id);
-        }
+        RoomType roomType = roomTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room type not found with id: " + id));
 
         // Check if any rooms are assigned to this type
         if (roomTypeRepository.hasAssignedRooms(id)) {
             throw new CannotDeleteException(
-                "Cannot delete room type: rooms are currently assigned to this type"
-            );
+                    "Cannot delete room type: rooms are currently assigned to this type");
         }
+
+        // 🔹 Audit log BEFORE deletion
+        auditService.log(
+                "DELETE_ROOM_TYPE",
+                "RoomType#" + id,
+                "name=" + roomType.getName());
 
         // Delete
         roomTypeRepository.deleteById(id);
@@ -123,7 +140,16 @@ public class RoomTypeService {
                 roomType.getBasePrice(),
                 roomType.getMaxGuests(),
                 roomType.getAmenities(),
-                roomType.getDescription()
-        );
+                roomType.getDescription());
+    }
+
+    // 🔹 Stub methods for upcoming security features (Day 3–4)
+
+    public void lockRoomType(Long id) {
+        auditService.log("LOCK_ROOM_TYPE", "RoomType#" + id, null);
+    }
+
+    public void unlockRoomType(Long id) {
+        auditService.log("UNLOCK_ROOM_TYPE", "RoomType#" + id, null);
     }
 }
