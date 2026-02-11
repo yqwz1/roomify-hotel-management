@@ -1,10 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Search, BedDouble, User, Pencil, Trash2, Plus } from 'lucide-react';
 import { z } from 'zod';
 import {
     getRoomTypes,
     createRoomType,
     updateRoomType,
-    toggleRoomTypeStatus,
+    deleteRoomType,
+    amenitiesStringToArray,
+    amenitiesArrayToString,
 } from '../services/roomTypeService';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -13,7 +16,7 @@ import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertTitle, AlertDescription } from '../components/ui/alert';
 
-// ── Zod Validation Schema ──────────────────────────────────────────
+// ── Zod Validation Schema (aligned with backend @Min / @Max) ──────
 const roomTypeSchema = z.object({
     name: z
         .string()
@@ -21,11 +24,12 @@ const roomTypeSchema = z.object({
         .max(100, 'Name must not exceed 100 characters'),
     basePrice: z
         .number({ invalid_type_error: 'Price must be a number' })
-        .positive('Price must be greater than 0'),
+        .min(0, 'Price cannot be negative'),
     maxGuests: z
         .number({ invalid_type_error: 'Max guests must be a number' })
         .int('Max guests must be a whole number')
-        .min(1, 'Must allow at least 1 guest'),
+        .min(1, 'Must allow at least 1 guest')
+        .max(8, 'Cannot exceed 8 guests'),
     amenities: z.array(z.string()).optional().default([]),
     description: z.string().max(500, 'Description must not exceed 500 characters').optional().default(''),
 });
@@ -109,7 +113,8 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
                 name: initialData.name || '',
                 basePrice: String(initialData.basePrice || ''),
                 maxGuests: String(initialData.maxGuests || ''),
-                amenities: initialData.amenities || [],
+                // Backend sends comma-separated string — convert to array for UI
+                amenities: amenitiesStringToArray(initialData.amenities),
                 description: initialData.description || '',
             });
         } else {
@@ -120,7 +125,6 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
 
     const handleChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        // Clear field error on change
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: undefined }));
         }
@@ -129,14 +133,12 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Parse numeric fields
         const parsed = {
             ...formData,
             basePrice: parseFloat(formData.basePrice) || 0,
             maxGuests: parseInt(formData.maxGuests, 10) || 0,
         };
 
-        // Validate with Zod
         const result = roomTypeSchema.safeParse(parsed);
         if (!result.success) {
             const fieldErrors = {};
@@ -148,20 +150,24 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
             return;
         }
 
-        onSubmit(result.data);
+        // Convert amenities array → comma-separated string for backend
+        const payload = {
+            ...result.data,
+            amenities: amenitiesArrayToString(result.data.amenities),
+        };
+
+        onSubmit(payload);
     };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={onClose}
             />
 
-            {/* Dialog */}
             <Card className="relative z-10 w-full max-w-lg mx-4 shadow-2xl border-0 animate-in fade-in-0 zoom-in-95 duration-200">
                 <CardHeader className="pb-4 border-b">
                     <CardTitle className="text-xl">
@@ -187,7 +193,7 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
                             )}
                         </div>
 
-                        {/* Price & Guests — side by side */}
+                        {/* Price & Guests */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="rt-price">
@@ -209,12 +215,13 @@ function RoomTypeFormDialog({ isOpen, onClose, onSubmit, initialData, isSubmitti
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="rt-guests">
-                                    Max Guests <span className="text-destructive">*</span>
+                                    Max Guests (1–8) <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="rt-guests"
                                     type="number"
                                     min="1"
+                                    max="8"
                                     value={formData.maxGuests}
                                     onChange={(e) => handleChange('maxGuests', e.target.value)}
                                     placeholder="2"
@@ -299,7 +306,6 @@ function Pagination({ page, limit, total, totalPages, onPageChange }) {
                 >
                     ← Previous
                 </Button>
-                {/* Page indicators */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <Button
                         key={p}
@@ -325,7 +331,7 @@ function Pagination({ page, limit, total, totalPages, onPageChange }) {
 }
 
 // ── Confirmation Dialog Sub-Component ──────────────────────────────
-function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmLabel, isLoading }) {
+function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmLabel, isLoading, variant = 'default' }) {
     if (!isOpen) return null;
 
     return (
@@ -339,7 +345,11 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmLabe
                     <p className="text-sm text-muted-foreground mb-6">{message}</p>
                     <div className="flex justify-end gap-3">
                         <Button variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
-                        <Button onClick={onConfirm} disabled={isLoading}>
+                        <Button
+                            onClick={onConfirm}
+                            disabled={isLoading}
+                            variant={variant === 'destructive' ? 'destructive' : 'default'}
+                        >
                             {isLoading ? (
                                 <span className="flex items-center gap-2">
                                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -371,9 +381,9 @@ export default function RoomTypes() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState(null);
 
-    // Toggle confirmation state
-    const [toggleConfirm, setToggleConfirm] = useState(null); // { id, name, currentlyActive }
-    const [isToggling, setIsToggling] = useState(false);
+    // Delete confirmation state
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, name }
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // ── Data Fetching ──
     const fetchRoomTypes = useCallback(async (page = 1, searchQuery = '') => {
@@ -437,25 +447,21 @@ export default function RoomTypes() {
         }
     };
 
-    const handleToggleStatus = (roomType) => {
-        setToggleConfirm({
-            id: roomType.id,
-            name: roomType.name,
-            currentlyActive: roomType.isActive,
-        });
+    const handleDelete = (roomType) => {
+        setDeleteConfirm({ id: roomType.id, name: roomType.name });
     };
 
-    const confirmToggleStatus = async () => {
-        if (!toggleConfirm) return;
+    const confirmDelete = async () => {
+        if (!deleteConfirm) return;
         try {
-            setIsToggling(true);
-            await toggleRoomTypeStatus(toggleConfirm.id);
-            setToggleConfirm(null);
+            setIsDeleting(true);
+            await deleteRoomType(deleteConfirm.id);
+            setDeleteConfirm(null);
             fetchRoomTypes(pagination.page, search);
         } catch (err) {
-            console.error('Failed to toggle status:', err);
+            console.error('Failed to delete room type:', err);
         } finally {
-            setIsToggling(false);
+            setIsDeleting(false);
         }
     };
 
@@ -510,14 +516,14 @@ export default function RoomTypes() {
                     </p>
                 </div>
                 <Button onClick={handleCreate} className="gap-2 shadow-sm">
-                    <span className="text-lg leading-none">+</span>
+                    <Plus className="h-4 w-4" />
                     Add Room Type
                 </Button>
             </div>
 
             {/* ── Search Bar ── */}
             <div className="relative max-w-sm">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">🔍</span>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -539,7 +545,7 @@ export default function RoomTypes() {
                 <Card className="border-dashed">
                     <CardContent className="flex flex-col items-center justify-center py-16">
                         <div className="bg-secondary rounded-full p-4 mb-4">
-                            <span className="text-4xl">🏨</span>
+                            <BedDouble className="h-10 w-10 text-muted-foreground" />
                         </div>
                         <h3 className="text-lg font-semibold mb-1">No room types found</h3>
                         <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm">
@@ -549,7 +555,7 @@ export default function RoomTypes() {
                         </p>
                         {!search && (
                             <Button onClick={handleCreate} className="gap-2">
-                                <span className="text-lg leading-none">+</span>
+                                <Plus className="h-4 w-4" />
                                 Add Your First Room Type
                             </Button>
                         )}
@@ -568,101 +574,87 @@ export default function RoomTypes() {
                                     <th className="text-left font-semibold py-3.5 px-4 text-muted-foreground">Base Price</th>
                                     <th className="text-left font-semibold py-3.5 px-4 text-muted-foreground">Max Guests</th>
                                     <th className="text-left font-semibold py-3.5 px-4 text-muted-foreground">Amenities</th>
-                                    <th className="text-left font-semibold py-3.5 px-4 text-muted-foreground">Status</th>
                                     <th className="text-right font-semibold py-3.5 px-4 text-muted-foreground">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {roomTypes.map((rt) => (
-                                    <tr
-                                        key={rt.id}
-                                        className={`border-b last:border-b-0 transition-colors hover:bg-muted/30 ${!rt.isActive ? 'opacity-60' : ''
-                                            }`}
-                                    >
-                                        {/* Name */}
-                                        <td className="py-3.5 px-4">
-                                            <div>
-                                                <p className="font-medium text-foreground">{rt.name}</p>
-                                                {rt.description && (
-                                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[200px]">
-                                                        {rt.description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </td>
+                                {roomTypes.map((rt) => {
+                                    // Convert amenities string → array for display
+                                    const amenitiesList = amenitiesStringToArray(rt.amenities);
 
-                                        {/* Price */}
-                                        <td className="py-3.5 px-4">
-                                            <span className="font-semibold text-foreground">
-                                                ${rt.basePrice.toFixed(2)}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground ml-1">/night</span>
-                                        </td>
+                                    return (
+                                        <tr
+                                            key={rt.id}
+                                            className="border-b last:border-b-0 transition-colors hover:bg-muted/30"
+                                        >
+                                            {/* Name */}
+                                            <td className="py-3.5 px-4">
+                                                <div>
+                                                    <p className="font-medium text-foreground">{rt.name}</p>
+                                                    {rt.description && (
+                                                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[200px]">
+                                                            {rt.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </td>
 
-                                        {/* Guests */}
-                                        <td className="py-3.5 px-4">
-                                            <span className="inline-flex items-center gap-1">
-                                                <span>👤</span>
-                                                <span className="font-medium">{rt.maxGuests}</span>
-                                            </span>
-                                        </td>
+                                            {/* Price */}
+                                            <td className="py-3.5 px-4">
+                                                <span className="font-semibold text-foreground">
+                                                    ${Number(rt.basePrice).toFixed(2)}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground ml-1">/night</span>
+                                            </td>
 
-                                        {/* Amenities */}
-                                        <td className="py-3.5 px-4">
-                                            <div className="flex flex-wrap gap-1 max-w-[220px]">
-                                                {(rt.amenities || []).slice(0, 3).map((a, idx) => (
-                                                    <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0.5">
-                                                        {a}
-                                                    </Badge>
-                                                ))}
-                                                {(rt.amenities || []).length > 3 && (
-                                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
-                                                        +{rt.amenities.length - 3}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </td>
+                                            {/* Guests */}
+                                            <td className="py-3.5 px-4">
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    <span className="font-medium">{rt.maxGuests}</span>
+                                                </span>
+                                            </td>
 
-                                        {/* Status */}
-                                        <td className="py-3.5 px-4">
-                                            <Badge
-                                                variant={rt.isActive ? 'default' : 'secondary'}
-                                                className={
-                                                    rt.isActive
-                                                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200'
-                                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-100 border-gray-200'
-                                                }
-                                            >
-                                                {rt.isActive ? 'Active' : 'Inactive'}
-                                            </Badge>
-                                        </td>
+                                            {/* Amenities */}
+                                            <td className="py-3.5 px-4">
+                                                <div className="flex flex-wrap gap-1 max-w-[220px]">
+                                                    {amenitiesList.slice(0, 3).map((a, idx) => (
+                                                        <Badge key={idx} variant="secondary" className="text-[10px] px-1.5 py-0.5">
+                                                            {a}
+                                                        </Badge>
+                                                    ))}
+                                                    {amenitiesList.length > 3 && (
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+                                                            +{amenitiesList.length - 3}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </td>
 
-                                        {/* Actions */}
-                                        <td className="py-3.5 px-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(rt)}
-                                                    className="h-8 px-2.5 text-xs"
-                                                >
-                                                    ✏️ Edit
-                                                </Button>
-                                                <Button
-                                                    variant={rt.isActive ? 'outline' : 'ghost'}
-                                                    size="sm"
-                                                    onClick={() => handleToggleStatus(rt)}
-                                                    className={`h-8 px-2.5 text-xs ${rt.isActive
-                                                            ? 'text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700'
-                                                            : 'text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700'
-                                                        }`}
-                                                >
-                                                    {rt.isActive ? '📦 Archive' : '♻️ Restore'}
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                            {/* Actions */}
+                                            <td className="py-3.5 px-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleEdit(rt)}
+                                                        className="h-8 px-2.5 text-xs gap-1.5"
+                                                    >
+                                                        <Pencil className="h-3 w-3" /> Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleDelete(rt)}
+                                                        className="h-8 px-2.5 text-xs gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" /> Delete
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -696,19 +688,16 @@ export default function RoomTypes() {
                 isSubmitting={isSubmitting}
             />
 
-            {/* ── Toggle Status Confirmation ── */}
+            {/* ── Delete Confirmation ── */}
             <ConfirmDialog
-                isOpen={!!toggleConfirm}
-                onClose={() => setToggleConfirm(null)}
-                onConfirm={confirmToggleStatus}
-                isLoading={isToggling}
-                title={toggleConfirm?.currentlyActive ? 'Archive Room Type' : 'Restore Room Type'}
-                message={
-                    toggleConfirm?.currentlyActive
-                        ? `Are you sure you want to archive "${toggleConfirm?.name}"? It will be hidden from active listings but can be restored later.`
-                        : `Are you sure you want to restore "${toggleConfirm?.name}"? It will appear in active listings again.`
-                }
-                confirmLabel={toggleConfirm?.currentlyActive ? 'Archive' : 'Restore'}
+                isOpen={!!deleteConfirm}
+                onClose={() => setDeleteConfirm(null)}
+                onConfirm={confirmDelete}
+                isLoading={isDeleting}
+                variant="destructive"
+                title="Delete Room Type"
+                message={`Are you sure you want to permanently delete "${deleteConfirm?.name}"? This action cannot be undone.`}
+                confirmLabel="Delete"
             />
         </div>
     );
