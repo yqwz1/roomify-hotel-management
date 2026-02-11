@@ -7,10 +7,27 @@ services:
       POSTGRES_DB: roomify
       POSTGRES_USER: roomify_user
       POSTGRES_PASSWORD: roomify_pass
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - roomify-network
+  backend:
+    build:
+      context: ./backend
+    container_name: roomify-backend
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://roomify-postgres:5432/roomify
+      SPRING_DATASOURCE_USERNAME: roomify_user
+      SPRING_DATASOURCE_PASSWORD: roomify_pass
+      SERVER_PORT: 8080
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
     networks:
       - roomify-network
 

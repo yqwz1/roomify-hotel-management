@@ -3,8 +3,7 @@ package com.roomify.backend.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class TokenRefreshRequest {
-
-    @NotBlank
+    @NotBlank(message = "Token is required")
     private String token;
 
     public TokenRefreshRequest() {

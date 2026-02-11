@@ -1,12 +1,12 @@
 package com.roomify.backend.controller;
 
-import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.dto.ApiError;
 import com.roomify.backend.dto.JwtResponse;
 import com.roomify.backend.dto.LoginRequest;
 import com.roomify.backend.dto.TokenRefreshRequest;
 import com.roomify.backend.dto.TokenRefreshResponse;
 import com.roomify.backend.service.AuditService;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

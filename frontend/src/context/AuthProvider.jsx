@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { login as loginService, logout as logoutService, getStoredToken, getStoredUser, storeAuthData } from '../services/authService';
+import { setupInterceptors } from '../services/api';
 import PropTypes from 'prop-types';
 import { jwtDecode } from 'jwt-decode';
 
@@ -38,8 +39,17 @@ export const AuthProvider = ({ children }) => {
                 const storedUser = getStoredUser();
 
                 if (storedToken) {
-                    // Decode token to check expiration
-                    const decoded = jwtDecode(storedToken);
+                    // 1. Decode token to check expiration & get roles
+                    let decoded;
+                    try {
+                        decoded = jwtDecode(storedToken);
+                    } catch (e) {
+                        console.error("Invalid token format", e);
+                        logoutService();
+                        setLoading(false);
+                        return;
+                    }
+
                     const currentTime = Date.now() / 1000;
 
                     if (decoded.exp < currentTime) {
@@ -48,8 +58,20 @@ export const AuthProvider = ({ children }) => {
                         logoutService();
                     } else if (storedUser) {
                         // Token valid
+                        // Ensure we have roles from the token, not just storedUser
+                        // The token is the source of truth for permissions
+                        const userWithRoles = {
+                            ...storedUser,
+                            roles: decoded.roles || decoded.role || [] // Adjust based on JWT structure
+                        };
+
+                        // Handle case where roles might be a single string in JWT
+                        if (typeof userWithRoles.roles === 'string') {
+                            userWithRoles.roles = [userWithRoles.roles];
+                        }
+
                         setToken(storedToken);
-                        setUser(storedUser);
+                        setUser(userWithRoles);
                         setIsAuthenticated(true);
                     }
                 }
@@ -76,17 +98,27 @@ export const AuthProvider = ({ children }) => {
         try {
             setLoading(true);
 
-            // Call login service (mock or real)
+            // Call login service (real backend)
             const response = await loginService(email, password);
 
             // Extract data from response
-            const { token: jwtToken, type, id, username, email: userEmail, roles } = response;
+            const { token: jwtToken, type, id, username, email: userEmail } = response;
+
+            // Decode the token to get the REAL roles
+            const decoded = jwtDecode(jwtToken);
+            console.log("Decoded JWT:", decoded);
+
+            let roles = decoded.roles || decoded.role || [];
+            // Handle case where roles might be a single string in JWT
+            if (typeof roles === 'string') {
+                roles = [roles];
+            }
 
             const userData = {
                 id,
                 username,
                 email: userEmail,
-                roles,
+                roles, // Use roles from JWT
                 tokenType: type
             };
 
@@ -118,7 +150,51 @@ export const AuthProvider = ({ children }) => {
 
         // Clear localStorage
         logoutService();
+        // Redirect to login is handled by components reacting to isAuthenticated=false
     };
+
+    // Setup global API interceptor for 401 handling
+    useEffect(() => {
+        // We need to pass the logout function to the API service so it can be called
+        // when a 401 Unauthorized response is received.
+        // Importing setupInterceptors dynamically to avoid circular dependencies if possible,
+        // or just using the imported one.
+        // For now, we'll assume we can import it at the top or here.
+        // Actually, let's just use the one we'll add to api.js
+        if (setupInterceptors) {
+            setupInterceptors(logout);
+        }
+    }, []);
+
+    // Check token expiration periodically
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            const storedToken = getStoredToken();
+            if (storedToken) {
+                try {
+                    const decoded = jwtDecode(storedToken);
+                    const currentTime = Date.now() / 1000;
+
+                    if (decoded.exp < currentTime) {
+                        console.warn('Token expired during active session, logging out');
+                        logout();
+                    }
+                } catch (e) {
+                    console.error("Error checking token expiration", e);
+                    logout();
+                }
+            }
+        };
+
+        // Check every minute
+        const intervalId = setInterval(checkTokenExpiration, 60000);
+
+        // Initial check on mount/update is already done in the main useEffect, 
+        // but checking here ensures we don't wait 60s if it's already close.
+        checkTokenExpiration();
+
+        return () => clearInterval(intervalId);
+    }, [token]); // Re-run if token changes
 
     /**
      * Check if user has a specific role

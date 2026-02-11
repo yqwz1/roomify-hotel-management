@@ -4,16 +4,16 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 
 // Mock the useAuth hook directly since we want to control the return values precisely
-const mockUseAuth = vi.fn();
-
-vi.mock('../context/AuthProvider', async () => {
-    const actual = await vi.importActual('../context/AuthProvider');
-    return {
-        ...actual,
-        useAuth: () => mockUseAuth(),
-        AuthProvider: ({ children }) => <div>{children}</div> // Mock provider to just render children
-    };
+const mockUseAuth = vi.fn().mockReturnValue({
+    loading: true,
+    isAuthenticated: false,
+    user: null
 });
+
+vi.mock('../context/AuthProvider', () => ({
+    useAuth: () => mockUseAuth(),
+    AuthProvider: ({ children }) => <div>{children}</div> // Mock provider to just render children
+}));
 
 describe('ProtectedRoute', () => {
     // Helper to render component wrapped in router
@@ -37,9 +37,8 @@ describe('ProtectedRoute', () => {
     };
 
     it('renders loading state when auth is loading', () => {
-        mockUseAuth.mockReturnValue({ loading: true });
         renderProtectedRoute(<div>Protected Content</div>);
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        expect(screen.getByRole('status')).toBeInTheDocument();
     });
 
     it('redirects to login when not authenticated', () => {

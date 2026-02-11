@@ -1,20 +1,25 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
-import Spinner from '../components/Spinner';
-import ErrorMessage from '../components/ErrorMessage';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 /**
  * LoginPage component
- * Professional login form with validation, loading states, and error handling
+ * Professional login form using Shadcn UI
  */
 const LoginPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
 
     const [formData, setFormData] = useState({
-        email: '',
-        password: ''
+        email: 'admin@roomify.com', // Default updated placeholder
+        password: 'password123'     // Default updated placeholder
     });
 
     const [errors, setErrors] = useState({
@@ -25,7 +30,7 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [loginError, setLoginError] = useState('');
 
-    // Email validation regex
+    // Email validation regex (basic)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     /**
@@ -38,7 +43,7 @@ const LoginPage = () => {
             [name]: value
         }));
 
-        // Clear field-specific error when user types
+        // Clear field-specific error
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -46,7 +51,7 @@ const LoginPage = () => {
             }));
         }
 
-        // Clear login error when user types
+        // Clear global login error
         if (loginError) {
             setLoginError('');
         }
@@ -54,7 +59,6 @@ const LoginPage = () => {
 
     /**
      * Validate form fields
-     * @returns {boolean} True if form is valid
      */
     const validateForm = () => {
         const newErrors = {
@@ -64,16 +68,15 @@ const LoginPage = () => {
 
         let isValid = true;
 
-        // Validate email
         if (!formData.email) {
             newErrors.email = 'Email is required';
             isValid = false;
         } else if (!emailRegex.test(formData.email)) {
+            // Optional: Relax this if username login is allowed, but requirement says "Update default credentials placeholder to: admin@roomify.com"
             newErrors.email = 'Please enter a valid email address';
             isValid = false;
         }
 
-        // Validate password
         if (!formData.password) {
             newErrors.password = 'Password is required';
             isValid = false;
@@ -90,7 +93,6 @@ const LoginPage = () => {
         e.preventDefault();
         setLoginError('');
 
-        // Validate form
         if (!validateForm()) {
             return;
         }
@@ -101,8 +103,14 @@ const LoginPage = () => {
             // Call login function from AuthProvider
             const user = await login(formData.email, formData.password);
 
-            // Redirect based on user role
-            const primaryRole = user.roles[0];
+            // Redirect based on user role or return URL
+            const from = location.state?.from?.pathname;
+            if (from) {
+                navigate(from, { replace: true });
+                return;
+            }
+
+            const primaryRole = user.roles && user.roles.length > 0 ? user.roles[0] : '';
 
             switch (primaryRole) {
                 case 'ROLE_MANAGER':
@@ -115,135 +123,87 @@ const LoginPage = () => {
                     navigate('/guest/dashboard', { replace: true });
                     break;
                 default:
-                    navigate('/guest/dashboard', { replace: true });
+                    navigate('/', { replace: true });
             }
         } catch (error) {
-            setLoginError(error.message || 'Login failed. Please try again.');
+            setLoginError(error.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    /**
-     * Handle forgot password link click
-     */
-    const handleForgotPassword = (e) => {
-        e.preventDefault();
-        console.log('Forgot Password clicked - This is a placeholder feature');
-        alert('Forgot Password feature coming soon!');
-    };
-
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                {/* Card Container */}
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                            Welcome to Roomify
-                        </h1>
-                        <p className="text-gray-600">
-                            Sign in to access your account
-                        </p>
-                    </div>
-
-                    {/* Login Error Message */}
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="w-full max-w-md shadow-lg">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl font-bold text-center" role="heading" aria-level="1">Sign in</CardTitle>
+                    <CardDescription className="text-center">
+                        Enter your email and password to access your account
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
                     {loginError && (
-                        <div className="mb-6">
-                            <ErrorMessage
-                                message={loginError}
-                                onDismiss={() => setLoginError('')}
-                            />
-                        </div>
+                        <Alert variant="destructive" className="mb-6">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>
+                                {loginError}
+                            </AlertDescription>
+                        </Alert>
                     )}
 
-                    {/* Login Form */}
-                    <form onSubmit={handleSubmit} noValidate className="space-y-6">
-                        {/* Email Field */}
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address
-                            </label>
-                            <input
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
                                 id="email"
                                 name="email"
                                 type="email"
-                                autoComplete="email"
+                                placeholder="name@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'
-                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none`}
-                                placeholder="you@example.com"
                                 disabled={isLoading}
+                                className={errors.email ? "border-red-500" : ""}
                             />
                             {errors.email && (
-                                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                                <p className="text-sm text-red-500">{errors.email}</p>
                             )}
                         </div>
-
-                        {/* Password Field */}
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Password
-                            </label>
-                            <input
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
                                 id="password"
                                 name="password"
                                 type="password"
-                                autoComplete="current-password"
+                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'
-                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none`}
-                                placeholder="Enter your password"
                                 disabled={isLoading}
+                                className={errors.password ? "border-red-500" : ""}
                             />
                             {errors.password && (
-                                <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                                <p className="text-sm text-red-500">{errors.password}</p>
                             )}
                         </div>
-
-                        {/* Forgot Password Link */}
-                        <div className="flex items-center justify-end">
-                            <a
-                                href="#"
-                                onClick={handleForgotPassword}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                            >
-                                Forgot Password?
-                            </a>
-                        </div>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <Spinner size="sm" className="mr-2" />
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
                                     Signing in...
                                 </>
                             ) : (
-                                'Sign In'
+                                "Sign In"
                             )}
-                        </button>
+                        </Button>
                     </form>
-
-                    {/* Demo Credentials Helper */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">Demo Credentials:</p>
-                        <div className="text-xs text-gray-600 space-y-1">
-                            <p>• Manager: admin@test.com</p>
-                            <p>• Staff: staff@test.com</p>
-                            <p>• Guest: user@test.com</p>
-                            <p className="text-gray-500 mt-1">Password: any value</p>
-                        </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-4">
+                    <div className="text-sm text-center text-gray-500">
+                        <p>Demo Credentials:</p>
+                        <p>Manager: admin@roomify.com / password123</p>
                     </div>
-                </div>
-            </div>
+                </CardFooter>
+            </Card>
         </div>
     );
 };

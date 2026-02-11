@@ -12,6 +12,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,9 @@ class JwtAuthenticationFilterTest {
         jwtUtils = new JwtUtils();
         ReflectionTestUtils.setField(jwtUtils, "secretKey", SECRET);
         ReflectionTestUtils.setField(jwtUtils, "jwtExpiration", 3600000L);
-        filter = new JwtAuthenticationFilter(jwtUtils);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        filter = new JwtAuthenticationFilter(jwtUtils, objectMapper);
         SecurityContextHolder.clearContext();
     }
 
@@ -45,15 +49,16 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void missingTokenAllowsRequestToProceed() throws Exception {
+    void missingTokenReturnsUnauthorized() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/protected");
         MockHttpServletResponse response = new MockHttpServletResponse();
         jakarta.servlet.FilterChain chain = Mockito.mock(jakarta.servlet.FilterChain.class);
 
         filter.doFilter(request, response, chain);
 
-        assertEquals(200, response.getStatus());
-        verify(chain).doFilter(any(), any());
+        assertEquals(401, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Missing token"));
+        verify(chain, never()).doFilter(any(), any());
     }
 
     @Test
