@@ -1,5 +1,11 @@
 package com.roomify.backend.service;
 
+import java.util.List;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.roomify.backend.dto.StaffCreateRequest;
 import com.roomify.backend.dto.StaffResponse;
 import com.roomify.backend.dto.StaffUpdateRequest;
@@ -10,10 +16,6 @@ import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.StaffRepository;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
-import java.util.List;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -49,14 +51,26 @@ public class StaffService {
         return StaffResponse.from(savedUser.getStaff());
     }
 
+    //  Unified list + search + filter
     @Transactional(readOnly = true)
-    public List<StaffResponse> listStaff(Boolean active) {
-        List<Staff> staffList = active == null
-                ? staffRepository.findAll()
-                : staffRepository.findByIsActive(active);
-        return staffList.stream()
-                .map(StaffResponse::from)
-                .toList();
+    public List<StaffResponse> searchStaff(
+            String search,
+            Role role,
+            String department,
+            Boolean active
+    ) {
+        return staffRepository.searchStaff(
+                normalize(search),
+                role,
+                normalize(department),
+                active
+        ).stream()
+         .map(StaffResponse::from)
+         .toList();
+    }
+
+    private String normalize(String value) {
+        return (value == null || value.isBlank()) ? null : value;
     }
 
     public StaffResponse updateStaff(Long id, StaffUpdateRequest request) {
@@ -74,9 +88,8 @@ public class StaffService {
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
 
         staff.setActive(active);
-        User user = staff.getUser();
-        if (user != null) {
-            user.setActive(active);
+        if (staff.getUser() != null) {
+            staff.getUser().setActive(active);
         }
 
         return StaffResponse.from(staff);
