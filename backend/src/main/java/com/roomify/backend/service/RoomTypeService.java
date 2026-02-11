@@ -3,6 +3,7 @@ package com.roomify.backend.service;
 import com.roomify.backend.dto.RoomTypeRequest;
 import com.roomify.backend.dto.RoomTypeResponse;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.exception.CannotDeleteException;
 import com.roomify.backend.exception.DuplicateResourceException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -93,11 +94,19 @@ public class RoomTypeService {
 
     /**
      * Delete a room type by ID.
+     * Prevents deletion if any rooms are assigned to this type.
      */
     public void delete(Long id) {
         // Check if exists
         if (!roomTypeRepository.existsById(id)) {
             throw new ResourceNotFoundException("Room type not found with id: " + id);
+        }
+
+        // Check if any rooms are assigned to this type
+        if (roomTypeRepository.hasAssignedRooms(id)) {
+            throw new CannotDeleteException(
+                "Cannot delete room type: rooms are currently assigned to this type"
+            );
         }
 
         // Delete
