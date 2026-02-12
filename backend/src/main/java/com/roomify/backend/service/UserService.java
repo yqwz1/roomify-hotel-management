@@ -16,10 +16,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordValidatorService passwordValidatorService;
+    private final AuditService auditService;
 
-    public UserService(UserRepository userRepository, PasswordValidatorService passwordValidatorService) {
+    public UserService(UserRepository userRepository,
+            PasswordValidatorService passwordValidatorService,
+            AuditService auditService) {
         this.userRepository = userRepository;
         this.passwordValidatorService = passwordValidatorService;
+        this.auditService = auditService;
     }
 
     /**
@@ -39,15 +43,30 @@ public class UserService {
     }
 
     /**
-     * Increments failed attempts and locks account for 30 minutes if limit (5) is reached.
+     * Increments failed attempts and locks account for 30 minutes if limit (5) is
+     * reached.
      */
     public void handleFailedLogin(User user) {
         int newAttempts = user.getFailedAttempts() + 1;
         user.setFailedAttempts(newAttempts);
 
+        // ✅ Log every failed attempt
+        auditService.log(
+                "LOGIN_FAILED_ATTEMPT",
+                user.getEmail(),
+                "{ \"failedAttempts\": " + newAttempts + " }");
+
         if (newAttempts >= 5) {
-            user.setLockUntil(Instant.now().plusSeconds(1800)); 
+            user.setLockUntil(Instant.now().plusSeconds(1800));
+
+            // ✅ Log lockout event (system actor)
+            auditService.log(
+                    "ACCOUNT_LOCKED",
+                    user.getEmail(),
+                    "{ \"failedAttempts\": " + newAttempts +
+                            ", \"lockUntil\": \"" + user.getLockUntil() + "\" }");
         }
+
         userRepository.save(user);
     }
 
