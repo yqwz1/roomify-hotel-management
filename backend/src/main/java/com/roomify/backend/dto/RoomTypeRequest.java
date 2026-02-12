@@ -13,7 +13,7 @@ public class RoomTypeRequest {
     private String name;
 
     @NotNull(message = "Base price is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Price cannot be negative")
+    @DecimalMin(value = "0.01", inclusive = true, message = "Price must be at least 0.01")
     private BigDecimal basePrice;
 
     @NotNull(message = "Max guests is required")
