@@ -51,6 +51,29 @@ export const useRoomTypes = () => {
         }
     };
 
+    // Update an existing room type
+    const updateRoomType = async (id, data) => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Transform amenities array to comma-separated string if it's an array
+            const payload = {
+                ...data,
+                amenities: Array.isArray(data.amenities) ? data.amenities.join(',') : data.amenities
+            };
+
+            const response = await api.put(`/room-types/${id}`, payload);
+            setRoomTypes(prev => prev.map(rt => rt.id === id ? response.data : rt));
+            return { success: true, data: response.data };
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || 'Failed to update room type';
+            const validationErrors = err.response?.data?.validationErrors;
+            return { success: false, error: errorMessage, validationErrors };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Delete a room type
     const deleteRoomType = async (id) => {
         setLoading(true);
@@ -77,6 +100,7 @@ export const useRoomTypes = () => {
         error,
         fetchRoomTypes,
         createRoomType,
+        updateRoomType,
         deleteRoomType
     };
 };

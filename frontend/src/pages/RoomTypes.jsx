@@ -5,16 +5,17 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
-import { Plus, Trash2, Loader2, Info } from 'lucide-react';
+import { Plus, Trash2, Loader2, Info, Pencil } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
 
 export default function RoomTypes() {
-    const { roomTypes, loading, error, fetchRoomTypes, createRoomType, deleteRoomType } = useRoomTypes();
+    const { roomTypes, loading, error, fetchRoomTypes, createRoomType, updateRoomType, deleteRoomType } = useRoomTypes();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -57,6 +58,18 @@ export default function RoomTypes() {
         });
     };
 
+    const handleEdit = (roomType) => {
+        setFormData({
+            name: roomType.name,
+            basePrice: roomType.basePrice,
+            maxGuests: roomType.maxGuests,
+            amenities: roomType.amenities ? roomType.amenities.split(',').map(a => a.trim()) : [],
+            description: roomType.description || ''
+        });
+        setEditingId(roomType.id);
+        setIsSheetOpen(true);
+    };
+
     const resetForm = () => {
         setFormData({
             name: '',
@@ -67,6 +80,7 @@ export default function RoomTypes() {
         });
         setFormError(null);
         setValidationErrors({});
+        setEditingId(null);
     };
 
     const handleSubmit = async (e) => {
@@ -89,12 +103,17 @@ export default function RoomTypes() {
             maxGuests: parseInt(formData.maxGuests)
         };
 
-        const result = await createRoomType(payload);
+        let result;
+        if (editingId) {
+            result = await updateRoomType(editingId, payload);
+        } else {
+            result = await createRoomType(payload);
+        }
 
         setIsSubmitting(false);
 
         if (result.success) {
-            setSuccessMessage("Room Type created successfully!");
+            setSuccessMessage(editingId ? "Room Type updated successfully!" : "Room Type created successfully!");
             setIsSheetOpen(false);
             resetForm();
             // Clear success message after 3 seconds
@@ -198,6 +217,14 @@ export default function RoomTypes() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    onClick={() => handleEdit(rt)}
+                                                    className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50 mr-1"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => handleDelete(rt.id)}
                                                     className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                                 >
@@ -217,9 +244,9 @@ export default function RoomTypes() {
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="sm:max-w-xl overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>Create Room Type</SheetTitle>
+                        <SheetTitle>{editingId ? 'Edit Room Type' : 'Create Room Type'}</SheetTitle>
                         <SheetDescription>
-                            Add a new category of rooms to your hotel.
+                            {editingId ? 'Update details of the room type.' : 'Add a new category of rooms to your hotel.'}
                         </SheetDescription>
                     </SheetHeader>
 
@@ -312,10 +339,10 @@ export default function RoomTypes() {
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Creating...'}
                                     </>
                                 ) : (
-                                    'Create Room Type'
+                                    editingId ? 'Update Room Type' : 'Create Room Type'
                                 )}
                             </Button>
                         </SheetFooter>
