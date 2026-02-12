@@ -60,6 +60,10 @@ export const useRoomTypes = () => {
             setRoomTypes(prev => prev.filter(rt => rt.id !== id));
             return { success: true };
         } catch (err) {
+            // Handle 409 Conflict (e.g. room type in use)
+            if (err.response?.status === 409) {
+                return { success: false, error: "Cannot delete this Room Type because it is assigned to rooms." };
+            }
             const errorMessage = err.response?.data?.message || 'Failed to delete room type';
             return { success: false, error: errorMessage };
         } finally {

@@ -74,11 +74,11 @@ export default function RoomTypes() {
         setFormError(null);
         setValidationErrors({});
 
-        // Client-side validation for negative price
-        if (parseFloat(formData.basePrice) < 0) {
-            setValidationErrors(prev => ({ ...prev, basePrice: "Price must be positive" }));
-            return;
-        }
+        // Client-side validation for negative price - REMOVED (Backend now handles this)
+        // if (parseFloat(formData.basePrice) < 0) {
+        //   setValidationErrors(prev => ({ ...prev, basePrice: "Price must be positive" }));
+        //   return;
+        // }
 
         setIsSubmitting(true);
 
