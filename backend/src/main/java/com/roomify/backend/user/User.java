@@ -87,5 +87,19 @@ public void setStaff(Staff staff) {
     this.staff = staff;
 }
 
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
 
+    public void setFailedAttempts(int failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
+    public Instant getLockUntil() {
+        return lockUntil;
+    }
+
+    public void setLockUntil(Instant lockUntil) {
+        this.lockUntil = lockUntil;
+    }
 }
