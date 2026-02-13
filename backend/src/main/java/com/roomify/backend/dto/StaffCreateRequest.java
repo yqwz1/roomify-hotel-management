@@ -1,18 +1,16 @@
 package com.roomify.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StaffCreateRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
     private String email;
-
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 72, message = "Password must be between 8 and 72 characters")
-    private String password;
 
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must be at most 100 characters")
@@ -25,9 +23,8 @@ public class StaffCreateRequest {
     public StaffCreateRequest() {
     }
 
-    public StaffCreateRequest(String email, String password, String name, String department) {
+    public StaffCreateRequest(String email, String name, String department) {
         this.email = email;
-        this.password = password;
         this.name = name;
         this.department = department;
     }
@@ -38,14 +35,6 @@ public class StaffCreateRequest {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getName() {
