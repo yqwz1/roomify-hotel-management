@@ -5,11 +5,43 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
-import { Plus, Trash2, Loader2, Info, Pencil } from 'lucide-react';
+import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
+
+function SkeletonRow() {
+    return (
+        <tr className="border-b">
+            <td className="p-4">
+                <div className="space-y-2">
+                    <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-40 bg-gray-200 rounded animate-pulse" />
+                </div>
+            </td>
+            <td className="p-4">
+                <div className="flex gap-1">
+                    <div className="h-5 w-12 bg-gray-200 rounded-full animate-pulse" />
+                    <div className="h-5 w-14 bg-gray-200 rounded-full animate-pulse" />
+                    <div className="h-5 w-10 bg-gray-200 rounded-full animate-pulse" />
+                </div>
+            </td>
+            <td className="p-4 text-right">
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
+            </td>
+            <td className="p-4 text-right">
+                <div className="h-4 w-8 bg-gray-200 rounded animate-pulse ml-auto" />
+            </td>
+            <td className="p-4 text-right">
+                <div className="flex justify-end gap-1">
+                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+                </div>
+            </td>
+        </tr>
+    );
+}
 
 export default function RoomTypes() {
     const { roomTypes, loading, error, fetchRoomTypes, createRoomType, updateRoomType, deleteRoomType } = useRoomTypes();
@@ -172,15 +204,37 @@ export default function RoomTypes() {
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
-                        <div className="flex justify-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        <div className="overflow-x-auto">
+                            <table className="w-full caption-bottom text-sm text-left">
+                                <thead className="[&_tr]:border-b">
+                                    <tr className="border-b">
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-[100px]">Details</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Amenities</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Price</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Max Guests</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right w-[100px]">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {[...Array(4)].map((_, i) => <SkeletonRow key={i} />)}
+                                </tbody>
+                            </table>
                         </div>
                     ) : roomTypes.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
-                            No room types found. Create one to get started.
+                        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
+                                <Box className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <div className="text-center space-y-1">
+                                <p className="text-lg font-medium text-gray-700">No room types yet</p>
+                                <p className="text-sm text-gray-500">Get started by creating your first room type.</p>
+                            </div>
+                            <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-2">
+                                <Plus className="h-4 w-4" /> Create Now
+                            </Button>
                         </div>
                     ) : (
-                        <div className="relative w-full overflow-auto">
+                        <div className="relative w-full overflow-x-auto">
                             <table className="w-full caption-bottom text-sm text-left">
                                 <thead className="[&_tr]:border-b">
                                     <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
