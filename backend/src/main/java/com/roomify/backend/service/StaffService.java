@@ -1,5 +1,13 @@
 package com.roomify.backend.service;
 
+import java.util.List;
+
+import org.springframework.mail.MailException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.roomify.backend.dto.StaffCreateRequest;
 import com.roomify.backend.dto.StaffResponse;
 import com.roomify.backend.dto.StaffUpdateRequest;
@@ -11,13 +19,6 @@ import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.StaffRepository;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
-import java.util.List;
-import org.springframework.mail.MailException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -25,20 +26,20 @@ public class StaffService {
 
     private final StaffRepository staffRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService; 
     private final PasswordGeneratorService passwordGeneratorService;
     private final EmailService emailService;
 
     public StaffService(
             StaffRepository staffRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
+            UserService userService, 
             PasswordGeneratorService passwordGeneratorService,
             EmailService emailService
     ) {
         this.staffRepository = staffRepository;
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
         this.passwordGeneratorService = passwordGeneratorService;
         this.emailService = emailService;
     }
@@ -49,26 +50,21 @@ public class StaffService {
         }
 
         String plainPassword = passwordGeneratorService.generatePassword();
-        String passwordHash = passwordEncoder.encode(plainPassword);
-        User user = new User(request.getEmail(), passwordHash, Role.STAFF, true);
-        Staff staff = new Staff(user, request.getName(), request.getDepartment());
+        
+        User savedUser = userService.createStaffUser(
+                request.getEmail(), 
+                plainPassword, 
+                request.getName(), 
+                request.getDepartment()
+        );
 
-        staff.setUser(user);
-        user.setStaff(staff);
-
-        User savedUser = userRepository.save(user);
         sendWelcomeEmail(savedUser, plainPassword);
+        
         return StaffResponse.from(savedUser.getStaff());
     }
 
-    //  Unified list + search + filter
     @Transactional(readOnly = true)
-    public List<StaffResponse> searchStaff(
-            String search,
-            Role role,
-            String department,
-            Boolean active
-    ) {
+    public List<StaffResponse> searchStaff(String search, Role role, String department, Boolean active) {
         return staffRepository.searchStaff(
                 normalize(search),
                 role,
@@ -123,17 +119,8 @@ public class StaffService {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-
         String currentEmail = authentication.getName();
-        if (currentEmail == null || currentEmail.isBlank()) {
-            return false;
-        }
-
         User user = staff.getUser();
-        if (user == null || user.getEmail() == null) {
-            return false;
-        }
-
-        return user.getEmail().equalsIgnoreCase(currentEmail);
+        return user != null && user.getEmail() != null && user.getEmail().equalsIgnoreCase(currentEmail);
     }
 }
