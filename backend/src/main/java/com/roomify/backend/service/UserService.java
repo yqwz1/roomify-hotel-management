@@ -21,9 +21,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       PasswordValidatorService passwordValidatorService,
-                       AuditService auditService,
-                       PasswordEncoder passwordEncoder) {
+            PasswordValidatorService passwordValidatorService,
+            AuditService auditService,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordValidatorService = passwordValidatorService;
         this.auditService = auditService;
@@ -78,8 +78,23 @@ public class UserService {
         }
     }
 
+    /**
+     * Manual unlock by manager.
+     */
+    public void manualUnlock(User user) {
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
+        userRepository.save(user);
+
+        auditService.log(
+                "MANUAL_UNLOCK",
+                user.getEmail(),
+                "{ \"status\": \"unlocked by manager\" }");
+    }
+
     public boolean isAccountLocked(User user) {
-        if (user.getLockUntil() == null) return false;
+        if (user.getLockUntil() == null)
+            return false;
         return user.getLockUntil().isAfter(Instant.now());
     }
 }

@@ -43,14 +43,13 @@ class StaffServiceTest {
         userService = mock(UserService.class); // عمل Mock للخدمة الجديدة
         passwordGeneratorService = mock(PasswordGeneratorService.class);
         emailService = mock(EmailService.class);
-        
+
         staffService = new StaffService(
                 staffRepository,
                 userRepository,
                 userService,
                 passwordGeneratorService,
-                emailService
-        );
+                emailService, null);
         SecurityContextHolder.clearContext();
     }
 
@@ -94,9 +93,7 @@ class StaffServiceTest {
                 new UsernamePasswordAuthenticationToken(
                         "manager@roomify.com",
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))
-                )
-        );
+                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))));
 
         assertThrows(ResourceConflictException.class, () -> staffService.setActive(1L, false));
     }
@@ -114,9 +111,7 @@ class StaffServiceTest {
                 new UsernamePasswordAuthenticationToken(
                         "manager@roomify.com",
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))
-                )
-        );
+                        List.of(new SimpleGrantedAuthority("ROLE_MANAGER"))));
 
         staffService.setActive(2L, false);
 
