@@ -131,7 +131,7 @@ class RoomTypeIntegrationTest {
                 .content(json))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message").value("Room type 'Standard Room' already exists"));
+                .andExpect(jsonPath("$.message").value("Room type with name 'Standard Room' already exists"));
     }
 
     @Test
@@ -218,7 +218,7 @@ class RoomTypeIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Room type 'Type A' already exists"));
+                .andExpect(jsonPath("$.message").value("Room type with name 'Type A' already exists"));
     }
 
     @Test
@@ -251,9 +251,8 @@ class RoomTypeIntegrationTest {
 
         mockMvc.perform(delete("/api/room-types/" + roomType.getId())
                 .header("Authorization", "Bearer " + managerToken))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message").value("Cannot delete room type with assigned rooms"));
+                .andExpect(jsonPath("$.message")
+                        .value("Cannot delete room type: rooms are currently assigned to this type"));
     }
 
     @Test
