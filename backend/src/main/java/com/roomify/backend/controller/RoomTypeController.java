@@ -6,12 +6,14 @@ import com.roomify.backend.service.RoomTypeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/room-types")
+@PreAuthorize("hasRole('MANAGER')")
 public class RoomTypeController {
 
     private final RoomTypeService roomTypeService;
