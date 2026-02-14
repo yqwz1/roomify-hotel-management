@@ -26,22 +26,24 @@ public class StaffService {
 
     private final StaffRepository staffRepository;
     private final UserRepository userRepository;
-    private final UserService userService; 
+    private final UserService userService;
     private final PasswordGeneratorService passwordGeneratorService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     public StaffService(
             StaffRepository staffRepository,
             UserRepository userRepository,
-            UserService userService, 
+            UserService userService,
             PasswordGeneratorService passwordGeneratorService,
-            EmailService emailService
-    ) {
+            EmailService emailService,
+            AuditService auditService) {
         this.staffRepository = staffRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.passwordGeneratorService = passwordGeneratorService;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     public StaffResponse createStaff(StaffCreateRequest request) {
@@ -50,16 +52,21 @@ public class StaffService {
         }
 
         String plainPassword = passwordGeneratorService.generatePassword();
-        
+
         User savedUser = userService.createStaffUser(
-                request.getEmail(), 
-                plainPassword, 
-                request.getName(), 
-                request.getDepartment()
-        );
+                request.getEmail(),
+                plainPassword,
+                request.getName(),
+                request.getDepartment());
 
         sendWelcomeEmail(savedUser, plainPassword);
-        
+
+        // Audit log for staff creation
+        auditService.log(
+                "STAFF_CREATED",
+                savedUser.getEmail(),
+                "{ \"department\": \"" + request.getDepartment() + "\" }");
+
         return StaffResponse.from(savedUser.getStaff());
     }
 
@@ -69,10 +76,9 @@ public class StaffService {
                 normalize(search),
                 role,
                 normalize(department),
-                active
-        ).stream()
-         .map(StaffResponse::from)
-         .toList();
+                active).stream()
+                .map(StaffResponse::from)
+                .toList();
     }
 
     private String normalize(String value) {
@@ -85,6 +91,12 @@ public class StaffService {
 
         staff.setName(request.getName());
         staff.setDepartment(request.getDepartment());
+
+        // Audit log for staff update
+        auditService.log(
+                "STAFF_UPDATED",
+                staff.getUser() != null ? staff.getUser().getEmail() : "UNKNOWN",
+                "{ \"name\": \"" + request.getName() + "\", \"department\": \"" + request.getDepartment() + "\" }");
 
         return StaffResponse.from(staff);
     }
@@ -101,6 +113,12 @@ public class StaffService {
         if (staff.getUser() != null) {
             staff.getUser().setActive(active);
         }
+
+        // Audit log for activate/deactivate
+        auditService.log(
+                active ? "STAFF_ACTIVATED" : "STAFF_DEACTIVATED",
+                staff.getUser() != null ? staff.getUser().getEmail() : "UNKNOWN",
+                "{ \"active\": " + active + " }");
 
         return StaffResponse.from(staff);
     }
