@@ -48,6 +48,7 @@ export default function RoomTypes() {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [pageError, setPageError] = useState(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -165,7 +166,8 @@ export default function RoomTypes() {
                 setSuccessMessage("Room Type deleted successfully!");
                 setTimeout(() => setSuccessMessage(null), 3000);
             } else {
-                alert(result.error);
+                setPageError(result.error);
+                setTimeout(() => setPageError(null), 4000);
             }
         }
     };
@@ -190,11 +192,11 @@ export default function RoomTypes() {
                 </Alert>
             )}
 
-            {error && (
+            {(error || pageError) && (
                 <Alert variant="destructive">
                     <Info className="h-4 w-4" />
                     <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>{pageError || error}</AlertDescription>
                 </Alert>
             )}
 
