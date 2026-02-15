@@ -34,6 +34,7 @@ class StaffServiceTest {
     private UserService userService; // أضفنا هذا
     private PasswordGeneratorService passwordGeneratorService;
     private EmailService emailService;
+    private AuditService auditService;
     private StaffService staffService;
 
     @BeforeEach
@@ -43,13 +44,15 @@ class StaffServiceTest {
         userService = mock(UserService.class); // عمل Mock للخدمة الجديدة
         passwordGeneratorService = mock(PasswordGeneratorService.class);
         emailService = mock(EmailService.class);
+        auditService = mock(AuditService.class);
 
         staffService = new StaffService(
                 staffRepository,
                 userRepository,
                 userService,
                 passwordGeneratorService,
-                emailService, null);
+                emailService,
+                auditService);
         SecurityContextHolder.clearContext();
     }
 
