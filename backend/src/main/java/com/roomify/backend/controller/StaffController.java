@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.roomify.backend.dto.StaffCreateRequest;
 import com.roomify.backend.dto.StaffResponse;
 import com.roomify.backend.dto.StaffUpdateRequest;
-import com.roomify.backend.security.annotation.RequireRole;
 import com.roomify.backend.service.StaffService;
 import com.roomify.backend.service.UserService;
 import com.roomify.backend.user.Role;
@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/staff")
-@RequireRole({ "MANAGER" })
+@PreAuthorize("hasRole('MANAGER')")
 public class StaffController {
 
     private final StaffService staffService;

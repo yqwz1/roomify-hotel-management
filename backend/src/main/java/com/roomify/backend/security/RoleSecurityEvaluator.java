@@ -24,6 +24,11 @@ public class RoleSecurityEvaluator {
             return false;
         }
 
+        if (roles == null || roles.length == 0) {
+            log.warn("Authorization failed: No required roles provided");
+            return false;
+        }
+
         Set<String> userRoles = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
