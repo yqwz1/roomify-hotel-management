@@ -45,7 +45,11 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         // (Audit Log)
-        auditService.log("USER_CREATED", email, "{ \"role\": \"STAFF\", \"name\": \"" + name + "\" }");
+        auditService.log(
+                "SYSTEM",
+                "USER_CREATED",
+                "User:" + email,
+                "{ \"role\": \"STAFF\", \"name\": \"" + name + "\" }");
 
         return savedUser;
     }
@@ -57,11 +61,19 @@ public class UserService {
         int newAttempts = user.getFailedAttempts() + 1;
         user.setFailedAttempts(newAttempts);
 
-        auditService.log("LOGIN_FAILED_ATTEMPT", user.getEmail(), "{ \"attempts\": " + newAttempts + " }");
+        auditService.log(
+                user.getEmail(),
+                "LOGIN_FAILED_ATTEMPT",
+                "User:" + user.getEmail(),
+                "{ \"attempts\": " + newAttempts + " }");
 
         if (newAttempts >= 5) {
             user.setLockUntil(Instant.now().plusSeconds(1800)); // قفل 30 دقيقة
-            auditService.log("ACCOUNT_LOCKED", user.getEmail(), "{ \"until\": \"" + user.getLockUntil() + "\" }");
+            auditService.log(
+                    user.getEmail(),
+                    "ACCOUNT_LOCKED",
+                    "User:" + user.getEmail(),
+                    "{ \"until\": \"" + user.getLockUntil() + "\" }");
         }
         userRepository.save(user);
     }
@@ -74,7 +86,11 @@ public class UserService {
             user.setFailedAttempts(0);
             user.setLockUntil(null);
             userRepository.save(user);
-            auditService.log("LOCKOUT_RESET", user.getEmail(), "{ \"status\": \"success\" }");
+            auditService.log(
+                    user.getEmail(),
+                    "LOCKOUT_RESET",
+                    "User:" + user.getEmail(),
+                    "{ \"status\": \"success\" }");
         }
     }
 
@@ -87,8 +103,9 @@ public class UserService {
         userRepository.save(user);
 
         auditService.log(
+                "MANAGER",
                 "MANUAL_UNLOCK",
-                user.getEmail(),
+                "User:" + user.getEmail(),
                 "{ \"status\": \"unlocked by manager\" }");
     }
 
