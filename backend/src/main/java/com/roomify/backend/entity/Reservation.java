@@ -1,0 +1,177 @@
+package com.roomify.backend.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+/**
+ * Reservation entity representing guest bookings for rooms.
+ */
+@Entity
+@Table(name = "reservations", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "confirmation_number", name = "uk_reservation_confirmation_number")
+})
+public class Reservation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull(message = "Guest is required")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_id", nullable = false)
+    private Guest guest;
+
+    @NotNull(message = "Room is required")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
+
+    @NotNull(message = "Check-in date is required")
+    @Column(name = "check_in_date", nullable = false)
+    private LocalDate checkInDate;
+
+    @NotNull(message = "Check-out date is required")
+    @Column(name = "check_out_date", nullable = false)
+    private LocalDate checkOutDate;
+
+    @NotNull(message = "Total price is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total price cannot be negative")
+    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPrice;
+
+    @NotNull(message = "Reservation status is required")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ReservationStatus status;
+
+    @NotBlank(message = "Confirmation number is required")
+    @Size(max = 100, message = "Confirmation number cannot exceed 100 characters")
+    @Column(name = "confirmation_number", nullable = false, unique = true, length = 100)
+    private String confirmationNumber;
+
+    public Reservation() {
+    }
+
+    public Reservation(
+            Guest guest,
+            Room room,
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            BigDecimal totalPrice,
+            ReservationStatus status,
+            String confirmationNumber) {
+        this.guest = guest;
+        this.room = room;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.totalPrice = totalPrice;
+        this.status = status;
+        this.confirmationNumber = confirmationNumber;
+    }
+
+    @PrePersist
+    public void applyDefaults() {
+        if (status == null) {
+            status = ReservationStatus.PENDING;
+        }
+    }
+
+    @AssertTrue(message = "Check-out date must be after check-in date")
+    public boolean isDateRangeValid() {
+        if (checkInDate == null || checkOutDate == null) {
+            return true;
+        }
+        return checkOutDate.isAfter(checkInDate);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Guest getGuest() {
+        return guest;
+    }
+
+    public void setGuest(Guest guest) {
+        this.guest = guest;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public Long getGuestId() {
+        return guest != null ? guest.getId() : null;
+    }
+
+    public Long getRoomId() {
+        return room != null ? room.getId() : null;
+    }
+
+    public LocalDate getCheckInDate() {
+        return checkInDate;
+    }
+
+    public void setCheckInDate(LocalDate checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
+    public LocalDate getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public void setCheckOutDate(LocalDate checkOutDate) {
+        this.checkOutDate = checkOutDate;
+    }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
+    }
+
+    public String getConfirmationNumber() {
+        return confirmationNumber;
+    }
+
+    public void setConfirmationNumber(String confirmationNumber) {
+        this.confirmationNumber = confirmationNumber;
+    }
+}
