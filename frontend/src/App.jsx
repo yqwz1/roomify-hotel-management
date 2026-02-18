@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthProvider'
 import Home from './pages/Home'
 import Rooms from './pages/Rooms'
 import RoomTypes from './pages/RoomTypes'
+import Staff from './pages/Staff'
 import Bookings from './pages/Bookings'
 import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
@@ -34,6 +35,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
               <Layout showSidebar={true}><RoomTypes /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/staff"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+              <Layout showSidebar={true}><Staff /></Layout>
             </ProtectedRoute>
           }
         />

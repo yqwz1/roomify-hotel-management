@@ -14,9 +14,10 @@ export default function Sidebar() {
     menuItems.push(
       { path: '/manager/dashboard', label: 'Dashboard', icon: '📊' },
       { path: '/room-types', label: 'Room Types', icon: '🏷️' },
+      { path: '/staff', label: 'Staff', icon: '👥' },
       { path: '/rooms', label: 'Manage Rooms', icon: '🏨' },
       { path: '/bookings', label: 'All Bookings', icon: '📅' },
-      { path: '/guests', label: 'Guest List', icon: '👥' },
+      { path: '/guests', label: 'Guest List', icon: '👤' },
       { path: '/settings', label: 'Settings', icon: '⚙️' }
     );
   } else if (hasRole('ROLE_STAFF')) {
