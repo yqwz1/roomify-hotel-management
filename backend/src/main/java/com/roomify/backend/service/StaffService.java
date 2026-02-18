@@ -63,8 +63,9 @@ public class StaffService {
 
         // Audit log for staff creation
         auditService.log(
+                getCurrentActor(),
                 "STAFF_CREATED",
-                savedUser.getEmail(),
+                "Staff:" + savedUser.getEmail(),
                 "{ \"department\": \"" + request.getDepartment() + "\" }");
 
         return StaffResponse.from(savedUser.getStaff());
@@ -94,8 +95,9 @@ public class StaffService {
 
         // Audit log for staff update
         auditService.log(
+                getCurrentActor(),
                 "STAFF_UPDATED",
-                staff.getUser() != null ? staff.getUser().getEmail() : "UNKNOWN",
+                "Staff:" + id,
                 "{ \"name\": \"" + request.getName() + "\", \"department\": \"" + request.getDepartment() + "\" }");
 
         return StaffResponse.from(staff);
@@ -116,8 +118,9 @@ public class StaffService {
 
         // Audit log for activate/deactivate
         auditService.log(
+                getCurrentActor(),
                 active ? "STAFF_ACTIVATED" : "STAFF_DEACTIVATED",
-                staff.getUser() != null ? staff.getUser().getEmail() : "UNKNOWN",
+                "Staff:" + id,
                 "{ \"active\": " + active + " }");
 
         return StaffResponse.from(staff);
@@ -140,5 +143,13 @@ public class StaffService {
         String currentEmail = authentication.getName();
         User user = staff.getUser();
         return user != null && user.getEmail() != null && user.getEmail().equalsIgnoreCase(currentEmail);
+    }
+
+    private String getCurrentActor() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "SYSTEM";
+        }
+        return authentication.getName();
     }
 }
