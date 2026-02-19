@@ -44,4 +44,9 @@ public class AuditService {
         }
         return authentication.getName();
     }
+
+    public void logWithMetadata(String action, String target, String key, String oldVal, String newVal) {
+        String metadata = String.format("{\"%s\":{\"old\":\"%s\",\"new\":\"%s\"}}", key, oldVal, newVal);
+        log(action, target, metadata);
+    }
 }

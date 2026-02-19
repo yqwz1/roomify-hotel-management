@@ -19,10 +19,13 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final AuditService auditService;
 
-    public RoomService(RoomRepository roomRepository, RoomTypeRepository roomTypeRepository) {
+    public RoomService(RoomRepository roomRepository, RoomTypeRepository roomTypeRepository,
+            AuditService auditService) {
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
+        this.auditService = auditService;
     }
 
     /**
@@ -36,15 +39,15 @@ public class RoomService {
 
         // Verify room type exists
         RoomType roomType = roomTypeRepository.findById(request.getRoomTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Room type not found with id: " + request.getRoomTypeId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Room type not found with id: " + request.getRoomTypeId()));
 
         // Create entity from DTO
         Room room = new Room(
                 request.getRoomNumber(),
                 roomType,
                 request.getFloor(),
-                request.getStatus()
-        );
+                request.getStatus());
 
         // Save to repository
         Room saved = roomRepository.save(room);
@@ -81,16 +84,27 @@ public class RoomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 
         // Check if new room number conflicts with another room
-        if (!existing.getRoomNumber().equals(request.getRoomNumber()) && 
-            roomRepository.existsByRoomNumber(request.getRoomNumber())) {
+        if (!existing.getRoomNumber().equals(request.getRoomNumber()) &&
+                roomRepository.existsByRoomNumber(request.getRoomNumber())) {
             throw new DuplicateResourceException("Room with number '" + request.getRoomNumber() + "' already exists");
         }
 
         // Verify room type exists if changed
         if (!existing.getRoomType().getId().equals(request.getRoomTypeId())) {
             RoomType newRoomType = roomTypeRepository.findById(request.getRoomTypeId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Room type not found with id: " + request.getRoomTypeId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Room type not found with id: " + request.getRoomTypeId()));
             existing.setRoomType(newRoomType);
+        }
+
+        // Audit: track status change
+        if (existing.getStatus() != request.getStatus()) {
+            auditService.logWithMetadata(
+                    "ROOM_STATUS_CHANGE",
+                    "ROOM:" + existing.getId(),
+                    "status",
+                    existing.getStatus().name(),
+                    request.getStatus().name());
         }
 
         // Update fields
@@ -129,15 +143,13 @@ public class RoomService {
                 roomType.getBasePrice(),
                 roomType.getMaxGuests(),
                 roomType.getAmenities(),
-                roomType.getDescription()
-        );
+                roomType.getDescription());
 
         return new RoomResponse(
                 room.getId(),
                 room.getRoomNumber(),
                 roomTypeResponse,
                 room.getFloor(),
-                room.getStatus()
-        );
+                room.getStatus());
     }
 }
