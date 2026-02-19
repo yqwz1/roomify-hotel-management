@@ -31,18 +31,26 @@ public class RoomController {
      * POST /api/rooms
      */
     @PostMapping
-    public ResponseEntity<RoomResponse> create(@Valid @RequestBody RoomRequest request) {
+    public ResponseEntity<RoomResponse> create(
+            @Valid @RequestBody RoomRequest request) {
+
         RoomResponse response = roomService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Get all rooms.
-     * GET /api/rooms
+     * Get all rooms with optional filters.
+     * GET /api/rooms?status=&floor=&type=
      */
     @GetMapping
-    public ResponseEntity<List<RoomResponse>> getAll() {
-        List<RoomResponse> rooms = roomService.findAll();
+    public ResponseEntity<List<RoomResponse>> getAll(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer floor,
+            @RequestParam(required = false, name = "type") Long roomTypeId
+    ) {
+        List<RoomResponse> rooms =
+                roomService.findAll(status, floor, roomTypeId);
+
         return ResponseEntity.ok(rooms);
     }
 
@@ -57,14 +65,28 @@ public class RoomController {
     }
 
     /**
-     * Update an existing room.
+     * Update an existing room (NOT for status changes).
      * PUT /api/rooms/{id}
      */
     @PutMapping("/{id}")
     public ResponseEntity<RoomResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody RoomRequest request) {
+
         RoomResponse response = roomService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update room status with transition validation.
+     * PUT /api/rooms/{id}/status
+     */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<RoomResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status
+    ) {
+        RoomResponse response = roomService.updateStatus(id, status);
         return ResponseEntity.ok(response);
     }
 
