@@ -16,6 +16,8 @@ export default function Sidebar() {
       { path: '/room-types', label: 'Room Types', icon: '🏷️' },
       { path: '/staff', label: 'Staff', icon: '👥' },
       { path: '/rooms', label: 'Manage Rooms', icon: '🏨' },
+      { path: '/rooms-management', label: 'Rooms Management', icon: '🏗️' },
+      { path: '/search', label: 'Room Search', icon: '🔍' },
       { path: '/bookings', label: 'All Bookings', icon: '📅' },
       { path: '/guests', label: 'Guest List', icon: '👤' },
       { path: '/settings', label: 'Settings', icon: '⚙️' }
@@ -23,6 +25,8 @@ export default function Sidebar() {
   } else if (hasRole('ROLE_STAFF')) {
     menuItems.push(
       { path: '/staff/dashboard', label: 'Dashboard', icon: '📊' },
+      { path: '/search', label: 'Room Search', icon: '🔍' },
+      { path: '/book', label: 'Book Room', icon: '📋' },
       { path: '/bookings', label: 'Bookings', icon: '📅' },
       { path: '/check-in', label: 'Check-In/Out', icon: '🔑' },
       { path: '/housekeeping', label: 'Housekeeping', icon: '🧹' }
