@@ -40,16 +40,14 @@ public class RoomController {
 
     /**
      * Get all rooms with optional filters.
-     * GET /api/rooms?status=&floor=&type=
+     * GET /api/rooms?status=AVAILABLE&floor=2&type=Deluxe
      */
     @GetMapping
     public ResponseEntity<List<RoomResponse>> getAll(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Integer floor,
-            @RequestParam(required = false, name = "type") Long roomTypeId
-    ) {
-        List<RoomResponse> rooms =
-                roomService.findAll(status, floor, roomTypeId);
+            @RequestParam(required = false, name = "type") String typeName) {
+        List<RoomResponse> rooms = roomService.findAll(status, floor, typeName);
 
         return ResponseEntity.ok(rooms);
     }
@@ -84,8 +82,7 @@ public class RoomController {
     @PutMapping("/{id}/status")
     public ResponseEntity<RoomResponse> updateStatus(
             @PathVariable Long id,
-            @RequestParam String status
-    ) {
+            @RequestParam String status) {
         RoomResponse response = roomService.updateStatus(id, status);
         return ResponseEntity.ok(response);
     }
