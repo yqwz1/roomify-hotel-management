@@ -146,14 +146,16 @@ public class AvailabilityQueryStrategy {
      *
      * <h3>Implementation notes for future integration</h3>
      * <ul>
-     * <li>The {@code Reservation} entity referenced in the sub-query does not
-     * exist yet. When it is created it must have at least: {@code room}
-     * (many-to-one → Room), {@code checkIn} (LocalDate), and
-     * {@code checkOut} (LocalDate).</li>
+     * <li>The {@code Reservation} entity uses fields {@code checkInDate}
+     * (LocalDate) and {@code checkOutDate} (LocalDate), with a
+     * {@code room} (ManyToOne → Room) relation and a {@code status}
+     * (ReservationStatus) field.</li>
      * <li>The query intentionally uses a {@code NOT EXISTS} sub-select rather
      * than a {@code LEFT JOIN … IS NULL} approach because it is
      * semantically clearer and typically performs equally well on modern
      * RDBMS engines with an indexed reservation table.</li>
+     * <li>Cancelled reservations ({@code CANCELLED} status) are excluded
+     * from the overlap check since they no longer block availability.</li>
      * <li>The sorting clause is appended dynamically using
      * {@link SearchSortField#getColumn()} and the request's sort direction.</li>
      * </ul>
@@ -198,28 +200,25 @@ public class AvailabilityQueryStrategy {
         /*
          * RESERVATION OVERLAP EXCLUSION
          * ─────────────────────────────
-         * Exclude any room that has at least one reservation overlapping
+         * Exclude any room that has at least one active reservation overlapping
          * the requested [checkIn, checkOut) interval.
          *
          * Overlap condition (half-open intervals):
-         * existing.checkIn < :checkOut
-         * existing.checkOut > :checkIn
+         * existing.checkInDate < :checkOut
+         * existing.checkOutDate > :checkIn
          *
          * We negate this with NOT EXISTS so that only rooms with ZERO
-         * overlapping reservations are returned.
+         * overlapping active reservations are returned.
          *
-         * NOTE: The "Reservation" entity is not yet implemented. This
-         * sub-query documents the intended structure and will compile
-         * once the Reservation entity is created with fields:
-         * - room (ManyToOne → Room)
-         * - checkIn (LocalDate)
-         * - checkOut (LocalDate)
+         * CANCELLED reservations are excluded from the overlap check
+         * since they no longer block availability.
          */
         jpql.append("AND NOT EXISTS (");
         jpql.append("SELECT 1 FROM Reservation res ");
         jpql.append("WHERE res.room = r ");
-        jpql.append("AND res.checkIn < :checkOut ");
-        jpql.append("AND res.checkOut > :checkIn");
+        jpql.append("AND res.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED ");
+        jpql.append("AND res.checkInDate < :checkOut ");
+        jpql.append("AND res.checkOutDate > :checkIn");
         jpql.append(") ");
 
         // ------------------------------------------------------------------
