@@ -14,6 +14,12 @@ import GuestDashboard from './pages/GuestDashboard'
 import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 
+// Day 1 Sprint — new pages (mock data, no API)
+import RoomsManagement from './pages/RoomsManagement'
+import RoomSearch from './pages/RoomSearch'
+import BookRoom from './pages/BookRoom'
+import ConfirmationPage from './pages/ConfirmationPage'
+
 import Layout from './components/Layout';
 
 /**
@@ -80,6 +86,43 @@ const AppContent = () => {
             <PrivateRoute allowedRoles={['ROLE_GUEST']}>
               <Layout showSidebar={true}><GuestDashboard /></Layout>
             </PrivateRoute>
+          }
+        />
+
+        {/* ── Day 1 Sprint: New Rooms / Booking Routes ── */}
+        <Route
+          path="/rooms-management"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+              <Layout showSidebar={true}><RoomsManagement /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><RoomSearch /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/book"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><BookRoom /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/confirmation"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><ConfirmationPage /></Layout>
+            </ProtectedRoute>
           }
         />
 
