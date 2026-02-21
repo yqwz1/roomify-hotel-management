@@ -107,11 +107,11 @@ public class RoomSearchRequest {
 
     /**
      * Optional minimum guest capacity.
-     * Only room types whose {@code maxGuests >= guests} will be returned.
+     * Only room types whose {@code maxGuests >= guestCapacity} will be returned.
      * Must be {@code >= 1} when provided.
      */
-    @Min(value = 1, message = "Guests must be at least 1")
-    private Integer guests;
+    @Min(value = 1, message = "Guest capacity must be at least 1")
+    private Integer guestCapacity;
 
     // -----------------------------------------------------------------------
     // Sorting parameters
@@ -139,14 +139,14 @@ public class RoomSearchRequest {
     }
 
     public RoomSearchRequest(LocalDate checkIn, LocalDate checkOut, String roomType,
-            BigDecimal minPrice, BigDecimal maxPrice, Integer guests,
+            BigDecimal minPrice, BigDecimal maxPrice, Integer guestCapacity,
             SearchSortField sortBy, Sort.Direction sortDirection) {
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.roomType = roomType;
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
-        this.guests = guests;
+        this.guestCapacity = guestCapacity;
         this.sortBy = sortBy;
         this.sortDirection = sortDirection;
     }
@@ -253,12 +253,12 @@ public class RoomSearchRequest {
         this.maxPrice = maxPrice;
     }
 
-    public Integer getGuests() {
-        return guests;
+    public Integer getGuestCapacity() {
+        return guestCapacity;
     }
 
-    public void setGuests(Integer guests) {
-        this.guests = guests;
+    public void setGuestCapacity(Integer guestCapacity) {
+        this.guestCapacity = guestCapacity;
     }
 
     public SearchSortField getSortBy() {
