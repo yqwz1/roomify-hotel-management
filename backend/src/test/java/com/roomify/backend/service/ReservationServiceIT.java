@@ -1,5 +1,6 @@
 package com.roomify.backend.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.roomify.backend.entity.Reservation;
-import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.entity.Room;
-import com.roomify.backend.exception.BookingConflictException;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.repository.RoomRepository;
+import com.roomify.backend.repository.RoomTypeRepository;
 
 @SpringBootTest
 @Transactional
@@ -24,29 +28,37 @@ class ReservationServiceIT {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
+
     @Test
     void shouldThrowExceptionWhenBookingOverlaps() {
-        // 1. Setup: Create and save a room
-        Room room = new Room(); // Assuming Wahib created Room entity
-        room = roomRepository.save(room);
+        // 1. Setup: Create and save a room type + room
+        RoomType roomType = roomTypeRepository.save(
+                new RoomType("Standard", new BigDecimal("100.00"), 2, "WiFi", "Standard room"));
+        Room room = roomRepository.save(new Room("101", roomType, 1, RoomStatus.AVAILABLE));
 
-        // 2. Create an existing reservation
-        Reservation existing = new Reservation();
-        existing.setRoom(room);
-        existing.setCheckInDate(LocalDate.of(2026, 3, 10));
-        existing.setCheckOutDate(LocalDate.of(2026, 3, 15));
-        existing.setStatus(ReservationStatus.CONFIRMED);
-        reservationService.createReservation(existing);
+        ReservationGuestRequest guestRequest = new ReservationGuestRequest(
+                "Test Guest", "test@example.com", "+966500000000", "ID12345", "Saudi");
+
+        // 2. Create an existing reservation via the service
+        ReservationCreateRequest existing = new ReservationCreateRequest(
+                room.getId(),
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 15),
+                null,
+                guestRequest);
+        reservationService.create(existing);
 
         // 3. Try to create an overlapping reservation (should fail)
-        Reservation overlapping = new Reservation();
-        overlapping.setRoom(room);
-        overlapping.setCheckInDate(LocalDate.of(2026, 3, 12)); // Overlaps!
-        overlapping.setCheckOutDate(LocalDate.of(2026, 3, 18));
+        ReservationCreateRequest overlapping = new ReservationCreateRequest(
+                room.getId(),
+                LocalDate.of(2026, 3, 12), // Overlaps!
+                LocalDate.of(2026, 3, 18),
+                null,
+                guestRequest);
 
-        // 4. Assert that it throws BookingConflictException (409)
-        assertThrows(BookingConflictException.class, () -> {
-            reservationService.createReservation(overlapping);
-        });
+        // 4. Assert that booking conflict is detected
+        assertThrows(ResourceConflictException.class, () -> reservationService.create(overlapping));
     }
 }
