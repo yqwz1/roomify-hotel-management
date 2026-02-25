@@ -255,7 +255,7 @@ public class AvailabilityQueryStrategy {
          * Only include room types whose maxGuests >= :guests,
          * ensuring the room can accommodate the requested party size.
          */
-        if (request.getGuests() != null) {
+        if (request.getGuestCapacity() != null) {
             jpql.append("AND rt.maxGuests >= :guests ");
         }
 
