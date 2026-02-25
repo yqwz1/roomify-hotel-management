@@ -138,12 +138,24 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
 
-        // Invalid status transition (e.g. OCCUPIED → AVAILABLE)
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ApiError> handleIllegalArgument(
+                        IllegalArgumentException ex,
+                        HttpServletRequest request) {
+                ApiError error = new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                ex.getMessage(),
+                                request.getRequestURI());
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        // Invalid room status transition (e.g. OCCUPIED → AVAILABLE) → 422
         @ExceptionHandler(IllegalStateException.class)
         public ResponseEntity<ApiError> handleIllegalState(
                         IllegalStateException ex,
                         HttpServletRequest request) {
-                // 422 Unprocessable Entity — use numeric code to avoid Spring 7 deprecation
+                // Use numeric 422 to avoid Spring 7 HttpStatus.UNPROCESSABLE_ENTITY deprecation
                 int code = 422;
                 ApiError error = new ApiError(
                                 code,
