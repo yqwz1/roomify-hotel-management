@@ -22,8 +22,11 @@ export default function BookRoom() {
     const stateCheckIn = location.state?.checkIn ?? '';
     const stateCheckOut = location.state?.checkOut ?? '';
 
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().split('T')[0];
+    const todayDate = new Date();
+    const today = todayDate.toISOString().split('T')[0];
+    const tomorrowDate = new Date(todayDate);
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrow = tomorrowDate.toISOString().split('T')[0];
 
     const [checkIn, setCheckIn] = useState(stateCheckIn || today);
     const [checkOut, setCheckOut] = useState(stateCheckOut || tomorrow);

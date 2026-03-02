@@ -55,11 +55,16 @@ public class ReservationService {
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + request.getRoomId()));
 
-        Guest guest = resolveOrCreateGuest(request.getGuest());
-
         long nights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
         if (nights <= 0) {
             throw new ResourceConflictException("Check-out date must be after check-in date");
+        }
+
+        if (!reservationRepository.findOverlappingReservations(
+                request.getRoomId(),
+                request.getCheckInDate(),
+                request.getCheckOutDate()).isEmpty()) {
+            throw new ResourceConflictException("Room is already booked for the selected dates");
         }
 
         BigDecimal roomRate = room.getRoomType().getBasePrice();
@@ -67,6 +72,8 @@ public class ReservationService {
             throw new ResourceConflictException(
                     "Room type price is not configured for room type id: " + room.getRoomType().getId());
         }
+
+        Guest guest = resolveOrCreateGuest(request.getGuest());
 
         BigDecimal normalizedRoomRate = roomRate.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
         BigDecimal subtotal = normalizedRoomRate.multiply(BigDecimal.valueOf(nights))

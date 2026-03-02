@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
-import { Menu, Hotel, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, Hotel, LogOut } from 'lucide-react';
 
 export default function Header({ onMenuToggle }) {
   const { isAuthenticated, user, logout, hasRole } = useAuth();

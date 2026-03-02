@@ -58,7 +58,7 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals(hashedPass, result.getPasswordHash());
         verify(passwordValidatorService).validatePassword(plainPass);
-        verify(auditService).log(eq("USER_CREATED"), eq(email), anyString());
+        verify(auditService).log(eq("SYSTEM"), eq("USER_CREATED"), eq("User:" + email), anyString());
         verify(userRepository).save(any(User.class));
     }
 
@@ -74,8 +74,10 @@ class UserServiceTest {
         assertNotNull(user.getLockUntil());
         assertTrue(user.getLockUntil().isAfter(Instant.now()));
         
-        verify(auditService).log(eq("LOGIN_FAILED_ATTEMPT"), anyString(), anyString());
-        verify(auditService).log(eq("ACCOUNT_LOCKED"), anyString(), anyString());
+        verify(auditService).log(eq(user.getEmail()), eq("LOGIN_FAILED_ATTEMPT"), eq("User:" + user.getEmail()),
+                anyString());
+        verify(auditService).log(eq(user.getEmail()), eq("ACCOUNT_LOCKED"), eq("User:" + user.getEmail()),
+                anyString());
     }
 
     @Test
@@ -89,6 +91,7 @@ class UserServiceTest {
 
         assertEquals(0, user.getFailedAttempts());
         assertNull(user.getLockUntil());
-        verify(auditService).log(eq("LOCKOUT_RESET"), anyString(), anyString());
+        verify(auditService).log(eq(user.getEmail()), eq("LOCKOUT_RESET"), eq("User:" + user.getEmail()),
+                anyString());
     }
 }

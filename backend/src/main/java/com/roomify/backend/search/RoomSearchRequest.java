@@ -261,6 +261,22 @@ public class RoomSearchRequest {
         this.guestCapacity = guestCapacity;
     }
 
+    /**
+     * Alias for query parameter compatibility with public API contract
+     * that uses "guests".
+     */
+    public Integer getGuests() {
+        return guestCapacity;
+    }
+
+    /**
+     * Alias for query parameter compatibility with public API contract
+     * that uses "guests".
+     */
+    public void setGuests(Integer guests) {
+        this.guestCapacity = guests;
+    }
+
     public SearchSortField getSortBy() {
         return sortBy;
     }

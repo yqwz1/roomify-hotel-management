@@ -71,7 +71,7 @@ export default function Staff() {
     const [successMessage, setSuccessMessage] = useState(null);
 
     useEffect(() => {
-        fetchStaff(filters);
+        fetchStaff();
     }, [fetchStaff]);
 
     const handleFilterChange = (e) => {

@@ -19,7 +19,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color }) => (
     </div>
 );
 
-const QuickLink = ({ icon: Icon, label, description, href, onClick }) => (
+const QuickLink = ({ icon: Icon, label, description, onClick }) => (
     <button
         onClick={onClick}
         className="group flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-sm transition-all text-left w-full"
