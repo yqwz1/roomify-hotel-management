@@ -7,12 +7,14 @@ import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
+import com.roomify.backend.exception.EmailDeliveryException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,16 +35,19 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
     private final RoomRepository roomRepository;
+    private final EmailService emailService;
     private final BigDecimal taxRate;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             GuestRepository guestRepository,
             RoomRepository roomRepository,
+            EmailService emailService,
             @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
+        this.emailService = emailService;
         this.taxRate = taxRate;
     }
 
@@ -79,7 +84,35 @@ public class ReservationService {
         reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        return toResponse(savedReservation, nights, normalizedRoomRate, subtotal, taxes);
+        ReservationResponse response = toResponse(savedReservation, nights, normalizedRoomRate, subtotal, taxes);
+        sendReservationConfirmationEmail(savedReservation, response);
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
+        Reservation reservation = reservationRepository.findByConfirmationNumber(normalizeConfirmationNumber(confirmationNumber))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
+        if (nights <= 0) {
+            throw new ResourceConflictException(
+                    "Stored reservation has invalid date range for confirmation number: " + reservation.getConfirmationNumber());
+        }
+
+        BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice();
+        if (roomRate == null) {
+            throw new ResourceConflictException(
+                    "Room type price is not configured for room type id: " + reservation.getRoom().getRoomType().getId());
+        }
+
+        BigDecimal normalizedRoomRate = roomRate.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal subtotal = normalizedRoomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights, normalizedRoomRate, subtotal, taxes);
     }
 
     private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
@@ -129,6 +162,24 @@ public class ReservationService {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeConfirmationNumber(String confirmationNumber) {
+        if (confirmationNumber == null || confirmationNumber.isBlank()) {
+            throw new IllegalArgumentException("Confirmation number is required");
+        }
+        return confirmationNumber.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private void sendReservationConfirmationEmail(Reservation reservation, ReservationResponse response) {
+        try {
+            emailService.sendReservationConfirmationEmail(
+                    reservation.getGuest().getEmail(),
+                    reservation.getGuest().getName(),
+                    response);
+        } catch (MailException ex) {
+            throw new EmailDeliveryException("Failed to send reservation confirmation email. Please try again.", ex);
+        }
     }
 
     private ReservationResponse toResponse(

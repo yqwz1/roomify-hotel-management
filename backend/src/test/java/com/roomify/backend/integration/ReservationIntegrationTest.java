@@ -14,10 +14,13 @@ import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,7 +33,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,6 +76,9 @@ class ReservationIntegrationTest {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
+    @Autowired
+    private JavaMailSender javaMailSender;
+
     private ObjectMapper objectMapper;
     private String managerToken;
     private String staffToken;
@@ -90,6 +100,7 @@ class ReservationIntegrationTest {
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
         guestRepository.deleteAll();
+        reset(javaMailSender);
 
         RoomType roomType = roomTypeRepository.save(
                 new RoomType("Deluxe", new BigDecimal("200.00"), 2, "WiFi, TV", "Deluxe room"));
@@ -134,6 +145,14 @@ class ReservationIntegrationTest {
         Optional<Reservation> savedReservation = reservationRepository.findByConfirmationNumber(confirmationNumber);
         assertTrue(savedReservation.isPresent());
         assertEquals("CONFIRMED", savedReservation.get().getStatus().name());
+
+        ArgumentCaptor<SimpleMailMessage> mailCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, times(1)).send(mailCaptor.capture());
+        SimpleMailMessage sentMail = mailCaptor.getValue();
+
+        assertEquals("john@example.com", sentMail.getTo()[0]);
+        assertEquals("Your Roomify reservation confirmation", sentMail.getSubject());
+        assertTrue(sentMail.getText().contains("Confirmation number: " + confirmationNumber));
     }
 
     @Test
@@ -193,6 +212,45 @@ class ReservationIntegrationTest {
     }
 
     @Test
+    void getReservationByConfirmationNumberReturnsReservation() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(7);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
+
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "Lookup Guest",
+                "lookup@example.com",
+                "0500011111",
+                "ID-LOOKUP-1",
+                "USA");
+
+        String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
+
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.guestEmail").value("lookup@example.com"))
+                .andExpect(jsonPath("$.roomId").value(roomId))
+                .andExpect(jsonPath("$.nights").value(2))
+                .andExpect(jsonPath("$.subtotal").value(400.00))
+                .andExpect(jsonPath("$.taxes").value(40.00))
+                .andExpect(jsonPath("$.totalPrice").value(440.00));
+    }
+
+    @Test
+    void getReservationByConfirmationNumberReturnsNotFoundForUnknownConfirmation() throws Exception {
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", "RSV-UNKNOWN1234")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Reservation not found with confirmation number: RSV-UNKNOWN1234"));
+    }
+
+    @Test
     void guestCannotCreateReservation() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusDays(5);
         LocalDate checkOutDate = checkInDate.plusDays(1);
@@ -213,6 +271,42 @@ class ReservationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void guestCannotRetrieveReservationByConfirmationNumber() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(8);
+        LocalDate checkOutDate = checkInDate.plusDays(1);
+
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Protected Guest",
+                "protected@example.com",
+                "0500003333",
+                "ID-PROTECTED-1",
+                "USA");
+
+        String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
+
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + guestToken))
+                .andExpect(status().isForbidden());
+    }
+
+    private String createReservationAndGetConfirmationNumber(String token, Map<String, Object> request) throws Exception {
+        String response = mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readTree(response).get("confirmationNumber").asText();
     }
 
     private Map<String, Object> buildCreateReservationRequest(
