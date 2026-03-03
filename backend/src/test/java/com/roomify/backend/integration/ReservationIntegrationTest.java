@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -251,6 +252,122 @@ class ReservationIntegrationTest {
     }
 
     @Test
+    void modifyReservationRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(12);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
+
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "Modify Guest",
+                "modify@example.com",
+                "0500012345",
+                "ID-MODIFY-1",
+                "USA");
+
+        Long reservationId = createReservationAndGetId(managerToken, createRequest);
+
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", checkInDate.plusDays(1).toString());
+        modifyRequest.put("checkOutDate", checkOutDate.plusDays(1).toString());
+        modifyRequest.put("modificationReason", "Guest requested a one-day shift");
+
+        mockMvc.perform(put("/api/reservations/{id}", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("modify"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
+
+    @Test
+    void cancelReservationRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(14);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
+
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Cancel Guest",
+                "cancel@example.com",
+                "0500044444",
+                "ID-CANCEL-1",
+                "USA");
+
+        Long reservationId = createReservationAndGetId(staffToken, createRequest);
+
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", "Guest changed travel plans");
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("cancel"))
+                .andExpect(jsonPath("$.currentStatus").value("CANCELLED"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
+
+    @Test
+    void checkInRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(16);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
+
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "CheckIn Guest",
+                "checkin@example.com",
+                "0500099999",
+                "ID-CHECKIN-1",
+                "USA");
+
+        Long reservationId = createReservationAndGetId(managerToken, createRequest);
+
+        Map<String, Object> checkInRequest = new HashMap<>();
+        checkInRequest.put("actualCheckInDate", LocalDate.now().toString());
+
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkInRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("check-in"))
+                .andExpect(jsonPath("$.currentStatus").value("CHECKED_IN"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
+
+    @Test
+    void modifyReservationReturnsStandardApiErrorWhenReservationMissing() throws Exception {
+        Long missingReservationId = 999_999L;
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", LocalDate.now().plusDays(20).toString());
+        modifyRequest.put("checkOutDate", LocalDate.now().plusDays(22).toString());
+        modifyRequest.put("modificationReason", "Placeholder update");
+
+        mockMvc.perform(put("/api/reservations/{id}", missingReservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Reservation not found with id: " + missingReservationId))
+                .andExpect(jsonPath("$.path").value("/api/reservations/" + missingReservationId));
+    }
+
+    @Test
     void guestCannotCreateReservation() throws Exception {
         LocalDate checkInDate = LocalDate.now().plusDays(5);
         LocalDate checkOutDate = checkInDate.plusDays(1);
@@ -307,6 +424,19 @@ class ReservationIntegrationTest {
                 .getContentAsString();
 
         return objectMapper.readTree(response).get("confirmationNumber").asText();
+    }
+
+    private Long createReservationAndGetId(String token, Map<String, Object> request) throws Exception {
+        String response = mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readTree(response).get("id").asLong();
     }
 
     private Map<String, Object> buildCreateReservationRequest(

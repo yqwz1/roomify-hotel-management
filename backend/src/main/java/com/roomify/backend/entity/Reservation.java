@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.AssertTrue;
@@ -21,6 +22,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Reservation entity representing guest bookings for rooms.
@@ -68,6 +70,23 @@ public class Reservation {
     @Column(name = "confirmation_number", nullable = false, unique = true, length = 100)
     private String confirmationNumber;
 
+    @Column(name = "actual_check_in_date")
+    private LocalDate actualCheckInDate;
+
+    @Size(max = 500, message = "Cancellation reason cannot exceed 500 characters")
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
+    @Column(name = "cancellation_at")
+    private LocalDateTime cancellationAt;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
+
+    @Size(max = 500, message = "Modification reason cannot exceed 500 characters")
+    @Column(name = "modification_reason", length = 500)
+    private String modificationReason;
+
     public Reservation() {
     }
 
@@ -93,6 +112,14 @@ public class Reservation {
         if (status == null) {
             status = ReservationStatus.PENDING;
         }
+        if (modifiedAt == null) {
+            modifiedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    public void touchModifiedAt() {
+        modifiedAt = LocalDateTime.now();
     }
 
     @AssertTrue(message = "Check-out date must be after check-in date")
@@ -173,5 +200,45 @@ public class Reservation {
 
     public void setConfirmationNumber(String confirmationNumber) {
         this.confirmationNumber = confirmationNumber;
+    }
+
+    public LocalDate getActualCheckInDate() {
+        return actualCheckInDate;
+    }
+
+    public void setActualCheckInDate(LocalDate actualCheckInDate) {
+        this.actualCheckInDate = actualCheckInDate;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public LocalDateTime getCancellationAt() {
+        return cancellationAt;
+    }
+
+    public void setCancellationAt(LocalDateTime cancellationAt) {
+        this.cancellationAt = cancellationAt;
+    }
+
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
+    public String getModificationReason() {
+        return modificationReason;
+    }
+
+    public void setModificationReason(String modificationReason) {
+        this.modificationReason = modificationReason;
     }
 }

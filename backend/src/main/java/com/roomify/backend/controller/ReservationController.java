@@ -1,6 +1,10 @@
 package com.roomify.backend.controller;
 
 import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
+import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
@@ -10,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +39,30 @@ public class ReservationController {
     @GetMapping("/{confirmationNumber}")
     public ResponseEntity<ReservationResponse> getByConfirmationNumber(@PathVariable String confirmationNumber) {
         ReservationResponse response = reservationService.getByConfirmationNumber(confirmationNumber);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservationActionPlaceholderResponse> modify(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationModifyRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.modify(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<ReservationActionPlaceholderResponse> cancel(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationCancelRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.cancel(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/check-in")
+    public ResponseEntity<ReservationActionPlaceholderResponse> checkIn(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationCheckInRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.checkIn(id, request);
         return ResponseEntity.ok(response);
     }
 }
