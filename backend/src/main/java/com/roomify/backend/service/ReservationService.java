@@ -36,6 +36,7 @@ public class ReservationService {
     private final GuestRepository guestRepository;
     private final RoomRepository roomRepository;
     private final EmailService emailService;
+    private final AuditService auditService;
     private final BigDecimal taxRate;
 
     public ReservationService(
@@ -43,19 +44,28 @@ public class ReservationService {
             GuestRepository guestRepository,
             RoomRepository roomRepository,
             EmailService emailService,
+            AuditService auditService,
             @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
+
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
         this.emailService = emailService;
+        this.auditService = auditService;
         this.taxRate = taxRate;
     }
 
+    // ========================= CREATE =========================
+
     public ReservationResponse create(ReservationCreateRequest request) {
+
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + request.getRoomId()));
 
-        long nights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
+        long nights = ChronoUnit.DAYS.between(
+                request.getCheckInDate(),
+                request.getCheckOutDate());
+
         if (nights <= 0) {
             throw new ResourceConflictException("Check-out date must be after check-in date");
         }
@@ -70,71 +80,128 @@ public class ReservationService {
         BigDecimal roomRate = room.getRoomType().getBasePrice();
         if (roomRate == null) {
             throw new ResourceConflictException(
-                    "Room type price is not configured for room type id: " + room.getRoomType().getId());
+                    "Room type price is not configured for room type id: "
+                            + room.getRoomType().getId());
         }
 
         Guest guest = resolveOrCreateGuest(request.getGuest());
 
         BigDecimal normalizedRoomRate = roomRate.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
         BigDecimal subtotal = normalizedRoomRate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal totalPrice = subtotal.add(taxes)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
         Reservation reservation = new Reservation();
         reservation.setGuest(guest);
         reservation.setRoom(room);
         reservation.setCheckInDate(request.getCheckInDate());
         reservation.setCheckOutDate(request.getCheckOutDate());
-        reservation.setStatus(request.getStatus() != null ? request.getStatus() : ReservationStatus.PENDING);
+        reservation.setStatus(
+                request.getStatus() != null
+                        ? request.getStatus()
+                        : ReservationStatus.PENDING);
         reservation.setTotalPrice(totalPrice);
         reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        ReservationResponse response = toResponse(savedReservation, nights, normalizedRoomRate, subtotal, taxes);
+
+        ReservationResponse response = toResponse(savedReservation, nights,
+                normalizedRoomRate, subtotal, taxes);
+
         sendReservationConfirmationEmail(savedReservation, response);
+
         return response;
     }
 
-    @Transactional(readOnly = true)
-    public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
-        Reservation reservation = reservationRepository.findByConfirmationNumber(normalizeConfirmationNumber(confirmationNumber))
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Reservation not found with confirmation number: " + confirmationNumber));
+    // ========================= CHECK-IN =========================
 
-        long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
-        if (nights <= 0) {
-            throw new ResourceConflictException(
-                    "Stored reservation has invalid date range for confirmation number: " + reservation.getConfirmationNumber());
+    public ReservationResponse checkIn(Long reservationId) {
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with id: " + reservationId));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException(
+                    "Only CONFIRMED reservations can be checked in");
         }
+
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservationRepository.save(reservation);
+
+        // ✅ Audit Log
+        auditService.log(
+                "CHECK_IN",
+                "Reservation#" + reservation.getId(),
+                "reservationId=" + reservation.getId()
+                        + ", roomId=" + reservation.getRoom().getId());
+
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate());
 
         BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice();
-        if (roomRate == null) {
-            throw new ResourceConflictException(
-                    "Room type price is not configured for room type id: " + reservation.getRoom().getRoomType().getId());
-        }
 
         BigDecimal normalizedRoomRate = roomRate.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
         BigDecimal subtotal = normalizedRoomRate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-        return toResponse(reservation, nights, normalizedRoomRate, subtotal, taxes);
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights,
+                normalizedRoomRate, subtotal, taxes);
     }
 
+    // ========================= GET BY CONFIRMATION =========================
+
+    @Transactional(readOnly = true)
+    public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
+
+        Reservation reservation = reservationRepository.findByConfirmationNumber(
+                normalizeConfirmationNumber(confirmationNumber))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: "
+                                + confirmationNumber));
+
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate());
+
+        BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice();
+
+        BigDecimal normalizedRoomRate = roomRate.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = normalizedRoomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights,
+                normalizedRoomRate, subtotal, taxes);
+    }
+
+    // ========================= PRIVATE METHODS =========================
+
     private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
+
         String normalizedEmail = normalizeEmail(request.getEmail());
         String normalizedIdNumber = request.getIdNumber().trim();
 
         Optional<Guest> guestByEmail = guestRepository.findByEmailIgnoreCase(normalizedEmail);
+
         Optional<Guest> guestByIdNumber = guestRepository.findByIdNumber(normalizedIdNumber);
 
-        if (guestByEmail.isPresent() && guestByIdNumber.isPresent()
-                && !guestByEmail.get().getId().equals(guestByIdNumber.get().getId())) {
-            throw new ResourceConflictException("Guest email and ID number belong to different guest records");
-        }
-
         Guest resolvedGuest = guestByEmail.orElseGet(() -> guestByIdNumber.orElse(null));
+
         if (resolvedGuest != null) {
             resolvedGuest.setName(request.getName().trim());
             resolvedGuest.setEmail(normalizedEmail);
@@ -150,6 +217,7 @@ public class ReservationService {
                 request.getPhone().trim(),
                 normalizedIdNumber,
                 request.getNationality().trim());
+
         return guestRepository.save(newGuest);
     }
 
@@ -159,12 +227,13 @@ public class ReservationService {
                     .replace("-", "")
                     .substring(0, 12)
                     .toUpperCase(Locale.ROOT);
+
             if (!reservationRepository.existsByConfirmationNumber(candidate)) {
                 return candidate;
             }
         }
-
-        throw new IllegalStateException("Unable to generate a unique confirmation number");
+        throw new IllegalStateException(
+                "Unable to generate a unique confirmation number");
     }
 
     private String normalizeEmail(String email) {
@@ -178,14 +247,19 @@ public class ReservationService {
         return confirmationNumber.trim().toUpperCase(Locale.ROOT);
     }
 
-    private void sendReservationConfirmationEmail(Reservation reservation, ReservationResponse response) {
+    private void sendReservationConfirmationEmail(
+            Reservation reservation,
+            ReservationResponse response) {
+
         try {
             emailService.sendReservationConfirmationEmail(
                     reservation.getGuest().getEmail(),
                     reservation.getGuest().getName(),
                     response);
         } catch (MailException ex) {
-            throw new EmailDeliveryException("Failed to send reservation confirmation email. Please try again.", ex);
+            throw new EmailDeliveryException(
+                    "Failed to send reservation confirmation email. Please try again.",
+                    ex);
         }
     }
 
@@ -195,6 +269,7 @@ public class ReservationService {
             BigDecimal roomRate,
             BigDecimal subtotal,
             BigDecimal taxes) {
+
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getConfirmationNumber(),
