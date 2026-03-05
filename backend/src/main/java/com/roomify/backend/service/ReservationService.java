@@ -11,6 +11,7 @@ import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.exception.EmailDeliveryException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
@@ -175,6 +176,59 @@ public class ReservationService {
                 "Reservation check-in endpoint is scaffolded; occupancy workflow rules are pending.");
     }
 
+    // ============================
+    // ✅ CI0 — CHECK-IN LOGIC ADDED
+    // ============================
+
+    public ReservationResponse checkIn(String confirmationNumber) {
+
+        String normalized = normalizeConfirmationNumber(confirmationNumber);
+
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(normalized)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reservation not found with confirmation number: " + confirmationNumber
+                        )
+                );
+
+        if (reservation.getStatus() == ReservationStatus.CHECKED_IN) {
+            throw new ResourceConflictException("Reservation is already checked in");
+        }
+
+        Room room = reservation.getRoom();
+
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new ResourceConflictException(
+                    "Room is not ready for check-in. Current status: " + room.getStatus()
+            );
+        }
+
+        room.setStatus(RoomStatus.OCCUPIED);
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+
+        roomRepository.save(room);
+        reservationRepository.save(reservation);
+
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate()
+        );
+
+        BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights, roomRate, subtotal, taxes);
+    }
+
+    // ============================
+
     private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
         String normalizedEmail = normalizeEmail(request.getEmail());
         String normalizedIdNumber = request.getIdNumber().trim();
@@ -216,7 +270,6 @@ public class ReservationService {
                 return candidate;
             }
         }
-
         throw new IllegalStateException("Unable to generate a unique confirmation number");
     }
 

@@ -6,6 +6,7 @@ import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCheckInRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,9 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationLookupService reservationLookupService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+            ReservationLookupService reservationLookupService) {
         this.reservationService = reservationService;
+        this.reservationLookupService = reservationLookupService;
     }
 
     @PostMapping

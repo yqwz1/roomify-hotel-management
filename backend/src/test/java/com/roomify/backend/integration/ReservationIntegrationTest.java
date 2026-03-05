@@ -45,15 +45,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(TestConfig.class)
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:reservationdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
-        "spring.datasource.driverClassName=org.h2.Driver",
-        "spring.datasource.username=sa",
-        "spring.datasource.password=",
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
-        "roomify.jwt.expiration=3600000",
-        "roomify.reservations.tax-rate=0.10"
+                "spring.datasource.url=jdbc:h2:mem:reservationdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
+                "spring.datasource.driverClassName=org.h2.Driver",
+                "spring.datasource.username=sa",
+                "spring.datasource.password=",
+                "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+                "spring.jpa.hibernate.ddl-auto=create-drop",
+                "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
+                "roomify.jwt.expiration=3600000",
+                "roomify.reservations.tax-rate=0.10"
 })
 class ReservationIntegrationTest {
 
