@@ -17,35 +17,38 @@ import jakarta.persistence.LockModeType;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    
-    Optional<Reservation> findByConfirmationNumber(String confirmationNumber);
+        Optional<Reservation> findByConfirmationNumber(String confirmationNumber);
 
-    boolean existsByConfirmationNumber(String confirmationNumber);
+        boolean existsByConfirmationNumber(String confirmationNumber);
 
-    List<Reservation> findByGuest_Id(Long guestId);
+        List<Reservation> findByGuest_Id(Long guestId);
 
-    List<Reservation> findByRoom_Id(Long roomId);
+        List<Reservation> findByRoom_Id(Long roomId);
 
+        /**
+         * Case-insensitive partial match on the guest's name.
+         * Used by the staff lookup endpoint when searching by guest name.
+         */
+        @Query("SELECT r FROM Reservation r JOIN r.guest g " +
+                        "WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+        List<Reservation> findByGuestNameContainingIgnoreCase(@Param("name") String name);
 
-    
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
-           "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
-           "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
-    List<Reservation> findOverlappingReservations(
-            @Param("roomId") Long roomId, 
-            @Param("newIn") LocalDate newIn, 
-            @Param("newOut") LocalDate newOut
-    );
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
+                        "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
+                        "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
+        List<Reservation> findOverlappingReservations(
+                        @Param("roomId") Long roomId,
+                        @Param("newIn") LocalDate newIn,
+                        @Param("newOut") LocalDate newOut);
 
-    @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
-           "AND r.id <> :currentId " +
-           "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
-           "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
-    List<Reservation> findOverlappingForUpdate(
-            @Param("roomId") Long roomId, 
-            @Param("newIn") LocalDate newIn, 
-            @Param("newOut") LocalDate newOut,
-            @Param("currentId") Long currentId
-    );
+        @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
+                        "AND r.id <> :currentId " +
+                        "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
+                        "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
+        List<Reservation> findOverlappingForUpdate(
+                        @Param("roomId") Long roomId,
+                        @Param("newIn") LocalDate newIn,
+                        @Param("newOut") LocalDate newOut,
+                        @Param("currentId") Long currentId);
 }
