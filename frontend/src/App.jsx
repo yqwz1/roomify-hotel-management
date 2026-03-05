@@ -20,6 +20,11 @@ import RoomSearch from './pages/RoomSearch'
 import BookRoom from './pages/BookRoom'
 import ConfirmationPage from './pages/ConfirmationPage'
 
+// Day 4 Sprint — reservation management pages
+import CheckIn from './pages/CheckIn'
+import ModifyReservation from './pages/ModifyReservation'
+import CancelReservation from './pages/CancelReservation'
+
 import Layout from './components/Layout';
 
 /**
@@ -122,6 +127,34 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
               <Layout showSidebar={true}><ConfirmationPage /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── Day 4 Sprint: Reservation Management Routes ── */}
+        <Route
+          path="/check-in"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><CheckIn /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reservations/modify"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><ModifyReservation /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reservations/cancel"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><CancelReservation /></Layout>
             </ProtectedRoute>
           }
         />
