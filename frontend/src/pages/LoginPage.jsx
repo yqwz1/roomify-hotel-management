@@ -1,129 +1,62 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Hotel, ShieldCheck, Zap, Users } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-/**
- * LoginPage component
- * Professional login form using Shadcn UI
- */
 const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
 
     const [formData, setFormData] = useState({
-        email: 'admin@roomify.com', // Default updated placeholder
-        password: 'password123'     // Default updated placeholder
+        email: 'admin@roomify.com',
+        password: 'password123'
     });
 
-    const [errors, setErrors] = useState({
-        email: '',
-        password: ''
-    });
-
+    const [errors, setErrors] = useState({ email: '', password: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [loginError, setLoginError] = useState('');
 
-    // Email validation regex (basic)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    /**
-     * Handle input changes
-     */
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
-        // Clear field-specific error
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
-
-        // Clear global login error
-        if (loginError) {
-            setLoginError('');
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+        if (loginError) setLoginError('');
     };
 
-    /**
-     * Validate form fields
-     */
     const validateForm = () => {
-        const newErrors = {
-            email: '',
-            password: ''
-        };
-
+        const newErrors = { email: '', password: '' };
         let isValid = true;
-
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-            isValid = false;
-        } else if (!emailRegex.test(formData.email)) {
-            // Optional: Relax this if username login is allowed, but requirement says "Update default credentials placeholder to: admin@roomify.com"
-            newErrors.email = 'Please enter a valid email address';
-            isValid = false;
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-            isValid = false;
-        }
-
+        if (!formData.email) { newErrors.email = 'Email is required'; isValid = false; }
+        else if (!emailRegex.test(formData.email)) { newErrors.email = 'Please enter a valid email address'; isValid = false; }
+        if (!formData.password) { newErrors.password = 'Password is required'; isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
 
-    /**
-     * Handle form submission
-     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoginError('');
-
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         try {
             setIsLoading(true);
-
-            // Call login function from AuthProvider
             const user = await login(formData.email, formData.password);
-
-            // Redirect based on user role or return URL
             const from = location.state?.from?.pathname;
-            if (from) {
-                navigate(from, { replace: true });
-                return;
-            }
+            if (from) { navigate(from, { replace: true }); return; }
 
             const primaryRole = user.roles && user.roles.length > 0 ? user.roles[0] : '';
-
             switch (primaryRole) {
-                case 'ROLE_MANAGER':
-                    navigate('/manager/dashboard', { replace: true });
-                    break;
-                case 'ROLE_STAFF':
-                    navigate('/staff/dashboard', { replace: true });
-                    break;
-                case 'ROLE_GUEST':
-                    navigate('/guest/dashboard', { replace: true });
-                    break;
-                default:
-                    navigate('/', { replace: true });
+                case 'ROLE_MANAGER': navigate('/manager/dashboard', { replace: true }); break;
+                case 'ROLE_STAFF': navigate('/staff/dashboard', { replace: true }); break;
+                case 'ROLE_GUEST': navigate('/guest/dashboard', { replace: true }); break;
+                default: navigate('/', { replace: true });
             }
         } catch (error) {
             setLoginError(error.message || 'Login failed. Please check your credentials.');
@@ -133,44 +66,103 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <Card className="w-full max-w-md shadow-lg">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center" role="heading" aria-level="1">Sign in</CardTitle>
-                    <CardDescription className="text-center">
-                        Enter your email and password to access your account
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+        <div className="min-h-screen flex">
+            {/* ── Left: Brand Panel (desktop only) ── */}
+            <div className="hidden lg:flex lg:w-[45%] bg-slate-900 flex-col justify-between p-10">
+                {/* Top: Logo */}
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center">
+                        <Hotel className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-white font-bold text-xl tracking-tight">Roomify</span>
+                </div>
+
+                {/* Middle: Headline */}
+                <div>
+                    <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-4">
+                        Hotel Management System
+                    </p>
+                    <h1 className="text-4xl font-bold text-white leading-snug mb-6">
+                        Manage your property<br />
+                        <span className="text-blue-400">with confidence.</span>
+                    </h1>
+                    <p className="text-slate-400 text-base leading-relaxed max-w-sm">
+                        A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.
+                    </p>
+                </div>
+
+                {/* Bottom: Feature chips */}
+                <div className="space-y-3">
+                    {[
+                        { icon: ShieldCheck, text: 'Role-based secure access' },
+                        { icon: Zap, text: 'Real-time room status updates' },
+                        { icon: Users, text: 'Staff & guest management' },
+                    ].map(({ icon: Icon, text }) => (
+                        <div key={text} className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                                <Icon className="h-3.5 w-3.5 text-blue-400" />
+                            </div>
+                            <span className="text-slate-300 text-sm">{text}</span>
+                        </div>
+                    ))}
+                    <p className="text-slate-600 text-xs pt-2">
+                        © {new Date().getFullYear()} Roomify PMS. All rights reserved.
+                    </p>
+                </div>
+            </div>
+
+            {/* ── Right: Login Form Panel ── */}
+            <div className="flex-1 flex items-center justify-center bg-gray-50 px-5 py-12 sm:px-8">
+                <div className="w-full max-w-sm">
+                    {/* Mobile logo */}
+                    <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
+                            <Hotel className="h-5 w-5 text-white" />
+                        </div>
+                        <span className="text-gray-900 font-bold text-xl">Roomify</span>
+                    </div>
+
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900" role="heading" aria-level="1">
+                            Sign in to your account
+                        </h2>
+                        <p className="text-gray-500 text-sm mt-1">
+                            Enter your credentials to access the system
+                        </p>
+                    </div>
+
                     {loginError && (
-                        <Alert variant="destructive" className="mb-6">
+                        <Alert variant="destructive" className="mb-5">
                             <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>
-                                {loginError}
-                            </AlertDescription>
+                            <AlertTitle>Authentication Failed</AlertTitle>
+                            <AlertDescription>{loginError}</AlertDescription>
                         </Alert>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
+                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
+                                Email Address
+                            </Label>
                             <Input
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="name@example.com"
+                                placeholder="you@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className={errors.email ? "border-red-500" : ""}
+                                className={`h-10 text-sm ${errors.email ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
                             />
                             {errors.email && (
-                                <p className="text-sm text-red-500">{errors.email}</p>
+                                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
                             )}
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+
+                        <div className="space-y-1.5">
+                            <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
+                                Password
+                            </Label>
                             <Input
                                 id="password"
                                 name="password"
@@ -179,31 +171,37 @@ const LoginPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className={errors.password ? "border-red-500" : ""}
+                                className={`h-10 text-sm ${errors.password ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
                             />
                             {errors.password && (
-                                <p className="text-sm text-red-500">{errors.password}</p>
+                                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
                             )}
                         </div>
-                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+
+                        <Button
+                            type="submit"
+                            className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
+                            disabled={isLoading}
+                        >
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
                                     Signing in...
                                 </>
                             ) : (
-                                "Sign In"
+                                'Sign In'
                             )}
                         </Button>
                     </form>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4">
-                    <div className="text-sm text-center text-gray-500">
-                        <p>Demo Credentials:</p>
-                        <p>Manager: admin@roomify.com / password123</p>
+
+                    {/* Demo credentials */}
+                    <div className="mt-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                        <p className="text-xs font-semibold text-blue-700 mb-1">Demo Credentials</p>
+                        <p className="text-xs text-blue-600">Manager: <span className="font-mono">admin@roomify.com</span></p>
+                        <p className="text-xs text-blue-600">Password: <span className="font-mono">password123</span></p>
                     </div>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };

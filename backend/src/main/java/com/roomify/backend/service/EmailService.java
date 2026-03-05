@@ -1,7 +1,6 @@
 package com.roomify.backend.service;
 
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
+import com.roomify.backend.dto.ReservationResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -46,24 +45,35 @@ public class EmailService {
         }
     }
 
-    private String buildHtmlBody(String name, String temporaryPassword) {
+    public void sendReservationConfirmationEmail(String to, String guestName, ReservationResponse reservation) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setFrom(fromAddress);
+        message.setSubject("Your Roomify reservation confirmation");
+        message.setText(buildReservationConfirmationBody(guestName, reservation));
+        mailSender.send(message);
+    }
 
-        String greeting = (name == null || name.isBlank())
-                ? "Hello"
-                : "Hello " + name;
+    private String buildBody(String name, String temporaryPassword) {
+        String greeting = (name == null || name.isBlank()) ? "Hello" : "Hello " + name;
+        return greeting + ",\n\n"
+                + "Your staff account has been created in Roomify.\n"
+                + "Temporary password: " + temporaryPassword + "\n\n"
+                + "Please log in and change your password right away.\n\n"
+                + "Thanks,\n"
+                + "Roomify Team";
+    }
 
-        return """
-                <html>
-                <body style="font-family: Arial, sans-serif;">
-                    <h2>Welcome to Roomify</h2>
-                    <p>%s,</p>
-                    <p>Your staff account has been created.</p>
-                    <p><strong>Temporary password:</strong> %s</p>
-                    <p>Please log in and change your password immediately.</p>
-                    <br>
-                    <p>Roomify Team</p>
-                </body>
-                </html>
-                """.formatted(greeting, temporaryPassword);
+    private String buildReservationConfirmationBody(String guestName, ReservationResponse reservation) {
+        String greeting = (guestName == null || guestName.isBlank()) ? "Hello" : "Hello " + guestName;
+        return greeting + ",\n\n"
+                + "Your reservation is confirmed.\n"
+                + "Confirmation number: " + reservation.getConfirmationNumber() + "\n"
+                + "Room: " + reservation.getRoomNumber() + "\n"
+                + "Check-in: " + reservation.getCheckInDate() + "\n"
+                + "Check-out: " + reservation.getCheckOutDate() + "\n"
+                + "Total: " + reservation.getTotalPrice() + "\n\n"
+                + "Thanks,\n"
+                + "Roomify Team";
     }
 }

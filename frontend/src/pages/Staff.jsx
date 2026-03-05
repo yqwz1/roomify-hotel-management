@@ -71,7 +71,7 @@ export default function Staff() {
     const [successMessage, setSuccessMessage] = useState(null);
 
     useEffect(() => {
-        fetchStaff(filters);
+        fetchStaff();
     }, [fetchStaff]);
 
     const handleFilterChange = (e) => {
@@ -205,13 +205,13 @@ export default function Staff() {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Staff Management</h1>
-                    <p className="text-gray-500 mt-2">Manage staff members and their accounts.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Staff Management</h1>
+                    <p className="text-gray-500 mt-1 text-sm">Manage staff members and their accounts.</p>
                 </div>
-                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2">
+                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto">
                     <Plus className="h-4 w-4" /> Add Staff
                 </Button>
             </div>

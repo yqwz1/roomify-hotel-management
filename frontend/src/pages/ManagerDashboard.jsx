@@ -1,101 +1,146 @@
 import { useAuth } from '../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+import { Hotel, CalendarCheck, TrendingUp, Tag, Users, Settings, ArrowRight } from 'lucide-react';
 
-/**
- * ManagerDashboard component
- * Placeholder dashboard for users with ROLE_MANAGER
- */
+const StatCard = ({ icon: Icon, label, value, sub, color }) => (
+    <div className={`relative overflow-hidden rounded-xl p-5 text-white ${color}`}>
+        <div className="flex items-start justify-between">
+            <div>
+                <p className="text-sm font-medium opacity-80 mb-1">{label}</p>
+                <p className="text-3xl font-bold tracking-tight">{value}</p>
+                {sub && <p className="text-xs opacity-65 mt-1.5">{sub}</p>}
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
+                <Icon className="h-5 w-5 text-white" />
+            </div>
+        </div>
+        {/* Subtle decorative circle */}
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-white/10" />
+    </div>
+);
+
+const QuickLink = ({ icon: Icon, label, description, onClick }) => (
+    <button
+        onClick={onClick}
+        className="group flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-sm transition-all text-left w-full"
+    >
+        <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
+                <Icon className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+                <p className="text-sm font-semibold text-gray-900">{label}</p>
+                <p className="text-xs text-gray-500">{description}</p>
+            </div>
+        </div>
+        <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-blue-500 transition flex-shrink-0" />
+    </button>
+);
+
 const ManagerDashboard = () => {
-    const { user, logout } = useAuth();
-
-    const handleLogout = () => {
-        logout();
-    };
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                Manager Dashboard
-                            </h1>
-                            <p className="mt-1 text-sm text-gray-600">
-                                Welcome back, {user?.username || 'Manager'}!
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                        >
-                            Logout
-                        </button>
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            {/* Page header */}
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Manager Dashboard</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                        Welcome back, <span className="font-semibold text-gray-700">{user?.username || 'Manager'}</span>
+                    </p>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg">
+                    <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-white uppercase">
+                            {user?.username?.[0] || 'M'}
+                        </span>
+                    </div>
+                    <span className="text-sm font-medium text-blue-700">
+                        {user?.roles?.[0]?.replace('ROLE_', '') || 'MANAGER'}
+                    </span>
+                </div>
+            </div>
+
+            {/* Stats cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <StatCard
+                    icon={Hotel}
+                    label="Total Rooms"
+                    value="42"
+                    sub="Across all floors"
+                    color="bg-gradient-to-br from-blue-500 to-blue-700"
+                />
+                <StatCard
+                    icon={CalendarCheck}
+                    label="Active Bookings"
+                    value="18"
+                    sub="Currently checked in"
+                    color="bg-gradient-to-br from-emerald-500 to-emerald-700"
+                />
+                <StatCard
+                    icon={TrendingUp}
+                    label="Revenue (This Month)"
+                    value="$12.5K"
+                    sub="Placeholder data"
+                    color="bg-gradient-to-br from-violet-500 to-violet-700"
+                />
+            </div>
+
+            {/* Account info + Quick actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* User info card */}
+                <div className="bg-white border border-gray-200 rounded-xl p-5">
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Account Information</h2>
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[
+                            { label: 'Username', value: user?.username },
+                            { label: 'Email', value: user?.email },
+                            { label: 'User ID', value: user?.id },
+                            { label: 'Role', value: user?.roles?.[0] || 'N/A', isRole: true },
+                        ].map(({ label, value, isRole }) => (
+                            <div key={label}>
+                                <dt className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</dt>
+                                {isRole ? (
+                                    <dd className="mt-1">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                            {value}
+                                        </span>
+                                    </dd>
+                                ) : (
+                                    <dd className="mt-1 text-sm text-gray-900 font-medium">{value || '—'}</dd>
+                                )}
+                            </div>
+                        ))}
+                    </dl>
+                </div>
+
+                {/* Quick actions */}
+                <div className="bg-white border border-gray-200 rounded-xl p-5">
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Quick Actions</h2>
+                    <div className="space-y-2.5">
+                        <QuickLink
+                            icon={Tag}
+                            label="Room Types"
+                            description="Manage categories and pricing"
+                            onClick={() => navigate('/room-types')}
+                        />
+                        <QuickLink
+                            icon={Users}
+                            label="Staff Management"
+                            description="Add and manage hotel staff"
+                            onClick={() => navigate('/staff')}
+                        />
+                        <QuickLink
+                            icon={Settings}
+                            label="Rooms Management"
+                            description="Configure room inventory"
+                            onClick={() => navigate('/rooms-management')}
+                        />
                     </div>
                 </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <div className="border-l-4 border-blue-600 pl-4 mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                            Manager Access Level
-                        </h2>
-                        <p className="text-gray-600">
-                            You have full administrative access to the Roomify system.
-                        </p>
-                    </div>
-
-                    {/* User Info Card */}
-                    <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            User Information
-                        </h3>
-                        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Username</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.username}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Email</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.email}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">User ID</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.id}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Role</dt>
-                                <dd className="mt-1">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {user?.roles?.[0] || 'N/A'}
-                                    </span>
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
-
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-                            <h4 className="text-sm font-medium opacity-90 mb-2">Total Rooms</h4>
-                            <p className="text-3xl font-bold">42</p>
-                            <p className="text-sm opacity-75 mt-2">Placeholder data</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white">
-                            <h4 className="text-sm font-medium opacity-90 mb-2">Active Bookings</h4>
-                            <p className="text-3xl font-bold">18</p>
-                            <p className="text-sm opacity-75 mt-2">Placeholder data</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white">
-                            <h4 className="text-sm font-medium opacity-90 mb-2">Revenue (This Month)</h4>
-                            <p className="text-3xl font-bold">$12.5K</p>
-                            <p className="text-sm opacity-75 mt-2">Placeholder data</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
     );
 };

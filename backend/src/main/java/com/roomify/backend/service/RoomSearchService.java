@@ -72,8 +72,8 @@ public class RoomSearchService {
         if (request.getMaxPrice() != null) {
             query.setParameter("maxPrice", request.getMaxPrice());
         }
-        if (request.getGuests() != null) {
-            query.setParameter("guests", request.getGuests());
+        if (request.getGuestCapacity() != null) {
+            query.setParameter("guests", request.getGuestCapacity());
         }
 
         // 6. Execute and map to DTOs

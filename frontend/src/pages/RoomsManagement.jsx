@@ -259,11 +259,6 @@ export default function RoomsManagement() {
         fetchRoomTypes();
     }, [fetchRooms, fetchRoomTypes]);
 
-    // Propagate hook-level errors to the banner
-    useEffect(() => {
-        if (error) setBannerError(error);
-    }, [error]);
-
     // Build API params from filters and re-fetch when they change
     const handleFiltersChange = (newFilters) => {
         setFilters(newFilters);
@@ -340,7 +335,7 @@ export default function RoomsManagement() {
             {/* ── Error Banner ── */}
             <div className="mb-4">
                 <ErrorBanner
-                    message={bannerError}
+                    message={bannerError ?? error}
                     onClose={() => { setBannerError(null); clearError(); }}
                 />
             </div>
