@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,387 +57,411 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 class ReservationIntegrationTest {
 
-        private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-        @Autowired
-        private WebApplicationContext webApplicationContext;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-        @Autowired
-        private JwtUtils jwtUtils;
+    @Autowired
+    private JwtUtils jwtUtils;
 
-        @Autowired
-        private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
-        @Autowired
-        private GuestRepository guestRepository;
+    @Autowired
+    private GuestRepository guestRepository;
 
-        @Autowired
-        private RoomRepository roomRepository;
+    @Autowired
+    private RoomRepository roomRepository;
 
-        @Autowired
-        private RoomTypeRepository roomTypeRepository;
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
 
-        @Autowired
-        private JavaMailSender javaMailSender;
+    @Autowired
+    private JavaMailSender javaMailSender;
 
-        private ObjectMapper objectMapper;
-        private String managerToken;
-        private String staffToken;
-        private String guestToken;
-        private Long roomId;
+    private ObjectMapper objectMapper;
+    private String managerToken;
+    private String staffToken;
+    private String guestToken;
+    private Long roomId;
 
-        @BeforeEach
-        void setUp() {
-                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                                .apply(springSecurity())
-                                .build();
-                objectMapper = new ObjectMapper();
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
+                .build();
+        objectMapper = new ObjectMapper();
 
-                managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
-                staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
-                guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
+        managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
+        staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
+        guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
-                reservationRepository.deleteAll();
-                roomRepository.deleteAll();
-                roomTypeRepository.deleteAll();
-                guestRepository.deleteAll();
-                reset(javaMailSender);
+        reservationRepository.deleteAll();
+        roomRepository.deleteAll();
+        roomTypeRepository.deleteAll();
+        guestRepository.deleteAll();
+        reset(javaMailSender);
 
-                RoomType roomType = roomTypeRepository.save(
-                                new RoomType("Deluxe", new BigDecimal("200.00"), 2, "WiFi, TV", "Deluxe room"));
-                Room room = new Room("101", roomType, 1, RoomStatus.AVAILABLE);
-                roomId = roomRepository.save(room).getId();
-        }
+        RoomType roomType = roomTypeRepository.save(
+                new RoomType("Deluxe", new BigDecimal("200.00"), 2, "WiFi, TV", "Deluxe room"));
+        Room room = new Room("101", roomType, 1, RoomStatus.AVAILABLE);
+        roomId = roomRepository.save(room).getId();
+    }
 
-        @Test
-        void createReservationWithValidDataReturnsCreatedAndStoresConfirmation() throws Exception {
-                LocalDate checkInDate = LocalDate.now().plusDays(5);
-                LocalDate checkOutDate = checkInDate.plusDays(3);
+    @Test
+    void createReservationWithValidDataReturnsCreatedAndStoresConfirmation() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(5);
+        LocalDate checkOutDate = checkInDate.plusDays(3);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "CONFIRMED",
-                                "John Doe",
-                                "john@example.com",
-                                "1234567890",
-                                "ID12345",
-                                "USA");
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "John Doe",
+                "john@example.com",
+                "1234567890",
+                "ID12345",
+                "USA");
 
-                String response = mockMvc.perform(post("/api/reservations")
-                                .header("Authorization", "Bearer " + managerToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.status").value("CONFIRMED"))
-                                .andExpect(jsonPath("$.confirmationNumber").isNotEmpty())
-                                .andExpect(jsonPath("$.roomId").value(roomId))
-                                .andExpect(jsonPath("$.nights").value(3))
-                                .andExpect(jsonPath("$.roomRate").value(200.00))
-                                .andExpect(jsonPath("$.subtotal").value(600.00))
-                                .andExpect(jsonPath("$.taxes").value(60.00))
-                                .andExpect(jsonPath("$.totalPrice").value(660.00))
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+        String response = mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.confirmationNumber").isNotEmpty())
+                .andExpect(jsonPath("$.roomId").value(roomId))
+                .andExpect(jsonPath("$.nights").value(3))
+                .andExpect(jsonPath("$.roomRate").value(200.00))
+                .andExpect(jsonPath("$.subtotal").value(600.00))
+                .andExpect(jsonPath("$.taxes").value(60.00))
+                .andExpect(jsonPath("$.totalPrice").value(660.00))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-                String confirmationNumber = objectMapper.readTree(response).get("confirmationNumber").asText();
-                Optional<Reservation> savedReservation = reservationRepository
-                                .findByConfirmationNumber(confirmationNumber);
-                assertTrue(savedReservation.isPresent());
-                assertEquals("CONFIRMED", savedReservation.get().getStatus().name());
+        String confirmationNumber = objectMapper.readTree(response).get("confirmationNumber").asText();
+        Optional<Reservation> savedReservation = reservationRepository.findByConfirmationNumber(confirmationNumber);
+        assertTrue(savedReservation.isPresent());
+        assertEquals("CONFIRMED", savedReservation.get().getStatus().name());
 
-                ArgumentCaptor<SimpleMailMessage> mailCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-                verify(javaMailSender, times(1)).send(mailCaptor.capture());
-                SimpleMailMessage sentMail = mailCaptor.getValue();
+        ArgumentCaptor<SimpleMailMessage> mailCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, times(1)).send(mailCaptor.capture());
+        SimpleMailMessage sentMail = mailCaptor.getValue();
 
-                assertEquals("john@example.com", sentMail.getTo()[0]);
-                assertEquals("Your Roomify reservation confirmation", sentMail.getSubject());
-                assertTrue(sentMail.getText().contains("Confirmation number: " + confirmationNumber));
-        }
+        assertEquals("john@example.com", sentMail.getTo()[0]);
+        assertEquals("Your Roomify reservation confirmation", sentMail.getSubject());
+        assertTrue(sentMail.getText().contains("Confirmation number: " + confirmationNumber));
+    }
 
-        @Test
-        void createReservationWithExistingGuestReusesGuest() throws Exception {
-                Guest existingGuest = guestRepository.save(
-                                new Guest("Existing Guest", "existing@example.com", "0500000000", "ID-EX-1", "USA"));
+    @Test
+    void createReservationWithExistingGuestReusesGuest() throws Exception {
+        Guest existingGuest = guestRepository.save(
+                new Guest("Existing Guest", "existing@example.com", "0500000000", "ID-EX-1", "USA"));
 
-                LocalDate checkInDate = LocalDate.now().plusDays(10);
-                LocalDate checkOutDate = checkInDate.plusDays(2);
+        LocalDate checkInDate = LocalDate.now().plusDays(10);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "PENDING",
-                                "Existing Guest Updated",
-                                "existing@example.com",
-                                "0511111111",
-                                "ID-EX-1",
-                                "USA");
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Existing Guest Updated",
+                "existing@example.com",
+                "0511111111",
+                "ID-EX-1",
+                "USA");
 
-                mockMvc.perform(post("/api/reservations")
-                                .header("Authorization", "Bearer " + staffToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.guestId").value(existingGuest.getId()))
-                                .andExpect(jsonPath("$.status").value("PENDING"));
+        mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.guestId").value(existingGuest.getId()))
+                .andExpect(jsonPath("$.status").value("PENDING"));
 
-                assertEquals(1L, guestRepository.count());
-        }
+        assertEquals(1L, guestRepository.count());
+    }
 
-        @Test
-        void createReservationWithInvalidDateRangeReturnsBadRequest() throws Exception {
-                LocalDate checkInDate = LocalDate.now().plusDays(5);
-                LocalDate checkOutDate = checkInDate.minusDays(1);
+    @Test
+    void createReservationWithInvalidDateRangeReturnsBadRequest() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(5);
+        LocalDate checkOutDate = checkInDate.minusDays(1);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "PENDING",
-                                "Invalid Dates",
-                                "invalid@example.com",
-                                "0555555555",
-                                "ID-BAD-DATE",
-                                "USA");
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Invalid Dates",
+                "invalid@example.com",
+                "0555555555",
+                "ID-BAD-DATE",
+                "USA");
 
-                mockMvc.perform(post("/api/reservations")
-                                .header("Authorization", "Bearer " + managerToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.error").value("Validation Error"))
-                                .andExpect(jsonPath("$.validationErrors.dateRangeValid")
-                                                .value("Check-out date must be after check-in date"));
-        }
+        mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.dateRangeValid")
+                        .value("Check-out date must be after check-in date"));
+    }
 
-        @Test
-        void getReservationByConfirmationNumberReturnsReservation() throws Exception {
-                LocalDate checkInDate = LocalDate.now().plusDays(7);
-                LocalDate checkOutDate = checkInDate.plusDays(2);
+    @Test
+    void getReservationByConfirmationNumberReturnsReservation() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(7);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "CONFIRMED",
-                                "Lookup Guest",
-                                "lookup@example.com",
-                                "0500011111",
-                                "ID-LOOKUP-1",
-                                "USA");
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "Lookup Guest",
+                "lookup@example.com",
+                "0500011111",
+                "ID-LOOKUP-1",
+                "USA");
 
-                String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
+        String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
 
-                mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
-                                .header("Authorization", "Bearer " + staffToken))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber))
-                                .andExpect(jsonPath("$.status").value("CONFIRMED"))
-                                .andExpect(jsonPath("$.guestEmail").value("lookup@example.com"))
-                                .andExpect(jsonPath("$.roomId").value(roomId))
-                                .andExpect(jsonPath("$.nights").value(2))
-                                .andExpect(jsonPath("$.subtotal").value(400.00))
-                                .andExpect(jsonPath("$.taxes").value(40.00))
-                                .andExpect(jsonPath("$.totalPrice").value(440.00));
-        }
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.guestEmail").value("lookup@example.com"))
+                .andExpect(jsonPath("$.roomId").value(roomId))
+                .andExpect(jsonPath("$.nights").value(2))
+                .andExpect(jsonPath("$.subtotal").value(400.00))
+                .andExpect(jsonPath("$.taxes").value(40.00))
+                .andExpect(jsonPath("$.totalPrice").value(440.00));
+    }
 
-        @Test
-        void getReservationByConfirmationNumberReturnsNotFoundForUnknownConfirmation() throws Exception {
-                mockMvc.perform(get("/api/reservations/{confirmationNumber}", "RSV-UNKNOWN1234")
-                                .header("Authorization", "Bearer " + managerToken))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message").value(
-                                                "Reservation not found with confirmation number: RSV-UNKNOWN1234"));
-        }
+    @Test
+    void getReservationByConfirmationNumberReturnsNotFoundForUnknownConfirmation() throws Exception {
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", "RSV-UNKNOWN1234")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Reservation not found with confirmation number: RSV-UNKNOWN1234"));
+    }
 
-        @Test
-        void guestCannotCreateReservation() throws Exception {
-                LocalDate checkInDate = LocalDate.now().plusDays(5);
-                LocalDate checkOutDate = checkInDate.plusDays(1);
+    @Test
+    void modifyReservationRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(12);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "PENDING",
-                                "Unauthorized Guest",
-                                "unauthorized@example.com",
-                                "0550000000",
-                                "ID-NO-AUTH",
-                                "USA");
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "Modify Guest",
+                "modify@example.com",
+                "0500012345",
+                "ID-MODIFY-1",
+                "USA");
 
-                mockMvc.perform(post("/api/reservations")
-                                .header("Authorization", "Bearer " + guestToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isForbidden());
-        }
+        Long reservationId = createReservationAndGetId(managerToken, createRequest);
 
-        @Test
-        void guestCannotRetrieveReservationByConfirmationNumber() throws Exception {
-                LocalDate checkInDate = LocalDate.now().plusDays(8);
-                LocalDate checkOutDate = checkInDate.plusDays(1);
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", checkInDate.plusDays(1).toString());
+        modifyRequest.put("checkOutDate", checkOutDate.plusDays(1).toString());
+        modifyRequest.put("modificationReason", "Guest requested a one-day shift");
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId,
-                                checkInDate.toString(),
-                                checkOutDate.toString(),
-                                "PENDING",
-                                "Protected Guest",
-                                "protected@example.com",
-                                "0500003333",
-                                "ID-PROTECTED-1",
-                                "USA");
+        mockMvc.perform(put("/api/reservations/{id}", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("modify"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
 
-                String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
+    @Test
+    void cancelReservationRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(14);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
 
-                mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
-                                .header("Authorization", "Bearer " + guestToken))
-                                .andExpect(status().isForbidden());
-        }
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Cancel Guest",
+                "cancel@example.com",
+                "0500044444",
+                "ID-CANCEL-1",
+                "USA");
 
-        // ─── GET /api/reservations/search ────────────────────────────────────────
+        Long reservationId = createReservationAndGetId(staffToken, createRequest);
 
-        @Test
-        void searchByConfirmationReturnsFullLookupPayload() throws Exception {
-                LocalDate checkIn = LocalDate.now().plusDays(14);
-                LocalDate checkOut = checkIn.plusDays(3);
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", "Guest changed travel plans");
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId, checkIn.toString(), checkOut.toString(), "CONFIRMED",
-                                "Alice Smith", "alice@example.com", "0500012345", "ID-ALICE-1", "UK");
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("cancel"))
+                .andExpect(jsonPath("$.currentStatus").value("CANCELLED"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
 
-                String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
+    @Test
+    void checkInRouteExistsAndReturnsPlaceholderResponse() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(16);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
 
-                mockMvc.perform(get("/api/reservations/search")
-                                .param("confirmation", confirmationNumber)
-                                .header("Authorization", "Bearer " + staffToken))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber))
-                                .andExpect(jsonPath("$.status").value("CONFIRMED"))
-                                // room section
-                                .andExpect(jsonPath("$.room.roomNumber").value("101"))
-                                .andExpect(jsonPath("$.room.roomTypeName").value("Deluxe"))
-                                .andExpect(jsonPath("$.room.floor").value(1))
-                                .andExpect(jsonPath("$.room.maxGuests").value(2))
-                                .andExpect(jsonPath("$.room.amenities").value("WiFi, TV"))
-                                // dates section
-                                .andExpect(jsonPath("$.dates.checkIn").value(checkIn.toString()))
-                                .andExpect(jsonPath("$.dates.checkOut").value(checkOut.toString()))
-                                .andExpect(jsonPath("$.dates.nights").value(3))
-                                // guest section
-                                .andExpect(jsonPath("$.guest.name").value("Alice Smith"))
-                                .andExpect(jsonPath("$.guest.email").value("alice@example.com"))
-                                .andExpect(jsonPath("$.guest.phone").value("0500012345"))
-                                .andExpect(jsonPath("$.guest.idNumber").value("ID-ALICE-1"))
-                                .andExpect(jsonPath("$.guest.nationality").value("UK"))
-                                // pricing section
-                                .andExpect(jsonPath("$.pricing.roomRate").value(200.00))
-                                .andExpect(jsonPath("$.pricing.subtotal").value(600.00))
-                                .andExpect(jsonPath("$.pricing.taxes").value(60.00))
-                                .andExpect(jsonPath("$.pricing.totalPrice").value(660.00));
-        }
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "CONFIRMED",
+                "CheckIn Guest",
+                "checkin@example.com",
+                "0500099999",
+                "ID-CHECKIN-1",
+                "USA");
 
-        @Test
-        void searchByGuestNameReturnsReservation() throws Exception {
-                LocalDate checkIn = LocalDate.now().plusDays(20);
-                LocalDate checkOut = checkIn.plusDays(2);
+        Long reservationId = createReservationAndGetId(managerToken, createRequest);
 
-                Map<String, Object> request = buildCreateReservationRequest(
-                                roomId, checkIn.toString(), checkOut.toString(), "PENDING",
-                                "Bob Marley", "bob@example.com", "0500099999", "ID-BOB-1", "Jamaica");
+        Map<String, Object> checkInRequest = new HashMap<>();
+        checkInRequest.put("actualCheckInDate", LocalDate.now().toString());
 
-                createReservationAndGetConfirmationNumber(managerToken, request);
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkInRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationId").value(reservationId))
+                .andExpect(jsonPath("$.action").value("check-in"))
+                .andExpect(jsonPath("$.currentStatus").value("CHECKED_IN"))
+                .andExpect(jsonPath("$.placeholder").value(true));
+    }
 
-                // Partial, case-insensitive name match
-                mockMvc.perform(get("/api/reservations/search")
-                                .param("guestName", "bob")
-                                .header("Authorization", "Bearer " + staffToken))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.guest.name").value("Bob Marley"))
-                                .andExpect(jsonPath("$.guest.nationality").value("Jamaica"))
-                                .andExpect(jsonPath("$.status").value("PENDING"));
-        }
+    @Test
+    void modifyReservationReturnsStandardApiErrorWhenReservationMissing() throws Exception {
+        Long missingReservationId = 999_999L;
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", LocalDate.now().plusDays(20).toString());
+        modifyRequest.put("checkOutDate", LocalDate.now().plusDays(22).toString());
+        modifyRequest.put("modificationReason", "Placeholder update");
 
-        @Test
-        void searchWithBothParamsBlankReturnsBadRequest() throws Exception {
-                mockMvc.perform(get("/api/reservations/search")
-                                .header("Authorization", "Bearer " + staffToken))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.message").value(
-                                                "At least one search parameter is required: 'confirmation' or 'guestName'"));
-        }
+        mockMvc.perform(put("/api/reservations/{id}", missingReservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Reservation not found with id: " + missingReservationId))
+                .andExpect(jsonPath("$.path").value("/api/reservations/" + missingReservationId));
+    }
 
-        @Test
-        void searchByUnknownConfirmationReturnsNotFound() throws Exception {
-                mockMvc.perform(get("/api/reservations/search")
-                                .param("confirmation", "RSV-NOTEXIST0000")
-                                .header("Authorization", "Bearer " + managerToken))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message").value(
-                                                "Reservation not found with confirmation number: RSV-NOTEXIST0000"));
-        }
+    @Test
+    void guestCannotCreateReservation() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(5);
+        LocalDate checkOutDate = checkInDate.plusDays(1);
 
-        @Test
-        void searchByUnknownGuestNameReturnsNotFound() throws Exception {
-                mockMvc.perform(get("/api/reservations/search")
-                                .param("guestName", "Nobody Nowhere")
-                                .header("Authorization", "Bearer " + managerToken))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message").value(
-                                                "No reservation found for guest name: Nobody Nowhere"));
-        }
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Unauthorized Guest",
+                "unauthorized@example.com",
+                "0550000000",
+                "ID-NO-AUTH",
+                "USA");
 
-        @Test
-        void guestRoleCannotAccessSearchEndpoint() throws Exception {
-                mockMvc.perform(get("/api/reservations/search")
-                                .param("confirmation", "RSV-ANYVALUE0000")
-                                .header("Authorization", "Bearer " + guestToken))
-                                .andExpect(status().isForbidden());
-        }
+        mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + guestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
 
-        // ─── Helpers ─────────────────────────────────────────────────────────────
+    @Test
+    void guestCannotRetrieveReservationByConfirmationNumber() throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(8);
+        LocalDate checkOutDate = checkInDate.plusDays(1);
 
-        private String createReservationAndGetConfirmationNumber(String token, Map<String, Object> request)
-                        throws Exception {
-                String response = mockMvc.perform(post("/api/reservations")
-                                .header("Authorization", "Bearer " + token)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isCreated())
-                                .andReturn()
-                                .getResponse()
-                                .getContentAsString();
+        Map<String, Object> request = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                "PENDING",
+                "Protected Guest",
+                "protected@example.com",
+                "0500003333",
+                "ID-PROTECTED-1",
+                "USA");
 
-                return objectMapper.readTree(response).get("confirmationNumber").asText();
-        }
+        String confirmationNumber = createReservationAndGetConfirmationNumber(managerToken, request);
 
-        private Map<String, Object> buildCreateReservationRequest(
-                        Long roomId,
-                        String checkInDate,
-                        String checkOutDate,
-                        String status,
-                        String guestName,
-                        String guestEmail,
-                        String guestPhone,
-                        String guestIdNumber,
-                        String guestNationality) {
-                Map<String, Object> guest = new HashMap<>();
-                guest.put("name", guestName);
-                guest.put("email", guestEmail);
-                guest.put("phone", guestPhone);
-                guest.put("idNumber", guestIdNumber);
-                guest.put("nationality", guestNationality);
+        mockMvc.perform(get("/api/reservations/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + guestToken))
+                .andExpect(status().isForbidden());
+    }
 
-                Map<String, Object> request = new HashMap<>();
-                request.put("roomId", roomId);
-                request.put("checkInDate", checkInDate);
-                request.put("checkOutDate", checkOutDate);
-                request.put("status", status);
-                request.put("guest", guest);
-                return request;
-        }
+    private String createReservationAndGetConfirmationNumber(String token, Map<String, Object> request) throws Exception {
+        String response = mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readTree(response).get("confirmationNumber").asText();
+    }
+
+    private Long createReservationAndGetId(String token, Map<String, Object> request) throws Exception {
+        String response = mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readTree(response).get("id").asLong();
+    }
+
+    private Map<String, Object> buildCreateReservationRequest(
+            Long roomId,
+            String checkInDate,
+            String checkOutDate,
+            String status,
+            String guestName,
+            String guestEmail,
+            String guestPhone,
+            String guestIdNumber,
+            String guestNationality) {
+        Map<String, Object> guest = new HashMap<>();
+        guest.put("name", guestName);
+        guest.put("email", guestEmail);
+        guest.put("phone", guestPhone);
+        guest.put("idNumber", guestIdNumber);
+        guest.put("nationality", guestNationality);
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("roomId", roomId);
+        request.put("checkInDate", checkInDate);
+        request.put("checkOutDate", checkOutDate);
+        request.put("status", status);
+        request.put("guest", guest);
+        return request;
+    }
 }

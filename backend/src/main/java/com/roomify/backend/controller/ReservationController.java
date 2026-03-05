@@ -1,7 +1,10 @@
 package com.roomify.backend.controller;
 
 import com.roomify.backend.dto.ReservationCreateRequest;
-import com.roomify.backend.dto.ReservationLookupResponse;
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
+import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
@@ -12,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,24 +47,27 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Staff check-in lookup endpoint.
-     *
-     * <p>
-     * Accepts at least one of:
-     * <ul>
-     * <li>{@code confirmation} – exact confirmation number (e.g.
-     * RSV-XXXXXXXXXXXX)</li>
-     * <li>{@code guestName} – partial, case-insensitive guest name</li>
-     * </ul>
-     *
-     * <p>
-     * Returns 400 if both parameters are omitted, 404 if no reservation matches.
-     */
-    @GetMapping("/search")
-    public ResponseEntity<ReservationLookupResponse> search(
-            @RequestParam(required = false) String confirmation,
-            @RequestParam(required = false) String guestName) {
-        return ResponseEntity.ok(reservationLookupService.search(confirmation, guestName));
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservationActionPlaceholderResponse> modify(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationModifyRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.modify(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<ReservationActionPlaceholderResponse> cancel(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationCancelRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.cancel(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/check-in")
+    public ResponseEntity<ReservationActionPlaceholderResponse> checkIn(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationCheckInRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.checkIn(id, request);
+        return ResponseEntity.ok(response);
     }
 }

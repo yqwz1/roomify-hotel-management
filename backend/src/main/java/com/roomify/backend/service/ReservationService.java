@@ -2,6 +2,10 @@ package com.roomify.backend.service;
 
 import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
+import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Optional;
@@ -121,6 +126,54 @@ public class ReservationService {
         BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
         return toResponse(reservation, nights, normalizedRoomRate, subtotal, taxes);
+    }
+
+    public ReservationActionPlaceholderResponse modify(Long id, ReservationModifyRequest request) {
+        Reservation reservation = findReservationById(id);
+
+        if (request.getCheckInDate() != null) {
+            reservation.setCheckInDate(request.getCheckInDate());
+        }
+        if (request.getCheckOutDate() != null) {
+            reservation.setCheckOutDate(request.getCheckOutDate());
+        }
+        reservation.setModificationReason(request.getModificationReason().trim());
+        reservation.setModifiedAt(LocalDateTime.now());
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return toPlaceholderResponse(
+                savedReservation,
+                "modify",
+                "Modify reservation endpoint is scaffolded; full business rules are pending.");
+    }
+
+    public ReservationActionPlaceholderResponse cancel(Long id, ReservationCancelRequest request) {
+        Reservation reservation = findReservationById(id);
+
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setCancellationReason(request.getCancellationReason().trim());
+        reservation.setCancellationAt(LocalDateTime.now());
+        reservation.setModifiedAt(LocalDateTime.now());
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return toPlaceholderResponse(
+                savedReservation,
+                "cancel",
+                "Cancel reservation endpoint is scaffolded; refund and policy rules are pending.");
+    }
+
+    public ReservationActionPlaceholderResponse checkIn(Long id, ReservationCheckInRequest request) {
+        Reservation reservation = findReservationById(id);
+
+        reservation.setActualCheckInDate(request.getActualCheckInDate());
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setModifiedAt(LocalDateTime.now());
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return toPlaceholderResponse(
+                savedReservation,
+                "check-in",
+                "Reservation check-in endpoint is scaffolded; occupancy workflow rules are pending.");
     }
 
     // ============================
@@ -229,6 +282,23 @@ public class ReservationService {
             throw new IllegalArgumentException("Confirmation number is required");
         }
         return confirmationNumber.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private Reservation findReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id: " + id));
+    }
+
+    private ReservationActionPlaceholderResponse toPlaceholderResponse(
+            Reservation reservation,
+            String action,
+            String message) {
+        return new ReservationActionPlaceholderResponse(
+                reservation.getId(),
+                action,
+                message,
+                true,
+                reservation.getStatus());
     }
 
     private void sendReservationConfirmationEmail(Reservation reservation, ReservationResponse response) {
