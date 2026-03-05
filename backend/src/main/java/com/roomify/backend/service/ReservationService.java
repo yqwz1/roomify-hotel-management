@@ -1,10 +1,23 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.ReservationCreateRequest;
-import com.roomify.backend.dto.ReservationGuestRequest;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
@@ -18,18 +31,6 @@ import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -165,10 +166,29 @@ public class ReservationService {
     public ReservationActionPlaceholderResponse checkIn(Long id, ReservationCheckInRequest request) {
         Reservation reservation = findReservationById(id);
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Reservation cannot be checked in from status: " + reservation.getStatus());
+        }
+
+        if (request.getActualCheckInDate().isBefore(reservation.getCheckInDate())) {
+            throw new ResourceConflictException("Actual check-in date cannot be before the scheduled check-in date");
+        }
+
+        Room room = reservation.getRoom();
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new ResourceConflictException(
+                    "Room is not ready for check-in. Current status: " + room.getStatus());
+        }
+
+        room.setStatus(RoomStatus.OCCUPIED);
         reservation.setActualCheckInDate(request.getActualCheckInDate());
         reservation.setStatus(ReservationStatus.CHECKED_IN);
         reservation.setModifiedAt(LocalDateTime.now());
 
+        roomRepository.save(room);
         Reservation savedReservation = reservationRepository.save(reservation);
         return toPlaceholderResponse(
                 savedReservation,
