@@ -2,31 +2,47 @@ package com.roomify.backend.service;
 
 import com.roomify.backend.dto.ReservationResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final String fromAddress;
+    private final EmailLogService emailLogService;
 
-    public EmailService(
-            JavaMailSender mailSender,
-            @Value("${app.email.from:no-reply@roomify.com}") String fromAddress
-    ) {
-        this.mailSender = mailSender;
-        this.fromAddress = fromAddress;
-    }
+    @Value("${app.email.from:no-reply@roomify.com}")
+    private String fromAddress;
 
     public void sendStaffWelcomeEmail(String to, String name, String temporaryPassword) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setFrom(fromAddress);
-        message.setSubject("Your Roomify staff account");
-        message.setText(buildBody(name, temporaryPassword));
-        mailSender.send(message);
+
+        String subject = "Your Roomify staff account";
+        String htmlBody = buildHtmlBody(name, temporaryPassword);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setFrom(fromAddress);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true); // true = HTML
+
+            mailSender.send(message);
+
+            // Log success
+            emailLogService.log(to, subject, "SENT", null);
+
+        } catch (Exception ex) {
+
+            // Log failure
+            emailLogService.log(to, subject, "FAILED", ex.getMessage());
+
+            throw new RuntimeException("Failed to send email", ex);
+        }
     }
 
     public void sendReservationConfirmationEmail(String to, String guestName, ReservationResponse reservation) {
