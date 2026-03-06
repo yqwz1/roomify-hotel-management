@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Cancellation</title>
+</head>
+
+<body style="font-family: Arial, sans-serif;">
+
+    <h2>Reservation Cancellation Confirmation</h2>
+
+    <p>Dear <span th:text="${guest}">Guest</span>,</p>
+
+    <p>Your reservation has been successfully cancelled.</p>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+
+        <tr>
+            <td><b>Guest Name</b></td>
+            <td th:text="${guest}"></td>
+        </tr>
+
+        <tr>
+            <td><b>Room</b></td>
+            <td th:text="${room}"></td>
+        </tr>
+
+        <tr>
+            <td><b>Check-in Date</b></td>
+            <td th:text="${checkin}"></td>
+        </tr>
+
+        <tr>
+            <td><b>Check-out Date</b></td>
+            <td th:text="${checkout}"></td>
+        </tr>
+
+        <tr>
+            <td><b>Total Price</b></td>
+            <td th:text="${total}"></td>
+        </tr>
+
+        <tr>
+            <td><b>Confirmation Number</b></td>
+            <td th:text="${confirmation}"></td>
+        </tr>
+
+    </table>
+
+    <p>If this cancellation was not made by you, please contact support.</p>
+
+</body>
+
+</html>

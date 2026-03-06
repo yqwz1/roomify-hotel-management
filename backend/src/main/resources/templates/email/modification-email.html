@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Modification</title>
+</head>
+
+<body style="font-family: Arial, sans-serif;">
+
+    <h2>Reservation Updated</h2>
+
+    <p>Your reservation has been modified.</p>
+
+    <h3>Previous Details</h3>
+
+    <table border="1" cellpadding="8">
+
+        <tr>
+            <td>Room</td>
+            <td th:text="${oldRoom}"></td>
+        </tr>
+
+        <tr>
+            <td>Check-in</td>
+            <td th:text="${oldCheckin}"></td>
+        </tr>
+
+        <tr>
+            <td>Check-out</td>
+            <td th:text="${oldCheckout}"></td>
+        </tr>
+
+    </table>
+
+    <h3>New Details</h3>
+
+    <table border="1" cellpadding="8">
+
+        <tr>
+            <td>Room</td>
+            <td th:text="${newRoom}"></td>
+        </tr>
+
+        <tr>
+            <td>Check-in</td>
+            <td th:text="${newCheckin}"></td>
+        </tr>
+
+        <tr>
+            <td>Check-out</td>
+            <td th:text="${newCheckout}"></td>
+        </tr>
+
+        <tr>
+            <td>New Total</td>
+            <td th:text="${newTotal}"></td>
+        </tr>
+
+        <tr>
+            <td>Confirmation Number</td>
+            <td th:text="${confirmation}"></td>
+        </tr>
+
+    </table>
+
+</body>
+
+</html>

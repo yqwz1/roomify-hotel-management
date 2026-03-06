@@ -1,10 +1,21 @@
 package com.roomify.backend.service;
 
+import com.roomify.backend.dto.EmailDeliveryStatus;
 import com.roomify.backend.dto.ReservationResponse;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import org.thymeleaf.context.Context;
+import org.thymeleaf.TemplateEngine;
 
 @Service
 @RequiredArgsConstructor
@@ -12,68 +23,171 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final EmailLogService emailLogService;
+    private final TemplateEngine templateEngine;
 
     @Value("${app.email.from:no-reply@roomify.com}")
     private String fromAddress;
 
-    public void sendStaffWelcomeEmail(String to, String name, String temporaryPassword) {
+    // ===============================
+    // CORE EMAIL SENDER
+    // ===============================
 
-        String subject = "Your Roomify staff account";
-        String htmlBody = buildHtmlBody(name, temporaryPassword);
+    private void sendHtmlEmail(
+            String to,
+            String subject,
+            String template,
+            Context context,
+            String confirmationNumber) {
+
+        String htmlBody = templateEngine.process(template, context);
 
         try {
+
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true, "UTF-8");
+
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(to);
             helper.setFrom(fromAddress);
             helper.setSubject(subject);
-            helper.setText(htmlBody, true); // true = HTML
+            helper.setText(htmlBody, true);
 
             mailSender.send(message);
 
-            // Log success
-            emailLogService.log(to, subject, "SENT", null);
+            emailLogService.log(
+                    to,
+                    subject,
+                    EmailDeliveryStatus.SENT,
+                    null,
+                    confirmationNumber);
 
-        } catch (Exception ex) {
+        } catch (MailException | MessagingException ex) {
 
-            // Log failure
-            emailLogService.log(to, subject, "FAILED", ex.getMessage());
+            emailLogService.log(
+                    to,
+                    subject,
+                    EmailDeliveryStatus.FAILED,
+                    ex.getMessage(),
+                    confirmationNumber);
 
-            throw new RuntimeException("Failed to send email", ex);
+            throw new RuntimeException("Email sending failed", ex);
         }
     }
 
-    public void sendReservationConfirmationEmail(String to, String guestName, ReservationResponse reservation) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setFrom(fromAddress);
-        message.setSubject("Your Roomify reservation confirmation");
-        message.setText(buildReservationConfirmationBody(guestName, reservation));
-        mailSender.send(message);
+    // ===============================
+    // STAFF WELCOME EMAIL
+    // ===============================
+
+    public void sendStaffWelcomeEmail(
+            String to,
+            String name,
+            String password) {
+
+        Context context = new Context();
+
+        context.setVariable("name", name);
+        context.setVariable("email", to);
+        context.setVariable("password", password);
+
+        sendHtmlEmail(
+                to,
+                "Welcome to Roomify Staff Portal",
+                "email/staff-welcome-email",
+                context,
+                null);
     }
 
-    private String buildBody(String name, String temporaryPassword) {
-        String greeting = (name == null || name.isBlank()) ? "Hello" : "Hello " + name;
-        return greeting + ",\n\n"
-                + "Your staff account has been created in Roomify.\n"
-                + "Temporary password: " + temporaryPassword + "\n\n"
-                + "Please log in and change your password right away.\n\n"
-                + "Thanks,\n"
-                + "Roomify Team";
+    // ===============================
+    // CONFIRMATION EMAIL
+    // ===============================
+
+    public void sendReservationConfirmationEmail(
+            String to,
+            String guestName,
+            ReservationResponse reservation) {
+
+        Context context = new Context();
+
+        context.setVariable("guest", guestName);
+        context.setVariable("room", reservation.getRoomNumber());
+        context.setVariable("checkin", reservation.getCheckInDate());
+        context.setVariable("checkout", reservation.getCheckOutDate());
+        context.setVariable("total", reservation.getTotalPrice());
+        context.setVariable("confirmation",
+                reservation.getConfirmationNumber());
+
+        sendHtmlEmail(
+                to,
+                "Reservation Confirmation",
+                "email/confirmation-email",
+                context,
+                reservation.getConfirmationNumber());
     }
 
-    private String buildReservationConfirmationBody(String guestName, ReservationResponse reservation) {
-        String greeting = (guestName == null || guestName.isBlank()) ? "Hello" : "Hello " + guestName;
-        return greeting + ",\n\n"
-                + "Your reservation is confirmed.\n"
-                + "Confirmation number: " + reservation.getConfirmationNumber() + "\n"
-                + "Room: " + reservation.getRoomNumber() + "\n"
-                + "Check-in: " + reservation.getCheckInDate() + "\n"
-                + "Check-out: " + reservation.getCheckOutDate() + "\n"
-                + "Total: " + reservation.getTotalPrice() + "\n\n"
-                + "Thanks,\n"
-                + "Roomify Team";
+    // ===============================
+    // CANCELLATION EMAIL
+    // ===============================
+
+    public void sendReservationCancellationEmail(
+            String to,
+            String guest,
+            String room,
+            String checkin,
+            String checkout,
+            String total,
+            String confirmation) {
+
+        Context context = new Context();
+
+        context.setVariable("guest", guest);
+        context.setVariable("room", room);
+        context.setVariable("checkin", checkin);
+        context.setVariable("checkout", checkout);
+        context.setVariable("total", total);
+        context.setVariable("confirmation", confirmation);
+
+        sendHtmlEmail(
+                to,
+                "Reservation Cancelled",
+                "email/cancellation-email",
+                context,
+                confirmation);
+    }
+
+    // ===============================
+    // MODIFICATION EMAIL
+    // ===============================
+
+    public void sendReservationModificationEmail(
+            String to,
+            String oldRoom,
+            String newRoom,
+            String oldCheckin,
+            String newCheckin,
+            String oldCheckout,
+            String newCheckout,
+            String newTotal,
+            String confirmation) {
+
+        Context context = new Context();
+
+        context.setVariable("oldRoom", oldRoom);
+        context.setVariable("newRoom", newRoom);
+
+        context.setVariable("oldCheckin", oldCheckin);
+        context.setVariable("newCheckin", newCheckin);
+
+        context.setVariable("oldCheckout", oldCheckout);
+        context.setVariable("newCheckout", newCheckout);
+
+        context.setVariable("newTotal", newTotal);
+        context.setVariable("confirmation", confirmation);
+
+        sendHtmlEmail(
+                to,
+                "Reservation Modified",
+                "email/modification-email",
+                context,
+                confirmation);
     }
 }
