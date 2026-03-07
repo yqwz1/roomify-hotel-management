@@ -1,30 +1,5 @@
 package com.roomify.backend.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.roomify.backend.config.JwtUtils;
-import com.roomify.backend.config.TestConfig;
-import com.roomify.backend.entity.Guest;
-import com.roomify.backend.entity.Reservation;
-import com.roomify.backend.entity.Room;
-import com.roomify.backend.entity.RoomStatus;
-import com.roomify.backend.entity.RoomType;
-import com.roomify.backend.repository.GuestRepository;
-import com.roomify.backend.repository.ReservationRepository;
-import com.roomify.backend.repository.RoomRepository;
-import com.roomify.backend.repository.RoomTypeRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -33,15 +8,41 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roomify.backend.config.JwtUtils;
+import com.roomify.backend.config.TestConfig;
+import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.RoomRepository;
+import com.roomify.backend.repository.RoomTypeRepository;
 
 @Import(TestConfig.class)
 @SpringBootTest(properties = {
@@ -317,25 +318,86 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    void checkInRouteExistsAndReturnsPlaceholderResponse() throws Exception {
-        LocalDate checkInDate = LocalDate.now().plusDays(16);
-        LocalDate checkOutDate = checkInDate.plusDays(2);
+    void checkInWithMissingActualCheckInDateReturnsBadRequest() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
 
-        Map<String, Object> createRequest = buildCreateReservationRequest(
-                roomId,
-                checkInDate.toString(),
-                checkOutDate.toString(),
-                "CONFIRMED",
-                "CheckIn Guest",
-                "checkin@example.com",
-                "0500099999",
-                "ID-CHECKIN-1",
-                "USA");
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.actualCheckInDate").value("Actual check-in date is required"));
+    }
 
-        Long reservationId = createReservationAndGetId(managerToken, createRequest);
+    @Test
+    void checkInWithFutureActualCheckInDateReturnsBadRequest() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
 
         Map<String, Object> checkInRequest = new HashMap<>();
-        checkInRequest.put("actualCheckInDate", LocalDate.now().toString());
+        checkInRequest.put("actualCheckInDate", LocalDate.now().plusDays(1).toString());
+
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkInRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.actualCheckInDate")
+                        .value("Actual check-in date cannot be in the future"));
+    }
+
+    @Test
+    void checkInBlockedWhenReservationIsCancelledKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CANCELLED, LocalDate.now());
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenReservationAlreadyCheckedInKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CHECKED_IN, LocalDate.now());
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenReservationAlreadyCheckedOutKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CHECKED_OUT, LocalDate.now());
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenActualDateBeforeScheduledCheckInDateKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now().plusDays(5));
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenRoomNeedsCleaningKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        room.setStatus(RoomStatus.NEEDS_CLEANING);
+        roomRepository.save(room);
+
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenRoomUnderMaintenanceKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        room.setStatus(RoomStatus.UNDER_MAINTENANCE);
+        roomRepository.save(room);
+
+        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    }
+
+    @Test
+    void checkInSucceedsWhenRoomIsAvailableAndUpdatesReservationAndRoom() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+
+        Map<String, Object> checkInRequest = new HashMap<>();
+        LocalDate actualCheckInDate = LocalDate.now();
+        checkInRequest.put("actualCheckInDate", actualCheckInDate.toString());
 
         mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
                         .header("Authorization", "Bearer " + managerToken)
@@ -343,9 +405,28 @@ class ReservationIntegrationTest {
                         .content(objectMapper.writeValueAsString(checkInRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservationId").value(reservationId))
-                .andExpect(jsonPath("$.action").value("check-in"))
-                .andExpect(jsonPath("$.currentStatus").value("CHECKED_IN"))
-                .andExpect(jsonPath("$.placeholder").value(true));
+                .andExpect(jsonPath("$.currentStatus").value("CHECKED_IN"));
+
+        Reservation savedReservation = reservationRepository.findById(reservationId).orElseThrow();
+        Room savedRoom = roomRepository.findById(roomId).orElseThrow();
+
+        assertEquals(ReservationStatus.CHECKED_IN, savedReservation.getStatus());
+        assertEquals(actualCheckInDate, savedReservation.getActualCheckInDate());
+        assertEquals(RoomStatus.OCCUPIED, savedRoom.getStatus());
+    }
+
+    @Test
+    void guestCannotCheckInReservation() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+
+        Map<String, Object> checkInRequest = new HashMap<>();
+        checkInRequest.put("actualCheckInDate", LocalDate.now().toString());
+
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + guestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkInRequest)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -437,6 +518,58 @@ class ReservationIntegrationTest {
                 .getContentAsString();
 
         return objectMapper.readTree(response).get("id").asLong();
+    }
+
+    private Long createReservationForCheckIn(ReservationStatus status, LocalDate checkInDate) throws Exception {
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkInDate.plusDays(2).toString(),
+                ReservationStatus.CONFIRMED.name(),
+                "CheckIn Guest",
+                "checkin." + status.name().toLowerCase() + "@example.com",
+                "0500099999",
+                "ID-CHECKIN-" + status.name(),
+                "USA");
+
+        Long reservationId = createReservationAndGetId(managerToken, createRequest);
+
+        if (status != ReservationStatus.CONFIRMED) {
+            Reservation reservation = reservationRepository.findById(reservationId).orElseThrow();
+            reservation.setStatus(status);
+            if (status == ReservationStatus.CHECKED_IN || status == ReservationStatus.CHECKED_OUT) {
+                reservation.setActualCheckInDate(checkInDate);
+            }
+            reservationRepository.save(reservation);
+        }
+
+        return reservationId;
+    }
+
+    private void assertCheckInBlockedAndDatabaseUnchanged(
+            Long reservationId,
+            LocalDate actualCheckInDate,
+            org.springframework.test.web.servlet.ResultMatcher expectedStatus) throws Exception {
+        Reservation beforeReservation = reservationRepository.findById(reservationId).orElseThrow();
+        ReservationStatus beforeReservationStatus = beforeReservation.getStatus();
+        LocalDate beforeActualCheckInDate = beforeReservation.getActualCheckInDate();
+        RoomStatus beforeRoomStatus = roomRepository.findById(roomId).orElseThrow().getStatus();
+
+        Map<String, Object> checkInRequest = new HashMap<>();
+        checkInRequest.put("actualCheckInDate", actualCheckInDate.toString());
+
+        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkInRequest)))
+                .andExpect(expectedStatus);
+
+        Reservation afterReservation = reservationRepository.findById(reservationId).orElseThrow();
+        RoomStatus afterRoomStatus = roomRepository.findById(roomId).orElseThrow().getStatus();
+
+        assertEquals(beforeReservationStatus, afterReservation.getStatus());
+        assertEquals(beforeActualCheckInDate, afterReservation.getActualCheckInDate());
+        assertEquals(beforeRoomStatus, afterRoomStatus);
     }
 
     private Map<String, Object> buildCreateReservationRequest(

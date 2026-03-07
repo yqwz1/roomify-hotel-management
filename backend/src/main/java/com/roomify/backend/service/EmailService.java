@@ -1,10 +1,15 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.ReservationResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import com.roomify.backend.dto.ReservationResponse;
+
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +24,7 @@ public class EmailService {
     public void sendStaffWelcomeEmail(String to, String name, String temporaryPassword) {
 
         String subject = "Your Roomify staff account";
-        String htmlBody = buildHtmlBody(name, temporaryPassword);
+        String htmlBody = buildBody(name, temporaryPassword);
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
