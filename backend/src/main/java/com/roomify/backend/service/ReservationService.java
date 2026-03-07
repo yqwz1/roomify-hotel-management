@@ -32,6 +32,7 @@ public class ReservationService {
     private final GuestRepository guestRepository;
     private final RoomRepository roomRepository;
     private final EmailService emailService;
+    private final AuditService auditService;
     private final BigDecimal taxRate;
 
     public ReservationService(
@@ -39,12 +40,14 @@ public class ReservationService {
             GuestRepository guestRepository,
             RoomRepository roomRepository,
             EmailService emailService,
+            AuditService auditService,
             @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
 
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
         this.emailService = emailService;
+        this.auditService = auditService;
         this.taxRate = taxRate;
     }
 
@@ -213,6 +216,12 @@ public class ReservationService {
 
         roomRepository.save(room);
         reservationRepository.save(reservation);
+
+        auditService.log(
+                "ROOM_STATUS_CHANGE",
+                "Room",
+                "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in"
+        );
 
         long nights = ChronoUnit.DAYS.between(
                 reservation.getCheckInDate(),
