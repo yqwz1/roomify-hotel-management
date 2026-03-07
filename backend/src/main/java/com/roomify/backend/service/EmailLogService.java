@@ -1,11 +1,10 @@
 package com.roomify.backend.service;
 
+import com.roomify.backend.dto.EmailDeliveryStatus;
 import com.roomify.backend.entity.EmailLog;
 import com.roomify.backend.repository.EmailLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -13,15 +12,19 @@ public class EmailLogService {
 
     private final EmailLogRepository repository;
 
-    public void log(String recipient, String subject, String status, String errorMessage) {
+    public void log(String to,
+                    String subject,
+                    EmailDeliveryStatus status,
+                    String error,
+                    String confirmationNumber) {
 
-        EmailLog log = EmailLog.builder()
-                .recipient(recipient)
-                .subject(subject)
-                .status(status)
-                .errorMessage(errorMessage)
-                .createdAt(LocalDateTime.now())
-                .build();
+        EmailLog log = new EmailLog(
+                to,
+                subject,
+                status,
+                error,
+                confirmationNumber
+        );
 
         repository.save(log);
     }

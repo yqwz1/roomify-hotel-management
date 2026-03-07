@@ -63,11 +63,12 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/check-in")
-    public ResponseEntity<ReservationActionPlaceholderResponse> checkIn(
-            @PathVariable Long id,
-            @Valid @RequestBody ReservationCheckInRequest request) {
-        ReservationActionPlaceholderResponse response = reservationService.checkIn(id, request);
+    @PostMapping("/check-in/{confirmationNumber}")
+    public ResponseEntity<ReservationResponse> checkIn(
+            @PathVariable String confirmationNumber) {
+
+        ReservationResponse response = reservationService.checkIn(confirmationNumber);
+
         return ResponseEntity.ok(response);
     }
 }
