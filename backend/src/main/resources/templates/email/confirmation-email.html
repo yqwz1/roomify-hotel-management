@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Confirmation</title>
+</head>
+<body>
+<p>Hi <span th:text="${guest}">Guest</span>,</p>
+<p>Your reservation is confirmed.</p>
+<p>Room: <span th:text="${room}">101</span></p>
+<p>Check-in: <span th:text="${checkin}">2026-03-10</span></p>
+<p>Check-out: <span th:text="${checkout}">2026-03-12</span></p>
+<p>Total: <span th:text="${total}">0.00</span></p>
+<p>Confirmation: <span th:text="${confirmation}">RSV-1234567890</span></p>
+</body>
+</html>

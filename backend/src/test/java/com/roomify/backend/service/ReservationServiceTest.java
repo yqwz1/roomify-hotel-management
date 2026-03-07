@@ -1,5 +1,21 @@
 package com.roomify.backend.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationResponse;
@@ -13,22 +29,6 @@ import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class ReservationServiceTest {
 
@@ -36,6 +36,7 @@ class ReservationServiceTest {
     private GuestRepository guestRepository;
     private RoomRepository roomRepository;
     private EmailService emailService;
+    private AuditService auditService;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -44,12 +45,14 @@ class ReservationServiceTest {
         guestRepository = mock(GuestRepository.class);
         roomRepository = mock(RoomRepository.class);
         emailService = mock(EmailService.class);
+        auditService = mock(AuditService.class);
 
         reservationService = new ReservationService(
                 reservationRepository,
                 guestRepository,
                 roomRepository,
                 emailService,
+                auditService,
                 new BigDecimal("0.15"));
     }
 
@@ -137,7 +140,7 @@ class ReservationServiceTest {
         assertEquals(3L, response.getNights());
         assertEquals(new BigDecimal("150.00"), response.getRoomRate());
         assertEquals(new BigDecimal("450.00"), response.getSubtotal());
-        assertEquals(new BigDecimal("67.50"), response.getTaxes());
+        assertEquals(0, new BigDecimal("67.50").compareTo(response.getTaxes()));
         assertEquals(new BigDecimal("517.50"), response.getTotalPrice());
     }
 

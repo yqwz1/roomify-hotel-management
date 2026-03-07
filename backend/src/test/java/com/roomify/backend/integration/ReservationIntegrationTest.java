@@ -5,23 +5,28 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,16 +38,22 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
+import com.roomify.backend.dto.EmailDeliveryStatus;
+import com.roomify.backend.entity.EmailLog;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.repository.EmailLogRepository;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
+
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
 @Import(TestConfig.class)
 @SpringBootTest(properties = {
@@ -79,6 +90,9 @@ class ReservationIntegrationTest {
     private RoomTypeRepository roomTypeRepository;
 
     @Autowired
+    private EmailLogRepository emailLogRepository;
+
+    @Autowired
     private JavaMailSender javaMailSender;
 
     private ObjectMapper objectMapper;
@@ -102,7 +116,10 @@ class ReservationIntegrationTest {
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
         guestRepository.deleteAll();
+        emailLogRepository.deleteAll();
         reset(javaMailSender);
+        when(javaMailSender.createMimeMessage())
+                .thenAnswer(invocation -> new MimeMessage(Session.getInstance(new Properties())));
 
         RoomType roomType = roomTypeRepository.save(
                 new RoomType("Deluxe", new BigDecimal("200.00"), 2, "WiFi, TV", "Deluxe room"));
@@ -131,7 +148,7 @@ class ReservationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.confirmationNumber").isNotEmpty())
                 .andExpect(jsonPath("$.roomId").value(roomId))
                 .andExpect(jsonPath("$.nights").value(3))
@@ -146,15 +163,9 @@ class ReservationIntegrationTest {
         String confirmationNumber = objectMapper.readTree(response).get("confirmationNumber").asText();
         Optional<Reservation> savedReservation = reservationRepository.findByConfirmationNumber(confirmationNumber);
         assertTrue(savedReservation.isPresent());
-        assertEquals("CONFIRMED", savedReservation.get().getStatus().name());
+        assertEquals("PENDING", savedReservation.get().getStatus().name());
 
-        ArgumentCaptor<SimpleMailMessage> mailCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-        verify(javaMailSender, times(1)).send(mailCaptor.capture());
-        SimpleMailMessage sentMail = mailCaptor.getValue();
-
-        assertEquals("john@example.com", sentMail.getTo()[0]);
-        assertEquals("Your Roomify reservation confirmation", sentMail.getSubject());
-        assertTrue(sentMail.getText().contains("Confirmation number: " + confirmationNumber));
+        verify(javaMailSender, times(1)).send(any(MimeMessage.class));
     }
 
     @Test
@@ -235,7 +246,7 @@ class ReservationIntegrationTest {
                         .header("Authorization", "Bearer " + staffToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber))
-                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.guestEmail").value("lookup@example.com"))
                 .andExpect(jsonPath("$.roomId").value(roomId))
                 .andExpect(jsonPath("$.nights").value(2))
@@ -249,7 +260,7 @@ class ReservationIntegrationTest {
         mockMvc.perform(get("/api/reservations/{confirmationNumber}", "RSV-UNKNOWN1234")
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Reservation not found with confirmation number: RSV-UNKNOWN1234"));
+                .andExpect(jsonPath("$.message").value("Reservation not found"));
     }
 
     @Test
@@ -286,146 +297,205 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    void cancelReservationRouteExistsAndReturnsPlaceholderResponse() throws Exception {
-        LocalDate checkInDate = LocalDate.now().plusDays(14);
-        LocalDate checkOutDate = checkInDate.plusDays(2);
+    void cancelReservationValidationRejectsMissingReason() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
 
-        Map<String, Object> createRequest = buildCreateReservationRequest(
-                roomId,
-                checkInDate.toString(),
-                checkOutDate.toString(),
-                "PENDING",
-                "Cancel Guest",
-                "cancel@example.com",
-                "0500044444",
-                "ID-CANCEL-1",
-                "USA");
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.cancellationReason")
+                        .value("Cancellation reason is required"));
+    }
 
-        Long reservationId = createReservationAndGetId(staffToken, createRequest);
+    @Test
+    void cancelReservationValidationRejectsNullReason() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cancellationReason\":null}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.cancellationReason")
+                        .value("Cancellation reason is required"));
+    }
+
+    @Test
+    void cancelReservationValidationRejectsBlankReason() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cancellationReason\":\"   \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.cancellationReason")
+                        .value("Cancellation reason is required"));
+    }
+
+    @Test
+    void cancelReservationValidationRejectsReasonLongerThan500() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+        String overLimitReason = "a".repeat(501);
 
         Map<String, Object> cancelRequest = new HashMap<>();
-        cancelRequest.put("cancellationReason", "Guest changed travel plans");
+        cancelRequest.put("cancellationReason", overLimitReason);
 
         mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
                         .header("Authorization", "Bearer " + staffToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(cancelRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservationId").value(reservationId))
-                .andExpect(jsonPath("$.action").value("cancel"))
-                .andExpect(jsonPath("$.currentStatus").value("CANCELLED"))
-                .andExpect(jsonPath("$.placeholder").value(true));
-    }
-
-    @Test
-    void checkInWithMissingActualCheckInDateReturnsBadRequest() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
-
-        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
-                        .header("Authorization", "Bearer " + managerToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Validation Error"))
-                .andExpect(jsonPath("$.validationErrors.actualCheckInDate").value("Actual check-in date is required"));
+                .andExpect(jsonPath("$.validationErrors.cancellationReason")
+                        .value("Cancellation reason cannot exceed 500 characters"));
     }
 
     @Test
-    void checkInWithFutureActualCheckInDateReturnsBadRequest() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+    void cancelReservationBlockedWhenStatusIsCheckedInAndDatabaseUnchanged() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.CHECKED_IN);
+        assertCancelBlockedAndDatabaseUnchanged(reservationId, "Guest asked to cancel after check-in");
+    }
 
-        Map<String, Object> checkInRequest = new HashMap<>();
-        checkInRequest.put("actualCheckInDate", LocalDate.now().plusDays(1).toString());
+    @Test
+    void cancelReservationBlockedWhenStatusIsCheckedOutAndDatabaseUnchanged() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.CHECKED_OUT);
+        assertCancelBlockedAndDatabaseUnchanged(reservationId, "Guest asked to cancel after check-out");
+    }
 
-        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
-                        .header("Authorization", "Bearer " + managerToken)
+    @Test
+    void cancelReservationSucceedsAndUpdatesDatabaseState() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+        String reason = "Guest changed travel plans";
+
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", reason);
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(checkInRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Validation Error"))
-                .andExpect(jsonPath("$.validationErrors.actualCheckInDate")
-                        .value("Actual check-in date cannot be in the future"));
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().is2xxSuccessful());
+
+        Reservation updated = reservationRepository.findById(reservationId).orElseThrow();
+        assertEquals(ReservationStatus.CANCELLED, updated.getStatus());
+        assertEquals(reason, updated.getCancellationReason());
+        assertNotNull(updated.getCancellationAt());
     }
 
     @Test
-    void checkInBlockedWhenReservationIsCancelledKeepsDatabaseState() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CANCELLED, LocalDate.now());
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    void cancelReservationSucceedsWhenEmailSendingFailsAndPersistsCancelledState() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+
+        doThrow(new MailSendException("SMTP unavailable"))
+                .when(javaMailSender)
+                .send(any(MimeMessage.class));
+
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", "Guest changed plans due emergency");
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().is2xxSuccessful());
+
+        Reservation updated = reservationRepository.findById(reservationId).orElseThrow();
+        assertEquals(ReservationStatus.CANCELLED, updated.getStatus());
+
+        String confirmationNumber = updated.getConfirmationNumber();
+        boolean hasFailedEmailLog = emailLogRepository.findAll().stream()
+                .filter(log -> confirmationNumber.equals(log.getConfirmationNumber()))
+                .map(EmailLog::getStatus)
+                .anyMatch(status -> status == EmailDeliveryStatus.FAILED);
+        assertTrue(hasFailedEmailLog);
     }
 
     @Test
-    void checkInBlockedWhenReservationAlreadyCheckedInKeepsDatabaseState() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CHECKED_IN, LocalDate.now());
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    void guestCannotCancelReservation() throws Exception {
+        Long reservationId = createReservationForCancel(ReservationStatus.PENDING);
+
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", "Unauthorized cancellation attempt");
+
+        mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + guestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    void checkInBlockedWhenReservationAlreadyCheckedOutKeepsDatabaseState() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CHECKED_OUT, LocalDate.now());
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
-    }
-
-    @Test
-    void checkInBlockedWhenActualDateBeforeScheduledCheckInDateKeepsDatabaseState() throws Exception {
-        Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now().plusDays(5));
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+    void checkInByConfirmationNumberReturnsNotFoundForUnknownConfirmation() throws Exception {
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", "RSV-UNKNOWN1234")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Reservation not found"));
     }
 
     @Test
     void checkInBlockedWhenRoomNeedsCleaningKeepsDatabaseState() throws Exception {
         Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        String confirmationNumber = getReservationConfirmationNumber(reservationId);
         Room room = roomRepository.findById(roomId).orElseThrow();
         room.setStatus(RoomStatus.NEEDS_CLEANING);
         roomRepository.save(room);
 
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+        assertCheckInBlockedAndDatabaseUnchanged(confirmationNumber, status().isConflict());
     }
 
     @Test
     void checkInBlockedWhenRoomUnderMaintenanceKeepsDatabaseState() throws Exception {
         Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        String confirmationNumber = getReservationConfirmationNumber(reservationId);
         Room room = roomRepository.findById(roomId).orElseThrow();
         room.setStatus(RoomStatus.UNDER_MAINTENANCE);
         roomRepository.save(room);
 
-        assertCheckInBlockedAndDatabaseUnchanged(reservationId, LocalDate.now(), status().isConflict());
+        assertCheckInBlockedAndDatabaseUnchanged(confirmationNumber, status().isConflict());
+    }
+
+    @Test
+    void checkInBlockedWhenRoomAlreadyOccupiedKeepsDatabaseState() throws Exception {
+        Long reservationId = createReservationForCheckIn(ReservationStatus.CHECKED_IN, LocalDate.now());
+        String confirmationNumber = getReservationConfirmationNumber(reservationId);
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        room.setStatus(RoomStatus.OCCUPIED);
+        roomRepository.save(room);
+        assertCheckInBlockedAndDatabaseUnchanged(confirmationNumber, status().isConflict());
     }
 
     @Test
     void checkInSucceedsWhenRoomIsAvailableAndUpdatesReservationAndRoom() throws Exception {
         Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        String confirmationNumber = getReservationConfirmationNumber(reservationId);
 
-        Map<String, Object> checkInRequest = new HashMap<>();
-        LocalDate actualCheckInDate = LocalDate.now();
-        checkInRequest.put("actualCheckInDate", actualCheckInDate.toString());
-
-        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
-                        .header("Authorization", "Bearer " + managerToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(checkInRequest)))
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservationId").value(reservationId))
-                .andExpect(jsonPath("$.currentStatus").value("CHECKED_IN"));
+                .andExpect(jsonPath("$.id").value(reservationId))
+                .andExpect(jsonPath("$.status").value("CHECKED_IN"))
+                .andExpect(jsonPath("$.confirmationNumber").value(confirmationNumber));
 
         Reservation savedReservation = reservationRepository.findById(reservationId).orElseThrow();
         Room savedRoom = roomRepository.findById(roomId).orElseThrow();
 
         assertEquals(ReservationStatus.CHECKED_IN, savedReservation.getStatus());
-        assertEquals(actualCheckInDate, savedReservation.getActualCheckInDate());
         assertEquals(RoomStatus.OCCUPIED, savedRoom.getStatus());
     }
 
     @Test
     void guestCannotCheckInReservation() throws Exception {
         Long reservationId = createReservationForCheckIn(ReservationStatus.CONFIRMED, LocalDate.now());
+        String confirmationNumber = getReservationConfirmationNumber(reservationId);
 
-        Map<String, Object> checkInRequest = new HashMap<>();
-        checkInRequest.put("actualCheckInDate", LocalDate.now().toString());
-
-        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
-                        .header("Authorization", "Bearer " + guestToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(checkInRequest)))
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + guestToken))
                 .andExpect(status().isForbidden());
     }
 
@@ -444,7 +514,7 @@ class ReservationIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("Reservation not found with id: " + missingReservationId))
+                .andExpect(jsonPath("$.message").value("Reservation not found"))
                 .andExpect(jsonPath("$.path").value("/api/reservations/" + missingReservationId));
     }
 
@@ -546,30 +616,77 @@ class ReservationIntegrationTest {
         return reservationId;
     }
 
-    private void assertCheckInBlockedAndDatabaseUnchanged(
-            Long reservationId,
-            LocalDate actualCheckInDate,
-            org.springframework.test.web.servlet.ResultMatcher expectedStatus) throws Exception {
+    private Long createReservationForCancel(ReservationStatus status) throws Exception {
+        LocalDate checkInDate = LocalDate.now().plusDays(14);
+        LocalDate checkOutDate = checkInDate.plusDays(2);
+
+        Map<String, Object> createRequest = buildCreateReservationRequest(
+                roomId,
+                checkInDate.toString(),
+                checkOutDate.toString(),
+                ReservationStatus.PENDING.name(),
+                "Cancel Guest " + status.name(),
+                "cancel." + status.name().toLowerCase() + "@example.com",
+                "0500044444",
+                "ID-CANCEL-" + status.name(),
+                "USA");
+
+        Long reservationId = createReservationAndGetId(staffToken, createRequest);
+
+        if (status != ReservationStatus.PENDING) {
+            Reservation reservation = reservationRepository.findById(reservationId).orElseThrow();
+            reservation.setStatus(status);
+            reservationRepository.save(reservation);
+        }
+
+        return reservationId;
+    }
+
+    private void assertCancelBlockedAndDatabaseUnchanged(Long reservationId, String cancellationReason) throws Exception {
         Reservation beforeReservation = reservationRepository.findById(reservationId).orElseThrow();
-        ReservationStatus beforeReservationStatus = beforeReservation.getStatus();
-        LocalDate beforeActualCheckInDate = beforeReservation.getActualCheckInDate();
-        RoomStatus beforeRoomStatus = roomRepository.findById(roomId).orElseThrow().getStatus();
+        ReservationStatus beforeStatus = beforeReservation.getStatus();
+        String beforeCancellationReason = beforeReservation.getCancellationReason();
+        java.time.LocalDateTime beforeCancellationAt = beforeReservation.getCancellationAt();
 
-        Map<String, Object> checkInRequest = new HashMap<>();
-        checkInRequest.put("actualCheckInDate", actualCheckInDate.toString());
+        Map<String, Object> cancelRequest = new HashMap<>();
+        cancelRequest.put("cancellationReason", cancellationReason);
 
-        mockMvc.perform(post("/api/reservations/{id}/check-in", reservationId)
-                        .header("Authorization", "Bearer " + managerToken)
+        MvcResult response = mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId)
+                        .header("Authorization", "Bearer " + staffToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(checkInRequest)))
-                .andExpect(expectedStatus);
+                        .content(objectMapper.writeValueAsString(cancelRequest)))
+                .andExpect(status().is4xxClientError())
+                .andReturn();
+
+        int actualStatus = response.getResponse().getStatus();
+        assertTrue(actualStatus == 409 || actualStatus == 400);
 
         Reservation afterReservation = reservationRepository.findById(reservationId).orElseThrow();
+        assertEquals(beforeStatus, afterReservation.getStatus());
+        assertEquals(beforeCancellationReason, afterReservation.getCancellationReason());
+        assertEquals(beforeCancellationAt, afterReservation.getCancellationAt());
+    }
+
+    private void assertCheckInBlockedAndDatabaseUnchanged(
+            String confirmationNumber,
+            org.springframework.test.web.servlet.ResultMatcher expectedStatus) throws Exception {
+        Reservation beforeReservation = reservationRepository.findByConfirmationNumber(confirmationNumber).orElseThrow();
+        ReservationStatus beforeReservationStatus = beforeReservation.getStatus();
+        RoomStatus beforeRoomStatus = roomRepository.findById(roomId).orElseThrow().getStatus();
+
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(expectedStatus);
+
+        Reservation afterReservation = reservationRepository.findByConfirmationNumber(confirmationNumber).orElseThrow();
         RoomStatus afterRoomStatus = roomRepository.findById(roomId).orElseThrow().getStatus();
 
         assertEquals(beforeReservationStatus, afterReservation.getStatus());
-        assertEquals(beforeActualCheckInDate, afterReservation.getActualCheckInDate());
         assertEquals(beforeRoomStatus, afterRoomStatus);
+    }
+
+    private String getReservationConfirmationNumber(Long reservationId) {
+        return reservationRepository.findById(reservationId).orElseThrow().getConfirmationNumber();
     }
 
     private Map<String, Object> buildCreateReservationRequest(

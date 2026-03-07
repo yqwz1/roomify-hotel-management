@@ -1,25 +1,34 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.*;
-import com.roomify.backend.entity.*;
-import com.roomify.backend.exception.EmailDeliveryException;
-import com.roomify.backend.exception.ResourceConflictException;
-import com.roomify.backend.exception.ResourceNotFoundException;
-import com.roomify.backend.repository.GuestRepository;
-import com.roomify.backend.repository.ReservationRepository;
-import com.roomify.backend.repository.RoomRepository;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationGuestRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
+import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.exception.EmailDeliveryException;
+import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.RoomRepository;
 
 @Service
 @Transactional
@@ -166,6 +175,12 @@ public class ReservationService {
 
         Reservation reservation = findReservationById(id);
 
+        if (reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot cancel reservation in status: " + reservation.getStatus());
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservation.setCancellationReason(request.getCancellationReason().trim());
         reservation.setCancellationAt(LocalDateTime.now());
@@ -184,10 +199,8 @@ public class ReservationService {
                     reservation.getTotalPrice().toString(),
                     reservation.getConfirmationNumber());
 
-        } catch (MailException ex) {
-
-            throw new EmailDeliveryException(
-                    "Failed to send cancellation email", ex);
+        } catch (RuntimeException ex) {
+            // Cancellation should not be blocked by notification failures.
         }
 
         return toPlaceholderResponse(saved, "cancel",
