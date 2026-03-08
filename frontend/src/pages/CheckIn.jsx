@@ -4,6 +4,7 @@ import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import { CHECKINABLE_STATUSES } from '../data/mockReservations';
+import { getReservationByConfirmationNumber, checkInReservation, extractReservationError } from '../services/reservationService';
 
 const formatDate = (iso) => {
     if (!iso) return '—';
@@ -47,14 +48,33 @@ export default function CheckIn() {
     };
 
     // Simulates API call — replace with real service later
-    const handleCheckIn = () => {
-        if (!canCheckIn) return;
+    const handleCheckIn = async () => {
+        if (!canCheckIn || submitting) return;
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setToast({ message: `✅ Check-in successful for ${selected.guestName} — Room ${selected.roomNumber}`, type: 'success' });
+        setToast(null);
+
+        try {
+            // The search endpoint returns a special DTO without the DB ID. We need the ID to check in.
+            // (Assuming `selected` is from searchReservations)
+            const confirmationNumber = selected.confirmationNumber;
+            const fullReservation = await getReservationByConfirmationNumber(confirmationNumber);
+            
+            // Format today's date "YYYY-MM-DD"
+            const today = new Date().toISOString().split('T')[0];
+            
+            await checkInReservation(fullReservation.id, today);
+
+            const guestName = selected.guest?.name || selected.guestName;
+            const roomNumber = selected.room?.roomNumber || selected.roomNumber;
+
+            setToast({ message: `✅ Check-in successful for ${guestName} — Room ${roomNumber}`, type: 'success' });
             setSelected((prev) => ({ ...prev, status: 'CHECKED_IN' }));
-        }, 800);
+
+        } catch (error) {
+            setToast({ message: `❌ ${extractReservationError(error)}`, type: 'error' });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -98,7 +118,7 @@ export default function CheckIn() {
                             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <div className="mb-4 flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
+                                        <p className="text-lg font-bold text-gray-900">{selected.guest?.name || selected.guestName}</p>
                                         <p className="text-xs font-mono text-gray-400">{selected.confirmationNumber}</p>
                                     </div>
                                     <StatusPill status={selected.status} />
@@ -111,12 +131,12 @@ export default function CheckIn() {
                                 )}
 
                                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                    <div><dt className="text-gray-400 text-xs">Room</dt><dd className="font-semibold text-gray-900">Room {selected.roomNumber} · {selected.roomTypeName}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Floor</dt><dd className="font-semibold text-gray-900">{selected.floor}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Check-In</dt><dd className="font-semibold text-gray-900">{formatDate(selected.checkInDate)}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Check-Out</dt><dd className="font-semibold text-gray-900">{formatDate(selected.checkOutDate)}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Nights</dt><dd className="font-semibold text-gray-900">{selected.nights}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Total</dt><dd className="font-bold text-blue-700">${selected.totalPrice.toFixed(2)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Room</dt><dd className="font-semibold text-gray-900">Room {selected.room?.roomNumber || selected.roomNumber} · {selected.room?.roomTypeName || selected.roomTypeName}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Floor</dt><dd className="font-semibold text-gray-900">{selected.room?.floor || selected.floor}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Check-In</dt><dd className="font-semibold text-gray-900">{formatDate(selected.dates?.checkIn || selected.checkInDate)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Check-Out</dt><dd className="font-semibold text-gray-900">{formatDate(selected.dates?.checkOut || selected.checkOutDate)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Nights</dt><dd className="font-semibold text-gray-900">{selected.dates?.nights || selected.nights}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Total</dt><dd className="font-bold text-blue-700">${Number(selected.pricing?.totalPrice || selected.totalPrice).toFixed(2)}</dd></div>
                                 </dl>
                             </div>
 
