@@ -1,9 +1,10 @@
 package com.roomify.backend.controller;
 
-import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.service.ReservationLookupService;
@@ -41,6 +42,14 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ReservationLookupResponse> search(
+            @RequestParam(required = false) String confirmation,
+            @RequestParam(required = false) String guestName) {
+        ReservationLookupResponse response = reservationLookupService.search(confirmation, guestName);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{confirmationNumber}")
     public ResponseEntity<ReservationResponse> getByConfirmationNumber(@PathVariable String confirmationNumber) {
         ReservationResponse response = reservationService.getByConfirmationNumber(confirmationNumber);
@@ -63,12 +72,11 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/check-in/{confirmationNumber}")
-    public ResponseEntity<ReservationResponse> checkIn(
-            @PathVariable String confirmationNumber) {
-
-        ReservationResponse response = reservationService.checkIn(confirmationNumber);
-
+    @PostMapping("/{id}/check-in")
+    public ResponseEntity<ReservationActionPlaceholderResponse> checkIn(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationCheckInRequest request) {
+        ReservationActionPlaceholderResponse response = reservationService.checkIn(id, request);
         return ResponseEntity.ok(response);
     }
 }

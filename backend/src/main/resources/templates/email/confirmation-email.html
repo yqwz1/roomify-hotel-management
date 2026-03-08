@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Confirmation</title>
+</head>
+<body>
+    <h2>Reservation Confirmation</h2>
+    <p>Dear <span th:text="${guest}">Guest</span>,</p>
+    <p>Your reservation is confirmed! Here are your details:</p>
+    <ul>
+        <li><strong>Confirmation Number:</strong> <span th:text="${confirmation}">RSV-XXXXXXXXXXXX</span></li>
+        <li><strong>Room:</strong> <span th:text="${room}">---</span></li>
+        <li><strong>Check-in:</strong> <span th:text="${checkin}">YYYY-MM-DD</span></li>
+        <li><strong>Check-out:</strong> <span th:text="${checkout}">YYYY-MM-DD</span></li>
+        <li><strong>Total Price:</strong> $<span th:text="${total}">0.00</span></li>
+    </ul>
+    <p>Thank you for choosing Roomify!</p>
+</body>
+</html>

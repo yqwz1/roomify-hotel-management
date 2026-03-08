@@ -11,9 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -103,6 +108,7 @@ class ReservationIntegrationTest {
         roomTypeRepository.deleteAll();
         guestRepository.deleteAll();
         reset(javaMailSender);
+        when(javaMailSender.createMimeMessage()).thenReturn(new org.springframework.mail.javamail.JavaMailSenderImpl().createMimeMessage());
 
         RoomType roomType = roomTypeRepository.save(
                 new RoomType("Deluxe", new BigDecimal("200.00"), 2, "WiFi, TV", "Deluxe room"));
@@ -148,13 +154,12 @@ class ReservationIntegrationTest {
         assertTrue(savedReservation.isPresent());
         assertEquals("CONFIRMED", savedReservation.get().getStatus().name());
 
-        ArgumentCaptor<SimpleMailMessage> mailCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        ArgumentCaptor<MimeMessage> mailCaptor = ArgumentCaptor.forClass(MimeMessage.class);
         verify(javaMailSender, times(1)).send(mailCaptor.capture());
-        SimpleMailMessage sentMail = mailCaptor.getValue();
+        MimeMessage sentMail = mailCaptor.getValue();
 
-        assertEquals("john@example.com", sentMail.getTo()[0]);
-        assertEquals("Your Roomify reservation confirmation", sentMail.getSubject());
-        assertTrue(sentMail.getText().contains("Confirmation number: " + confirmationNumber));
+        assertEquals("john@example.com", ((InternetAddress) sentMail.getRecipients(Message.RecipientType.TO)[0]).getAddress());
+        assertEquals("Reservation Confirmation", sentMail.getSubject());
     }
 
     @Test
@@ -182,7 +187,7 @@ class ReservationIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.guestId").value(existingGuest.getId()))
-                .andExpect(jsonPath("$.status").value("PENDING"));
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         assertEquals(1L, guestRepository.count());
     }

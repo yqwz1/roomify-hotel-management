@@ -1,6 +1,7 @@
 package com.roomify.backend.service;
 
 import com.roomify.backend.dto.*;
+import com.roomify.backend.dto.ReservationCheckInRequest;
 import com.roomify.backend.entity.*;
 import com.roomify.backend.exception.EmailDeliveryException;
 import com.roomify.backend.exception.ResourceConflictException;
@@ -97,7 +98,7 @@ public class ReservationService {
         reservation.setRoom(room);
         reservation.setCheckInDate(request.getCheckInDate());
         reservation.setCheckOutDate(request.getCheckOutDate());
-        reservation.setStatus(ReservationStatus.PENDING);
+        reservation.setStatus(ReservationStatus.CONFIRMED);
         reservation.setTotalPrice(totalPrice);
         reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
@@ -198,21 +199,36 @@ public class ReservationService {
     // CHECK-IN
     // =============================
 
-    public ReservationResponse checkIn(String confirmationNumber) {
+    public ReservationActionPlaceholderResponse checkIn(Long id, ReservationCheckInRequest request) {
 
-        Reservation reservation = reservationRepository
-                .findByConfirmationNumber(
-                        confirmationNumber.trim().toUpperCase())
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        Reservation reservation = findReservationById(id);
 
-        Room room = reservation.getRoom();
-
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
-            throw new ResourceConflictException("Room not ready");
+        // 1. Reject terminal / already-processed statuses (→ 409)
+        ReservationStatus status = reservation.getStatus();
+        if (status == ReservationStatus.CANCELLED
+                || status == ReservationStatus.CHECKED_IN
+                || status == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot check in: reservation status is " + status);
         }
 
+        // 2. Actual date must not precede the scheduled check-in date (→ 409)
+        if (request.getActualCheckInDate().isBefore(reservation.getCheckInDate())) {
+            throw new ResourceConflictException(
+                    "Actual check-in date cannot be before the scheduled check-in date");
+        }
+
+        // 3. Room must be AVAILABLE — Eyed's service will also handle room state,
+        //    but we guard here so the reservation stays clean on failure (→ 409)
+        Room room = reservation.getRoom();
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new ResourceConflictException("Room is not ready for check-in");
+        }
+
+        // 4. Perform the check-in
         room.setStatus(RoomStatus.OCCUPIED);
         reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setActualCheckInDate(request.getActualCheckInDate());
 
         roomRepository.save(room);
         reservationRepository.save(reservation);
@@ -220,21 +236,9 @@ public class ReservationService {
         auditService.log(
                 "ROOM_STATUS_CHANGE",
                 "Room",
-                "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in"
-        );
+                "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in");
 
-        long nights = ChronoUnit.DAYS.between(
-                reservation.getCheckInDate(),
-                reservation.getCheckOutDate());
-
-        BigDecimal rate = room.getRoomType()
-                .getBasePrice()
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights));
-        BigDecimal taxes = subtotal.multiply(taxRate);
-
-        return toResponse(reservation, nights, rate, subtotal, taxes);
+        return toPlaceholderResponse(reservation, "check-in", "Guest checked in successfully");
     }
 
     // =============================
@@ -245,7 +249,7 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository
                 .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with confirmation number: " + confirmationNumber));
 
         long nights = ChronoUnit.DAYS.between(
                 reservation.getCheckInDate(),
@@ -304,7 +308,7 @@ public class ReservationService {
     private Reservation findReservationById(Long id) {
 
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id: " + id));
     }
 
     private void sendReservationConfirmationEmail(
