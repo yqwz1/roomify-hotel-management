@@ -28,9 +28,9 @@ public class EmailService {
     @Value("${app.email.from:no-reply@roomify.com}")
     private String fromAddress;
 
-    // ===============================
-    // CORE EMAIL SENDER
-    // ===============================
+    // ====================================
+    // CORE HTML EMAIL SENDER
+    // ====================================
 
     private void sendHtmlEmail(
             String to,
@@ -74,9 +74,9 @@ public class EmailService {
         }
     }
 
-    // ===============================
+    // ====================================
     // STAFF WELCOME EMAIL
-    // ===============================
+    // ====================================
 
     public void sendStaffWelcomeEmail(
             String to,
@@ -97,9 +97,9 @@ public class EmailService {
                 null);
     }
 
-    // ===============================
-    // CONFIRMATION EMAIL
-    // ===============================
+    // ====================================
+    // RESERVATION CONFIRMATION EMAIL
+    // ====================================
 
     public void sendReservationConfirmationEmail(
             String to,
@@ -124,9 +124,9 @@ public class EmailService {
                 reservation.getConfirmationNumber());
     }
 
-    // ===============================
-    // CANCELLATION EMAIL
-    // ===============================
+    // ====================================
+    // RESERVATION CANCELLATION EMAIL
+    // ====================================
 
     public void sendReservationCancellationEmail(
             String to,
@@ -154,9 +154,9 @@ public class EmailService {
                 confirmation);
     }
 
-    // ===============================
-    // MODIFICATION EMAIL
-    // ===============================
+    // ====================================
+    // RESERVATION MODIFICATION EMAIL
+    // ====================================
 
     public void sendReservationModificationEmail(
             String to,
