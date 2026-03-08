@@ -143,3 +143,19 @@ export const checkInReservation = async (id, actualCheckInDate) => {
     const response = await api.post(`/reservations/${id}/check-in`, { actualCheckInDate });
     return response.data;
 };
+
+/**
+ * Cancel a reservation.
+ *
+ * Endpoint: POST /api/reservations/{id}/cancel
+ * Auth:     ROLE_MANAGER | ROLE_STAFF
+ *
+ * @param {number} id Reservation ID
+ * @param {string} reason Optional cancellation reason
+ * @returns {Promise<ReservationActionPlaceholderResponse>}
+ */
+export const cancelReservation = async (id, reason) => {
+    const payload = { cancellationReason: reason || 'No reason provided' };
+    const response = await api.post(`/reservations/${id}/cancel`, payload);
+    return response.data;
+};

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
+import { cancelReservation, extractReservationError } from '../services/reservationService';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import { CANCELLABLE_STATUSES } from '../data/mockReservations';
@@ -18,23 +19,19 @@ const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 function CancelDialog({ reservation, onClose, onConfirm }) {
     const [reason, setReason] = useState('');
     const [confirming, setConfirming] = useState(false);
+    const [error, setError] = useState(null);
 
-    const CANCEL_REASONS = [
-        'Guest requested cancellation',
-        'No-show',
-        'Booking made in error',
-        'Medical emergency',
-        'Travel disruption',
-        'Other',
-    ];
-
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         setConfirming(true);
-        // MOCK — replace with API call
-        setTimeout(() => {
+        setError(null);
+        try {
+            const result = await cancelReservation(reservation.id, reason);
+            onConfirm(result);
+        } catch (err) {
+            setError(extractReservationError(err));
+        } finally {
             setConfirming(false);
-            onConfirm();
-        }, 700);
+        }
     };
 
     return (
@@ -63,22 +60,26 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                         <p className="text-gray-500 text-xs">{reservation.nights} nights · Total: <strong>{money(reservation.totalPrice)}</strong></p>
                     </div>
 
+                    {/* Error */}
+                    {error && (
+                        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
+                            {error}
+                        </div>
+                    )}
+
                     {/* Cancellation reason */}
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="cancel-reason" className="text-xs font-medium text-gray-600">
-                            Reason for cancellation <span className="text-red-500">*</span>
+                            Reason for cancellation (Optional)
                         </label>
-                        <select
+                        <textarea
                             id="cancel-reason"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-                        >
-                            <option value="">Select a reason…</option>
-                            {CANCEL_REASONS.map((r) => (
-                                <option key={r} value={r}>{r}</option>
-                            ))}
-                        </select>
+                            placeholder="e.g. Guest changed mind, Error in booking..."
+                            rows={3}
+                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 resize-none"
+                        />
                     </div>
 
                     {/* Actions */}
@@ -91,7 +92,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                         </button>
                         <button
                             onClick={handleConfirm}
-                            disabled={!reason || confirming}
+                            disabled={confirming}
                             className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-400"
                         >
                             {confirming ? 'Cancelling…' : 'Yes, Cancel It'}
@@ -118,10 +119,10 @@ export default function CancelReservation() {
 
     const handleSelect = (r) => { setSelected(r); setShowDialog(false); };
 
-    const handleConfirm = () => {
+    const handleConfirm = (result) => {
         setShowDialog(false);
-        setSelected((prev) => ({ ...prev, status: 'CANCELLED' }));
-        setToast({ message: `Reservation ${selected.confirmationNumber} has been cancelled.`, type: 'error' });
+        setSelected((prev) => ({ ...prev, status: result?.currentStatus || 'CANCELLED' }));
+        setToast({ message: `Reservation ${selected.confirmationNumber} has been cancelled.`, type: 'success' });
     };
 
     return (
