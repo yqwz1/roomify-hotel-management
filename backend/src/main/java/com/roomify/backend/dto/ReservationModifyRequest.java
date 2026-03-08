@@ -16,6 +16,8 @@ public class ReservationModifyRequest {
     @Future(message = "Check-out date must be in the future")
     private LocalDate checkOutDate;
 
+    private Long roomId;
+
     @NotBlank(message = "Modification reason is required")
     @Size(max = 500, message = "Modification reason cannot exceed 500 characters")
     private String modificationReason;
@@ -23,9 +25,10 @@ public class ReservationModifyRequest {
     public ReservationModifyRequest() {
     }
 
-    public ReservationModifyRequest(LocalDate checkInDate, LocalDate checkOutDate, String modificationReason) {
+    public ReservationModifyRequest(LocalDate checkInDate, LocalDate checkOutDate, Long roomId, String modificationReason) {
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
+        this.roomId = roomId;
         this.modificationReason = modificationReason;
     }
 
@@ -51,6 +54,14 @@ public class ReservationModifyRequest {
 
     public void setCheckOutDate(LocalDate checkOutDate) {
         this.checkOutDate = checkOutDate;
+    }
+
+    public Long getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 
     public String getModificationReason() {

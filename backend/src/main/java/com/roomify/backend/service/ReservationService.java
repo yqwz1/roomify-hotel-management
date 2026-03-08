@@ -123,13 +123,32 @@ public class ReservationService {
         String oldCheckIn = reservation.getCheckInDate().toString();
         String oldCheckOut = reservation.getCheckOutDate().toString();
 
-        if (request.getCheckInDate() != null) {
-            reservation.setCheckInDate(request.getCheckInDate());
+        java.time.LocalDate newCheckIn = request.getCheckInDate() != null ? request.getCheckInDate() : reservation.getCheckInDate();
+        java.time.LocalDate newCheckOut = request.getCheckOutDate() != null ? request.getCheckOutDate() : reservation.getCheckOutDate();
+        Long newRoomId = request.getRoomId() != null ? request.getRoomId() : reservation.getRoom().getId();
+
+        if (ChronoUnit.DAYS.between(newCheckIn, newCheckOut) <= 0) {
+            throw new ResourceConflictException("Check-out must be after check-in");
         }
 
-        if (request.getCheckOutDate() != null) {
-            reservation.setCheckOutDate(request.getCheckOutDate());
+        Room room = roomRepository.findById(newRoomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+
+        if (!reservationRepository.findOverlappingForUpdate(newRoomId, newCheckIn, newCheckOut, id).isEmpty()) {
+            throw new ResourceConflictException("Room is not available for the selected dates");
         }
+
+        reservation.setCheckInDate(newCheckIn);
+        reservation.setCheckOutDate(newCheckOut);
+        reservation.setRoom(room);
+
+        long nights = ChronoUnit.DAYS.between(newCheckIn, newCheckOut);
+        BigDecimal roomRate = room.getRoomType().getBasePrice().setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights)).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        reservation.setTotalPrice(totalPrice);
 
         reservation.setModificationReason(request.getModificationReason().trim());
         reservation.setModifiedAt(LocalDateTime.now());

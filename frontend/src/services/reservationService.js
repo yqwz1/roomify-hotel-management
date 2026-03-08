@@ -159,3 +159,18 @@ export const cancelReservation = async (id, reason) => {
     const response = await api.post(`/reservations/${id}/cancel`, payload);
     return response.data;
 };
+
+/**
+ * Modify a reservation's dates and/or room.
+ *
+ * Endpoint: PUT /api/reservations/{id}
+ * Auth:     ROLE_MANAGER | ROLE_STAFF
+ *
+ * @param {number} id Reservation ID
+ * @param {{ checkInDate: string, checkOutDate: string, roomId?: number, modificationReason: string }} data
+ * @returns {Promise<ReservationActionPlaceholderResponse>}
+ */
+export const modifyReservation = async (id, data) => {
+    const response = await api.put(`/reservations/${id}`, data);
+    return response.data;
+};

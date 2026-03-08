@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import DateRangePicker from '../components/DateRangePicker';
 import ErrorBanner from '../components/ErrorBanner';
+import { searchRooms } from '../services/searchService';
+import { modifyReservation, extractReservationError } from '../services/reservationService';
 import { MODIFIABLE_STATUSES } from '../data/mockReservations';
 
 const formatDate = (iso) => {
@@ -20,31 +22,103 @@ const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 function ModifyModal({ reservation, onClose, onSave }) {
     const [checkIn, setCheckIn] = useState(reservation.checkInDate);
     const [checkOut, setCheckOut] = useState(reservation.checkOutDate);
+    const [reason, setReason] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+
+    // Room Selection
+    const [availableRooms, setAvailableRooms] = useState([]);
+    const [loadingRooms, setLoadingRooms] = useState(false);
+    const [selectedRoomId, setSelectedRoomId] = useState(reservation.roomId);
+
+    // Fetch available rooms whenever dates change
+    useEffect(() => {
+        if (!checkIn || !checkOut || checkOut <= checkIn) {
+            setAvailableRooms([]);
+            return;
+        }
+
+        const fetchRooms = async () => {
+            setLoadingRooms(true);
+            try {
+                const data = await searchRooms({ checkIn, checkOut });
+                // We also inject the currently booked room so they can keep it,
+                // even if it appears "booked" (since they are the ones holding it).
+                // The backend allows updating without changing the room.
+                const realRooms = data.rooms || [];
+                const isCurrentRoomInResults = realRooms.some(r => r.id === reservation.roomId);
+                
+                if (!isCurrentRoomInResults) {
+                    realRooms.push({
+                        id: reservation.roomId,
+                        roomNumber: reservation.roomNumber,
+                        roomType: { name: reservation.roomTypeName, basePrice: reservation.roomRate, maxGuests: reservation.guestCapacity || 2 }
+                    });
+                }
+                setAvailableRooms(realRooms);
+                // Reset selected room if it's no longer in the list (though we just forced it in above)
+                setSelectedRoomId(reservation.roomId);
+            } catch (err) {
+                console.error('Failed to fetch rooms', err);
+            } finally {
+                setLoadingRooms(false);
+            }
+        };
+
+        fetchRooms();
+    }, [checkIn, checkOut, reservation.roomId, reservation.roomNumber, reservation.roomTypeName, reservation.roomRate, reservation.guestCapacity]);
 
     const nights = useMemo(() => {
         if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
         return Math.round((new Date(checkOut) - new Date(checkIn)) / 86_400_000);
     }, [checkIn, checkOut]);
 
-    const subtotal = reservation.roomRate * nights;
+    const selectedRoom = useMemo(() => {
+        return availableRooms.find(r => r.id === Number(selectedRoomId));
+    }, [availableRooms, selectedRoomId]);
+
+    const subtotal = (selectedRoom?.roomType?.basePrice || reservation.roomRate) * nights;
     const taxes = subtotal * 0.10;
     const totalPrice = subtotal + taxes;
 
-    const unchanged = checkIn === reservation.checkInDate && checkOut === reservation.checkOutDate;
+    const unchanged = checkIn === reservation.checkInDate &&
+                      checkOut === reservation.checkOutDate &&
+                      Number(selectedRoomId) === reservation.roomId;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (nights <= 0) return setError('Check-out must be after check-in.');
+        if (!reason.trim()) return setError('Please provide a reason for modification.');
         if (unchanged) return setError('No changes detected.');
 
         setError(null);
         setSaving(true);
-        // MOCK — replace with API call
-        setTimeout(() => {
+        try {
+            const data = {
+                checkInDate: checkIn,
+                checkOutDate: checkOut,
+                roomId: selectedRoomId,
+                modificationReason: reason
+            };
+            const result = await modifyReservation(reservation.id || reservation.confirmationNumber, data);
+            
+            // Build updated object for the UI (mock update)
+            const updated = {
+                 ...reservation,
+                 checkInDate: checkIn,
+                 checkOutDate: checkOut,
+                 roomId: selectedRoomId,
+                 roomNumber: selectedRoom?.roomNumber || reservation.roomNumber,
+                 roomTypeName: selectedRoom?.roomType?.name || reservation.roomTypeName,
+                 roomRate: selectedRoom?.roomType?.basePrice || reservation.roomRate,
+                 nights, subtotal, taxes, totalPrice
+            };
+            
+            onSave(updated, result);
+        } catch (err) {
+            setError(extractReservationError(err));
+        } finally {
             setSaving(false);
-            onSave({ ...reservation, checkInDate: checkIn, checkOutDate: checkOut, nights, subtotal, taxes, totalPrice });
-        }, 700);
+        }
     };
 
     return (
@@ -76,7 +150,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
                     {/* Date change */}
                     <div>
-                        <p className="text-xs font-semibold text-gray-600 mb-2">New Dates</p>
+                        <p className="text-xs font-semibold text-gray-600 mb-2">1. Select New Dates</p>
                         <DateRangePicker
                             checkIn={checkIn}
                             checkOut={checkOut}
@@ -85,17 +159,57 @@ function ModifyModal({ reservation, onClose, onSave }) {
                         />
                     </div>
 
+                    {/* Room change */}
+                    {nights > 0 && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-600 mb-2">2. Select Room</p>
+                            {loadingRooms ? (
+                                <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+                            ) : availableRooms.length > 0 ? (
+                                <select
+                                    value={selectedRoomId}
+                                    onChange={(e) => setSelectedRoomId(e.target.value)}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                >
+                                    {availableRooms.map((r) => (
+                                        <option key={r.id} value={r.id}>
+                                            Room {r.roomNumber} ({r.roomType?.name}) — {money(r.roomType?.basePrice)}/night
+                                            {r.id === reservation.roomId ? ' (Current)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <p className="text-sm text-red-600">No rooms available for these dates.</p>
+                            )}
+                        </div>
+                    )}
+
                     {/* New price preview */}
-                    {nights > 0 && !unchanged && (
+                    {nights > 0 && (
                         <div className="rounded-lg border border-blue-100 bg-blue-50 p-3">
                             <p className="text-xs font-semibold text-blue-700 mb-2">Updated Price Preview</p>
                             <div className="flex flex-col gap-1 text-sm text-blue-900">
-                                <div className="flex justify-between"><span>{nights} nights × {money(reservation.roomRate)}</span><span>{money(subtotal)}</span></div>
+                                <div className="flex justify-between"><span>{nights} nights × {money(selectedRoom?.roomType?.basePrice || reservation.roomRate)}</span><span>{money(subtotal)}</span></div>
                                 <div className="flex justify-between"><span>Taxes (10%)</span><span>{money(taxes)}</span></div>
                                 <div className="flex justify-between border-t border-blue-200 pt-1 mt-1 font-bold"><span>New Total</span><span>{money(totalPrice)}</span></div>
                             </div>
                         </div>
                     )}
+
+                    {/* Reason */}
+                    <div className="flex flex-col gap-1.5">
+                        <label htmlFor="modify-reason" className="text-xs font-medium text-gray-600">
+                            Reason for modification <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="modify-reason"
+                            type="text"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="e.g. Guest requested extended stay..."
+                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        />
+                    </div>
 
                     {/* Actions */}
                     <div className="flex gap-2 pt-1">
@@ -104,7 +218,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
                         </button>
                         <button
                             onClick={handleSave}
-                            disabled={saving || unchanged || nights <= 0}
+                            disabled={saving || unchanged || nights <= 0 || !reason.trim() || !selectedRoomId}
                             className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
                             {saving ? 'Saving…' : 'Save Changes'}
