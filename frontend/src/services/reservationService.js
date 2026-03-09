@@ -1,7 +1,3 @@
-/**
- * reservationService.js
- * API client for reservation endpoints.
- */
 import api from './api';
 
 export const extractReservationError = (err) => {
@@ -9,7 +5,7 @@ export const extractReservationError = (err) => {
     if (!data) return err?.message ?? 'Unknown error';
 
     if (data.validationErrors) {
-        return Object.values(data.validationErrors).join(' · ');
+        return Object.values(data.validationErrors).join(' | ');
     }
 
     if (data.message) return data.message;
@@ -29,23 +25,69 @@ export const getReservationByConfirmationNumber = async (confirmationNumber) => 
     return response.data;
 };
 
-/**
- * Search by confirmation number or guest name.
- * Backend returns a single object; the UI expects a list.
- */
-export const searchReservations = async (query) => {
-    const trimmed = (query ?? '').trim();
-    const isConfirmation = trimmed.toUpperCase().startsWith('RSV-');
-    const params = isConfirmation ? { confirmation: trimmed } : { guestName: trimmed };
+const resolveReservationId = async (idOrConfirmation) => {
+    if (typeof idOrConfirmation === 'number' && Number.isFinite(idOrConfirmation)) {
+        return idOrConfirmation;
+    }
 
-    const response = await api.get('/reservations/search', { params });
-    return [response.data];
+    const raw = String(idOrConfirmation ?? '').trim();
+    if (!raw) {
+        throw new Error('Invalid reservation identifier');
+    }
+
+    if (raw.toUpperCase().startsWith('RSV-')) {
+        const reservation = await getReservationByConfirmationNumber(raw);
+        return reservation.id;
+    }
+
+    const parsed = Number(raw);
+    if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
+        return parsed;
+    }
+
+    throw new Error('Invalid reservation identifier');
 };
 
-/**
- * Check in using confirmation number.
- */
+export const searchReservations = async (query) => {
+    const trimmed = (query ?? '').trim();
+    if (!trimmed) return [];
+
+    const isConfirmation = trimmed.toUpperCase().startsWith('RSV-');
+    const params = isConfirmation ? { confirmation: trimmed } : { guestName: trimmed };
+    const lookupResponse = await api.get('/reservations/search', { params });
+    const lookup = lookupResponse.data;
+
+    let id = null;
+    try {
+        const full = await getReservationByConfirmationNumber(lookup.confirmationNumber);
+        id = full.id;
+    } catch {
+        // Allow UI lookup rendering even if id enrichment fails.
+    }
+
+    return [{ ...lookup, id }];
+};
+
 export const checkInReservation = async (confirmationNumber) => {
     const response = await api.post(`/reservations/check-in/${confirmationNumber}`);
+    return response.data;
+};
+
+export const cancelReservation = async (idOrConfirmation, reason) => {
+    const id = await resolveReservationId(idOrConfirmation);
+    const payload = {};
+    const trimmedReason = (reason ?? '').trim();
+
+    if (trimmedReason) {
+        payload.cancellationReason = trimmedReason;
+    }
+
+    const response = await api.post(`/reservations/${id}/cancel`, payload);
+    return response.data;
+};
+
+export const modifyReservation = async (idOrConfirmation, data) => {
+    const id = await resolveReservationId(idOrConfirmation);
+    const response = await api.put(`/reservations/${id}`, data);
     return response.data;
 };
