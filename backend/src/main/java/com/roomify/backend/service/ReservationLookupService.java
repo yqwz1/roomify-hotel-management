@@ -32,100 +32,97 @@ import java.util.Locale;
 @Transactional(readOnly = true)
 public class ReservationLookupService {
 
-    private static final int MONEY_SCALE = 2;
+        private static final int MONEY_SCALE = 2;
 
-    private final ReservationRepository reservationRepository;
-    private final BigDecimal taxRate;
+        private final ReservationRepository reservationRepository;
+        private final BigDecimal taxRate;
 
-    public ReservationLookupService(
-            ReservationRepository reservationRepository,
-            @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
-        this.reservationRepository = reservationRepository;
-        this.taxRate = taxRate;
-    }
-
-    /**
-     * Look up a reservation by confirmation number OR guest name.
-     *
-     * @param confirmation exact confirmation number (e.g. "RSV-XXXXXXXXXXXX"), may
-     *                     be blank
-     * @param guestName    partial guest name (case-insensitive), may be blank
-     * @return a fully-populated {@link ReservationLookupResponse} for the check-in
-     *         UI
-     * @throws IllegalArgumentException  if both parameters are blank (→ 400)
-     * @throws ResourceNotFoundException if no matching reservation is found (→ 404)
-     */
-    public ReservationLookupResponse search(String confirmation, String guestName) {
-        boolean hasConfirmation = confirmation != null && !confirmation.isBlank();
-        boolean hasGuestName = guestName != null && !guestName.isBlank();
-
-        if (!hasConfirmation && !hasGuestName) {
-            throw new IllegalArgumentException(
-                    "At least one search parameter is required: 'confirmation' or 'guestName'");
+        public ReservationLookupService(
+                        ReservationRepository reservationRepository,
+                        @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
+                this.reservationRepository = reservationRepository;
+                this.taxRate = taxRate;
         }
 
-        Reservation reservation;
+        /**
+         * Look up a reservation by confirmation number OR guest name.
+         *
+         * @param confirmation exact confirmation number (e.g. "RSV-XXXXXXXXXXXX"), may
+         *                     be blank
+         * @param guestName    partial guest name (case-insensitive), may be blank
+         * @return a fully-populated {@link ReservationLookupResponse} for the check-in
+         *         UI
+         * @throws IllegalArgumentException  if both parameters are blank (→ 400)
+         * @throws ResourceNotFoundException if no matching reservation is found (→ 404)
+         */
+        public ReservationLookupResponse search(String confirmation, String guestName) {
+                Reservation reservation;
 
-        if (hasConfirmation) {
-            String normalised = confirmation.trim().toUpperCase(Locale.ROOT);
-            reservation = reservationRepository
-                    .findByConfirmationNumber(normalised)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Reservation not found with confirmation number: " + confirmation));
-        } else {
-            List<Reservation> results = reservationRepository.findByGuestNameContainingIgnoreCase(guestName.trim());
-            if (results.isEmpty()) {
-                throw new ResourceNotFoundException(
-                        "No reservation found for guest name: " + guestName);
-            }
-            reservation = results.get(0);
+                if (confirmation != null && !confirmation.isBlank()) {
+                        String normalised = confirmation.trim().toUpperCase(Locale.ROOT);
+                        reservation = reservationRepository
+                                        .findByConfirmationNumber(normalised)
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Reservation not found with confirmation number: "
+                                                                        + confirmation));
+                } else if (guestName != null && !guestName.isBlank()) {
+                        List<Reservation> results = reservationRepository
+                                        .findByGuestNameContainingIgnoreCase(guestName.trim());
+                        if (results.isEmpty()) {
+                                throw new ResourceNotFoundException(
+                                                "No reservation found for guest name: " + guestName);
+                        }
+                        reservation = results.get(0);
+                } else {
+                        throw new IllegalArgumentException(
+                                        "At least one search parameter is required: 'confirmation' or 'guestName'");
+                }
+
+                return toResponse(reservation);
         }
 
-        return toResponse(reservation);
-    }
+        // ─── Mapping ─────────────────────────────────────────────────────────────
 
-    // ─── Mapping ─────────────────────────────────────────────────────────────
+        private ReservationLookupResponse toResponse(Reservation r) {
+                long nights = ChronoUnit.DAYS.between(r.getCheckInDate(), r.getCheckOutDate());
 
-    private ReservationLookupResponse toResponse(Reservation r) {
-        long nights = ChronoUnit.DAYS.between(r.getCheckInDate(), r.getCheckOutDate());
+                BigDecimal roomRate = r.getRoom().getRoomType().getBasePrice()
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-        BigDecimal roomRate = r.getRoom().getRoomType().getBasePrice()
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                ReservationLookupResponse.RoomInfo roomInfo = new ReservationLookupResponse.RoomInfo(
+                                r.getRoom().getId(),
+                                r.getRoom().getRoomNumber(),
+                                r.getRoom().getFloor(),
+                                r.getRoom().getRoomType().getName(),
+                                r.getRoom().getRoomType().getMaxGuests(),
+                                r.getRoom().getRoomType().getAmenities());
 
-        ReservationLookupResponse.RoomInfo roomInfo = new ReservationLookupResponse.RoomInfo(
-                r.getRoom().getId(),
-                r.getRoom().getRoomNumber(),
-                r.getRoom().getFloor(),
-                r.getRoom().getRoomType().getName(),
-                r.getRoom().getRoomType().getMaxGuests(),
-                r.getRoom().getRoomType().getAmenities());
+                ReservationLookupResponse.DateInfo dateInfo = new ReservationLookupResponse.DateInfo(
+                                r.getCheckInDate(),
+                                r.getCheckOutDate(),
+                                nights);
 
-        ReservationLookupResponse.DateInfo dateInfo = new ReservationLookupResponse.DateInfo(
-                r.getCheckInDate(),
-                r.getCheckOutDate(),
-                nights);
+                ReservationLookupResponse.GuestInfo guestInfo = new ReservationLookupResponse.GuestInfo(
+                                r.getGuest().getId(),
+                                r.getGuest().getName(),
+                                r.getGuest().getEmail(),
+                                r.getGuest().getPhone(),
+                                r.getGuest().getIdNumber(),
+                                r.getGuest().getNationality());
 
-        ReservationLookupResponse.GuestInfo guestInfo = new ReservationLookupResponse.GuestInfo(
-                r.getGuest().getId(),
-                r.getGuest().getName(),
-                r.getGuest().getEmail(),
-                r.getGuest().getPhone(),
-                r.getGuest().getIdNumber(),
-                r.getGuest().getNationality());
+                ReservationLookupResponse.PricingInfo pricingInfo = new ReservationLookupResponse.PricingInfo(
+                                roomRate, subtotal, taxes, totalPrice);
 
-        ReservationLookupResponse.PricingInfo pricingInfo = new ReservationLookupResponse.PricingInfo(
-                roomRate, subtotal, taxes, totalPrice);
-
-        return new ReservationLookupResponse(
-                r.getConfirmationNumber(),
-                r.getStatus(),
-                roomInfo,
-                dateInfo,
-                guestInfo,
-                pricingInfo);
-    }
+                return new ReservationLookupResponse(
+                                r.getConfirmationNumber(),
+                                r.getStatus(),
+                                roomInfo,
+                                dateInfo,
+                                guestInfo,
+                                pricingInfo);
+        }
 }

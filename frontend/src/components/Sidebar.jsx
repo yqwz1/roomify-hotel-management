@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-i18next'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
 import { X, LayoutDashboard, Tag, Users, Hotel, Settings, Search, CalendarDays, User, Key, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'

@@ -9,7 +9,6 @@ import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -45,7 +44,7 @@ class RoomServiceTest {
         room.setStatus(RoomStatus.AVAILABLE);
     }
 
-    //  Valid transition: AVAILABLE → OCCUPIED
+    // Valid transition: AVAILABLE → OCCUPIED
     @Test
     void shouldAllowValidStatusTransition() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
@@ -56,29 +55,25 @@ class RoomServiceTest {
         assertEquals(RoomStatus.OCCUPIED, room.getStatus());
     }
 
-    //  Invalid transition: OCCUPIED → AVAILABLE
+    // Invalid transition: OCCUPIED → AVAILABLE
     @Test
     void shouldThrowExceptionForInvalidStatusTransition() {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(IllegalStateException.class, () ->
-                roomService.updateStatus(1L, "AVAILABLE")
-        );
+        assertThrows(IllegalStateException.class, () -> roomService.updateStatus(1L, "AVAILABLE"));
     }
 
-    //  Delete OCCUPIED room should fail
+    // Delete OCCUPIED room should fail
     @Test
     void shouldNotDeleteOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(CannotDeleteException.class, () ->
-                roomService.delete(1L)
-        );
+        assertThrows(CannotDeleteException.class, () -> roomService.delete(1L));
     }
 
-    //  Delete AVAILABLE room should succeed
+    // Delete AVAILABLE room should succeed
     @Test
     void shouldDeleteAvailableRoom() {
         room.setStatus(RoomStatus.AVAILABLE);
@@ -89,13 +84,11 @@ class RoomServiceTest {
         verify(roomRepository, times(1)).delete(room);
     }
 
-    //  Room not found
+    // Room not found
     @Test
     void shouldThrowIfRoomNotFound() {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                roomService.delete(1L)
-        );
+        assertThrows(ResourceNotFoundException.class, () -> roomService.delete(1L));
     }
 }
