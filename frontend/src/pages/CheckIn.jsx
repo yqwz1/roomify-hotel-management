@@ -4,15 +4,15 @@ import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import { CHECKINABLE_STATUSES } from '../data/mockReservations';
+import { checkInReservation, extractReservationError } from '../services/reservationService';
 
 const formatDate = (iso) => {
-    if (!iso) return '—';
+    if (!iso) return '-';
     return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {
         weekday: 'short', month: 'long', day: 'numeric', year: 'numeric',
     });
 };
 
-// ─── Room readiness checklist ─────────────────────────────────────────────────
 const CHECKLIST_ITEMS = [
     { id: 'keys', label: 'Room keys prepared' },
     { id: 'clean', label: 'Room is clean and inspected' },
@@ -21,12 +21,6 @@ const CHECKLIST_ITEMS = [
     { id: 'welcome', label: 'Welcome amenities placed' },
 ];
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-/**
- * CheckIn  –  /check-in
- * Staff/Manager view: look up a reservation and perform check-in.
- * Mock only — no real API calls.
- */
 export default function CheckIn() {
     const navigate = useNavigate();
 
@@ -46,15 +40,23 @@ export default function CheckIn() {
         setChecklist({});
     };
 
-    // Simulates API call — replace with real service later
-    const handleCheckIn = () => {
-        if (!canCheckIn) return;
+    const handleCheckIn = async () => {
+        if (!canCheckIn || submitting) return;
+
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setToast({ message: `✅ Check-in successful for ${selected.guestName} — Room ${selected.roomNumber}`, type: 'success' });
+        setToast(null);
+
+        try {
+            await checkInReservation(selected.confirmationNumber);
+            const guestName = selected.guest?.name || selected.guestName;
+            const roomNumber = selected.room?.roomNumber || selected.roomNumber;
+            setToast({ message: `Check-in successful for ${guestName} - Room ${roomNumber}`, type: 'success' });
             setSelected((prev) => ({ ...prev, status: 'CHECKED_IN' }));
-        }, 800);
+        } catch (error) {
+            setToast({ message: extractReservationError(error), type: 'error' });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -65,10 +67,9 @@ export default function CheckIn() {
                 onClose={() => setToast(null)}
             />
 
-            {/* Header */}
             <div className="mb-6 flex items-center gap-3">
                 <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">
-                    ← Back
+                    Back
                 </button>
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Check-In</h1>
@@ -77,28 +78,23 @@ export default function CheckIn() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-                {/* Left: Lookup */}
                 <div>
                     <ReservationLookupPanel onSelect={handleSelect} />
                 </div>
 
-                {/* Right: Selected reservation + Checklist */}
                 <div>
                     {!selected ? (
                         <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-                            <span className="text-5xl mb-3">🏨</span>
+                            <span className="text-5xl mb-3">Hotel</span>
                             <p className="text-sm font-medium text-gray-600">No reservation selected</p>
                             <p className="text-xs text-gray-400 mt-1">Search and click a reservation on the left to start check-in.</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
-
-                            {/* Reservation Card */}
                             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <div className="mb-4 flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
+                                        <p className="text-lg font-bold text-gray-900">{selected.guest?.name || selected.guestName}</p>
                                         <p className="text-xs font-mono text-gray-400">{selected.confirmationNumber}</p>
                                     </div>
                                     <StatusPill status={selected.status} />
@@ -106,21 +102,20 @@ export default function CheckIn() {
 
                                 {!CHECKINABLE_STATUSES.includes(selected.status) && (
                                     <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-                                        ⚠️ This reservation cannot be checked in — status is <strong>{selected.status.replace('_', ' ')}</strong>.
+                                        This reservation cannot be checked in - status is <strong>{selected.status.replace('_', ' ')}</strong>.
                                     </div>
                                 )}
 
                                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                    <div><dt className="text-gray-400 text-xs">Room</dt><dd className="font-semibold text-gray-900">Room {selected.roomNumber} · {selected.roomTypeName}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Floor</dt><dd className="font-semibold text-gray-900">{selected.floor}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Check-In</dt><dd className="font-semibold text-gray-900">{formatDate(selected.checkInDate)}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Check-Out</dt><dd className="font-semibold text-gray-900">{formatDate(selected.checkOutDate)}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Nights</dt><dd className="font-semibold text-gray-900">{selected.nights}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">Total</dt><dd className="font-bold text-blue-700">${selected.totalPrice.toFixed(2)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Room</dt><dd className="font-semibold text-gray-900">Room {selected.room?.roomNumber || selected.roomNumber} - {selected.room?.roomTypeName || selected.roomTypeName}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Floor</dt><dd className="font-semibold text-gray-900">{selected.room?.floor || selected.floor}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Check-In</dt><dd className="font-semibold text-gray-900">{formatDate(selected.dates?.checkIn || selected.checkInDate)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Check-Out</dt><dd className="font-semibold text-gray-900">{formatDate(selected.dates?.checkOut || selected.checkOutDate)}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Nights</dt><dd className="font-semibold text-gray-900">{selected.dates?.nights || selected.nights}</dd></div>
+                                    <div><dt className="text-gray-400 text-xs">Total</dt><dd className="font-bold text-blue-700">${Number(selected.pricing?.totalPrice || selected.totalPrice).toFixed(2)}</dd></div>
                                 </dl>
                             </div>
 
-                            {/* Checklist */}
                             {CHECKINABLE_STATUSES.includes(selected.status) && (
                                 <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                     <h3 className="mb-1 text-sm font-semibold text-gray-700">Pre-Check-In Checklist</h3>
@@ -145,7 +140,6 @@ export default function CheckIn() {
                                         ))}
                                     </ul>
 
-                                    {/* Progress bar */}
                                     <div className="mt-4">
                                         <div className="flex justify-between text-xs text-gray-400 mb-1">
                                             <span>Progress</span>
@@ -161,7 +155,6 @@ export default function CheckIn() {
                                 </div>
                             )}
 
-                            {/* Check-In Button */}
                             {CHECKINABLE_STATUSES.includes(selected.status) && (
                                 <button
                                     onClick={handleCheckIn}
@@ -169,13 +162,10 @@ export default function CheckIn() {
                                     className="w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-400"
                                 >
                                     {submitting
-                                        ? <span className="flex items-center justify-center gap-2">
-                                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
-                                            Processing…
-                                        </span>
+                                        ? 'Processing...'
                                         : !allChecked
                                             ? `Complete checklist to check in (${Object.values(checklist).filter(Boolean).length}/${CHECKLIST_ITEMS.length})`
-                                            : '✓ Confirm Check-In'
+                                            : 'Confirm Check-In'
                                     }
                                 </button>
                             )}

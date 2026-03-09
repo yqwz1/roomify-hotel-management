@@ -1,9 +1,9 @@
 package com.roomify.backend.controller;
 
-import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
-import com.roomify.backend.dto.ReservationCheckInRequest;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.service.ReservationLookupService;
@@ -39,6 +39,14 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationCreateRequest request) {
         ReservationResponse response = reservationService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ReservationLookupResponse> search(
+            @RequestParam(required = false) String confirmation,
+            @RequestParam(required = false) String guestName) {
+        ReservationLookupResponse response = reservationLookupService.search(confirmation, guestName);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{confirmationNumber}")

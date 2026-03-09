@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { mockLookup } from '../data/mockReservations';
+import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
 
 /**
  * ReservationLookupPanel
  * Search for a reservation by confirmation number or guest name.
- * Uses mock data — swap mockLookup() for a real API call when ready.
+ * Uses real API data via searchReservations() from reservationService.
  *
  * Props:
  *   onSelect   {Function}  – (reservation) => void — called when user picks a result
@@ -27,7 +27,9 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
         setSearched(false);
 
         try {
-            const data = await mockLookup(query);
+            const data = await searchReservations(query);
+            // The searchReservations function returns an array, but if empty it might be []
+            // The object contains nested structures: guest, room, dates, pricing
             setResults(data);
             setSearched(true);
         } catch {
@@ -104,25 +106,37 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
             {/* Results */}
             {!loading && results.length > 0 && (
                 <ul className="mt-4 divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
-                    {results.map((r) => (
-                        <li key={r.id}>
+                    {results.map((r, idx) => {
+                        // The search API might return a single object, we'll map over it
+                        // if we wrapped it in an array in the service.
+                        const isMock = !r.guest; // mock records don't have nested .guest 
+                        
+                        const id = r.id || r.confirmationNumber || idx;
+                        const guestName = isMock ? r.guestName : r.guest?.name;
+                        const conf = isMock ? r.confirmationNumber : r.confirmationNumber;
+                        const roomNum = isMock ? r.roomNumber : r.room?.roomNumber;
+                        const checkIn = isMock ? r.checkInDate : r.dates?.checkIn;
+                        const checkOut = isMock ? r.checkOutDate : r.dates?.checkOut;
+
+                        return (
+                        <li key={id}>
                             <button
                                 onClick={() => onSelect?.(r)}
                                 className="w-full px-4 py-3 text-left transition hover:bg-blue-50 focus:outline-none focus:bg-blue-50"
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-900">{r.guestName}</p>
-                                        <p className="text-xs text-gray-500 font-mono">{r.confirmationNumber}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{guestName}</p>
+                                        <p className="text-xs text-gray-500 font-mono">{conf}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">
-                                            Room {r.roomNumber} · {formatDate(r.checkInDate)} → {formatDate(r.checkOutDate)}
+                                            Room {roomNum} · {formatDate(checkIn)} → {formatDate(checkOut)}
                                         </p>
                                     </div>
                                     <StatusPill status={r.status} size="sm" />
                                 </div>
                             </button>
                         </li>
-                    ))}
+                    )})}
                 </ul>
             )}
         </div>
