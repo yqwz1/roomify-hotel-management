@@ -3,6 +3,7 @@ import { useRooms } from '../hooks/useRooms';
 import { useRoomTypes } from '../hooks/useRoomTypes';
 import RoomFilters from '../components/RoomFilters';
 import ErrorBanner from '../components/ErrorBanner';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
@@ -30,6 +31,7 @@ const STATUS_LABELS = {
 
 // ─── Add Room Modal ───────────────────────────────────────────────────────────
 function AddRoomModal({ roomTypes, onSave, onClose }) {
+    const { t } = useTranslation();
     const [form, setForm] = useState({
         roomNumber: '',
         roomTypeId: roomTypes[0]?.id ?? '',
@@ -44,8 +46,8 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setFormError(null);
-        if (!form.roomNumber.trim()) return setFormError('Room number is required.');
-        if (!form.roomTypeId) return setFormError('Please select a room type.');
+        if (!form.roomNumber.trim()) return setFormError(t('roomNumRequired') || 'Room number is required.');
+        if (!form.roomTypeId) return setFormError(t('roomTypeRequired') || 'Please select a room type.');
 
         setSaving(true);
         const result = await onSave({
@@ -59,14 +61,14 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
         if (result.success) {
             onClose();
         } else {
-            setFormError(result.error ?? 'Failed to create room.');
+            setFormError(result.error ?? (t('failedCreateRoom') || 'Failed to create room.'));
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 className="mb-4 text-lg font-bold text-gray-900">Add New Room</h2>
+                <h2 className="mb-4 text-lg font-bold text-gray-900">{t('addNewRoom') || 'Add New Room'}</h2>
 
                 <ErrorBanner message={formError} onClose={() => setFormError(null)} />
 
@@ -74,12 +76,12 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
                     {/* Room Number */}
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="add-roomNumber" className="text-xs font-medium text-gray-600">
-                            Room Number <span className="text-red-500">*</span>
+                            {t('roomNumLabel') || 'Room Number'} <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="add-roomNumber"
                             type="text"
-                            placeholder="e.g. 305"
+                            placeholder={t('roomNumPlaceholder') || "e.g. 305"}
                             value={form.roomNumber}
                             onChange={(e) => set('roomNumber', e.target.value)}
                             className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -89,7 +91,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
                     {/* Room Type */}
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="add-roomType" className="text-xs font-medium text-gray-600">
-                            Room Type <span className="text-red-500">*</span>
+                            {t('roomTypeLabel') || 'Room Type'} <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="add-roomType"
@@ -105,7 +107,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
 
                     {/* Floor */}
                     <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-floor" className="text-xs font-medium text-gray-600">Floor</label>
+                        <label htmlFor="add-floor" className="text-xs font-medium text-gray-600">{t('floorLabel') || 'Floor'}</label>
                         <input
                             id="add-floor"
                             type="number"
@@ -118,7 +120,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
 
                     {/* Initial Status */}
                     <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-status" className="text-xs font-medium text-gray-600">Initial Status</label>
+                        <label htmlFor="add-status" className="text-xs font-medium text-gray-600">{t('initialStatusLabel') || 'Initial Status'}</label>
                         <select
                             id="add-status"
                             value={form.status}
@@ -126,7 +128,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
                             className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                         >
                             {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
                             ))}
                         </select>
                     </div>
@@ -137,14 +139,14 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
                             onClick={onClose}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                         >
-                            Cancel
+                            {t('cancel') || 'Cancel'}
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
                             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition"
                         >
-                            {saving ? 'Saving…' : 'Save Room'}
+                            {saving ? (t('savingMsg') || 'Saving…') : (t('saveRoomBtn') || 'Save Room')}
                         </button>
                     </div>
                 </form>
@@ -155,6 +157,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
 
 // ─── Update Status Modal ──────────────────────────────────────────────────────
 function UpdateStatusModal({ room, onSave, onClose }) {
+    const { t } = useTranslation();
     const [selectedStatus, setSelectedStatus] = useState(room.status);
     const [modalError, setModalError] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -171,18 +174,18 @@ function UpdateStatusModal({ room, onSave, onClose }) {
         if (result.success) {
             onClose();
         } else {
-            setModalError(result.error ?? 'Failed to update status.');
+            setModalError(result.error ?? (t('failedUpdateStatus') || 'Failed to update status.'));
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 className="mb-1 text-lg font-bold text-gray-900">Update Room Status</h2>
+                <h2 className="mb-1 text-lg font-bold text-gray-900">{t('updateRoomStatus') || 'Update Room Status'}</h2>
                 <p className="mb-4 text-sm text-gray-500">
-                    Room <strong>{room.roomNumber}</strong> — current:{' '}
+                    {t('roomNumber', { number: room.roomNumber }) || `Room ${room.roomNumber}`} — {t('currentLabel') || 'current:'}{' '}
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLORS[room.status]}`}>
-                        {STATUS_LABELS[room.status]}
+                        {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[room.status]}
                     </span>
                 </p>
 
@@ -190,7 +193,7 @@ function UpdateStatusModal({ room, onSave, onClose }) {
 
                 <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label htmlFor="update-status" className="text-xs font-medium text-gray-600">New Status</label>
+                        <label htmlFor="update-status" className="text-xs font-medium text-gray-600">{t('newStatusLabel') || 'New Status'}</label>
                         <select
                             id="update-status"
                             value={selectedStatus}
@@ -198,7 +201,7 @@ function UpdateStatusModal({ room, onSave, onClose }) {
                             className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                         >
                             {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
                             ))}
                         </select>
                     </div>
@@ -206,8 +209,7 @@ function UpdateStatusModal({ room, onSave, onClose }) {
                     {/* Transition hint */}
                     {selectedStatus === 'AVAILABLE' && room.status === 'OCCUPIED' && (
                         <p className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
-                            ⚠️ The backend will reject OCCUPIED → AVAILABLE directly.
-                            Set to <strong>Needs Cleaning</strong> first.
+                            {t('occupyToAvailWarning') || '⚠️ The backend will reject OCCUPIED → AVAILABLE directly. Set to Needs Cleaning first.'}
                         </p>
                     )}
 
@@ -217,14 +219,14 @@ function UpdateStatusModal({ room, onSave, onClose }) {
                             onClick={onClose}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                         >
-                            Cancel
+                            {t('cancel') || 'Cancel'}
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
                             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition"
                         >
-                            {saving ? 'Saving…' : 'Update Status'}
+                            {saving ? (t('savingMsg') || 'Saving…') : (t('updateStatusBtn') || 'Update Status')}
                         </button>
                     </div>
                 </form>
@@ -241,6 +243,7 @@ function UpdateStatusModal({ room, onSave, onClose }) {
  * Wired to real API via useRooms hook (Day 2).
  */
 export default function RoomsManagement() {
+    const { t } = useTranslation();
     const {
         rooms, loading, error,
         fetchRooms, addRoom, changeStatus, removeRoom, clearError,
@@ -318,17 +321,17 @@ export default function RoomsManagement() {
             {/* ── Header ── */}
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Rooms Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('roomsTitle') || 'Rooms Management'}</h1>
                     <p className="mt-1 text-sm text-gray-500">
-                        {loading ? 'Loading…' : `${displayedRooms.length} room${displayedRooms.length !== 1 ? 's' : ''} shown`}
-                        {!loading && rooms.length !== displayedRooms.length && ` (filtered from ${rooms.length})`}
+                        {loading ? (t('loadingRooms') || 'Loading…') : (t('roomsShown', { count: displayedRooms.length }) || `${displayedRooms.length} room${displayedRooms.length !== 1 ? 's' : ''} shown`)}
+                        {!loading && rooms.length !== displayedRooms.length && (t('filteredFrom', { total: rooms.length }) || ` (filtered from ${rooms.length})`)}
                     </p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
                     className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
-                    ＋ Add Room
+                    {t('addRoomBtn') || '＋ Add Room'}
                 </button>
             </div>
 
@@ -364,12 +367,12 @@ export default function RoomsManagement() {
                     <table className="min-w-full divide-y divide-gray-200 text-sm">
                         <thead>
                             <tr className="bg-gray-50">
-                                {['Room #', 'Floor', 'Type', 'Status', 'Base Price', 'Max Guests', 'Amenities', 'Actions'].map((h) => (
+                                {['colRoomNum', 'colFloor', 'colType', 'colStatus', 'colBasePrice', 'colMaxGuests', 'colAmenities', 'colActions'].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                                        className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-gray-500"
                                     >
-                                        {h}
+                                        {t(h)}
                                     </th>
                                 ))}
                             </tr>
@@ -378,7 +381,7 @@ export default function RoomsManagement() {
                             {displayedRooms.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="px-4 py-14 text-center text-gray-400">
-                                        No rooms match the current filters.
+                                        {t('noRoomsMatched') || 'No rooms match the current filters.'}
                                     </td>
                                 </tr>
                             ) : (
@@ -395,9 +398,9 @@ export default function RoomsManagement() {
                                             <td className="px-4 py-3">
                                                 <span
                                                     className={`inline-flex cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-semibold transition hover:opacity-80 ${STATUS_COLORS[room.status] ?? 'bg-gray-100 text-gray-700'}`}
-                                                    title="Click row actions to change status"
+                                                    title={t('clickRowActions') || "Click row actions to change status"}
                                                 >
-                                                    {STATUS_LABELS[room.status] ?? room.status}
+                                                    {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || (STATUS_LABELS[room.status] ?? room.status)}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 font-semibold text-gray-900">
@@ -423,7 +426,7 @@ export default function RoomsManagement() {
                                                     {/* Change Status */}
                                                     <button
                                                         onClick={() => setStatusModal(room)}
-                                                        title="Update status"
+                                                        title={t('updateStatusTitle') || "Update status"}
                                                         className="rounded-md p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
                                                     >
                                                         🔄
@@ -431,7 +434,7 @@ export default function RoomsManagement() {
                                                     {/* Delete */}
                                                     <button
                                                         onClick={() => handleDelete(room)}
-                                                        title="Delete room"
+                                                        title={t('deleteRoomTitle') || "Delete room"}
                                                         className="rounded-md p-1.5 text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
                                                     >
                                                         🗑️

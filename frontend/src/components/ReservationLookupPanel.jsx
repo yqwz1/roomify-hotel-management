@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
+import { useTranslation } from 'react-i18next';
+import { LtrText } from './LtrText';
+
 
 /**
  * ReservationLookupPanel
@@ -12,6 +15,7 @@ import StatusPill from './StatusPill';
  *   className? {string}
  */
 export default function ReservationLookupPanel({ onSelect, className = '' }) {
+    const { t, i18n } = useTranslation();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -33,7 +37,7 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
             setResults(data);
             setSearched(true);
         } catch {
-            setError('Failed to search reservations. Please try again.');
+            setError(t('failedSearch'));
         } finally {
             setLoading(false);
         }
@@ -41,20 +45,21 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
 
     const formatDate = (iso) => {
         if (!iso) return '—';
-        return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {
+        const locale = i18n.language.startsWith('ar') ? 'ar-SA' : 'en-US';
+        return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
             month: 'short', day: 'numeric', year: 'numeric',
         });
     };
 
     return (
         <div className={`rounded-xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}>
-            <h2 className="mb-1 text-sm font-semibold text-gray-700">Reservation Lookup</h2>
-            <p className="mb-4 text-xs text-gray-400">Search by confirmation number (e.g. RSV-…) or guest name.</p>
+            <h2 className="mb-1 text-sm font-semibold text-gray-700">{t('reservationLookup')}</h2>
+            <p className="mb-4 text-xs text-gray-400">{t('searchDescription')}</p>
 
             {/* Search Form */}
             <form onSubmit={handleSearch} className="flex gap-2">
                 <div className="relative flex-1">
-                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-gray-400">
                         🔍
                     </span>
                     <input
@@ -62,8 +67,8 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                         type="text"
                         value={query}
                         onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
-                        placeholder="RSV-XXXXXXXXXXXX or Guest Name"
-                        className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        placeholder={t('searchPlaceholder')}
+                        className="w-full rounded-lg border border-gray-300 py-2 ps-9 pe-3 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     />
                 </div>
                 <button
@@ -76,7 +81,7 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
-                    ) : 'Search'}
+                    ) : t('search')}
                 </button>
             </form>
 
@@ -98,8 +103,8 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
             {!loading && searched && results.length === 0 && (
                 <div className="mt-4 flex flex-col items-center rounded-lg border border-dashed border-gray-200 py-8 text-center">
                     <span className="text-3xl">🔍</span>
-                    <p className="mt-2 text-sm font-medium text-gray-600">No reservations found</p>
-                    <p className="text-xs text-gray-400">Try a different confirmation number or guest name.</p>
+                    <p className="mt-2 text-sm font-medium text-gray-600">{t('noReservations')}</p>
+                    <p className="text-xs text-gray-400">{t('tryDifferent')}</p>
                 </div>
             )}
 
@@ -122,14 +127,18 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                         <li key={id}>
                             <button
                                 onClick={() => onSelect?.(r)}
-                                className="w-full px-4 py-3 text-left transition hover:bg-blue-50 focus:outline-none focus:bg-blue-50"
+                                className="w-full px-4 py-3 text-start transition hover:bg-blue-50 focus:outline-none focus:bg-blue-50"
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{guestName}</p>
-                                        <p className="text-xs text-gray-500 font-mono">{conf}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5">
-                                            Room {roomNum} · {formatDate(checkIn)} → {formatDate(checkOut)}
+                                        <p className="text-xs text-gray-500 font-mono mt-0.5"><LtrText>{conf}</LtrText></p>
+                                        <p className="text-xs text-gray-400 mt-0.5 flex gap-1 items-center flex-wrap">
+                                            <span>{t('room')} <LtrText>{roomNum}</LtrText></span>
+                                            <span>·</span>
+                                            <span className="font-mono text-[10px]"><LtrText>{formatDate(checkIn)}</LtrText></span>
+                                            <span>→</span>
+                                            <span className="font-mono text-[10px]"><LtrText>{formatDate(checkOut)}</LtrText></span>
                                         </p>
                                     </div>
                                     <StatusPill status={r.status} size="sm" />

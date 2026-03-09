@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-i18next'
 import { useAuth } from '../context/AuthProvider'
 import { X, LayoutDashboard, Tag, Users, Hotel, Settings, Search, CalendarDays, User, Key, Sparkles } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const ICON_MAP = {
   '/manager/dashboard': LayoutDashboard,
@@ -24,39 +25,40 @@ const ICON_MAP = {
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
   const { hasRole, user } = useAuth()
+  const { t } = useTranslation()
 
   const menuItems = []
 
   if (hasRole('ROLE_MANAGER')) {
     menuItems.push(
-      { path: '/manager/dashboard', label: 'Dashboard' },
-      { path: '/room-types', label: 'Room Types' },
-      { path: '/staff', label: 'Staff' },
-      { path: '/rooms', label: 'Manage Rooms' },
-      { path: '/rooms-management', label: 'Rooms Management' },
-      { path: '/search', label: 'Room Search' },
-      { path: '/bookings', label: 'All Bookings' },
-      { path: '/guests', label: 'Guest List' },
-      { path: '/settings', label: 'Settings' },
+      { path: '/manager/dashboard', label: t('dashboard') },
+      { path: '/room-types', label: t('roomTypes') },
+      { path: '/staff', label: t('staffMenu') },
+      { path: '/rooms', label: t('manageRooms') },
+      { path: '/rooms-management', label: t('roomsManagement') },
+      { path: '/search', label: t('roomSearch') },
+      { path: '/bookings', label: t('allBookings') },
+      { path: '/guests', label: t('guestList') },
+      { path: '/settings', label: t('settings') },
     )
   } else if (hasRole('ROLE_STAFF')) {
     menuItems.push(
-      { path: '/staff/dashboard', label: 'Dashboard' },
-      { path: '/search', label: 'Room Search' },
-      { path: '/book', label: 'Book Room' },
-      { path: '/bookings', label: 'Bookings' },
-      { path: '/check-in', label: 'Check-In/Out' },
-      { path: '/housekeeping', label: 'Housekeeping' },
+      { path: '/staff/dashboard', label: t('dashboard') },
+      { path: '/search', label: t('roomSearch') },
+      { path: '/book', label: t('bookRoom') },
+      { path: '/bookings', label: t('bookings') },
+      { path: '/check-in', label: t('checkInOut') },
+      { path: '/housekeeping', label: t('housekeeping') },
     )
   } else if (hasRole('ROLE_GUEST')) {
     menuItems.push(
-      { path: '/guest/dashboard', label: 'My Dashboard' },
-      { path: '/my-bookings', label: 'My Bookings' },
-      { path: '/profile', label: 'My Profile' },
+      { path: '/guest/dashboard', label: t('myDashboard') },
+      { path: '/my-bookings', label: t('myBookings') },
+      { path: '/profile', label: t('myProfile') },
     )
   }
 
-  const roleLabel = hasRole('ROLE_MANAGER') ? 'Manager' : hasRole('ROLE_STAFF') ? 'Staff' : 'Guest'
+  const roleLabel = hasRole('ROLE_MANAGER') ? t('roleManager') : hasRole('ROLE_STAFF') ? t('roleStaff') : t('roleGuest')
 
   return (
     <>
@@ -72,7 +74,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Sidebar panel */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen w-64 bg-slate-900 flex flex-col shadow-xl
+          fixed top-0 start-0 z-40 h-screen w-64 bg-slate-900 flex flex-col shadow-xl
           transform transition-transform duration-300 ease-in-out
           md:relative md:translate-x-0 md:flex-shrink-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -130,7 +132,7 @@ export default function Sidebar({ isOpen, onClose }) {
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{user?.username || user?.email || 'User'}</p>
+              <p className="text-xs font-semibold text-white truncate">{user?.username || user?.email || t('user')}</p>
               <p className="text-xs text-slate-400">{roleLabel}</p>
             </div>
           </div>

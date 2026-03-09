@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ErrorBanner
@@ -10,6 +11,7 @@ import PropTypes from 'prop-types';
  *   onClose  {Function}     – Called when the user dismisses the banner.
  */
 export default function ErrorBanner({ message, onClose }) {
+    const { t } = useTranslation();
     if (!message) return null;
 
     return (
@@ -27,7 +29,7 @@ export default function ErrorBanner({ message, onClose }) {
             {onClose && (
                 <button
                     onClick={onClose}
-                    aria-label="Dismiss error"
+                    aria-label={t('dismissError') || 'Dismiss error'}
                     className="shrink-0 rounded p-0.5 text-red-600 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

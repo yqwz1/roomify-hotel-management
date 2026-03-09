@@ -18,7 +18,7 @@ export default function Layout({ children, showSidebar = false }) {
           />
         )}
 
-        <main className={`flex-1 overflow-y-auto ${showSidebar ? 'md:pl-0' : ''}`}>
+        <main className={`flex-1 overflow-y-auto ${showSidebar ? 'md:ps-0' : ''}`}>
           {children}
         </main>
       </div>

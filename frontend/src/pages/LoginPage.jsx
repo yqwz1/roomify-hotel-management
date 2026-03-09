@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         email: 'admin@roomify.com',
@@ -33,9 +35,9 @@ const LoginPage = () => {
     const validateForm = () => {
         const newErrors = { email: '', password: '' };
         let isValid = true;
-        if (!formData.email) { newErrors.email = 'Email is required'; isValid = false; }
-        else if (!emailRegex.test(formData.email)) { newErrors.email = 'Please enter a valid email address'; isValid = false; }
-        if (!formData.password) { newErrors.password = 'Password is required'; isValid = false; }
+        if (!formData.email) { newErrors.email = t('emailRequired') || 'Email is required'; isValid = false; }
+        else if (!emailRegex.test(formData.email)) { newErrors.email = t('invalidEmail') || 'Please enter a valid email address'; isValid = false; }
+        if (!formData.password) { newErrors.password = t('passwordRequired') || 'Password is required'; isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
@@ -59,7 +61,7 @@ const LoginPage = () => {
                 default: navigate('/', { replace: true });
             }
         } catch (error) {
-            setLoginError(error.message || 'Login failed. Please check your credentials.');
+            setLoginError(error.message || t('loginFailedDefault') || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
@@ -80,23 +82,23 @@ const LoginPage = () => {
                 {/* Middle: Headline */}
                 <div>
                     <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-4">
-                        Hotel Management System
+                        {t('hotelManagementSystem') || 'Hotel Management System'}
                     </p>
                     <h1 className="text-4xl font-bold text-white leading-snug mb-6">
-                        Manage your property<br />
-                        <span className="text-blue-400">with confidence.</span>
+                        {t('manageYourProperty') || 'Manage your property'}<br />
+                        <span className="text-blue-400">{t('withConfidence') || 'with confidence.'}</span>
                     </h1>
                     <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-                        A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.
+                        {t('loginDescription') || 'A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.'}
                     </p>
                 </div>
 
                 {/* Bottom: Feature chips */}
                 <div className="space-y-3">
                     {[
-                        { icon: ShieldCheck, text: 'Role-based secure access' },
-                        { icon: Zap, text: 'Real-time room status updates' },
-                        { icon: Users, text: 'Staff & guest management' },
+                        { icon: ShieldCheck, text: t('featureSecureAccess') || 'Role-based secure access' },
+                        { icon: Zap, text: t('featureRealTimeUpdates') || 'Real-time room status updates' },
+                        { icon: Users, text: t('featureStaffGuest') || 'Staff & guest management' },
                     ].map(({ icon: Icon, text }) => (
                         <div key={text} className="flex items-center gap-3">
                             <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
@@ -106,7 +108,7 @@ const LoginPage = () => {
                         </div>
                     ))}
                     <p className="text-slate-600 text-xs pt-2">
-                        © {new Date().getFullYear()} Roomify PMS. All rights reserved.
+                        {t('copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()} Roomify PMS. All rights reserved.`}
                     </p>
                 </div>
             </div>
@@ -124,17 +126,17 @@ const LoginPage = () => {
 
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-gray-900" role="heading" aria-level="1">
-                            Sign in to your account
+                            {t('signInToAccount') || 'Sign in to your account'}
                         </h2>
                         <p className="text-gray-500 text-sm mt-1">
-                            Enter your credentials to access the system
+                            {t('enterCredentials') || 'Enter your credentials to access the system'}
                         </p>
                     </div>
 
                     {loginError && (
                         <Alert variant="destructive" className="mb-5">
                             <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Authentication Failed</AlertTitle>
+                            <AlertTitle>{t('authFailed') || 'Authentication Failed'}</AlertTitle>
                             <AlertDescription>{loginError}</AlertDescription>
                         </Alert>
                     )}
@@ -142,7 +144,7 @@ const LoginPage = () => {
                     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                         <div className="space-y-1.5">
                             <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
-                                Email Address
+                                {t('emailAddress') || 'Email Address'}
                             </Label>
                             <Input
                                 id="email"
@@ -161,7 +163,7 @@ const LoginPage = () => {
 
                         <div className="space-y-1.5">
                             <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
-                                Password
+                                {t('password') || 'Password'}
                             </Label>
                             <Input
                                 id="password"
@@ -185,20 +187,20 @@ const LoginPage = () => {
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
-                                    Signing in...
+                                    <Loader2 className="me-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
+                                    {t('signingIn') || 'Signing in...'}
                                 </>
                             ) : (
-                                'Sign In'
+                                t('signIn') || 'Sign In'
                             )}
                         </Button>
                     </form>
 
                     {/* Demo credentials */}
                     <div className="mt-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                        <p className="text-xs font-semibold text-blue-700 mb-1">Demo Credentials</p>
-                        <p className="text-xs text-blue-600">Manager: <span className="font-mono">admin@roomify.com</span></p>
-                        <p className="text-xs text-blue-600">Password: <span className="font-mono">password123</span></p>
+                        <p className="text-xs font-semibold text-blue-700 mb-1">{t('demoCredentials') || 'Demo Credentials'}</p>
+                        <p className="text-xs text-blue-600">{t('managerLabel') || 'Manager:'} <span className="font-mono">admin@roomify.com</span></p>
+                        <p className="text-xs text-blue-600">{t('password') || 'Password'}: <span className="font-mono">password123</span></p>
                     </div>
                 </div>
             </div>

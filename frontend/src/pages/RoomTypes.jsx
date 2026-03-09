@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
 
@@ -27,13 +28,13 @@ function SkeletonRow() {
                     <div className="h-5 w-10 bg-gray-200 rounded-full animate-pulse" />
                 </div>
             </td>
-            <td className="p-4 text-right">
-                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
+            <td className="p-4 text-end">
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ms-auto" />
             </td>
-            <td className="p-4 text-right">
-                <div className="h-4 w-8 bg-gray-200 rounded animate-pulse ml-auto" />
+            <td className="p-4 text-end">
+                <div className="h-4 w-8 bg-gray-200 rounded animate-pulse ms-auto" />
             </td>
-            <td className="p-4 text-right">
+            <td className="p-4 text-end">
                 <div className="flex justify-end gap-1">
                     <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
                     <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
@@ -44,6 +45,7 @@ function SkeletonRow() {
 }
 
 export default function RoomTypes() {
+    const { t } = useTranslation();
     const { roomTypes, loading, error, fetchRoomTypes, createRoomType, updateRoomType, deleteRoomType } = useRoomTypes();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +148,7 @@ export default function RoomTypes() {
         setIsSubmitting(false);
 
         if (result.success) {
-            setSuccessMessage(editingId ? "Room Type updated successfully!" : "Room Type created successfully!");
+            setSuccessMessage(editingId ? (t('roomTypeUpdated') || "Room Type updated successfully!") : (t('roomTypeCreated') || "Room Type created successfully!"));
             setIsSheetOpen(false);
             resetForm();
             // Clear success message after 3 seconds
@@ -160,10 +162,10 @@ export default function RoomTypes() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this room type?")) {
+        if (window.confirm(t('confirmDeleteRoomType') || "Are you sure you want to delete this room type?")) {
             const result = await deleteRoomType(id);
             if (result.success) {
-                setSuccessMessage("Room Type deleted successfully!");
+                setSuccessMessage(t('roomTypeDeleted') || "Room Type deleted successfully!");
                 setTimeout(() => setSuccessMessage(null), 3000);
             } else {
                 setPageError(result.error);
@@ -176,18 +178,18 @@ export default function RoomTypes() {
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Room Types</h1>
-                    <p className="text-gray-500 mt-1 text-sm">Manage your hotel's room categories and pricing.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">{t('roomTypesTitle') || 'Room Types'}</h1>
+                    <p className="text-gray-500 mt-1 text-sm">{t('roomTypesDesc') || "Manage your hotel's room categories and pricing."}</p>
                 </div>
                 <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto">
-                    <Plus className="h-4 w-4" /> Create New
+                    <Plus className="h-4 w-4" /> {t('createNewBtn') || 'Create New'}
                 </Button>
             </div>
 
             {successMessage && (
                 <Alert className="bg-green-50 border-green-200 text-green-800">
                     <Info className="h-4 w-4 text-green-600" />
-                    <AlertTitle>Success</AlertTitle>
+                    <AlertTitle>{t('success') || 'Success'}</AlertTitle>
                     <AlertDescription>{successMessage}</AlertDescription>
                 </Alert>
             )}
@@ -195,26 +197,26 @@ export default function RoomTypes() {
             {(error || pageError) && (
                 <Alert variant="destructive">
                     <Info className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>{t('error') || 'Error'}</AlertTitle>
                     <AlertDescription>{pageError || error}</AlertDescription>
                 </Alert>
             )}
 
             <Card className="border shadow-sm">
                 <CardHeader>
-                    <CardTitle>All Room Types</CardTitle>
+                    <CardTitle>{t('allRoomTypes') || 'All Room Types'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full caption-bottom text-sm text-left">
+                            <table className="w-full caption-bottom text-sm text-start">
                                 <thead className="[&_tr]:border-b">
                                     <tr className="border-b">
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-[100px]">Details</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Amenities</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Price</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Max Guests</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right w-[100px]">Actions</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-[100px]">{t('colDetails') || 'Details'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">{t('colAmenities') || 'Amenities'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end">{t('colPrice') || 'Price'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end">{t('colMaxGuests') || 'Max Guests'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end w-[100px]">{t('colActions') || 'Actions'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -228,23 +230,23 @@ export default function RoomTypes() {
                                 <Box className="h-8 w-8 text-gray-400" />
                             </div>
                             <div className="text-center space-y-1">
-                                <p className="text-lg font-medium text-gray-700">No room types yet</p>
-                                <p className="text-sm text-gray-500">Get started by creating your first room type.</p>
+                                <p className="text-lg font-medium text-gray-700">{t('noRoomTypesYet') || 'No room types yet'}</p>
+                                <p className="text-sm text-gray-500">{t('getStartedRoomType') || 'Get started by creating your first room type.'}</p>
                             </div>
                             <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-2">
-                                <Plus className="h-4 w-4" /> Create Now
+                                <Plus className="h-4 w-4" /> {t('createNowBtn') || 'Create Now'}
                             </Button>
                         </div>
                     ) : (
                         <div className="relative w-full overflow-x-auto">
-                            <table className="w-full caption-bottom text-sm text-left">
+                            <table className="w-full caption-bottom text-sm text-start">
                                 <thead className="[&_tr]:border-b">
                                     <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-[100px]">Details</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Amenities</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Price</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Max Guests</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right w-[100px]">Actions</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-[100px]">{t('colDetails') || 'Details'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">{t('colAmenities') || 'Amenities'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end">{t('colPrice') || 'Price'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end">{t('colMaxGuests') || 'Max Guests'}</th>
+                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end w-[100px]">{t('colActions') || 'Actions'}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="[&_tr:last-child]:border-0">
@@ -263,18 +265,18 @@ export default function RoomTypes() {
                                                     )) : <span className="text-gray-400 text-xs">-</span>}
                                                 </div>
                                             </td>
-                                            <td className="p-4 align-middle text-right font-mono">
+                                            <td className="p-4 align-middle text-end font-mono">
                                                 ${rt.basePrice?.toFixed(2)}
                                             </td>
-                                            <td className="p-4 align-middle text-right">
+                                            <td className="p-4 align-middle text-end">
                                                 {rt.maxGuests}
                                             </td>
-                                            <td className="p-4 align-middle text-right">
+                                            <td className="p-4 align-middle text-end">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => handleEdit(rt)}
-                                                    className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50 mr-1"
+                                                    className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50 me-1"
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
@@ -300,9 +302,9 @@ export default function RoomTypes() {
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="sm:max-w-xl overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>{editingId ? 'Edit Room Type' : 'Create Room Type'}</SheetTitle>
+                        <SheetTitle>{editingId ? (t('editRoomType') || 'Edit Room Type') : (t('createRoomType') || 'Create Room Type')}</SheetTitle>
                         <SheetDescription>
-                            {editingId ? 'Update details of the room type.' : 'Add a new category of rooms to your hotel.'}
+                            {editingId ? (t('updateRoomTypeDesc') || 'Update details of the room type.') : (t('createRoomTypeDesc') || 'Add a new category of rooms to your hotel.')}
                         </SheetDescription>
                     </SheetHeader>
 
@@ -316,13 +318,13 @@ export default function RoomTypes() {
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="name">{t('nameLabel') || 'Name'} <span className="text-red-500">*</span></Label>
                             <Input
                                 id="name"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                placeholder="e.g. Deluxe Suite"
+                                placeholder={t('namePlaceholder') || "e.g. Deluxe Suite"}
                                 className={validationErrors.name ? "border-red-500" : ""}
                                 required
                             />
@@ -331,7 +333,7 @@ export default function RoomTypes() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="basePrice">Base Price ($) <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="basePrice">{t('basePriceLabel') || 'Base Price ($)'} <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="basePrice"
                                     name="basePrice"
@@ -346,7 +348,7 @@ export default function RoomTypes() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="maxGuests">Max Guests <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="maxGuests">{t('maxGuestsLabel') || 'Max Guests'} <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="maxGuests"
                                     name="maxGuests"
@@ -363,7 +365,7 @@ export default function RoomTypes() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Amenities</Label>
+                            <Label>{t('amenitiesLabel') || 'Amenities'}</Label>
                             <div className="grid grid-cols-2 gap-2 mt-2">
                                 {COMMON_AMENITIES.map((amenity) => (
                                     <label key={amenity} className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-2 border rounded hover:bg-gray-50">
@@ -380,25 +382,25 @@ export default function RoomTypes() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">{t('descLabel') || 'Description'}</Label>
                             <Input
                                 id="description"
                                 name="description"
                                 value={formData.description}
                                 onChange={handleInputChange}
-                                placeholder="Optional description..."
+                                placeholder={t('descPlaceholder') || "Optional description..."}
                             />
                         </div>
 
                         <SheetFooter className="mt-8">
-                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)}>Cancel</Button>
+                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)}>{t('cancel') || 'Cancel'}</Button>
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Creating...'}
+                                        <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? (t('updatingMsg') || 'Updating...') : (t('creatingMsg') || 'Creating...')}
                                     </>
                                 ) : (
-                                    editingId ? 'Update Room Type' : 'Create Room Type'
+                                    editingId ? (t('updateRoomTypeBtn') || 'Update Room Type') : (t('createRoomTypeBtn') || 'Create Room Type')
                                 )}
                             </Button>
                         </SheetFooter>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 /**
  * StatusPill
  * Displays a reservation status as a colored badge.
@@ -16,6 +18,7 @@ const CONFIG = {
 };
 
 export default function StatusPill({ status, size = 'md' }) {
+    const { t } = useTranslation();
     const cfg = CONFIG[status] ?? {
         label: status,
         classes: 'bg-gray-100 text-gray-600 ring-gray-200',
@@ -29,7 +32,7 @@ export default function StatusPill({ status, size = 'md' }) {
             className={`inline-flex items-center gap-1.5 rounded-full font-semibold ring-1 ring-inset ${cfg.classes} ${textSize}`}
         >
             <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} aria-hidden="true" />
-            {cfg.label}
+            {t(status?.toLowerCase().replace('_', '')) || cfg.label}
         </span>
     );
 }

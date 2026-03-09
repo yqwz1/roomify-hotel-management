@@ -1,10 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 import { Menu, Hotel, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
+
 
 export default function Header({ onMenuToggle }) {
   const { isAuthenticated, user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -49,24 +53,26 @@ export default function Header({ onMenuToggle }) {
         {/* Center: Nav links – desktop only */}
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
-            Home
+            {t('dashboard') || 'Home'}
           </Link>
           {!isAuthenticated && (
             <Link to="/bookings" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
-              Bookings
+              {t('bookings')}
             </Link>
           )}
           {isAuthenticated && hasRole('ROLE_MANAGER') && (
             <Link to="/rooms" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
-              Rooms
+              {t('rooms')}
             </Link>
           )}
         </nav>
 
         {/* Right: auth actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          
           {!isAuthenticated ? (
-            <>
+            <div className="flex items-center gap-2">
               <Link
                 to="/login"
                 className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium"
@@ -76,7 +82,7 @@ export default function Header({ onMenuToggle }) {
               <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
                 Sign Up
               </button>
-            </>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               {/* User chip – desktop */}
@@ -87,20 +93,20 @@ export default function Header({ onMenuToggle }) {
                   </span>
                 </div>
                 <span className="text-sm font-medium text-gray-800 max-w-[120px] truncate">
-                  {user?.username || 'User'}
+                  {user?.username || t('user')}
                 </span>
                 {roleLabel && (
-                  <span className="text-xs text-gray-400 border-l border-gray-200 pl-2">{roleLabel}</span>
+                  <span className="text-xs text-gray-400 border-s border-gray-200 ps-2">{roleLabel}</span>
                 )}
               </div>
 
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium"
-                title="Logout"
+                title={t('logout')}
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:block">Logout</span>
+                <span className="hidden sm:block">{t('logout')}</span>
               </button>
             </div>
           )}

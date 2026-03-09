@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ConfirmationToast
@@ -12,6 +13,7 @@ import { useEffect, useState } from 'react';
  *   onClose   {Function}     – Called on dismiss or auto-hide.
  */
 export default function ConfirmationToast({ message, type = 'success', duration = 4000, onClose }) {
+    const { t } = useTranslation();
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -35,7 +37,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
             role="status"
             aria-live="polite"
             className={`
-                fixed top-5 right-5 z-[9999] w-80 rounded-xl border shadow-xl
+                fixed top-5 end-5 z-[9999] w-80 rounded-xl border shadow-xl
                 transition-all duration-300 ease-in-out
                 ${s.bg}
                 ${visible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}
@@ -49,7 +51,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
                 <p className={`flex-1 text-sm font-medium ${s.text}`}>{message}</p>
                 <button
                     onClick={() => { setVisible(false); onClose?.(); }}
-                    aria-label="Dismiss"
+                    aria-label={t('dismissToast') || 'Dismiss'}
                     className="shrink-0 rounded p-0.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
                     <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

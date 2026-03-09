@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * DateRangePicker
@@ -12,6 +13,7 @@ import PropTypes from 'prop-types';
  *   onCheckOutChange  {Function}  – (value: string) => void
  */
 export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, onCheckOutChange }) {
+    const { t } = useTranslation();
     // Minimum selectable date is today
     const today = new Date().toISOString().split('T')[0];
 
@@ -22,7 +24,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Check-In */}
             <div className="flex flex-col gap-1">
                 <label htmlFor="check-in-date" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Check-In
+                    {t('checkInLabel') || 'Check-In'}
                 </label>
                 <input
                     id="check-in-date"
@@ -40,7 +42,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Check-Out */}
             <div className="flex flex-col gap-1">
                 <label htmlFor="check-out-date" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Check-Out
+                    {t('checkOutLabel') || 'Check-Out'}
                 </label>
                 <input
                     id="check-out-date"
@@ -58,7 +60,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Validation message */}
             {isInvalid && (
                 <p className="text-xs font-medium text-red-600 sm:self-end sm:pb-2" role="alert">
-                    Check-out must be after check-in.
+                    {t('checkoutAfterCheckin')}
                 </p>
             )}
         </div>

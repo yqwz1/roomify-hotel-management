@@ -7,6 +7,7 @@ import {
     extractReservationError,
     isConflictError,
 } from '../services/reservationService';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_GUEST = {
@@ -28,27 +29,28 @@ const typeIcon = (name = '') => {
 
 // ─── 409 Conflict Banner ──────────────────────────────────────────────────────
 function ConflictBanner({ message, checkIn, checkOut, room, onSearchAlternatives }) {
+    const { t } = useTranslation();
     return (
         <div className="rounded-xl border border-red-200 bg-red-50 p-5">
             <div className="flex items-start gap-3">
                 <span className="text-2xl shrink-0">🚫</span>
                 <div className="flex-1">
-                    <p className="font-bold text-red-800">Room Already Booked</p>
+                    <p className="font-bold text-red-800">{t('roomAlreadyBooked') || 'Room Already Booked'}</p>
                     <p className="mt-1 text-sm text-red-700">{message}</p>
 
                     {/* Suggestion */}
                     <div className="mt-4 rounded-lg border border-red-200 bg-white p-4">
-                        <p className="text-sm font-semibold text-gray-700 mb-2">💡 What you can do:</p>
+                        <p className="text-sm font-semibold text-gray-700 mb-2">{t('whatYouCanDo') || '💡 What you can do:'}</p>
                         <ul className="space-y-2 text-sm text-gray-600">
                             <li className="flex items-start gap-2">
                                 <span className="text-red-500 shrink-0">•</span>
                                 <span>
-                                    Try <strong>different dates</strong> for Room <strong>{room?.roomNumber}</strong>
+                                    {t('tryDifferentDatesRoom', { room: room?.roomNumber }) || `Try different dates for Room ${room?.roomNumber}`}
                                 </span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-red-500 shrink-0">•</span>
-                                <span>Search for <strong>alternative rooms</strong> available for your dates</span>
+                                <span>{t('searchAlternativeRooms') || 'Search for alternative rooms available for your dates'}</span>
                             </li>
                         </ul>
 
@@ -58,7 +60,7 @@ function ConflictBanner({ message, checkIn, checkOut, room, onSearchAlternatives
                                 onClick={onSearchAlternatives}
                                 className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             >
-                                🔍 Search Alternative Rooms
+                                {t('searchAlternativeBtn') || '🔍 Search Alternative Rooms'}
                             </button>
                         </div>
                     </div>
@@ -99,6 +101,7 @@ export default function BookRoom() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const location = useLocation();
+    const { t } = useTranslation();
 
     // Room + dates passed from RoomSearch via navigation state
     const room = location.state?.room ?? null;
@@ -145,14 +148,14 @@ export default function BookRoom() {
         setConflictError(null);
 
         // Client-side validation
-        if (!checkIn || !checkOut) return setValidationError('Please select check-in and check-out dates.');
-        if (checkOut <= checkIn) return setValidationError('Check-out date must be after check-in date.');
-        if (!guest.name.trim()) return setValidationError('Guest full name is required.');
-        if (!guest.email.trim()) return setValidationError('Guest email address is required.');
-        if (!guest.phone.trim()) return setValidationError('Guest phone number is required.');
-        if (!guest.idNumber.trim()) return setValidationError('Guest ID / Passport number is required.');
-        if (!guest.nationality.trim()) return setValidationError('Guest nationality is required.');
-        if (!roomId) return setValidationError('No room selected. Please go back and select a room.');
+        if (!checkIn || !checkOut) return setValidationError(t('pleaseSelectDates') || 'Please select check-in and check-out dates.');
+        if (checkOut <= checkIn) return setValidationError(t('checkoutAfterCheckin') || 'Check-out date must be after check-in date.');
+        if (!guest.name.trim()) return setValidationError(t('guestNameRequired') || 'Guest full name is required.');
+        if (!guest.email.trim()) return setValidationError(t('guestEmailRequired') || 'Guest email address is required.');
+        if (!guest.phone.trim()) return setValidationError(t('guestPhoneRequired') || 'Guest phone number is required.');
+        if (!guest.idNumber.trim()) return setValidationError(t('guestIdRequired') || 'Guest ID / Passport number is required.');
+        if (!guest.nationality.trim()) return setValidationError(t('guestNationalityRequired') || 'Guest nationality is required.');
+        if (!roomId) return setValidationError(t('noRoomError') || 'No room selected. Please go back and select a room.');
 
         setSubmitting(true);
         try {
@@ -194,15 +197,15 @@ export default function BookRoom() {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8 text-center">
                 <span className="text-5xl mb-4">🏨</span>
-                <h1 className="text-xl font-bold text-gray-800 mb-2">No room selected</h1>
+                <h1 className="text-xl font-bold text-gray-800 mb-2">{t('noRoomSelected') || 'No room selected'}</h1>
                 <p className="text-gray-500 mb-6 text-sm">
-                    Please go back to Room Search and click <strong>Book Now</strong> on a room.
+                    {t('plzGoBackRoomSearch') || 'Please go back to Room Search and click Book Now on a room.'}
                 </p>
                 <button
                     onClick={() => navigate('/search')}
                     className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
                 >
-                    ← Back to Room Search
+                    {t('backToRoomSearch') || '← Back to Room Search'}
                 </button>
             </div>
         );
@@ -219,12 +222,12 @@ export default function BookRoom() {
                         onClick={() => navigate(-1)}
                         className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100"
                     >
-                        ← Back
+                        {t('back') || '← Back'}
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Book a Room</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">{t('bookARoom') || 'Book a Room'}</h1>
                         <p className="text-sm text-gray-500">
-                            Fill in the guest details to complete the reservation.
+                            {t('fillGuestDetails') || 'Fill in the guest details to complete the reservation.'}
                         </p>
                     </div>
                 </div>
@@ -252,7 +255,7 @@ export default function BookRoom() {
 
                             {/* Dates Card */}
                             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h2 className="mb-4 text-sm font-semibold text-gray-700">Stay Dates</h2>
+                                <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('stayDates') || 'Stay Dates'}</h2>
                                 <DateRangePicker
                                     checkIn={checkIn}
                                     checkOut={checkOut}
@@ -261,14 +264,14 @@ export default function BookRoom() {
                                 />
                                 {nights > 0 && (
                                     <p className="mt-3 text-sm font-medium text-blue-600">
-                                        📆 {nights} night{nights !== 1 ? 's' : ''}
+                                        📆 {t('nightsCount', { count: nights }) || `${nights} night(s)`}
                                     </p>
                                 )}
                             </div>
 
                             {/* Guest Details Card */}
                             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h2 className="mb-4 text-sm font-semibold text-gray-700">Guest Details</h2>
+                                <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('guestDetails') || 'Guest Details'}</h2>
 
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
@@ -276,9 +279,9 @@ export default function BookRoom() {
                                     <div className="sm:col-span-2">
                                         <Field
                                             id="guest-name"
-                                            label="Full Name"
+                                            label={t('fullName') || 'Full Name'}
                                             required
-                                            placeholder="e.g. John Smith"
+                                            placeholder={t('fullNamePlaceholder') || 'e.g. John Smith'}
                                             value={guest.name}
                                             onChange={(v) => setField('name', v)}
                                         />
@@ -287,10 +290,10 @@ export default function BookRoom() {
                                     {/* Email */}
                                     <Field
                                         id="guest-email"
-                                        label="Email Address"
+                                        label={t('emailAddress') || 'Email Address'}
                                         required
                                         type="email"
-                                        placeholder="guest@example.com"
+                                        placeholder={t('emailPlaceholder') || 'guest@example.com'}
                                         value={guest.email}
                                         onChange={(v) => setField('email', v)}
                                     />
@@ -298,10 +301,10 @@ export default function BookRoom() {
                                     {/* Phone */}
                                     <Field
                                         id="guest-phone"
-                                        label="Phone Number"
+                                        label={t('phoneNumber') || 'Phone Number'}
                                         required
                                         type="tel"
-                                        placeholder="+1 555 000 0000"
+                                        placeholder={t('phonePlaceholder') || '+1 555 000 0000'}
                                         value={guest.phone}
                                         onChange={(v) => setField('phone', v)}
                                     />
@@ -309,9 +312,9 @@ export default function BookRoom() {
                                     {/* ID Number */}
                                     <Field
                                         id="guest-idNumber"
-                                        label="ID / Passport Number"
+                                        label={t('idPassport') || 'ID / Passport Number'}
                                         required
-                                        placeholder="e.g. A12345678"
+                                        placeholder={t('idPlaceholder') || 'e.g. A12345678'}
                                         value={guest.idNumber}
                                         onChange={(v) => setField('idNumber', v)}
                                     />
@@ -319,9 +322,9 @@ export default function BookRoom() {
                                     {/* Nationality */}
                                     <Field
                                         id="guest-nationality"
-                                        label="Nationality"
+                                        label={t('nationality') || 'Nationality'}
                                         required
-                                        placeholder="e.g. Saudi Arabian"
+                                        placeholder={t('nationalityPlaceholder') || 'e.g. Saudi Arabian'}
                                         value={guest.nationality}
                                         onChange={(v) => setField('nationality', v)}
                                     />
@@ -338,12 +341,12 @@ export default function BookRoom() {
                                     ? <span className="flex items-center justify-center gap-2">
                                         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                        </svg>
-                                        Processing…
-                                    </span>
-                                    : `Confirm Booking — $${totalPrice.toFixed(2)}`
-                                }
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                    </svg>
+                                    {t('processing') || 'Processing…'}
+                                </span>
+                                : t('confirmBookingPrice', { price: totalPrice.toFixed(2) }) || `Confirm Booking — $${totalPrice.toFixed(2)}`
+                            }
                             </button>
                         </form>
                     </div>
@@ -351,7 +354,7 @@ export default function BookRoom() {
                     {/* ── Right: Booking Summary ── */}
                     <div className="lg:col-span-2">
                         <div className="sticky top-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <h2 className="mb-4 text-sm font-semibold text-gray-700">Booking Summary</h2>
+                            <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('bookingSummary') || 'Booking Summary'}</h2>
 
                             {/* Room thumbnail */}
                             <div className="mb-4 flex h-28 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -362,39 +365,39 @@ export default function BookRoom() {
 
                             {room ? (
                                 <>
-                                    <p className="text-lg font-bold text-gray-900">Room {room.roomNumber}</p>
+                                    <p className="text-lg font-bold text-gray-900">{t('roomNum', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</p>
                                     <p className="text-sm text-gray-500 mb-1">
-                                        {room.floor ? `Floor ${room.floor} · ` : ''}{room.roomType?.name ?? room.type ?? '—'}
+                                        {room.floor ? `${t('floorNum', { floor: room.floor }) || `Floor ${room.floor}`} · ` : ''}{room.roomType?.name ?? room.type ?? '—'}
                                     </p>
                                     {room.roomType?.description && (
                                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{room.roomType.description}</p>
                                     )}
                                 </>
                             ) : (
-                                <p className="text-sm text-gray-500 mb-4">Room #{roomId}</p>
+                                <p className="text-sm text-gray-500 mb-4">{t('roomNum', { number: roomId }) || `Room #${roomId}`}</p>
                             )}
 
                             <hr className="my-3 border-gray-100" />
 
                             <dl className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                    <dt className="text-gray-500">Rate / night</dt>
+                                    <dt className="text-gray-500">{t('ratePerNight') || 'Rate / night'}</dt>
                                     <dd className="font-semibold text-gray-800">${roomRate.toFixed(2)}</dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-gray-500">Nights</dt>
+                                    <dt className="text-gray-500">{t('nightsLabel') || 'Nights'}</dt>
                                     <dd className="font-semibold text-gray-800">{nights || '—'}</dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-gray-500">Subtotal</dt>
+                                    <dt className="text-gray-500">{t('subtotal') || 'Subtotal'}</dt>
                                     <dd className="text-gray-800">${subtotal.toFixed(2)}</dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-gray-500">Taxes (10%)</dt>
+                                    <dt className="text-gray-500">{t('taxes10') || 'Taxes (10%)'}</dt>
                                     <dd className="text-gray-800">${taxes.toFixed(2)}</dd>
                                 </div>
                                 <div className="flex justify-between border-t border-gray-100 pt-2">
-                                    <dt className="font-bold text-gray-800">Total</dt>
+                                    <dt className="font-bold text-gray-800">{t('total') || 'Total'}</dt>
                                     <dd className="text-lg font-bold text-blue-700">${totalPrice.toFixed(2)}</dd>
                                 </div>
                             </dl>

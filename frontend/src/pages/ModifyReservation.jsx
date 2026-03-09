@@ -5,13 +5,16 @@ import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import DateRangePicker from '../components/DateRangePicker';
 import ErrorBanner from '../components/ErrorBanner';
+import { LtrText } from '../components/LtrText';
 import { searchRooms } from '../services/searchService';
 import { modifyReservation, extractReservationError } from '../services/reservationService';
 import { MODIFIABLE_STATUSES } from '../data/mockReservations';
+import { useTranslation } from 'react-i18next';
 
-const formatDate = (iso) => {
+const formatDate = (iso, lang) => {
     if (!iso) return '—';
-    return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {
+    const locale = lang?.startsWith('ar') ? 'ar-SA' : 'en-US';
+    return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
         month: 'short', day: 'numeric', year: 'numeric',
     });
 };
@@ -20,6 +23,7 @@ const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 
 // ─── Modify Modal ─────────────────────────────────────────────────────────────
 function ModifyModal({ reservation, onClose, onSave }) {
+    const { t, i18n } = useTranslation();
     const [checkIn, setCheckIn] = useState(reservation.checkInDate);
     const [checkOut, setCheckOut] = useState(reservation.checkOutDate);
     const [reason, setReason] = useState('');
@@ -86,9 +90,9 @@ function ModifyModal({ reservation, onClose, onSave }) {
                       Number(selectedRoomId) === reservation.roomId;
 
     const handleSave = async () => {
-        if (nights <= 0) return setError('Check-out must be after check-in.');
-        if (!reason.trim()) return setError('Please provide a reason for modification.');
-        if (unchanged) return setError('No changes detected.');
+        if (nights <= 0) return setError(t('checkoutAfterCheckin'));
+        if (!reason.trim()) return setError(t('provideReason'));
+        if (unchanged) return setError(t('noChangesDetected'));
 
         setError(null);
         setSaving(true);
@@ -128,8 +132,8 @@ function ModifyModal({ reservation, onClose, onSave }) {
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                     <div>
-                        <h2 className="text-base font-bold text-gray-900">Modify Reservation</h2>
-                        <p className="text-xs text-gray-400 font-mono">{reservation.confirmationNumber}</p>
+                        <h2 className="text-base font-bold text-gray-900">{t('modifyReservationTitle')}</h2>
+                        <p className="text-xs text-gray-400 font-mono"><LtrText>{reservation.confirmationNumber}</LtrText></p>
                     </div>
                     <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-300" aria-label="Close">
                         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -143,14 +147,14 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
                     {/* Current info */}
                     <div className="rounded-lg bg-gray-50 p-3 text-sm">
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wide">Current Booking</p>
-                        <p className="text-gray-700">Room <strong>{reservation.roomNumber}</strong> · {reservation.guestName}</p>
-                        <p className="text-gray-500 text-xs">{formatDate(reservation.checkInDate)} → {formatDate(reservation.checkOutDate)} ({reservation.nights} nights)</p>
+                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wide">{t('currentBooking')}</p>
+                        <p className="text-gray-700">{t('room')} <strong><LtrText>{reservation.roomNumber}</LtrText></strong> · {reservation.guestName}</p>
+                        <p className="text-gray-500 text-xs"><LtrText>{formatDate(reservation.checkInDate, i18n.language)}</LtrText> → <LtrText>{formatDate(reservation.checkOutDate, i18n.language)}</LtrText> ({reservation.nights} {t('nights')})</p>
                     </div>
 
                     {/* Date change */}
                     <div>
-                        <p className="text-xs font-semibold text-gray-600 mb-2">1. Select New Dates</p>
+                        <p className="text-xs font-semibold text-gray-600 mb-2">{t('selectNewDates')}</p>
                         <DateRangePicker
                             checkIn={checkIn}
                             checkOut={checkOut}
@@ -162,7 +166,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
                     {/* Room change */}
                     {nights > 0 && (
                         <div>
-                            <p className="text-xs font-semibold text-gray-600 mb-2">2. Select Room</p>
+                            <p className="text-xs font-semibold text-gray-600 mb-2">{t('selectRoom')}</p>
                             {loadingRooms ? (
                                 <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
                             ) : availableRooms.length > 0 ? (
@@ -173,13 +177,13 @@ function ModifyModal({ reservation, onClose, onSave }) {
                                 >
                                     {availableRooms.map((r) => (
                                         <option key={r.id} value={r.id}>
-                                            Room {r.roomNumber} ({r.roomType?.name}) — {money(r.roomType?.basePrice)}/night
-                                            {r.id === reservation.roomId ? ' (Current)' : ''}
+                                            {t('room')} {r.roomNumber} ({r.roomType?.name}) — {money(r.roomType?.basePrice)}/{t('nights')}
+                                            {r.id === reservation.roomId ? ` ${t('currentRoomSuffix')}` : ''}
                                         </option>
                                     ))}
                                 </select>
                             ) : (
-                                <p className="text-sm text-red-600">No rooms available for these dates.</p>
+                                <p className="text-sm text-red-600">{t('noRoomsAvailable')}</p>
                             )}
                         </div>
                     )}
@@ -187,11 +191,11 @@ function ModifyModal({ reservation, onClose, onSave }) {
                     {/* New price preview */}
                     {nights > 0 && (
                         <div className="rounded-lg border border-blue-100 bg-blue-50 p-3">
-                            <p className="text-xs font-semibold text-blue-700 mb-2">Updated Price Preview</p>
+                            <p className="text-xs font-semibold text-blue-700 mb-2">{t('updatedPricePreview')}</p>
                             <div className="flex flex-col gap-1 text-sm text-blue-900">
-                                <div className="flex justify-between"><span>{nights} nights × {money(selectedRoom?.roomType?.basePrice || reservation.roomRate)}</span><span>{money(subtotal)}</span></div>
-                                <div className="flex justify-between"><span>Taxes (10%)</span><span>{money(taxes)}</span></div>
-                                <div className="flex justify-between border-t border-blue-200 pt-1 mt-1 font-bold"><span>New Total</span><span>{money(totalPrice)}</span></div>
+                                <div className="flex justify-between"><span>{nights} {t('nights')} × <LtrText>{money(selectedRoom?.roomType?.basePrice || reservation.roomRate)}</LtrText></span><span><LtrText>{money(subtotal)}</LtrText></span></div>
+                                <div className="flex justify-between"><span>{t('taxes')}</span><span><LtrText>{money(taxes)}</LtrText></span></div>
+                                <div className="flex justify-between border-t border-blue-200 pt-1 mt-1 font-bold"><span>{t('newTotal')}</span><span><LtrText>{money(totalPrice)}</LtrText></span></div>
                             </div>
                         </div>
                     )}
@@ -199,14 +203,14 @@ function ModifyModal({ reservation, onClose, onSave }) {
                     {/* Reason */}
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="modify-reason" className="text-xs font-medium text-gray-600">
-                            Reason for modification <span className="text-red-500">*</span>
+                            {t('reasonForModification')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="modify-reason"
                             type="text"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="e.g. Guest requested extended stay..."
+                            placeholder={t('modifyReasonPlaceholder')}
                             className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                         />
                     </div>
@@ -214,14 +218,14 @@ function ModifyModal({ reservation, onClose, onSave }) {
                     {/* Actions */}
                     <div className="flex gap-2 pt-1">
                         <button onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-300">
-                            Cancel
+                            {t('cancel')}
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={saving || unchanged || nights <= 0 || !reason.trim() || !selectedRoomId}
                             className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
-                            {saving ? 'Saving…' : 'Save Changes'}
+                            {saving ? t('saving') : t('saveChanges')}
                         </button>
                     </div>
                 </div>
@@ -238,6 +242,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
  */
 export default function ModifyReservation() {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -248,7 +253,7 @@ export default function ModifyReservation() {
     const handleSave = (updated) => {
         setSelected(updated);
         setShowModal(false);
-        setToast({ message: `Reservation ${updated.confirmationNumber} updated successfully.`, type: 'success' });
+        setToast({ message: t('modifySuccess', { conf: updated.confirmationNumber }), type: 'success' });
     };
 
     return (
@@ -265,10 +270,10 @@ export default function ModifyReservation() {
 
             {/* Header */}
             <div className="mb-6 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">← Back</button>
+                <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">{t('back')}</button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Modify Reservation</h1>
-                    <p className="text-sm text-gray-500">Look up a reservation and update its dates.</p>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('modifyReservationTitle')}</h1>
+                    <p className="text-sm text-gray-500">{t('modifyReservationDesc')}</p>
                 </div>
             </div>
 
@@ -281,32 +286,32 @@ export default function ModifyReservation() {
                     {!selected ? (
                         <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
                             <span className="text-5xl mb-3">📋</span>
-                            <p className="text-sm font-medium text-gray-600">No reservation selected</p>
-                            <p className="text-xs text-gray-400 mt-1">Search and select a reservation to modify it.</p>
+                            <p className="text-sm font-medium text-gray-600">{t('noReservationSelected')}</p>
+                            <p className="text-xs text-gray-400 mt-1">{t('searchAndSelectToModify')}</p>
                         </div>
                     ) : (
                         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                             <div className="mb-4 flex items-start justify-between gap-2">
                                 <div>
                                     <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
-                                    <p className="text-xs font-mono text-gray-400">{selected.confirmationNumber}</p>
+                                    <p className="text-xs font-mono text-gray-400"><LtrText>{selected.confirmationNumber}</LtrText></p>
                                 </div>
                                 <StatusPill status={selected.status} />
                             </div>
 
                             {!MODIFIABLE_STATUSES.includes(selected.status) && (
                                 <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-                                    ⚠️ This reservation cannot be modified — status is <strong>{selected.status.replace('_', ' ')}</strong>.
+                                    {t('cannotModify')} <strong>{t(selected.status.toLowerCase()) || selected.status.replace('_', ' ')}</strong>.
                                 </div>
                             )}
 
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm mb-5">
-                                <div><dt className="text-xs text-gray-400">Room</dt><dd className="font-semibold">Room {selected.roomNumber} · {selected.roomTypeName}</dd></div>
-                                <div><dt className="text-xs text-gray-400">Floor</dt><dd className="font-semibold">{selected.floor}</dd></div>
-                                <div><dt className="text-xs text-gray-400">Check-In</dt><dd className="font-semibold">{formatDate(selected.checkInDate)}</dd></div>
-                                <div><dt className="text-xs text-gray-400">Check-Out</dt><dd className="font-semibold">{formatDate(selected.checkOutDate)}</dd></div>
-                                <div><dt className="text-xs text-gray-400">Nights</dt><dd className="font-semibold">{selected.nights}</dd></div>
-                                <div><dt className="text-xs text-gray-400">Total</dt><dd className="font-bold text-blue-700">{money(selected.totalPrice)}</dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('room')}</dt><dd className="font-semibold">{t('room')} <LtrText>{selected.roomNumber}</LtrText> · {selected.roomTypeName}</dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('floor')}</dt><dd className="font-semibold">{selected.floor}</dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('checkInDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkInDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('checkOutDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkOutDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('nights')}</dt><dd className="font-semibold">{selected.nights}</dd></div>
+                                <div><dt className="text-xs text-gray-400">{t('total')}</dt><dd className="font-bold text-blue-700"><LtrText>{money(selected.totalPrice)}</LtrText></dd></div>
                             </dl>
 
                             {MODIFIABLE_STATUSES.includes(selected.status) && (
@@ -314,7 +319,7 @@ export default function ModifyReservation() {
                                     onClick={() => setShowModal(true)}
                                     className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 >
-                                    ✏️ Modify Dates
+                                    {t('modifyDatesButton')}
                                 </button>
                             )}
                         </div>

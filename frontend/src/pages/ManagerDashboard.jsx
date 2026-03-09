@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { Hotel, CalendarCheck, TrendingUp, Tag, Users, Settings, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const StatCard = ({ icon: Icon, label, value, sub, color }) => (
     <div className={`relative overflow-hidden rounded-xl p-5 text-white ${color}`}>
@@ -15,14 +16,14 @@ const StatCard = ({ icon: Icon, label, value, sub, color }) => (
             </div>
         </div>
         {/* Subtle decorative circle */}
-        <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-white/10" />
+        <div className="absolute -bottom-4 -end-4 w-24 h-24 rounded-full bg-white/10" />
     </div>
 );
 
 const QuickLink = ({ icon: Icon, label, description, onClick }) => (
     <button
         onClick={onClick}
-        className="group flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-sm transition-all text-left w-full"
+        className="group flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-sm transition-all text-start w-full"
     >
         <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
@@ -40,15 +41,16 @@ const QuickLink = ({ icon: Icon, label, description, onClick }) => (
 const ManagerDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             {/* Page header */}
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Manager Dashboard</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{t('managerDashboardTitle') || 'Manager Dashboard'}</h1>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Welcome back, <span className="font-semibold text-gray-700">{user?.username || 'Manager'}</span>
+                        {t('welcomeBackUser', { username: user?.username || t('managerFallback') }) || `Welcome back, ${user?.username || 'Manager'}`}
                     </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg">
@@ -67,23 +69,23 @@ const ManagerDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <StatCard
                     icon={Hotel}
-                    label="Total Rooms"
+                    label={t('totalRooms') || 'Total Rooms'}
                     value="42"
-                    sub="Across all floors"
+                    sub={t('acrossAllFloors') || 'Across all floors'}
                     color="bg-gradient-to-br from-blue-500 to-blue-700"
                 />
                 <StatCard
                     icon={CalendarCheck}
-                    label="Active Bookings"
+                    label={t('activeBookings') || 'Active Bookings'}
                     value="18"
-                    sub="Currently checked in"
+                    sub={t('currentlyCheckedIn') || 'Currently checked in'}
                     color="bg-gradient-to-br from-emerald-500 to-emerald-700"
                 />
                 <StatCard
                     icon={TrendingUp}
-                    label="Revenue (This Month)"
+                    label={t('revenueThisMonth') || 'Revenue (This Month)'}
                     value="$12.5K"
-                    sub="Placeholder data"
+                    sub={t('placeholderData') || 'Placeholder data'}
                     color="bg-gradient-to-br from-violet-500 to-violet-700"
                 />
             </div>
@@ -92,13 +94,13 @@ const ManagerDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* User info card */}
                 <div className="bg-white border border-gray-200 rounded-xl p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Account Information</h2>
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">{t('accountInfo') || 'Account Information'}</h2>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
-                            { label: 'Username', value: user?.username },
-                            { label: 'Email', value: user?.email },
-                            { label: 'User ID', value: user?.id },
-                            { label: 'Role', value: user?.roles?.[0] || 'N/A', isRole: true },
+                            { label: t('usernameLabel') || 'Username', value: user?.username },
+                            { label: t('emailLabel') || 'Email', value: user?.email },
+                            { label: t('userIdLabel') || 'User ID', value: user?.id },
+                            { label: t('roleLabel') || 'Role', value: user?.roles?.[0] || 'N/A', isRole: true },
                         ].map(({ label, value, isRole }) => (
                             <div key={label}>
                                 <dt className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</dt>
@@ -118,24 +120,24 @@ const ManagerDashboard = () => {
 
                 {/* Quick actions */}
                 <div className="bg-white border border-gray-200 rounded-xl p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Quick Actions</h2>
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">{t('quickActions') || 'Quick Actions'}</h2>
                     <div className="space-y-2.5">
                         <QuickLink
                             icon={Tag}
-                            label="Room Types"
-                            description="Manage categories and pricing"
+                            label={t('roomTypesLabel') || 'Room Types'}
+                            description={t('manageCategoriesPricing') || 'Manage categories and pricing'}
                             onClick={() => navigate('/room-types')}
                         />
                         <QuickLink
                             icon={Users}
-                            label="Staff Management"
-                            description="Add and manage hotel staff"
+                            label={t('staffManagementLabel') || 'Staff Management'}
+                            description={t('addManageStaff') || 'Add and manage hotel staff'}
                             onClick={() => navigate('/staff')}
                         />
                         <QuickLink
                             icon={Settings}
-                            label="Rooms Management"
-                            description="Configure room inventory"
+                            label={t('roomsManagementLabel') || 'Rooms Management'}
+                            description={t('configRoomInventory') || 'Configure room inventory'}
                             onClick={() => navigate('/rooms-management')}
                         />
                     </div>
