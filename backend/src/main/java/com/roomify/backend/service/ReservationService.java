@@ -101,7 +101,10 @@ public class ReservationService {
         reservation.setRoom(room);
         reservation.setCheckInDate(request.getCheckInDate());
         reservation.setCheckOutDate(request.getCheckOutDate());
-        reservation.setStatus(ReservationStatus.PENDING);
+        ReservationStatus initialStatus = request.getStatus() != null
+                ? request.getStatus()
+                : ReservationStatus.PENDING;
+        reservation.setStatus(initialStatus);
         reservation.setTotalPrice(totalPrice);
         reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
@@ -200,6 +203,11 @@ public class ReservationService {
             log.warn("Failed to send modification email for reservation {}", reservation.getId(), ex);
         }
 
+        auditService.log(
+                "RESERVATION_MODIFIED",
+                "Reservation#" + saved.getId(),
+                "confirmation=" + saved.getConfirmationNumber());
+
         return toPlaceholderResponse(saved, "modify",
                 "Reservation modified");
     }
@@ -248,6 +256,11 @@ public class ReservationService {
             log.warn("Failed to send cancellation email for reservation {}", reservation.getId(), ex);
         }
 
+        auditService.log(
+                "RESERVATION_CANCELLED",
+                "Reservation#" + saved.getId(),
+                "confirmation=" + saved.getConfirmationNumber());
+
         return toPlaceholderResponse(saved, "cancel",
                 "Reservation cancelled");
     }
@@ -261,7 +274,16 @@ public class ReservationService {
         Reservation reservation = reservationRepository
                 .findByConfirmationNumber(
                         confirmationNumber.trim().toUpperCase())
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new ResourceConflictException("Only CONFIRMED reservations can be checked in");
+        }
+
+        if (LocalDate.now().isBefore(reservation.getCheckInDate())) {
+            throw new ResourceConflictException("Cannot check in before scheduled check-in date");
+        }
 
         Room room = reservation.getRoom();
 
@@ -271,6 +293,8 @@ public class ReservationService {
 
         room.setStatus(RoomStatus.OCCUPIED);
         reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setActualCheckInDate(LocalDate.now());
+        reservation.setModifiedAt(LocalDateTime.now());
 
         roomRepository.save(room);
         reservationRepository.save(reservation);
@@ -303,7 +327,8 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository
                 .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
 
         long nights = ChronoUnit.DAYS.between(
                 reservation.getCheckInDate(),
@@ -362,7 +387,7 @@ public class ReservationService {
     private Reservation findReservationById(Long id) {
 
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id: " + id));
     }
 
     private void sendReservationConfirmationEmail(
@@ -376,7 +401,7 @@ public class ReservationService {
                     reservation.getGuest().getName(),
                     response);
 
-        } catch (MailException ex) {
+        } catch (RuntimeException ex) {
 
             throw new EmailDeliveryException(
                     "Failed to send confirmation email", ex);
