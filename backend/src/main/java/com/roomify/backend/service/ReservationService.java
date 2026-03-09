@@ -13,9 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -25,6 +28,7 @@ import java.util.UUID;
 @Transactional
 public class ReservationService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
     private static final int MONEY_SCALE = 2;
     private static final int CONFIRMATION_MAX_ATTEMPTS = 10;
 
@@ -122,15 +126,59 @@ public class ReservationService {
         String oldCheckIn = reservation.getCheckInDate().toString();
         String oldCheckOut = reservation.getCheckOutDate().toString();
 
-        if (request.getCheckInDate() != null) {
-            reservation.setCheckInDate(request.getCheckInDate());
+        Room targetRoom = reservation.getRoom();
+        if (request.getRoomId() != null && !request.getRoomId().equals(targetRoom.getId())) {
+            targetRoom = roomRepository.findById(request.getRoomId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
         }
 
-        if (request.getCheckOutDate() != null) {
-            reservation.setCheckOutDate(request.getCheckOutDate());
+        LocalDate newCheckIn = request.getCheckInDate() != null
+                ? request.getCheckInDate()
+                : reservation.getCheckInDate();
+        LocalDate newCheckOut = request.getCheckOutDate() != null
+                ? request.getCheckOutDate()
+                : reservation.getCheckOutDate();
+
+        if (!newCheckOut.isAfter(newCheckIn)) {
+            throw new ResourceConflictException("Check-out must be after check-in");
         }
 
-        reservation.setModificationReason(request.getModificationReason().trim());
+        if (!reservationRepository.findOverlappingForUpdate(
+                targetRoom.getId(),
+                newCheckIn,
+                newCheckOut,
+                reservation.getId()).isEmpty()) {
+            throw new ResourceConflictException("Selected room is not available for the requested dates");
+        }
+
+        long nights = ChronoUnit.DAYS.between(newCheckIn, newCheckOut);
+
+        BigDecimal roomRate = targetRoom.getRoomType()
+                .getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal totalPrice = subtotal.add(taxes)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        String modificationReason = null;
+        if (request.getModificationReason() != null) {
+            String trimmedReason = request.getModificationReason().trim();
+            if (!trimmedReason.isEmpty()) {
+                modificationReason = trimmedReason;
+            }
+        }
+
+        reservation.setRoom(targetRoom);
+        reservation.setCheckInDate(newCheckIn);
+        reservation.setCheckOutDate(newCheckOut);
+        reservation.setTotalPrice(totalPrice);
+        reservation.setModificationReason(modificationReason);
         reservation.setModifiedAt(LocalDateTime.now());
 
         Reservation saved = reservationRepository.save(reservation);
@@ -148,14 +196,12 @@ public class ReservationService {
                     reservation.getTotalPrice().toString(),
                     reservation.getConfirmationNumber());
 
-        } catch (MailException ex) {
-
-            throw new EmailDeliveryException(
-                    "Failed to send modification email", ex);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to send modification email for reservation {}", reservation.getId(), ex);
         }
 
         return toPlaceholderResponse(saved, "modify",
-                "Reservation modified and email sent");
+                "Reservation modified");
     }
 
     // =============================
@@ -166,8 +212,22 @@ public class ReservationService {
 
         Reservation reservation = findReservationById(id);
 
+        if (reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot cancel reservation that is already checked in or checked out");
+        }
+
+        String cancellationReason = null;
+        if (request != null && request.getCancellationReason() != null) {
+            String trimmedReason = request.getCancellationReason().trim();
+            if (!trimmedReason.isEmpty()) {
+                cancellationReason = trimmedReason;
+            }
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
-        reservation.setCancellationReason(request.getCancellationReason().trim());
+        reservation.setCancellationReason(cancellationReason);
         reservation.setCancellationAt(LocalDateTime.now());
         reservation.setModifiedAt(LocalDateTime.now());
 
@@ -184,14 +244,12 @@ public class ReservationService {
                     reservation.getTotalPrice().toString(),
                     reservation.getConfirmationNumber());
 
-        } catch (MailException ex) {
-
-            throw new EmailDeliveryException(
-                    "Failed to send cancellation email", ex);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to send cancellation email for reservation {}", reservation.getId(), ex);
         }
 
         return toPlaceholderResponse(saved, "cancel",
-                "Reservation cancelled and email sent");
+                "Reservation cancelled");
     }
 
     // =============================

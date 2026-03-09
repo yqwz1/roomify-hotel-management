@@ -3,12 +3,13 @@ package com.roomify.backend.dto;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
 public class ReservationModifyRequest {
+
+    private Long roomId;
 
     @FutureOrPresent(message = "Check-in date must be today or in the future")
     private LocalDate checkInDate;
@@ -16,14 +17,14 @@ public class ReservationModifyRequest {
     @Future(message = "Check-out date must be in the future")
     private LocalDate checkOutDate;
 
-    @NotBlank(message = "Modification reason is required")
     @Size(max = 500, message = "Modification reason cannot exceed 500 characters")
     private String modificationReason;
 
     public ReservationModifyRequest() {
     }
 
-    public ReservationModifyRequest(LocalDate checkInDate, LocalDate checkOutDate, String modificationReason) {
+    public ReservationModifyRequest(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, String modificationReason) {
+        this.roomId = roomId;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.modificationReason = modificationReason;
@@ -35,6 +36,14 @@ public class ReservationModifyRequest {
             return true;
         }
         return checkOutDate.isAfter(checkInDate);
+    }
+
+    public Long getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 
     public LocalDate getCheckInDate() {
