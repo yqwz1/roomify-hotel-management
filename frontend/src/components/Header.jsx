@@ -40,11 +40,8 @@ export default function Header({ onMenuToggle }) {
             </button>
           )}
 
-          <Link to="/" className="flex items-center gap-2 text-black">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black">
-              <Hotel className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-xl font-extrabold tracking-tight text-black hidden sm:block">
+          <Link to="/" className="text-black">
+            <span className="text-2xl font-black tracking-tighter">
               Roomify
             </span>
           </Link>

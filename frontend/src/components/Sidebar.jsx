@@ -82,11 +82,8 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         {/* Brand header */}
         <div className="flex items-center justify-between px-6 py-6 border-b border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white">
-              <Hotel className="h-4 w-4 text-black" />
-            </div>
-            <span className="text-xl font-extrabold text-white tracking-tight">Roomify</span>
+          <div className="flex items-center">
+            <span className="text-2xl font-black text-white tracking-tighter">Roomify</span>
           </div>
           {/* Close button – mobile only */}
           <button

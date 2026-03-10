@@ -72,11 +72,8 @@ const LoginPage = () => {
             {/* ── Left: Brand Panel (desktop only) ── */}
             <div className="hidden lg:flex lg:w-[45%] bg-black flex-col justify-between p-12">
                 {/* Top: Logo */}
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md">
-                        <Hotel className="h-5 w-5 text-black" />
-                    </div>
-                    <span className="text-white font-extrabold text-2xl tracking-tighter">Roomify</span>
+                <div className="flex items-center">
+                    <span className="text-white font-black text-3xl tracking-tighter">Roomify</span>
                 </div>
 
                 {/* Middle: Headline */}
@@ -117,11 +114,8 @@ const LoginPage = () => {
             <div className="flex-1 flex items-center justify-center bg-zinc-50 px-5 py-12 sm:px-8">
                 <div className="w-full max-w-sm">
                     {/* Mobile logo */}
-                    <div className="lg:hidden flex items-center justify-center gap-3 mb-10">
-                        <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shadow-md">
-                            <Hotel className="h-5 w-5 text-white" />
-                        </div>
-                        <span className="text-black font-extrabold text-2xl tracking-tighter">Roomify</span>
+                    <div className="lg:hidden flex items-center justify-center mb-10">
+                        <span className="text-black font-black text-3xl tracking-tighter">Roomify</span>
                     </div>
 
                     <div className="mb-10 text-center lg:text-left">
