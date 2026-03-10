@@ -1,21 +1,5 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.*;
-import com.roomify.backend.entity.*;
-import com.roomify.backend.exception.EmailDeliveryException;
-import com.roomify.backend.exception.ResourceConflictException;
-import com.roomify.backend.exception.ResourceNotFoundException;
-import com.roomify.backend.repository.GuestRepository;
-import com.roomify.backend.repository.ReservationRepository;
-import com.roomify.backend.repository.RoomRepository;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -23,6 +7,30 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationGuestRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
+import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.exception.EmailDeliveryException;
+import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.RoomRepository;
 
 @Service
 @Transactional
@@ -125,6 +133,13 @@ public class ReservationService {
 
         Reservation reservation = findReservationById(id);
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot modify reservation in status: " + reservation.getStatus());
+        }
+
         String oldRoom = reservation.getRoom().getRoomNumber();
         String oldCheckIn = reservation.getCheckInDate().toString();
         String oldCheckOut = reservation.getCheckOutDate().toString();
@@ -169,13 +184,7 @@ public class ReservationService {
         BigDecimal totalPrice = subtotal.add(taxes)
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-        String modificationReason = null;
-        if (request.getModificationReason() != null) {
-            String trimmedReason = request.getModificationReason().trim();
-            if (!trimmedReason.isEmpty()) {
-                modificationReason = trimmedReason;
-            }
-        }
+        String modificationReason = request.getModificationReason().trim();
 
         reservation.setRoom(targetRoom);
         reservation.setCheckInDate(newCheckIn);

@@ -1,11 +1,12 @@
 package com.roomify.backend.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
-import java.time.LocalDate;
 
 public class ReservationModifyRequest {
 
@@ -17,6 +18,7 @@ public class ReservationModifyRequest {
     @Future(message = "Check-out date must be in the future")
     private LocalDate checkOutDate;
 
+    @NotBlank(message = "Modification reason is required")
     @Size(max = 500, message = "Modification reason cannot exceed 500 characters")
     private String modificationReason;
 
