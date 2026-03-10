@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
+import { LtrText } from '../components/LtrText';
+import { useTranslation } from 'react-i18next';
 import { CHECKINABLE_STATUSES } from '../data/mockReservations';
 import { checkInReservation, extractReservationError } from '../services/reservationService';
 
@@ -23,6 +25,7 @@ const CHECKLIST_ITEMS = [
 
 export default function CheckIn() {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [checklist, setChecklist] = useState({});
@@ -60,7 +63,7 @@ export default function CheckIn() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
             <ConfirmationToast
                 message={toast?.message}
                 type={toast?.type}
@@ -72,8 +75,8 @@ export default function CheckIn() {
                     Back
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Check-In</h1>
-                    <p className="text-sm text-gray-500">Look up a reservation and complete the guest check-in process.</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('checkInTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('checkInDesc')}</p>
                 </div>
             </div>
 
@@ -94,8 +97,8 @@ export default function CheckIn() {
                             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <div className="mb-4 flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="text-lg font-bold text-gray-900">{selected.guest?.name || selected.guestName}</p>
-                                        <p className="text-xs font-mono text-gray-400">{selected.confirmationNumber}</p>
+                                        <p className="text-xl font-extrabold text-black">{selected.guest?.name || selected.guestName}</p>
+                                        <p className="text-xs font-mono font-bold text-zinc-400 mt-1"><LtrText>{selected.confirmationNumber}</LtrText></p>
                                     </div>
                                     <StatusPill status={selected.status} />
                                 </div>
@@ -117,23 +120,27 @@ export default function CheckIn() {
                             </div>
 
                             {CHECKINABLE_STATUSES.includes(selected.status) && (
-                                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                    <h3 className="mb-1 text-sm font-semibold text-gray-700">Pre-Check-In Checklist</h3>
-                                    <p className="mb-4 text-xs text-gray-400">Complete all items before confirming check-in.</p>
+                                <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                                    <h3 className="mb-1 text-sm font-bold text-black uppercase tracking-wide">{t('preCheckInChecklist')}</h3>
+                                    <p className="mb-5 text-xs font-medium text-zinc-400">{t('completeAllItems')}</p>
 
-                                    <ul className="space-y-2">
+                                    <ul className="space-y-3">
                                         {CHECKLIST_ITEMS.map((item) => (
                                             <li key={item.id}>
-                                                <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-gray-50">
+                                                <label className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition border border-transparent hover:border-zinc-200 hover:bg-zinc-50">
                                                     <input
                                                         type="checkbox"
                                                         id={`check-${item.id}`}
                                                         checked={!!checklist[item.id]}
                                                         onChange={() => toggleCheck(item.id)}
-                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400"
+                                                        className="h-5 w-5 rounded-full border-zinc-300 text-black focus:ring-black/10"
                                                     />
-                                                    <span className={`text-sm ${checklist[item.id] ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                                                        {item.label}
+                                                    <span className={`text-sm font-bold ${checklist[item.id] ? 'text-zinc-400 line-through' : 'text-black'}`}>
+                                                        {t(item.id === 'keys' ? 'roomKeysPrepared' : 
+                                                           item.id === 'clean' ? 'roomCleaned' : 
+                                                           item.id === 'id' ? 'guestIdVerified' : 
+                                                           item.id === 'payment' ? 'paymentConfirmed' : 
+                                                           'welcomeAmenitiesPlaced')}
                                                     </span>
                                                 </label>
                                             </li>
@@ -145,9 +152,9 @@ export default function CheckIn() {
                                             <span>Progress</span>
                                             <span>{Object.values(checklist).filter(Boolean).length}/{CHECKLIST_ITEMS.length}</span>
                                         </div>
-                                        <div className="h-1.5 w-full rounded-full bg-gray-100">
+                                        <div className="h-2 w-full rounded-full bg-zinc-100">
                                             <div
-                                                className="h-1.5 rounded-full bg-blue-500 transition-all duration-300"
+                                                className="h-2 rounded-full bg-black transition-all duration-300"
                                                 style={{ width: `${(Object.values(checklist).filter(Boolean).length / CHECKLIST_ITEMS.length) * 100}%` }}
                                             />
                                         </div>
@@ -159,7 +166,7 @@ export default function CheckIn() {
                                 <button
                                     onClick={handleCheckIn}
                                     disabled={!canCheckIn || submitting}
-                                    className="w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                    className="w-full rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-400"
                                 >
                                     {submitting
                                         ? 'Processing...'

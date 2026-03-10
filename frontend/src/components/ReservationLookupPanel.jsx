@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
+import { useTranslation } from 'react-i18next';
+import { LtrText } from './LtrText';
+
 
 const toUiReservation = (record, fallbackIndex) => {
     const isLegacy = !record?.guest;
@@ -31,6 +34,7 @@ const toUiReservation = (record, fallbackIndex) => {
 };
 
 export default function ReservationLookupPanel({ onSelect, className = '' }) {
+    const { t, i18n } = useTranslation();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -90,14 +94,14 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                 >
                     {loading ? 'Loading...' : 'Search'}
                 </button>
             </form>
 
             {error && (
-                <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+                <p className="mt-4 rounded-full bg-red-50 border border-red-100 px-5 py-3 text-sm font-medium text-red-900">{error}</p>
             )}
 
             {!loading && searched && results.length === 0 && (

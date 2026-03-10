@@ -4,22 +4,23 @@ import { useSearch } from '../hooks/useSearch';
 import DateRangePicker from '../components/DateRangePicker';
 import RoomFilters from '../components/RoomFilters';
 import ErrorBanner from '../components/ErrorBanner';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
 
 const STATUS_COLORS = {
-    AVAILABLE: 'bg-green-100 text-green-800',
-    OCCUPIED: 'bg-red-100 text-red-800',
-    NEEDS_CLEANING: 'bg-yellow-100 text-yellow-800',
-    UNDER_MAINTENANCE: 'bg-orange-100 text-orange-800',
+    AVAILABLE: 'border border-zinc-300 bg-white text-black',
+    OCCUPIED: 'bg-black text-white',
+    NEEDS_CLEANING: 'bg-zinc-200 text-black',
+    UNDER_MAINTENANCE: 'bg-zinc-100 text-zinc-600',
 };
 
 const STATUS_LABELS = {
-    AVAILABLE: 'Available',
-    OCCUPIED: 'Occupied',
-    NEEDS_CLEANING: 'Needs Cleaning',
-    UNDER_MAINTENANCE: 'Under Maintenance',
+    AVAILABLE: 'available',
+    OCCUPIED: 'occupied',
+    NEEDS_CLEANING: 'needsCleaning',
+    UNDER_MAINTENANCE: 'underMaintenance',
 };
 
 // Room type → display icon
@@ -33,21 +34,21 @@ const typeIcon = (name = '') => {
 
 // Sort options shown in the UI
 const SORT_OPTIONS = [
-    { label: 'Price: Low → High', sortBy: 'PRICE', sortDirection: 'ASC' },
-    { label: 'Price: High → Low', sortBy: 'PRICE', sortDirection: 'DESC' },
-    { label: 'Type A → Z', sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
-    { label: 'Type Z → A', sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
+    { labelKey: 'sortPriceAsc', defaultLabel: 'Price: Low → High', sortBy: 'PRICE', sortDirection: 'ASC' },
+    { labelKey: 'sortPriceDesc', defaultLabel: 'Price: High → Low', sortBy: 'PRICE', sortDirection: 'DESC' },
+    { labelKey: 'sortTypeAsc', defaultLabel: 'Type A → Z', sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
+    { labelKey: 'sortTypeDesc', defaultLabel: 'Type Z → A', sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
 ];
 
 // ─── Skeleton card for loading state ─────────────────────────────────────────
 function SkeletonCard() {
     return (
-        <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm animate-pulse">
-            <div className="h-36 rounded-t-xl bg-gray-200" />
-            <div className="flex flex-col gap-3 p-4">
-                <div className="h-4 w-2/3 rounded bg-gray-200" />
-                <div className="h-3 w-1/2 rounded bg-gray-100" />
-                <div className="h-8 w-full rounded-lg bg-gray-200 mt-auto" />
+        <div className="flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-sm animate-pulse">
+            <div className="h-40 rounded-t-3xl bg-zinc-100" />
+            <div className="flex flex-col gap-4 p-6">
+                <div className="h-5 w-2/3 rounded-full bg-zinc-200" />
+                <div className="h-4 w-1/2 rounded-full bg-zinc-100" />
+                <div className="h-12 w-full rounded-full bg-zinc-200 mt-auto" />
             </div>
         </div>
     );
@@ -62,6 +63,7 @@ function SkeletonCard() {
  */
 export default function RoomSearch() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const todayDate = new Date();
     const today = todayDate.toISOString().split('T')[0];
@@ -122,13 +124,13 @@ export default function RoomSearch() {
 
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
 
             {/* ── Header ── */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Room Search</h1>
-                <p className="mt-1 text-sm text-gray-500">
-                    Find available rooms for your guests — live availability from the database.
+            <div className="mb-8">
+                <h1 className="text-4xl font-extrabold text-black tracking-tight">{t('roomSearchTitle') || 'Room Search'}</h1>
+                <p className="mt-2 text-sm font-medium text-zinc-500">
+                    {t('roomSearchDesc') || 'Find available rooms for your guests — live availability from the database.'}
                 </p>
             </div>
 
@@ -138,8 +140,8 @@ export default function RoomSearch() {
             </div>
 
             {/* ── Date Picker + Sort + Search Button ── */}
-            <div className="mb-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-sm font-semibold text-gray-700">Select Stay Dates</h2>
+            <div className="mb-6 rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                <h2 className="mb-4 text-sm font-bold text-zinc-500 uppercase tracking-widest">{t('selectStayDates') || 'Select Stay Dates'}</h2>
 
                 <DateRangePicker
                     checkIn={checkIn}
@@ -149,25 +151,25 @@ export default function RoomSearch() {
                 />
 
                 {nights > 0 && (
-                    <p className="mt-2 text-sm text-blue-600 font-medium">
-                        📆 {nights} night{nights !== 1 ? 's' : ''} selected
+                    <p className="mt-3 text-sm text-black font-bold">
+                        📆 {t('nightsSelected', { count: nights }) || `${nights} night(s) selected`}
                     </p>
                 )}
 
                 {/* Sort selector + Search button */}
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2">
-                        <label htmlFor="sort-select" className="text-xs font-medium text-gray-600 whitespace-nowrap">
-                            Sort by:
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                        <label htmlFor="sort-select" className="text-xs font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">
+                            {t('sortBy') || 'Sort by:'}
                         </label>
                         <select
                             id="sort-select"
                             value={SORT_OPTIONS.indexOf(sortOption)}
                             onChange={(e) => setSortOption(SORT_OPTIONS[Number(e.target.value)])}
-                            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-bold text-black focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
                         >
                             {SORT_OPTIONS.map((opt, i) => (
-                                <option key={opt.label} value={i}>{opt.label}</option>
+                                <option key={opt.labelKey} value={i}>{t(opt.labelKey) || opt.defaultLabel}</option>
                             ))}
                         </select>
                     </div>
@@ -175,17 +177,17 @@ export default function RoomSearch() {
                     <button
                         onClick={handleSearch}
                         disabled={loading || !checkIn || !checkOut || checkOut <= checkIn}
-                        className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-400 w-full sm:w-auto"
                     >
                         {loading ? (
-                            <span className="flex items-center gap-2">
+                            <span className="flex items-center justify-center gap-2">
                                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                 </svg>
-                                Searching…
+                                {t('searching') || 'Searching…'}
                             </span>
-                        ) : '🔍 Search Rooms'}
+                        ) : (t('searchRoomsButton') || '🔍 Search Rooms')}
                     </button>
                 </div>
             </div>
@@ -201,13 +203,13 @@ export default function RoomSearch() {
 
             {/* ── Results Header ── */}
             {hasSearched && !loading && (
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        {totalResults} Available Room{totalResults !== 1 ? 's' : ''} Found
+                <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-xl font-extrabold text-black">
+                        {t('roomsFound', { count: totalResults }) || `${totalResults} Available Room(s) Found`}
                     </h2>
                     {nights > 0 && totalResults > 0 && (
-                        <p className="text-xs text-gray-400">
-                            Prices shown per night · {nights}-night stay
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                            {t('pricesShownPerNight', { count: nights }) || `Prices shown per night · ${nights}-night stay`}
                         </p>
                     )}
                 </div>
@@ -222,22 +224,22 @@ export default function RoomSearch() {
 
             {/* ── No search yet ── */}
             {!loading && !hasSearched && (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white py-24 text-center">
-                    <span className="mb-4 text-6xl">🏨</span>
-                    <p className="text-lg font-semibold text-gray-600">Ready to search</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                        Select your dates and click <strong>Search Rooms</strong> to see live availability.
+                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent py-24 text-center">
+                    <span className="mb-6 text-6xl">🏨</span>
+                    <p className="text-xl font-bold text-black">{t('readyToSearch') || 'Ready to search'}</p>
+                    <p className="mt-2 text-sm font-medium text-zinc-500">
+                        {t('searchInstructions') || 'Select your dates and click Search Rooms to see live availability.'}
                     </p>
                 </div>
             )}
 
             {/* ── No results ── */}
             {!loading && hasSearched && results.length === 0 && !error && (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white py-20 text-center">
-                    <span className="mb-4 text-5xl">🔍</span>
-                    <p className="text-lg font-semibold text-gray-600">No rooms available</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                        Try different dates, adjust the price range, or remove type filters.
+                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent py-20 text-center">
+                    <span className="mb-6 text-5xl">🔍</span>
+                    <p className="text-xl font-bold text-black">{t('noRoomsAvailable') || 'No rooms available'}</p>
+                    <p className="mt-2 text-sm font-medium text-zinc-500">
+                        {t('tryDifferentDates') || 'Try different dates, adjust the price range, or remove type filters.'}
                     </p>
                 </div>
             )}
@@ -256,42 +258,42 @@ export default function RoomSearch() {
                         return (
                             <div
                                 key={room.id}
-                                className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+                                className="flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
                             >
                                 {/* Image / icon */}
-                                <div className="flex h-36 items-center justify-center rounded-t-xl bg-gradient-to-br from-blue-50 to-indigo-100">
-                                    <span className="text-4xl">{typeIcon(room.roomType?.name)}</span>
+                                <div className="flex h-40 items-center justify-center rounded-t-3xl bg-zinc-100">
+                                    <span className="text-5xl drop-shadow-sm">{typeIcon(room.roomType?.name)}</span>
                                 </div>
 
-                                <div className="flex flex-1 flex-col p-4">
+                                <div className="flex flex-1 flex-col p-6 sm:p-8">
                                     {/* Title & Status badge */}
-                                    <div className="mb-2 flex items-start justify-between gap-2">
+                                    <div className="mb-4 flex items-start justify-between gap-2">
                                         <div>
-                                            <h3 className="font-bold text-gray-900">Room {room.roomNumber}</h3>
-                                            <p className="text-xs text-gray-500">
-                                                {room.floor ? `Floor ${room.floor} · ` : ''}{room.roomType?.name ?? '—'}
+                                            <h3 className="text-2xl font-extrabold text-black">{t('roomNum', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</h3>
+                                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mt-1">
+                                                {room.floor ? `${t('floorNum', { floor: room.floor }) || `Floor ${room.floor}`} · ` : ''}{room.roomType?.name ?? '—'}
                                             </p>
                                         </div>
-                                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[room.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                                            {STATUS_LABELS[room.status] ?? room.status}
+                                        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${STATUS_COLORS[room.status] ?? 'bg-zinc-100 text-zinc-600'}`}>
+                                            {t(STATUS_LABELS[room.status]) || room.status}
                                         </span>
                                     </div>
 
                                     {/* Description */}
                                     {room.roomType?.description && (
-                                        <p className="mb-3 text-xs text-gray-500 line-clamp-2">
+                                        <p className="mb-5 text-sm font-medium text-zinc-500 line-clamp-2">
                                             {room.roomType.description}
                                         </p>
                                     )}
 
                                     {/* Amenity tags */}
                                     {amenities.length > 0 && (
-                                        <div className="mb-3 flex flex-wrap gap-1">
+                                        <div className="mb-5 flex flex-wrap gap-2">
                                             {amenities.slice(0, 3).map((a) => (
-                                                <span key={a} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{a}</span>
+                                                <span key={a} className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-bold text-black">{a}</span>
                                             ))}
                                             {amenities.length > 3 && (
-                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-400">
+                                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-500">
                                                     +{amenities.length - 3}
                                                 </span>
                                             )}
@@ -299,21 +301,21 @@ export default function RoomSearch() {
                                     )}
 
                                     {/* Price & capacity */}
-                                    <div className="mt-auto flex items-end justify-between">
+                                    <div className="mt-auto flex items-end justify-between border-t border-zinc-100 pt-5">
                                         <div>
-                                            <span className="text-xl font-bold text-gray-900">
+                                            <span className="text-3xl font-extrabold text-black">
                                                 ${room.roomType?.basePrice?.toFixed(2) ?? '—'}
                                             </span>
-                                            <span className="text-xs text-gray-400"> / night</span>
+                                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">/ {t('perNight') || 'night'}</span>
                                             {totalCost && (
-                                                <p className="text-xs text-blue-600 font-medium">
-                                                    Total: ${totalCost}
+                                                <p className="text-xs font-bold text-black mt-1">
+                                                    {t('totalCost') || 'Total:'} ${totalCost}
                                                 </p>
                                             )}
                                         </div>
                                         {room.roomType?.maxGuests && (
-                                            <span className="text-xs text-gray-500">
-                                                👥 up to {room.roomType.maxGuests}
+                                            <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-bold text-black">
+                                                👥 {t('upToGuests', { count: room.roomType.maxGuests }) || `up to ${room.roomType.maxGuests}`}
                                             </span>
                                         )}
                                     </div>
@@ -321,9 +323,9 @@ export default function RoomSearch() {
                                     {/* Book Now */}
                                     <button
                                         onClick={() => handleBookNow(room)}
-                                        className="mt-3 w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        className="mt-6 w-full rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-zinc-400"
                                     >
-                                        Book Now
+                                        {t('bookNow') || 'Book Now'}
                                     </button>
                                 </div>
                             </div>

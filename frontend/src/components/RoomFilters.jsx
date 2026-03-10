@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { ROOM_TYPES, ROOM_STATUSES, FLOORS } from '../data/mockRooms';
+import { useTranslation } from 'react-i18next';
 
 /**
  * RoomFilters
@@ -12,19 +13,20 @@ import { ROOM_TYPES, ROOM_STATUSES, FLOORS } from '../data/mockRooms';
  *   onClear          {Function}  – Called when the user clears all filters.
  */
 export default function RoomFilters({ filters, onFiltersChange, onClear }) {
+    const { t } = useTranslation();
     const handle = (field, value) => {
         onFiltersChange({ ...filters, [field]: value });
     };
 
     return (
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Filters</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">{t('filters')}</h3>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 {/* Status */}
                 <div className="flex flex-col gap-1">
                     <label htmlFor="filter-status" className="text-xs font-medium text-gray-600">
-                        Status
+                        {t('status')}
                     </label>
                     <select
                         id="filter-status"
@@ -32,7 +34,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                         onChange={(e) => handle('status', e.target.value)}
                         className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     >
-                        <option value="">All Statuses</option>
+                        <option value="">{t('allStatuses')}</option>
                         {ROOM_STATUSES.map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
@@ -42,7 +44,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                 {/* Room Type */}
                 <div className="flex flex-col gap-1">
                     <label htmlFor="filter-type" className="text-xs font-medium text-gray-600">
-                        Room Type
+                        {t('roomType')}
                     </label>
                     <select
                         id="filter-type"
@@ -50,9 +52,9 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                         onChange={(e) => handle('type', e.target.value)}
                         className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     >
-                        <option value="">All Types</option>
-                        {ROOM_TYPES.map((t) => (
-                            <option key={t} value={t}>{t}</option>
+                        <option value="">{t('allTypes')}</option>
+                        {ROOM_TYPES.map((tItem) => (
+                            <option key={tItem} value={tItem}>{tItem}</option>
                         ))}
                     </select>
                 </div>
@@ -60,7 +62,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                 {/* Floor */}
                 <div className="flex flex-col gap-1">
                     <label htmlFor="filter-floor" className="text-xs font-medium text-gray-600">
-                        Floor
+                        {t('floor')}
                     </label>
                     <select
                         id="filter-floor"
@@ -68,9 +70,9 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                         onChange={(e) => handle('floor', e.target.value)}
                         className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     >
-                        <option value="">All Floors</option>
+                        <option value="">{t('allFloors')}</option>
                         {FLOORS.map((f) => (
-                            <option key={f} value={f}>Floor {f}</option>
+                            <option key={f} value={f}>{t('floor')} {f}</option>
                         ))}
                     </select>
                 </div>
@@ -78,7 +80,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                 {/* Min Price */}
                 <div className="flex flex-col gap-1">
                     <label htmlFor="filter-min-price" className="text-xs font-medium text-gray-600">
-                        Min Price ($)
+                        {t('minPrice')} ($)
                     </label>
                     <input
                         id="filter-min-price"
@@ -94,7 +96,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                 {/* Max Price */}
                 <div className="flex flex-col gap-1">
                     <label htmlFor="filter-max-price" className="text-xs font-medium text-gray-600">
-                        Max Price ($)
+                        {t('maxPrice')} ($)
                     </label>
                     <input
                         id="filter-max-price"
@@ -114,7 +116,7 @@ export default function RoomFilters({ filters, onFiltersChange, onClear }) {
                     onClick={onClear}
                     className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
-                    Clear Filters
+                    {t('clearFilters')}
                 </button>
             </div>
         </div>

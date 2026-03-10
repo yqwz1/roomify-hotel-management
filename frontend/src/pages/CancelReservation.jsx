@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import { cancelReservation, extractReservationError } from '../services/reservationService';
 import StatusPill from '../components/StatusPill';
-import ConfirmationToast from '../components/ConfirmationToast';
 import { CANCELLABLE_STATUSES } from '../data/mockReservations';
+import { LtrText } from '../components/LtrText';
+import { useTranslation } from 'react-i18next';
 
 const formatDate = (iso) => {
     if (!iso) return '-';
@@ -16,6 +17,7 @@ const formatDate = (iso) => {
 const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 
 function CancelDialog({ reservation, onClose, onConfirm }) {
+    const { t, i18n } = useTranslation();
     const [reason, setReason] = useState('');
     const [confirming, setConfirming] = useState(false);
     const [error, setError] = useState(null);
@@ -87,12 +89,12 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                             onClick={onClose}
                             className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
                         >
-                            Keep Reservation
+                            {t('keepReservation')}
                         </button>
                         <button
                             onClick={handleConfirm}
                             disabled={confirming}
-                            className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+                            className="flex-1 rounded-full bg-red-600 py-3 text-sm font-bold text-white transition shadow-sm hover:bg-red-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-red-400"
                         >
                             {confirming ? 'Cancelling...' : 'Confirm Cancellation'}
                         </button>
@@ -105,6 +107,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
 
 export default function CancelReservation() {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showDialog, setShowDialog] = useState(false);
@@ -148,8 +151,8 @@ export default function CancelReservation() {
                     Back
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Cancel Reservation</h1>
-                    <p className="text-sm text-gray-500">Look up a reservation and process a cancellation.</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('cancelReservationTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('cancelReservationDesc')}</p>
                 </div>
             </div>
 
@@ -165,8 +168,8 @@ export default function CancelReservation() {
                             <p className="mt-1 text-xs text-gray-400">Search and select a reservation to cancel it.</p>
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <div className="mb-4 flex items-start justify-between gap-2">
+                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                            <div className="mb-6 flex items-start justify-between gap-2">
                                 <div>
                                     <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
                                     <p className="font-mono text-xs text-gray-400">{selected.confirmationNumber}</p>
@@ -192,7 +195,7 @@ export default function CancelReservation() {
                             {CANCELLABLE_STATUSES.includes(selected.status) && (
                                 <button
                                     onClick={() => setShowDialog(true)}
-                                    className="w-full rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    className="w-full rounded-full border-2 border-red-600 bg-white hover:bg-red-50 py-4 text-sm font-bold text-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm"
                                 >
                                     Cancel This Reservation
                                 </button>

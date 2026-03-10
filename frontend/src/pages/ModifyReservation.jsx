@@ -5,9 +5,11 @@ import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import DateRangePicker from '../components/DateRangePicker';
 import ErrorBanner from '../components/ErrorBanner';
+import { LtrText } from '../components/LtrText';
 import { searchRooms } from '../services/searchService';
 import { modifyReservation, extractReservationError } from '../services/reservationService';
 import { MODIFIABLE_STATUSES } from '../data/mockReservations';
+import { useTranslation } from 'react-i18next';
 
 const formatDate = (iso) => {
     if (!iso) return '-';
@@ -19,6 +21,7 @@ const formatDate = (iso) => {
 const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 
 function ModifyModal({ reservation, onClose, onSave }) {
+    const { t, i18n } = useTranslation();
     const [checkIn, setCheckIn] = useState(reservation.checkInDate);
     const [checkOut, setCheckOut] = useState(reservation.checkOutDate);
     const [reason, setReason] = useState('');
@@ -193,12 +196,12 @@ function ModifyModal({ reservation, onClose, onSave }) {
                         <div>
                             <p className="mb-2 text-xs font-semibold text-gray-600">2. Select Room</p>
                             {loadingRooms ? (
-                                <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+                                <div className="h-12 animate-pulse rounded-full bg-zinc-100" />
                             ) : availableRooms.length > 0 ? (
                                 <select
                                     value={selectedRoomId}
                                     onChange={(e) => setSelectedRoomId(e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                    className="w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold text-black focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
                                 >
                                     {availableRooms.map((room) => (
                                         <option key={room.id} value={room.id}>
@@ -208,7 +211,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
                                     ))}
                                 </select>
                             ) : (
-                                <p className="text-sm text-red-600">No rooms available for these dates.</p>
+                                <p className="text-sm text-red-600">{t('noRoomsAvailable')}</p>
                             )}
                         </div>
                     )}
@@ -261,6 +264,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
 export default function ModifyReservation() {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -274,7 +278,7 @@ export default function ModifyReservation() {
     const handleSave = (updated) => {
         setSelected(updated);
         setShowModal(false);
-        setToast({ message: `Reservation ${updated.confirmationNumber} updated successfully.`, type: 'success' });
+        setToast({ message: t('modifySuccess', { conf: updated.confirmationNumber }), type: 'success' });
     };
 
     return (
@@ -301,8 +305,8 @@ export default function ModifyReservation() {
                     Back
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Modify Reservation</h1>
-                    <p className="text-sm text-gray-500">Look up a reservation and update its dates.</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('modifyReservationTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('modifyReservationDesc')}</p>
                 </div>
             </div>
 
@@ -318,8 +322,8 @@ export default function ModifyReservation() {
                             <p className="mt-1 text-xs text-gray-400">Search and select a reservation to modify it.</p>
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <div className="mb-4 flex items-start justify-between gap-2">
+                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                            <div className="mb-6 flex items-start justify-between gap-2">
                                 <div>
                                     <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
                                     <p className="font-mono text-xs text-gray-400">{selected.confirmationNumber}</p>
@@ -345,7 +349,7 @@ export default function ModifyReservation() {
                             {MODIFIABLE_STATUSES.includes(selected.status) && (
                                 <button
                                     onClick={() => setShowModal(true)}
-                                    className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    className="w-full rounded-full bg-black py-4 text-sm font-bold text-white transition hover:bg-zinc-800 shadow-md focus:outline-none focus:ring-2 focus:ring-zinc-400"
                                 >
                                     Modify Dates
                                 </button>

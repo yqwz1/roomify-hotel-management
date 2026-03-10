@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
+import { useTranslation } from 'react-i18next';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         email: 'admin@roomify.com',
@@ -33,9 +35,9 @@ const LoginPage = () => {
     const validateForm = () => {
         const newErrors = { email: '', password: '' };
         let isValid = true;
-        if (!formData.email) { newErrors.email = 'Email is required'; isValid = false; }
-        else if (!emailRegex.test(formData.email)) { newErrors.email = 'Please enter a valid email address'; isValid = false; }
-        if (!formData.password) { newErrors.password = 'Password is required'; isValid = false; }
+        if (!formData.email) { newErrors.email = t('emailRequired') || 'Email is required'; isValid = false; }
+        else if (!emailRegex.test(formData.email)) { newErrors.email = t('invalidEmail') || 'Please enter a valid email address'; isValid = false; }
+        if (!formData.password) { newErrors.password = t('passwordRequired') || 'Password is required'; isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
@@ -59,90 +61,84 @@ const LoginPage = () => {
                 default: navigate('/', { replace: true });
             }
         } catch (error) {
-            setLoginError(error.message || 'Login failed. Please check your credentials.');
+            setLoginError(error.message || t('loginFailedDefault') || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="h-full flex">
             {/* ── Left: Brand Panel (desktop only) ── */}
-            <div className="hidden lg:flex lg:w-[45%] bg-slate-900 flex-col justify-between p-10">
+            <div className="hidden lg:flex lg:w-[45%] bg-black flex-col justify-between p-12">
                 {/* Top: Logo */}
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center">
-                        <Hotel className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-white font-bold text-xl tracking-tight">Roomify</span>
+                <div className="flex items-center">
+                    <span className="text-white font-black text-3xl tracking-tighter">Roomify</span>
                 </div>
 
                 {/* Middle: Headline */}
                 <div>
-                    <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-4">
-                        Hotel Management System
+                    <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-6">
+                        {t('hotelManagementSystem') || 'Hotel Management System'}
                     </p>
-                    <h1 className="text-4xl font-bold text-white leading-snug mb-6">
-                        Manage your property<br />
-                        <span className="text-blue-400">with confidence.</span>
+                    <h1 className="text-5xl font-extrabold text-white leading-tight mb-8 tracking-tight">
+                        {t('manageYourProperty') || 'Manage your property'}<br />
+                        <span className="text-zinc-400">{t('withConfidence') || 'with confidence.'}</span>
                     </h1>
-                    <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-                        A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.
+                    <p className="text-zinc-500 text-lg font-medium leading-relaxed max-w-sm">
+                        {t('loginDescription') || 'A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.'}
                     </p>
                 </div>
 
                 {/* Bottom: Feature chips */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {[
-                        { icon: ShieldCheck, text: 'Role-based secure access' },
-                        { icon: Zap, text: 'Real-time room status updates' },
-                        { icon: Users, text: 'Staff & guest management' },
+                        { icon: ShieldCheck, text: t('featureSecureAccess') || 'Role-based secure access' },
+                        { icon: Zap, text: t('featureRealTimeUpdates') || 'Real-time room status updates' },
+                        { icon: Users, text: t('featureStaffGuest') || 'Staff & guest management' },
                     ].map(({ icon: Icon, text }) => (
-                        <div key={text} className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                                <Icon className="h-3.5 w-3.5 text-blue-400" />
+                        <div key={text} className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                                <Icon className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-slate-300 text-sm">{text}</span>
+                            <span className="text-zinc-300 text-sm font-medium">{text}</span>
                         </div>
                     ))}
-                    <p className="text-slate-600 text-xs pt-2">
-                        © {new Date().getFullYear()} Roomify PMS. All rights reserved.
+                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest pt-4">
+                        {t('copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()} Roomify PMS. All rights reserved.`}
                     </p>
                 </div>
             </div>
 
             {/* ── Right: Login Form Panel ── */}
-            <div className="flex-1 flex items-center justify-center bg-gray-50 px-5 py-12 sm:px-8">
+            <div className="flex-1 flex items-center justify-center bg-zinc-50 px-5 py-12 sm:px-8">
                 <div className="w-full max-w-sm">
                     {/* Mobile logo */}
-                    <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
-                            <Hotel className="h-5 w-5 text-white" />
-                        </div>
-                        <span className="text-gray-900 font-bold text-xl">Roomify</span>
+                    <div className="lg:hidden flex items-center justify-center mb-10">
+                        <span className="text-black font-black text-3xl tracking-tighter">Roomify</span>
                     </div>
 
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900" role="heading" aria-level="1">
-                            Sign in to your account
+                    <div className="mb-10 text-center lg:text-left">
+                        <h2 className="text-3xl font-extrabold text-black tracking-tight" role="heading" aria-level="1">
+                            {t('signInToAccount') || 'Sign in to your account'}
                         </h2>
-                        <p className="text-gray-500 text-sm mt-1">
-                            Enter your credentials to access the system
+                        <p className="text-zinc-500 text-sm font-medium mt-2">
+                            {t('enterCredentials') || 'Enter your credentials to access the system'}
                         </p>
                     </div>
 
                     {loginError && (
                         <Alert variant="destructive" className="mb-5">
                             <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Authentication Failed</AlertTitle>
+                            <AlertTitle>{t('authFailed') || 'Authentication Failed'}</AlertTitle>
                             <AlertDescription>{loginError}</AlertDescription>
                         </Alert>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                        <div className="space-y-1.5">
-                            <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
-                                Email Address
+                    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-black font-bold text-sm tracking-wide">
+                                {t('emailAddress') || 'Email Address'}
                             </Label>
                             <Input
                                 id="email"
@@ -152,16 +148,16 @@ const LoginPage = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className={`h-10 text-sm ${errors.email ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
+                                className={`h-12 text-sm rounded-full px-5 border ${errors.email ? 'border-red-500 focus-visible:ring-red-300' : 'border-zinc-300 focus-visible:ring-black'}`}
                             />
                             {errors.email && (
-                                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                                <p className="text-xs font-bold text-red-500 mt-1 pl-4">{errors.email}</p>
                             )}
                         </div>
 
-                        <div className="space-y-1.5">
-                            <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
-                                Password
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-black font-bold text-sm tracking-wide">
+                                {t('password') || 'Password'}
                             </Label>
                             <Input
                                 id="password"
@@ -171,34 +167,36 @@ const LoginPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className={`h-10 text-sm ${errors.password ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
+                                className={`h-12 text-sm rounded-full px-5 border ${errors.password ? 'border-red-500 focus-visible:ring-red-300' : 'border-zinc-300 focus-visible:ring-black'}`}
                             />
                             {errors.password && (
-                                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                                <p className="text-xs font-bold text-red-500 mt-1 pl-4">{errors.password}</p>
                             )}
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
+                            className="w-full h-12 bg-black hover:bg-zinc-800 text-white text-sm font-extrabold rounded-full shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-zinc-400 mt-2"
                             disabled={isLoading}
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" role="status" aria-label="Loading" />
-                                    Signing in...
+                                    <Loader2 className="me-2 h-5 w-5 animate-spin" role="status" aria-label="Loading" />
+                                    {t('signingIn') || 'Signing in...'}
                                 </>
                             ) : (
-                                'Sign In'
+                                t('signIn') || 'Sign In'
                             )}
                         </Button>
                     </form>
 
                     {/* Demo credentials */}
-                    <div className="mt-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                        <p className="text-xs font-semibold text-blue-700 mb-1">Demo Credentials</p>
-                        <p className="text-xs text-blue-600">Manager: <span className="font-mono">admin@roomify.com</span></p>
-                        <p className="text-xs text-blue-600">Password: <span className="font-mono">password123</span></p>
+                    <div className="mt-8 p-5 bg-zinc-50 border border-zinc-200 rounded-3xl text-center">
+                        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">{t('demoCredentials') || 'Demo Credentials'}</p>
+                        <div className="flex flex-col gap-1 items-center">
+                            <p className="text-sm font-medium text-zinc-600">{t('managerLabel') || 'Manager:'} <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ml-1">admin@roomify.com</span></p>
+                            <p className="text-sm font-medium text-zinc-600">{t('password') || 'Password'}: <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ml-1">password123</span></p>
+                        </div>
                     </div>
                 </div>
             </div>

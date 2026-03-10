@@ -24,28 +24,28 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Welcome to Roomify</h1>
-      <p className="text-gray-600 mb-6">Hotel Management System</p>
+    <div className="h-full bg-zinc-50 p-6 lg:p-10 flex flex-col items-center justify-center text-center">
+      <h1 className="text-5xl font-extrabold mb-4 text-black tracking-tight">Welcome to Roomify</h1>
+      <p className="text-lg font-bold text-zinc-500 tracking-widest uppercase mb-12">Hotel Management System</p>
 
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Backend Connection Status</h2>
+      <div className="bg-white p-8 rounded-3xl shadow-sm border border-zinc-200 max-w-md w-full">
+        <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Backend Connection Status</h2>
         
         {loading && (
-          <p className="text-gray-500">Checking connection...</p>
+          <p className="text-zinc-500 font-bold animate-pulse">Checking connection...</p>
         )}
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            ❌ {error}
+          <div className="bg-red-50 border border-red-200 text-red-700 font-bold px-6 py-4 rounded-2xl">
+            <span className="mr-2">❌</span> {error}
           </div>
         )}
         
         {health && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            <p className="font-semibold">✅ Backend Connected!</p>
-            <p className="text-sm mt-2">Status: {health.status}</p>
-            <p className="text-sm">Time: {new Date(health.timestamp).toLocaleString()}</p>
+          <div className="bg-zinc-50 border border-zinc-200 px-6 py-6 rounded-2xl text-left">
+            <p className="font-extrabold text-black text-lg flex items-center gap-2"><span className="text-green-500">●</span> Backend Connected!</p>
+            <p className="text-xs font-bold text-zinc-500 uppercase mt-4 tracking-wider">Status: <span className="text-black">{health.status}</span></p>
+            <p className="text-xs font-bold text-zinc-500 uppercase mt-2 tracking-wider">Time: <span className="text-black">{new Date(health.timestamp).toLocaleString()}</span></p>
           </div>
         )}
       </div>

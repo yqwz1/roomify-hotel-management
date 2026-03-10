@@ -3,6 +3,7 @@ import { useRooms } from '../hooks/useRooms';
 import { useRoomTypes } from '../hooks/useRoomTypes';
 import RoomFilters from '../components/RoomFilters';
 import ErrorBanner from '../components/ErrorBanner';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
@@ -15,10 +16,10 @@ const BACKEND_STATUSES = [
 ];
 
 const STATUS_COLORS = {
-    AVAILABLE: 'bg-green-100 text-green-800',
-    OCCUPIED: 'bg-red-100 text-red-800',
-    NEEDS_CLEANING: 'bg-yellow-100 text-yellow-800',
-    UNDER_MAINTENANCE: 'bg-orange-100 text-orange-800',
+    AVAILABLE: 'border border-zinc-300 bg-white text-black shadow-sm',
+    OCCUPIED: 'bg-black text-white border-transparent',
+    NEEDS_CLEANING: 'bg-zinc-100 text-zinc-600 border-transparent',
+    UNDER_MAINTENANCE: 'bg-zinc-200 text-zinc-700 border-transparent',
 };
 
 const STATUS_LABELS = {
@@ -30,6 +31,7 @@ const STATUS_LABELS = {
 
 // ─── Add Room Modal ───────────────────────────────────────────────────────────
 function AddRoomModal({ roomTypes, onSave, onClose }) {
+    const { t } = useTranslation();
     const [form, setForm] = useState({
         roomNumber: '',
         roomTypeId: roomTypes[0]?.id ?? '',
@@ -44,8 +46,8 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setFormError(null);
-        if (!form.roomNumber.trim()) return setFormError('Room number is required.');
-        if (!form.roomTypeId) return setFormError('Please select a room type.');
+        if (!form.roomNumber.trim()) return setFormError(t('roomNumRequired') || 'Room number is required.');
+        if (!form.roomTypeId) return setFormError(t('roomTypeRequired') || 'Please select a room type.');
 
         setSaving(true);
         const result = await onSave({
@@ -59,43 +61,43 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
         if (result.success) {
             onClose();
         } else {
-            setFormError(result.error ?? 'Failed to create room.');
+            setFormError(result.error ?? (t('failedCreateRoom') || 'Failed to create room.'));
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 className="mb-4 text-lg font-bold text-gray-900">Add New Room</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 transition-all pb-[10vh]">
+            <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
+                <h2 className="mb-6 text-xl font-extrabold text-black tracking-tight">{t('addNewRoom') || 'Add New Room'}</h2>
 
                 <ErrorBanner message={formError} onClose={() => setFormError(null)} />
 
-                <form onSubmit={handleSubmit} noValidate className="mt-4 flex flex-col gap-4">
+                <form onSubmit={handleSubmit} noValidate className="mt-4 flex flex-col gap-5">
                     {/* Room Number */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-roomNumber" className="text-xs font-medium text-gray-600">
-                            Room Number <span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="add-roomNumber" className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            {t('roomNumLabel') || 'Room Number'} <span className="text-black">*</span>
                         </label>
                         <input
                             id="add-roomNumber"
                             type="text"
-                            placeholder="e.g. 305"
+                            placeholder={t('roomNumPlaceholder') || "e.g. 305"}
                             value={form.roomNumber}
                             onChange={(e) => set('roomNumber', e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
                         />
                     </div>
 
                     {/* Room Type */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-roomType" className="text-xs font-medium text-gray-600">
-                            Room Type <span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="add-roomType" className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            {t('roomTypeLabel') || 'Room Type'} <span className="text-black">*</span>
                         </label>
                         <select
                             id="add-roomType"
                             value={form.roomTypeId}
                             onChange={(e) => set('roomTypeId', e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
                         >
                             {roomTypes.map((rt) => (
                                 <option key={rt.id} value={rt.id}>{rt.name}</option>
@@ -104,47 +106,47 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
                     </div>
 
                     {/* Floor */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-floor" className="text-xs font-medium text-gray-600">Floor</label>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="add-floor" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('floorLabel') || 'Floor'}</label>
                         <input
                             id="add-floor"
                             type="number"
                             min="1"
                             value={form.floor}
                             onChange={(e) => set('floor', e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
                         />
                     </div>
 
                     {/* Initial Status */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="add-status" className="text-xs font-medium text-gray-600">Initial Status</label>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="add-status" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('initialStatusLabel') || 'Initial Status'}</label>
                         <select
                             id="add-status"
                             value={form.status}
                             onChange={(e) => set('status', e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
                         >
                             {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
+                    <div className="flex justify-end gap-3 pt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                            className="rounded-full border border-zinc-200 px-6 py-3 text-sm font-extrabold text-black hover:bg-zinc-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                         >
-                            Cancel
+                            {t('cancel') || 'Cancel'}
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition"
+                            className="rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white hover:bg-zinc-800 disabled:opacity-60 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                         >
-                            {saving ? 'Saving…' : 'Save Room'}
+                            {saving ? (t('savingMsg') || 'Saving…') : (t('saveRoomBtn') || 'Save Room')}
                         </button>
                     </div>
                 </form>
@@ -155,6 +157,7 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
 
 // ─── Update Status Modal ──────────────────────────────────────────────────────
 function UpdateStatusModal({ room, onSave, onClose }) {
+    const { t } = useTranslation();
     const [selectedStatus, setSelectedStatus] = useState(room.status);
     const [modalError, setModalError] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -171,60 +174,59 @@ function UpdateStatusModal({ room, onSave, onClose }) {
         if (result.success) {
             onClose();
         } else {
-            setModalError(result.error ?? 'Failed to update status.');
+            setModalError(result.error ?? (t('failedUpdateStatus') || 'Failed to update status.'));
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 className="mb-1 text-lg font-bold text-gray-900">Update Room Status</h2>
-                <p className="mb-4 text-sm text-gray-500">
-                    Room <strong>{room.roomNumber}</strong> — current:{' '}
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLORS[room.status]}`}>
-                        {STATUS_LABELS[room.status]}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 pb-[10vh]">
+            <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
+                <h2 className="mb-2 text-2xl font-extrabold text-black tracking-tight">{t('updateRoomStatus') || 'Update Room Status'}</h2>
+                <p className="mb-6 text-sm font-medium text-zinc-500">
+                    {t('roomNumber', { number: room.roomNumber }) || `Room ${room.roomNumber}`} — {t('currentLabel') || 'current:'}{' '}
+                    <span className={`inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-wider font-extrabold border ${STATUS_COLORS[room.status]}`}>
+                        {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[room.status]}
                     </span>
                 </p>
 
                 <ErrorBanner message={modalError} onClose={() => setModalError(null)} />
 
-                <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="update-status" className="text-xs font-medium text-gray-600">New Status</label>
+                <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="update-status" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('newStatusLabel') || 'New Status'}</label>
                         <select
                             id="update-status"
                             value={selectedStatus}
                             onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
                         >
                             {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
                             ))}
                         </select>
                     </div>
 
                     {/* Transition hint */}
                     {selectedStatus === 'AVAILABLE' && room.status === 'OCCUPIED' && (
-                        <p className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
-                            ⚠️ The backend will reject OCCUPIED → AVAILABLE directly.
-                            Set to <strong>Needs Cleaning</strong> first.
+                        <p className="rounded-2xl bg-zinc-100 border border-zinc-200 px-4 py-3 text-xs font-bold text-zinc-600">
+                            {t('occupyToAvailWarning') || '⚠️ The backend will reject OCCUPIED → AVAILABLE directly. Set to Needs Cleaning first.'}
                         </p>
                     )}
 
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-3 pt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                            className="rounded-full border border-zinc-200 px-6 py-3 text-sm font-extrabold text-black hover:bg-zinc-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                         >
-                            Cancel
+                            {t('cancel') || 'Cancel'}
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition"
+                            className="rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white hover:bg-zinc-800 disabled:opacity-60 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                         >
-                            {saving ? 'Saving…' : 'Update Status'}
+                            {saving ? (t('savingMsg') || 'Saving…') : (t('updateStatusBtn') || 'Update Status')}
                         </button>
                     </div>
                 </form>
@@ -241,6 +243,7 @@ function UpdateStatusModal({ room, onSave, onClose }) {
  * Wired to real API via useRooms hook (Day 2).
  */
 export default function RoomsManagement() {
+    const { t } = useTranslation();
     const {
         rooms, loading, error,
         fetchRooms, addRoom, changeStatus, removeRoom, clearError,
@@ -314,26 +317,26 @@ export default function RoomsManagement() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
             {/* ── Header ── */}
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Rooms Management</h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        {loading ? 'Loading…' : `${displayedRooms.length} room${displayedRooms.length !== 1 ? 's' : ''} shown`}
-                        {!loading && rooms.length !== displayedRooms.length && ` (filtered from ${rooms.length})`}
+                    <h1 className="text-4xl font-extrabold text-black tracking-tight">{t('roomsTitle') || 'Rooms Management'}</h1>
+                    <p className="mt-2 text-sm font-medium text-zinc-500">
+                        {loading ? (t('loadingRooms') || 'Loading…') : (t('roomsShown', { count: displayedRooms.length }) || `${displayedRooms.length} room${displayedRooms.length !== 1 ? 's' : ''} shown`)}
+                        {!loading && rooms.length !== displayedRooms.length && (t('filteredFrom', { total: rooms.length }) || ` (filtered from ${rooms.length})`)}
                     </p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 >
-                    ＋ Add Room
+                    {t('addRoomBtn') || '＋ Add Room'}
                 </button>
             </div>
 
             {/* ── Error Banner ── */}
-            <div className="mb-4">
+            <div className="mb-6">
                 <ErrorBanner
                     message={bannerError ?? error}
                     onClose={() => { setBannerError(null); clearError(); }}
@@ -360,25 +363,25 @@ export default function RoomsManagement() {
 
             {/* ── Table ── */}
             {!loading && (
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <div className="overflow-x-auto rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+                    <table className="min-w-full divide-y divide-zinc-200 text-sm">
                         <thead>
-                            <tr className="bg-gray-50">
-                                {['Room #', 'Floor', 'Type', 'Status', 'Base Price', 'Max Guests', 'Amenities', 'Actions'].map((h) => (
+                            <tr className="bg-zinc-50 border-b border-zinc-200">
+                                {['colRoomNum', 'colFloor', 'colType', 'colStatus', 'colBasePrice', 'colMaxGuests', 'colAmenities', 'colActions'].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                                        className="px-6 py-4 text-start pl-8 text-[10px] font-extrabold uppercase tracking-widest text-zinc-400"
                                     >
-                                        {h}
+                                        {t(h)}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-zinc-100 bg-white">
                             {displayedRooms.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-4 py-14 text-center text-gray-400">
-                                        No rooms match the current filters.
+                                    <td colSpan={8} className="px-6 py-14 text-center text-zinc-500 font-medium">
+                                        {t('noRoomsMatched') || 'No rooms match the current filters.'}
                                     </td>
                                 </tr>
                             ) : (
@@ -388,51 +391,51 @@ export default function RoomsManagement() {
                                         : [];
 
                                     return (
-                                        <tr key={room.id} className="transition hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-semibold text-gray-900">{room.roomNumber}</td>
-                                            <td className="px-4 py-3 text-gray-600">{room.floor ?? '—'}</td>
-                                            <td className="px-4 py-3 text-gray-700">{room.roomType?.name ?? '—'}</td>
-                                            <td className="px-4 py-3">
+                                        <tr key={room.id} className="transition-colors hover:bg-zinc-50">
+                                            <td className="px-6 pl-8 py-5 text-xl font-extrabold text-black">{room.roomNumber}</td>
+                                            <td className="px-6 py-5 text-zinc-500 font-bold">{room.floor ?? '—'}</td>
+                                            <td className="px-6 py-5 text-zinc-900 font-bold">{room.roomType?.name ?? '—'}</td>
+                                            <td className="px-6 py-5">
                                                 <span
-                                                    className={`inline-flex cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-semibold transition hover:opacity-80 ${STATUS_COLORS[room.status] ?? 'bg-gray-100 text-gray-700'}`}
-                                                    title="Click row actions to change status"
+                                                    className={`inline-flex items-center cursor-pointer rounded-full px-3 py-1 text-[10px] uppercase font-extrabold tracking-wider transition hover:opacity-80 border ${STATUS_COLORS[room.status] ?? 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}
+                                                    title={t('clickRowActions') || "Click row actions to change status"}
                                                 >
-                                                    {STATUS_LABELS[room.status] ?? room.status}
+                                                    {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || (STATUS_LABELS[room.status] ?? room.status)}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 font-semibold text-gray-900">
+                                            <td className="px-6 py-5 font-bold text-black">
                                                 ${room.roomType?.basePrice?.toFixed(2) ?? '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-600">
+                                            <td className="px-6 py-5 text-zinc-500 font-bold">
                                                 {room.roomType?.maxGuests ?? '—'}
                                             </td>
-                                            <td className="px-4 py-3 max-w-xs">
-                                                <div className="flex flex-wrap gap-1">
+                                            <td className="px-6 py-5 max-w-xs">
+                                                <div className="flex flex-wrap gap-1.5">
                                                     {amenities.slice(0, 3).map((a) => (
-                                                        <span key={a} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{a}</span>
+                                                        <span key={a} className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold text-zinc-600 border border-zinc-200">{a}</span>
                                                     ))}
                                                     {amenities.length > 3 && (
-                                                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                                                        <span className="rounded-full bg-black px-2 py-0.5 text-[10px] font-extrabold text-white">
                                                             +{amenities.length - 3}
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-6 py-5">
                                                 <div className="flex items-center gap-2">
                                                     {/* Change Status */}
                                                     <button
                                                         onClick={() => setStatusModal(room)}
-                                                        title="Update status"
-                                                        className="rounded-md p-1.5 text-blue-600 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                        title={t('updateStatusTitle') || "Update status"}
+                                                        className="rounded-full p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-black focus:outline-none bg-zinc-50 border border-transparent hover:border-zinc-200"
                                                     >
                                                         🔄
                                                     </button>
                                                     {/* Delete */}
                                                     <button
                                                         onClick={() => handleDelete(room)}
-                                                        title="Delete room"
-                                                        className="rounded-md p-1.5 text-red-500 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                                        title={t('deleteRoomTitle') || "Delete room"}
+                                                        className="rounded-full p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 focus:outline-none bg-zinc-50 border border-transparent hover:border-red-100"
                                                     >
                                                         🗑️
                                                     </button>

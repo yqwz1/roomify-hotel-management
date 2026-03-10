@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * DateRangePicker
@@ -12,6 +13,7 @@ import PropTypes from 'prop-types';
  *   onCheckOutChange  {Function}  – (value: string) => void
  */
 export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, onCheckOutChange }) {
+    const { t } = useTranslation();
     // Minimum selectable date is today
     const today = new Date().toISOString().split('T')[0];
 
@@ -21,8 +23,8 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
             {/* Check-In */}
             <div className="flex flex-col gap-1">
-                <label htmlFor="check-in-date" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Check-In
+                <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+                    {t('checkInLabel') || 'Check-In'}
                 </label>
                 <input
                     id="check-in-date"
@@ -30,17 +32,17 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                     value={checkIn}
                     min={today}
                     onChange={(e) => onCheckInChange(e.target.value)}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-black transition-all focus:bg-white focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
             </div>
 
             {/* Arrow separator */}
-            <span className="hidden self-center text-gray-400 sm:block" aria-hidden="true">→</span>
+            <span className="hidden self-center text-zinc-300 sm:block mb-3" aria-hidden="true">→</span>
 
             {/* Check-Out */}
             <div className="flex flex-col gap-1">
-                <label htmlFor="check-out-date" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Check-Out
+                <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+                    {t('checkOutLabel') || 'Check-Out'}
                 </label>
                 <input
                     id="check-out-date"
@@ -48,9 +50,9 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                     value={checkOut}
                     min={checkIn || today}
                     onChange={(e) => onCheckOutChange(e.target.value)}
-                    className={`rounded-lg border bg-white px-3 py-2 text-sm text-gray-800 shadow-sm transition focus:outline-none focus:ring-2 ${isInvalid
+                    className={`rounded-full border bg-zinc-50 px-4 py-3 text-sm font-medium text-black transition-all focus:bg-white focus:outline-none focus:ring-2 ${isInvalid
                             ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
-                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                            : 'border-zinc-200 focus:border-black focus:ring-black/5'
                         }`}
                 />
             </div>
@@ -58,7 +60,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Validation message */}
             {isInvalid && (
                 <p className="text-xs font-medium text-red-600 sm:self-end sm:pb-2" role="alert">
-                    Check-out must be after check-in.
+                    {t('checkoutAfterCheckin')}
                 </p>
             )}
         </div>
