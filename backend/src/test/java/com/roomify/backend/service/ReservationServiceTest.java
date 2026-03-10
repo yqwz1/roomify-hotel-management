@@ -15,20 +15,18 @@ import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -219,7 +217,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void modifyShouldAllowOptionalBlankReason() {
+    void modifyShouldTrimReasonWhenUpdatingReservation() {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
         when(reservationRepository.findById(71L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findOverlappingForUpdate(
@@ -236,9 +234,9 @@ class ReservationServiceTest {
                         null,
                         LocalDate.of(2026, 4, 2),
                         LocalDate.of(2026, 4, 4),
-                        "   "));
+                        "   Guest moved dates   "));
 
-        assertNull(reservation.getModificationReason());
+        assertEquals("Guest moved dates", reservation.getModificationReason());
         assertEquals(new BigDecimal("345.00"), reservation.getTotalPrice());
     }
 
@@ -276,6 +274,21 @@ class ReservationServiceTest {
         assertEquals(LocalDate.of(2026, 4, 2), reservation.getCheckInDate());
         assertEquals(LocalDate.of(2026, 4, 4), reservation.getCheckOutDate());
         verify(reservationRepository, times(1)).save(any(Reservation.class));
+    }
+
+    @Test
+    void modifyShouldThrowConflictWhenReservationIsCancelled() {
+        assertModifyBlockedForStatus(ReservationStatus.CANCELLED);
+    }
+
+    @Test
+    void modifyShouldThrowConflictWhenReservationIsCheckedIn() {
+        assertModifyBlockedForStatus(ReservationStatus.CHECKED_IN);
+    }
+
+    @Test
+    void modifyShouldThrowConflictWhenReservationIsCheckedOut() {
+        assertModifyBlockedForStatus(ReservationStatus.CHECKED_OUT);
     }
 
     @Test
@@ -342,6 +355,77 @@ class ReservationServiceTest {
         assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
         assertNotNull(reservation.getCancellationAt());
         verify(reservationRepository, times(1)).save(any(Reservation.class));
+    }
+
+    @Test
+    void checkInShouldUpdateReservationAndRoomWhenConfirmedAndAvailable() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReservationResponse response = reservationService.checkIn(" rsv-abc123def456 ");
+
+        assertEquals(ReservationStatus.CHECKED_IN, reservation.getStatus());
+        assertEquals(RoomStatus.OCCUPIED, reservation.getRoom().getStatus());
+        assertEquals(LocalDate.now(), reservation.getActualCheckInDate());
+        assertEquals(2L, response.getNights());
+        assertEquals(new BigDecimal("150.00"), response.getRoomRate());
+        assertEquals(0, response.getSubtotal().compareTo(new BigDecimal("300.00")));
+        assertEquals(0, response.getTaxes().compareTo(new BigDecimal("45.00")));
+        verify(roomRepository).save(reservation.getRoom());
+        verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    void checkInShouldThrowConflictWhenReservationIsNotConfirmed() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.PENDING);
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.checkIn("RSV-ABC123DEF456"));
+
+        assertEquals("Only CONFIRMED reservations can be checked in", ex.getMessage());
+        verify(roomRepository, never()).save(any(Room.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void checkInShouldThrowConflictWhenRoomIsNotAvailable() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+        reservation.getRoom().setStatus(RoomStatus.NEEDS_CLEANING);
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.checkIn("RSV-ABC123DEF456"));
+
+        assertEquals("Room not ready", ex.getMessage());
+        verify(roomRepository, never()).save(any(Room.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    private void assertModifyBlockedForStatus(ReservationStatus status) {
+        Reservation reservation = buildReservationForCancel(status);
+        when(reservationRepository.findById(71L)).thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.modify(
+                        71L,
+                        new ReservationModifyRequest(
+                                20L,
+                                LocalDate.of(2026, 4, 2),
+                                LocalDate.of(2026, 4, 5),
+                                "Attempt blocked")));
+
+        assertEquals("Cannot modify reservation in status: " + status, ex.getMessage());
+        verify(reservationRepository, never()).save(any(Reservation.class));
+        verifyNoInteractions(emailService);
     }
 
     private void assertCancelBlockedForStatus(ReservationStatus status) {

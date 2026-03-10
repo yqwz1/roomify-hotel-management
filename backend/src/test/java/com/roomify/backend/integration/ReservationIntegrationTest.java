@@ -97,6 +97,7 @@ class ReservationIntegrationTest {
     private ObjectMapper objectMapper;
     private String managerToken;
     private String staffToken;
+    private String guestToken;
     private Long room1Id;
     private Long room2Id;
 
@@ -109,6 +110,7 @@ class ReservationIntegrationTest {
 
         managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
         staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
+        guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
@@ -273,7 +275,7 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    void modifyFlowRecalculatesPricePersistsReasonAndCreatesEmailLogAndAuditEntry() throws Exception {
+    void modifyReservationValidationRejectsMissingReason() throws Exception {
         CreatedReservation created = createReservation(
                 managerToken,
                 room1Id,
@@ -281,23 +283,303 @@ class ReservationIntegrationTest {
                 LocalDate.now().plusDays(8),
                 "CONFIRMED");
 
-        long beforeCount = reservationRepository.count();
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.modificationReason")
+                        .value("Modification reason is required"));
+    }
+
+    @Test
+    void modifyReservationValidationRejectsNullReason() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"modificationReason\":null}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.modificationReason")
+                        .value("Modification reason is required"));
+    }
+
+    @Test
+    void modifyReservationValidationRejectsBlankReason() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"modificationReason\":\"   \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.modificationReason")
+                        .value("Modification reason is required"));
+    }
+
+    @Test
+    void modifyReservationValidationRejectsReasonLongerThan500() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
 
         Map<String, Object> modifyRequest = new HashMap<>();
-        modifyRequest.put("roomId", room2Id);
-        modifyRequest.put("checkInDate", LocalDate.now().plusDays(7).toString());
-        modifyRequest.put("checkOutDate", LocalDate.now().plusDays(10).toString());
-        modifyRequest.put("modificationReason", "  Guest requested upgrade  ");
+        modifyRequest.put("modificationReason", "a".repeat(501));
 
         mockMvc.perform(put("/api/reservations/{id}", created.id())
                         .header("Authorization", "Bearer " + managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(modifyRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservationId").value(created.id()))
-                .andExpect(jsonPath("$.action").value("modify"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.modificationReason")
+                        .value("Modification reason cannot exceed 500 characters"));
+    }
 
-        assertEquals(beforeCount, reservationRepository.count());
+    @Test
+    void modifyReservationValidationRejectsPastCheckInDate() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", LocalDate.now().minusDays(1).toString());
+        modifyRequest.put("modificationReason", "Shift dates");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.checkInDate")
+                        .value("Check-in date must be today or in the future"));
+    }
+
+    @Test
+    void modifyReservationValidationRejectsTodayCheckOutDate() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkOutDate", LocalDate.now().toString());
+        modifyRequest.put("modificationReason", "Shift dates");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.checkOutDate")
+                        .value("Check-out date must be in the future"));
+    }
+
+    @Test
+    void modifyReservationValidationRejectsInvalidDateRange() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = new HashMap<>();
+        modifyRequest.put("checkInDate", LocalDate.now().plusDays(10).toString());
+        modifyRequest.put("checkOutDate", LocalDate.now().plusDays(10).toString());
+        modifyRequest.put("modificationReason", "Shift dates");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.dateRangeValid")
+                        .value("Check-out date must be after check-in date"));
+    }
+
+    @Test
+    void modifyReservationBlockedWhenStatusCancelledAndDatabaseUnchanged() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
+
+        assertModifyBlockedAndDatabaseUnchanged(created.id(), buildModifyRequest(room2Id,
+                LocalDate.now().plusDays(7), LocalDate.now().plusDays(9), "Attempt after cancel"));
+    }
+
+    @Test
+    void modifyReservationBlockedWhenStatusCheckedInAndDatabaseUnchanged() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setActualCheckInDate(LocalDate.now());
+        reservationRepository.save(reservation);
+
+        assertModifyBlockedAndDatabaseUnchanged(created.id(), buildModifyRequest(room2Id,
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3), "Attempt after check in"));
+    }
+
+    @Test
+    void modifyReservationBlockedWhenStatusCheckedOutAndDatabaseUnchanged() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setStatus(ReservationStatus.CHECKED_OUT);
+        reservation.setActualCheckInDate(LocalDate.now());
+        reservationRepository.save(reservation);
+
+        assertModifyBlockedAndDatabaseUnchanged(created.id(), buildModifyRequest(room2Id,
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(3), "Attempt after check out"));
+    }
+
+    @Test
+    void modifyReservationReturnsConflictOnAvailabilityOverlapAndKeepsDatabaseState() throws Exception {
+        CreatedReservation target = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(25),
+                LocalDate.now().plusDays(27),
+                "CONFIRMED");
+        createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(21),
+                LocalDate.now().plusDays(24),
+                "CONFIRMED");
+
+        Reservation before = reservationRepository.findById(target.id()).orElseThrow();
+
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                room1Id,
+                LocalDate.now().plusDays(21),
+                LocalDate.now().plusDays(23),
+                "Overlap attempt");
+
+        mockMvc.perform(put("/api/reservations/{id}", target.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.message").value("Selected room is not available for the requested dates"));
+
+        Reservation after = reservationRepository.findById(target.id()).orElseThrow();
+        assertEquals(before.getRoom().getId(), after.getRoom().getId());
+        assertEquals(before.getCheckInDate(), after.getCheckInDate());
+        assertEquals(before.getCheckOutDate(), after.getCheckOutDate());
+    }
+
+    @Test
+    void modifyReservationSucceedsWhenUpdatingDatesOnly() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                null,
+                LocalDate.now().plusDays(7),
+                LocalDate.now().plusDays(10),
+                "Guest shifted dates");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk());
+
+        Reservation modified = reservationRepository.findById(created.id()).orElseThrow();
+        assertEquals(room1Id, modified.getRoom().getId());
+        assertEquals(LocalDate.now().plusDays(7), modified.getCheckInDate());
+        assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
+        assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("660.00")));
+    }
+
+    @Test
+    void modifyReservationSucceedsWhenUpdatingRoomOnly() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                room2Id,
+                null,
+                null,
+                "Guest requested room change");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk());
+
+        Reservation modified = reservationRepository.findById(created.id()).orElseThrow();
+        assertEquals(room2Id, modified.getRoom().getId());
+        assertEquals(LocalDate.now().plusDays(6), modified.getCheckInDate());
+        assertEquals(LocalDate.now().plusDays(8), modified.getCheckOutDate());
+        assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("660.00")));
+    }
+
+    @Test
+    void modifyReservationSucceedsWhenUpdatingDatesAndRoom() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                room2Id,
+                LocalDate.now().plusDays(7),
+                LocalDate.now().plusDays(10),
+                "Guest requested upgrade");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk());
 
         Reservation modified = reservationRepository.findById(created.id()).orElseThrow();
         assertEquals(room2Id, modified.getRoom().getId());
@@ -305,50 +587,64 @@ class ReservationIntegrationTest {
         assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
         assertEquals("Guest requested upgrade", modified.getModificationReason());
         assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("990.00")));
+    }
+
+    @Test
+    void modifyReservationStillSucceedsWhenEmailDeliveryFails() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
+                "CONFIRMED");
+
+        doThrow(new MailSendException("SMTP unavailable"))
+                .when(javaMailSender)
+                .send(any(MimeMessage.class));
+
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                room2Id,
+                LocalDate.now().plusDays(7),
+                LocalDate.now().plusDays(10),
+                "Email should not block");
+
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().isOk());
+
+        Reservation modified = reservationRepository.findById(created.id()).orElseThrow();
+        assertEquals(room2Id, modified.getRoom().getId());
+        assertEquals(LocalDate.now().plusDays(7), modified.getCheckInDate());
+        assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
 
         assertTrue(emailLogRepository.findAll().stream().anyMatch(log ->
                 created.confirmationNumber().equals(log.getConfirmationNumber())
                         && "Reservation Modified".equals(log.getSubject())
-                        && log.getStatus() == EmailDeliveryStatus.SENT));
-
-        assertTrue(auditLogRepository.findAll().stream()
-                .anyMatch(log -> "RESERVATION_MODIFIED".equals(log.getAction())));
+                        && log.getStatus() == EmailDeliveryStatus.FAILED));
     }
 
     @Test
-    void modifyFlowReturnsConflictOnAvailabilityOverlapWithClearMessage() throws Exception {
-        CreatedReservation first = createReservation(
+    void guestCannotModifyReservation() throws Exception {
+        CreatedReservation created = createReservation(
                 managerToken,
-                room2Id,
-                LocalDate.now().plusDays(20),
-                LocalDate.now().plusDays(23),
-                "CONFIRMED");
-        CreatedReservation second = createReservation(
-                managerToken,
-                room2Id,
-                LocalDate.now().plusDays(25),
-                LocalDate.now().plusDays(27),
+                room1Id,
+                LocalDate.now().plusDays(6),
+                LocalDate.now().plusDays(8),
                 "CONFIRMED");
 
-        Map<String, Object> modifyRequest = new HashMap<>();
-        modifyRequest.put("roomId", room2Id);
-        modifyRequest.put("checkInDate", LocalDate.now().plusDays(21).toString());
-        modifyRequest.put("checkOutDate", LocalDate.now().plusDays(26).toString());
+        Map<String, Object> modifyRequest = buildModifyRequest(
+                room2Id,
+                LocalDate.now().plusDays(7),
+                LocalDate.now().plusDays(10),
+                "Unauthorized modify");
 
-        mockMvc.perform(put("/api/reservations/{id}", second.id())
-                        .header("Authorization", "Bearer " + managerToken)
+        mockMvc.perform(put("/api/reservations/{id}", created.id())
+                        .header("Authorization", "Bearer " + guestToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(modifyRequest)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message").value("Selected room is not available for the requested dates"))
-                .andExpect(jsonPath("$.path").value("/api/reservations/" + second.id()));
-
-        Reservation unchanged = reservationRepository.findById(second.id()).orElseThrow();
-        assertEquals(LocalDate.now().plusDays(25), unchanged.getCheckInDate());
-        assertEquals(LocalDate.now().plusDays(27), unchanged.getCheckOutDate());
-        assertEquals(first.id(), reservationRepository.findById(first.id()).orElseThrow().getId());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -358,6 +654,7 @@ class ReservationIntegrationTest {
         Map<String, Object> modifyRequest = new HashMap<>();
         modifyRequest.put("checkInDate", LocalDate.now().plusDays(5).toString());
         modifyRequest.put("checkOutDate", LocalDate.now().plusDays(7).toString());
+        modifyRequest.put("modificationReason", "Missing reservation");
 
         mockMvc.perform(put("/api/reservations/{id}", missingId)
                         .header("Authorization", "Bearer " + managerToken)
@@ -436,6 +733,45 @@ class ReservationIntegrationTest {
         request.put("status", status);
         request.put("guest", guest);
         return request;
+    }
+
+    private Map<String, Object> buildModifyRequest(
+            Long roomId,
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            String modificationReason) {
+
+        Map<String, Object> request = new HashMap<>();
+        if (roomId != null) {
+            request.put("roomId", roomId);
+        }
+        if (checkInDate != null) {
+            request.put("checkInDate", checkInDate.toString());
+        }
+        if (checkOutDate != null) {
+            request.put("checkOutDate", checkOutDate.toString());
+        }
+        request.put("modificationReason", modificationReason);
+        return request;
+    }
+
+    private void assertModifyBlockedAndDatabaseUnchanged(Long reservationId, Map<String, Object> modifyRequest)
+            throws Exception {
+        Reservation before = reservationRepository.findById(reservationId).orElseThrow();
+
+        mockMvc.perform(put("/api/reservations/{id}", reservationId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(modifyRequest)))
+                .andExpect(status().is4xxClientError());
+
+        Reservation after = reservationRepository.findById(reservationId).orElseThrow();
+        assertEquals(before.getStatus(), after.getStatus());
+        assertEquals(before.getRoom().getId(), after.getRoom().getId());
+        assertEquals(before.getCheckInDate(), after.getCheckInDate());
+        assertEquals(before.getCheckOutDate(), after.getCheckOutDate());
+        assertEquals(before.getModificationReason(), after.getModificationReason());
+        assertEquals(0, before.getTotalPrice().compareTo(after.getTotalPrice()));
     }
 
     private record CreatedReservation(Long id, String confirmationNumber) {
