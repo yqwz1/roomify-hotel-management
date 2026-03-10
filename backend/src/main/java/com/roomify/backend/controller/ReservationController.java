@@ -2,7 +2,6 @@ package com.roomify.backend.controller;
 
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
-import com.roomify.backend.dto.ReservationCheckInRequest;
 import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
@@ -72,11 +71,12 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/check-in")
-    public ResponseEntity<ReservationActionPlaceholderResponse> checkIn(
-            @PathVariable Long id,
-            @Valid @RequestBody ReservationCheckInRequest request) {
-        ReservationActionPlaceholderResponse response = reservationService.checkIn(id, request);
+    @PostMapping("/check-in/{confirmationNumber}")
+    public ResponseEntity<ReservationResponse> checkIn(
+            @PathVariable String confirmationNumber) {
+
+        ReservationResponse response = reservationService.checkIn(confirmationNumber);
+
         return ResponseEntity.ok(response);
     }
 }
