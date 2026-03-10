@@ -13,27 +13,27 @@ import { useTranslation } from 'react-i18next';
 
 function SkeletonRow() {
     return (
-        <tr className="border-b">
+        <tr className="border-b border-zinc-100">
             <td className="p-4">
                 <div className="space-y-2">
-                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-32 bg-zinc-200 rounded-full animate-pulse" />
+                    <div className="h-3 w-48 bg-zinc-100 rounded-full animate-pulse" />
                 </div>
             </td>
             <td className="p-4">
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-zinc-200 rounded-full animate-pulse" />
             </td>
             <td className="p-4">
-                <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-6 w-20 bg-zinc-200 rounded-full animate-pulse" />
             </td>
             <td className="p-4">
-                <div className="h-5 w-14 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-6 w-20 bg-zinc-200 rounded-full animate-pulse" />
             </td>
             <td className="p-4 text-end">
-                <div className="flex justify-end gap-1">
-                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                <div className="flex justify-end gap-2">
+                    <div className="h-8 w-8 bg-zinc-200 rounded-full animate-pulse" />
+                    <div className="h-8 w-20 bg-zinc-200 rounded-full animate-pulse" />
+                    <div className="h-8 w-16 bg-zinc-200 rounded-full animate-pulse" />
                 </div>
             </td>
         </tr>
@@ -222,62 +222,62 @@ export default function Staff() {
     const isFiltersActive = Object.values(filters).some(value => value !== '' && value !== null && value !== 'all');
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 bg-zinc-50 h-full">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">{t('staffManagementTitle') || 'Staff Management'}</h1>
-                    <p className="text-gray-500 mt-1 text-sm">{t('staffManagementDesc') || 'Manage staff members and their accounts.'}</p>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-black">{t('staffManagementTitle') || 'Staff Management'}</h1>
+                    <p className="text-zinc-500 mt-2 text-sm font-medium">{t('staffManagementDesc') || 'Manage staff members and their accounts.'}</p>
                 </div>
-                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto">
-                    <UserPlus className="h-4 w-4" /> {t('addStaffBtn') || 'Add Staff'}
+                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto rounded-full bg-black hover:bg-zinc-800 text-white font-extrabold h-12 px-6 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5">
+                    <UserPlus className="h-5 w-5" /> {t('addStaffBtn') || 'Add Staff'}
                 </Button>
             </div>
 
             {successMessage && (
-                <Alert className="bg-green-50 border-green-200 text-green-800">
-                    <Info className="h-4 w-4 text-green-600" />
-                    <AlertTitle>{t('success') || 'Success'}</AlertTitle>
-                    <AlertDescription>{successMessage}</AlertDescription>
+                <Alert className="bg-zinc-100 border-zinc-200 text-black rounded-3xl p-5">
+                    <Info className="h-5 w-5 text-black" />
+                    <AlertTitle className="font-extrabold tracking-tight">{t('success') || 'Success'}</AlertTitle>
+                    <AlertDescription className="font-medium">{successMessage}</AlertDescription>
                 </Alert>
             )}
 
             {(error || pageError) && (
-                <Alert variant="destructive">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>{t('error') || 'Error'}</AlertTitle>
-                    <AlertDescription>{pageError || error}</AlertDescription>
+                <Alert variant="destructive" className="rounded-3xl p-5">
+                    <Info className="h-5 w-5" />
+                    <AlertTitle className="font-extrabold tracking-tight">{t('error') || 'Error'}</AlertTitle>
+                    <AlertDescription className="font-medium">{pageError || error}</AlertDescription>
                 </Alert>
             )}
 
             {/* Filters Card */}
-            <Card className="border shadow-sm">
-                <CardHeader className="py-4 flex flex-row items-center justify-between bg-gray-50/50 border-b">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-700">
+            <Card className="border-zinc-200 shadow-sm rounded-3xl overflow-hidden bg-white">
+                <CardHeader className="py-5 flex flex-row items-center justify-between bg-zinc-50 border-b border-zinc-100">
+                    <CardTitle className="text-sm font-extrabold flex items-center gap-2 text-black uppercase tracking-widest">
                         <Filter className="h-4 w-4" /> {t('filters') || 'Filters'}
                     </CardTitle>
                     {isFiltersActive && (
-                        <Button variant="ghost" size="sm" onClick={handleResetFilters} className="text-xs text-gray-500 hover:text-gray-700">
+                        <Button variant="ghost" size="sm" onClick={handleResetFilters} className="text-xs font-bold text-zinc-500 hover:text-black rounded-full h-8">
                             <X className="h-3 w-3 mr-1" /> {t('resetFilters') || 'Reset Filters'}
                         </Button>
                     )}
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="space-y-2">
-                            <Label className="text-xs text-gray-500 uppercase tracking-wider">{t('searchLabel') || 'Search'}</Label>
+                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('searchLabel') || 'Search'}</Label>
                             <Input
                                 placeholder={t('searchPlaceholder') || "Name or email..."}
                                 value={filters.search}
                                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                                className="h-9"
+                                className="h-12 rounded-full border-zinc-200 focus-visible:ring-black px-5"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs text-gray-500 uppercase tracking-wider">{t('roleLabel') || 'Role'}</Label>
+                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('roleLabel') || 'Role'}</Label>
                             <select 
                                 value={filters.role} 
                                 onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                className="flex h-12 w-full rounded-full border border-zinc-200 bg-white px-5 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black"
                             >
                                 <option value="all">{t('allRoles') || 'All Roles'}</option>
                                 <option value="MANAGER">{t('managerRole') || 'Manager'}</option>
@@ -285,23 +285,23 @@ export default function Staff() {
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs text-gray-500 uppercase tracking-wider">{t('departmentLabel') || 'Department'}</Label>
+                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('departmentLabel') || 'Department'}</Label>
                             <Input
                                 placeholder={t('deptPlaceholder') || "e.g. Front Desk"}
                                 value={filters.department}
                                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                                className="h-9"
+                                className="h-12 rounded-full border-zinc-200 focus-visible:ring-black px-5"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs text-gray-500 uppercase tracking-wider">{t('statusLabel') || 'Status'}</Label>
+                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('statusLabel') || 'Status'}</Label>
                             <select 
                                 value={filters.active === null ? 'all' : filters.active.toString()} 
                                 onChange={(e) => {
                                     const v = e.target.value;
                                     setFilters({ ...filters, active: v === 'all' ? null : v === 'true' });
                                 }}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                className="flex h-12 w-full rounded-full border border-zinc-200 bg-white px-5 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black"
                             >
                                 <option value="all">{t('allStatus') || 'All Status'}</option>
                                 <option value="true">{t('activeOnly') || 'Active Only'}</option>
@@ -313,9 +313,12 @@ export default function Staff() {
             </Card>
 
             {/* Staff List Card */}
-            <Card className="border shadow-sm">
-                <CardHeader className="py-4 border-b bg-gray-50/50">
-                    <CardTitle className="text-base font-semibold">{t('allStaff') || 'All Staff'} <Badge variant="secondary" className="ml-2 font-normal">{filteredStaff.length}</Badge></CardTitle>
+            <Card className="border-zinc-200 shadow-sm rounded-3xl overflow-hidden bg-white">
+                <CardHeader className="py-5 border-b border-zinc-100 bg-zinc-50">
+                    <CardTitle className="text-lg font-extrabold text-black uppercase tracking-widest flex items-center gap-3">
+                        {t('allStaff') || 'All Staff'} 
+                        <Badge variant="secondary" className="font-extrabold rounded-full bg-black text-white px-3 py-1 text-xs">{filteredStaff.length}</Badge>
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     {loading && !staff.length ? (
@@ -381,31 +384,31 @@ export default function Staff() {
                                                 <td className="p-4 align-middle">
                                                     {s.department}
                                                 </td>
-                                                <td className="p-4 align-middle">
-                                                    <Badge variant="secondary" className={s.role === 'MANAGER' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-gray-50 text-gray-700 border-gray-100'}>
+                                                <td className="p-5 align-middle">
+                                                    <Badge variant="secondary" className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${s.role === 'MANAGER' ? 'bg-black text-white border-transparent' : 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}>
                                                         {s.role === 'MANAGER' ? (t('managerRole') || 'Manager') : (t('staffRole') || 'Staff')}
                                                     </Badge>
                                                 </td>
-                                                <td className="p-4 align-middle">
+                                                <td className="p-5 align-middle">
                                                     {s.active ? (
-                                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 pr-2">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 ml-0.5" />
+                                                        <Badge variant="outline" className="rounded-full bg-white text-black border-zinc-300 shadow-sm gap-1.5 pr-3 py-1 text-[10px] font-extrabold uppercase tracking-wider h-6">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-black ml-1" />
                                                             {t('activeBadge') || 'Active'}
                                                         </Badge>
                                                     ) : (
-                                                        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200 gap-1 pr-2">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400 ml-0.5" />
+                                                        <Badge variant="outline" className="rounded-full bg-zinc-100 text-zinc-500 border-transparent gap-1.5 pr-3 py-1 text-[10px] font-extrabold uppercase tracking-wider h-6">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 ml-1" />
                                                             {t('inactiveBadge') || 'Inactive'}
                                                         </Badge>
                                                     )}
                                                 </td>
-                                                <td className="p-4 align-middle text-end">
-                                                    <div className="flex justify-end gap-1">
+                                                <td className="p-5 align-middle text-end">
+                                                    <div className="flex justify-end gap-2 text-zinc-500">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => handleEdit(s)}
-                                                            className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                                                            className="h-10 w-10 rounded-full hover:bg-zinc-100 hover:text-black transition-colors"
                                                             title={t('editStaffTitle') || "Edit staff"}
                                                         >
                                                             <Pencil className="h-4 w-4" />
@@ -416,22 +419,22 @@ export default function Staff() {
                                                                 size="sm"
                                                                 onClick={() => handleDeactivate(s)}
                                                                 disabled={isCurrentUser}
-                                                                className={`h-8 px-3 ${isCurrentUser ? 'opacity-50 cursor-not-allowed' : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'}`}
+                                                                className={`h-10 rounded-full px-4 border border-zinc-200 ${isCurrentUser ? 'opacity-50 cursor-not-allowed text-zinc-400' : 'text-zinc-600 hover:text-black hover:bg-zinc-50'}`}
                                                                 title={isCurrentUser ? (t('cannotDeactivateSelf') || "Cannot deactivate your own account") : (t('deactivateBtn') || "Deactivate")}
                                                             >
-                                                                <PowerOff className="h-4 w-4 me-1" />
-                                                                <span className="text-xs">{t('deactivateBtn') || 'Deactivate'}</span>
+                                                                <PowerOff className="h-4 w-4 me-2" />
+                                                                <span className="text-xs font-bold uppercase tracking-widest">{t('deactivateBtn') || 'Deactivate'}</span>
                                                             </Button>
                                                         ) : (
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => handleActivate(s)}
-                                                                className="h-8 px-3 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                className="h-10 rounded-full px-4 border border-black bg-black text-white hover:bg-zinc-800"
                                                                 title={t('activateBtn') || "Activate"}
                                                             >
-                                                                <Power className="h-4 w-4 me-1" />
-                                                                <span className="text-xs">{t('activateBtn') || 'Activate'}</span>
+                                                                <Power className="h-4 w-4 me-2" />
+                                                                <span className="text-xs font-bold uppercase tracking-widest">{t('activateBtn') || 'Activate'}</span>
                                                             </Button>
                                                         )}
                                                         {isManager && (
@@ -439,11 +442,11 @@ export default function Staff() {
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => handleResetLoginAttempts(s)}
-                                                                className="h-8 px-3 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                                className="h-10 rounded-full px-4 border border-zinc-200 text-zinc-600 hover:text-black hover:bg-zinc-50"
                                                                 title={t('unlockAccountBtn') || "Unlock account"}
                                                             >
-                                                                <RefreshCw className="h-4 w-4 me-1" />
-                                                                <span className="text-xs">{t('unlockBtn') || 'Unlock'}</span>
+                                                                <RefreshCw className="h-4 w-4 me-2" />
+                                                                <span className="text-xs font-bold uppercase tracking-widest">{t('unlockBtn') || 'Unlock'}</span>
                                                             </Button>
                                                         )}
                                                     </div>
@@ -553,17 +556,17 @@ export default function Staff() {
                         </div>
 
                         {!editingId && (
-                            <Alert className="bg-blue-50 border-blue-200">
-                                <Info className="h-4 w-4 text-blue-600" />
-                                <AlertDescription className="text-blue-800">
+                            <Alert className="bg-zinc-50 border-zinc-200 rounded-3xl p-5 mt-4">
+                                <Info className="h-5 w-5 text-black" />
+                                <AlertDescription className="text-zinc-600 font-medium">
                                     {t('autoGenPwdMsg') || "A secure password will be automatically generated and sent to the staff member's email."}
                                 </AlertDescription>
                             </Alert>
                         )}
 
-                        <SheetFooter className="mt-8">
-                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)}>{t('cancel') || 'Cancel'}</Button>
-                            <Button type="submit" disabled={isSubmitting}>
+                        <SheetFooter className="mt-8 pt-6 border-t border-zinc-100 flex gap-3 sm:justify-end">
+                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full h-12 px-6 font-extrabold text-black border-zinc-200 hover:bg-zinc-50 uppercase tracking-widest text-xs">{t('cancel') || 'Cancel'}</Button>
+                            <Button type="submit" disabled={isSubmitting} className="rounded-full h-12 px-6 font-extrabold text-white bg-black hover:bg-zinc-800 uppercase tracking-widest text-xs">
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? (t('updatingMsg') || 'Updating...') : (t('creatingMsg') || 'Creating...')}

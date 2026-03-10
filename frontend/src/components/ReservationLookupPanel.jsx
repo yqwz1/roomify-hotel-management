@@ -52,14 +52,14 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
     };
 
     return (
-        <div className={`rounded-xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}>
-            <h2 className="mb-1 text-sm font-semibold text-gray-700">{t('reservationLookup')}</h2>
-            <p className="mb-4 text-xs text-gray-400">{t('searchDescription')}</p>
+        <div className={`rounded-3xl border border-zinc-200 bg-white p-6 md:p-8 ${className}`}>
+            <h2 className="mb-2 text-xl font-extrabold text-black tracking-tight">{t('reservationLookup')}</h2>
+            <p className="mb-6 text-sm text-zinc-500">{t('searchDescription')}</p>
 
             {/* Search Form */}
             <form onSubmit={handleSearch} className="flex gap-2">
                 <div className="relative flex-1">
-                    <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-gray-400">
+                    <span className="pointer-events-none absolute inset-y-0 start-4 flex items-center text-zinc-400">
                         🔍
                     </span>
                     <input
@@ -68,13 +68,13 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                         value={query}
                         onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
                         placeholder={t('searchPlaceholder')}
-                        className="w-full rounded-lg border border-gray-300 py-2 ps-9 pe-3 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        className="w-full rounded-full border border-zinc-200 bg-zinc-50 py-3 ps-12 pe-5 text-sm font-medium text-black focus:bg-white focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
                     />
                 </div>
                 <button
                     type="submit"
                     disabled={loading || !query.trim()}
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                 >
                     {loading ? (
                         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -87,30 +87,37 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
 
             {/* Error */}
             {error && (
-                <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+                <p className="mt-4 rounded-full bg-red-50 border border-red-100 px-5 py-3 text-sm font-medium text-red-900">{error}</p>
             )}
 
             {/* Loading skeleton */}
             {loading && (
-                <div className="mt-4 space-y-2">
-                    {[1, 2].map((i) => (
-                        <div key={i} className="h-14 animate-pulse rounded-lg bg-gray-100" />
+                <div className="mt-6 space-y-3">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex flex-col gap-3 rounded-3xl border border-zinc-100 p-5 animate-pulse bg-white">
+                            <div className="flex justify-between items-center">
+                                <div className="h-5 w-1/3 rounded bg-zinc-200" />
+                                <div className="h-6 w-16 rounded-full bg-zinc-200" />
+                            </div>
+                            <div className="h-4 w-1/4 rounded bg-zinc-100" />
+                            <div className="h-4 w-2/3 rounded bg-zinc-100" />
+                        </div>
                     ))}
                 </div>
             )}
 
             {/* No results */}
             {!loading && searched && results.length === 0 && (
-                <div className="mt-4 flex flex-col items-center rounded-lg border border-dashed border-gray-200 py-8 text-center">
-                    <span className="text-3xl">🔍</span>
-                    <p className="mt-2 text-sm font-medium text-gray-600">{t('noReservations')}</p>
-                    <p className="text-xs text-gray-400">{t('tryDifferent')}</p>
+                <div className="mt-6 flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 py-12 px-6 text-center">
+                    <span className="text-4xl mb-4 opacity-50">🔍</span>
+                    <p className="text-base font-bold text-black">{t('noReservations')}</p>
+                    <p className="mt-1 text-sm text-zinc-500">{t('tryDifferent')}</p>
                 </div>
             )}
 
             {/* Results */}
             {!loading && results.length > 0 && (
-                <ul className="mt-4 divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
+                <ul className="mt-6 space-y-3">
                     {results.map((r, idx) => {
                         // The search API might return a single object, we'll map over it
                         // if we wrapped it in an array in the service.
@@ -124,25 +131,23 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
                         const checkOut = isMock ? r.checkOutDate : r.dates?.checkOut;
 
                         return (
-                        <li key={id}>
+                        <li key={id} className="relative">
                             <button
                                 onClick={() => onSelect?.(r)}
-                                className="w-full px-4 py-3 text-start transition hover:bg-blue-50 focus:outline-none focus:bg-blue-50"
+                                className="w-full flex flex-col text-start rounded-3xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 hover:shadow-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                             >
-                                <div className="flex items-center justify-between gap-2">
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">{guestName}</p>
-                                        <p className="text-xs text-gray-500 font-mono mt-0.5"><LtrText>{conf}</LtrText></p>
-                                        <p className="text-xs text-gray-400 mt-0.5 flex gap-1 items-center flex-wrap">
-                                            <span>{t('room')} <LtrText>{roomNum}</LtrText></span>
-                                            <span>·</span>
-                                            <span className="font-mono text-[10px]"><LtrText>{formatDate(checkIn)}</LtrText></span>
-                                            <span>→</span>
-                                            <span className="font-mono text-[10px]"><LtrText>{formatDate(checkOut)}</LtrText></span>
-                                        </p>
-                                    </div>
+                                <div className="flex items-center justify-between w-full mb-3">
+                                    <p className="text-lg font-bold text-black">{guestName}</p>
                                     <StatusPill status={r.status} size="sm" />
                                 </div>
+                                <p className="text-sm font-mono text-zinc-500 mb-2"><LtrText>{conf}</LtrText></p>
+                                <p className="text-sm text-zinc-500 flex gap-2 items-center flex-wrap">
+                                    <span className="font-semibold text-black">{t('room')} <LtrText>{roomNum}</LtrText></span>
+                                    <span className="text-zinc-300">•</span>
+                                    <span className="font-mono text-xs font-semibold"><LtrText>{formatDate(checkIn)}</LtrText></span>
+                                    <span className="text-zinc-400">→</span>
+                                    <span className="font-mono text-xs font-semibold"><LtrText>{formatDate(checkOut)}</LtrText></span>
+                                </p>
                             </button>
                         </li>
                     )})}

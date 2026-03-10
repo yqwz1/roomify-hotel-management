@@ -7,28 +7,28 @@ const Unauthorized = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-            <Card className="w-full max-w-md shadow-lg border-red-100">
-                <CardHeader className="text-center">
-                    <div className="flex justify-center mb-4">
-                        <div className="p-3 bg-red-100 rounded-full">
-                            <ShieldAlert className="h-8 w-8 text-red-600" />
+        <div className="h-full flex items-center justify-center bg-zinc-50 px-4 sm:px-6 lg:px-8">
+            <Card className="w-full max-w-md shadow-sm border-zinc-200 rounded-3xl overflow-hidden bg-white">
+                <CardHeader className="text-center pt-10">
+                    <div className="flex justify-center mb-6">
+                        <div className="p-4 bg-zinc-100 rounded-full border border-zinc-200">
+                            <ShieldAlert className="h-10 w-10 text-black" />
                         </div>
                     </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900">Access Denied</CardTitle>
-                    <CardDescription className="text-base text-gray-600">
+                    <CardTitle className="text-3xl font-extrabold text-black tracking-tight">Access Denied</CardTitle>
+                    <CardDescription className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-2">
                         403 - Unauthorized Request
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-center text-gray-600">
+                    <p className="text-center text-zinc-600 font-medium pb-2">
                         You do not have the necessary permissions to view this page. If you believe this is an error, please contact your administrator.
                     </p>
                 </CardContent>
-                <CardFooter className="flex justify-center">
+                <CardFooter className="flex justify-center pb-10">
                     <Button
                         onClick={() => navigate('/')}
-                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full sm:w-auto bg-black hover:bg-zinc-800 text-white rounded-full font-bold px-8 py-6 h-auto shadow-md transition-all hover:-translate-y-0.5"
                     >
                         Return to Dashboard
                     </Button>

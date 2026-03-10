@@ -18,7 +18,7 @@ const PrivateRoute = ({ children, allowedRoles = null }) => {
     // Show loading spinner while checking authentication status
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="h-full flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <Spinner size="lg" />
                     <p className="mt-4 text-gray-600">Loading...</p>

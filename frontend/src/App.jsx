@@ -32,7 +32,7 @@ import Layout from './components/Layout';
  */
 const AppContent = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full bg-gray-50">
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />

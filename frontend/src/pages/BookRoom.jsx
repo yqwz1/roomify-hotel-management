@@ -31,34 +31,34 @@ const typeIcon = (name = '') => {
 function ConflictBanner({ message, checkIn, checkOut, room, onSearchAlternatives }) {
     const { t } = useTranslation();
     return (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-            <div className="flex items-start gap-3">
-                <span className="text-2xl shrink-0">🚫</span>
+        <div className="rounded-3xl border border-red-200 bg-red-50 p-6 sm:p-8">
+            <div className="flex items-start gap-4">
+                <span className="text-3xl shrink-0 mt-0.5">🚫</span>
                 <div className="flex-1">
-                    <p className="font-bold text-red-800">{t('roomAlreadyBooked') || 'Room Already Booked'}</p>
-                    <p className="mt-1 text-sm text-red-700">{message}</p>
+                    <p className="text-lg font-extrabold text-red-900">{t('roomAlreadyBooked') || 'Room Already Booked'}</p>
+                    <p className="mt-1 text-sm font-medium text-red-700">{message}</p>
 
                     {/* Suggestion */}
-                    <div className="mt-4 rounded-lg border border-red-200 bg-white p-4">
-                        <p className="text-sm font-semibold text-gray-700 mb-2">{t('whatYouCanDo') || '💡 What you can do:'}</p>
-                        <ul className="space-y-2 text-sm text-gray-600">
-                            <li className="flex items-start gap-2">
-                                <span className="text-red-500 shrink-0">•</span>
+                    <div className="mt-6 rounded-2xl border border-red-100 bg-white p-5 shadow-sm">
+                        <p className="text-xs font-bold text-red-800 mb-3 uppercase tracking-widest">{t('whatYouCanDo') || '💡 What you can do:'}</p>
+                        <ul className="space-y-3 text-sm font-medium text-black">
+                            <li className="flex items-start gap-3 w-full">
+                                <span className="text-red-500 shrink-0 select-none">•</span>
                                 <span>
                                     {t('tryDifferentDatesRoom', { room: room?.roomNumber }) || `Try different dates for Room ${room?.roomNumber}`}
                                 </span>
                             </li>
-                            <li className="flex items-start gap-2">
-                                <span className="text-red-500 shrink-0">•</span>
+                            <li className="flex items-start gap-3 w-full">
+                                <span className="text-red-500 shrink-0 select-none">•</span>
                                 <span>{t('searchAlternativeRooms') || 'Search for alternative rooms available for your dates'}</span>
                             </li>
                         </ul>
 
-                        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
                             <button
                                 type="button"
                                 onClick={onSearchAlternatives}
-                                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="flex-1 rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white transition-all shadow-sm hover:bg-red-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
                             >
                                 {t('searchAlternativeBtn') || '🔍 Search Alternative Rooms'}
                             </button>
@@ -73,8 +73,8 @@ function ConflictBanner({ message, checkIn, checkOut, room, onSearchAlternatives
 // ─── Field ────────────────────────────────────────────────────────────────────
 function Field({ id, label, required, type = 'text', placeholder, value, onChange, hint }) {
     return (
-        <div className="flex flex-col gap-1.5">
-            <label htmlFor={id} className="text-xs font-medium text-gray-600">
+        <div className="flex flex-col gap-2">
+            <label htmlFor={id} className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             <input
@@ -83,9 +83,9 @@ function Field({ id, label, required, type = 'text', placeholder, value, onChang
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="rounded-full border border-zinc-200 bg-zinc-50 px-5 py-3.5 text-sm font-medium text-black transition-colors focus:bg-white focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
             />
-            {hint && <p className="text-xs text-gray-400">{hint}</p>}
+            {hint && <p className="text-xs font-medium text-zinc-400 mt-1">{hint}</p>}
         </div>
     );
 }
@@ -195,15 +195,15 @@ export default function BookRoom() {
     // ── No room found ─────────────────────────────────────────────────────────
     if (!room && !roomId) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8 text-center">
-                <span className="text-5xl mb-4">🏨</span>
-                <h1 className="text-xl font-bold text-gray-800 mb-2">{t('noRoomSelected') || 'No room selected'}</h1>
-                <p className="text-gray-500 mb-6 text-sm">
+            <div className="h-full bg-zinc-50 flex flex-col items-center justify-center p-8 text-center">
+                <span className="text-6xl mb-6">🏨</span>
+                <h1 className="text-3xl font-extrabold text-black mb-2">{t('noRoomSelected') || 'No room selected'}</h1>
+                <p className="text-zinc-500 mb-8 font-medium text-sm">
                     {t('plzGoBackRoomSearch') || 'Please go back to Room Search and click Book Now on a room.'}
                 </p>
                 <button
                     onClick={() => navigate('/search')}
-                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                    className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white hover:bg-zinc-800 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 >
                     {t('backToRoomSearch') || '← Back to Room Search'}
                 </button>
@@ -213,20 +213,20 @@ export default function BookRoom() {
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
-            <div className="mx-auto max-w-4xl">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
+            <div className="mx-auto max-w-5xl">
 
                 {/* Header */}
-                <div className="mb-6 flex items-center gap-3">
+                <div className="mb-8 flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100"
+                        className="rounded-full border border-zinc-200 px-5 py-2 text-sm font-bold text-black bg-white shadow-sm transition-all hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300"
                     >
                         {t('back') || '← Back'}
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">{t('bookARoom') || 'Book a Room'}</h1>
-                        <p className="text-sm text-gray-500">
+                        <h1 className="text-4xl font-extrabold text-black tracking-tight">{t('bookARoom') || 'Book a Room'}</h1>
+                        <p className="text-sm font-medium text-zinc-500 mt-2">
                             {t('fillGuestDetails') || 'Fill in the guest details to complete the reservation.'}
                         </p>
                     </div>
@@ -254,8 +254,8 @@ export default function BookRoom() {
                             <ErrorBanner message={validationError} onClose={() => setValidationError(null)} />
 
                             {/* Dates Card */}
-                            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('stayDates') || 'Stay Dates'}</h2>
+                            <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                                <h2 className="mb-5 text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('stayDates') || 'Stay Dates'}</h2>
                                 <DateRangePicker
                                     checkIn={checkIn}
                                     checkOut={checkOut}
@@ -263,17 +263,17 @@ export default function BookRoom() {
                                     onCheckOutChange={(d) => { setCheckOut(d); setConflictError(null); }}
                                 />
                                 {nights > 0 && (
-                                    <p className="mt-3 text-sm font-medium text-blue-600">
+                                    <p className="mt-4 text-sm font-extrabold text-black">
                                         📆 {t('nightsCount', { count: nights }) || `${nights} night(s)`}
                                     </p>
                                 )}
                             </div>
 
                             {/* Guest Details Card */}
-                            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('guestDetails') || 'Guest Details'}</h2>
+                            <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                                <h2 className="mb-6 text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('guestDetails') || 'Guest Details'}</h2>
 
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                                     {/* Full Name */}
                                     <div className="sm:col-span-2">
@@ -335,11 +335,11 @@ export default function BookRoom() {
                             <button
                                 type="submit"
                                 disabled={submitting || nights <= 0}
-                                className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-full rounded-full bg-black py-4 text-base font-extrabold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-400 mb-8"
                             >
                                 {submitting
-                                    ? <span className="flex items-center justify-center gap-2">
-                                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                    ? <span className="flex items-center justify-center gap-3">
+                                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                     </svg>
@@ -353,65 +353,65 @@ export default function BookRoom() {
 
                     {/* ── Right: Booking Summary ── */}
                     <div className="lg:col-span-2">
-                        <div className="sticky top-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('bookingSummary') || 'Booking Summary'}</h2>
+                        <div className="sticky top-6 rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                            <h2 className="mb-6 text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('bookingSummary') || 'Booking Summary'}</h2>
 
                             {/* Room thumbnail */}
-                            <div className="mb-4 flex h-28 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100">
-                                <span className="text-5xl">
+                            <div className="mb-5 flex h-40 items-center justify-center rounded-3xl bg-zinc-100">
+                                <span className="text-6xl drop-shadow-sm">
                                     {room ? typeIcon(room.roomType?.name ?? room.type) : '🛏️'}
                                 </span>
                             </div>
 
                             {room ? (
                                 <>
-                                    <p className="text-lg font-bold text-gray-900">{t('roomNum', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</p>
-                                    <p className="text-sm text-gray-500 mb-1">
+                                    <p className="text-2xl font-extrabold text-black">{t('roomNum', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</p>
+                                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mt-1 mb-4">
                                         {room.floor ? `${t('floorNum', { floor: room.floor }) || `Floor ${room.floor}`} · ` : ''}{room.roomType?.name ?? room.type ?? '—'}
                                     </p>
                                     {room.roomType?.description && (
-                                        <p className="text-xs text-gray-400 mb-4 line-clamp-2">{room.roomType.description}</p>
+                                        <p className="text-sm font-medium text-zinc-500 mb-6 line-clamp-3">{room.roomType.description}</p>
                                     )}
                                 </>
                             ) : (
-                                <p className="text-sm text-gray-500 mb-4">{t('roomNum', { number: roomId }) || `Room #${roomId}`}</p>
+                                <p className="text-lg font-bold text-black mb-4">{t('roomNum', { number: roomId }) || `Room #${roomId}`}</p>
                             )}
 
-                            <hr className="my-3 border-gray-100" />
+                            <hr className="my-5 border-zinc-100" />
 
-                            <dl className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <dt className="text-gray-500">{t('ratePerNight') || 'Rate / night'}</dt>
-                                    <dd className="font-semibold text-gray-800">${roomRate.toFixed(2)}</dd>
+                            <dl className="space-y-3 text-sm">
+                                <div className="flex justify-between font-medium">
+                                    <dt className="text-zinc-500">{t('ratePerNight') || 'Rate / night'}</dt>
+                                    <dd className="text-black">${roomRate.toFixed(2)}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-gray-500">{t('nightsLabel') || 'Nights'}</dt>
-                                    <dd className="font-semibold text-gray-800">{nights || '—'}</dd>
+                                <div className="flex justify-between font-medium">
+                                    <dt className="text-zinc-500">{t('nightsLabel') || 'Nights'}</dt>
+                                    <dd className="text-black">{nights || '—'}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-gray-500">{t('subtotal') || 'Subtotal'}</dt>
-                                    <dd className="text-gray-800">${subtotal.toFixed(2)}</dd>
+                                <div className="flex justify-between font-medium">
+                                    <dt className="text-zinc-500">{t('subtotal') || 'Subtotal'}</dt>
+                                    <dd className="text-black">${subtotal.toFixed(2)}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-gray-500">{t('taxes10') || 'Taxes (10%)'}</dt>
-                                    <dd className="text-gray-800">${taxes.toFixed(2)}</dd>
+                                <div className="flex justify-between font-medium">
+                                    <dt className="text-zinc-500">{t('taxes10') || 'Taxes (10%)'}</dt>
+                                    <dd className="text-black">${taxes.toFixed(2)}</dd>
                                 </div>
-                                <div className="flex justify-between border-t border-gray-100 pt-2">
-                                    <dt className="font-bold text-gray-800">{t('total') || 'Total'}</dt>
-                                    <dd className="text-lg font-bold text-blue-700">${totalPrice.toFixed(2)}</dd>
+                                <div className="flex justify-between border-t border-zinc-200 pt-4 mt-2">
+                                    <dt className="text-lg font-extrabold text-black">{t('total') || 'Total'}</dt>
+                                    <dd className="text-2xl font-extrabold text-black">${totalPrice.toFixed(2)}</dd>
                                 </div>
                             </dl>
 
                             {/* Amenities */}
                             {room?.roomType?.amenities && (
-                                <div className="mt-4 flex flex-wrap gap-1">
+                                <div className="mt-6 flex flex-wrap gap-2">
                                     {room.roomType.amenities
                                         .split(',')
                                         .map((a) => a.trim())
                                         .filter(Boolean)
                                         .slice(0, 4)
                                         .map((a) => (
-                                            <span key={a} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                            <span key={a} className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-bold text-black">
                                                 {a}
                                             </span>
                                         ))}

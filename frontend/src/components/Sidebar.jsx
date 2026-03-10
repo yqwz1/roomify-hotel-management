@@ -74,24 +74,24 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Sidebar panel */}
       <aside
         className={`
-          fixed top-0 start-0 z-40 h-screen w-64 bg-slate-900 flex flex-col shadow-xl
+          fixed top-0 start-0 z-40 h-full w-64 bg-black flex flex-col shadow-2xl
           transform transition-transform duration-300 ease-in-out
           md:relative md:translate-x-0 md:flex-shrink-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Brand header */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-slate-700/60">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500">
-              <Hotel className="h-4 w-4 text-white" />
+        <div className="flex items-center justify-between px-6 py-6 border-b border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white">
+              <Hotel className="h-4 w-4 text-black" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">Roomify</span>
+            <span className="text-xl font-extrabold text-white tracking-tight">Roomify</span>
           </div>
           {/* Close button – mobile only */}
           <button
             onClick={onClose}
-            className="md:hidden p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition"
+            className="md:hidden p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -109,14 +109,14 @@ export default function Sidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
+                  flex items-center gap-3 px-4 py-3 rounded-full text-sm font-bold transition-all duration-200
                   ${isActive
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
                 <span>{item.label}</span>
               </Link>
             )
@@ -124,16 +124,16 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Footer – user info */}
-        <div className="px-4 py-4 border-t border-slate-700/60">
+        <div className="px-6 py-5 border-t border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-blue-300 uppercase">
+            <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-bold text-white uppercase">
                 {user?.username?.[0] || user?.email?.[0] || 'U'}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{user?.username || user?.email || t('user')}</p>
-              <p className="text-xs text-slate-400">{roleLabel}</p>
+              <p className="text-sm font-bold text-white truncate">{user?.username || user?.email || t('user')}</p>
+              <p className="text-xs font-medium text-zinc-500">{roleLabel}</p>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 import { Menu, Hotel, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -24,8 +24,8 @@ export default function Header({ onMenuToggle }) {
         : null;
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
-      <div className="flex items-center justify-between h-14 px-4 sm:px-6">
+    <header className="bg-white border-b border-zinc-200 sticky top-0 z-20 flex-shrink-0">
+      <div className="flex items-center justify-between h-16 px-4 md:px-8">
 
         {/* Left: hamburger + brand */}
         <div className="flex items-center gap-3">
@@ -40,30 +40,30 @@ export default function Header({ onMenuToggle }) {
             </button>
           )}
 
-          <Link to="/" className="flex items-center gap-2 text-gray-900">
-            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-blue-600">
+          <Link to="/" className="flex items-center gap-2 text-black">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black">
               <Hotel className="h-4 w-4 text-white" />
             </div>
-            <span className="text-base font-bold tracking-tight text-gray-900 hidden sm:block">
+            <span className="text-xl font-extrabold tracking-tight text-black hidden sm:block">
               Roomify
             </span>
           </Link>
         </div>
 
         {/* Center: Nav links – desktop only */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
+        <nav className="hidden md:flex items-center gap-8">
+          <NavLink to="/" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
             {t('dashboard') || 'Home'}
-          </Link>
+          </NavLink>
           {!isAuthenticated && (
-            <Link to="/bookings" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
+            <NavLink to="/bookings" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
               {t('bookings')}
-            </Link>
+            </NavLink>
           )}
           {isAuthenticated && hasRole('ROLE_MANAGER') && (
-            <Link to="/rooms" className="text-sm text-gray-600 hover:text-blue-600 transition font-medium">
+            <NavLink to="/rooms" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
               {t('rooms')}
-            </Link>
+            </NavLink>
           )}
         </nav>
 
@@ -72,37 +72,37 @@ export default function Header({ onMenuToggle }) {
           <LanguageSwitcher />
           
           {!isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium"
+                className="px-4 py-2 text-sm text-black hover:bg-zinc-100 rounded-full transition font-medium"
               >
                 Login
               </Link>
-              <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+              <button className="px-5 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-medium">
                 Sign Up
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {/* User chip – desktop */}
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-white border border-zinc-200 rounded-full">
+                <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                   <span className="text-[10px] font-bold text-white uppercase">
                     {user?.username?.[0] || user?.email?.[0] || 'U'}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-gray-800 max-w-[120px] truncate">
+                <span className="text-sm font-medium text-black max-w-[120px] truncate">
                   {user?.username || t('user')}
                 </span>
                 {roleLabel && (
-                  <span className="text-xs text-gray-400 border-s border-gray-200 ps-2">{roleLabel}</span>
+                  <span className="text-xs text-zinc-400 border-s border-zinc-200 ps-2">{roleLabel}</span>
                 )}
               </div>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-black rounded-full transition font-medium border border-transparent hover:border-zinc-200"
                 title={t('logout')}
               >
                 <LogOut className="h-4 w-4" />

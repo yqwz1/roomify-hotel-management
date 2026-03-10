@@ -39,40 +39,40 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+            <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
 
                 {/* Header — red accent */}
-                <div className="rounded-t-2xl bg-red-50 border-b border-red-100 px-6 py-4 flex items-start gap-3">
+                <div className="bg-red-50 border-b border-red-100 px-8 py-5 flex items-start gap-4">
                     <span className="text-2xl mt-0.5">🚫</span>
                     <div>
-                        <h2 className="text-base font-bold text-red-900">{t('cancelReservationTitle')}</h2>
-                        <p className="text-xs text-red-600 font-mono"><LtrText>{reservation.confirmationNumber}</LtrText></p>
+                        <h2 className="text-lg font-bold text-red-900">{t('cancelReservationTitle')}</h2>
+                        <p className="text-xs font-bold font-mono text-red-600 mt-1"><LtrText>{reservation.confirmationNumber}</LtrText></p>
                     </div>
                 </div>
 
-                <div className="px-6 py-5 flex flex-col gap-4">
+                <div className="px-8 py-6 flex flex-col gap-5">
                     {/* Warning */}
-                    <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                    <div className="rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 text-sm font-medium text-amber-800">
                         {t('cancelWarning')}
                     </div>
 
                     {/* Summary */}
-                    <div className="rounded-lg bg-gray-50 p-3 text-sm">
-                        <p className="font-semibold text-gray-900">{reservation.guestName}</p>
-                        <p className="text-gray-500 text-xs">{t('room')} <LtrText>{reservation.roomNumber}</LtrText> — <LtrText>{formatDate(reservation.checkInDate, i18n.language)}</LtrText> → <LtrText>{formatDate(reservation.checkOutDate, i18n.language)}</LtrText></p>
-                        <p className="text-gray-500 text-xs">{reservation.nights} {t('nights')} · {t('totalPaid')}: <strong><LtrText>{money(reservation.totalPrice)}</LtrText></strong></p>
+                    <div className="rounded-2xl bg-zinc-50 border border-zinc-200 p-4 text-sm">
+                        <p className="font-bold text-black">{reservation.guestName}</p>
+                        <p className="text-zinc-500 font-medium text-xs mt-1">{t('room')} <LtrText>{reservation.roomNumber}</LtrText> — <LtrText>{formatDate(reservation.checkInDate, i18n.language)}</LtrText> → <LtrText>{formatDate(reservation.checkOutDate, i18n.language)}</LtrText></p>
+                        <p className="text-zinc-500 font-medium text-xs mt-1">{reservation.nights} {t('nights')} · {t('totalPaid')}: <strong className="text-black"><LtrText>{money(reservation.totalPrice)}</LtrText></strong></p>
                     </div>
 
                     {/* Error */}
                     {error && (
-                        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
+                        <div className="rounded-2xl bg-red-50 px-5 py-3 text-sm font-bold text-red-700 border border-red-200">
                             {error}
                         </div>
                     )}
 
                     {/* Cancellation reason */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="cancel-reason" className="text-xs font-medium text-gray-600">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="cancel-reason" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
                             {t('reasonForCancellation')}
                         </label>
                         <textarea
@@ -81,22 +81,22 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                             onChange={(e) => setReason(e.target.value)}
                             placeholder={t('cancelReasonPlaceholder')}
                             rows={3}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 resize-none"
+                            className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-black focus:bg-white focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 resize-none transition-all"
                         />
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 pt-1">
+                    <div className="flex gap-3 pt-2">
                         <button
                             onClick={onClose}
-                            className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            className="flex-1 rounded-full border border-zinc-200 py-3 text-sm font-bold text-black hover:bg-zinc-50 transition focus:outline-none focus:ring-2 focus:ring-zinc-300"
                         >
                             {t('keepReservation')}
                         </button>
                         <button
                             onClick={handleConfirm}
                             disabled={confirming}
-                            className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+                            className="flex-1 rounded-full bg-red-600 py-3 text-sm font-bold text-white transition shadow-sm hover:bg-red-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-red-400"
                         >
                             {confirming ? t('cancelling') : t('yesCancelIt')}
                         </button>
@@ -130,7 +130,7 @@ export default function CancelReservation() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
             <ConfirmationToast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
 
             {showDialog && selected && (
@@ -142,11 +142,13 @@ export default function CancelReservation() {
             )}
 
             {/* Header */}
-            <div className="mb-6 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">{t('back')}</button>
+            <div className="mb-8 flex items-center gap-4">
+                <button onClick={() => navigate(-1)} className="rounded-full border border-zinc-200 px-5 py-2 text-sm font-bold text-black hover:bg-white transition shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300">
+                    {t('back')}
+                </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('cancelReservationTitle')}</h1>
-                    <p className="text-sm text-gray-500">{t('cancelReservationDesc')}</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('cancelReservationTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('cancelReservationDesc')}</p>
                 </div>
             </div>
 
@@ -157,17 +159,17 @@ export default function CancelReservation() {
                 {/* Selected */}
                 <div>
                     {!selected ? (
-                        <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-                            <span className="text-5xl mb-3">🔍</span>
-                            <p className="text-sm font-medium text-gray-600">{t('noReservationSelected')}</p>
-                            <p className="text-xs text-gray-400 mt-1">{t('searchAndSelectToCancel')}</p>
+                        <div className="flex h-full min-h-[250px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent p-12 text-center">
+                            <span className="text-5xl mb-4">🔍</span>
+                            <p className="text-sm font-bold text-black">{t('noReservationSelected')}</p>
+                            <p className="text-xs font-medium text-zinc-500 mt-2">{t('searchAndSelectToCancel')}</p>
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <div className="mb-4 flex items-start justify-between gap-2">
+                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                            <div className="mb-6 flex items-start justify-between gap-2">
                                 <div>
-                                    <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
-                                    <p className="text-xs font-mono text-gray-400"><LtrText>{selected.confirmationNumber}</LtrText></p>
+                                    <p className="text-xl font-extrabold text-black">{selected.guestName}</p>
+                                    <p className="text-xs font-mono font-bold text-zinc-400 mt-1"><LtrText>{selected.confirmationNumber}</LtrText></p>
                                 </div>
                                 <StatusPill status={selected.status} />
                             </div>
@@ -178,19 +180,19 @@ export default function CancelReservation() {
                                 </div>
                             )}
 
-                            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm mb-5">
-                                <div><dt className="text-xs text-gray-400">{t('room')}</dt><dd className="font-semibold">{t('room')} <LtrText>{selected.roomNumber}</LtrText> · {selected.roomTypeName}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('guestEmail')}</dt><dd className="font-semibold truncate">{selected.guestEmail}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('checkInDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkInDate, i18n.language)}</LtrText></dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('checkOutDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkOutDate, i18n.language)}</LtrText></dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('nights')}</dt><dd className="font-semibold">{selected.nights}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('totalPaid')}</dt><dd className="font-bold text-gray-900"><LtrText>{money(selected.totalPrice)}</LtrText></dd></div>
+                            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm mb-6">
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('room')}</dt><dd className="font-bold text-black mt-1">{t('room')} <LtrText>{selected.roomNumber}</LtrText> · {selected.roomTypeName}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('guestEmail')}</dt><dd className="font-bold text-black mt-1 truncate">{selected.guestEmail}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('checkInDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.checkInDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('checkOutDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.checkOutDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('nights')}</dt><dd className="font-bold text-black mt-1">{selected.nights}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('totalPaid')}</dt><dd className="font-extrabold text-lg text-black mt-1"><LtrText>{money(selected.totalPrice)}</LtrText></dd></div>
                             </dl>
 
                             {CANCELLABLE_STATUSES.includes(selected.status) && (
                                 <button
                                     onClick={() => setShowDialog(true)}
-                                    className="w-full rounded-lg bg-red-600 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    className="w-full rounded-full border-2 border-red-600 bg-white hover:bg-red-50 py-4 text-sm font-bold text-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm"
                                 >
                                     {t('cancelThisReservation')}
                                 </button>

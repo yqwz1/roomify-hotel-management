@@ -127,29 +127,29 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+            <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div className="flex items-center justify-between border-b border-zinc-100 px-8 py-5">
                     <div>
-                        <h2 className="text-base font-bold text-gray-900">{t('modifyReservationTitle')}</h2>
-                        <p className="text-xs text-gray-400 font-mono"><LtrText>{reservation.confirmationNumber}</LtrText></p>
+                        <h2 className="text-xl font-extrabold text-black tracking-tight">{t('modifyReservationTitle')}</h2>
+                        <p className="text-xs text-zinc-400 font-mono font-bold mt-1"><LtrText>{reservation.confirmationNumber}</LtrText></p>
                     </div>
-                    <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-300" aria-label="Close">
+                    <button onClick={onClose} className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-black transition focus:outline-none focus:ring-2 focus:ring-zinc-300" aria-label="Close">
                         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                     </button>
                 </div>
 
-                <div className="px-6 py-5 flex flex-col gap-4">
+                <div className="px-8 py-6 flex flex-col gap-5">
                     <ErrorBanner message={error} onClose={() => setError(null)} />
 
                     {/* Current info */}
-                    <div className="rounded-lg bg-gray-50 p-3 text-sm">
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wide">{t('currentBooking')}</p>
-                        <p className="text-gray-700">{t('room')} <strong><LtrText>{reservation.roomNumber}</LtrText></strong> · {reservation.guestName}</p>
-                        <p className="text-gray-500 text-xs"><LtrText>{formatDate(reservation.checkInDate, i18n.language)}</LtrText> → <LtrText>{formatDate(reservation.checkOutDate, i18n.language)}</LtrText> ({reservation.nights} {t('nights')})</p>
+                    <div className="rounded-2xl bg-zinc-50 border border-zinc-200 p-4 text-sm">
+                        <p className="text-xs text-zinc-400 mb-2 font-bold uppercase tracking-widest">{t('currentBooking')}</p>
+                        <p className="text-black font-bold">{t('room')} <strong><LtrText>{reservation.roomNumber}</LtrText></strong> · {reservation.guestName}</p>
+                        <p className="text-zinc-500 font-medium text-xs mt-1"><LtrText>{formatDate(reservation.checkInDate, i18n.language)}</LtrText> → <LtrText>{formatDate(reservation.checkOutDate, i18n.language)}</LtrText> ({reservation.nights} {t('nights')})</p>
                     </div>
 
                     {/* Date change */}
@@ -166,14 +166,14 @@ function ModifyModal({ reservation, onClose, onSave }) {
                     {/* Room change */}
                     {nights > 0 && (
                         <div>
-                            <p className="text-xs font-semibold text-gray-600 mb-2">{t('selectRoom')}</p>
+                            <p className="text-xs font-bold text-zinc-500 mb-3 uppercase tracking-widest">{t('selectRoom')}</p>
                             {loadingRooms ? (
-                                <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+                                <div className="h-12 animate-pulse rounded-full bg-zinc-100" />
                             ) : availableRooms.length > 0 ? (
                                 <select
                                     value={selectedRoomId}
                                     onChange={(e) => setSelectedRoomId(e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                    className="w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold text-black focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
                                 >
                                     {availableRooms.map((r) => (
                                         <option key={r.id} value={r.id}>
@@ -190,19 +190,19 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
                     {/* New price preview */}
                     {nights > 0 && (
-                        <div className="rounded-lg border border-blue-100 bg-blue-50 p-3">
-                            <p className="text-xs font-semibold text-blue-700 mb-2">{t('updatedPricePreview')}</p>
-                            <div className="flex flex-col gap-1 text-sm text-blue-900">
-                                <div className="flex justify-between"><span>{nights} {t('nights')} × <LtrText>{money(selectedRoom?.roomType?.basePrice || reservation.roomRate)}</LtrText></span><span><LtrText>{money(subtotal)}</LtrText></span></div>
-                                <div className="flex justify-between"><span>{t('taxes')}</span><span><LtrText>{money(taxes)}</LtrText></span></div>
-                                <div className="flex justify-between border-t border-blue-200 pt-1 mt-1 font-bold"><span>{t('newTotal')}</span><span><LtrText>{money(totalPrice)}</LtrText></span></div>
+                        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm p-4">
+                            <p className="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-widest">{t('updatedPricePreview')}</p>
+                            <div className="flex flex-col gap-2 text-sm text-black">
+                                <div className="flex justify-between font-medium"><span>{nights} {t('nights')} × <LtrText>{money(selectedRoom?.roomType?.basePrice || reservation.roomRate)}</LtrText></span><span><LtrText>{money(subtotal)}</LtrText></span></div>
+                                <div className="flex justify-between font-medium"><span>{t('taxes')}</span><span><LtrText>{money(taxes)}</LtrText></span></div>
+                                <div className="flex justify-between border-t border-zinc-100 pt-2 mt-1 font-extrabold text-lg"><span>{t('newTotal')}</span><span><LtrText>{money(totalPrice)}</LtrText></span></div>
                             </div>
                         </div>
                     )}
 
                     {/* Reason */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="modify-reason" className="text-xs font-medium text-gray-600">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="modify-reason" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
                             {t('reasonForModification')} <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -211,19 +211,19 @@ function ModifyModal({ reservation, onClose, onSave }) {
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder={t('modifyReasonPlaceholder')}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-black transition focus:bg-white focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
                         />
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 pt-1">
-                        <button onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <div className="flex gap-3 pt-2">
+                        <button onClick={onClose} className="flex-1 rounded-full border border-zinc-200 py-3 text-sm font-bold text-black hover:bg-zinc-50 transition focus:outline-none focus:ring-2 focus:ring-zinc-300">
                             {t('cancel')}
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={saving || unchanged || nights <= 0 || !reason.trim() || !selectedRoomId}
-                            className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="flex-1 rounded-full bg-black py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-500 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-zinc-400"
                         >
                             {saving ? t('saving') : t('saveChanges')}
                         </button>
@@ -257,7 +257,7 @@ export default function ModifyReservation() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
             <ConfirmationToast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
 
             {showModal && selected && (
@@ -269,11 +269,13 @@ export default function ModifyReservation() {
             )}
 
             {/* Header */}
-            <div className="mb-6 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">{t('back')}</button>
+            <div className="mb-8 flex items-center gap-4">
+                <button onClick={() => navigate(-1)} className="rounded-full border border-zinc-200 px-5 py-2 text-sm font-bold text-black hover:bg-white transition shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300">
+                    {t('back')}
+                </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('modifyReservationTitle')}</h1>
-                    <p className="text-sm text-gray-500">{t('modifyReservationDesc')}</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('modifyReservationTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('modifyReservationDesc')}</p>
                 </div>
             </div>
 
@@ -284,17 +286,17 @@ export default function ModifyReservation() {
                 {/* Selected reservation */}
                 <div>
                     {!selected ? (
-                        <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-                            <span className="text-5xl mb-3">📋</span>
-                            <p className="text-sm font-medium text-gray-600">{t('noReservationSelected')}</p>
-                            <p className="text-xs text-gray-400 mt-1">{t('searchAndSelectToModify')}</p>
+                        <div className="flex h-full min-h-[250px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent p-12 text-center">
+                            <span className="text-5xl mb-4">📋</span>
+                            <p className="text-sm font-bold text-black">{t('noReservationSelected')}</p>
+                            <p className="text-xs font-medium text-zinc-500 mt-2">{t('searchAndSelectToModify')}</p>
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                            <div className="mb-4 flex items-start justify-between gap-2">
+                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                            <div className="mb-6 flex items-start justify-between gap-2">
                                 <div>
-                                    <p className="text-lg font-bold text-gray-900">{selected.guestName}</p>
-                                    <p className="text-xs font-mono text-gray-400"><LtrText>{selected.confirmationNumber}</LtrText></p>
+                                    <p className="text-xl font-extrabold text-black">{selected.guestName}</p>
+                                    <p className="text-xs font-mono font-bold text-zinc-400 mt-1"><LtrText>{selected.confirmationNumber}</LtrText></p>
                                 </div>
                                 <StatusPill status={selected.status} />
                             </div>
@@ -305,19 +307,19 @@ export default function ModifyReservation() {
                                 </div>
                             )}
 
-                            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm mb-5">
-                                <div><dt className="text-xs text-gray-400">{t('room')}</dt><dd className="font-semibold">{t('room')} <LtrText>{selected.roomNumber}</LtrText> · {selected.roomTypeName}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('floor')}</dt><dd className="font-semibold">{selected.floor}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('checkInDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkInDate, i18n.language)}</LtrText></dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('checkOutDate')}</dt><dd className="font-semibold"><LtrText>{formatDate(selected.checkOutDate, i18n.language)}</LtrText></dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('nights')}</dt><dd className="font-semibold">{selected.nights}</dd></div>
-                                <div><dt className="text-xs text-gray-400">{t('total')}</dt><dd className="font-bold text-blue-700"><LtrText>{money(selected.totalPrice)}</LtrText></dd></div>
+                            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm mb-6">
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('room')}</dt><dd className="font-bold text-black mt-1">{t('room')} <LtrText>{selected.roomNumber}</LtrText> · {selected.roomTypeName}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('floor')}</dt><dd className="font-bold text-black mt-1">{selected.floor}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('checkInDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.checkInDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('checkOutDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.checkOutDate, i18n.language)}</LtrText></dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('nights')}</dt><dd className="font-bold text-black mt-1">{selected.nights}</dd></div>
+                                <div><dt className="text-xs font-bold uppercase tracking-wide text-zinc-400">{t('total')}</dt><dd className="font-extrabold text-lg text-black mt-1"><LtrText>{money(selected.totalPrice)}</LtrText></dd></div>
                             </dl>
 
                             {MODIFIABLE_STATUSES.includes(selected.status) && (
                                 <button
                                     onClick={() => setShowModal(true)}
-                                    className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    className="w-full rounded-full bg-black py-4 text-sm font-bold text-white transition hover:bg-zinc-800 shadow-md focus:outline-none focus:ring-2 focus:ring-zinc-400"
                                 >
                                     {t('modifyDatesButton')}
                                 </button>

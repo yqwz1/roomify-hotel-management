@@ -24,24 +24,24 @@ export default function Rooms() {
     fetchRooms();
   }, []);
 
-  if (loading) return <div className="p-8">{t('loadingRooms') || 'Loading rooms...'}</div>;
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  if (loading) return <div className="h-full bg-zinc-50 p-6 lg:p-8 font-bold text-zinc-500">{t('loadingRooms') || 'Loading rooms...'}</div>;
+  if (error) return <div className="h-full bg-zinc-50 p-6 lg:p-8 font-bold text-red-600">{error}</div>;
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">{t('roomsTitle') || 'Rooms Management'}</h1>
+    <div className="h-full bg-zinc-50 p-6 lg:p-8">
+      <h1 className="text-4xl font-extrabold mb-8 text-black tracking-tight">{t('roomsTitle') || 'Rooms Management'}</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {rooms.map((room) => (
-          <div key={room.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
+          <div key={room.id} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow p-6 sm:p-8 border border-zinc-200 flex flex-col">
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">{t('roomNumber', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</h3>
-                <p className="text-gray-500 font-medium">{room.type}</p>
+                <h3 className="text-2xl font-extrabold text-black">{t('roomNumber', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</h3>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">{room.type}</p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold 
-                ${room.status === 'Available' ? 'bg-green-100 text-green-800' :
-                  room.status === 'Occupied' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+              <span className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0
+                ${room.status === 'Available' ? 'border border-zinc-300 bg-white text-black' :
+                  room.status === 'Occupied' ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-600'}`}>
                 {room.status === 'Available' && t('statusAvailable') ||
                  room.status === 'Occupied' && t('statusOccupied') ||
                  room.status === 'Needs Cleaning' && t('statusNeedsCleaning') ||
@@ -49,9 +49,9 @@ export default function Rooms() {
               </span>
             </div>
 
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-              <span className="text-2xl font-bold text-gray-900">${room.price}</span>
-              <span className="text-sm text-gray-500">{t('perNight') || 'per night'}</span>
+            <div className="mt-auto flex justify-between items-end pt-5 border-t border-zinc-100">
+              <span className="text-3xl font-extrabold text-black">${room.price}</span>
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1.5">{t('perNight') || 'per night'}</span>
             </div>
           </div>
         ))}

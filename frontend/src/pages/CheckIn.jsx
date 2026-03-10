@@ -82,7 +82,7 @@ export default function CheckIn() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 lg:p-8">
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
             <ConfirmationToast
                 message={toast?.message}
                 type={toast?.type}
@@ -90,13 +90,13 @@ export default function CheckIn() {
             />
 
             {/* Header */}
-            <div className="mb-6 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition">
+            <div className="mb-8 flex items-center gap-4">
+                <button onClick={() => navigate(-1)} className="rounded-full border border-zinc-200 px-5 py-2 text-sm font-bold text-black hover:bg-white transition shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300">
                     {t('back')}
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('checkInTitle')}</h1>
-                    <p className="text-sm text-gray-500">{t('checkInDesc')}</p>
+                    <h1 className="text-3xl font-extrabold text-black">{t('checkInTitle')}</h1>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">{t('checkInDesc')}</p>
                 </div>
             </div>
 
@@ -110,20 +110,20 @@ export default function CheckIn() {
                 {/* Right: Selected reservation + Checklist */}
                 <div>
                     {!selected ? (
-                        <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
-                            <span className="text-5xl mb-3">🏨</span>
-                            <p className="text-sm font-medium text-gray-600">{t('noReservationSelected')}</p>
-                            <p className="text-xs text-gray-400 mt-1">{t('searchAndClickToStart')}</p>
+                        <div className="flex h-full min-h-[250px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent p-12 text-center">
+                            <span className="text-5xl mb-4">🏨</span>
+                            <p className="text-sm font-bold text-black">{t('noReservationSelected')}</p>
+                            <p className="text-xs font-medium text-zinc-500 mt-2">{t('searchAndClickToStart')}</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
 
                             {/* Reservation Card */}
-                            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <div className="mb-4 flex items-start justify-between gap-2">
+                            <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                                <div className="mb-6 flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="text-lg font-bold text-gray-900">{selected.guest?.name || selected.guestName}</p>
-                                        <p className="text-xs font-mono text-gray-400"><LtrText>{selected.confirmationNumber}</LtrText></p>
+                                        <p className="text-xl font-extrabold text-black">{selected.guest?.name || selected.guestName}</p>
+                                        <p className="text-xs font-mono font-bold text-zinc-400 mt-1"><LtrText>{selected.confirmationNumber}</LtrText></p>
                                     </div>
                                     <StatusPill status={selected.status} />
                                 </div>
@@ -134,34 +134,34 @@ export default function CheckIn() {
                                     </div>
                                 )}
 
-                                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                    <div><dt className="text-gray-400 text-xs">{t('room')}</dt><dd className="font-semibold text-gray-900">{t('room')} <LtrText>{selected.room?.roomNumber || selected.roomNumber}</LtrText> · {selected.room?.roomTypeName || selected.roomTypeName}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">{t('floor')}</dt><dd className="font-semibold text-gray-900">{selected.room?.floor || selected.floor}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">{t('checkInDate')}</dt><dd className="font-semibold text-gray-900"><LtrText>{formatDate(selected.dates?.checkIn || selected.checkInDate, i18n.language)}</LtrText></dd></div>
-                                    <div><dt className="text-gray-400 text-xs">{t('checkOutDate')}</dt><dd className="font-semibold text-gray-900"><LtrText>{formatDate(selected.dates?.checkOut || selected.checkOutDate, i18n.language)}</LtrText></dd></div>
-                                    <div><dt className="text-gray-400 text-xs">{t('nights')}</dt><dd className="font-semibold text-gray-900">{selected.dates?.nights || selected.nights}</dd></div>
-                                    <div><dt className="text-gray-400 text-xs">{t('total')}</dt><dd className="font-bold text-blue-700"><LtrText>${Number(selected.pricing?.totalPrice || selected.totalPrice).toFixed(2)}</LtrText></dd></div>
+                                <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm mb-2">
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('room')}</dt><dd className="font-bold text-black mt-1">{t('room')} <LtrText>{selected.room?.roomNumber || selected.roomNumber}</LtrText> · {selected.room?.roomTypeName || selected.roomTypeName}</dd></div>
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('floor')}</dt><dd className="font-bold text-black mt-1">{selected.room?.floor || selected.floor}</dd></div>
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('checkInDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.dates?.checkIn || selected.checkInDate, i18n.language)}</LtrText></dd></div>
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('checkOutDate')}</dt><dd className="font-bold text-black mt-1"><LtrText>{formatDate(selected.dates?.checkOut || selected.checkOutDate, i18n.language)}</LtrText></dd></div>
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('nights')}</dt><dd className="font-bold text-black mt-1">{selected.dates?.nights || selected.nights}</dd></div>
+                                    <div><dt className="text-zinc-400 text-xs font-bold uppercase tracking-wide">{t('total')}</dt><dd className="font-extrabold text-zinc-900 mt-1"><LtrText>${Number(selected.pricing?.totalPrice || selected.totalPrice).toFixed(2)}</LtrText></dd></div>
                                 </dl>
                             </div>
 
                             {/* Checklist */}
                             {CHECKINABLE_STATUSES.includes(selected.status) && (
-                                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                    <h3 className="mb-1 text-sm font-semibold text-gray-700">{t('preCheckInChecklist')}</h3>
-                                    <p className="mb-4 text-xs text-gray-400">{t('completeAllItems')}</p>
+                                <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+                                    <h3 className="mb-1 text-sm font-bold text-black uppercase tracking-wide">{t('preCheckInChecklist')}</h3>
+                                    <p className="mb-5 text-xs font-medium text-zinc-400">{t('completeAllItems')}</p>
 
-                                    <ul className="space-y-2">
+                                    <ul className="space-y-3">
                                         {CHECKLIST_ITEMS.map((item) => (
                                             <li key={item.id}>
-                                                <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-gray-50">
+                                                <label className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition border border-transparent hover:border-zinc-200 hover:bg-zinc-50">
                                                     <input
                                                         type="checkbox"
                                                         id={`check-${item.id}`}
                                                         checked={!!checklist[item.id]}
                                                         onChange={() => toggleCheck(item.id)}
-                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400"
+                                                        className="h-5 w-5 rounded-full border-zinc-300 text-black focus:ring-black/10"
                                                     />
-                                                    <span className={`text-sm ${checklist[item.id] ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                                                    <span className={`text-sm font-bold ${checklist[item.id] ? 'text-zinc-400 line-through' : 'text-black'}`}>
                                                         {t(item.id === 'keys' ? 'roomKeysPrepared' : 
                                                            item.id === 'clean' ? 'roomCleaned' : 
                                                            item.id === 'id' ? 'guestIdVerified' : 
@@ -174,14 +174,14 @@ export default function CheckIn() {
                                     </ul>
 
                                     {/* Progress bar */}
-                                    <div className="mt-4">
-                                        <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                    <div className="mt-6">
+                                        <div className="flex justify-between text-xs font-bold text-zinc-400 mb-2">
                                             <span>{t('progress')}</span>
                                             <span>{Object.values(checklist).filter(Boolean).length}/{CHECKLIST_ITEMS.length}</span>
                                         </div>
-                                        <div className="h-1.5 w-full rounded-full bg-gray-100">
+                                        <div className="h-2 w-full rounded-full bg-zinc-100">
                                             <div
-                                                className="h-1.5 rounded-full bg-blue-500 transition-all duration-300"
+                                                className="h-2 rounded-full bg-black transition-all duration-300"
                                                 style={{ width: `${(Object.values(checklist).filter(Boolean).length / CHECKLIST_ITEMS.length) * 100}%` }}
                                             />
                                         </div>
@@ -194,7 +194,7 @@ export default function CheckIn() {
                                 <button
                                     onClick={handleCheckIn}
                                     disabled={!canCheckIn || submitting}
-                                    className="w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                    className="w-full rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-400"
                                 >
                                     {submitting
                                         ? <span className="flex items-center justify-center gap-2">
