@@ -118,7 +118,7 @@ const LoginPage = () => {
                         <span className="text-black font-black text-3xl tracking-tighter">Roomify</span>
                     </div>
 
-                    <div className="mb-10 text-center lg:text-left">
+                    <div className="mb-10 text-center lg:text-start">
                         <h2 className="text-3xl font-extrabold text-black tracking-tight" role="heading" aria-level="1">
                             {t('signInToAccount') || 'Sign in to your account'}
                         </h2>
@@ -151,7 +151,7 @@ const LoginPage = () => {
                                 className={`h-12 text-sm rounded-full px-5 border ${errors.email ? 'border-red-500 focus-visible:ring-red-300' : 'border-zinc-300 focus-visible:ring-black'}`}
                             />
                             {errors.email && (
-                                <p className="text-xs font-bold text-red-500 mt-1 pl-4">{errors.email}</p>
+                                <p className="text-xs font-bold text-red-500 mt-1 ps-4">{errors.email}</p>
                             )}
                         </div>
 
@@ -170,7 +170,7 @@ const LoginPage = () => {
                                 className={`h-12 text-sm rounded-full px-5 border ${errors.password ? 'border-red-500 focus-visible:ring-red-300' : 'border-zinc-300 focus-visible:ring-black'}`}
                             />
                             {errors.password && (
-                                <p className="text-xs font-bold text-red-500 mt-1 pl-4">{errors.password}</p>
+                                <p className="text-xs font-bold text-red-500 mt-1 ps-4">{errors.password}</p>
                             )}
                         </div>
 
@@ -194,8 +194,8 @@ const LoginPage = () => {
                     <div className="mt-8 p-5 bg-zinc-50 border border-zinc-200 rounded-3xl text-center">
                         <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">{t('demoCredentials') || 'Demo Credentials'}</p>
                         <div className="flex flex-col gap-1 items-center">
-                            <p className="text-sm font-medium text-zinc-600">{t('managerLabel') || 'Manager:'} <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ml-1">admin@roomify.com</span></p>
-                            <p className="text-sm font-medium text-zinc-600">{t('password') || 'Password'}: <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ml-1">password123</span></p>
+                            <p className="text-sm font-medium text-zinc-600">{t('managerLabel') || 'Manager:'} <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ms-1">admin@roomify.com</span></p>
+                            <p className="text-sm font-medium text-zinc-600">{t('password') || 'Password'}: <span className="font-mono text-black font-bold px-2 py-0.5 bg-zinc-200 rounded-full text-xs ms-1">password123</span></p>
                         </div>
                     </div>
                 </div>
