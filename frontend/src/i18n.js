@@ -35,7 +35,7 @@ const resources = {
       "noReservations": "No reservations found",
       "tryDifferent": "Try a different confirmation number or guest name.",
       "room": "Room",
-      
+
       "back": "← Back",
       "checkInTitle": "Check-In",
       "checkInDesc": "Look up a reservation and complete the guest check-in process.",
@@ -64,11 +64,11 @@ const resources = {
       "checkOutLabel": "Check-Out",
       "dismissError": "Dismiss error",
       "dismissToast": "Dismiss",
-      
+
       "roleManager": "Manager",
       "roleStaff": "Staff",
       "roleGuest": "Guest",
-      
+
       "roomTypes": "Room Types",
       "staffMenu": "Staff",
       "manageRooms": "Manage Rooms",
@@ -104,6 +104,16 @@ const resources = {
       "invalidEmail": "Please enter a valid email address",
       "passwordRequired": "Password is required",
       "loginFailedDefault": "Login failed. Please check your credentials.",
+      "forgotPassword": "Forgot password?",
+      "dontHaveAccount": "Don't have an account?",
+      "signUpLink": "Sign up",
+      "createAccountTitle": "Create your account",
+      "createAccountDesc": "Complete the following form to create the account",
+      "emailHint": "We will contact you via this email. Make sure to enter it correctly.",
+      "passwordHint": "Must be at least 8 characters.",
+      "createAccountBtn": "Create account",
+      "alreadyHaveAccount": "Have an account?",
+      "signInLink": "Sign in",
 
       "filters": "Filters",
       "allStatuses": "All Statuses",
@@ -479,11 +489,11 @@ const resources = {
       "checkOutLabel": "تاريخ الخروج",
       "dismissError": "تجاهل الخطأ",
       "dismissToast": "تجاهل",
-      
+
       "roleManager": "مدير",
       "roleStaff": "موظف",
       "roleGuest": "ضيف",
-      
+
       "roomTypes": "أنواع الغرف",
       "staffMenu": "الموظفين",
       "manageRooms": "إدارة الغرف",
@@ -519,6 +529,16 @@ const resources = {
       "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح",
       "passwordRequired": "كلمة المرور مطلوبة",
       "loginFailedDefault": "فشل تسجيل الدخول. يرجى التحقق من بياناتك.",
+      "forgotPassword": "هل نسيت كلمة المرور؟",
+      "dontHaveAccount": "ليس لديك حساب؟",
+      "signUpLink": "أنشئ حسابًا",
+      "createAccountTitle": "أنشئ حسابك",
+      "createAccountDesc": "أكمل النموذج التالي لإنشاء الحساب",
+      "emailHint": "سنتواصل معك عبر هذا البريد الإلكتروني. تأكد من إدخاله بشكل صحيح.",
+      "passwordHint": "يجب أن تكون 8 أحرف على الأقل.",
+      "createAccountBtn": "إنشاء حساب",
+      "alreadyHaveAccount": "لديك حساب؟",
+      "signInLink": "تسجيل دخول",
 
       "filters": "تصفية",
       "allStatuses": "جميع الحالات",
