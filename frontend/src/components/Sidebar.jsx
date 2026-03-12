@@ -108,12 +108,12 @@ export default function Sidebar({ isOpen, onClose }) {
                 className={`
                   flex items-center gap-3 px-4 py-3 rounded-full text-sm font-bold transition-all duration-200
                   ${isActive
-                    ? 'bg-white text-black shadow-sm'
+                    ? 'bg-white text-rose-900 shadow-sm'
                     : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
+                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-rose-900' : 'text-zinc-500'}`} />
                 <span>{item.label}</span>
               </Link>
             )

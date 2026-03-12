@@ -6,7 +6,7 @@ export default function Layout({ children, showSidebar = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-zinc-50 overflow-hidden font-sans">
       <Header onMenuToggle={() => setSidebarOpen(prev => !prev)} />
 
       <div className="flex flex-1 overflow-hidden">
