@@ -24,6 +24,9 @@ import ConfirmationPage from './pages/ConfirmationPage'
 import CheckIn from './pages/CheckIn'
 import ModifyReservation from './pages/ModifyReservation'
 import CancelReservation from './pages/CancelReservation'
+import Checkout from './pages/Checkout'
+import RoomStatus from './pages/RoomStatus'
+import InvoicePreview from './pages/InvoicePreview'
 
 import Layout from './components/Layout';
 
@@ -155,6 +158,32 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
               <Layout showSidebar={true}><CancelReservation /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Current Sprint: UI Scaffolding & Navigation */}
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><Checkout /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/room-status"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><RoomStatus /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/invoice-preview"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><InvoicePreview /></Layout>
             </ProtectedRoute>
           }
         />

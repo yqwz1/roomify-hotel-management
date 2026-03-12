@@ -67,18 +67,15 @@ export default function Header({ onMenuToggle }) {
         {/* Right: auth actions */}
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
-          
+
           {!isAuthenticated ? (
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-4 py-2 text-sm text-black hover:bg-zinc-100 rounded-full transition font-medium"
+                className="px-6 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-bold"
               >
-                Login
+                {t('signIn') || 'Sign In'}
               </Link>
-              <button className="px-5 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-medium">
-                Sign Up
-              </button>
             </div>
           ) : (
             <div className="flex items-center gap-3">

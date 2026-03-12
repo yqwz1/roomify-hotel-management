@@ -16,23 +16,26 @@ import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional
 public class BillingService {
 
     private static final Logger log = LoggerFactory.getLogger(BillingService.class);
-
     private static final int MONEY_SCALE = 2;
     private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
 
     private final ReservationRepository reservationRepository;
+    private final AuditService auditService;
     private final BigDecimal vatRate;
 
     public BillingService(
             ReservationRepository reservationRepository,
+            AuditService auditService,
             @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
         this.reservationRepository = reservationRepository;
+        this.auditService = auditService;
         this.vatRate = vatRate;
     }
 
@@ -41,35 +44,42 @@ public class BillingService {
             BigDecimal serviceCharges,
             BigDecimal discountAmount) {
 
-        Reservation reservation = reservationRepository.findByConfirmationNumber(confirmationNumber)
+        String normalized = normaliseConfirmationNumber(confirmationNumber);
+        Reservation reservation = reservationRepository.findByConfirmationNumber(normalized)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
-        BigDecimal svcCharges = sanitise(serviceCharges);
-        BigDecimal discount = sanitise(discountAmount);
+        BigDecimal safeServiceCharges = sanitise(serviceCharges);
+        BigDecimal safeDiscount = sanitise(discountAmount);
 
-        long nights = Math.max(1, ChronoUnit.DAYS.between(
-                reservation.getCheckInDate(), reservation.getCheckOutDate()));
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(), reservation.getCheckOutDate());
 
         BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice()
                 .setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal roomCharge = roomRate
-                .multiply(BigDecimal.valueOf(nights))
+        BigDecimal roomCharge = roomRate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal subtotal = roomCharge.add(svcCharges).setScale(MONEY_SCALE, ROUNDING);
-        BigDecimal taxableBase = subtotal.subtract(discount).max(BigDecimal.ZERO).setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal vatBase = roomCharge.add(safeServiceCharges)
+                .setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal vatAmount = vatBase.multiply(vatRate)
+                .setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal vatAmount = taxableBase.multiply(vatRate).setScale(MONEY_SCALE, ROUNDING);
-
-        BigDecimal balanceDue = taxableBase.add(vatAmount).setScale(MONEY_SCALE, ROUNDING);
-
-        log.info("Bill Calculated - Confirmation: {}, Nights: {}, Subtotal: {}, Discount: {}, TaxableBase: {}, VAT: {}, BalanceDue: {}",
-                confirmationNumber, nights, subtotal, discount, taxableBase, vatAmount, balanceDue);
+        BigDecimal balanceDue = vatBase.add(vatAmount).subtract(safeDiscount)
+                .setScale(MONEY_SCALE, ROUNDING);
 
         List<BillLineItem> lineItems = buildLineItems(
-                nights, roomRate, roomCharge, svcCharges, vatRate, vatAmount, discount, balanceDue);
+                nights, roomRate, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+
+        String metadata = String.format(
+                "nights=%d roomCharge=%s svcCharges=%s vatAmount=%s discount=%s balanceDue=%s",
+                nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+        auditService.log("BILL_CALCULATED", normalized, metadata);
+
+        log.info(
+                "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={}",
+                normalized, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
 
         return new BillResponse(
                 reservation.getConfirmationNumber(),
@@ -80,10 +90,10 @@ public class BillingService {
                 nights,
                 roomRate,
                 roomCharge,
-                svcCharges,
+                safeServiceCharges,
                 vatRate,
                 vatAmount,
-                discount,
+                safeDiscount,
                 balanceDue,
                 lineItems);
     }
@@ -92,33 +102,31 @@ public class BillingService {
             long nights,
             BigDecimal roomRate,
             BigDecimal roomCharge,
-            BigDecimal svcCharges,
-            BigDecimal vatRate,
+            BigDecimal serviceCharges,
             BigDecimal vatAmount,
             BigDecimal discount,
             BigDecimal balanceDue) {
 
         List<BillLineItem> items = new ArrayList<>();
-
         items.add(new BillLineItem(
-                String.format("Room Charge (%d night%s × %s)", nights, nights == 1 ? "" : "s", roomRate),
+                String.format("Room Charge (%d night%s x %s)", nights, nights == 1 ? "" : "s", roomRate),
                 roomCharge,
                 false));
 
-        if (svcCharges.compareTo(BigDecimal.ZERO) > 0) {
-            items.add(new BillLineItem("Additional Service Charges", svcCharges, false));
+        if (serviceCharges.compareTo(BigDecimal.ZERO) > 0) {
+            items.add(new BillLineItem("Additional Service Charges", serviceCharges, false));
         }
+
+        String vatPct = vatRate.multiply(BigDecimal.valueOf(100))
+                .stripTrailingZeros()
+                .toPlainString();
+        items.add(new BillLineItem("VAT (" + vatPct + "%)", vatAmount, false));
 
         if (discount.compareTo(BigDecimal.ZERO) > 0) {
             items.add(new BillLineItem("Discount", discount, true));
         }
 
-        String vatPct = vatRate.multiply(BigDecimal.valueOf(100))
-                .stripTrailingZeros().toPlainString();
-        items.add(new BillLineItem("VAT (" + vatPct + "%)", vatAmount, false));
-
         items.add(new BillLineItem("Balance Due", balanceDue, false));
-
         return items;
     }
 
@@ -126,5 +134,12 @@ public class BillingService {
         return (value == null || value.compareTo(BigDecimal.ZERO) < 0)
                 ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
                 : value.setScale(MONEY_SCALE, ROUNDING);
+    }
+
+    private String normaliseConfirmationNumber(String confirmationNumber) {
+        if (confirmationNumber == null || confirmationNumber.isBlank()) {
+            throw new IllegalArgumentException("Confirmation number is required");
+        }
+        return confirmationNumber.trim().toUpperCase(Locale.ROOT);
     }
 }

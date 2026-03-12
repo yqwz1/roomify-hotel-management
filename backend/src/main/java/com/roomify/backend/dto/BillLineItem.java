@@ -2,27 +2,30 @@ package com.roomify.backend.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * A single line on the itemised bill rendered to the frontend.
+ */
 public class BillLineItem {
 
-    private String description;
+    private String label;
     private BigDecimal amount;
-    private boolean isCredit;
+    private boolean credit;
 
     public BillLineItem() {
     }
 
-    public BillLineItem(String description, BigDecimal amount, boolean isCredit) {
-        this.description = description;
+    public BillLineItem(String label, BigDecimal amount, boolean credit) {
+        this.label = label;
         this.amount = amount;
-        this.isCredit = isCredit;
+        this.credit = credit;
     }
 
-    public String getDescription() {
-        return description;
+    public String getLabel() {
+        return label;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public BigDecimal getAmount() {
@@ -34,10 +37,10 @@ public class BillLineItem {
     }
 
     public boolean isCredit() {
-        return isCredit;
+        return credit;
     }
 
     public void setCredit(boolean credit) {
-        isCredit = credit;
+        this.credit = credit;
     }
 }

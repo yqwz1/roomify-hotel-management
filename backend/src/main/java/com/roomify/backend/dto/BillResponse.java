@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Full itemised bill breakdown for a reservation.
+ */
 public class BillResponse {
 
     private String confirmationNumber;
@@ -17,7 +20,7 @@ public class BillResponse {
     private BigDecimal serviceCharges;
     private BigDecimal vatRate;
     private BigDecimal vatAmount;
-    private BigDecimal discount;
+    private BigDecimal discountAmount;
     private BigDecimal balanceDue;
     private List<BillLineItem> lineItems;
 
@@ -36,7 +39,7 @@ public class BillResponse {
             BigDecimal serviceCharges,
             BigDecimal vatRate,
             BigDecimal vatAmount,
-            BigDecimal discount,
+            BigDecimal discountAmount,
             BigDecimal balanceDue,
             List<BillLineItem> lineItems) {
         this.confirmationNumber = confirmationNumber;
@@ -50,7 +53,7 @@ public class BillResponse {
         this.serviceCharges = serviceCharges;
         this.vatRate = vatRate;
         this.vatAmount = vatAmount;
-        this.discount = discount;
+        this.discountAmount = discountAmount;
         this.balanceDue = balanceDue;
         this.lineItems = lineItems;
     }
@@ -143,12 +146,12 @@ public class BillResponse {
         this.vatAmount = vatAmount;
     }
 
-    public BigDecimal getDiscount() {
-        return discount;
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
     }
 
-    public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
     }
 
     public BigDecimal getBalanceDue() {

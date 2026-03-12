@@ -54,8 +54,6 @@ public class RoomService {
 
         /**
          * Get all rooms with optional filters.
-         * Filters are optional and applied server-side.
-         * typeName matches room type name (e.g. "Deluxe", "Suite").
          */
         public List<RoomResponse> findAll(String status,
                         Integer floor,
@@ -90,7 +88,6 @@ public class RoomService {
                 Room existing = roomRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 
-                // Check room number uniqueness if changed
                 if (!existing.getRoomNumber().equals(request.getRoomNumber())
                                 && roomRepository.existsByRoomNumber(request.getRoomNumber())) {
 
@@ -98,7 +95,6 @@ public class RoomService {
                                         "Room with number '" + request.getRoomNumber() + "' already exists");
                 }
 
-                // Update room type if changed
                 if (!existing.getRoomType().getId().equals(request.getRoomTypeId())) {
                         RoomType newRoomType = roomTypeRepository.findById(request.getRoomTypeId())
                                         .orElseThrow(() -> new ResourceNotFoundException(
@@ -132,7 +128,6 @@ public class RoomService {
 
         /**
          * Delete a room by ID.
-         * Prevent deleting OCCUPIED rooms.
          */
         public void delete(Long id) {
 
@@ -153,11 +148,58 @@ public class RoomService {
         private void validateStatusTransition(RoomStatus current,
                         RoomStatus target) {
 
-                if (current == RoomStatus.OCCUPIED
+                // Occupied rooms cannot be manually modified
+                if (current == RoomStatus.OCCUPIED) {
+                        throw new IllegalStateException(
+                                        "Occupied rooms cannot be manually modified");
+                }
+
+                boolean validTransition = false;
+
+                // NeedsCleaning → Available
+                if (current == RoomStatus.NEEDS_CLEANING
+                                && target == RoomStatus.AVAILABLE) {
+                        validTransition = true;
+                }
+
+                // Available → UnderMaintenance
+                if (current == RoomStatus.AVAILABLE
+                                && target == RoomStatus.UNDER_MAINTENANCE) {
+                        validTransition = true;
+                }
+
+                // UnderMaintenance → Available
+                if (current == RoomStatus.UNDER_MAINTENANCE
+                                && target == RoomStatus.AVAILABLE) {
+                        validTransition = true;
+                }
+
+                if (!validTransition) {
+                        throw new IllegalStateException(
+                                        "Invalid room status transition: "
+                                                        + current + " -> " + target);
+                }
+
+                // Hook for housekeeping or maintenance notifications
+                housekeepingHook(current, target);
+        }
+
+        /**
+         * Hook for housekeeping / maintenance notifications.
+         */
+        private void housekeepingHook(RoomStatus current,
+                        RoomStatus target) {
+
+                if (current == RoomStatus.NEEDS_CLEANING
                                 && target == RoomStatus.AVAILABLE) {
 
-                        throw new IllegalStateException(
-                                        "Cannot change status from OCCUPIED to AVAILABLE directly");
+                        System.out.println("Housekeeping finished cleaning. Room is now available.");
+                }
+
+                if (current == RoomStatus.AVAILABLE
+                                && target == RoomStatus.UNDER_MAINTENANCE) {
+
+                        System.out.println("Room moved to maintenance.");
                 }
         }
 

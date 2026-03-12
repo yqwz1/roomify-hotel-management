@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eeeeee;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>ROOMIFY HOTEL</h1>
+
+    <h2>Invoice</h2>
+
+    <p><b>Guest:</b> [[${guest}]]</p>
+    <p><b>Email:</b> [[${email}]]</p>
+    <p><b>Confirmation:</b> [[${confirmation}]]</p>
+
+    <br>
+
+    <table>
+
+        <tr>
+            <th>Room</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Total</th>
+        </tr>
+
+        <tr>
+            <td>[[${room}]]</td>
+            <td>[[${checkin}]]</td>
+            <td>[[${checkout}]]</td>
+            <td>$[[${total}]]</td>
+        </tr>
+
+    </table>
+
+    <br>
+
+    <p>Thank you for choosing Roomify.</p>
+
+</body>
+
+</html>
