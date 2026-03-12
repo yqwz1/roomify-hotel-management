@@ -328,6 +328,19 @@ public class ReservationService {
         return toResponse(reservation, nights, rate, subtotal, taxes);
     }
 
+    public ReservationActionPlaceholderResponse checkOut(String confirmationNumber) {
+
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        return toPlaceholderResponse(
+                reservation,
+                "checkout",
+                "Checkout endpoint scaffolded");
+    }
+
     // =============================
     // GET BY CONFIRMATION NUMBER
     // =============================
