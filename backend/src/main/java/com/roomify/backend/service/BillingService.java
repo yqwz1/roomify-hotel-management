@@ -5,6 +5,8 @@ import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import java.util.List;
 @Service
 @Transactional
 public class BillingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BillingService.class);
 
     private static final int MONEY_SCALE = 2;
     private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
@@ -44,8 +48,8 @@ public class BillingService {
         BigDecimal svcCharges = sanitise(serviceCharges);
         BigDecimal discount = sanitise(discountAmount);
 
-        long nights = ChronoUnit.DAYS.between(
-                reservation.getCheckInDate(), reservation.getCheckOutDate());
+        long nights = Math.max(1, ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(), reservation.getCheckOutDate()));
 
         BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice()
                 .setScale(MONEY_SCALE, ROUNDING);
@@ -54,11 +58,15 @@ public class BillingService {
                 .multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal vatBase = roomCharge.add(svcCharges).setScale(MONEY_SCALE, ROUNDING);
-        BigDecimal vatAmount = vatBase.multiply(vatRate).setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal subtotal = roomCharge.add(svcCharges).setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal taxableBase = subtotal.subtract(discount).max(BigDecimal.ZERO).setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal balanceDue = vatBase.add(vatAmount).subtract(discount)
-                .setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal vatAmount = taxableBase.multiply(vatRate).setScale(MONEY_SCALE, ROUNDING);
+
+        BigDecimal balanceDue = taxableBase.add(vatAmount).setScale(MONEY_SCALE, ROUNDING);
+
+        log.info("Bill Calculated - Confirmation: {}, Nights: {}, Subtotal: {}, Discount: {}, TaxableBase: {}, VAT: {}, BalanceDue: {}",
+                confirmationNumber, nights, subtotal, discount, taxableBase, vatAmount, balanceDue);
 
         List<BillLineItem> lineItems = buildLineItems(
                 nights, roomRate, roomCharge, svcCharges, vatRate, vatAmount, discount, balanceDue);
@@ -101,13 +109,13 @@ public class BillingService {
             items.add(new BillLineItem("Additional Service Charges", svcCharges, false));
         }
 
-        String vatPct = vatRate.multiply(BigDecimal.valueOf(100))
-                .stripTrailingZeros().toPlainString();
-        items.add(new BillLineItem("VAT (" + vatPct + "%)", vatAmount, false));
-
         if (discount.compareTo(BigDecimal.ZERO) > 0) {
             items.add(new BillLineItem("Discount", discount, true));
         }
+
+        String vatPct = vatRate.multiply(BigDecimal.valueOf(100))
+                .stripTrailingZeros().toPlainString();
+        items.add(new BillLineItem("VAT (" + vatPct + "%)", vatAmount, false));
 
         items.add(new BillLineItem("Balance Due", balanceDue, false));
 

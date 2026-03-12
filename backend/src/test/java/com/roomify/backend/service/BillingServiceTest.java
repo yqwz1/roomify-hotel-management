@@ -71,35 +71,37 @@ class BillingServiceTest {
 
         // 3 nights @ 125.55 = 376.65
         // Service charges = 45.33
-        // Base = 376.65 + 45.33 = 421.98
-        // VAT = 421.98 * 0.15 = 63.297 -> half up: 63.30
-        // Total = 421.98 + 63.30 = 485.28
-        // Discount 10.00
-        // Balance = 475.28
+        // Subtotal = 376.65 + 45.33 = 421.98
+        // Discount = 10.00
+        // Taxable Base = 421.98 - 10.00 = 411.98
+        // VAT = 411.98 * 0.15 = 61.797 -> half up: 61.80
+        // Total = 411.98 + 61.80 = 473.78
 
         BillResponse bill = billingService.calculateBill("RM-2", new BigDecimal("45.33"), new BigDecimal("10.00"));
 
         assertThat(bill.getRoomCharge()).isEqualByComparingTo("376.65");
-        assertThat(bill.getVatAmount()).isEqualByComparingTo("63.30");
-        assertThat(bill.getBalanceDue()).isEqualByComparingTo("475.28");
+        assertThat(bill.getVatAmount()).isEqualByComparingTo("61.80");
+        assertThat(bill.getBalanceDue()).isEqualByComparingTo("473.78");
     }
 
     @Test
     void testSample3_HighDiscountEdgeCase() {
-        Reservation res = createSampleReservation("RM-3", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 2), new BigDecimal("50.00"));
+        Reservation res = createSampleReservation("RM-3", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 1), new BigDecimal("50.00"));
         when(reservationRepository.findByConfirmationNumber("RM-3")).thenReturn(Optional.of(res));
 
-        // 1 night @ 50.00 = 50.00
+        // 0 nights -> clamped to 1 night @ 50.00 = 50.00
         // Service = 0
-        // Base = 50.00
-        // VAT = 7.50
-        // Discount = 100.00 (This exceeds the total cost!)
-        // BalanceDue = 50 + 7.50 - 100 = -42.50 (If the hotel owes the customer)
+        // Subtotal = 50.00
+        // Discount = 100.00 (exceeds cost)
+        // Taxable Base = max(0, 50.00 - 100.00) = 0.00
+        // VAT = 0.00
+        // BalanceDue = 0.00
         
         BillResponse bill = billingService.calculateBill("RM-3", BigDecimal.ZERO, new BigDecimal("100.00"));
         
+        assertThat(bill.getNights()).isEqualTo(1);
         assertThat(bill.getRoomCharge()).isEqualByComparingTo("50.00");
-        assertThat(bill.getVatAmount()).isEqualByComparingTo("7.50");
-        assertThat(bill.getBalanceDue()).isEqualByComparingTo("-42.50");
+        assertThat(bill.getVatAmount()).isEqualByComparingTo("0.00");
+        assertThat(bill.getBalanceDue()).isEqualByComparingTo("0.00");
     }
 }
