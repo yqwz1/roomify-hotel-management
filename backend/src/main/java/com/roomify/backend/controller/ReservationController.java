@@ -6,9 +6,12 @@ import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.dto.BillResponse;
+import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,11 +31,14 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationLookupService reservationLookupService;
+    private final BillingService billingService;
 
     public ReservationController(ReservationService reservationService,
-            ReservationLookupService reservationLookupService) {
+            ReservationLookupService reservationLookupService,
+            BillingService billingService) {
         this.reservationService = reservationService;
         this.reservationLookupService = reservationLookupService;
+        this.billingService = billingService;
     }
 
     @PostMapping
@@ -78,5 +84,14 @@ public class ReservationController {
         ReservationResponse response = reservationService.checkIn(confirmationNumber);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{confirmationNumber}/bill")
+    public ResponseEntity<BillResponse> getBill(
+            @PathVariable String confirmationNumber,
+            @RequestParam(defaultValue = "0.00") BigDecimal serviceCharges,
+            @RequestParam(defaultValue = "0.00") BigDecimal discountAmount) {
+        BillResponse bill = billingService.calculateBill(confirmationNumber, serviceCharges, discountAmount);
+        return ResponseEntity.ok(bill);
     }
 }
