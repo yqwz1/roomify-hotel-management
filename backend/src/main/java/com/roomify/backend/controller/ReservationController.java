@@ -11,6 +11,7 @@ import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
