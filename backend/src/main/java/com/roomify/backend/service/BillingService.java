@@ -1,22 +1,23 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.BillLineItem;
-import com.roomify.backend.dto.BillResponse;
-import com.roomify.backend.entity.Reservation;
-import com.roomify.backend.exception.ResourceNotFoundException;
-import com.roomify.backend.repository.ReservationRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.roomify.backend.dto.BillLineItem;
+import com.roomify.backend.dto.BillResponse;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.ReservationRepository;
 
 @Service
 @Transactional
@@ -54,6 +55,9 @@ public class BillingService {
 
         long nights = ChronoUnit.DAYS.between(
                 reservation.getCheckInDate(), reservation.getCheckOutDate());
+        if (nights <= 0) {
+            throw new IllegalArgumentException("Reservation date range is invalid for billing");
+        }
 
         BigDecimal roomRate = reservation.getRoom().getRoomType().getBasePrice()
                 .setScale(MONEY_SCALE, ROUNDING);
@@ -66,8 +70,7 @@ public class BillingService {
         BigDecimal vatAmount = vatBase.multiply(vatRate)
                 .setScale(MONEY_SCALE, ROUNDING);
 
-        BigDecimal balanceDue = vatBase.add(vatAmount).subtract(safeDiscount)
-                .setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal balanceDue = nonNegative(vatBase.add(vatAmount).subtract(safeDiscount));
 
         List<BillLineItem> lineItems = buildLineItems(
                 nights, roomRate, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
@@ -141,5 +144,12 @@ public class BillingService {
             throw new IllegalArgumentException("Confirmation number is required");
         }
         return confirmationNumber.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private BigDecimal nonNegative(BigDecimal value) {
+        BigDecimal scaled = value.setScale(MONEY_SCALE, ROUNDING);
+        return scaled.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
+                : scaled;
     }
 }

@@ -1,26 +1,44 @@
 package com.roomify.backend.service;
 
-import com.roomify.backend.dto.*;
-import com.roomify.backend.entity.*;
-import com.roomify.backend.exception.ResourceConflictException;
-import com.roomify.backend.repository.GuestRepository;
-import com.roomify.backend.repository.ReservationRepository;
-import com.roomify.backend.repository.RoomRepository;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import com.roomify.backenddto.ReservationActionPlaceholderResponsegumentMatchers.*;
+import com.roomify.backenddto.ReservationCancelRequestockito.*;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationGuestRequest;
+import com.roomify.backend.dto.ReservationModifyRequest;
+import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.RoomRepository;
 
 class ReservationServiceTest {
 
@@ -204,6 +222,77 @@ class ReservationServiceTest {
                 ex.getMessage());
     }
 
+    @Test
+    void checkOutShouldThrowConflictWhenInvoiceIsNotFinalized() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setInvoiceFinalized(false);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+
+        assertEquals("Finalized invoice is required before checkout", ex.getMessage());
+    }
+
+    @Test
+    void checkOutShouldThrowConflictWhenOutstandingIsPositive() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setOutstandingBalance(new BigDecimal("25.00"));
+        reservation.setInvoiceFinalized(true);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+
+        assertTrue(ex.getMessage().contains("Outstanding balance must be 0.00 before checkout"));
+    }
+
+    @Test
+    void checkOutShouldReturnIdempotentResponseWhenAlreadyCheckedOut() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_OUT);
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
+
+        assertEquals("check-out", response.getAction());
+        assertEquals("Checkout already completed", response.getMessage());
+        verify(reservationRepository, never()).save(any());
+        verify(roomRepository, never()).save(any());
+    }
+
+    @Test
+    void checkOutShouldSucceedAndPersistCheckoutTimestamp() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
+
+        assertEquals(ReservationStatus.CHECKED_OUT, reservation.getStatus());
+        assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
+        assertNotNull(reservation.getActualCheckOutAt());
+        assertEquals("Checkout completed successfully", response.getMessage());
+    }
+
     // ==============================
     // Helper Methods
     // ==============================
@@ -231,6 +320,9 @@ class ReservationServiceTest {
         reservation.setStatus(status);
         reservation.setConfirmationNumber("RSV-ABC123DEF456");
         reservation.setTotalPrice(new BigDecimal("517.50"));
+        reservation.setTotalPaid(BigDecimal.ZERO);
+        reservation.setOutstandingBalance(new BigDecimal("517.50"));
+        reservation.setInvoiceFinalized(false);
 
         return reservation;
     }

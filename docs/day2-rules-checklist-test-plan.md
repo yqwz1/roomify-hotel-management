@@ -1,7 +1,7 @@
 # Day 2 QA Rules Checklist and Test Plan
 
 Date: March 12, 2026  
-Owner: Wahib (QA / Test Owner)
+Owner: Muaz (QA / Test Owner)
 
 ## Purpose
 Prepare a test-ready checklist and case matrix for:

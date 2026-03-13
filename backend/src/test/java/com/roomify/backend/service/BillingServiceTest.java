@@ -1,5 +1,19 @@
 package com.roomify.backend.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
@@ -9,20 +23,6 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class BillingServiceTest {
 
@@ -95,6 +95,29 @@ class BillingServiceTest {
         assertThrows(
                 ResourceNotFoundException.class,
                 () -> billingService.calculateBill("RSV-MISSING", BigDecimal.ZERO, BigDecimal.ZERO));
+    }
+
+    @Test
+    void calculateBillShouldThrowWhenNightsAreZeroOrNegative() {
+        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 20));
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> billingService.calculateBill("RSV-ABC123", BigDecimal.ZERO, BigDecimal.ZERO));
+    }
+
+    @Test
+    void calculateBillShouldNeverReturnNegativeBalance() {
+        Reservation reservation = buildReservation("150.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 22));
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+
+        BillResponse response = billingService.calculateBill(
+                "RSV-ABC123",
+                BigDecimal.ZERO,
+                new BigDecimal("1000.00"));
+
+        assertEquals(new BigDecimal("0.00"), response.getBalanceDue());
     }
 
     private Reservation buildReservation(String roomRate, LocalDate checkIn, LocalDate checkOut) {

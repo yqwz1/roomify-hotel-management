@@ -122,6 +122,9 @@ public class ReservationService {
                                 : ReservationStatus.PENDING;
                 reservation.setStatus(initialStatus);
                 reservation.setTotalPrice(totalPrice);
+                reservation.setTotalPaid(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP));
+                reservation.setOutstandingBalance(totalPrice);
+                reservation.setInvoiceFinalized(false);
                 reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
                 Reservation saved = reservationRepository.save(reservation);
@@ -198,6 +201,7 @@ public class ReservationService {
                 reservation.setCheckInDate(newCheckIn);
                 reservation.setCheckOutDate(newCheckOut);
                 reservation.setTotalPrice(totalPrice);
+                reservation.setOutstandingBalance(calculateOutstandingBalance(totalPrice, reservation.getTotalPaid()));
                 reservation.setModificationReason(modificationReason);
                 reservation.setModifiedAt(LocalDateTime.now());
 
@@ -352,13 +356,35 @@ public class ReservationService {
                                                 "Reservation not found with confirmation number: "
                                                                 + confirmationNumber));
 
+                if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+                        return toPlaceholderResponse(
+                                        reservation,
+                                        "check-out",
+                                        "Checkout already completed");
+                }
+
                 if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
                         throw new ResourceConflictException("Only CHECKED_IN reservations can be checked out");
                 }
 
                 Room room = reservation.getRoom();
+                if (room.getStatus() != RoomStatus.OCCUPIED) {
+                        throw new ResourceConflictException("Room must be OCCUPIED before checkout");
+                }
+
+                if (!reservation.isInvoiceFinalized()) {
+                        throw new ResourceConflictException("Finalized invoice is required before checkout");
+                }
+
+                BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
+                if (outstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
+                        throw new ResourceConflictException(
+                                        "Outstanding balance must be 0.00 before checkout. Current outstanding: "
+                                                        + outstanding);
+                }
 
                 reservation.setStatus(ReservationStatus.CHECKED_OUT);
+                reservation.setActualCheckOutAt(LocalDateTime.now());
                 reservation.setModifiedAt(LocalDateTime.now());
 
                 room.setStatus(RoomStatus.NEEDS_CLEANING);
@@ -499,6 +525,22 @@ public class ReservationService {
                                 message,
                                 true,
                                 reservation.getStatus());
+        }
+
+        private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
+                BigDecimal safeTotal = safeMoney(total);
+                BigDecimal safePaid = safeMoney(paid);
+                BigDecimal outstanding = safeTotal.subtract(safePaid).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                return outstanding.compareTo(BigDecimal.ZERO) < 0
+                                ? BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)
+                                : outstanding;
+        }
+
+        private BigDecimal safeMoney(BigDecimal value) {
+                if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
+                        return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                }
+                return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
         }
 
         private ReservationResponse toResponse(
