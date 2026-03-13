@@ -91,3 +91,27 @@ export const modifyReservation = async (idOrConfirmation, data) => {
     const response = await api.put(`/reservations/${id}`, data);
     return response.data;
 };
+
+/**
+ * Fetches the itemised bill for a reservation.
+ * @param {string} confirmationNumber - The reservation confirmation number
+ * @param {number} [serviceCharges=0] - Optional additional service charges
+ * @param {number} [discountAmount=0] - Optional discount amount
+ * @returns {Promise<BillResponse>}
+ */
+export const getBill = async (confirmationNumber, serviceCharges = 0, discountAmount = 0) => {
+    const response = await api.get(`/reservations/${confirmationNumber}/bill`, {
+        params: { serviceCharges, discountAmount },
+    });
+    return response.data;
+};
+
+/**
+ * Executes checkout for a reservation. Requires paid balance (balanceDue = 0).
+ * @param {string} confirmationNumber - The reservation confirmation number
+ * @returns {Promise<ReservationActionPlaceholderResponse>}
+ */
+export const checkOutReservation = async (confirmationNumber) => {
+    const response = await api.post(`/reservations/check-out/${confirmationNumber}`);
+    return response.data;
+};
