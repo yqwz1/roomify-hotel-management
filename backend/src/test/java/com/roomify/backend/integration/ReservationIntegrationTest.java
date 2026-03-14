@@ -279,6 +279,9 @@ class ReservationIntegrationTest {
         mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Payment Required"))
+                .andExpect(jsonPath("$.code").value("PAYMENT_BALANCE_DUE"))
+                .andExpect(jsonPath("$.details.paymentStatus").value("PARTIALLY_PAID"))
                 .andExpect(jsonPath("$.message")
                         .value("Outstanding balance must be 0.00 before checkout. Current outstanding: 10.00"));
     }
@@ -304,7 +307,10 @@ class ReservationIntegrationTest {
         mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Finalized invoice is required before checkout"));
+                .andExpect(jsonPath("$.error").value("Payment Required"))
+                .andExpect(jsonPath("$.code").value("PAYMENT_NOT_FINALIZED"))
+                .andExpect(jsonPath("$.details.paymentStatus").value("PAYMENT_PENDING"))
+                .andExpect(jsonPath("$.message").value("Payment must be finalized before checkout"));
     }
 
     @Test

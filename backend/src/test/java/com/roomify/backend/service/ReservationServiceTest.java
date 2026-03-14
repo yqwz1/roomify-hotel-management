@@ -236,7 +236,7 @@ class ReservationServiceTest {
                 ResourceConflictException.class,
                 () -> reservationService.checkOut("RSV-ABC123DEF456"));
 
-        assertEquals("Finalized invoice is required before checkout", ex.getMessage());
+        assertEquals("Payment must be finalized before checkout", ex.getMessage());
     }
 
     @Test
