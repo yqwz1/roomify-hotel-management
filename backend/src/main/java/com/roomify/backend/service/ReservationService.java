@@ -330,10 +330,57 @@ public class ReservationService {
                                 .getBasePrice()
                                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights));
-                BigDecimal taxes = subtotal.multiply(taxRate);
+                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+                BigDecimal taxes = subtotal.multiply(taxRate)
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
                 return toResponse(reservation, nights, rate, subtotal, taxes);
+        }
+
+        // =============================
+        // CHECK-OUT
+        // =============================
+
+        public ReservationActionPlaceholderResponse checkOut(String confirmationNumber) {
+
+                Reservation reservation = reservationRepository
+                                .findByConfirmationNumber(
+                                                confirmationNumber.trim().toUpperCase())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Reservation not found with confirmation number: "
+                                                                + confirmationNumber));
+
+                if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+                        throw new ResourceConflictException("Only CHECKED_IN reservations can be checked out");
+                }
+
+                Room room = reservation.getRoom();
+
+                reservation.setStatus(ReservationStatus.CHECKED_OUT);
+                reservation.setModifiedAt(LocalDateTime.now());
+
+                room.setStatus(RoomStatus.NEEDS_CLEANING);
+
+                roomRepository.save(room);
+                reservationRepository.save(reservation);
+
+                triggerHousekeepingEvent(room);
+
+                auditService.log(
+                                "ROOM_STATUS_CHANGE",
+                                "Room",
+                                "Room " + room.getRoomNumber()
+                                                + " status changed to NEEDS_CLEANING after checkout");
+
+                log.info("Room {} set to NEEDS_CLEANING after checkout",
+                                room.getRoomNumber());
+
+                return toPlaceholderResponse(
+                                reservation,
+                                "check-out",
+                                "Checkout completed successfully");
         }
 
         // =============================
@@ -356,8 +403,11 @@ public class ReservationService {
                                 .getBasePrice()
                                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights));
-                BigDecimal taxes = subtotal.multiply(taxRate);
+                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+                BigDecimal taxes = subtotal.multiply(taxRate)
+                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
                 return toResponse(reservation, nights, rate, subtotal, taxes);
         }
@@ -365,6 +415,17 @@ public class ReservationService {
         // =============================
         // HELPERS
         // =============================
+
+        private void triggerHousekeepingEvent(Room room) {
+
+                log.info("Housekeeping notified: Room {} needs cleaning",
+                                room.getRoomNumber());
+
+                System.out.println(
+                                "Housekeeping notification: Room "
+                                                + room.getRoomNumber()
+                                                + " requires cleaning");
+        }
 
         private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
 

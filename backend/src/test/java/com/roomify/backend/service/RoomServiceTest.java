@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class RoomServiceTest {
@@ -41,39 +43,54 @@ class RoomServiceTest {
         room.setRoomNumber("101");
         room.setRoomType(type);
         room.setFloor(1);
-        room.setStatus(RoomStatus.AVAILABLE);
+        room.setStatus(RoomStatus.NEEDS_CLEANING);
     }
 
-    // Valid transition: AVAILABLE → OCCUPIED
+    // ✅ Valid transition: NEEDS_CLEANING -> AVAILABLE
     @Test
     void shouldAllowValidStatusTransition() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
         when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
 
-        roomService.updateStatus(1L, "OCCUPIED");
+        roomService.updateStatus(1L, "AVAILABLE");
 
-        assertEquals(RoomStatus.OCCUPIED, room.getStatus());
+        assertEquals(RoomStatus.AVAILABLE, room.getStatus());
     }
 
-    // Invalid transition: OCCUPIED → AVAILABLE
+    // ❌ Invalid transition: AVAILABLE -> OCCUPIED
     @Test
     void shouldThrowExceptionForInvalidStatusTransition() {
+        room.setStatus(RoomStatus.AVAILABLE);
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+
+        assertThrows(IllegalStateException.class, () ->
+                roomService.updateStatus(1L, "OCCUPIED")
+        );
+    }
+
+    // ❌ Occupied rooms cannot be manually changed
+    @Test
+    void shouldBlockManualChangesForOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(IllegalStateException.class, () -> roomService.updateStatus(1L, "AVAILABLE"));
+        assertThrows(IllegalStateException.class, () ->
+                roomService.updateStatus(1L, "AVAILABLE")
+        );
     }
 
-    // Delete OCCUPIED room should fail
+    // ❌ Delete OCCUPIED room should fail
     @Test
     void shouldNotDeleteOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(CannotDeleteException.class, () -> roomService.delete(1L));
+        assertThrows(CannotDeleteException.class, () ->
+                roomService.delete(1L)
+        );
     }
 
-    // Delete AVAILABLE room should succeed
+    // ✅ Delete AVAILABLE room should succeed
     @Test
     void shouldDeleteAvailableRoom() {
         room.setStatus(RoomStatus.AVAILABLE);
@@ -84,11 +101,13 @@ class RoomServiceTest {
         verify(roomRepository, times(1)).delete(room);
     }
 
-    // Room not found
+    // ❌ Room not found
     @Test
     void shouldThrowIfRoomNotFound() {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> roomService.delete(1L));
+        assertThrows(ResourceNotFoundException.class, () ->
+                roomService.delete(1L)
+        );
     }
 }
