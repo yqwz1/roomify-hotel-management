@@ -19,15 +19,18 @@ public class InvoiceEmailService {
     private final JavaMailSender mailSender;
     private final InvoicePdfService pdfService;
     private final InvoiceLogService logService;
+    private final InvoiceNumberService invoiceNumberService;
 
     public void sendInvoiceEmail(Reservation reservation) {
+
+        String invoiceNumber = invoiceNumberService.generate();
 
         String to = reservation.getGuest().getEmail();
         String subject = "Roomify Invoice";
 
         try {
 
-            byte[] pdf = pdfService.generateInvoice(reservation);
+            byte[] pdf = pdfService.generateInvoice(reservation, invoiceNumber);
 
             MimeMessage message = mailSender.createMimeMessage();
 
@@ -38,9 +41,7 @@ public class InvoiceEmailService {
             helper.setText("Your reservation invoice is attached.");
 
             helper.addAttachment(
-                    "invoice-" +
-                            reservation.getConfirmationNumber()
-                            + ".pdf",
+                    "invoice-" + invoiceNumber + ".pdf",
                     new ByteArrayResource(pdf));
 
             mailSender.send(message);
@@ -61,7 +62,6 @@ public class InvoiceEmailService {
                     InvoiceDeliveryStatus.FAILED,
                     ex.getMessage());
 
-            throw new RuntimeException("Invoice email failed", ex);
         }
     }
 }
