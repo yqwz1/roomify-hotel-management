@@ -211,6 +211,140 @@ class ReservationIntegrationTest {
     }
 
     @Test
+    void checkOutSuccessWhenInvoiceFinalizedAndOutstandingZero() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk());
+
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setTotalPaid(reservation.getTotalPrice());
+        reservationRepository.save(reservation);
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action").value("check-out"))
+                .andExpect(jsonPath("$.currentStatus").value("CHECKED_OUT"));
+
+        Reservation checkedOut = reservationRepository.findById(created.id()).orElseThrow();
+        Room room = roomRepository.findById(room1Id).orElseThrow();
+
+        assertEquals(ReservationStatus.CHECKED_OUT, checkedOut.getStatus());
+        assertNotNull(checkedOut.getActualCheckOutAt());
+        assertEquals(RoomStatus.NEEDS_CLEANING, room.getStatus());
+    }
+
+    @Test
+    void checkOutBlockedWhenReservationIsNotCheckedIn() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Only CHECKED_IN reservations can be checked out"));
+    }
+
+    @Test
+    void checkOutBlockedWhenOutstandingBalanceIsPositive() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk());
+
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(new BigDecimal("10.00"));
+        reservationRepository.save(reservation);
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message")
+                        .value("Outstanding balance must be 0.00 before checkout. Current outstanding: 10.00"));
+    }
+
+    @Test
+    void checkOutBlockedWhenInvoiceIsNotFinalized() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk());
+
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setInvoiceFinalized(false);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservationRepository.save(reservation);
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Finalized invoice is required before checkout"));
+    }
+
+    @Test
+    void checkOutIsIdempotentWhenAlreadyCheckedOut() throws Exception {
+        CreatedReservation created = createReservation(
+                managerToken,
+                room1Id,
+                LocalDate.now(),
+                LocalDate.now().plusDays(2),
+                "CONFIRMED");
+
+        mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk());
+
+        Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setTotalPaid(reservation.getTotalPrice());
+        reservationRepository.save(reservation);
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Checkout completed successfully"));
+
+        Reservation firstCheckout = reservationRepository.findById(created.id()).orElseThrow();
+        assertNotNull(firstCheckout.getActualCheckOutAt());
+
+        mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Checkout already completed"))
+                .andExpect(jsonPath("$.currentStatus").value("CHECKED_OUT"));
+
+        Reservation secondCheckout = reservationRepository.findById(created.id()).orElseThrow();
+        assertEquals(firstCheckout.getActualCheckOutAt(), secondCheckout.getActualCheckOutAt());
+    }
+
+    @Test
     void cancelFlowUpdatesStatusAndCreatesEmailLogAndAuditEntry() throws Exception {
         CreatedReservation created = createReservation(
                 staffToken,

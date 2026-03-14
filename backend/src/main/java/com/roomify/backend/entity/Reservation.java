@@ -73,6 +73,9 @@ public class Reservation {
     @Column(name = "actual_check_in_date")
     private LocalDate actualCheckInDate;
 
+    @Column(name = "actual_check_out_at")
+    private LocalDateTime actualCheckOutAt;
+
     @Size(max = 500, message = "Cancellation reason cannot exceed 500 characters")
     @Column(name = "cancellation_reason", length = 500)
     private String cancellationReason;
@@ -86,6 +89,19 @@ public class Reservation {
     @Size(max = 500, message = "Modification reason cannot exceed 500 characters")
     @Column(name = "modification_reason", length = 500)
     private String modificationReason;
+
+    @NotNull(message = "Total paid is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total paid cannot be negative")
+    @Column(name = "total_paid", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPaid = BigDecimal.ZERO;
+
+    @NotNull(message = "Outstanding balance is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Outstanding balance cannot be negative")
+    @Column(name = "outstanding_balance", nullable = false, precision = 10, scale = 2)
+    private BigDecimal outstandingBalance = BigDecimal.ZERO;
+
+    @Column(name = "invoice_finalized", nullable = false)
+    private boolean invoiceFinalized = false;
 
     public Reservation() {
     }
@@ -114,6 +130,12 @@ public class Reservation {
         }
         if (modifiedAt == null) {
             modifiedAt = LocalDateTime.now();
+        }
+        if (totalPaid == null || totalPaid.compareTo(BigDecimal.ZERO) < 0) {
+            totalPaid = BigDecimal.ZERO;
+        }
+        if (outstandingBalance == null || outstandingBalance.compareTo(BigDecimal.ZERO) < 0) {
+            outstandingBalance = totalPrice != null ? totalPrice : BigDecimal.ZERO;
         }
     }
 
@@ -210,6 +232,14 @@ public class Reservation {
         this.actualCheckInDate = actualCheckInDate;
     }
 
+    public LocalDateTime getActualCheckOutAt() {
+        return actualCheckOutAt;
+    }
+
+    public void setActualCheckOutAt(LocalDateTime actualCheckOutAt) {
+        this.actualCheckOutAt = actualCheckOutAt;
+    }
+
     public String getCancellationReason() {
         return cancellationReason;
     }
@@ -240,5 +270,29 @@ public class Reservation {
 
     public void setModificationReason(String modificationReason) {
         this.modificationReason = modificationReason;
+    }
+
+    public BigDecimal getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(BigDecimal totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public BigDecimal getOutstandingBalance() {
+        return outstandingBalance;
+    }
+
+    public void setOutstandingBalance(BigDecimal outstandingBalance) {
+        this.outstandingBalance = outstandingBalance;
+    }
+
+    public boolean isInvoiceFinalized() {
+        return invoiceFinalized;
+    }
+
+    public void setInvoiceFinalized(boolean invoiceFinalized) {
+        this.invoiceFinalized = invoiceFinalized;
     }
 }

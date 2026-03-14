@@ -1,8 +1,8 @@
 package com.roomify.backend.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-
 import java.math.BigDecimal;
+
+import jakarta.validation.constraints.DecimalMin;
 
 /**
  * Optional parameters for live bill recalculation.
