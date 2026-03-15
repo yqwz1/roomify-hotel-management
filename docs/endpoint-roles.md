@@ -13,6 +13,11 @@
 - `POST /api/reservations/{id}/cancel` -> `ROLE_MANAGER`, `ROLE_STAFF`
 - `PUT /api/reservations/{id}` -> `ROLE_MANAGER`, `ROLE_STAFF`
 
+## Invoice Endpoints
+- `POST /api/invoices/{reservationId}` -> `ROLE_MANAGER`, `ROLE_STAFF`
+- `GET /api/invoices/pdf/{reservationId}` -> `ROLE_MANAGER`, `ROLE_STAFF`
+- `GET /api/invoices/{reservationId}/delivery-status` -> `ROLE_MANAGER`, `ROLE_STAFF`
+
 ## Notes
 - Reservation routes are guarded at controller level with:
   - `@PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")`

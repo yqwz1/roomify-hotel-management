@@ -1,12 +1,11 @@
 package com.roomify.backend.service;
 
-import org.springframework.stereotype.Service;
-
 import com.roomify.backend.dto.InvoiceDeliveryStatus;
 import com.roomify.backend.entity.InvoiceDeliveryLog;
 import com.roomify.backend.repository.InvoiceDeliveryLogRepository;
-
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +23,7 @@ public class InvoiceDeliveryLogService {
                         subject,
                         confirmationNumber,
                         InvoiceDeliveryStatus.SENT,
-                        null
-                ));
+                        null));
     }
 
     public void logFailure(String email, String confirmationNumber, String error) {
@@ -38,7 +36,10 @@ public class InvoiceDeliveryLogService {
                         subject,
                         confirmationNumber,
                         InvoiceDeliveryStatus.FAILED,
-                        error
-                ));
+                        error));
+    }
+
+    public Optional<InvoiceDeliveryLog> getLatestByConfirmationNumber(String confirmationNumber) {
+        return repository.findFirstByConfirmationNumberOrderByCreatedAtDesc(confirmationNumber);
     }
 }
