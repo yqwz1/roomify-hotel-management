@@ -13,45 +13,38 @@ const InvoicePreview = ({ reservationId: propReservationId }) => {
     const [statusMeta, setStatusMeta] = useState({ errorMessage: null, sentAt: null });
     const [statusError, setStatusError] = useState(null);
     const [downloading, setDownloading] = useState(false);
+    const [pdfError, setPdfError] = useState(null);
+
+    const fetchStatus = useCallback(async () => {
+        if (!reservationId) return;
+        setStatus('LOADING');
+        setStatusError(null);
+        try {
+            const data = await getInvoiceDeliveryStatus(reservationId);
+            setStatus(data.status || 'UNKNOWN');
+            setStatusMeta({
+                errorMessage: data.errorMessage ?? null,
+                sentAt: data.sentAt ?? null,
+            });
+        } catch (err) {
+            if (err?.response?.status === 404) {
+                setStatus('UNKNOWN');
+                setStatusMeta({ errorMessage: null, sentAt: null });
+            } else {
+                setStatus('ERROR');
+                setStatusError('تعذر جلب حالة إرسال البريد الإلكتروني.');
+            }
+        }
+    }, [reservationId]);
 
     useEffect(() => {
-        if (!reservationId) return;
-
-        let isCancelled = false;
-
-        const fetchStatus = async () => {
-            setStatus('LOADING');
-            setStatusError(null);
-            try {
-                const data = await getInvoiceDeliveryStatus(reservationId);
-                if (isCancelled) return;
-                setStatus(data.status || 'UNKNOWN');
-                setStatusMeta({
-                    errorMessage: data.errorMessage ?? null,
-                    sentAt: data.sentAt ?? null,
-                });
-            } catch (err) {
-                if (isCancelled) return;
-                if (err?.response?.status === 404) {
-                    setStatus('UNKNOWN');
-                    setStatusMeta({ errorMessage: null, sentAt: null });
-                } else {
-                    setStatus('ERROR');
-                    setStatusError('تعذر جلب حالة إرسال البريد الإلكتروني.');
-                }
-            }
-        };
-
         fetchStatus();
-
-        return () => {
-            isCancelled = true;
-        };
-    }, [reservationId]);
+    }, [fetchStatus]);
 
     const handleDownload = useCallback(async () => {
         if (!reservationId || downloading) return;
         try {
+            setPdfError(null);
             setDownloading(true);
             const blob = await getInvoicePdf(reservationId);
             const url = window.URL.createObjectURL(blob);
@@ -63,8 +56,8 @@ const InvoicePreview = ({ reservationId: propReservationId }) => {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            // In a real app you might show a toast
             console.error('Failed to download invoice PDF', err);
+            setPdfError('تعذر تحميل الفاتورة. حاول مرة أخرى.');
         } finally {
             setDownloading(false);
         }
@@ -73,6 +66,7 @@ const InvoicePreview = ({ reservationId: propReservationId }) => {
     const handlePrint = useCallback(async () => {
         if (!reservationId) return;
         try {
+            setPdfError(null);
             const blob = await getInvoicePdf(reservationId);
             const url = window.URL.createObjectURL(blob);
             const printWindow = window.open(url);
@@ -81,6 +75,7 @@ const InvoicePreview = ({ reservationId: propReservationId }) => {
             }
         } catch (err) {
             console.error('Failed to open invoice PDF for printing', err);
+            setPdfError('تعذر فتح الفاتورة للطباعة. حاول مرة أخرى.');
         }
     }, [reservationId]);
 
@@ -148,7 +143,12 @@ const InvoicePreview = ({ reservationId: propReservationId }) => {
                         {renderStatusBadge()}
                     </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    {pdfError && (
+                        <div className="w-full sm:w-auto text-xs font-medium text-rose-900 bg-rose-50 border border-rose-200 rounded-full px-4 py-1.5 text-center">
+                            {pdfError}
+                        </div>
+                    )}
                     <Button
                         variant="outline"
                         className="flex items-center gap-2 rounded-full border-rose-900/10 text-rose-900 hover:bg-rose-900 hover:text-white"
