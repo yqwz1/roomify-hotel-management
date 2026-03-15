@@ -23,8 +23,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.roomify.backenddto.ReservationActionPlaceholderResponsegumentMatchers.*;
-import com.roomify.backenddto.ReservationCancelRequestockito.*;
+import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
+import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
