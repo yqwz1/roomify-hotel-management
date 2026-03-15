@@ -185,6 +185,7 @@ const Checkout = () => {
         setBill(null);
         setSearchError(null);
         setCheckoutError(null);
+        setCheckoutSuccess(false);
         setSearchQuery('');
     };
 
@@ -205,7 +206,12 @@ const Checkout = () => {
             />
 
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold font-heading text-black">تسجيل الخروج للضيف</h1>
+                <h1
+                    className="text-3xl font-bold font-heading text-rose-900"
+                    style={{ fontFamily: "'Khat Alharf Alyadawi', system-ui, sans-serif" }}
+                >
+                    تسجيل الخروج للضيف
+                </h1>
             </div>
 
             <Card className="rounded-3xl border-zinc-200 shadow-sm">
@@ -223,13 +229,13 @@ const Checkout = () => {
                                     setSearchError(null);
                                 }}
                                 placeholder="ابحث باسم الضيف أو رقم التأكيد (مثلاً RSV-...)"
-                                className="pe-10 rounded-full border-zinc-300 focus-visible:ring-black"
+                                className="pe-10 rounded-full border-zinc-300 focus-visible:ring-rose-900"
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={searchLoading || !searchQuery?.trim()}
-                            className="rounded-full bg-black hover:bg-zinc-800 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-full bg-rose-900 hover:bg-rose-900/90 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {searchLoading ? 'جاري البحث...' : 'بحث'}
                         </Button>
@@ -318,7 +324,7 @@ const Checkout = () => {
                             <Button
                                 onClick={handleCheckout}
                                 disabled={isCheckoutDisabled}
-                                className="flex items-center gap-2 rounded-full bg-black hover:bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-2 rounded-full bg-rose-900 hover:bg-rose-900/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <CreditCard className="h-4 w-4 ms-2" />
                                 {checkoutLoading
