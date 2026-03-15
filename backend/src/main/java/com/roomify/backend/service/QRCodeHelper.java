@@ -4,32 +4,29 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
 
-import javax.imageio.ImageIO;
+import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
-import org.springframework.stereotype.Component;
+import javax.imageio.ImageIO;
 
-@Component
+@Service
 public class QRCodeHelper {
 
     public byte[] generateQR(String text) {
 
         try {
 
-            QRCodeWriter writer = new QRCodeWriter();
+            int size = 250;
 
-            BitMatrix matrix = writer.encode(
-                    text,
-                    BarcodeFormat.QR_CODE,
-                    200,
-                    200);
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix matrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, size, size);
 
-            BufferedImage image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
-            for (int x = 0; x < 200; x++) {
-                for (int y = 0; y < 200; y++) {
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
 
                     image.setRGB(
                             x,
@@ -39,7 +36,6 @@ public class QRCodeHelper {
             }
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-
             ImageIO.write(image, "PNG", output);
 
             return output.toByteArray();
