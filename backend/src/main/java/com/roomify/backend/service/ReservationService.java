@@ -26,6 +26,7 @@ import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.exception.EmailDeliveryException;
+import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
@@ -373,14 +374,23 @@ public class ReservationService {
                 }
 
                 if (!reservation.isInvoiceFinalized()) {
-                        throw new ResourceConflictException("Finalized invoice is required before checkout");
+                        throw new PaymentValidationException(
+                                        "PAYMENT_NOT_FINALIZED",
+                                        "Payment must be finalized before checkout",
+                                        resolvePaymentStatus(reservation),
+                                        safeMoney(reservation.getOutstandingBalance()),
+                                        reservation.isInvoiceFinalized());
                 }
 
                 BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
                 if (outstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
-                        throw new ResourceConflictException(
+                        throw new PaymentValidationException(
+                                        "PAYMENT_BALANCE_DUE",
                                         "Outstanding balance must be 0.00 before checkout. Current outstanding: "
-                                                        + outstanding);
+                                                        + outstanding,
+                                        resolvePaymentStatus(reservation),
+                                        outstanding,
+                                        reservation.isInvoiceFinalized());
                 }
 
                 reservation.setStatus(ReservationStatus.CHECKED_OUT);
@@ -524,7 +534,10 @@ public class ReservationService {
                                 action,
                                 message,
                                 true,
-                                reservation.getStatus());
+                                reservation.getStatus(),
+                                resolvePaymentStatus(reservation),
+                                safeMoney(reservation.getOutstandingBalance()),
+                                reservation.isInvoiceFinalized());
         }
 
         private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
@@ -541,6 +554,13 @@ public class ReservationService {
                         return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
                 }
                 return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        }
+
+        private String resolvePaymentStatus(Reservation reservation) {
+                return PaymentStatusResolver.resolve(
+                                reservation.getTotalPaid(),
+                                reservation.getOutstandingBalance(),
+                                reservation.isInvoiceFinalized());
         }
 
         private ReservationResponse toResponse(
@@ -565,6 +585,10 @@ public class ReservationService {
                                 rate,
                                 subtotal,
                                 taxes,
-                                reservation.getTotalPrice());
+                                reservation.getTotalPrice(),
+                                safeMoney(reservation.getTotalPaid()),
+                                safeMoney(reservation.getOutstandingBalance()),
+                                reservation.isInvoiceFinalized(),
+                                resolvePaymentStatus(reservation));
         }
 }

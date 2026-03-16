@@ -90,6 +90,25 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
+        @ExceptionHandler(PaymentValidationException.class)
+        public ResponseEntity<ApiError> handlePaymentValidation(
+                        PaymentValidationException ex,
+                        HttpServletRequest request) {
+                Map<String, Object> details = new HashMap<>();
+                details.put("paymentStatus", ex.getPaymentStatus());
+                details.put("outstandingBalance", ex.getOutstandingBalance());
+                details.put("invoiceFinalized", ex.isInvoiceFinalized());
+
+                ApiError error = new ApiError(
+                                HttpStatus.CONFLICT.value(),
+                                "Payment Required",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                ex.getCode(),
+                                details);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
+
         @ExceptionHandler(ResourceConflictException.class)
         public ResponseEntity<ApiError> handleConflict(
                         ResourceConflictException ex,
