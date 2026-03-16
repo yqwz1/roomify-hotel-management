@@ -3,10 +3,6 @@ package com.roomify.backend.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Represents a single audit log record stored in the database.
- * Each record tracks who did what, on which target, and when.
- */
 @Entity
 @Table(name = "audit_logs")
 public class AuditLog {
@@ -15,27 +11,27 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // The user responsible for the action (usually email from JWT)
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String actor;
 
-    // The type of action performed (e.g., LOGIN, CREATE_ROOM, DELETE_BOOKING)
     @Column(nullable = false)
     private String action;
 
-    // The object or resource affected by the action
+    @Column(nullable = false)
     private String target;
 
-    // Extra details stored as text (can be JSON format if needed)
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 1000)
     private String metadata;
 
-    // Time when the action happened (automatically set once)
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "timestamp", nullable = false)
+    private LocalDateTime createdAt;
 
     public AuditLog() {
-        this.timestamp = LocalDateTime.now();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
     }
 
     public AuditLog(String actor, String action, String target, String metadata) {
@@ -43,7 +39,6 @@ public class AuditLog {
         this.action = action;
         this.target = target;
         this.metadata = metadata;
-        this.timestamp = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -54,35 +49,35 @@ public class AuditLog {
         return actor;
     }
 
-    public void setActor(String actor) {
-        this.actor = actor;
-    }
-
     public String getAction() {
         return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
     }
 
     public String getTarget() {
         return target;
     }
 
-    public void setTarget(String target) {
-        this.target = target;
-    }
-
     public String getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 }
