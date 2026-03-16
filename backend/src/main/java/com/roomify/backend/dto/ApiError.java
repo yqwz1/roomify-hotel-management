@@ -11,15 +11,25 @@ public record ApiError(
         String error,
         String message,
         String path,
-        Map<String, String> validationErrors) {
+        String code,
+        Map<String, String> validationErrors,
+        Map<String, Object> details) {
 
-    // Constructor للأخطاء العادية
     public ApiError(int status, String error, String message, String path) {
-        this(Instant.now(), status, error, message, path, null);
+        this(Instant.now(), status, error, message, path, null, null, null);
     }
-    
-    // Constructor لأخطاء الـ Validation
+
     public ApiError(int status, String error, String message, String path, Map<String, String> validationErrors) {
-        this(Instant.now(), status, error, message, path, validationErrors);
+        this(Instant.now(), status, error, message, path, null, validationErrors, null);
+    }
+
+    public ApiError(
+            int status,
+            String error,
+            String message,
+            String path,
+            String code,
+            Map<String, Object> details) {
+        this(Instant.now(), status, error, message, path, code, null, details);
     }
 }

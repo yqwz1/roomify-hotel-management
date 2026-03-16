@@ -279,6 +279,9 @@ class ReservationIntegrationTest {
         mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Payment Required"))
+                .andExpect(jsonPath("$.code").value("PAYMENT_BALANCE_DUE"))
+                .andExpect(jsonPath("$.details.paymentStatus").value("PARTIALLY_PAID"))
                 .andExpect(jsonPath("$.message")
                         .value("Outstanding balance must be 0.00 before checkout. Current outstanding: 10.00"));
     }
@@ -304,7 +307,10 @@ class ReservationIntegrationTest {
         mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Finalized invoice is required before checkout"));
+                .andExpect(jsonPath("$.error").value("Payment Required"))
+                .andExpect(jsonPath("$.code").value("PAYMENT_NOT_FINALIZED"))
+                .andExpect(jsonPath("$.details.paymentStatus").value("PAYMENT_PENDING"))
+                .andExpect(jsonPath("$.message").value("Payment must be finalized before checkout"));
     }
 
     @Test
@@ -406,6 +412,29 @@ class ReservationIntegrationTest {
                 created.confirmationNumber().equals(log.getConfirmationNumber())
                         && "Reservation Cancelled".equals(log.getSubject())
                         && log.getStatus() == EmailDeliveryStatus.FAILED));
+    }
+
+    @Test
+    void createReservationValidationRejectsInvalidInitialStatus() throws Exception {
+        Map<String, Object> request = buildCreateReservationRequest(
+                room1Id,
+                LocalDate.now().plusDays(6).toString(),
+                LocalDate.now().plusDays(8).toString(),
+                "CHECKED_OUT",
+                "Guest " + UUID.randomUUID().toString().substring(0, 6),
+                "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
+                "0500000000",
+                "ID-" + UUID.randomUUID().toString().substring(0, 8),
+                "USA");
+
+        mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.initialStatusValid")
+                        .value("Reservation status must be PENDING or CONFIRMED"));
     }
 
     @Test

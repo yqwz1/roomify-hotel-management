@@ -22,6 +22,10 @@ public class BillResponse {
     private BigDecimal vatAmount;
     private BigDecimal discountAmount;
     private BigDecimal balanceDue;
+    private BigDecimal totalPaid;
+    private BigDecimal outstandingBalance;
+    private boolean invoiceFinalized;
+    private String paymentStatus;
     private List<BillLineItem> lineItems;
 
     public BillResponse() {
@@ -42,6 +46,46 @@ public class BillResponse {
             BigDecimal discountAmount,
             BigDecimal balanceDue,
             List<BillLineItem> lineItems) {
+        this(
+                confirmationNumber,
+                guestName,
+                roomNumber,
+                checkInDate,
+                checkOutDate,
+                nights,
+                roomRate,
+                roomCharge,
+                serviceCharges,
+                vatRate,
+                vatAmount,
+                discountAmount,
+                balanceDue,
+                null,
+                null,
+                false,
+                null,
+                lineItems);
+    }
+
+    public BillResponse(
+            String confirmationNumber,
+            String guestName,
+            String roomNumber,
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            long nights,
+            BigDecimal roomRate,
+            BigDecimal roomCharge,
+            BigDecimal serviceCharges,
+            BigDecimal vatRate,
+            BigDecimal vatAmount,
+            BigDecimal discountAmount,
+            BigDecimal balanceDue,
+            BigDecimal totalPaid,
+            BigDecimal outstandingBalance,
+            boolean invoiceFinalized,
+            String paymentStatus,
+            List<BillLineItem> lineItems) {
         this.confirmationNumber = confirmationNumber;
         this.guestName = guestName;
         this.roomNumber = roomNumber;
@@ -55,6 +99,10 @@ public class BillResponse {
         this.vatAmount = vatAmount;
         this.discountAmount = discountAmount;
         this.balanceDue = balanceDue;
+        this.totalPaid = totalPaid;
+        this.outstandingBalance = outstandingBalance;
+        this.invoiceFinalized = invoiceFinalized;
+        this.paymentStatus = paymentStatus;
         this.lineItems = lineItems;
     }
 
@@ -160,6 +208,38 @@ public class BillResponse {
 
     public void setBalanceDue(BigDecimal balanceDue) {
         this.balanceDue = balanceDue;
+    }
+
+    public BigDecimal getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(BigDecimal totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public BigDecimal getOutstandingBalance() {
+        return outstandingBalance;
+    }
+
+    public void setOutstandingBalance(BigDecimal outstandingBalance) {
+        this.outstandingBalance = outstandingBalance;
+    }
+
+    public boolean isInvoiceFinalized() {
+        return invoiceFinalized;
+    }
+
+    public void setInvoiceFinalized(boolean invoiceFinalized) {
+        this.invoiceFinalized = invoiceFinalized;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public List<BillLineItem> getLineItems() {
