@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +27,10 @@ public class GlobalExceptionHandler {
                 Map<String, String> validationErrors = new HashMap<>();
                 ex.getBindingResult().getFieldErrors()
                                 .forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
+                ex.getBindingResult().getGlobalErrors()
+                                .forEach(error -> validationErrors.putIfAbsent(
+                                                resolveGlobalErrorKey(error),
+                                                error.getDefaultMessage()));
 
                 // نرجع ApiError يحتوي على الماب، عشان نوحد الشكل
                 ApiError error = new ApiError(
@@ -37,6 +42,24 @@ public class GlobalExceptionHandler {
                 );
 
                 return ResponseEntity.badRequest().body(error);
+        }
+
+        private String resolveGlobalErrorKey(ObjectError error) {
+                String[] codes = error.getCodes();
+                if (codes != null) {
+                        for (String code : codes) {
+                                String[] parts = code.split("\\.");
+                                if (parts.length >= 2) {
+                                        String candidate = parts[parts.length - 1];
+                                        if (!candidate.equals(error.getObjectName())
+                                                        && !candidate.equals(error.getCode())
+                                                        && !"java.lang.Boolean".equals(candidate)) {
+                                                return candidate;
+                                        }
+                                }
+                        }
+                }
+                return error.getObjectName();
         }
 
         // 2. معالجة 403 Forbidden - المستخدم مصادق عليه لكن ما عنده صلاحية
