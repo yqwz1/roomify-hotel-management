@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Search, CreditCard, Receipt } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -92,6 +93,7 @@ const FinalBillSection = ({ bill }) => {
 };
 
 const Checkout = () => {
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState(null);
@@ -118,10 +120,9 @@ const Checkout = () => {
         }
     }, []);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        const q = searchQuery?.trim();
-        if (!q) return;
+    const runSearch = useCallback(async (q) => {
+        const trimmed = q?.trim();
+        if (!trimmed) return;
 
         setSearchLoading(true);
         setSearchError(null);
@@ -131,24 +132,32 @@ const Checkout = () => {
         setCheckoutError(null);
 
         try {
-            const results = await searchReservations(q);
+            const results = await searchReservations(trimmed);
             const reservation = Array.isArray(results) ? results[0] : null;
             if (!reservation) {
                 setSearchError('لم يتم العثور على حجز مطابق. جرّب اسم ضيف أو رقم تأكيد آخر.');
-                setSelected(null);
-                setBill(null);
                 return;
             }
             setSelected(reservation);
             await fetchBill(reservation.confirmationNumber);
         } catch (err) {
             setSearchError(extractReservationError(err));
-            setSelected(null);
-            setBill(null);
         } finally {
             setSearchLoading(false);
         }
+    }, [fetchBill]);
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        await runSearch(searchQuery);
     };
+
+    useEffect(() => {
+        const initialQuery = String(location.state?.initialQuery ?? '').trim();
+        if (!initialQuery) return;
+        setSearchQuery(initialQuery);
+        runSearch(initialQuery);
+    }, [location.state?.initialQuery, runSearch]);
 
     const handleCheckout = async () => {
         if (!selected?.confirmationNumber || checkoutLoading) return;

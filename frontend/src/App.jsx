@@ -27,6 +27,7 @@ import CancelReservation from './pages/CancelReservation'
 import Checkout from './pages/Checkout'
 import RoomStatus from './pages/RoomStatus'
 import InvoicePreview from './pages/InvoicePreview'
+import ReservationDetails from './pages/ReservationDetails'
 
 import Layout from './components/Layout';
 
@@ -184,6 +185,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
               <Layout showSidebar={true}><InvoicePreview /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reservations/:confirmationNumber"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><ReservationDetails /></Layout>
             </ProtectedRoute>
           }
         />

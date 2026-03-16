@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
 import { useTranslation } from 'react-i18next';
 import { LtrText } from './LtrText';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 
 const toUiReservation = (record, fallbackIndex) => {
@@ -33,7 +34,12 @@ const toUiReservation = (record, fallbackIndex) => {
     };
 };
 
-export default function ReservationLookupPanel({ onSelect, className = '' }) {
+export default function ReservationLookupPanel({
+    onSelect,
+    className = '',
+    initialQuery = '',
+    autoSearch = true,
+}) {
     const { t, i18n } = useTranslation();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
@@ -41,26 +47,36 @@ export default function ReservationLookupPanel({ onSelect, className = '' }) {
     const [searched, setSearched] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+    const handleSearch = useCallback(async (e, forcedQuery) => {
+        e?.preventDefault?.();
+        const q = (forcedQuery ?? query).trim();
+        if (!q) return;
 
         setLoading(true);
         setError(null);
         setSearched(false);
 
         try {
-            const data = await searchReservations(query);
+            const data = await searchReservations(q);
             setResults(Array.isArray(data) ? data : []);
             setSearched(true);
-        } catch {
-            setError('Failed to search reservations. Please try again.');
+        } catch (err) {
+            setError(extractApiErrorMessage(err, 'Failed to search reservations. Please try again.'));
             setResults([]);
             setSearched(true);
         } finally {
             setLoading(false);
         }
-    };
+    }, [query]);
+
+    useEffect(() => {
+        const trimmed = String(initialQuery ?? '').trim();
+        if (!trimmed) return;
+        setQuery(trimmed);
+        if (autoSearch) {
+            handleSearch(null, trimmed);
+        }
+    }, [initialQuery, autoSearch, handleSearch]);
 
     const formatDate = (iso) => {
         if (!iso) return '-';

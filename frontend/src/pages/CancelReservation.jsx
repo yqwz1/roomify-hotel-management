@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import { cancelReservation, extractReservationError } from '../services/reservationService';
 import StatusPill from '../components/StatusPill';
-import { CANCELLABLE_STATUSES } from '../data/mockReservations';
 import { LtrText } from '../components/LtrText';
 import { useTranslation } from 'react-i18next';
+import { reservationStatusRules, normalizeReservationStatusLabel } from '../domain/reservations/statusRules';
 
 const formatDate = (iso) => {
     if (!iso) return '-';
@@ -107,11 +107,17 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
 
 export default function CancelReservation() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showDialog, setShowDialog] = useState(false);
     const [toast, setToast] = useState(null);
+
+    const initialQuery = useMemo(
+        () => String(location.state?.initialQuery ?? '').trim(),
+        [location.state?.initialQuery]
+    );
 
     const handleSelect = (reservation) => {
         setSelected(reservation);
@@ -158,7 +164,7 @@ export default function CancelReservation() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                    <ReservationLookupPanel onSelect={handleSelect} />
+                    <ReservationLookupPanel onSelect={handleSelect} initialQuery={initialQuery} />
                 </div>
 
                 <div>
@@ -177,9 +183,9 @@ export default function CancelReservation() {
                                 <StatusPill status={selected.status} />
                             </div>
 
-                            {!CANCELLABLE_STATUSES.includes(selected.status) && (
+                            {!reservationStatusRules.canCancel(selected.status) && (
                                 <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                    This reservation cannot be cancelled because status is <strong>{selected.status.replace('_', ' ')}</strong>.
+                                    This reservation cannot be cancelled because status is <strong>{normalizeReservationStatusLabel(selected.status)}</strong>.
                                 </div>
                             )}
 
@@ -192,7 +198,7 @@ export default function CancelReservation() {
                                 <div><dt className="text-xs text-gray-400">Total Paid</dt><dd className="font-bold text-gray-900">{money(selected.totalPrice)}</dd></div>
                             </dl>
 
-                            {CANCELLABLE_STATUSES.includes(selected.status) && (
+                            {reservationStatusRules.canCancel(selected.status) && (
                                 <button
                                     onClick={() => setShowDialog(true)}
                                     className="w-full rounded-full border-2 border-red-600 bg-white hover:bg-red-50 py-4 text-sm font-bold text-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm"
