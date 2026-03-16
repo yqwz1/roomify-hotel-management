@@ -196,7 +196,9 @@ public class ReservationService {
                 BigDecimal totalPrice = subtotal.add(taxes)
                                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                String modificationReason = request.getModificationReason().trim();
+                String modificationReason = request.getModificationReason() == null
+                                ? null
+                                : request.getModificationReason().trim();
 
                 reservation.setRoom(targetRoom);
                 reservation.setCheckInDate(newCheckIn);

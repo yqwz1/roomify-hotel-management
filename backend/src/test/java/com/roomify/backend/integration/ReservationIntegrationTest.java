@@ -415,6 +415,29 @@ class ReservationIntegrationTest {
     }
 
     @Test
+    void createReservationValidationRejectsInvalidInitialStatus() throws Exception {
+        Map<String, Object> request = buildCreateReservationRequest(
+                room1Id,
+                LocalDate.now().plusDays(6).toString(),
+                LocalDate.now().plusDays(8).toString(),
+                "CHECKED_OUT",
+                "Guest " + UUID.randomUUID().toString().substring(0, 6),
+                "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
+                "0500000000",
+                "ID-" + UUID.randomUUID().toString().substring(0, 8),
+                "USA");
+
+        mockMvc.perform(post("/api/reservations")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.validationErrors.initialStatusValid")
+                        .value("Reservation status must be PENDING or CONFIRMED"));
+    }
+
+    @Test
     void modifyReservationValidationRejectsMissingReason() throws Exception {
         CreatedReservation created = createReservation(
                 managerToken,
