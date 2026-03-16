@@ -1,16 +1,8 @@
 import api from './api';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 export const extractReservationError = (err) => {
-    const data = err?.response?.data;
-    if (!data) return err?.message ?? 'Unknown error';
-
-    if (data.validationErrors) {
-        return Object.values(data.validationErrors).join(' | ');
-    }
-
-    if (data.message) return data.message;
-
-    return err.message ?? 'Unknown error';
+    return extractApiErrorMessage(err, 'Reservation request failed. Please try again.');
 };
 
 export const isConflictError = (err) => err?.response?.status === 409;

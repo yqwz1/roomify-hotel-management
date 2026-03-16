@@ -14,6 +14,11 @@ const LoginPage = () => {
     const { login } = useAuth();
     const { t } = useTranslation();
 
+    const tx = (key, fallback, options) => {
+        const value = t(key, options);
+        return value === key ? fallback : value;
+    };
+
     const [formData, setFormData] = useState({
         email: 'admin@roomify.com',
         password: 'password123'
@@ -49,9 +54,9 @@ const LoginPage = () => {
     const validateForm = () => {
         const newErrors = { email: '', password: '' };
         let isValid = true;
-        if (!formData.email) { newErrors.email = t('emailRequired') || 'Email is required'; isValid = false; }
-        else if (!emailRegex.test(formData.email)) { newErrors.email = t('invalidEmail') || 'Please enter a valid email address'; isValid = false; }
-        if (!formData.password) { newErrors.password = t('passwordRequired') || 'Password is required'; isValid = false; }
+        if (!formData.email) { newErrors.email = tx('emailRequired', 'Email is required'); isValid = false; }
+        else if (!emailRegex.test(formData.email)) { newErrors.email = tx('invalidEmail', 'Please enter a valid email address'); isValid = false; }
+        if (!formData.password) { newErrors.password = tx('passwordRequired', 'Password is required'); isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
@@ -75,7 +80,7 @@ const LoginPage = () => {
                 default: navigate('/', { replace: true });
             }
         } catch (error) {
-            setLoginError(error.message || t('loginFailedDefault') || 'Login failed. Please check your credentials.');
+            setLoginError(error.message || tx('loginFailedDefault', 'Login failed. Please check your credentials.'));
         } finally {
             setIsLoading(false);
         }
@@ -93,23 +98,23 @@ const LoginPage = () => {
                 {/* Middle: Headline */}
                 <div>
                     <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-6">
-                        {t('hotelManagementSystem') || 'Hotel Management System'}
+                        {tx('hotelManagementSystem', 'Hotel Management System')}
                     </p>
                     <h1 className="text-5xl font-extrabold text-white leading-tight mb-8 tracking-tight">
-                        {t('manageYourProperty') || 'Manage your property'}<br />
-                        <span className="text-zinc-400">{t('withConfidence') || 'with confidence.'}</span>
+                        {tx('manageYourProperty', 'Manage your property')}<br />
+                        <span className="text-zinc-400">{tx('withConfidence', 'with confidence.')}</span>
                     </h1>
                     <p className="text-zinc-500 text-lg font-medium leading-relaxed max-w-sm">
-                        {t('loginDescription') || 'A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.'}
+                        {tx('loginDescription', 'A professional PMS designed for hotels of every size — from boutique stays to full-service resorts.')}
                     </p>
                 </div>
 
                 {/* Bottom: Feature chips */}
                 <div className="space-y-4">
                     {[
-                        { icon: ShieldCheck, text: t('featureSecureAccess') || 'Role-based secure access' },
-                        { icon: Zap, text: t('featureRealTimeUpdates') || 'Real-time room status updates' },
-                        { icon: Users, text: t('featureStaffGuest') || 'Staff & guest management' },
+                        { icon: ShieldCheck, text: tx('featureSecureAccess', 'Role-based secure access') },
+                        { icon: Zap, text: tx('featureRealTimeUpdates', 'Real-time room status updates') },
+                        { icon: Users, text: tx('featureStaffGuest', 'Staff & guest management') },
                     ].map(({ icon: Icon, text }) => (
                         <div key={text} className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
@@ -119,7 +124,7 @@ const LoginPage = () => {
                         </div>
                     ))}
                     <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest pt-4">
-                        {t('copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()} Roomify PMS. All rights reserved.`}
+                        {tx('copyright', `© ${new Date().getFullYear()} Roomify PMS. All rights reserved.`, { year: new Date().getFullYear() })}
                     </p>
                 </div>
             </div>
@@ -136,7 +141,7 @@ const LoginPage = () => {
                         <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-300">
                             <Loader2 className="h-10 w-10 text-black animate-spin mb-4" />
                             <p className="text-zinc-500 font-medium animate-pulse">
-                                {t('processing') || 'Processing...'}
+                                {tx('processing', 'Processing...')}
                             </p>
                         </div>
                     ) : (
@@ -145,17 +150,17 @@ const LoginPage = () => {
                                 <>
                                     <div className="mb-10 text-center">
                                         <h2 className="text-3xl font-extrabold font-heading text-black tracking-tight mb-2" role="heading" aria-level="1">
-                                            {t('signInToAccount') || 'Sign in to your account'}
+                                            {tx('signInToAccount', 'Sign in to your account')}
                                         </h2>
                                         <p className="text-zinc-500 text-sm font-medium">
-                                            {t('enterCredentials') || 'Enter your email and password to continue'}
+                                            {tx('enterCredentials', 'Enter your email and password to continue')}
                                         </p>
                                     </div>
 
                                     {loginError && (
                                         <Alert variant="destructive" className="mb-5 rounded-2xl">
                                             <AlertCircle className="h-4 w-4" />
-                                            <AlertTitle>{t('authFailed') || 'Authentication Failed'}</AlertTitle>
+                                            <AlertTitle>{tx('authFailed', 'Authentication Failed')}</AlertTitle>
                                             <AlertDescription>{loginError}</AlertDescription>
                                         </Alert>
                                     )}
@@ -163,7 +168,7 @@ const LoginPage = () => {
                                     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                                         <div className="space-y-2">
                                             <Label htmlFor="email" className="text-black font-bold text-sm tracking-wide">
-                                                {t('emailAddress') || 'Email Address'}
+                                                {tx('emailAddress', 'Email Address')}
                                             </Label>
                                             <Input
                                                 id="email"
@@ -183,10 +188,10 @@ const LoginPage = () => {
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center">
                                                 <Label htmlFor="password" className="text-black font-bold text-sm tracking-wide">
-                                                    {t('password') || 'Password'}
+                                                    {tx('password', 'Password')}
                                                 </Label>
                                                 <button type="button" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors">
-                                                    {t('forgotPassword') || 'Forgot password?'}
+                                                    {tx('forgotPassword', 'Forgot password?')}
                                                 </button>
                                             </div>
                                             <Input
@@ -211,24 +216,24 @@ const LoginPage = () => {
                                         >
                                             {isLoading ? (
                                                 <>
-                                                    <Loader2 className="me-2 h-5 w-5 animate-spin" />
-                                                    {t('signingIn') || 'Signing in...'}
+                                                    <Loader2 className="me-2 h-5 w-5 animate-spin" role="status" aria-label="loading" />
+                                                    {tx('signingIn', 'Signing in...')}
                                                 </>
                                             ) : (
-                                                t('signIn') || 'Sign In'
+                                                tx('signIn', 'Sign In')
                                             )}
                                         </Button>
                                     </form>
 
                                     <div className="mt-8 text-center">
                                         <p className="text-sm text-zinc-500 font-medium">
-                                            {t('dontHaveAccount') || "Don't have an account?"}{' '}
+                                            {tx('dontHaveAccount', "Don't have an account?")}{' '}
                                             <button
                                                 type="button"
                                                 onClick={() => handleSwitchView('signup')}
                                                 className="text-black font-bold hover:underline underline-offset-4"
                                             >
-                                                {t('signUpLink') || 'Sign up'}
+                                                {tx('signUpLink', 'Sign up')}
                                             </button>
                                         </p>
                                     </div>

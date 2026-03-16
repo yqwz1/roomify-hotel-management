@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
@@ -8,8 +8,8 @@ import ErrorBanner from '../components/ErrorBanner';
 import { LtrText } from '../components/LtrText';
 import { searchRooms } from '../services/searchService';
 import { modifyReservation, extractReservationError } from '../services/reservationService';
-import { MODIFIABLE_STATUSES } from '../data/mockReservations';
 import { useTranslation } from 'react-i18next';
+import { reservationStatusRules, normalizeReservationStatusLabel } from '../domain/reservations/statusRules';
 
 const formatDate = (iso) => {
     if (!iso) return '-';
@@ -264,11 +264,17 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
 export default function ModifyReservation() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t, i18n } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [toast, setToast] = useState(null);
+
+    const initialQuery = useMemo(
+        () => String(location.state?.initialQuery ?? '').trim(),
+        [location.state?.initialQuery]
+    );
 
     const handleSelect = (reservation) => {
         setSelected(reservation);
@@ -312,7 +318,7 @@ export default function ModifyReservation() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                    <ReservationLookupPanel onSelect={handleSelect} />
+                    <ReservationLookupPanel onSelect={handleSelect} initialQuery={initialQuery} />
                 </div>
 
                 <div>
@@ -331,9 +337,9 @@ export default function ModifyReservation() {
                                 <StatusPill status={selected.status} />
                             </div>
 
-                            {!MODIFIABLE_STATUSES.includes(selected.status) && (
+                            {!reservationStatusRules.canModify(selected.status) && (
                                 <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                    This reservation cannot be modified because status is <strong>{selected.status.replace('_', ' ')}</strong>.
+                                    This reservation cannot be modified because status is <strong>{normalizeReservationStatusLabel(selected.status)}</strong>.
                                 </div>
                             )}
 
@@ -346,7 +352,7 @@ export default function ModifyReservation() {
                                 <div><dt className="text-xs text-gray-400">Total</dt><dd className="font-bold text-blue-700">{money(selected.totalPrice)}</dd></div>
                             </dl>
 
-                            {MODIFIABLE_STATUSES.includes(selected.status) && (
+                            {reservationStatusRules.canModify(selected.status) && (
                                 <button
                                     onClick={() => setShowModal(true)}
                                     className="w-full rounded-full bg-black py-4 text-sm font-bold text-white transition hover:bg-zinc-800 shadow-md focus:outline-none focus:ring-2 focus:ring-zinc-400"
