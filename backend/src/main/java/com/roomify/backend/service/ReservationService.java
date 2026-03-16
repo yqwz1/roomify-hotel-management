@@ -47,6 +47,7 @@ public class ReservationService {
         private final RoomRepository roomRepository;
         private final EmailService emailService;
         private final AuditService auditService;
+        private final HousekeepingNotificationService housekeepingNotificationService;
         private final BigDecimal taxRate;
         private final InvoiceEmailService invoiceEmailService;
         private final InvoiceDeliveryLogService invoiceDeliveryLogService;
@@ -59,6 +60,7 @@ public class ReservationService {
                         InvoiceEmailService invoiceEmailService,
                         InvoiceDeliveryLogService invoiceDeliveryLogService,
                         AuditService auditService,
+                        HousekeepingNotificationService housekeepingNotificationService,
                         @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
 
                 this.reservationRepository = reservationRepository;
@@ -68,6 +70,7 @@ public class ReservationService {
                 this.invoiceEmailService = invoiceEmailService;
                 this.invoiceDeliveryLogService = invoiceDeliveryLogService;
                 this.auditService = auditService;
+                this.housekeepingNotificationService = housekeepingNotificationService;
                 this.taxRate = taxRate;
         }
 
@@ -444,13 +447,11 @@ public class ReservationService {
 
         private void triggerHousekeepingEvent(Room room) {
 
-                log.info("Housekeeping notified: Room {} needs cleaning",
+                housekeepingNotificationService.notifyCheckoutNeedsCleaning(
                                 room.getRoomNumber());
 
-                System.out.println(
-                                "Housekeeping notification: Room "
-                                                + room.getRoomNumber()
-                                                + " requires cleaning");
+                log.info("Housekeeping routing verified for checkout: room {}",
+                                room.getRoomNumber());
         }
 
         private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
@@ -519,7 +520,7 @@ public class ReservationService {
                         String action,
                         String message) {
 
-                return new ReservationActionPlaceholderResponse(
+                        return new ReservationActionPlaceholderResponse(
                                 reservation.getId(),
                                 action,
                                 message,

@@ -2,6 +2,7 @@ package com.roomify.backend.controller;
 
 import com.roomify.backend.dto.RoomRequest;
 import com.roomify.backend.dto.RoomResponse;
+import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,15 @@ public class RoomController {
     public ResponseEntity<RoomResponse> getById(@PathVariable Long id) {
         RoomResponse response = roomService.findById(id);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Expose only valid next statuses for the room-status page.
+     * GET /api/rooms/{id}/valid-next-statuses
+     */
+    @GetMapping("/{id}/valid-next-statuses")
+    public ResponseEntity<List<RoomStatus>> getValidNextStatuses(@PathVariable Long id) {
+        return ResponseEntity.ok(roomService.getValidNextStatuses(id));
     }
 
     /**
