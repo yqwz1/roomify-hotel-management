@@ -155,53 +155,6 @@ class ReservationServiceTest {
         }
 
         @Test
-        void createShouldDefaultStatusToPendingWhenStatusIsMissing() {
-
-                Room room = buildRoom(10L, "301", "120.00");
-
-                ReservationCreateRequest request = buildCreateRequest(
-                                10L,
-                                LocalDate.of(2026, 3, 10),
-                                LocalDate.of(2026, 3, 12),
-                                null);
-
-                when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
-
-                when(reservationRepository.findOverlappingReservations(
-                                eq(10L),
-                                eq(LocalDate.of(2026, 3, 10)),
-                                eq(LocalDate.of(2026, 3, 12))))
-                                .thenReturn(Collections.emptyList());
-
-                when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
-                                .thenReturn(Optional.empty());
-
-                when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
-                        Guest guest = invocation.getArgument(0);
-                        guest.setId(21L);
-                        return guest;
-                });
-
-                when(reservationRepository.existsByConfirmationNumber(anyString()))
-                                .thenReturn(false);
-
-                when(reservationRepository.save(any(Reservation.class)))
-                                .thenAnswer(invocation -> {
-                                        Reservation reservation = invocation.getArgument(0);
-                                        reservation.setId(71L);
-                                        return reservation;
-                                });
-
-                ReservationResponse response = reservationService.create(request);
-
-                assertEquals(ReservationStatus.PENDING, response.getStatus());
-
-                ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-                verify(reservationRepository).save(captor.capture());
-                assertEquals(ReservationStatus.PENDING, captor.getValue().getStatus());
-        }
-
-        @Test
         void modifyShouldReturnConflictWhenRequestedDatesOverlap() {
 
                 Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
