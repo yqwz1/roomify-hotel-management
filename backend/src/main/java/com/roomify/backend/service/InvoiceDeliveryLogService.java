@@ -18,12 +18,10 @@ public class InvoiceDeliveryLogService {
      */
     public void logSuccess(String email, String confirmationNumber) {
 
-        try {
-
         repository.save(
                 new InvoiceDeliveryLog(
                         email,
-                        subject,
+                        "Invoice",
                         confirmationNumber,
                         InvoiceDeliveryStatus.SENT,
                         null));
@@ -34,12 +32,10 @@ public class InvoiceDeliveryLogService {
      */
     public void logFailure(String email, String confirmationNumber, String error) {
 
-        try {
-
         repository.save(
                 new InvoiceDeliveryLog(
                         email,
-                        subject,
+                        "Invoice",
                         confirmationNumber,
                         InvoiceDeliveryStatus.FAILED,
                         error));
