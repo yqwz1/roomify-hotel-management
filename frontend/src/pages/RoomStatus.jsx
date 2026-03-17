@@ -198,15 +198,9 @@ const RoomStatus = () => {
                                             </>
                                         )}
                                         {room.status === 'OCCUPIED' && (
-                                            <Button
-                                                size="xs"
-                                                variant="outline"
-                                                className="rounded-full border-zinc-300 text-zinc-800 hover:bg-rose-50 hover:text-rose-900"
-                                                disabled={updatingRoomId === room.id}
-                                                onClick={() => handleStatusChange(room.id, 'NEEDS_CLEANING')}
-                                            >
-                                                يحتاج تنظيف
-                                            </Button>
+                                            <div className="text-xs text-zinc-500 font-medium py-1">
+                                                لا يمكن تغييره يدوياً (تغيير تلقائي عند تسجيل الخروج)
+                                            </div>
                                         )}
                                         {room.status === 'NEEDS_CLEANING' && (
                                             <>

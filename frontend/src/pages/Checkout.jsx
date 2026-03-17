@@ -30,7 +30,7 @@ const formatAmount = (val) => {
 };
 
 const FinalBillSection = ({ bill }) => {
-    if (!bill?.lineItems?.length) {
+    if (!bill) {
         return (
             <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
                 <CardContent className="p-8">
@@ -40,12 +40,26 @@ const FinalBillSection = ({ bill }) => {
         );
     }
 
-    const balanceDue = Number(bill?.balanceDue ?? 0);
-    const hasUnpaidBalance = balanceDue > 0;
-    const statusLabel = hasUnpaidBalance ? 'رصيد غير مدفوع' : 'جاهز للخروج';
-    const statusClass = hasUnpaidBalance
+    const {
+        roomRate,
+        nights,
+        roomCharge,
+        serviceCharges,
+        vatRate,
+        vatAmount,
+        discountAmount,
+        balanceDue,
+        totalPaid,
+        outstandingBalance,
+        paymentStatus,
+        lineItems
+    } = bill;
+
+    const hasUnpaidBalance = Number(outstandingBalance ?? balanceDue ?? 0) > 0;
+    const statusLabel = paymentStatus === 'PAID' ? 'مكتمل الدفع' : (hasUnpaidBalance ? 'رصيد غير مدفوع' : 'جاهز للخروج');
+    const statusClass = hasUnpaidBalance || paymentStatus === 'FAILED'
         ? 'bg-rose-100 text-rose-900 border-rose-200'
-        : 'bg-zinc-200 text-zinc-800 border-zinc-200';
+        : 'bg-emerald-100 text-emerald-900 border-emerald-200';
 
     return (
         <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
@@ -57,29 +71,71 @@ const FinalBillSection = ({ bill }) => {
             </CardHeader>
             <CardContent>
                 <div className="space-y-3 text-sm">
-                    {bill.lineItems.map((item, idx) => {
-                        const amount = Number(item?.amount ?? 0);
-                        const credit = !!item?.credit;
-                        const label = item?.label ?? '';
-                        return (
-                            <div key={idx} className="flex justify-between">
-                                <span className={credit ? 'text-zinc-500' : 'text-zinc-600'}>
-                                    {label}
-                                </span>
-                                <span
-                                    className={`font-bold ${credit ? 'text-zinc-600' : 'text-zinc-900'}`}
-                                >
-                                    {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
-                                </span>
-                            </div>
-                        );
-                    })}
+                    {/* Fixed fields approach mapping to Java BillResponse */}
+                    <div className="flex justify-between">
+                        <span className="text-zinc-600">رسوم الغرفة ({nights} ليالي × {formatAmount(roomRate)})</span>
+                        <span className="font-bold text-zinc-900">{formatAmount(roomCharge)}</span>
+                    </div>
+
+                    {Number(serviceCharges) > 0 && (
+                        <div className="flex justify-between">
+                            <span className="text-zinc-600">رسوم إضافية (الخدمات)</span>
+                            <span className="font-bold text-zinc-900">{formatAmount(serviceCharges)}</span>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between">
+                        <span className="text-zinc-600">ضريبة القيمة المضافة ({(Number(vatRate) * 100).toFixed(0)}%)</span>
+                        <span className="font-bold text-zinc-900">{formatAmount(vatAmount)}</span>
+                    </div>
+
+                    {Number(discountAmount) > 0 && (
+                        <div className="flex justify-between text-zinc-500">
+                            <span>الخصومات</span>
+                            <span className="font-bold text-zinc-600">-{formatAmount(discountAmount)}</span>
+                        </div>
+                    )}
+
                     <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
-                        <span className="text-base font-bold text-zinc-900">الإجمالي الكلي</span>
-                        <span className="text-xl font-black text-rose-900">
-                            {formatAmount(bill.balanceDue)}
+                        <span className="text-base font-bold text-zinc-900">الإجمالي الكلي قبل الدفع</span>
+                        <span className="text-xl font-black text-zinc-900">
+                            {formatAmount(balanceDue)}
                         </span>
                     </div>
+
+                    <div className="flex justify-between text-emerald-700 mt-2">
+                        <span>المبلغ المدفوع</span>
+                        <span className="font-bold">-{formatAmount(totalPaid)}</span>
+                    </div>
+
+                    <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
+                        <span className="text-base font-bold text-zinc-900">الرصيد المتبقي</span>
+                        <span className={`text-xl font-black ${hasUnpaidBalance ? 'text-rose-900' : 'text-emerald-700'}`}>
+                            {formatAmount(outstandingBalance ?? balanceDue)}
+                        </span>
+                    </div>
+
+                    {lineItems && lineItems.length > 0 && (
+                        <div className="mt-4 border-t border-zinc-200 pt-3">
+                            <p className="font-bold text-zinc-700 mb-2">تفاصيل إضافية:</p>
+                            {lineItems.map((item, idx) => {
+                                const amount = Number(item?.amount ?? 0);
+                                const credit = !!item?.credit;
+                                const label = item?.label ?? '';
+                                return (
+                                    <div key={idx} className="flex justify-between text-xs mb-1">
+                                        <span className={credit ? 'text-zinc-500' : 'text-zinc-600'}>
+                                            {label}
+                                        </span>
+                                        <span className={`font-bold ${credit ? 'text-zinc-600' : 'text-zinc-900'}`}>
+                                            {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
                     <div
                         className={`mt-4 flex justify-between items-center p-3 rounded-2xl border ${statusClass}`}
                     >
