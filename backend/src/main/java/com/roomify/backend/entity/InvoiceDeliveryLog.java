@@ -7,33 +7,23 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "invoice_delivery_logs", indexes = {
-        @Index(name = "idx_invoice_delivery_confirmation", columnList = "confirmationNumber"),
-        @Index(name = "idx_invoice_delivery_created", columnList = "createdAt")
-})
 public class InvoiceDeliveryLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String recipient;
 
-    @Column(nullable = false)
     private String subject;
 
-    @Column(nullable = false)
     private String confirmationNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private InvoiceDeliveryStatus status;
 
-    @Column(length = 1000)
     private String errorMessage;
 
-    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public InvoiceDeliveryLog() {
@@ -52,16 +42,6 @@ public class InvoiceDeliveryLog {
         this.status = status;
         this.errorMessage = errorMessage;
         this.createdAt = LocalDateTime.now();
-    }
-
-    /**
-     * Ensure createdAt is always set
-     */
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
     }
 
     public Long getId() {

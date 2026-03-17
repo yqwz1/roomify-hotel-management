@@ -13,12 +13,9 @@ public class InvoiceDeliveryLogService {
 
     private final InvoiceDeliveryLogRepository repository;
 
-    /**
-     * Log successful email delivery
-     */
     public void logSuccess(String email, String confirmationNumber) {
 
-        try {
+        String subject = "Roomify Invoice - " + confirmationNumber;
 
         repository.save(
                 new InvoiceDeliveryLog(
@@ -29,12 +26,9 @@ public class InvoiceDeliveryLogService {
                         null));
     }
 
-    /**
-     * Log failed email delivery
-     */
     public void logFailure(String email, String confirmationNumber, String error) {
 
-        try {
+        String subject = "Roomify Invoice - " + confirmationNumber;
 
             String subject = buildSubject(confirmationNumber);
 

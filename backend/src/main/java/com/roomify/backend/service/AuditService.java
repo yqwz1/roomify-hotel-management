@@ -24,63 +24,24 @@ public class AuditService {
      * @param metadata Extra contextual data
      */
     public void log(String action, String target, String metadata) {
-
-        try {
-
-            String actor = getCurrentActor();
-
-            AuditLog auditLog = new AuditLog(
-                    actor,
-                    action,
-                    target,
-                    metadata);
-
-            auditLogRepository.save(auditLog);
-
-        } catch (Exception ex) {
-
-            // Audit logging must NEVER break the main flow
-            System.err.println("Audit log failed: " + ex.getMessage());
-        }
+        String actor = getCurrentActor();
+        AuditLog auditLog = new AuditLog(actor, action, target, metadata);
+        auditLogRepository.save(auditLog);
     }
 
     /**
      * Writes an audit log entry with explicit actor.
      */
     public void log(String actor, String action, String target, String metadata) {
-
-        try {
-
-            AuditLog auditLog = new AuditLog(
-                    actor,
-                    action,
-                    target,
-                    metadata);
-
-            auditLogRepository.save(auditLog);
-
-        } catch (Exception ex) {
-
-            System.err.println("Audit log failed: " + ex.getMessage());
-        }
+        AuditLog auditLog = new AuditLog(actor, action, target, metadata);
+        auditLogRepository.save(auditLog);
     }
 
-    /**
-     * Gets the currently authenticated user.
-     */
     private String getCurrentActor() {
-
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || authentication.getName() == null) {
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             return "SYSTEM";
         }
-
         return authentication.getName();
     }
 }
