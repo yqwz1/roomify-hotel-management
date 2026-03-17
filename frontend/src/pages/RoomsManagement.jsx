@@ -1,509 +1,623 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Pencil,
+  Plus,
+  Trash2,
+  Waves,
+  X,
+} from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomTypes } from '../hooks/useRoomTypes';
 import RoomFilters from '../components/RoomFilters';
-import ErrorBanner from '../components/ErrorBanner';
-import { useTranslation } from 'react-i18next';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
 
 const BACKEND_STATUSES = [
-    'AVAILABLE',
-    'OCCUPIED',
-    'NEEDS_CLEANING',
-    'UNDER_MAINTENANCE',
+  'AVAILABLE',
+  'OCCUPIED',
+  'NEEDS_CLEANING',
+  'UNDER_MAINTENANCE',
 ];
 
-const STATUS_COLORS = {
-    AVAILABLE: 'border border-zinc-300 bg-white text-black shadow-sm',
-    OCCUPIED: 'bg-black text-white border-transparent',
-    NEEDS_CLEANING: 'bg-zinc-100 text-zinc-600 border-transparent',
-    UNDER_MAINTENANCE: 'bg-zinc-200 text-zinc-700 border-transparent',
-};
-
 const STATUS_LABELS = {
-    AVAILABLE: 'Available',
-    OCCUPIED: 'Occupied',
-    NEEDS_CLEANING: 'Needs Cleaning',
-    UNDER_MAINTENANCE: 'Under Maintenance',
+  AVAILABLE: 'Available',
+  OCCUPIED: 'Occupied',
+  NEEDS_CLEANING: 'Needs Cleaning',
+  UNDER_MAINTENANCE: 'Under Maintenance',
 };
 
-// ─── Add Room Modal ───────────────────────────────────────────────────────────
+const STATUS_STYLES = {
+  AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  OCCUPIED: 'border-zinc-300 bg-zinc-100 text-zinc-700',
+  NEEDS_CLEANING: 'border-amber-200 bg-amber-50 text-amber-900',
+  UNDER_MAINTENANCE: 'border-rose-200 bg-rose-50 text-rose-900',
+};
+
+const buildApiFilters = (filters) => {
+  const params = {};
+  if (filters.status) params.status = filters.status;
+  if (filters.type) params.type = filters.type;
+  if (filters.floor) params.floor = Number(filters.floor);
+  return params;
+};
+
+function ModalFrame({ title, description, children, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+      <div className="w-full max-w-lg rounded-[2rem] border border-black/5 bg-white shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5">
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-zinc-950">{title}</h2>
+            {description && (
+              <p className="mt-1 text-sm font-medium text-zinc-500">{description}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-50 hover:text-black"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="px-6 py-6">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 function AddRoomModal({ roomTypes, onSave, onClose }) {
-    const { t } = useTranslation();
-    const [form, setForm] = useState({
-        roomNumber: '',
-        roomTypeId: roomTypes[0]?.id ?? '',
-        floor: 1,
-        status: 'AVAILABLE',
+  const [form, setForm] = useState({
+    roomNumber: '',
+    roomTypeId: roomTypes[0]?.id ?? '',
+    floor: 1,
+    status: 'AVAILABLE',
+  });
+  const [formError, setFormError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const setField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError(null);
+
+    if (!form.roomNumber.trim()) {
+      setFormError('Room number is required.');
+      return;
+    }
+
+    if (!form.roomTypeId) {
+      setFormError('Please select a room type.');
+      return;
+    }
+
+    setSaving(true);
+    const result = await onSave({
+      roomNumber: form.roomNumber.trim(),
+      roomTypeId: Number(form.roomTypeId),
+      floor: Number(form.floor) || null,
+      status: form.status,
     });
-    const [formError, setFormError] = useState(null);
-    const [saving, setSaving] = useState(false);
+    setSaving(false);
 
-    const set = (field, value) => setForm((p) => ({ ...p, [field]: value }));
+    if (result.success) {
+      onClose();
+      return;
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setFormError(null);
-        if (!form.roomNumber.trim()) return setFormError(t('roomNumRequired') || 'Room number is required.');
-        if (!form.roomTypeId) return setFormError(t('roomTypeRequired') || 'Please select a room type.');
+    setFormError(result.error ?? 'Failed to create room.');
+  };
 
-        setSaving(true);
-        const result = await onSave({
-            roomNumber: form.roomNumber.trim(),
-            roomTypeId: Number(form.roomTypeId),
-            floor: Number(form.floor) || null,
-            status: form.status,
-        });
-        setSaving(false);
+  const inputClassName =
+    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
-        if (result.success) {
-            onClose();
-        } else {
-            setFormError(result.error ?? (t('failedCreateRoom') || 'Failed to create room.'));
-        }
-    };
+  return (
+    <ModalFrame
+      title="Add New Room"
+      description="Create a room record using an existing room type and an initial operational status."
+      onClose={onClose}
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {formError && (
+          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+            {formError}
+          </div>
+        )}
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 transition-all pb-[10vh]">
-            <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
-                <h2 className="mb-6 text-xl font-extrabold text-black tracking-tight">{t('addNewRoom') || 'Add New Room'}</h2>
-
-                <ErrorBanner message={formError} onClose={() => setFormError(null)} />
-
-                <form onSubmit={handleSubmit} noValidate className="mt-4 flex flex-col gap-5">
-                    {/* Room Number */}
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="add-roomNumber" className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                            {t('roomNumLabel') || 'Room Number'} <span className="text-black">*</span>
-                        </label>
-                        <input
-                            id="add-roomNumber"
-                            type="text"
-                            placeholder={t('roomNumPlaceholder') || "e.g. 305"}
-                            value={form.roomNumber}
-                            onChange={(e) => set('roomNumber', e.target.value)}
-                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
-                        />
-                    </div>
-
-                    {/* Room Type */}
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="add-roomType" className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                            {t('roomTypeLabel') || 'Room Type'} <span className="text-black">*</span>
-                        </label>
-                        <select
-                            id="add-roomType"
-                            value={form.roomTypeId}
-                            onChange={(e) => set('roomTypeId', e.target.value)}
-                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
-                        >
-                            {roomTypes.map((rt) => (
-                                <option key={rt.id} value={rt.id}>{rt.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Floor */}
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="add-floor" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('floorLabel') || 'Floor'}</label>
-                        <input
-                            id="add-floor"
-                            type="number"
-                            min="1"
-                            value={form.floor}
-                            onChange={(e) => set('floor', e.target.value)}
-                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
-                        />
-                    </div>
-
-                    {/* Initial Status */}
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="add-status" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('initialStatusLabel') || 'Initial Status'}</label>
-                        <select
-                            id="add-status"
-                            value={form.status}
-                            onChange={(e) => set('status', e.target.value)}
-                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
-                        >
-                            {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-full border border-zinc-200 px-6 py-3 text-sm font-extrabold text-black hover:bg-zinc-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                        >
-                            {t('cancel') || 'Cancel'}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white hover:bg-zinc-800 disabled:opacity-60 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                        >
-                            {saving ? (t('savingMsg') || 'Saving…') : (t('saveRoomBtn') || 'Save Room')}
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            Room Number
+          </label>
+          <input
+            value={form.roomNumber}
+            onChange={(event) => setField('roomNumber', event.target.value)}
+            placeholder="e.g. 305"
+            className={inputClassName}
+          />
         </div>
-    );
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            Room Type
+          </label>
+          <select
+            value={form.roomTypeId}
+            onChange={(event) => setField('roomTypeId', event.target.value)}
+            className={inputClassName}
+          >
+            {roomTypes.map((roomType) => (
+              <option key={roomType.id} value={roomType.id}>
+                {roomType.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              Floor
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={form.floor}
+              onChange={(event) => setField('floor', event.target.value)}
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              Initial Status
+            </label>
+            <select
+              value={form.status}
+              onChange={(event) => setField('status', event.target.value)}
+              className={inputClassName}
+            >
+              {BACKEND_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+          >
+            {saving ? 'Saving Room...' : 'Save Room'}
+          </button>
+        </div>
+      </form>
+    </ModalFrame>
+  );
 }
 
-// ─── Update Status Modal ──────────────────────────────────────────────────────
 function UpdateStatusModal({ room, onSave, onClose }) {
-    const { t } = useTranslation();
-    const [selectedStatus, setSelectedStatus] = useState(room.status);
-    const [modalError, setModalError] = useState(null);
-    const [saving, setSaving] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(room.status);
+  const [modalError, setModalError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setModalError(null);
-        if (selectedStatus === room.status) return onClose();
+  const inputClassName =
+    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
-        setSaving(true);
-        const result = await onSave(room.id, selectedStatus);
-        setSaving(false);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setModalError(null);
 
-        if (result.success) {
-            onClose();
-        } else {
-            setModalError(result.error ?? (t('failedUpdateStatus') || 'Failed to update status.'));
-        }
-    };
+    if (selectedStatus === room.status) {
+      onClose();
+      return;
+    }
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 pb-[10vh]">
-            <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
-                <h2 className="mb-2 text-2xl font-extrabold text-black tracking-tight">{t('updateRoomStatus') || 'Update Room Status'}</h2>
-                <p className="mb-6 text-sm font-medium text-zinc-500">
-                    {t('roomNumber', { number: room.roomNumber }) || `Room ${room.roomNumber}`} — {t('currentLabel') || 'current:'}{' '}
-                    <span className={`inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-wider font-extrabold border ${STATUS_COLORS[room.status]}`}>
-                        {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[room.status]}
-                    </span>
-                </p>
+    setSaving(true);
+    const result = await onSave(room.id, selectedStatus);
+    setSaving(false);
 
-                <ErrorBanner message={modalError} onClose={() => setModalError(null)} />
+    if (result.success) {
+      onClose();
+      return;
+    }
 
-                <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="update-status" className="text-xs font-bold uppercase tracking-widest text-zinc-500">{t('newStatusLabel') || 'New Status'}</label>
-                        <select
-                            id="update-status"
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="h-12 rounded-full border border-zinc-200 px-5 text-sm font-medium focus:border-black focus:outline-none focus:ring-1 focus:ring-black bg-white"
-                        >
-                            {BACKEND_STATUSES.map((s) => (
-                                <option key={s} value={s}>{t(`status${s.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || STATUS_LABELS[s]}</option>
-                            ))}
-                        </select>
-                    </div>
+    setModalError(result.error ?? 'Failed to update room status.');
+  };
 
-                    {/* Transition hint */}
-                    {selectedStatus === 'AVAILABLE' && room.status === 'OCCUPIED' && (
-                        <p className="rounded-2xl bg-zinc-100 border border-zinc-200 px-4 py-3 text-xs font-bold text-zinc-600">
-                            {t('occupyToAvailWarning') || '⚠️ The backend will reject OCCUPIED → AVAILABLE directly. Set to Needs Cleaning first.'}
-                        </p>
-                    )}
+  return (
+    <ModalFrame
+      title={`Update Room ${room.roomNumber}`}
+      description="Choose the next operational status. The backend still enforces transition rules."
+      onClose={onClose}
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {modalError && (
+          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+            {modalError}
+          </div>
+        )}
 
-                    <div className="flex justify-end gap-3 pt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-full border border-zinc-200 px-6 py-3 text-sm font-extrabold text-black hover:bg-zinc-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                        >
-                            {t('cancel') || 'Cancel'}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white hover:bg-zinc-800 disabled:opacity-60 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                        >
-                            {saving ? (t('savingMsg') || 'Saving…') : (t('updateStatusBtn') || 'Update Status')}
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            Current Status
+          </p>
+          <div
+            className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] ${
+              STATUS_STYLES[room.status]
+            }`}
+          >
+            {STATUS_LABELS[room.status]}
+          </div>
         </div>
-    );
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            New Status
+          </label>
+          <select
+            value={selectedStatus}
+            onChange={(event) => setSelectedStatus(event.target.value)}
+            className={inputClassName}
+          >
+            {BACKEND_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_LABELS[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedStatus === 'AVAILABLE' && room.status === 'OCCUPIED' && (
+          <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            The backend will reject an occupied room returning directly to available. Move it
+            through needs cleaning first.
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+          >
+            {saving ? 'Updating...' : 'Update Status'}
+          </button>
+        </div>
+      </form>
+    </ModalFrame>
+  );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
-/**
- * RoomsManagement  –  /rooms-management
- * Manager view: live data from GET /api/rooms with server-side + client-side filters.
- * Wired to real API via useRooms hook (Day 2).
- */
 export default function RoomsManagement() {
-    const { t } = useTranslation();
-    const {
-        rooms, loading, error,
-        fetchRooms, addRoom, changeStatus, removeRoom, clearError,
-    } = useRooms();
+  const { rooms, loading, error, fetchRooms, addRoom, changeStatus, removeRoom, clearError } =
+    useRooms();
+  const { roomTypes, fetchRoomTypes } = useRoomTypes();
 
-    const { roomTypes, fetchRoomTypes } = useRoomTypes();
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [statusModal, setStatusModal] = useState(null);
+  const [bannerError, setBannerError] = useState(null);
 
-    const [filters, setFilters] = useState(EMPTY_FILTERS);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [statusModal, setStatusModal] = useState(null); // room object | null
-    const [bannerError, setBannerError] = useState(null);
+  useEffect(() => {
+    fetchRooms();
+    fetchRoomTypes();
+  }, [fetchRooms, fetchRoomTypes]);
 
-    const statusOptions = useMemo(
-        () =>
-            BACKEND_STATUSES.map((status) => ({
-                value: status,
-                label:
-                    t(
-                        `status${status
-                            .replace(/_([a-z])/g, (m, p1) => p1.toUpperCase())
-                            .replace(/^[a-z]/, (m) => m.toUpperCase())}`
-                    ) || STATUS_LABELS[status],
-            })),
-        [t]
-    );
+  const displayedRooms = useMemo(() => {
+    const minPrice = filters.minPrice ? Number(filters.minPrice) : null;
+    const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : null;
 
-    const roomTypeOptions = useMemo(
-        () =>
-            roomTypes.map((roomType) => ({
-                value: roomType.name,
-                label: roomType.name,
-            })),
-        [roomTypes]
-    );
+    return rooms.filter((room) => {
+      const price = Number(room.roomType?.basePrice ?? 0);
+      if (minPrice != null && price < minPrice) return false;
+      if (maxPrice != null && price > maxPrice) return false;
+      return true;
+    });
+  }, [rooms, filters.minPrice, filters.maxPrice]);
 
-    const floorOptions = useMemo(
-        () =>
-            [...new Set(rooms.map((room) => room.floor).filter((floor) => floor != null))]
-                .sort((a, b) => a - b)
-                .map((floor) => ({
-                    value: floor,
-                    label: String(floor),
-                })),
-        [rooms]
-    );
+  const statusOptions = useMemo(
+    () => BACKEND_STATUSES.map((status) => ({ value: status, label: STATUS_LABELS[status] })),
+    []
+  );
 
-    // On mount: load rooms (no filters) and room types (for the Add form dropdown)
-    useEffect(() => {
-        fetchRooms();
-        fetchRoomTypes();
-    }, [fetchRooms, fetchRoomTypes]);
+  const roomTypeOptions = useMemo(
+    () => roomTypes.map((roomType) => ({ value: roomType.name, label: roomType.name })),
+    [roomTypes]
+  );
 
-    // Build API params from filters and re-fetch when they change
-    const handleFiltersChange = (newFilters) => {
-        setFilters(newFilters);
+  const floorOptions = useMemo(
+    () =>
+      [...new Set(rooms.map((room) => room.floor).filter((floor) => floor != null))]
+        .sort((a, b) => a - b)
+        .map((floor) => ({ value: floor, label: String(floor) })),
+    [rooms]
+  );
 
-        // Server handles status, type, floor; we still apply price client-side below
-        const apiParams = {};
-        if (newFilters.status) apiParams.status = newFilters.status;
-        if (newFilters.type) apiParams.type = newFilters.type;
-        if (newFilters.floor) apiParams.floor = Number(newFilters.floor);
-
-        fetchRooms(apiParams);
-    };
-
-    const handleClearFilters = () => {
-        setFilters(EMPTY_FILTERS);
-        fetchRooms();
-    };
-
-    // Client-side price filter (not supported by the current backend endpoint)
-    const displayedRooms = useMemo(() => {
-        const minP = filters.minPrice ? Number(filters.minPrice) : null;
-        const maxP = filters.maxPrice ? Number(filters.maxPrice) : null;
-        if (!minP && !maxP) return rooms;
-
-        return rooms.filter((room) => {
-            const price = room.roomType?.basePrice ?? 0;
-            if (minP && price < minP) return false;
-            if (maxP && price > maxP) return false;
-            return true;
-        });
-    }, [rooms, filters.minPrice, filters.maxPrice]);
-
-    // ── Handlers ─────────────────────────────────────────────────────────────
-    const handleAddRoom = async (data) => {
-        const result = await addRoom(data);
-        return result;
-    };
-
-    const handleChangeStatus = async (id, status) => {
-        const result = await changeStatus(id, status);
-        return result;
-    };
-
-    const handleDelete = async (room) => {
-        if (!window.confirm(
-            `Delete Room ${room.roomNumber}? This cannot be undone.`
-        )) return;
-
-        const result = await removeRoom(room.id);
-        if (!result.success) {
-            setBannerError(result.error ?? 'Failed to delete room.');
+  const summary = useMemo(() => {
+    return rooms.reduce(
+      (acc, room) => {
+        if (acc[room.status] != null) {
+          acc[room.status] += 1;
         }
-    };
-
-    return (
-        <div className="h-full bg-zinc-50 p-6 lg:p-8">
-            {/* ── Header ── */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-4xl font-extrabold text-black tracking-tight">{t('roomsTitle') || 'Rooms Management'}</h1>
-                    <p className="mt-2 text-sm font-medium text-zinc-500">
-                        {loading ? (t('loadingRooms') || 'Loading…') : (t('roomsShown', { count: displayedRooms.length }) || `${displayedRooms.length} room${displayedRooms.length !== 1 ? 's' : ''} shown`)}
-                        {!loading && rooms.length !== displayedRooms.length && (t('filteredFrom', { total: rooms.length }) || ` (filtered from ${rooms.length})`)}
-                    </p>
-                </div>
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-extrabold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-zinc-400"
-                >
-                    {t('addRoomBtn') || '＋ Add Room'}
-                </button>
-            </div>
-
-            {/* ── Error Banner ── */}
-            <div className="mb-6">
-                <ErrorBanner
-                    message={bannerError ?? error}
-                    onClose={() => { setBannerError(null); clearError(); }}
-                />
-            </div>
-
-            {/* ── Filters ── */}
-            <div className="mb-6">
-                <RoomFilters
-                    filters={filters}
-                    onFiltersChange={handleFiltersChange}
-                    onClear={handleClearFilters}
-                    statusOptions={statusOptions}
-                    roomTypeOptions={roomTypeOptions}
-                    floorOptions={floorOptions}
-                />
-            </div>
-
-            {/* ── Loading skeleton ── */}
-            {loading && (
-                <div className="space-y-3">
-                    {[...Array(5)].map((_, i) => (
-                        <div key={i} className="h-12 w-full animate-pulse rounded-lg bg-gray-200" />
-                    ))}
-                </div>
-            )}
-
-            {/* ── Table ── */}
-            {!loading && (
-                <div className="overflow-x-auto rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-                    <table className="min-w-full divide-y divide-zinc-200 text-sm">
-                        <thead>
-                            <tr className="bg-zinc-50 border-b border-zinc-200">
-                                {['colRoomNum', 'colFloor', 'colType', 'colStatus', 'colBasePrice', 'colMaxGuests', 'colAmenities', 'colActions'].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="px-6 py-4 text-start pl-8 text-[10px] font-extrabold uppercase tracking-widest text-zinc-400"
-                                    >
-                                        {t(h)}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-100 bg-white">
-                            {displayedRooms.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="px-6 py-14 text-center text-zinc-500 font-medium">
-                                        {t('noRoomsMatched') || 'No rooms match the current filters.'}
-                                    </td>
-                                </tr>
-                            ) : (
-                                displayedRooms.map((room) => {
-                                    const amenities = room.roomType?.amenities
-                                        ? room.roomType.amenities.split(',').map((a) => a.trim()).filter(Boolean)
-                                        : [];
-
-                                    return (
-                                        <tr key={room.id} className="transition-colors hover:bg-zinc-50">
-                                            <td className="px-6 pl-8 py-5 text-xl font-extrabold text-black">{room.roomNumber}</td>
-                                            <td className="px-6 py-5 text-zinc-500 font-bold">{room.floor ?? '—'}</td>
-                                            <td className="px-6 py-5 text-zinc-900 font-bold">{room.roomType?.name ?? '—'}</td>
-                                            <td className="px-6 py-5">
-                                                <span
-                                                    className={`inline-flex items-center cursor-pointer rounded-full px-3 py-1 text-[10px] uppercase font-extrabold tracking-wider transition hover:opacity-80 border ${STATUS_COLORS[room.status] ?? 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}
-                                                    title={t('clickRowActions') || "Click row actions to change status"}
-                                                >
-                                                    {t(`status${room.status.replace(/_([a-z])/g, (m, p1) => p1.toUpperCase()).replace(/^[a-z]/, (m) => m.toUpperCase())}`) || (STATUS_LABELS[room.status] ?? room.status)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-5 font-bold text-black">
-                                                ${room.roomType?.basePrice?.toFixed(2) ?? '—'}
-                                            </td>
-                                            <td className="px-6 py-5 text-zinc-500 font-bold">
-                                                {room.roomType?.maxGuests ?? '—'}
-                                            </td>
-                                            <td className="px-6 py-5 max-w-xs">
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {amenities.slice(0, 3).map((a) => (
-                                                        <span key={a} className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] uppercase tracking-wider font-extrabold text-zinc-600 border border-zinc-200">{a}</span>
-                                                    ))}
-                                                    {amenities.length > 3 && (
-                                                        <span className="rounded-full bg-black px-2 py-0.5 text-[10px] font-extrabold text-white">
-                                                            +{amenities.length - 3}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-2">
-                                                    {/* Change Status */}
-                                                    <button
-                                                        onClick={() => setStatusModal(room)}
-                                                        title={t('updateStatusTitle') || "Update status"}
-                                                        className="rounded-full p-2 text-zinc-600 transition hover:bg-zinc-100 hover:text-black focus:outline-none bg-zinc-50 border border-transparent hover:border-zinc-200"
-                                                    >
-                                                        🔄
-                                                    </button>
-                                                    {/* Delete */}
-                                                    <button
-                                                        onClick={() => handleDelete(room)}
-                                                        title={t('deleteRoomTitle') || "Delete room"}
-                                                        className="rounded-full p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600 focus:outline-none bg-zinc-50 border border-transparent hover:border-red-100"
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {/* ── Add Room Modal ── */}
-            {showAddModal && (
-                <AddRoomModal
-                    roomTypes={roomTypes}
-                    onSave={handleAddRoom}
-                    onClose={() => setShowAddModal(false)}
-                />
-            )}
-
-            {/* ── Update Status Modal ── */}
-            {statusModal && (
-                <UpdateStatusModal
-                    room={statusModal}
-                    onSave={handleChangeStatus}
-                    onClose={() => setStatusModal(null)}
-                />
-            )}
-        </div>
+        return acc;
+      },
+      {
+        AVAILABLE: 0,
+        OCCUPIED: 0,
+        NEEDS_CLEANING: 0,
+        UNDER_MAINTENANCE: 0,
+      }
     );
+  }, [rooms]);
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    fetchRooms(buildApiFilters(newFilters));
+  };
+
+  const handleClearFilters = () => {
+    setFilters(EMPTY_FILTERS);
+    fetchRooms();
+  };
+
+  const handleAddRoom = async (data) => {
+    const result = await addRoom(data);
+    if (result.success) {
+      fetchRooms(buildApiFilters(filters));
+    }
+    return result;
+  };
+
+  const handleChangeStatus = async (id, status) => {
+    const result = await changeStatus(id, status);
+    if (result.success) {
+      fetchRooms(buildApiFilters(filters));
+    }
+    return result;
+  };
+
+  const handleDelete = async (room) => {
+    if (!window.confirm(`Delete Room ${room.roomNumber}? This cannot be undone.`)) return;
+
+    const result = await removeRoom(room.id);
+    if (!result.success) {
+      setBannerError(result.error ?? 'Failed to delete room.');
+      return;
+    }
+
+    fetchRooms(buildApiFilters(filters));
+  };
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <DashboardHero
+        eyebrow="Inventory Control"
+        title="Rooms Management"
+        description="Manage live room inventory, operational status, and room setup from a single manager workspace."
+        meta={[
+          `${rooms.length} rooms loaded`,
+          `${summary.AVAILABLE} available`,
+          `${roomTypes.length} room types`,
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            Inventory Snapshot
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Cleaning
+              </p>
+              <p className="mt-2 text-lg font-black">{summary.NEEDS_CLEANING}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Maintenance
+              </p>
+              <p className="mt-2 text-lg font-black">{summary.UNDER_MAINTENANCE}</p>
+            </div>
+          </div>
+        </div>
+      </DashboardHero>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+        >
+          <Plus className="h-4 w-4" />
+          Add Room
+        </button>
+      </div>
+
+      {(bannerError || error) && (
+        <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="flex items-start justify-between gap-3">
+            <span>{bannerError || error}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setBannerError(null);
+                clearError();
+              }}
+              className="text-xs font-bold uppercase tracking-[0.18em] text-rose-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      <RoomFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onClear={handleClearFilters}
+        statusOptions={statusOptions}
+        roomTypeOptions={roomTypeOptions}
+        floorOptions={floorOptions}
+      />
+
+      <DashboardPanel
+        title="Inventory Table"
+        description={`${displayedRooms.length} room${displayedRooms.length === 1 ? '' : 's'} shown in the current filter state.`}
+      >
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="h-14 animate-pulse rounded-2xl bg-zinc-100" />
+            ))}
+          </div>
+        ) : displayedRooms.length === 0 ? (
+          <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
+            <Waves className="mx-auto h-10 w-10 text-zinc-400" />
+            <p className="mt-4 text-lg font-black text-zinc-950">No rooms match the filters</p>
+            <p className="mt-2 text-sm font-medium text-zinc-500">
+              Adjust the status, type, floor, or price range filters to expand the inventory list.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-[1.5rem] border border-zinc-200">
+            <table className="min-w-full border-collapse">
+              <thead className="bg-zinc-50">
+                <tr>
+                  {[
+                    'Room',
+                    'Floor',
+                    'Type',
+                    'Status',
+                    'Base Price',
+                    'Capacity',
+                    'Amenities',
+                    'Actions',
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500"
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200 bg-white">
+                {displayedRooms.map((room) => {
+                  const amenities = room.roomType?.amenities
+                    ? room.roomType.amenities
+                        .split(',')
+                        .map((item) => item.trim())
+                        .filter(Boolean)
+                    : [];
+
+                  return (
+                    <tr key={room.id}>
+                      <td className="px-4 py-4 text-xl font-black tracking-tight text-zinc-950">
+                        {room.roomNumber}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium text-zinc-600">
+                        {room.floor ?? '-'}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-bold text-zinc-950">
+                        {room.roomType?.name ?? '-'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
+                            STATUS_STYLES[room.status]
+                          }`}
+                        >
+                          {STATUS_LABELS[room.status] ?? room.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm font-bold text-zinc-950">
+                        ${Number(room.roomType?.basePrice ?? 0).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium text-zinc-600">
+                        {room.roomType?.maxGuests ?? '-'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex max-w-xs flex-wrap gap-2">
+                          {amenities.slice(0, 3).map((amenity) => (
+                            <span
+                              key={amenity}
+                              className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
+                            >
+                              {amenity}
+                            </span>
+                          ))}
+                          {amenities.length > 3 && (
+                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600">
+                              +{amenities.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setStatusModal(room)}
+                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Status
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(room)}
+                            className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </DashboardPanel>
+
+      {showAddModal && (
+        <AddRoomModal
+          roomTypes={roomTypes}
+          onSave={handleAddRoom}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
+
+      {statusModal && (
+        <UpdateStatusModal
+          room={statusModal}
+          onSave={handleChangeStatus}
+          onClose={() => setStatusModal(null)}
+        />
+      )}
+    </div>
+  );
 }

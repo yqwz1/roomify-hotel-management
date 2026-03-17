@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { checkHealth } from '../services/healthService'
+import { useAuth } from '../context/AuthProvider'
+import { getDefaultRouteForRoles } from '../components/navigation/navConfig'
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth()
   const [health, setHealth] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (isAuthenticated) {
+      return undefined
+    }
+
     const fetchHealth = async () => {
       try {
         const data = await checkHealth()
@@ -21,7 +29,11 @@ export default function Home() {
     }
 
     fetchHealth()
-  }, [])
+  }, [isAuthenticated])
+
+  if (isAuthenticated) {
+    return <Navigate to={getDefaultRouteForRoles(user?.roles ?? [])} replace />
+  }
 
   return (
     <div className="h-full bg-zinc-50 p-6 lg:p-10 flex flex-col items-center justify-center text-center">

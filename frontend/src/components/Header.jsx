@@ -30,7 +30,7 @@ export default function Header({ onMenuToggle }) {
         {/* Left: hamburger + brand */}
         <div className="flex items-center gap-3">
           {/* Hamburger – only visible on mobile when authenticated */}
-          {isAuthenticated && (
+          {isAuthenticated && onMenuToggle && (
             <button
               onClick={onMenuToggle}
               className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition"

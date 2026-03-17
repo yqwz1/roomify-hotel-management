@@ -1,148 +1,264 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CalendarClock, ClipboardCheck, FileText, LogOut, Search, UserRound, Wallet } from 'lucide-react';
-import { useAuth } from '../context/AuthProvider';
+import {
+  BedDouble,
+  CalendarClock,
+  ClipboardCheck,
+  FileText,
+  Receipt,
+  Search,
+  Sparkles,
+  Wallet,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
+import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
+import ErrorState from '../components/common/ErrorState';
+import LoadingState from '../components/common/LoadingState';
+import { useAuth } from '../context/AuthProvider';
+import { useStaffDashboard } from '../hooks/useStaffDashboard';
 
-const ActionCard = ({ icon: Icon, title, description, onClick }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="group flex w-full items-center justify-between rounded-3xl border border-zinc-200 bg-white p-5 text-start transition-all hover:border-black hover:shadow-md"
-    >
-        <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 transition-colors group-hover:bg-black">
-                <Icon className="h-5 w-5 text-zinc-700 group-hover:text-white" />
-            </div>
-            <div>
-                <p className="text-sm font-bold text-black">{title}</p>
-                <p className="mt-1 text-xs text-zinc-500">{description}</p>
-            </div>
-        </div>
-        <ArrowRight className="h-5 w-5 flex-shrink-0 text-zinc-300 transition group-hover:text-black" />
-    </button>
-);
+const currency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
 
-const StaffDashboard = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
-    const { t } = useTranslation();
+export default function StaffDashboard() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const {
+    inventory,
+    loading,
+    error,
+    availableTonight,
+    floorsCovered,
+    startingRate,
+    premiumReady,
+    guestCapacityReady,
+    roomTypeSummary,
+    alerts,
+    dateWindow,
+  } = useStaffDashboard();
 
+  const welcomeName = user?.username || 'Staff Member';
+
+  const quickActions = useMemo(
+    () => [
+      {
+        icon: Search,
+        title: t('roomSearch') || 'Room Search',
+        description: 'Find available rooms and start a new reservation.',
+        onClick: () => navigate('/search'),
+      },
+      {
+        icon: ClipboardCheck,
+        title: t('checkInTitle') || 'Check-In',
+        description: 'Complete guest arrivals and checklist verification.',
+        onClick: () => navigate('/check-in'),
+      },
+      {
+        icon: CalendarClock,
+        title: t('modifyReservationTitle') || 'Modify Reservation',
+        description: 'Adjust dates and room assignments when plans change.',
+        onClick: () => navigate('/reservations/modify'),
+      },
+      {
+        icon: FileText,
+        title: t('cancelReservationTitle') || 'Cancel Reservation',
+        description: 'Handle cancellation requests with the current policy.',
+        onClick: () => navigate('/reservations/cancel'),
+      },
+      {
+        icon: Receipt,
+        title: t('invoicePreview') || 'Invoices',
+        description: 'Generate billing documents and confirm delivery.',
+        onClick: () => navigate('/invoice-preview'),
+      },
+      {
+        icon: Wallet,
+        title: t('checkoutTitle') || 'Checkout',
+        description: 'Review balances and complete guest departure.',
+        onClick: () => navigate('/checkout'),
+      },
+    ],
+    [navigate, t]
+  );
+
+  if (loading) {
     return (
-        <div className="h-full bg-zinc-50 p-6 lg:p-8">
-            <div className="mx-auto max-w-6xl space-y-6">
-                <div className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                            {t('dashboard') || 'Dashboard'}
-                        </p>
-                        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black">
-                            {t('staffDashboardTitle') || 'Staff Dashboard'}
-                        </h1>
-                        <p className="mt-2 text-sm font-medium text-zinc-500">
-                            {t('welcomeBackUser', { username: user?.username || t('staffMemberFallback') }) || `Welcome back, ${user?.username || 'Staff Member'}`}
-                        </p>
-                    </div>
-                    <button
-                        onClick={logout}
-                        className="rounded-full bg-black px-6 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
-                    >
-                        <span className="inline-flex items-center gap-2">
-                            <LogOut className="h-4 w-4" />
-                            {t('logout') || 'Logout'}
-                        </span>
-                    </button>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black text-white">
-                                <UserRound className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-extrabold text-black">{user?.username || 'Staff Member'}</h2>
-                                <p className="mt-1 text-sm font-medium text-zinc-500">
-                                    {t('staffAccessDesc') || 'Use the operational tools below to search rooms, check guests in and out, and manage reservation changes.'}
-                                </p>
-                            </div>
-                        </div>
-
-                        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                                    {t('emailLabel') || 'Email'}
-                                </dt>
-                                <dd className="mt-2 text-sm font-semibold text-black">{user?.email || '—'}</dd>
-                            </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                                    {t('roleLabel') || 'Role'}
-                                </dt>
-                                <dd className="mt-2">
-                                    <span className="inline-flex rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-bold text-black">
-                                        {user?.roles?.[0] || 'ROLE_STAFF'}
-                                    </span>
-                                </dd>
-                            </div>
-                        </dl>
-
-                        <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-5">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-500">Front Desk Workflow</h3>
-                            <div className="mt-4 space-y-3">
-                                {[
-                                    'Search room availability before creating a reservation.',
-                                    'Use Check-In and Checkout tools for guest arrivals and departures.',
-                                    'Review reservation changes and invoices from the dedicated service pages.',
-                                ].map((item) => (
-                                    <div key={item} className="rounded-2xl bg-white px-4 py-3 text-sm font-medium text-zinc-600">
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">
-                            Operational Actions
-                        </h2>
-                        <div className="mt-5 grid gap-3">
-                            <ActionCard
-                                icon={Search}
-                                title={t('roomSearch') || 'Room Search'}
-                                description="Find available rooms and start new bookings."
-                                onClick={() => navigate('/search')}
-                            />
-                            <ActionCard
-                                icon={ClipboardCheck}
-                                title={t('checkInTitle') || 'Check-In'}
-                                description="Look up reservations and complete guest arrivals."
-                                onClick={() => navigate('/check-in')}
-                            />
-                            <ActionCard
-                                icon={CalendarClock}
-                                title={t('modifyReservationTitle') || 'Modify Reservation'}
-                                description="Adjust reservation dates and room assignments."
-                                onClick={() => navigate('/reservations/modify')}
-                            />
-                            <ActionCard
-                                icon={FileText}
-                                title={t('invoicePreview') || 'Invoice Preview'}
-                                description="Generate, review, and download reservation invoices."
-                                onClick={() => navigate('/invoice-preview')}
-                            />
-                            <ActionCard
-                                icon={Wallet}
-                                title={t('checkoutTitle') || 'Checkout'}
-                                description="Review balances and complete guest departures."
-                                onClick={() => navigate('/checkout')}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="p-6 lg:p-8">
+        <LoadingState message="Loading tonight's available inventory..." />
+      </div>
     );
-};
+  }
 
-export default StaffDashboard;
+  if (error) {
+    return (
+      <div className="p-6 lg:p-8">
+        <ErrorState
+          title="Staff dashboard unavailable"
+          message={error}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <DashboardHero
+        eyebrow="Front Desk Operations"
+        title={t('staffDashboardTitle') || 'Staff Dashboard'}
+        description={`Welcome back, ${welcomeName}. This view is tuned for tonight's availability window so the front desk can move quickly between room search, check-in, billing, and reservation changes.`}
+        meta={[
+          `${dateWindow.checkIn} arrival window`,
+          `${availableTonight} rooms available`,
+          `${floorsCovered} floors represented`,
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            Tonight's Inventory
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Starting Rate
+              </p>
+              <p className="mt-2 text-3xl font-black">
+                {startingRate ? currency.format(startingRate) : 'N/A'}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Largest Fit
+              </p>
+              <p className="mt-2 text-3xl font-black">{guestCapacityReady || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      </DashboardHero>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardMetricCard
+          icon={BedDouble}
+          label="Available Tonight"
+          value={String(availableTonight)}
+          hint="Current search window using today's arrival and tomorrow's departure."
+        />
+        <DashboardMetricCard
+          icon={Sparkles}
+          label="Premium Ready"
+          value={String(premiumReady)}
+          hint="Deluxe and suite inventory currently available."
+        />
+        <DashboardMetricCard
+          icon={Search}
+          label="Room Types Ready"
+          value={String(roomTypeSummary.length)}
+          hint="Distinct room categories you can offer immediately."
+        />
+        <DashboardMetricCard
+          icon={Receipt}
+          label="Starting Rate"
+          value={startingRate ? currency.format(startingRate) : 'N/A'}
+          hint="Lowest visible base rate in tonight's live search."
+          tone="dark"
+        />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <DashboardPanel
+          title="Operational Actions"
+          description="Primary workflows for the current shift."
+        >
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {quickActions.map((action) => (
+              <DashboardQuickAction key={action.title} {...action} />
+            ))}
+          </div>
+        </DashboardPanel>
+
+        <DashboardPanel
+          title="Shift Alerts"
+          description="Conditions worth calling out before promising inventory changes."
+        >
+          {alerts.length > 0 ? (
+            <div className="space-y-3">
+              {alerts.map((alert) => (
+                <div key={alert} className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-4">
+                  <p className="text-sm font-medium leading-6 text-amber-950">{alert}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 px-4 py-5">
+              <p className="text-sm font-bold text-emerald-900">
+                Inventory looks healthy.
+              </p>
+              <p className="mt-1 text-sm font-medium text-emerald-800/80">
+                The current search window has sufficient availability for standard front desk changes.
+              </p>
+            </div>
+          )}
+        </DashboardPanel>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <DashboardPanel
+          title="Availability by Room Type"
+          description="Live mix of the room categories you can currently offer tonight."
+        >
+          <div className="space-y-3">
+            {roomTypeSummary.length > 0 ? (
+              roomTypeSummary.map((item) => (
+                <div key={item.name} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-zinc-950">{item.name}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                        Available immediately for the active search window.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-700 shadow-sm">
+                      {item.count} room{item.count === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm font-medium text-zinc-500">
+                No inventory was returned for tonight's window.
+              </p>
+            )}
+          </div>
+        </DashboardPanel>
+
+        <DashboardPanel
+          title="Front Desk Playbook"
+          description="Suggested workflow for the most common hotel desk scenarios."
+        >
+          <div className="grid gap-3">
+            {[
+              'Start every walk-in or modification request from Room Search so the room promise is based on live availability.',
+              'Use Check-In only after confirming identity, payment readiness, and room status.',
+              'Generate invoices before checkout when guests request paperwork in advance.',
+              `Tonight's search returned ${inventory.length} available rooms, so escalate scarce categories early if premium inventory is low.`,
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium leading-6 text-zinc-600"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </DashboardPanel>
+      </div>
+    </div>
+  );
+}

@@ -1,475 +1,474 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Download, FilePlus2, Hotel, Search } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
-import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Input } from '../components/ui/input'
-import LoadingState from '../components/common/LoadingState'
-import ErrorState from '../components/common/ErrorState'
-import ConfirmationToast from '../components/ConfirmationToast'
-import { generateInvoice, getInvoiceDeliveryStatus, getInvoicePdf } from '../services/invoiceService'
+import { useCallback, useMemo, useState } from 'react';
+import {
+  Download,
+  FilePlus2,
+  Mail,
+  Printer,
+  Receipt,
+  Send,
+} from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import ConfirmationToast from '../components/ConfirmationToast';
+import ReservationLookupPanel from '../components/ReservationLookupPanel';
+import { LtrText } from '../components/LtrText';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
+import {
+  generateInvoice,
+  getInvoiceDeliveryStatus,
+  getInvoicePdf,
+} from '../services/invoiceService';
 import {
   extractReservationError,
   getBill,
   getReservationByConfirmationNumber,
-} from '../services/reservationService'
+} from '../services/reservationService';
 
-const formatDateAr = (iso) => {
-  if (!iso) return '—'
-  return new Date(`${iso}T12:00:00`).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'long',
+const formatDate = (iso) => {
+  if (!iso) return '-';
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
-  })
+    year: 'numeric',
+  });
+};
+
+const money = (value) => `$${Number(value ?? 0).toFixed(2)}`;
+
+function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta }) {
+  if (!invoiceFinalized) {
+    return (
+      <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-amber-900">
+        Invoice not finalized
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'LOADING') {
+    return (
+      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+        Loading delivery status
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'SENT') {
+    return (
+      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
+        Delivered by email
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'FAILED') {
+    return (
+      <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        Delivery failed
+        {deliveryMeta?.errorMessage ? `: ${deliveryMeta.errorMessage}` : ''}
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'ERROR') {
+    return (
+      <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        Delivery status unavailable
+      </span>
+    );
+  }
+
+  return (
+    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+      Delivery pending
+    </span>
+  );
 }
 
-const formatAmount = (val) => {
-  const n = Number(val ?? 0)
-  return `$${n.toFixed(2)}`
+function InvoiceLedger({ bill }) {
+  if (!bill) {
+    return (
+      <div className="rounded-[1.35rem] border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
+        <p className="text-sm font-bold text-zinc-950">No invoice data loaded</p>
+        <p className="mt-2 text-sm font-medium text-zinc-500">
+          Select a reservation to review the invoice ledger.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-[1.5rem] border border-zinc-200">
+      <table className="w-full border-collapse">
+        <thead className="bg-zinc-50">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+              Description
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+              Amount
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-zinc-200 bg-white">
+          {(bill.lineItems ?? []).map((item, index) => {
+            const amount = Number(item?.amount ?? 0);
+            const credit = Boolean(item?.credit);
+
+            return (
+              <tr key={`${item?.label ?? 'line'}-${index}`}>
+                <td className="px-4 py-3 text-sm font-medium text-zinc-700">
+                  {item?.label || 'Line item'}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
+                  {credit ? `-${money(amount)}` : money(amount)}
+                </td>
+              </tr>
+            );
+          })}
+          <tr className="bg-zinc-50">
+            <td className="px-4 py-3 text-sm font-bold text-zinc-950">Total</td>
+            <td className="px-4 py-3 text-right text-lg font-black text-zinc-950">
+              {money(bill.balanceDue)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
-const InvoicePreview = () => {
-  const location = useLocation()
-  const [query, setQuery] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [toast, setToast] = useState(null)
+export default function InvoicePreview() {
+  const location = useLocation();
+  const [selected, setSelected] = useState(null);
+  const [bill, setBill] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [deliveryStatus, setDeliveryStatus] = useState('IDLE');
+  const [deliveryMeta, setDeliveryMeta] = useState({ errorMessage: null, sentAt: null });
+  const [generating, setGenerating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
-  const [reservation, setReservation] = useState(null)
-  const [bill, setBill] = useState(null)
+  const initialQuery = useMemo(
+    () =>
+      String(
+        location.state?.confirmationNumber ?? location.state?.initialQuery ?? ''
+      ).trim(),
+    [location.state?.confirmationNumber, location.state?.initialQuery]
+  );
 
-  const [deliveryStatus, setDeliveryStatus] = useState('IDLE')
-  const [deliveryMeta, setDeliveryMeta] = useState({ errorMessage: null, sentAt: null })
+  const invoiceFinalized = Boolean(bill?.invoiceFinalized);
 
-  const [generating, setGenerating] = useState(false)
-  const [downloading, setDownloading] = useState(false)
+  const fetchInvoiceData = useCallback(async (confirmationNumber) => {
+    if (!confirmationNumber) return;
 
-  const reservationId = reservation?.id
-  const confirmationNumber = reservation?.confirmationNumber
-  const invoiceFinalized = !!bill?.invoiceFinalized
-
-  const fetchEverything = useCallback(async (confirmation) => {
-    const trimmed = String(confirmation ?? '').trim()
-    if (!trimmed) return
-
-    setLoading(true)
-    setError(null)
-    setReservation(null)
-    setBill(null)
-    setDeliveryStatus('LOADING')
-    setDeliveryMeta({ errorMessage: null, sentAt: null })
+    setLoading(true);
+    setError(null);
+    setBill(null);
+    setDeliveryStatus('LOADING');
+    setDeliveryMeta({ errorMessage: null, sentAt: null });
 
     try {
-      const reservationData = await getReservationByConfirmationNumber(trimmed)
-      setReservation(reservationData)
+      const reservation = await getReservationByConfirmationNumber(confirmationNumber);
+      const billData = await getBill(reservation.confirmationNumber);
 
-      const billData = await getBill(reservationData.confirmationNumber)
-      setBill(billData)
+      setSelected(reservation);
+      setBill(billData);
 
       if (!billData?.invoiceFinalized) {
-        setDeliveryStatus('IDLE')
-        setDeliveryMeta({ errorMessage: null, sentAt: null })
-        return
+        setDeliveryStatus('IDLE');
+        return;
       }
 
       try {
-        const delivery = await getInvoiceDeliveryStatus(reservationData.id)
-        setDeliveryStatus(delivery?.status || 'UNKNOWN')
+        const delivery = await getInvoiceDeliveryStatus(reservation.id);
+        setDeliveryStatus(delivery?.status || 'UNKNOWN');
         setDeliveryMeta({
           errorMessage: delivery?.errorMessage ?? null,
           sentAt: delivery?.sentAt ?? null,
-        })
+        });
       } catch (err) {
         if (err?.response?.status === 404) {
-          setDeliveryStatus('UNKNOWN')
-          setDeliveryMeta({ errorMessage: null, sentAt: null })
+          setDeliveryStatus('UNKNOWN');
         } else {
-          setDeliveryStatus('ERROR')
-          setDeliveryMeta({ errorMessage: null, sentAt: null })
+          setDeliveryStatus('ERROR');
         }
       }
     } catch (err) {
-      setError(extractReservationError(err))
-      setDeliveryStatus('IDLE')
+      setError(extractReservationError(err));
+      setSelected(null);
+      setBill(null);
+      setDeliveryStatus('IDLE');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  useEffect(() => {
-    const initial = String(location.state?.confirmationNumber ?? '').trim()
-    if (!initial) return
-    setQuery(initial)
-    fetchEverything(initial)
-  }, [location.state?.confirmationNumber, fetchEverything])
-
-  const handleSearch = async (e) => {
-    e.preventDefault()
-    await fetchEverything(query)
-  }
+  const handleSelect = async (reservation) => {
+    await fetchInvoiceData(reservation.confirmationNumber);
+  };
 
   const handleGenerate = useCallback(async () => {
-    if (!reservationId || generating || invoiceFinalized) return
+    if (!selected?.id || generating || invoiceFinalized) return;
 
     try {
-      setGenerating(true)
-      await generateInvoice(reservationId)
-      setToast({ message: 'تم إنشاء الفاتورة وإرسالها بنجاح.', type: 'success' })
-      await fetchEverything(confirmationNumber)
+      setGenerating(true);
+      await generateInvoice(selected.id);
+      setToast({ message: 'Invoice generated successfully.', type: 'success' });
+      await fetchInvoiceData(selected.confirmationNumber);
     } catch (err) {
-      setToast({ message: extractReservationError(err), type: 'error' })
+      setToast({ message: extractReservationError(err), type: 'error' });
     } finally {
-      setGenerating(false)
+      setGenerating(false);
     }
-  }, [reservationId, generating, invoiceFinalized, fetchEverything, confirmationNumber])
+  }, [fetchInvoiceData, generating, invoiceFinalized, selected]);
 
   const handleDownload = useCallback(async () => {
-    if (!reservationId || !invoiceFinalized || downloading) return
+    if (!selected?.id || !invoiceFinalized || downloading) return;
 
     try {
-      setDownloading(true)
-      const blob = await getInvoicePdf(reservationId)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `invoice-${reservationId}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      setDownloading(true);
+      const blob = await getInvoicePdf(selected.id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${selected.confirmationNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch {
-      setToast({ message: 'تعذر تحميل الفاتورة. حاول مرة أخرى.', type: 'error' })
+      setToast({ message: 'Unable to download the invoice.', type: 'error' });
     } finally {
-      setDownloading(false)
+      setDownloading(false);
     }
-  }, [reservationId, invoiceFinalized, downloading])
+  }, [downloading, invoiceFinalized, selected]);
 
   const handlePrint = useCallback(async () => {
-    if (!reservationId || !invoiceFinalized) return
+    if (!selected?.id || !invoiceFinalized) return;
 
     try {
-      const blob = await getInvoicePdf(reservationId)
-      const url = window.URL.createObjectURL(blob)
-      const printWindow = window.open(url)
-      if (printWindow) printWindow.focus()
+      const blob = await getInvoicePdf(selected.id);
+      const url = window.URL.createObjectURL(blob);
+      const printWindow = window.open(url);
+      if (printWindow) {
+        printWindow.focus();
+      }
     } catch {
-      setToast({ message: 'تعذر فتح الفاتورة للطباعة. حاول مرة أخرى.', type: 'error' })
+      setToast({ message: 'Unable to open the invoice for printing.', type: 'error' });
     }
-  }, [reservationId, invoiceFinalized])
-
-  const deliveryBadge = useMemo(() => {
-    if (!reservationId) {
-      return (
-        <span className="inline-flex items-center rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-medium text-zinc-600">
-          ابحث عن حجز لعرض الفاتورة
-        </span>
-      )
-    }
-
-    if (!invoiceFinalized) {
-      return (
-        <span className="inline-flex items-center rounded-full bg-amber-100 px-4 py-1.5 text-xs font-medium text-amber-900">
-          لم يتم إنشاء الفاتورة بعد
-        </span>
-      )
-    }
-
-    if (deliveryStatus === 'LOADING') {
-      return (
-        <span className="inline-flex items-center rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-medium text-zinc-600">
-          جاري تحميل حالة إرسال الفاتورة...
-        </span>
-      )
-    }
-
-    if (deliveryStatus === 'ERROR') {
-      return (
-        <span className="inline-flex items-center rounded-full bg-rose-100 px-4 py-1.5 text-xs font-medium text-rose-900">
-          تعذر جلب حالة إرسال البريد الإلكتروني.
-        </span>
-      )
-    }
-
-    if (deliveryStatus === 'SENT') {
-      return (
-        <span className="inline-flex items-center rounded-full bg-rose-900/10 px-4 py-1.5 text-xs font-medium text-rose-900">
-          تم إرسال الفاتورة إلى البريد الإلكتروني
-        </span>
-      )
-    }
-
-    if (deliveryStatus === 'FAILED') {
-      return (
-        <span className="inline-flex flex-col gap-1 rounded-full bg-rose-100 px-4 py-1.5 text-xs font-medium text-rose-900 sm:flex-row sm:items-center">
-          <span>فشل إرسال الفاتورة إلى البريد الإلكتروني</span>
-          {deliveryMeta.errorMessage && (
-            <span className="text-[11px] text-rose-800">({deliveryMeta.errorMessage})</span>
-          )}
-        </span>
-      )
-    }
-
-    return (
-      <span className="inline-flex items-center rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-medium text-zinc-600">
-        لم يتم إرسال الفاتورة بعد
-      </span>
-    )
-  }, [reservationId, invoiceFinalized, deliveryStatus, deliveryMeta.errorMessage])
+  }, [invoiceFinalized, selected]);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6" dir="rtl">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <ConfirmationToast
         message={toast?.message}
         type={toast?.type}
         onClose={() => setToast(null)}
       />
 
-      <Card className="rounded-3xl border-zinc-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-4">
-            <span
-              className="me-2 text-2xl font-bold text-rose-900"
-              style={{ fontFamily: "'Khat Alharf Alyadawi', system-ui, sans-serif" }}
-            >
-              معاينة الفاتورة
-            </span>
-            <div>{deliveryBadge}</div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute end-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
-              <Input
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value)
-                  setError(null)
-                }}
-                placeholder="رقم التأكيد (مثلاً RSV-...)"
-                className="rounded-full border-zinc-300 pe-10 focus-visible:ring-rose-900"
-              />
+      <DashboardHero
+        eyebrow="Billing Workflow"
+        title="Invoice Preview"
+        description="Search for a reservation, generate the invoice when needed, and then print or download the final document."
+        meta={[
+          'Reservation-first billing',
+          selected ? `Selected ${selected.confirmationNumber}` : 'Awaiting selection',
+          invoiceFinalized ? 'Invoice ready' : 'Invoice pending',
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            Invoice State
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Finalized
+              </p>
+              <p className="mt-2 text-lg font-black">{invoiceFinalized ? 'Yes' : 'No'}</p>
             </div>
-            <Button
-              type="submit"
-              disabled={loading || !query.trim()}
-              className="rounded-full bg-rose-900 px-8 text-white hover:bg-rose-900/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? 'جاري البحث...' : 'بحث'}
-            </Button>
-          </form>
-
-          {error && (
-            <div className="mt-4">
-              <ErrorState
-                title="تعذر تحميل الفاتورة"
-                message={error}
-                onRetry={() => fetchEverything(query)}
-              />
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                Delivery
+              </p>
+              <p className="mt-2 text-lg font-black">
+                {invoiceFinalized ? deliveryStatus : 'Pending'}
+              </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {loading && <LoadingState message="جاري تحميل بيانات الفاتورة..." />}
-
-      {!loading && reservation && bill && (
-        <>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
-            {!invoiceFinalized ? (
-              <Button
-                className="flex items-center gap-2 rounded-full bg-rose-900 text-white hover:bg-rose-900/90"
-                onClick={handleGenerate}
-                disabled={!reservationId || generating}
-              >
-                <FilePlus2 className="ms-2 h-4 w-4" />
-                {generating ? 'جارٍ إنشاء الفاتورة...' : 'إنشاء الفاتورة'}
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 rounded-full border-rose-900/10 text-rose-900 hover:bg-rose-900 hover:text-white"
-                  onClick={handlePrint}
-                  disabled={!reservationId || !invoiceFinalized}
-                >
-                  طباعة
-                </Button>
-                <Button
-                  className="flex items-center gap-2 rounded-full bg-rose-900 text-white hover:bg-rose-900/90"
-                  onClick={handleDownload}
-                  disabled={!reservationId || !invoiceFinalized || downloading}
-                >
-                  <Download className="ms-2 h-4 w-4" />
-                  {downloading ? 'جارٍ التحميل...' : 'تحميل الفاتورة'}
-                </Button>
-              </>
-            )}
           </div>
+        </div>
+      </DashboardHero>
 
-          {!invoiceFinalized && (
-            <Card className="rounded-3xl border-amber-200 bg-amber-50 shadow-sm">
-              <CardContent className="p-5 text-sm text-amber-900">
-                أنشئ الفاتورة أولاً ليتم إرسالها بالبريد الإلكتروني وتفعيل الطباعة والتنزيل.
-              </CardContent>
-            </Card>
-          )}
+      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
 
-          <Card className="rounded-3xl border-zinc-200 border-t-8 border-t-rose-900 bg-white shadow-sm">
-            <CardContent className="p-8 md:p-12">
-              <div className="mb-8 flex items-start justify-between border-b border-zinc-100 pb-8">
-                <div className="flex items-center gap-3 text-black">
-                  <Hotel className="ms-3 h-10 w-10" />
-                  <div>
-                    <h2
-                      className="text-3xl font-black tracking-tighter text-rose-900"
-                      style={{ fontFamily: "'Khat Alharf Alyadawi', system-ui, sans-serif" }}
-                    >
-                      روميفاي
-                    </h2>
-                    <p
-                      className="text-sm font-medium text-zinc-500"
-                      style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                    >
-                      فنادق ومنتجعات فاخرة
-                    </p>
-                  </div>
-                </div>
-                <div className="text-start">
-                  <p
-                    className="text-start text-sm text-zinc-500"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    رقم التأكيد: {confirmationNumber}
-                  </p>
-                  <p
-                    className="text-start text-sm text-zinc-500"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    التاريخ: {formatDateAr(new Date().toISOString().slice(0, 10))}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-8 grid grid-cols-2 gap-8 rounded-3xl border border-rose-100 bg-rose-50 p-6">
-                <div>
-                  <h4
-                    className="mb-2 text-xs font-bold uppercase tracking-wider text-rose-800"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    فاتورة إلى
-                  </h4>
-                  <p
-                    className="mb-1 text-xl font-black text-rose-950"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    {reservation.guestName || '—'}
-                  </p>
-                  <p
-                    className="text-sm font-medium text-rose-900/70"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    {reservation.guestEmail || '—'}
-                  </p>
-                </div>
-                <div>
-                  <h4
-                    className="mb-2 text-xs font-bold uppercase tracking-wider text-rose-800"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    تفاصيل الإقامة
-                  </h4>
-                  <p
-                    className="mb-1 text-sm font-bold text-rose-950"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    <span className="ms-2 font-normal text-rose-900/70">الغرفة:</span> {reservation.roomNumber || '—'}
-                  </p>
-                  <p
-                    className="mb-1 text-sm font-bold text-rose-950"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    <span className="ms-2 font-normal text-rose-900/70">الدخول:</span> {formatDateAr(reservation.checkInDate)}
-                  </p>
-                  <p
-                    className="text-sm font-bold text-rose-950"
-                    style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                  >
-                    <span className="ms-2 font-normal text-rose-900/70">الخروج:</span> {formatDateAr(reservation.checkOutDate)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-8 overflow-hidden rounded-3xl border border-rose-200">
-                <table className="w-full border-collapse text-end">
-                  <thead className="border-b border-rose-200 bg-rose-50">
-                    <tr>
-                      <th
-                        className="w-3/4 px-6 py-4 text-xs font-bold uppercase tracking-wider text-rose-800"
-                        style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                      >
-                        الوصف
-                      </th>
-                      <th
-                        className="w-1/4 px-6 py-4 text-start text-xs font-bold uppercase tracking-wider text-rose-800"
-                        style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                      >
-                        المبلغ
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-rose-100 bg-white">
-                    {(bill?.lineItems ?? []).map((item, idx) => {
-                      const amount = Number(item?.amount ?? 0)
-                      const credit = !!item?.credit
-                      return (
-                        <tr key={idx} className="transition-colors hover:bg-rose-50/50">
-                          <td
-                            className="px-6 py-4 text-start text-sm font-medium text-rose-950"
-                            style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                          >
-                            {item?.label ?? '—'}
-                          </td>
-                          <td className="px-6 py-4 text-start text-sm font-bold text-rose-950">
-                            {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-end">
-                <div className="w-full max-w-sm space-y-3 rounded-3xl border border-rose-100 bg-rose-50 p-6">
-                  <div className="mt-4 flex items-center justify-between border-t border-rose-200 pt-4">
-                    <span
-                      className="text-lg font-black text-rose-950"
-                      style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
-                    >
-                      الإجمالي الكلي
-                    </span>
-                    <span className="font-mono text-2xl font-black text-rose-950">
-                      {formatAmount(bill.balanceDue)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-16 border-t border-zinc-200 pt-8 text-center">
-                <p
-                  className="text-sm font-medium text-zinc-400"
-                  style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
+        {!selected && !loading ? (
+          <DashboardPanel
+            title="Select a Reservation"
+            description="Load a reservation before generating or previewing its invoice."
+          >
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                'Invoice generation is a separate action and must happen before print or download.',
+                'Delivery status is only available after the invoice is finalized.',
+                'Use the confirmation number when possible for the most reliable invoice lookup.',
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
                 >
-                  شكراً لاختياركم فنادق ومنتجعات روميفاي. نتمنى رؤيتكم قريباً.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
-    </div>
-  )
-}
+                  {item}
+                </div>
+              ))}
+            </div>
+          </DashboardPanel>
+        ) : (
+          <div className="space-y-6">
+            <DashboardPanel
+              title="Invoice Controls"
+              description="Generate the invoice first, then print or download the final document."
+              action={
+                selected ? (
+                  <DeliveryBadge
+                    deliveryStatus={deliveryStatus}
+                    invoiceFinalized={invoiceFinalized}
+                    deliveryMeta={deliveryMeta}
+                  />
+                ) : null
+              }
+            >
+              {loading ? (
+                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-5 py-10 text-center">
+                  <p className="text-sm font-medium text-zinc-500">
+                    Loading invoice data...
+                  </p>
+                </div>
+              ) : error ? (
+                <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                  {error}
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                        Guest
+                      </p>
+                      <p className="mt-2 text-lg font-black text-zinc-950">
+                        {selected?.guestName || '-'}
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                        {selected?.guestEmail || 'No guest email provided'}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                        Reservation
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                        <LtrText>{selected?.confirmationNumber}</LtrText>
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                        Room {selected?.roomNumber} | {formatDate(selected?.checkInDate)} to{' '}
+                        {formatDate(selected?.checkOutDate)}
+                      </p>
+                    </div>
+                  </div>
 
-export default InvoicePreview
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                    {!invoiceFinalized ? (
+                      <button
+                        type="button"
+                        onClick={handleGenerate}
+                        disabled={!selected?.id || generating}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                      >
+                        <FilePlus2 className="h-4 w-4" />
+                        {generating ? 'Generating Invoice...' : 'Generate Invoice'}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handlePrint}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                        >
+                          <Printer className="h-4 w-4" />
+                          Print Invoice
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDownload}
+                          disabled={downloading}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                        >
+                          <Download className="h-4 w-4" />
+                          {downloading ? 'Downloading...' : 'Download PDF'}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </DashboardPanel>
+
+            <DashboardPanel
+              title="Invoice Ledger"
+              description="Review the charge lines, taxes, and total before printing or downloading."
+            >
+              <InvoiceLedger bill={bill} />
+            </DashboardPanel>
+
+            <DashboardPanel
+              title="Billing Signals"
+              description="Operational status for invoice delivery and finalization."
+            >
+              <div className="grid gap-3 md:grid-cols-3">
+                {[
+                  {
+                    icon: Receipt,
+                    title: 'Finalization',
+                    description: invoiceFinalized
+                      ? 'The invoice is finalized and locked for downstream actions.'
+                      : 'The invoice has not been generated yet.',
+                  },
+                  {
+                    icon: Send,
+                    title: 'Delivery',
+                    description: invoiceFinalized
+                      ? `Current delivery status: ${deliveryStatus}.`
+                      : 'Delivery status will appear after invoice generation.',
+                  },
+                  {
+                    icon: Mail,
+                    title: 'Email Metadata',
+                    description: deliveryMeta?.sentAt
+                      ? `Last sent at ${new Date(deliveryMeta.sentAt).toLocaleString()}.`
+                      : 'No delivery timestamp is currently available.',
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <p className="mt-3 text-sm font-bold text-zinc-950">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+                        {item.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </DashboardPanel>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
