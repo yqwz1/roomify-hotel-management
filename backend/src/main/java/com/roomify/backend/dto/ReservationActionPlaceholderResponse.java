@@ -1,7 +1,6 @@
 package com.roomify.backend.dto;
 
 import com.roomify.backend.entity.ReservationStatus;
-import java.math.BigDecimal;
 
 public class ReservationActionPlaceholderResponse {
 
@@ -10,9 +9,6 @@ public class ReservationActionPlaceholderResponse {
     private String message;
     private boolean placeholder;
     private ReservationStatus currentStatus;
-    private String paymentStatus;
-    private BigDecimal outstandingBalance;
-    private boolean invoiceFinalized;
 
     public ReservationActionPlaceholderResponse() {
     }
@@ -23,34 +19,11 @@ public class ReservationActionPlaceholderResponse {
             String message,
             boolean placeholder,
             ReservationStatus currentStatus) {
-        this(
-                reservationId,
-                action,
-                message,
-                placeholder,
-                currentStatus,
-                null,
-                null,
-                false);
-    }
-
-    public ReservationActionPlaceholderResponse(
-            Long reservationId,
-            String action,
-            String message,
-            boolean placeholder,
-            ReservationStatus currentStatus,
-            String paymentStatus,
-            BigDecimal outstandingBalance,
-            boolean invoiceFinalized) {
         this.reservationId = reservationId;
         this.action = action;
         this.message = message;
         this.placeholder = placeholder;
         this.currentStatus = currentStatus;
-        this.paymentStatus = paymentStatus;
-        this.outstandingBalance = outstandingBalance;
-        this.invoiceFinalized = invoiceFinalized;
     }
 
     public Long getReservationId() {
@@ -91,29 +64,5 @@ public class ReservationActionPlaceholderResponse {
 
     public void setCurrentStatus(ReservationStatus currentStatus) {
         this.currentStatus = currentStatus;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public BigDecimal getOutstandingBalance() {
-        return outstandingBalance;
-    }
-
-    public void setOutstandingBalance(BigDecimal outstandingBalance) {
-        this.outstandingBalance = outstandingBalance;
-    }
-
-    public boolean isInvoiceFinalized() {
-        return invoiceFinalized;
-    }
-
-    public void setInvoiceFinalized(boolean invoiceFinalized) {
-        this.invoiceFinalized = invoiceFinalized;
     }
 }

@@ -71,12 +71,6 @@ public class BillingService {
                 .setScale(MONEY_SCALE, ROUNDING);
 
         BigDecimal balanceDue = nonNegative(vatBase.add(vatAmount).subtract(safeDiscount));
-        BigDecimal totalPaid = sanitise(reservation.getTotalPaid());
-        BigDecimal outstandingBalance = sanitise(reservation.getOutstandingBalance());
-        String paymentStatus = PaymentStatusResolver.resolve(
-                reservation.getTotalPaid(),
-                reservation.getOutstandingBalance(),
-                reservation.isInvoiceFinalized());
 
         List<BillLineItem> lineItems = buildLineItems(
                 nights, roomRate, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
@@ -90,7 +84,7 @@ public class BillingService {
                 "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={}",
                 normalized, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
 
-        BillResponse response = new BillResponse(
+        return new BillResponse(
                 reservation.getConfirmationNumber(),
                 reservation.getGuest().getName(),
                 reservation.getRoom().getRoomNumber(),
@@ -105,12 +99,6 @@ public class BillingService {
                 safeDiscount,
                 balanceDue,
                 lineItems);
-
-        response.setTotalPaid(totalPaid);
-        response.setOutstandingBalance(outstandingBalance);
-        response.setInvoiceFinalized(reservation.isInvoiceFinalized());
-        response.setPaymentStatus(paymentStatus);
-        return response;
     }
 
     private List<BillLineItem> buildLineItems(

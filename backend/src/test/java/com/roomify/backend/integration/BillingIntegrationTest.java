@@ -184,10 +184,6 @@ class BillingIntegrationTest {
                 .andExpect(jsonPath("$.vatAmount").exists())
                 .andExpect(jsonPath("$.discountAmount").exists())
                 .andExpect(jsonPath("$.balanceDue").exists())
-                .andExpect(jsonPath("$.totalPaid").exists())
-                .andExpect(jsonPath("$.outstandingBalance").exists())
-                .andExpect(jsonPath("$.invoiceFinalized").exists())
-                .andExpect(jsonPath("$.paymentStatus").exists())
                 .andExpect(jsonPath("$.lineItems").isArray());
     }
 

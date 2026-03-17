@@ -229,8 +229,15 @@ class ReservationServiceTest {
                 reservation.setOutstandingBalance(BigDecimal.ZERO);
                 reservation.setInvoiceFinalized(false);
 
-        assertEquals("Payment must be finalized before checkout", ex.getMessage());
-    }
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                                .thenReturn(Optional.of(reservation));
+
+                ResourceConflictException ex = assertThrows(
+                                ResourceConflictException.class,
+                                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+
+                assertEquals("Finalized invoice is required before checkout", ex.getMessage());
+        }
 
         @Test
         void checkOutShouldThrowConflictWhenOutstandingIsPositive() {

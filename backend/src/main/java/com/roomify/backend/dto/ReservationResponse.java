@@ -22,10 +22,6 @@ public class ReservationResponse {
     private BigDecimal subtotal;
     private BigDecimal taxes;
     private BigDecimal totalPrice;
-    private BigDecimal totalPaid;
-    private BigDecimal outstandingBalance;
-    private boolean invoiceFinalized;
-    private String paymentStatus;
 
     public ReservationResponse() {
     }
@@ -46,48 +42,6 @@ public class ReservationResponse {
             BigDecimal subtotal,
             BigDecimal taxes,
             BigDecimal totalPrice) {
-        this(
-                id,
-                confirmationNumber,
-                status,
-                roomId,
-                roomNumber,
-                guestId,
-                guestName,
-                guestEmail,
-                checkInDate,
-                checkOutDate,
-                nights,
-                roomRate,
-                subtotal,
-                taxes,
-                totalPrice,
-                null,
-                null,
-                false,
-                null);
-    }
-
-    public ReservationResponse(
-            Long id,
-            String confirmationNumber,
-            ReservationStatus status,
-            Long roomId,
-            String roomNumber,
-            Long guestId,
-            String guestName,
-            String guestEmail,
-            LocalDate checkInDate,
-            LocalDate checkOutDate,
-            long nights,
-            BigDecimal roomRate,
-            BigDecimal subtotal,
-            BigDecimal taxes,
-            BigDecimal totalPrice,
-            BigDecimal totalPaid,
-            BigDecimal outstandingBalance,
-            boolean invoiceFinalized,
-            String paymentStatus) {
         this.id = id;
         this.confirmationNumber = confirmationNumber;
         this.status = status;
@@ -103,10 +57,6 @@ public class ReservationResponse {
         this.subtotal = subtotal;
         this.taxes = taxes;
         this.totalPrice = totalPrice;
-        this.totalPaid = totalPaid;
-        this.outstandingBalance = outstandingBalance;
-        this.invoiceFinalized = invoiceFinalized;
-        this.paymentStatus = paymentStatus;
     }
 
     public Long getId() {
@@ -227,37 +177,5 @@ public class ReservationResponse {
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
-    }
-
-    public BigDecimal getTotalPaid() {
-        return totalPaid;
-    }
-
-    public void setTotalPaid(BigDecimal totalPaid) {
-        this.totalPaid = totalPaid;
-    }
-
-    public BigDecimal getOutstandingBalance() {
-        return outstandingBalance;
-    }
-
-    public void setOutstandingBalance(BigDecimal outstandingBalance) {
-        this.outstandingBalance = outstandingBalance;
-    }
-
-    public boolean isInvoiceFinalized() {
-        return invoiceFinalized;
-    }
-
-    public void setInvoiceFinalized(boolean invoiceFinalized) {
-        this.invoiceFinalized = invoiceFinalized;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
     }
 }
