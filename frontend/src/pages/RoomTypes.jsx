@@ -7,7 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
 import { useTranslation } from 'react-i18next';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];

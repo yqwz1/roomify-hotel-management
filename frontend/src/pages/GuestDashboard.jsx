@@ -1,137 +1,179 @@
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BedDouble, CalendarDays, LifeBuoy, LogOut, Mail, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
 import { useTranslation } from 'react-i18next';
 
-/**
- * GuestDashboard component
- * Placeholder dashboard for users with ROLE_GUEST
- */
-const GuestDashboard = () => {
-    const { user, logout } = useAuth();
-    const { t } = useTranslation();
+const SUPPORT_EMAIL = 'info@roomify.com';
+const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Guest%20Support`;
 
-    const handleLogout = () => {
-        logout();
-    };
+const ActionCard = ({ icon: Icon, title, description, onClick, href }) => {
+    const className = 'group flex h-full w-full items-center justify-between rounded-3xl border border-zinc-200 bg-white p-5 text-start transition-all hover:border-black hover:shadow-md';
 
-    return (
-        <div className="h-full bg-zinc-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-4xl font-extrabold text-black tracking-tight">
-                                {t('guestDashboardTitle') || 'Guest Dashboard'}
-                            </h1>
-                            <p className="mt-1 text-sm text-gray-600">
-                                {t('welcomeUser', { username: user?.username || t('guestFallback') }) || `Welcome, ${user?.username || 'Guest'}!`}
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="px-6 py-2.5 bg-black text-white font-bold rounded-full hover:bg-zinc-800 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
-                        >
-                            {t('logout') || 'Logout'}
-                        </button>
+    if (href) {
+        return (
+            <a href={href} className={className}>
+                <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 transition-colors group-hover:bg-black">
+                        <Icon className="h-5 w-5 text-zinc-700 group-hover:text-white" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-black">{title}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{description}</p>
                     </div>
                 </div>
-            </header>
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
+                    Open
+                </span>
+            </a>
+        );
+    }
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-6 sm:p-8">
-                    <div className="border-s-4 border-black ps-5 mb-8">
-                        <h2 className="text-2xl font-bold text-black mb-2">
-                            {t('guestAccessLevel') || 'Guest Access Level'}
-                        </h2>
-                        <p className="text-gray-600">
-                            {t('guestAccessDesc') || 'You can view and manage your bookings and profile.'}
+    return (
+        <button type="button" onClick={onClick} className={className}>
+            <div className="flex items-center gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 transition-colors group-hover:bg-black">
+                    <Icon className="h-5 w-5 text-zinc-700 group-hover:text-white" />
+                </div>
+                <div>
+                    <p className="text-sm font-bold text-black">{title}</p>
+                    <p className="mt-1 text-xs text-zinc-500">{description}</p>
+                </div>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
+                Open
+            </span>
+        </button>
+    );
+};
+
+const GuestDashboard = () => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    const displayName = useMemo(
+        () => user?.username || user?.email || t('guestFallback') || 'Guest',
+        [user?.username, user?.email, t]
+    );
+
+    return (
+        <div className="h-full bg-zinc-50 p-6 lg:p-8">
+            <div className="mx-auto max-w-6xl space-y-6">
+                <div className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                            {t('myDashboard') || 'My Dashboard'}
+                        </p>
+                        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black">
+                            {t('guestDashboardTitle') || 'Guest Dashboard'}
+                        </h1>
+                        <p className="mt-2 text-sm font-medium text-zinc-500">
+                            {t('welcomeUser', { username: displayName }) || `Welcome, ${displayName}!`}
                         </p>
                     </div>
+                    <button
+                        onClick={logout}
+                        className="rounded-full bg-black px-6 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <LogOut className="h-4 w-4" />
+                            {t('logout') || 'Logout'}
+                        </span>
+                    </button>
+                </div>
 
-                    {/* User Info Card */}
-                    <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-6 mb-8">
-                        <h3 className="text-lg font-bold text-black mb-4">
-                            {t('userInfo') || 'User Information'}
-                        </h3>
-                        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">{t('usernameLabel') || 'Username'}</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.username}</dd>
+                <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black text-white">
+                                <UserRound className="h-6 w-6" />
                             </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">{t('emailLabel') || 'Email'}</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.email}</dd>
+                            <div className="flex-1">
+                                <h2 className="text-xl font-extrabold text-black">{displayName}</h2>
+                                <p className="mt-1 text-sm font-medium text-zinc-500">
+                                    {t('guestAccessDesc') || 'Use your dashboard to reach booking help, view account details, and contact support quickly.'}
+                                </p>
                             </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">{t('userIdLabel') || 'User ID'}</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{user?.id}</dd>
+                        </div>
+
+                        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                                    {t('usernameLabel') || 'Username'}
+                                </dt>
+                                <dd className="mt-2 text-sm font-semibold text-black">{user?.username || '—'}</dd>
                             </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">{t('roleLabel') || 'Role'}</dt>
-                                <dd className="mt-1">
-                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border border-zinc-300 bg-white text-black">
-                                        {user?.roles?.[0] || 'N/A'}
+                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                                    {t('emailLabel') || 'Email'}
+                                </dt>
+                                <dd className="mt-2 text-sm font-semibold text-black">{user?.email || '—'}</dd>
+                            </div>
+                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                                    {t('roleLabel') || 'Role'}
+                                </dt>
+                                <dd className="mt-2">
+                                    <span className="inline-flex rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-bold text-black">
+                                        {user?.roles?.[0] || 'ROLE_GUEST'}
                                     </span>
                                 </dd>
+                            </div>
+                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                                <dt className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                                    Booking Support
+                                </dt>
+                                <dd className="mt-2 text-sm font-semibold text-black">{SUPPORT_EMAIL}</dd>
                             </div>
                         </dl>
                     </div>
 
-                    {/* My Bookings */}
-                    <div className="mb-6">
-                        <h3 className="text-lg font-bold text-black mb-4">
-                            {t('myBookingsPlaceholder') || 'My Bookings (Placeholder)'}
-                        </h3>
-                        <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-8 text-center">
-                            <svg className="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p className="text-gray-700 font-medium">{t('noActiveBookings') || 'No active bookings'}</p>
-                            <p className="text-sm text-gray-600 mt-1">{t('browseRoomsMsg') || 'Browse our rooms to make a reservation'}</p>
-                            <button className="mt-5 px-8 py-3 bg-black text-white font-bold rounded-full hover:bg-zinc-800 transition-all shadow-md">
-                                {t('browseRoomsBtn') || 'Browse Rooms'}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Quick Links */}
-                    <div>
-                        <h3 className="text-lg font-bold text-black mb-4">
+                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">
                             {t('quickLinks') || 'Quick Links'}
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <a
-                                href="#"
-                                className="block p-5 bg-white border border-zinc-200 rounded-3xl hover:border-black hover:shadow-lg transition-all"
-                            >
-                                <div className="text-black font-bold">{t('browseRoomsBtn') || 'Browse Rooms'}</div>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    {t('viewAvailableRooms') || 'View available rooms'}
-                                </p>
-                            </a>
-                            <a
-                                href="#"
-                                className="block p-5 bg-white border border-zinc-200 rounded-3xl hover:border-black hover:shadow-lg transition-all"
-                            >
-                                <div className="text-black font-bold">{t('myProfile') || 'My Profile'}</div>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    {t('updateYourInfo') || 'Update your information'}
-                                </p>
-                            </a>
-                            <a
-                                href="#"
-                                className="block p-5 bg-white border border-zinc-200 rounded-3xl hover:border-black hover:shadow-lg transition-all"
-                            >
-                                <div className="text-black font-bold">{t('helpSupport') || 'Help & Support'}</div>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    {t('getAssistance') || 'Get assistance'}
-                                </p>
-                            </a>
+                        </h2>
+                        <div className="mt-5 grid gap-3">
+                            <ActionCard
+                                icon={CalendarDays}
+                                title={t('bookings') || 'Bookings'}
+                                description="Open the booking assistance page and guest self-service links."
+                                onClick={() => navigate('/bookings')}
+                            />
+                            <ActionCard
+                                icon={BedDouble}
+                                title={t('browseRoomsBtn') || 'Browse Rooms'}
+                                description="Return to the public hotel pages and current offers."
+                                onClick={() => navigate('/')}
+                            />
+                            <ActionCard
+                                icon={Mail}
+                                title={t('helpSupport') || 'Help & Support'}
+                                description="Contact the hotel team with your confirmation number and stay dates."
+                                href={SUPPORT_LINK}
+                            />
                         </div>
                     </div>
                 </div>
-            </main>
+
+                <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <LifeBuoy className="h-5 w-5 text-zinc-700" />
+                        <h2 className="text-lg font-extrabold text-black">Reservation Help</h2>
+                    </div>
+                    <div className="mt-5 grid gap-4 md:grid-cols-3">
+                        {[
+                            'Keep your confirmation number ready before contacting the hotel.',
+                            'Use the Bookings page for the fastest path to guest support and account actions.',
+                            'If you need itinerary changes, contact the hotel directly so staff can review availability.',
+                        ].map((item) => (
+                            <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium text-zinc-600">
+                                {item}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

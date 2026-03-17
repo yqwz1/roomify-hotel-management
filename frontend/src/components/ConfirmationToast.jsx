@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -14,12 +14,11 @@ import { useTranslation } from 'react-i18next';
  */
 export default function ConfirmationToast({ message, type = 'success', duration = 4000, onClose }) {
     const { t } = useTranslation();
-    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        if (!message) { setVisible(false); return; }
-        setVisible(true);
-        const t = setTimeout(() => { setVisible(false); onClose?.(); }, duration);
+        if (!message) return undefined;
+
+        const t = setTimeout(() => { onClose?.(); }, duration);
         return () => clearTimeout(t);
     }, [message, duration, onClose]);
 
@@ -38,9 +37,8 @@ export default function ConfirmationToast({ message, type = 'success', duration 
             aria-live="polite"
             className={`
                 fixed top-6 end-6 z-[9999] w-80 rounded-2xl border shadow-2xl
-                transition-all duration-300 ease-in-out
+                animate-in slide-in-from-top-2 fade-in duration-300
                 ${s.bg}
-                ${visible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}
             `}
         >
             {/* Top accent bar */}
@@ -50,7 +48,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
                 <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">{s.icon}</span>
                 <p className={`flex-1 text-sm font-medium ${s.text}`}>{message}</p>
                 <button
-                    onClick={() => { setVisible(false); onClose?.(); }}
+                    onClick={() => { onClose?.(); }}
                     aria-label={t('dismissToast') || 'Dismiss'}
                     className="shrink-0 rounded-full p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-zinc-300"
                 >

@@ -1,14 +1,13 @@
 package com.roomify.backend.service;
 
+import com.roomify.backend.entity.InvoiceDeliveryLog;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.repository.ReservationRepository;
-
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +81,22 @@ public class InvoiceService {
         }
     }
 
+    /**
+     * Get latest invoice delivery status for a reservation.
+     */
+    public Optional<InvoiceDeliveryLog> getLatestDeliveryStatus(Long reservationId) {
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        String confirmationNumber = reservation.getConfirmationNumber();
+
+        return deliveryLogService.getLatestByConfirmationNumber(confirmationNumber);
+    }
+
+    /**
+     * Generate unique invoice number
+     */
     private String generateInvoiceNumber() {
 
         return "INV-" + UUID.randomUUID()

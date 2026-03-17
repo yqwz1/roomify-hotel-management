@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
 const SuccessState = ({ title = "تمت العملية بنجاح!", message = "تم تنفيذ طلبك بنجاح." }) => {

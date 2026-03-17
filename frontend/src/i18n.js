@@ -3,8 +3,8 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 const resources = {
-  en: {
-    translation: {
+  "en": {
+    "translation": {
       "welcome": "Welcome",
       "dashboard": "Dashboard",
       "rooms": "Rooms",
@@ -19,7 +19,7 @@ const resources = {
       "search": "Search",
       "print": "Print",
       "guestName": "Guest Name",
-      "roomNumber": "Room Number",
+      "roomNumber": "Room {{number}}",
       "checkInDate": "Check-in Date",
       "totalPrice": "Total Price",
       "status": "Status",
@@ -30,12 +30,11 @@ const resources = {
       "cancelled": "Cancelled",
       "reservationLookup": "Reservation Lookup",
       "searchDescription": "Search by confirmation number (e.g. RSV-…) or guest name.",
-      "searchPlaceholder": "RSV-XXXXXXXXXXXX or Guest Name",
+      "searchPlaceholder": "Name or email...",
       "failedSearch": "Failed to search reservations. Please try again.",
       "noReservations": "No reservations found",
       "tryDifferent": "Try a different confirmation number or guest name.",
       "room": "Room",
-
       "back": "← Back",
       "checkInTitle": "Check-In",
       "checkInDesc": "Look up a reservation and complete the guest check-in process.",
@@ -59,16 +58,13 @@ const resources = {
       "welcomeAmenitiesPlaced": "Welcome amenities placed",
       "checkInSuccess": "✅ Check-in successful for {{name}} — Room {{room}}",
       "errorPrefix": "❌ {{message}}",
-
       "checkInLabel": "Check-In",
       "checkOutLabel": "Check-Out",
       "dismissError": "Dismiss error",
       "dismissToast": "Dismiss",
-
       "roleManager": "Manager",
       "roleStaff": "Staff",
       "roleGuest": "Guest",
-
       "roomTypes": "Room Types",
       "staffMenu": "Staff",
       "manageRooms": "Manage Rooms",
@@ -82,7 +78,6 @@ const resources = {
       "myDashboard": "My Dashboard",
       "myBookings": "My Bookings",
       "myProfile": "My Profile",
-
       "hotelManagementSystem": "Hotel Management System",
       "manageYourProperty": "Manage your property",
       "withConfidence": "with confidence.",
@@ -114,7 +109,6 @@ const resources = {
       "createAccountBtn": "Create account",
       "alreadyHaveAccount": "Have an account?",
       "signInLink": "Sign in",
-
       "filters": "Filters",
       "allStatuses": "All Statuses",
       "allTypes": "All Types",
@@ -122,7 +116,6 @@ const resources = {
       "minPrice": "Min Price",
       "maxPrice": "Max Price",
       "clearFilters": "Clear Filters",
-
       "available": "Available",
       "occupied": "Occupied",
       "needsCleaning": "Needs Cleaning",
@@ -150,11 +143,9 @@ const resources = {
       "totalCost": "Total:",
       "upToGuests": "up to {{count}}",
       "bookNow": "Book Now",
-
       "roomsTitle": "Rooms Management",
       "loadingRooms": "Loading rooms...",
       "failedLoadRooms": "Failed to load rooms",
-      "roomNumber": "Room {{number}}",
       "statusAvailable": "Available",
       "statusOccupied": "Occupied",
       "statusNeedsCleaning": "Needs Cleaning",
@@ -193,7 +184,6 @@ const resources = {
       "updateStatusTitle": "Update status",
       "deleteRoomTitle": "Delete room",
       "confirmDeleteRoom": "Delete Room {{number}}? This cannot be undone.",
-
       "roomTypesTitle": "Room Types",
       "roomTypesDesc": "Manage your hotel's room categories and pricing.",
       "createNewBtn": "Create New",
@@ -223,13 +213,10 @@ const resources = {
       "updatingMsg": "Updating...",
       "creatingMsg": "Creating...",
       "updateRoomTypeBtn": "Update Room Type",
-
       "staffManagementTitle": "Staff Management",
       "staffManagementDesc": "Manage staff members and their accounts.",
       "addStaffBtn": "Add Staff",
-      "filters": "Filters",
       "searchLabel": "Search",
-      "searchPlaceholder": "Name or email...",
       "roleLabel": "Role",
       "allRoles": "All Roles",
       "managerRole": "Manager",
@@ -262,11 +249,9 @@ const resources = {
       "updateStaffDesc": "Update staff member details.",
       "addNewStaffDesc": "Add a new staff member to your team. Password will be auto-generated and emailed.",
       "emailLabel": "Email",
-      "emailPlaceholder": "staff@example.com",
       "welcomeEmailMsg": "A welcome email with login credentials will be sent to this address.",
       "emailCannotChange": "Email cannot be changed.",
       "fullNameLabel": "Full Name",
-      "fullNamePlaceholder": "e.g. John Doe",
       "deptExample": "e.g. Front Desk, Housekeeping",
       "autoGenPwdMsg": "A secure password will be automatically generated and sent to the staff member's email.",
       "updateStaffBtn": "Update Staff",
@@ -279,16 +264,13 @@ const resources = {
       "staffDeactivated": "Staff deactivated successfully!",
       "staffActivated": "Staff activated successfully!",
       "accountUnlocked": "Account unlocked successfully!",
-
       "guestDashboardTitle": "Guest Dashboard",
       "welcomeUser": "Welcome, {{username}}!",
       "guestAccessLevel": "Guest Access Level",
       "guestAccessDesc": "You can view and manage your bookings and profile.",
       "userInfo": "User Information",
       "usernameLabel": "Username",
-      "emailLabel": "Email",
       "userIdLabel": "User ID",
-      "roleLabel": "Role",
       "myBookingsPlaceholder": "My Bookings (Placeholder)",
       "noActiveBookings": "No active bookings",
       "browseRoomsMsg": "Browse our rooms to make a reservation",
@@ -299,7 +281,6 @@ const resources = {
       "helpSupport": "Help & Support",
       "getAssistance": "Get assistance",
       "guestFallback": "Guest",
-
       "managerDashboardTitle": "Manager Dashboard",
       "welcomeBackUser": "Welcome back, {{username}}",
       "managerFallback": "Manager",
@@ -317,7 +298,6 @@ const resources = {
       "addManageStaff": "Add and manage hotel staff",
       "roomsManagementLabel": "Rooms Management",
       "configRoomInventory": "Configure room inventory",
-
       "staffDashboardTitle": "Staff Dashboard",
       "staffMemberFallback": "Staff Member",
       "staffAccessLevel": "Staff Access Level",
@@ -331,7 +311,6 @@ const resources = {
       "roomsRequiringAttention": "Rooms requiring attention",
       "newReservations": "New Reservations",
       "bookingsThisWeek": "Bookings this week",
-
       "roomAlreadyBooked": "Room Already Booked",
       "whatYouCanDo": "💡 What you can do:",
       "tryDifferentDatesRoom": "Try different dates for Room {{room}}",
@@ -340,7 +319,6 @@ const resources = {
       "noRoomSelected": "No room selected",
       "plzGoBackRoomSearch": "Please go back to Room Search and click Book Now on a room.",
       "backToRoomSearch": "← Back to Room Search",
-      "back": "← Back",
       "bookARoom": "Book a Room",
       "fillGuestDetails": "Fill in the guest details to complete the reservation.",
       "pleaseSelectDates": "Please select check-in and check-out dates.",
@@ -353,23 +331,18 @@ const resources = {
       "stayDates": "Stay Dates",
       "guestDetails": "Guest Details",
       "fullName": "Full Name",
-      "fullNamePlaceholder": "e.g. John Smith",
-      "emailPlaceholder": "guest@example.com",
       "phoneNumber": "Phone Number",
       "phonePlaceholder": "+1 555 000 0000",
       "idPassport": "ID / Passport Number",
       "idPlaceholder": "e.g. A12345678",
       "nationality": "Nationality",
       "nationalityPlaceholder": "e.g. Saudi Arabian",
-      "processing": "Processing…",
       "confirmBookingPrice": "Confirm Booking — ${{price}}",
       "bookingSummary": "Booking Summary",
       "ratePerNight": "Rate / night",
       "nightsLabel": "Nights",
       "subtotal": "Subtotal",
       "taxes10": "Taxes (10%)",
-      "total": "Total",
-
       "noBookingData": "No booking data found",
       "completeBookingMsg": "Please complete a booking through the Room Search page.",
       "goToRoomSearch": "Go to Room Search",
@@ -388,7 +361,6 @@ const resources = {
       "printConfirmation": "🖨️ Print Confirmation",
       "newSearch": "← New Search",
       "goToDashboard": "Go to Dashboard →",
-
       "modifyReservationTitle": "Modify Reservation",
       "modifyReservationDesc": "Look up a reservation and update its dates.",
       "searchAndSelectToModify": "Search and select a reservation to modify it.",
@@ -397,21 +369,18 @@ const resources = {
       "currentBooking": "Current Booking",
       "selectNewDates": "1. Select New Dates",
       "selectRoom": "2. Select Room",
-      "noRoomsAvailable": "No rooms available for these dates.",
       "currentRoomSuffix": "(Current)",
       "updatedPricePreview": "Updated Price Preview",
       "taxes": "Taxes (10%)",
       "newTotal": "New Total",
       "reasonForModification": "Reason for modification",
       "modifyReasonPlaceholder": "e.g. Guest requested extended stay...",
-      "cancel": "Cancel",
       "saveChanges": "Save Changes",
       "saving": "Saving…",
       "checkoutAfterCheckin": "Check-out must be after check-in.",
       "provideReason": "Please provide a reason for modification.",
       "noChangesDetected": "No changes detected.",
       "modifySuccess": "Reservation {{conf}} updated successfully.",
-
       "cancelReservationTitle": "Cancel Reservation",
       "cancelReservationDesc": "Look up a reservation and process a cancellation.",
       "searchAndSelectToCancel": "Search and select a reservation to cancel it.",
@@ -425,11 +394,16 @@ const resources = {
       "keepReservation": "Keep Reservation",
       "yesCancelIt": "Yes, Cancel It",
       "cancelling": "Cancelling…",
-      "cancelSuccess": "Reservation {{conf}} has been cancelled."
+      "cancelSuccess": "Reservation {{conf}} has been cancelled.",
+      "noRoomsAvailableForDates": "No rooms available for these dates.",
+      "staffEmailPlaceholder": "staff@example.com",
+      "guestEmailPlaceholder": "guest@example.com",
+      "staffFullNamePlaceholder": "e.g. John Doe",
+      "guestFullNamePlaceholder": "e.g. John Smith"
     }
   },
-  ar: {
-    translation: {
+  "ar": {
+    "translation": {
       "welcome": "مرحباً",
       "dashboard": "لوحة التحكم",
       "rooms": "الغرف",
@@ -444,7 +418,7 @@ const resources = {
       "search": "بحث",
       "print": "طباعة",
       "guestName": "اسم الضيف",
-      "roomNumber": "رقم الغرفة",
+      "roomNumber": "غرفة {{number}}",
       "checkInDate": "تاريخ الدخول",
       "totalPrice": "السعر الإجمالي",
       "status": "الحالة",
@@ -455,13 +429,12 @@ const resources = {
       "cancelled": "ملغي",
       "reservationLookup": "البحث عن حجز",
       "searchDescription": "ابحث برقم التأكيد (مثل RSV-…) أو اسم الضيف.",
-      "searchPlaceholder": "RSV-XXXXXXXXXXXX أو اسم الضيف",
+      "searchPlaceholder": "الاسم أو البريد الإلكتروني...",
       "failedSearch": "فشل البحث عن الحجوزات. يرجى المحاولة مرة أخرى.",
       "noReservations": "لم يتم العثور على حجوزات",
       "tryDifferent": "جرب رقم تأكيد أو اسم ضيف مختلف.",
       "room": "غرفة",
-
-      "back": "← رجوع",
+      "back": "← عودة",
       "checkInTitle": "تسجيل الدخول",
       "checkInDesc": "ابحث عن حجز وأكمل عملية تسجيل دخول الضيف.",
       "noReservationSelected": "لم يتم تحديد حجز",
@@ -474,7 +447,7 @@ const resources = {
       "preCheckInChecklist": "قائمة التحقق قبل تسجيل الدخول",
       "completeAllItems": "أكمل جميع العناصر قبل تأكيد تسجيل الدخول.",
       "progress": "التقدم",
-      "processing": "جاري المعالجة…",
+      "processing": "جاري المعالجة...",
       "completeChecklistToCheckIn": "أكمل قائمة التحقق لتسجيل الدخول",
       "confirmCheckIn": "✓ تأكيد تسجيل الدخول",
       "roomKeysPrepared": "مفاتيح الغرفة جاهزة",
@@ -484,16 +457,13 @@ const resources = {
       "welcomeAmenitiesPlaced": "تم وضع وسائل الراحة الترحيبية",
       "checkInSuccess": "✅ تم تسجيل الدخول بنجاح لـ {{name}} — غرفة {{room}}",
       "errorPrefix": "❌ {{message}}",
-
       "checkInLabel": "تاريخ الدخول",
       "checkOutLabel": "تاريخ الخروج",
       "dismissError": "تجاهل الخطأ",
       "dismissToast": "تجاهل",
-
       "roleManager": "مدير",
       "roleStaff": "موظف",
       "roleGuest": "ضيف",
-
       "roomTypes": "أنواع الغرف",
       "staffMenu": "الموظفين",
       "manageRooms": "إدارة الغرف",
@@ -507,7 +477,6 @@ const resources = {
       "myDashboard": "لوحة التحكم الخاصة بي",
       "myBookings": "حجوزاتي",
       "myProfile": "ملفي الشخصي",
-
       "hotelManagementSystem": "نظام إدارة الفنادق",
       "manageYourProperty": "أدر منشأتك",
       "withConfidence": "بكل ثقة.",
@@ -539,15 +508,13 @@ const resources = {
       "createAccountBtn": "إنشاء حساب",
       "alreadyHaveAccount": "لديك حساب؟",
       "signInLink": "تسجيل دخول",
-
-      "filters": "تصفية",
+      "filters": "عوامل التصفية",
       "allStatuses": "جميع الحالات",
       "allTypes": "جميع الأنواع",
       "allFloors": "جميع الطوابق",
       "minPrice": "أقل سعر",
       "maxPrice": "أعلى سعر",
       "clearFilters": "مسح التصفية",
-
       "available": "متاح",
       "occupied": "مشغول",
       "needsCleaning": "يحتاج تنظيف",
@@ -567,7 +534,7 @@ const resources = {
       "pricesShownPerNight": "الأسعار المعروضة لليلة الواحدة · إقامة {{count}} ليالي",
       "readyToSearch": "جاهز للبحث",
       "searchInstructions": "حدد التواريخ واضغط على بحث عن الغرف لرؤية التوافر المباشر.",
-      "noRoomsAvailable": "لا توجد غرف متاحة",
+      "noRoomsAvailable": "?? ???? ??? ?????",
       "tryDifferentDates": "جرب تواريخ مختلفة، أو عدل نطاق السعر، أو أزل تصفية النوع.",
       "roomNum": "غرفة {{number}}",
       "floorNum": "طابق {{floor}}",
@@ -575,11 +542,9 @@ const resources = {
       "totalCost": "الإجمالي:",
       "upToGuests": "حتى {{count}} ضيوف",
       "bookNow": "احجز الآن",
-
       "roomsTitle": "إدارة الغرف",
       "loadingRooms": "جاري تحميل الغرف...",
       "failedLoadRooms": "فشل في تحميل الغرف",
-      "roomNumber": "غرفة {{number}}",
       "statusAvailable": "متاح",
       "statusOccupied": "مشغول",
       "statusNeedsCleaning": "يحتاج تنظيف",
@@ -618,7 +583,6 @@ const resources = {
       "updateStatusTitle": "تحديث الحالة",
       "deleteRoomTitle": "حذف الغرفة",
       "confirmDeleteRoom": "هل أنت متأكد من حذف الغرفة {{number}}؟ لا يمكن التراجع عن هذا الإجراء.",
-
       "roomTypesTitle": "أنواع الغرف",
       "roomTypesDesc": "إدارة فئات الغرف وأسعارها في فندقك.",
       "createNewBtn": "إنشاء جديد",
@@ -648,13 +612,10 @@ const resources = {
       "updatingMsg": "جاري التحديث...",
       "creatingMsg": "جاري الإنشاء...",
       "updateRoomTypeBtn": "تحديث نوع الغرفة",
-
       "staffManagementTitle": "إدارة الموظفين",
       "staffManagementDesc": "إدارة أفراد طاقم العمل وحساباتهم.",
       "addStaffBtn": "إضافة موظف",
-      "filters": "عوامل التصفية",
       "searchLabel": "البحث",
-      "searchPlaceholder": "الاسم أو البريد الإلكتروني...",
       "roleLabel": "الصلاحية",
       "allRoles": "جميع الصلاحيات",
       "managerRole": "مدير",
@@ -687,11 +648,9 @@ const resources = {
       "updateStaffDesc": "تحديث تفاصيل عضو هيئة الموظفين.",
       "addNewStaffDesc": "إضافة عضو جديد إلى فريقك. سيتم إنشاء وتوليد كلمة مرور تلقائياً وإرسالها بالبريد.",
       "emailLabel": "البريد الإلكتروني",
-      "emailPlaceholder": "staff@example.com",
       "welcomeEmailMsg": "سيتم إرسال بريد ترحيبي يتضمن بيانات الدخول إلى هذا العنوان.",
       "emailCannotChange": "لا يمكن تغيير البريد الإلكتروني.",
       "fullNameLabel": "الاسم الكامل",
-      "fullNamePlaceholder": "مثال: أحمد محمد",
       "deptExample": "مثال: الاستقبال، النظافة",
       "autoGenPwdMsg": "سيتم توليد كلمة مرور آمنة تلقائياً وإرسالها إلى البريد الإلكتروني الخاص للموظف.",
       "updateStaffBtn": "تحديث الموظف",
@@ -704,16 +663,13 @@ const resources = {
       "staffDeactivated": "تم تعطيل حساب الموظف بنجاح!",
       "staffActivated": "تم تفعيل حساب الموظف بنجاح!",
       "accountUnlocked": "تم إلغاء قفل الحساب بنجاح!",
-
       "guestDashboardTitle": "لوحة تحكم الضيف",
       "welcomeUser": "أهلاً بك، {{username}}!",
       "guestAccessLevel": "مستوى وصول الضيف",
       "guestAccessDesc": "يمكنك عرض وإدارة حجوزاتك وملفك الشخصي.",
       "userInfo": "معلومات المستخدم",
       "usernameLabel": "اسم المستخدم",
-      "emailLabel": "البريد الإلكتروني",
       "userIdLabel": "رقم المستخدم",
-      "roleLabel": "الصلاحية",
       "myBookingsPlaceholder": "حجوزاتي (تجريبي)",
       "noActiveBookings": "لا توجد حجوزات نشطة",
       "browseRoomsMsg": "تصفح غرفنا للقيام بحجز",
@@ -724,7 +680,6 @@ const resources = {
       "helpSupport": "المساعدة والدعم",
       "getAssistance": "احصل على المساعدة",
       "guestFallback": "ضيف",
-
       "managerDashboardTitle": "لوحة تحكم المدير",
       "welcomeBackUser": "أهلاً بك مجدداً، {{username}}",
       "managerFallback": "مدير",
@@ -742,7 +697,6 @@ const resources = {
       "addManageStaff": "إضافة وإدارة موظفي الفندق",
       "roomsManagementLabel": "إدارة الغرف",
       "configRoomInventory": "تكوين قائمة الغرف",
-
       "staffDashboardTitle": "لوحة تحكم الموظف",
       "staffMemberFallback": "موظف",
       "staffAccessLevel": "مستوى وصول الموظف",
@@ -756,7 +710,6 @@ const resources = {
       "roomsRequiringAttention": "غرف تحتاج انتباه",
       "newReservations": "حجوزات جديدة",
       "bookingsThisWeek": "حجوزات هذا الأسبوع",
-
       "roomAlreadyBooked": "الغرفة محجوزة بالفعل",
       "whatYouCanDo": "💡 ما يمكنك فعله:",
       "tryDifferentDatesRoom": "جرب تواريخ مختلفة للغرفة {{room}}",
@@ -765,7 +718,6 @@ const resources = {
       "noRoomSelected": "لم يتم تحديد غرفة",
       "plzGoBackRoomSearch": "يرجى العودة إلى صفحة البحث عن الغرف والضغط على احجز الآن.",
       "backToRoomSearch": "← العودة للبحث عن الغرف",
-      "back": "← عودة",
       "bookARoom": "حجز غرفة",
       "fillGuestDetails": "املأ بيانات الضيف لإتمام الحجز.",
       "pleaseSelectDates": "يرجى تحديد تواريخ تسجيل الدخول والمغادرة.",
@@ -778,23 +730,18 @@ const resources = {
       "stayDates": "تواريخ الإقامة",
       "guestDetails": "بيانات الضيف",
       "fullName": "الاسم الكامل",
-      "fullNamePlaceholder": "مثال: أحمد محمد",
-      "emailPlaceholder": "guest@example.com",
       "phoneNumber": "رقم الهاتف",
       "phonePlaceholder": "+966 50 000 0000",
       "idPassport": "رقم الهوية / جواز السفر",
       "idPlaceholder": "مثال: 10xxxxxxxxx",
       "nationality": "الجنسية",
       "nationalityPlaceholder": "مثال: سعودي",
-      "processing": "جاري المعالجة...",
       "confirmBookingPrice": "تأكيد الحجز — ${{price}}",
       "bookingSummary": "ملخص الحجز",
       "ratePerNight": "السعر / ليلة",
       "nightsLabel": "الليالي",
       "subtotal": "المجموع الفرعي",
       "taxes10": "الضرائب (10%)",
-      "total": "الإجمالي",
-
       "noBookingData": "لم يتم العثور على بيانات الحجز",
       "completeBookingMsg": "يرجى إتمام الحجز عبر صفحة البحث عن الغرف.",
       "goToRoomSearch": "الذهاب للبحث عن الغرف",
@@ -813,7 +760,6 @@ const resources = {
       "printConfirmation": "🖨️ طباعة التأكيد",
       "newSearch": "← بحث جديد",
       "goToDashboard": "الذهاب للوحة التحكم →",
-
       "modifyReservationTitle": "تعديل الحجز",
       "modifyReservationDesc": "ابحث عن حجز وقم بتحديث تواريخه.",
       "searchAndSelectToModify": "ابحث وحدد حجزًا لتعديله.",
@@ -822,21 +768,18 @@ const resources = {
       "currentBooking": "الحجز الحالي",
       "selectNewDates": "1. تحديد تواريخ جديدة",
       "selectRoom": "2. تحديد الغرفة",
-      "noRoomsAvailable": "لا توجد غرف متاحة لهذه التواريخ.",
       "currentRoomSuffix": "(الحالي)",
       "updatedPricePreview": "معاينة السعر المحدث",
       "taxes": "الضرائب (10%)",
       "newTotal": "الإجمالي الجديد",
       "reasonForModification": "سبب التعديل",
       "modifyReasonPlaceholder": "مثال: طلب الضيف تمديد الإقامة...",
-      "cancel": "إلغاء",
       "saveChanges": "حفظ التغييرات",
       "saving": "جاري الحفظ…",
       "checkoutAfterCheckin": "يجب أن يكون تاريخ الخروج بعد تاريخ الدخول.",
       "provideReason": "يرجى تقديم سبب للتعديل.",
       "noChangesDetected": "لم يتم اكتشاف أي تغييرات.",
       "modifySuccess": "تم تحديث الحجز {{conf}} بنجاح.",
-
       "cancelReservationTitle": "إلغاء الحجز",
       "cancelReservationDesc": "ابحث عن حجز وقم بإلغائه.",
       "searchAndSelectToCancel": "ابحث وحدد حجزًا لإلغائه.",
@@ -850,7 +793,12 @@ const resources = {
       "keepReservation": "الاحتفاظ بالحجز",
       "yesCancelIt": "نعم، قم بالإلغاء",
       "cancelling": "جاري الإلغاء…",
-      "cancelSuccess": "تم إلغاء الحجز {{conf}}."
+      "cancelSuccess": "تم إلغاء الحجز {{conf}}.",
+      "noRoomsAvailableForDates": "\u0644\u0627 \u062a\u0648\u062c\u062f \u063a\u0631\u0641 \u0645\u062a\u0627\u062d\u0629 \u0644\u0647\u0630\u0647 \u0627\u0644\u062a\u0648\u0627\u0631\u064a\u062e.",
+      "staffEmailPlaceholder": "staff@example.com",
+      "guestEmailPlaceholder": "guest@example.com",
+      "staffFullNamePlaceholder": "\u0645\u062b\u0627\u0644: \u0623\u062d\u0645\u062f \u0639\u0644\u064a",
+      "guestFullNamePlaceholder": "\u0645\u062b\u0627\u0644: \u0623\u062d\u0645\u062f \u0639\u0644\u064a"
     }
   }
 };
@@ -862,18 +810,16 @@ i18n
     resources,
     fallbackLng: 'en',
     interpolation: {
-      escapeValue: false, // not needed for react as it escapes by default
-    }
+      escapeValue: false,
+    },
   });
 
-// Listen to language changes and update dir attribute on document directly
 i18n.on('languageChanged', (lng) => {
   const isRtl = lng.startsWith('ar');
   document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
   document.documentElement.lang = lng;
 });
 
-// Set initial direction
 const initialLng = i18n.language || 'en';
 document.documentElement.dir = initialLng.startsWith('ar') ? 'rtl' : 'ltr';
 document.documentElement.lang = initialLng;

@@ -28,7 +28,7 @@ const typeIcon = (name = '') => {
 };
 
 // ─── 409 Conflict Banner ──────────────────────────────────────────────────────
-function ConflictBanner({ message, checkIn, checkOut, room, onSearchAlternatives }) {
+function ConflictBanner({ message, room, onSearchAlternatives }) {
     const { t } = useTranslation();
     return (
         <div className="rounded-3xl border border-red-200 bg-red-50 p-6 sm:p-8">
@@ -281,7 +281,7 @@ export default function BookRoom() {
                                             id="guest-name"
                                             label={t('fullName') || 'Full Name'}
                                             required
-                                            placeholder={t('fullNamePlaceholder') || 'e.g. John Smith'}
+                                            placeholder={t('guestFullNamePlaceholder') || 'e.g. John Smith'}
                                             value={guest.name}
                                             onChange={(v) => setField('name', v)}
                                         />
@@ -293,7 +293,7 @@ export default function BookRoom() {
                                         label={t('emailAddress') || 'Email Address'}
                                         required
                                         type="email"
-                                        placeholder={t('emailPlaceholder') || 'guest@example.com'}
+                                        placeholder={t('guestEmailPlaceholder') || 'guest@example.com'}
                                         value={guest.email}
                                         onChange={(v) => setField('email', v)}
                                     />

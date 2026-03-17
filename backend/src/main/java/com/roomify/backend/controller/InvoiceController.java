@@ -1,15 +1,24 @@
 package com.roomify.backend.controller;
 
+import com.roomify.backend.entity.InvoiceDeliveryLog;
 import com.roomify.backend.service.InvoiceService;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/invoices")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
@@ -32,5 +41,27 @@ public class InvoiceController {
         return ResponseEntity.ok()
                 .header("Content-Type", "application/pdf")
                 .body(pdf);
+    }
+
+    @GetMapping("/{reservationId}/delivery-status")
+    public ResponseEntity<Map<String, Object>> getInvoiceDeliveryStatus(
+            @PathVariable Long reservationId) {
+
+        Optional<InvoiceDeliveryLog> latestLog = invoiceService.getLatestDeliveryStatus(reservationId);
+
+        if (latestLog.isEmpty()) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", "UNKNOWN");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        }
+
+        InvoiceDeliveryLog log = latestLog.get();
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", log.getStatus().name());
+        body.put("errorMessage", log.getErrorMessage());
+        body.put("sentAt", log.getCreatedAt());
+
+        return ResponseEntity.ok(body);
     }
 }

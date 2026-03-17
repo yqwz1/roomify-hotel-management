@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Search, CreditCard, Receipt } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -29,7 +30,7 @@ const formatAmount = (val) => {
 };
 
 const FinalBillSection = ({ bill }) => {
-    if (!bill?.lineItems?.length) {
+    if (!bill) {
         return (
             <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
                 <CardContent className="p-8">
@@ -39,12 +40,26 @@ const FinalBillSection = ({ bill }) => {
         );
     }
 
-    const balanceDue = Number(bill?.balanceDue ?? 0);
-    const hasUnpaidBalance = balanceDue > 0;
-    const statusLabel = hasUnpaidBalance ? 'رصيد غير مدفوع' : 'جاهز للخروج';
-    const statusClass = hasUnpaidBalance
+    const {
+        roomRate,
+        nights,
+        roomCharge,
+        serviceCharges,
+        vatRate,
+        vatAmount,
+        discountAmount,
+        balanceDue,
+        totalPaid,
+        outstandingBalance,
+        paymentStatus,
+        lineItems
+    } = bill;
+
+    const hasUnpaidBalance = Number(outstandingBalance ?? balanceDue ?? 0) > 0;
+    const statusLabel = paymentStatus === 'PAID' ? 'مكتمل الدفع' : (hasUnpaidBalance ? 'رصيد غير مدفوع' : 'جاهز للخروج');
+    const statusClass = hasUnpaidBalance || paymentStatus === 'FAILED'
         ? 'bg-rose-100 text-rose-900 border-rose-200'
-        : 'bg-zinc-200 text-zinc-800 border-zinc-200';
+        : 'bg-emerald-100 text-emerald-900 border-emerald-200';
 
     return (
         <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
@@ -56,29 +71,71 @@ const FinalBillSection = ({ bill }) => {
             </CardHeader>
             <CardContent>
                 <div className="space-y-3 text-sm">
-                    {bill.lineItems.map((item, idx) => {
-                        const amount = Number(item?.amount ?? 0);
-                        const credit = !!item?.credit;
-                        const label = item?.label ?? '';
-                        return (
-                            <div key={idx} className="flex justify-between">
-                                <span className={credit ? 'text-zinc-500' : 'text-zinc-600'}>
-                                    {label}
-                                </span>
-                                <span
-                                    className={`font-bold ${credit ? 'text-zinc-600' : 'text-zinc-900'}`}
-                                >
-                                    {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
-                                </span>
-                            </div>
-                        );
-                    })}
+                    {/* Fixed fields approach mapping to Java BillResponse */}
+                    <div className="flex justify-between">
+                        <span className="text-zinc-600">رسوم الغرفة ({nights} ليالي × {formatAmount(roomRate)})</span>
+                        <span className="font-bold text-zinc-900">{formatAmount(roomCharge)}</span>
+                    </div>
+
+                    {Number(serviceCharges) > 0 && (
+                        <div className="flex justify-between">
+                            <span className="text-zinc-600">رسوم إضافية (الخدمات)</span>
+                            <span className="font-bold text-zinc-900">{formatAmount(serviceCharges)}</span>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between">
+                        <span className="text-zinc-600">ضريبة القيمة المضافة ({(Number(vatRate) * 100).toFixed(0)}%)</span>
+                        <span className="font-bold text-zinc-900">{formatAmount(vatAmount)}</span>
+                    </div>
+
+                    {Number(discountAmount) > 0 && (
+                        <div className="flex justify-between text-zinc-500">
+                            <span>الخصومات</span>
+                            <span className="font-bold text-zinc-600">-{formatAmount(discountAmount)}</span>
+                        </div>
+                    )}
+
                     <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
-                        <span className="text-base font-bold text-zinc-900">الإجمالي الكلي</span>
-                        <span className="text-xl font-black text-rose-900">
-                            {formatAmount(bill.balanceDue)}
+                        <span className="text-base font-bold text-zinc-900">الإجمالي الكلي قبل الدفع</span>
+                        <span className="text-xl font-black text-zinc-900">
+                            {formatAmount(balanceDue)}
                         </span>
                     </div>
+
+                    <div className="flex justify-between text-emerald-700 mt-2">
+                        <span>المبلغ المدفوع</span>
+                        <span className="font-bold">-{formatAmount(totalPaid)}</span>
+                    </div>
+
+                    <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
+                        <span className="text-base font-bold text-zinc-900">الرصيد المتبقي</span>
+                        <span className={`text-xl font-black ${hasUnpaidBalance ? 'text-rose-900' : 'text-emerald-700'}`}>
+                            {formatAmount(outstandingBalance ?? balanceDue)}
+                        </span>
+                    </div>
+
+                    {lineItems && lineItems.length > 0 && (
+                        <div className="mt-4 border-t border-zinc-200 pt-3">
+                            <p className="font-bold text-zinc-700 mb-2">تفاصيل إضافية:</p>
+                            {lineItems.map((item, idx) => {
+                                const amount = Number(item?.amount ?? 0);
+                                const credit = !!item?.credit;
+                                const label = item?.label ?? '';
+                                return (
+                                    <div key={idx} className="flex justify-between text-xs mb-1">
+                                        <span className={credit ? 'text-zinc-500' : 'text-zinc-600'}>
+                                            {label}
+                                        </span>
+                                        <span className={`font-bold ${credit ? 'text-zinc-600' : 'text-zinc-900'}`}>
+                                            {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
                     <div
                         className={`mt-4 flex justify-between items-center p-3 rounded-2xl border ${statusClass}`}
                     >
@@ -92,6 +149,7 @@ const FinalBillSection = ({ bill }) => {
 };
 
 const Checkout = () => {
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState(null);
@@ -118,10 +176,9 @@ const Checkout = () => {
         }
     }, []);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        const q = searchQuery?.trim();
-        if (!q) return;
+    const runSearch = useCallback(async (q) => {
+        const trimmed = q?.trim();
+        if (!trimmed) return;
 
         setSearchLoading(true);
         setSearchError(null);
@@ -131,24 +188,32 @@ const Checkout = () => {
         setCheckoutError(null);
 
         try {
-            const results = await searchReservations(q);
+            const results = await searchReservations(trimmed);
             const reservation = Array.isArray(results) ? results[0] : null;
             if (!reservation) {
                 setSearchError('لم يتم العثور على حجز مطابق. جرّب اسم ضيف أو رقم تأكيد آخر.');
-                setSelected(null);
-                setBill(null);
                 return;
             }
             setSelected(reservation);
             await fetchBill(reservation.confirmationNumber);
         } catch (err) {
             setSearchError(extractReservationError(err));
-            setSelected(null);
-            setBill(null);
         } finally {
             setSearchLoading(false);
         }
+    }, [fetchBill]);
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        await runSearch(searchQuery);
     };
+
+    useEffect(() => {
+        const initialQuery = String(location.state?.initialQuery ?? '').trim();
+        if (!initialQuery) return;
+        setSearchQuery(initialQuery);
+        runSearch(initialQuery);
+    }, [location.state?.initialQuery, runSearch]);
 
     const handleCheckout = async () => {
         if (!selected?.confirmationNumber || checkoutLoading) return;
@@ -185,6 +250,7 @@ const Checkout = () => {
         setBill(null);
         setSearchError(null);
         setCheckoutError(null);
+        setCheckoutSuccess(false);
         setSearchQuery('');
     };
 
@@ -205,7 +271,12 @@ const Checkout = () => {
             />
 
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold font-heading text-black">تسجيل الخروج للضيف</h1>
+                <h1
+                    className="text-3xl font-bold font-heading text-rose-900"
+                    style={{ fontFamily: "'Khat Alharf Alyadawi', system-ui, sans-serif" }}
+                >
+                    تسجيل الخروج للضيف
+                </h1>
             </div>
 
             <Card className="rounded-3xl border-zinc-200 shadow-sm">
@@ -223,17 +294,20 @@ const Checkout = () => {
                                     setSearchError(null);
                                 }}
                                 placeholder="ابحث باسم الضيف أو رقم التأكيد (مثلاً RSV-...)"
-                                className="pe-10 rounded-full border-zinc-300 focus-visible:ring-black"
+                                className="pe-10 rounded-full border-zinc-300 focus-visible:ring-rose-900"
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={searchLoading || !searchQuery?.trim()}
-                            className="rounded-full bg-black hover:bg-zinc-800 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-full bg-rose-900 hover:bg-rose-900/90 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {searchLoading ? 'جاري البحث...' : 'بحث'}
                         </Button>
                     </form>
+                    <p className="mt-3 text-xs text-zinc-500">
+                        Guest-name search returns the first matching reservation. Use the confirmation number when available.
+                    </p>
                     {searchError && (
                         <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4">
                             <p className="text-sm font-medium text-rose-900">{searchError}</p>
@@ -318,7 +392,7 @@ const Checkout = () => {
                             <Button
                                 onClick={handleCheckout}
                                 disabled={isCheckoutDisabled}
-                                className="flex items-center gap-2 rounded-full bg-black hover:bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-2 rounded-full bg-rose-900 hover:bg-rose-900/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <CreditCard className="h-4 w-4 ms-2" />
                                 {checkoutLoading

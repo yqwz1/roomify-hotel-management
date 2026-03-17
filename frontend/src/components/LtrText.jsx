@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * A wrapper component that forces its content to be displayed Left-to-Right (LTR).
  * Useful for data strings like reservation numbers or phone numbers that should 

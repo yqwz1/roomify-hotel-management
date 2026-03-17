@@ -34,6 +34,7 @@ import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
@@ -65,16 +66,11 @@ class ReservationServiceTest {
                 auditService = mock(AuditService.class);
                 housekeepingNotificationService = mock(HousekeepingNotificationService.class);
 
-                invoiceEmailService = mock(InvoiceEmailService.class);
-                invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
-
                 reservationService = new ReservationService(
                                 reservationRepository,
                                 guestRepository,
                                 roomRepository,
                                 emailService,
-                                invoiceEmailService,
-                                invoiceDeliveryLogService,
                                 auditService,
                                 housekeepingNotificationService,
                                 new BigDecimal("0.15"));
@@ -271,8 +267,15 @@ class ReservationServiceTest {
                 reservation.setOutstandingBalance(BigDecimal.ZERO);
                 reservation.setInvoiceFinalized(false);
 
-        assertEquals("Payment must be finalized before checkout", ex.getMessage());
-    }
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                                .thenReturn(Optional.of(reservation));
+
+                PaymentValidationException ex = assertThrows(
+                                PaymentValidationException.class,
+                                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+
+                assertEquals("Payment must be finalized before checkout", ex.getMessage());
+        }
 
         @Test
         void checkOutShouldThrowConflictWhenOutstandingIsPositive() {

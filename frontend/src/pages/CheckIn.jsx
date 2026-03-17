@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import { LtrText } from '../components/LtrText';
 import { useTranslation } from 'react-i18next';
-import { CHECKINABLE_STATUSES } from '../data/mockReservations';
 import { checkInReservation, extractReservationError } from '../services/reservationService';
+import { reservationStatusRules, normalizeReservationStatusLabel } from '../domain/reservations/statusRules';
 
 const formatDate = (iso) => {
     if (!iso) return '-';
@@ -25,15 +25,24 @@ const CHECKLIST_ITEMS = [
 
 export default function CheckIn() {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
+    const location = useLocation();
+    const { t } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [checklist, setChecklist] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
 
+    const initialQuery = useMemo(
+        () => String(location.state?.initialQuery ?? '').trim(),
+        [location.state?.initialQuery]
+    );
+
     const allChecked = CHECKLIST_ITEMS.every((item) => checklist[item.id]);
-    const canCheckIn = selected && CHECKINABLE_STATUSES.includes(selected.status) && allChecked;
+    const canCheckIn =
+        selected &&
+        reservationStatusRules.canCheckIn(selected.status) &&
+        allChecked;
 
     const toggleCheck = (id) =>
         setChecklist((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -82,7 +91,7 @@ export default function CheckIn() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                    <ReservationLookupPanel onSelect={handleSelect} />
+                    <ReservationLookupPanel onSelect={handleSelect} initialQuery={initialQuery} />
                 </div>
 
                 <div>
@@ -90,7 +99,7 @@ export default function CheckIn() {
                         <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
                             <span className="text-5xl mb-3">Hotel</span>
                             <p className="text-sm font-medium text-gray-600">No reservation selected</p>
-                            <p className="text-xs text-gray-400 mt-1">Search and click a reservation on the left to start check-in.</p>
+                            <p className="text-xs text-gray-400 mt-1">Search for a reservation to start check-in.</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
@@ -103,9 +112,9 @@ export default function CheckIn() {
                                     <StatusPill status={selected.status} />
                                 </div>
 
-                                {!CHECKINABLE_STATUSES.includes(selected.status) && (
+                                {!reservationStatusRules.canCheckIn(selected.status) && (
                                     <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-                                        This reservation cannot be checked in - status is <strong>{selected.status.replace('_', ' ')}</strong>.
+                                        This reservation cannot be checked in - status is <strong>{normalizeReservationStatusLabel(selected.status)}</strong>.
                                     </div>
                                 )}
 
@@ -119,7 +128,7 @@ export default function CheckIn() {
                                 </dl>
                             </div>
 
-                            {CHECKINABLE_STATUSES.includes(selected.status) && (
+                            {reservationStatusRules.canCheckIn(selected.status) && (
                                 <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
                                     <h3 className="mb-1 text-sm font-bold text-black uppercase tracking-wide">{t('preCheckInChecklist')}</h3>
                                     <p className="mb-5 text-xs font-medium text-zinc-400">{t('completeAllItems')}</p>
@@ -162,7 +171,7 @@ export default function CheckIn() {
                                 </div>
                             )}
 
-                            {CHECKINABLE_STATUSES.includes(selected.status) && (
+                            {reservationStatusRules.canCheckIn(selected.status) && (
                                 <button
                                     onClick={handleCheckIn}
                                     disabled={!canCheckIn || submitting}

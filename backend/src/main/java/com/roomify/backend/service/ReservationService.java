@@ -32,8 +32,6 @@ import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
-import com.roomify.backend.service.InvoiceDeliveryLogService;
-import com.roomify.backend.service.InvoiceEmailService;
 
 @Service
 @Transactional
@@ -50,16 +48,12 @@ public class ReservationService {
         private final AuditService auditService;
         private final HousekeepingNotificationService housekeepingNotificationService;
         private final BigDecimal taxRate;
-        private final InvoiceEmailService invoiceEmailService;
-        private final InvoiceDeliveryLogService invoiceDeliveryLogService;
 
         public ReservationService(
                         ReservationRepository reservationRepository,
                         GuestRepository guestRepository,
                         RoomRepository roomRepository,
                         EmailService emailService,
-                        InvoiceEmailService invoiceEmailService,
-                        InvoiceDeliveryLogService invoiceDeliveryLogService,
                         AuditService auditService,
                         HousekeepingNotificationService housekeepingNotificationService,
                         @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
@@ -68,8 +62,6 @@ public class ReservationService {
                 this.guestRepository = guestRepository;
                 this.roomRepository = roomRepository;
                 this.emailService = emailService;
-                this.invoiceEmailService = invoiceEmailService;
-                this.invoiceDeliveryLogService = invoiceDeliveryLogService;
                 this.auditService = auditService;
                 this.housekeepingNotificationService = housekeepingNotificationService;
                 this.taxRate = taxRate;

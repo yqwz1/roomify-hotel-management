@@ -1,25 +1,22 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
-import { X, LayoutDashboard, Tag, Users, Hotel, Settings, Search, CalendarDays, User, Key, Sparkles } from 'lucide-react'
+import { X, LayoutDashboard, Tag, Users, Settings, Search, CalendarDays, Key, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 const ICON_MAP = {
   '/manager/dashboard': LayoutDashboard,
   '/room-types': Tag,
   '/staff': Users,
-  '/rooms': Hotel,
   '/rooms-management': Settings,
   '/search': Search,
   '/bookings': CalendarDays,
-  '/guests': User,
-  '/settings': Settings,
   '/staff/dashboard': LayoutDashboard,
   '/book': CalendarDays,
   '/check-in': Key,
-  '/housekeeping': Sparkles,
   '/guest/dashboard': LayoutDashboard,
-  '/my-bookings': CalendarDays,
-  '/profile': User,
+  '/checkout': CalendarDays,
+  '/room-status': Sparkles,
+  '/invoice-preview': CalendarDays,
 }
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -34,27 +31,30 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/manager/dashboard', label: t('dashboard') },
       { path: '/room-types', label: t('roomTypes') },
       { path: '/staff', label: t('staffMenu') },
-      { path: '/rooms', label: t('manageRooms') },
       { path: '/rooms-management', label: t('roomsManagement') },
       { path: '/search', label: t('roomSearch') },
-      { path: '/bookings', label: t('allBookings') },
-      { path: '/guests', label: t('guestList') },
-      { path: '/settings', label: t('settings') },
+      { path: '/check-in', label: t('checkInOut') },
+      { path: '/reservations/modify', label: t('modifyReservationTitle') || 'Modify Reservation' },
+      { path: '/reservations/cancel', label: t('cancelReservationTitle') || 'Cancel Reservation' },
+      { path: '/checkout', label: t('checkoutTitle') || 'Checkout' },
+      { path: '/room-status', label: t('roomStatus') || 'Room Status' },
+      { path: '/invoice-preview', label: t('invoicePreview') || 'Invoice Preview' },
     )
   } else if (hasRole('ROLE_STAFF')) {
     menuItems.push(
       { path: '/staff/dashboard', label: t('dashboard') },
       { path: '/search', label: t('roomSearch') },
       { path: '/book', label: t('bookRoom') },
-      { path: '/bookings', label: t('bookings') },
       { path: '/check-in', label: t('checkInOut') },
-      { path: '/housekeeping', label: t('housekeeping') },
+      { path: '/reservations/modify', label: t('modifyReservationTitle') || 'Modify Reservation' },
+      { path: '/reservations/cancel', label: t('cancelReservationTitle') || 'Cancel Reservation' },
+      { path: '/checkout', label: t('checkoutTitle') || 'Checkout' },
+      { path: '/invoice-preview', label: t('invoicePreview') || 'Invoice Preview' },
     )
   } else if (hasRole('ROLE_GUEST')) {
     menuItems.push(
       { path: '/guest/dashboard', label: t('myDashboard') },
-      { path: '/my-bookings', label: t('myBookings') },
-      { path: '/profile', label: t('myProfile') },
+      { path: '/bookings', label: t('bookings') },
     )
   }
 

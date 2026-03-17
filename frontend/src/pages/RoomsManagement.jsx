@@ -256,6 +256,40 @@ export default function RoomsManagement() {
     const [statusModal, setStatusModal] = useState(null); // room object | null
     const [bannerError, setBannerError] = useState(null);
 
+    const statusOptions = useMemo(
+        () =>
+            BACKEND_STATUSES.map((status) => ({
+                value: status,
+                label:
+                    t(
+                        `status${status
+                            .replace(/_([a-z])/g, (m, p1) => p1.toUpperCase())
+                            .replace(/^[a-z]/, (m) => m.toUpperCase())}`
+                    ) || STATUS_LABELS[status],
+            })),
+        [t]
+    );
+
+    const roomTypeOptions = useMemo(
+        () =>
+            roomTypes.map((roomType) => ({
+                value: roomType.name,
+                label: roomType.name,
+            })),
+        [roomTypes]
+    );
+
+    const floorOptions = useMemo(
+        () =>
+            [...new Set(rooms.map((room) => room.floor).filter((floor) => floor != null))]
+                .sort((a, b) => a - b)
+                .map((floor) => ({
+                    value: floor,
+                    label: String(floor),
+                })),
+        [rooms]
+    );
+
     // On mount: load rooms (no filters) and room types (for the Add form dropdown)
     useEffect(() => {
         fetchRooms();
@@ -349,6 +383,9 @@ export default function RoomsManagement() {
                     filters={filters}
                     onFiltersChange={handleFiltersChange}
                     onClear={handleClearFilters}
+                    statusOptions={statusOptions}
+                    roomTypeOptions={roomTypeOptions}
+                    floorOptions={floorOptions}
                 />
             </div>
 

@@ -1,9 +1,10 @@
 package com.roomify.backend.repository;
 
+import com.roomify.backend.entity.InvoiceDeliveryLog;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.roomify.backend.entity.InvoiceDeliveryLog;
+public interface InvoiceDeliveryLogRepository extends JpaRepository<InvoiceDeliveryLog, Long> {
 
-public interface InvoiceDeliveryLogRepository
-        extends JpaRepository<InvoiceDeliveryLog, Long> {
+    Optional<InvoiceDeliveryLog> findFirstByConfirmationNumberOrderByCreatedAtDesc(String confirmationNumber);
 }

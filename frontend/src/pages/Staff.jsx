@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
-import { Loader2, UserPlus, Filter, X, Shield, Briefcase, Mail, KeyRound, LockKeyhole, PowerOff, Power, RefreshCw, Pencil, Users, Unlock, User } from 'lucide-react';
+import { Loader2, UserPlus, Filter, X, Briefcase, Mail, PowerOff, Power, RefreshCw, Pencil, Users, User, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { useTranslation } from 'react-i18next';
@@ -26,9 +26,6 @@ function SkeletonRow() {
             <td className="p-4">
                 <div className="h-6 w-20 bg-zinc-200 rounded-full animate-pulse" />
             </td>
-            <td className="p-4">
-                <div className="h-6 w-20 bg-zinc-200 rounded-full animate-pulse" />
-            </td>
             <td className="p-4 text-end">
                 <div className="flex justify-end gap-2">
                     <div className="h-8 w-8 bg-zinc-200 rounded-full animate-pulse" />
@@ -42,7 +39,7 @@ function SkeletonRow() {
 
 export default function Staff() {
     const { t } = useTranslation();
-    const { staff, loading, error, fetchStaff, createStaff, updateStaff, deactivateStaff, activateStaff, resetLoginAttempts } = useStaff();
+    const { staff, loading, error, fetchStaff, createStaff, updateStaff, deactivateStaff, activateStaff, unlockStaff } = useStaff();
     const { user, hasRole } = useAuth();
     const currentUserEmail = user?.email;
     const isManager = hasRole('ROLE_MANAGER');
@@ -55,7 +52,6 @@ export default function Staff() {
     // Filter State
     const [filters, setFilters] = useState({
         search: '',
-        role: '',
         department: '',
         active: null
     });
@@ -76,29 +72,9 @@ export default function Staff() {
         fetchStaff();
     }, [fetchStaff]);
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleApplyFilters = () => {
-        const cleanFilters = {};
-        if (filters.search) cleanFilters.search = filters.search;
-        if (filters.role && filters.role !== 'all') cleanFilters.role = filters.role;
-        if (filters.department) cleanFilters.department = filters.department;
-        if (filters.active !== null && filters.active !== '') {
-            cleanFilters.active = filters.active === 'true';
-        }
-        fetchStaff(cleanFilters);
-    };
-
     const handleResetFilters = () => {
         setFilters({
             search: '',
-            role: '',
             department: '',
             active: null
         });
@@ -199,7 +175,7 @@ export default function Staff() {
 
     const handleResetLoginAttempts = async (staffMember) => {
         if (window.confirm(t('confirmResetLoginAttempts', { name: staffMember.name }) || `Unlock ${staffMember.name}'s account and reset failed login attempts?`)) {
-            const result = await resetLoginAttempts(staffMember.id);
+            const result = await unlockStaff(staffMember.id);
 
             if (result.success) {
                 setSuccessMessage(t('accountUnlocked') || "Account unlocked successfully!");
@@ -212,14 +188,16 @@ export default function Staff() {
     };
 
     const filteredStaff = staff.filter(s => {
-        const matchesSearch = filters.search ? (s.name.toLowerCase().includes(filters.search.toLowerCase()) || s.email.toLowerCase().includes(filters.search.toLowerCase())) : true;
-        const matchesRole = filters.role && filters.role !== 'all' ? s.role === filters.role : true;
+        const searchTerm = filters.search.toLowerCase();
+        const matchesSearch = filters.search
+            ? ((s.name ?? '').toLowerCase().includes(searchTerm) || (s.email ?? '').toLowerCase().includes(searchTerm))
+            : true;
         const matchesDepartment = filters.department ? s.department?.toLowerCase().includes(filters.department.toLowerCase()) : true;
         const matchesActive = filters.active !== null ? s.active === filters.active : true;
-        return matchesSearch && matchesRole && matchesDepartment && matchesActive;
+        return matchesSearch && matchesDepartment && matchesActive;
     });
 
-    const isFiltersActive = Object.values(filters).some(value => value !== '' && value !== null && value !== 'all');
+    const isFiltersActive = Object.values(filters).some(value => value !== '' && value !== null);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 bg-zinc-50 h-full">
@@ -262,7 +240,7 @@ export default function Staff() {
                     )}
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2">
                             <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('searchLabel') || 'Search'}</Label>
                             <Input
@@ -271,18 +249,6 @@ export default function Staff() {
                                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                                 className="h-12 rounded-full border-zinc-200 focus-visible:ring-black px-5"
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('roleLabel') || 'Role'}</Label>
-                            <select 
-                                value={filters.role} 
-                                onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                                className="flex h-12 w-full rounded-full border border-zinc-200 bg-white px-5 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black"
-                            >
-                                <option value="all">{t('allRoles') || 'All Roles'}</option>
-                                <option value="MANAGER">{t('managerRole') || 'Manager'}</option>
-                                <option value="STAFF">{t('staffRole') || 'Staff'}</option>
-                            </select>
                         </div>
                         <div className="space-y-2">
                             <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('departmentLabel') || 'Department'}</Label>
@@ -328,7 +294,6 @@ export default function Staff() {
                                     <tr className="border-b transition-colors">
                                         <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase">{t('nameLabel') || 'Name'}</th>
                                         <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase">{t('colDepartment') || 'Department'}</th>
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase">{t('colRole') || 'Role'}</th>
                                         <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase">{t('statusLabel') || 'Status'}</th>
                                         <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase text-end w-[140px]">{t('colActions') || 'Actions'}</th>
                                     </tr>
@@ -358,7 +323,6 @@ export default function Staff() {
                                     <tr className="border-b transition-colors hover:bg-muted/50">
                                         <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Details</th>
                                         <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Department</th>
-                                        <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Role</th>
                                         <th className="h-12 px-4 align-middle font-medium text-muted-foreground">Status</th>
                                         <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-end">Actions</th>
                                     </tr>
@@ -383,11 +347,6 @@ export default function Staff() {
                                                 </td>
                                                 <td className="p-4 align-middle">
                                                     {s.department}
-                                                </td>
-                                                <td className="p-5 align-middle">
-                                                    <Badge variant="secondary" className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${s.role === 'MANAGER' ? 'bg-black text-white border-transparent' : 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}>
-                                                        {s.role === 'MANAGER' ? (t('managerRole') || 'Manager') : (t('staffRole') || 'Staff')}
-                                                    </Badge>
                                                 </td>
                                                 <td className="p-5 align-middle">
                                                     {s.active ? (
@@ -462,7 +421,15 @@ export default function Staff() {
             </Card>
 
             {/* Create/Edit Sheet */}
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <Sheet
+                open={isSheetOpen}
+                onOpenChange={(open) => {
+                    setIsSheetOpen(open);
+                    if (!open) {
+                        resetForm();
+                    }
+                }}
+            >
                 <SheetContent className="sm:max-w-md overflow-y-auto">
                     <SheetHeader>
                         <SheetTitle className="flex items-center gap-2">
@@ -494,7 +461,7 @@ export default function Staff() {
                                     type="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    placeholder={t('emailPlaceholder') || "staff@example.com"}
+                                    placeholder={t('staffEmailPlaceholder') || "staff@example.com"}
                                     disabled={!!editingId} // Email can't be changed after creation
                                     className={validationErrors.email ? "border-red-500" : ""}
                                     required
@@ -513,28 +480,11 @@ export default function Staff() {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
-                                    placeholder={t('fullNamePlaceholder') || "e.g. John Doe"}
+                                    placeholder={t('staffFullNamePlaceholder') || "e.g. John Doe"}
                                     className={validationErrors.name ? "border-red-500" : ""}
                                     required
                                 />
                                 {validationErrors.name && <p className="text-xs text-red-500">{validationErrors.name}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="role" className="flex items-center gap-2">
-                                    <Shield className="h-4 w-4 text-gray-500" /> {t('roleLabel') || 'Role'} <span className="text-red-500">*</span>
-                                </Label>
-                                <select 
-                                    id="role"
-                                    value={formData.role} 
-                                    onChange={(e) => handleSelectChange('role', e.target.value)}
-                                    className={`flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${validationErrors.role ? "border-red-500" : "border-input"}`}
-                                >
-                                    <option value="" disabled>{t('selectRolePlaceholder') || "Select a role"}</option>
-                                    <option value="MANAGER">{t('managerRole') || 'Manager'}</option>
-                                    <option value="STAFF">{t('staffRole') || 'Staff'}</option>
-                                </select>
-                                {validationErrors.role && <p className="text-xs text-red-500">{validationErrors.role}</p>}
                             </div>
 
                             <div className="space-y-2">
