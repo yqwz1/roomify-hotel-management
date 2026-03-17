@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -77,6 +76,9 @@ public class InvoiceService {
         }
     }
 
+    /**
+     * Generate unique invoice number
+     */
     private String generateInvoiceNumber() {
 
         return "INV-" + UUID.randomUUID()
