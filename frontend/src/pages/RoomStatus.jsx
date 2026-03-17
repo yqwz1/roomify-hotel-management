@@ -244,7 +244,7 @@ const RoomStatus = () => {
             )}
 
             {!loading && !error && filteredRooms.length === 0 && (
-                <div className="text-center py-16 bg-zinc-50 rounded-3xl border border-dashed border-zinc-300 text-zinc-500 font-medium">
+                <div className="text-center py-16 bg-rose-50 rounded-3xl border border-dashed border-rose-300 text-rose-900 font-medium font-heading">
                     لم يتم العثور على غرف تطابق معايير البحث.
                 </div>
             )}

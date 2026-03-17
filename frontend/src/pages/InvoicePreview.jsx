@@ -281,56 +281,56 @@ const InvoicePreview = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-8 mb-8 bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+              <div className="grid grid-cols-2 gap-8 mb-8 bg-rose-50 p-6 rounded-3xl border border-rose-100">
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                  <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider mb-2" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                     فاتورة إلى
                   </h4>
-                  <p className="font-black text-black text-xl mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                  <p className="font-black text-rose-950 text-xl mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                     {reservation.guestName || '—'}
                   </p>
-                  <p className="text-zinc-500 text-sm font-medium" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                  <p className="text-rose-900/70 text-sm font-medium" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                     {reservation.guestEmail || '—'}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                  <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider mb-2" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                     تفاصيل الإقامة
                   </h4>
-                  <p className="text-black font-bold text-sm mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
-                    <span className="text-zinc-500 ms-2 font-normal">الغرفة:</span> {reservation.roomNumber || '—'}
+                  <p className="text-rose-950 font-bold text-sm mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                    <span className="text-rose-900/70 ms-2 font-normal">الغرفة:</span> {reservation.roomNumber || '—'}
                   </p>
-                  <p className="text-black font-bold text-sm mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
-                    <span className="text-zinc-500 ms-2 font-normal">الدخول:</span> {formatDateAr(reservation.checkInDate)}
+                  <p className="text-rose-950 font-bold text-sm mb-1" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                    <span className="text-rose-900/70 ms-2 font-normal">الدخول:</span> {formatDateAr(reservation.checkInDate)}
                   </p>
-                  <p className="text-black font-bold text-sm" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
-                    <span className="text-zinc-500 ms-2 font-normal">الخروج:</span> {formatDateAr(reservation.checkOutDate)}
+                  <p className="text-rose-950 font-bold text-sm" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                    <span className="text-rose-900/70 ms-2 font-normal">الخروج:</span> {formatDateAr(reservation.checkOutDate)}
                   </p>
                 </div>
               </div>
 
-              <div className="mb-8 rounded-2xl border border-zinc-200 overflow-hidden">
+              <div className="mb-8 rounded-3xl border border-rose-200 overflow-hidden">
                 <table className="w-full text-end border-collapse">
-                  <thead className="bg-zinc-50 border-b border-zinc-200">
+                  <thead className="bg-rose-50 border-b border-rose-200">
                     <tr>
-                      <th className="py-4 px-6 text-xs font-bold text-zinc-500 uppercase tracking-wider w-3/4" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                      <th className="py-4 px-6 text-xs font-bold text-rose-800 uppercase tracking-wider w-3/4" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                         الوصف
                       </th>
-                      <th className="py-4 px-6 text-xs font-bold text-zinc-500 uppercase tracking-wider w-1/4 text-start" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                      <th className="py-4 px-6 text-xs font-bold text-rose-800 uppercase tracking-wider w-1/4 text-start" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                         المبلغ
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 bg-white">
+                  <tbody className="divide-y divide-rose-100 bg-white">
                     {(bill?.lineItems ?? []).map((item, idx) => {
                       const amount = Number(item?.amount ?? 0)
                       const credit = !!item?.credit
                       return (
-                        <tr key={idx} className="hover:bg-zinc-50/50 transition-colors">
-                          <td className="py-4 px-6 text-zinc-900 font-medium text-sm text-start" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                        <tr key={idx} className="hover:bg-rose-50/50 transition-colors">
+                          <td className="py-4 px-6 text-rose-950 font-medium text-sm text-start" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                             {item?.label ?? '—'}
                           </td>
-                          <td className="py-4 px-6 text-zinc-900 font-bold text-sm text-start font-mono">
+                          <td className="py-4 px-6 text-rose-950 font-bold text-sm text-start font-mono">
                             {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
                           </td>
                         </tr>
@@ -341,12 +341,12 @@ const InvoicePreview = () => {
               </div>
 
               <div className="flex justify-end">
-                <div className="w-full max-w-sm space-y-3 bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
-                  <div className="border-t border-zinc-200 pt-4 mt-4 flex justify-between items-center">
-                    <span className="text-lg font-black text-black" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
+                <div className="w-full max-w-sm space-y-3 bg-rose-50 p-6 rounded-3xl border border-rose-100">
+                  <div className="border-t border-rose-200 pt-4 mt-4 flex justify-between items-center">
+                    <span className="text-lg font-black text-rose-950" style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}>
                       الإجمالي الكلي
                     </span>
-                    <span className="text-2xl font-black text-black font-mono">{formatAmount(bill.balanceDue)}</span>
+                    <span className="text-2xl font-black text-rose-950 font-mono">{formatAmount(bill.balanceDue)}</span>
                   </div>
                 </div>
               </div>
