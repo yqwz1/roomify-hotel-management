@@ -26,7 +26,7 @@ const CHECKLIST_ITEMS = [
 export default function CheckIn() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [checklist, setChecklist] = useState({});
@@ -99,7 +99,7 @@ export default function CheckIn() {
                         <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
                             <span className="text-5xl mb-3">Hotel</span>
                             <p className="text-sm font-medium text-gray-600">No reservation selected</p>
-                            <p className="text-xs text-gray-400 mt-1">Search and click a reservation on the left to start check-in.</p>
+                            <p className="text-xs text-gray-400 mt-1">Search for a reservation to start check-in.</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">

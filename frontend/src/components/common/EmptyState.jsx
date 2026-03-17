@@ -1,4 +1,3 @@
-import React from 'react';
 import { Inbox } from 'lucide-react';
 
 const EmptyState = ({ title = "لا توجد بيانات", message = "لا يوجد بيانات لعرضها في الوقت الحالي.", icon: Icon = Inbox }) => {

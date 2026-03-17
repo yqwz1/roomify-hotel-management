@@ -5,7 +5,6 @@ import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
 import DateRangePicker from '../components/DateRangePicker';
 import ErrorBanner from '../components/ErrorBanner';
-import { LtrText } from '../components/LtrText';
 import { searchRooms } from '../services/searchService';
 import { modifyReservation, extractReservationError } from '../services/reservationService';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +20,7 @@ const formatDate = (iso) => {
 const money = (v) => `$${Number(v ?? 0).toFixed(2)}`;
 
 function ModifyModal({ reservation, onClose, onSave }) {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const [checkIn, setCheckIn] = useState(reservation.checkInDate);
     const [checkOut, setCheckOut] = useState(reservation.checkOutDate);
     const [reason, setReason] = useState('');
@@ -211,7 +210,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
                                     ))}
                                 </select>
                             ) : (
-                                <p className="text-sm text-red-600">{t('noRoomsAvailable')}</p>
+                                <p className="text-sm text-red-600">{t('noRoomsAvailableForDates') || t('noRoomsAvailable')}</p>
                             )}
                         </div>
                     )}
@@ -265,7 +264,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
 export default function ModifyReservation() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const [selected, setSelected] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -325,7 +324,7 @@ export default function ModifyReservation() {
                     {!selected ? (
                         <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
                             <p className="text-sm font-medium text-gray-600">No reservation selected</p>
-                            <p className="mt-1 text-xs text-gray-400">Search and select a reservation to modify it.</p>
+                            <p className="mt-1 text-xs text-gray-400">Search for a reservation to modify it.</p>
                         </div>
                     ) : (
                         <div className="rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">

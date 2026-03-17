@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSearch } from '../hooks/useSearch';
 import DateRangePicker from '../components/DateRangePicker';
 import RoomFilters from '../components/RoomFilters';
@@ -7,7 +7,7 @@ import ErrorBanner from '../components/ErrorBanner';
 import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
+const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
 
 const STATUS_COLORS = {
     AVAILABLE: 'border border-zinc-300 bg-white text-black',
@@ -63,6 +63,7 @@ function SkeletonCard() {
  */
 export default function RoomSearch() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useTranslation();
 
     const todayDate = new Date();
@@ -71,8 +72,16 @@ export default function RoomSearch() {
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
     const tomorrow = tomorrowDate.toISOString().split('T')[0];
 
-    const [checkIn, setCheckIn] = useState(today);
-    const [checkOut, setCheckOut] = useState(tomorrow);
+    const recoveredCheckIn = String(location.state?.checkIn ?? '').trim();
+    const recoveredCheckOut = String(location.state?.checkOut ?? '').trim();
+    const hasRecoveredDates = Boolean(
+        recoveredCheckIn &&
+        recoveredCheckOut &&
+        recoveredCheckOut > recoveredCheckIn
+    );
+
+    const [checkIn, setCheckIn] = useState(() => (hasRecoveredDates ? recoveredCheckIn : today));
+    const [checkOut, setCheckOut] = useState(() => (hasRecoveredDates ? recoveredCheckOut : tomorrow));
     const [filters, setFilters] = useState(EMPTY_FILTERS);
     const [sortOption, setSortOption] = useState(SORT_OPTIONS[0]);
 
@@ -85,6 +94,19 @@ export default function RoomSearch() {
         search,
         clearError,
     } = useSearch();
+
+    useEffect(() => {
+        if (!hasRecoveredDates) {
+            return;
+        }
+
+        search({
+            checkIn: recoveredCheckIn,
+            checkOut: recoveredCheckOut,
+            sortBy: SORT_OPTIONS[0].sortBy,
+            sortDirection: SORT_OPTIONS[0].sortDirection,
+        });
+    }, [hasRecoveredDates, recoveredCheckIn, recoveredCheckOut, search]);
 
     // ── Derived ──────────────────────────────────────────────────────────────
     const nights = useMemo(() => {
@@ -102,7 +124,7 @@ export default function RoomSearch() {
             roomType: filters.type || undefined,
             minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
             maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
-            // guestCapacity not in RoomFilters — future enhancement
+            guestCapacity: filters.guestCapacity ? Number(filters.guestCapacity) : undefined,
             sortBy: sortOption.sortBy,
             sortDirection: sortOption.sortDirection,
         });
@@ -198,6 +220,9 @@ export default function RoomSearch() {
                     filters={filters}
                     onFiltersChange={handleFiltersChange}
                     onClear={handleClearFilters}
+                    showStatus={false}
+                    showFloor={false}
+                    showGuestCapacity={true}
                 />
             </div>
 

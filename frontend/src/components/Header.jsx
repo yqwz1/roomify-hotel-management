@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
-import { Menu, Hotel, LogOut } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
@@ -58,8 +58,8 @@ export default function Header({ onMenuToggle }) {
             </NavLink>
           )}
           {isAuthenticated && hasRole('ROLE_MANAGER') && (
-            <NavLink to="/rooms" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
-              {t('rooms')}
+            <NavLink to="/rooms-management" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
+              {t('roomsManagement') || t('rooms')}
             </NavLink>
           )}
         </nav>

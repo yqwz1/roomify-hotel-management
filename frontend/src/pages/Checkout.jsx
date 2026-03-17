@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Search, CreditCard, Receipt } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button';
@@ -305,6 +305,9 @@ const Checkout = () => {
                             {searchLoading ? 'جاري البحث...' : 'بحث'}
                         </Button>
                     </form>
+                    <p className="mt-3 text-xs text-zinc-500">
+                        Guest-name search returns the first matching reservation. Use the confirmation number when available.
+                    </p>
                     {searchError && (
                         <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4">
                             <p className="text-sm font-medium text-rose-900">{searchError}</p>

@@ -1,13 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
-import { X, LayoutDashboard, Tag, Users, Hotel, Settings, Search, CalendarDays, User, Key, Sparkles } from 'lucide-react'
+import { X, LayoutDashboard, Tag, Users, Settings, Search, CalendarDays, Key, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 const ICON_MAP = {
   '/manager/dashboard': LayoutDashboard,
   '/room-types': Tag,
   '/staff': Users,
-  '/rooms': Hotel,
   '/rooms-management': Settings,
   '/search': Search,
   '/bookings': CalendarDays,
@@ -32,7 +31,6 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/manager/dashboard', label: t('dashboard') },
       { path: '/room-types', label: t('roomTypes') },
       { path: '/staff', label: t('staffMenu') },
-      { path: '/rooms', label: t('manageRooms') },
       { path: '/rooms-management', label: t('roomsManagement') },
       { path: '/search', label: t('roomSearch') },
       { path: '/check-in', label: t('checkInOut') },
