@@ -23,6 +23,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
   const { hasRole, user } = useAuth()
   const { t } = useTranslation()
+  const brandName = t('brandName')
 
   const menuItems = []
 
@@ -34,11 +35,11 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/rooms-management', label: t('roomsManagement') },
       { path: '/search', label: t('roomSearch') },
       { path: '/check-in', label: t('checkInOut') },
-      { path: '/reservations/modify', label: t('modifyReservationTitle') || 'Modify Reservation' },
-      { path: '/reservations/cancel', label: t('cancelReservationTitle') || 'Cancel Reservation' },
-      { path: '/checkout', label: t('checkoutTitle') || 'Checkout' },
-      { path: '/room-status', label: t('roomStatus') || 'Room Status' },
-      { path: '/invoice-preview', label: t('invoicePreview') || 'Invoice Preview' },
+      { path: '/reservations/modify', label: t('modifyReservationTitle') },
+      { path: '/reservations/cancel', label: t('cancelReservationTitle') },
+      { path: '/checkout', label: t('checkoutTitle') },
+      { path: '/room-status', label: t('roomStatus') },
+      { path: '/invoice-preview', label: t('invoicePreview') },
     )
   } else if (hasRole('ROLE_STAFF')) {
     menuItems.push(
@@ -46,10 +47,10 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/search', label: t('roomSearch') },
       { path: '/book', label: t('bookRoom') },
       { path: '/check-in', label: t('checkInOut') },
-      { path: '/reservations/modify', label: t('modifyReservationTitle') || 'Modify Reservation' },
-      { path: '/reservations/cancel', label: t('cancelReservationTitle') || 'Cancel Reservation' },
-      { path: '/checkout', label: t('checkoutTitle') || 'Checkout' },
-      { path: '/invoice-preview', label: t('invoicePreview') || 'Invoice Preview' },
+      { path: '/reservations/modify', label: t('modifyReservationTitle') },
+      { path: '/reservations/cancel', label: t('cancelReservationTitle') },
+      { path: '/checkout', label: t('checkoutTitle') },
+      { path: '/invoice-preview', label: t('invoicePreview') },
     )
   } else if (hasRole('ROLE_GUEST')) {
     menuItems.push(
@@ -83,13 +84,13 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Brand header */}
         <div className="flex items-center justify-between px-6 py-6 border-b border-zinc-800">
           <div className="flex items-center">
-            <span className="text-2xl font-black text-white tracking-tighter">Roomify</span>
+            <span className="text-2xl font-black text-white tracking-tighter">{brandName}</span>
           </div>
           {/* Close button – mobile only */}
           <button
             onClick={onClose}
             className="md:hidden p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
-            aria-label="Close menu"
+            aria-label={t('closeMenu')}
           >
             <X className="h-5 w-5" />
           </button>
@@ -125,7 +126,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-white uppercase">
-                {user?.username?.[0] || user?.email?.[0] || 'U'}
+                {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </span>
             </div>
             <div className="min-w-0">

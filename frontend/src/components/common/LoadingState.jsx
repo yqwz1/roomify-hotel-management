@@ -1,12 +1,15 @@
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const LoadingState = ({ message = "جاري التحميل، يرجى الانتظار..." }) => {
-    return (
-        <div className="flex flex-col items-center justify-center p-8 text-center min-h-[300px]">
-            <Loader2 className="h-8 w-8 animate-spin text-zinc-900 mb-4" />
-            <p className="text-zinc-500 font-medium">{message}</p>
-        </div>
-    );
+const LoadingState = ({ message }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="min-h-[300px] p-8 text-center flex flex-col items-center justify-center">
+      <Loader2 className="mb-4 h-8 w-8 animate-spin text-zinc-900" />
+      <p className="font-medium text-zinc-500">{message || t('loadingMessage')}</p>
+    </div>
+  );
 };
 
 export default LoadingState;

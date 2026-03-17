@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   BedDouble,
@@ -10,26 +11,24 @@ import {
   Sparkles,
   Wallet,
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import ErrorState from '../components/common/ErrorState';
+import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
-import ErrorState from '../components/common/ErrorState';
-import LoadingState from '../components/common/LoadingState';
 import { useAuth } from '../context/AuthProvider';
 import { useStaffDashboard } from '../hooks/useStaffDashboard';
-
-const currency = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  translateKnownValue,
+} from '../utils/localization';
 
 export default function StaffDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     inventory,
     loading,
@@ -44,44 +43,45 @@ export default function StaffDashboard() {
     dateWindow,
   } = useStaffDashboard();
 
-  const welcomeName = user?.username || 'Staff Member';
+  const pageTx = 'staffDashboardPage';
+  const welcomeName = user?.username || t('roleStaff');
 
   const quickActions = useMemo(
     () => [
       {
         icon: Search,
-        title: t('roomSearch') || 'Room Search',
-        description: 'Find available rooms and start a new reservation.',
+        title: t('roomSearch'),
+        description: t(`${pageTx}.actions.roomSearchDescription`),
         onClick: () => navigate('/search'),
       },
       {
         icon: ClipboardCheck,
-        title: t('checkInTitle') || 'Check-In',
-        description: 'Complete guest arrivals and checklist verification.',
+        title: t('checkInTitle'),
+        description: t(`${pageTx}.actions.checkInDescription`),
         onClick: () => navigate('/check-in'),
       },
       {
         icon: CalendarClock,
-        title: t('modifyReservationTitle') || 'Modify Reservation',
-        description: 'Adjust dates and room assignments when plans change.',
+        title: t('modifyReservationTitle'),
+        description: t(`${pageTx}.actions.modifyDescription`),
         onClick: () => navigate('/reservations/modify'),
       },
       {
         icon: FileText,
-        title: t('cancelReservationTitle') || 'Cancel Reservation',
-        description: 'Handle cancellation requests with the current policy.',
+        title: t('cancelReservationTitle'),
+        description: t(`${pageTx}.actions.cancelDescription`),
         onClick: () => navigate('/reservations/cancel'),
       },
       {
         icon: Receipt,
-        title: t('invoicePreview') || 'Invoices',
-        description: 'Generate billing documents and confirm delivery.',
+        title: t('invoicePreview'),
+        description: t(`${pageTx}.actions.invoiceDescription`),
         onClick: () => navigate('/invoice-preview'),
       },
       {
         icon: Wallet,
-        title: t('checkoutTitle') || 'Checkout',
-        description: 'Review balances and complete guest departure.',
+        title: t('checkoutTitle'),
+        description: t(`${pageTx}.actions.checkoutDescription`),
         onClick: () => navigate('/checkout'),
       },
     ],
@@ -91,7 +91,7 @@ export default function StaffDashboard() {
   if (loading) {
     return (
       <div className="p-6 lg:p-8">
-        <LoadingState message="Loading tonight's available inventory..." />
+        <LoadingState message={t(`${pageTx}.loading`)} />
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function StaffDashboard() {
     return (
       <div className="p-6 lg:p-8">
         <ErrorState
-          title="Staff dashboard unavailable"
+          title={t(`${pageTx}.errorTitle`)}
           message={error}
           onRetry={() => window.location.reload()}
         />
@@ -111,33 +111,43 @@ export default function StaffDashboard() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow="Front Desk Operations"
-        title={t('staffDashboardTitle') || 'Staff Dashboard'}
-        description={`Welcome back, ${welcomeName}. This view is tuned for tonight's availability window so the front desk can move quickly between room search, check-in, billing, and reservation changes.`}
+        eyebrow={t(`${pageTx}.eyebrow`)}
+        title={t('staffDashboardTitle')}
+        description={t(`${pageTx}.description`, { name: welcomeName })}
         meta={[
-          `${dateWindow.checkIn} arrival window`,
-          `${availableTonight} rooms available`,
-          `${floorsCovered} floors represented`,
+          t(`${pageTx}.arrivalWindow`, {
+            date: formatLocalizedDate(dateWindow.checkIn, i18n.language, {
+              month: 'short',
+              day: 'numeric',
+            }),
+          }),
+          t(`${pageTx}.roomsAvailable`, { count: availableTonight }),
+          t(`${pageTx}.floorsRepresented`, { count: floorsCovered }),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
-            Tonight's Inventory
+            {t(`${pageTx}.inventoryTitle`)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Starting Rate
+                {t(`${pageTx}.startingRate`)}
               </p>
               <p className="mt-2 text-3xl font-black">
-                {startingRate ? currency.format(startingRate) : 'N/A'}
+                {startingRate == null
+                  ? '-'
+                  : formatLocalizedCurrency(startingRate, i18n.language, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Largest Fit
+                {t(`${pageTx}.largestFit`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{guestCapacityReady || 'N/A'}</p>
+              <p className="mt-2 text-3xl font-black">{guestCapacityReady || '-'}</p>
             </div>
           </div>
         </div>
@@ -146,35 +156,42 @@ export default function StaffDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={BedDouble}
-          label="Available Tonight"
+          label={t(`${pageTx}.metrics.availableLabel`)}
           value={String(availableTonight)}
-          hint="Current search window using today's arrival and tomorrow's departure."
+          hint={t(`${pageTx}.metrics.availableHint`)}
         />
         <DashboardMetricCard
           icon={Sparkles}
-          label="Premium Ready"
+          label={t(`${pageTx}.metrics.premiumLabel`)}
           value={String(premiumReady)}
-          hint="Deluxe and suite inventory currently available."
+          hint={t(`${pageTx}.metrics.premiumHint`)}
         />
         <DashboardMetricCard
           icon={Search}
-          label="Room Types Ready"
+          label={t(`${pageTx}.metrics.roomTypesLabel`)}
           value={String(roomTypeSummary.length)}
-          hint="Distinct room categories you can offer immediately."
+          hint={t(`${pageTx}.metrics.roomTypesHint`)}
         />
         <DashboardMetricCard
           icon={Receipt}
-          label="Starting Rate"
-          value={startingRate ? currency.format(startingRate) : 'N/A'}
-          hint="Lowest visible base rate in tonight's live search."
+          label={t(`${pageTx}.metrics.rateLabel`)}
+          value={
+            startingRate == null
+              ? '-'
+              : formatLocalizedCurrency(startingRate, i18n.language, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+          }
+          hint={t(`${pageTx}.metrics.rateHint`)}
           tone="dark"
         />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <DashboardPanel
-          title="Operational Actions"
-          description="Primary workflows for the current shift."
+          title={t(`${pageTx}.actionsTitle`)}
+          description={t(`${pageTx}.actionsDescription`)}
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {quickActions.map((action) => (
@@ -184,24 +201,29 @@ export default function StaffDashboard() {
         </DashboardPanel>
 
         <DashboardPanel
-          title="Shift Alerts"
-          description="Conditions worth calling out before promising inventory changes."
+          title={t(`${pageTx}.shiftAlertsTitle`)}
+          description={t(`${pageTx}.shiftAlertsDescription`)}
         >
           {alerts.length > 0 ? (
             <div className="space-y-3">
               {alerts.map((alert) => (
-                <div key={alert} className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-4">
-                  <p className="text-sm font-medium leading-6 text-amber-950">{alert}</p>
+                <div
+                  key={alert.type}
+                  className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-4"
+                >
+                  <p className="text-sm font-medium leading-6 text-amber-950">
+                    {t(`${pageTx}.alert${alert.type[0].toUpperCase()}${alert.type.slice(1)}`)}
+                  </p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 px-4 py-5">
               <p className="text-sm font-bold text-emerald-900">
-                Inventory looks healthy.
+                {t(`${pageTx}.noAlertsTitle`)}
               </p>
               <p className="mt-1 text-sm font-medium text-emerald-800/80">
-                The current search window has sufficient availability for standard front desk changes.
+                {t(`${pageTx}.noAlertsDescription`)}
               </p>
             </div>
           )}
@@ -210,8 +232,8 @@ export default function StaffDashboard() {
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <DashboardPanel
-          title="Availability by Room Type"
-          description="Live mix of the room categories you can currently offer tonight."
+          title={t(`${pageTx}.availabilityTitle`)}
+          description={t(`${pageTx}.availabilityDescription`)}
         >
           <div className="space-y-3">
             {roomTypeSummary.length > 0 ? (
@@ -219,35 +241,37 @@ export default function StaffDashboard() {
                 <div key={item.name} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-bold text-zinc-950">{item.name}</p>
+                      <p className="text-sm font-bold text-zinc-950">
+                        {translateKnownValue(item.name, t)}
+                      </p>
                       <p className="mt-1 text-sm font-medium text-zinc-500">
-                        Available immediately for the active search window.
+                        {t(`${pageTx}.availabilityItemDescription`)}
                       </p>
                     </div>
                     <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-700 shadow-sm">
-                      {item.count} room{item.count === 1 ? '' : 's'}
+                      {t(`${pageTx}.availabilityItemCount`, { count: item.count })}
                     </span>
                   </div>
                 </div>
               ))
             ) : (
               <p className="text-sm font-medium text-zinc-500">
-                No inventory was returned for tonight's window.
+                {t(`${pageTx}.noInventory`)}
               </p>
             )}
           </div>
         </DashboardPanel>
 
         <DashboardPanel
-          title="Front Desk Playbook"
-          description="Suggested workflow for the most common hotel desk scenarios."
+          title={t(`${pageTx}.playbookTitle`)}
+          description={t(`${pageTx}.playbookDescription`)}
         >
           <div className="grid gap-3">
             {[
-              'Start every walk-in or modification request from Room Search so the room promise is based on live availability.',
-              'Use Check-In only after confirming identity, payment readiness, and room status.',
-              'Generate invoices before checkout when guests request paperwork in advance.',
-              `Tonight's search returned ${inventory.length} available rooms, so escalate scarce categories early if premium inventory is low.`,
+              t(`${pageTx}.playbookTip1`),
+              t(`${pageTx}.playbookTip2`),
+              t(`${pageTx}.playbookTip3`),
+              t(`${pageTx}.playbookTip4`, { count: inventory.length }),
             ].map((item) => (
               <div
                 key={item}

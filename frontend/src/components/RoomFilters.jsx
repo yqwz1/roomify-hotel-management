@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { translateKnownValue } from '../utils/localization';
 
 const toOption = (option) => {
   if (typeof option === 'object' && option !== null) {
@@ -53,7 +54,10 @@ export default function RoomFilters({
   };
 
   const normalizedStatusOptions = statusOptions.map(toOption);
-  const normalizedRoomTypeOptions = roomTypeOptions.map(toOption);
+  const normalizedRoomTypeOptions = roomTypeOptions.map(toOption).map((option) => ({
+    ...option,
+    label: translateKnownValue(option.label, t),
+  }));
   const normalizedFloorOptions = floorOptions.map(toOption);
 
   const hasActiveFilters = Object.entries(filters).some(([, value]) => {
@@ -73,10 +77,10 @@ export default function RoomFilters({
           </span>
           <div>
             <h3 className="text-lg font-black tracking-tight text-zinc-950">
-              {t('filters') || 'Filters'}
+              {t('filters')}
             </h3>
             <p className="mt-1 text-sm font-medium text-zinc-500">
-              Narrow the room list by type, price, floor, status, or capacity.
+              {t('filtersDescription')}
             </p>
           </div>
         </div>
@@ -88,21 +92,21 @@ export default function RoomFilters({
           className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
         >
           <X className="h-4 w-4" />
-          {t('clearFilters') || 'Clear Filters'}
+          {t('clearFilters')}
         </button>
       </div>
 
       <div className="px-5 py-5 sm:px-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {showStatus && (
-            <FilterField id="filter-status" label={t('status') || 'Status'}>
+            <FilterField id="filter-status" label={t('status')}>
               <select
                 id="filter-status"
                 value={filters.status ?? ''}
                 onChange={(event) => handle('status', event.target.value)}
                 className={inputClassName}
               >
-                <option value="">{t('allStatuses') || 'All Statuses'}</option>
+                <option value="">{t('allStatuses')}</option>
                 {normalizedStatusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -113,7 +117,7 @@ export default function RoomFilters({
           )}
 
           {showType && (
-            <FilterField id="filter-type" label={t('roomType') || 'Room Type'}>
+            <FilterField id="filter-type" label={t('roomType')}>
               {normalizedRoomTypeOptions.length > 0 ? (
                 <select
                   id="filter-type"
@@ -121,7 +125,7 @@ export default function RoomFilters({
                   onChange={(event) => handle('type', event.target.value)}
                   className={inputClassName}
                 >
-                  <option value="">{t('allTypes') || 'All Types'}</option>
+                  <option value="">{t('allTypes')}</option>
                   {normalizedRoomTypeOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -132,7 +136,7 @@ export default function RoomFilters({
                 <input
                   id="filter-type"
                   type="text"
-                  placeholder={t('roomType') || 'Room Type'}
+                  placeholder={t('roomType')}
                   value={filters.type ?? ''}
                   onChange={(event) => handle('type', event.target.value)}
                   className={inputClassName}
@@ -142,7 +146,7 @@ export default function RoomFilters({
           )}
 
           {showFloor && (
-            <FilterField id="filter-floor" label={t('floor') || 'Floor'}>
+            <FilterField id="filter-floor" label={t('floor')}>
               {normalizedFloorOptions.length > 0 ? (
                 <select
                   id="filter-floor"
@@ -150,7 +154,7 @@ export default function RoomFilters({
                   onChange={(event) => handle('floor', event.target.value)}
                   className={inputClassName}
                 >
-                  <option value="">{t('allFloors') || 'All Floors'}</option>
+                  <option value="">{t('allFloors')}</option>
                   {normalizedFloorOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -174,7 +178,7 @@ export default function RoomFilters({
           {showGuestCapacity && (
             <FilterField
               id="filter-guests"
-              label={t('maxGuestsLabel') || 'Guest Capacity'}
+              label={t('maxGuestsLabel')}
             >
               <input
                 id="filter-guests"
@@ -189,7 +193,7 @@ export default function RoomFilters({
           )}
 
           {showPriceRange && (
-            <FilterField id="filter-min-price" label={`${t('minPrice') || 'Min Price'} ($)`}>
+            <FilterField id="filter-min-price" label={`${t('minPrice')} ($)`}>
               <input
                 id="filter-min-price"
                 type="number"
@@ -203,7 +207,7 @@ export default function RoomFilters({
           )}
 
           {showPriceRange && (
-            <FilterField id="filter-max-price" label={`${t('maxPrice') || 'Max Price'} ($)`}>
+            <FilterField id="filter-max-price" label={`${t('maxPrice')} ($)`}>
               <input
                 id="filter-max-price"
                 type="number"

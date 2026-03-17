@@ -19,6 +19,7 @@ export default function AppTopbar({ onMenuToggle }) {
   const homePath = getDefaultRouteForRoles(roles);
   const pageMeta = getPageMeta(location.pathname, roles, t);
   const roleLabel = getRoleDisplayLabel(roles, t);
+  const brandName = t('brandName');
   const currentDate = new Intl.DateTimeFormat(i18n.language?.startsWith('ar') ? 'ar-SA' : 'en-US', {
     weekday: 'short',
     month: 'long',
@@ -38,7 +39,7 @@ export default function AppTopbar({ onMenuToggle }) {
             type="button"
             onClick={onMenuToggle}
             className="rounded-2xl border border-zinc-200 bg-white p-2.5 text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black md:hidden"
-            aria-label="Open navigation"
+            aria-label={t('openNavigation')}
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -64,7 +65,7 @@ export default function AppTopbar({ onMenuToggle }) {
                 to={homePath}
                 className="hidden rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black md:inline-flex"
               >
-                Roomify
+                {brandName}
               </Link>
             </div>
           </div>
@@ -75,7 +76,7 @@ export default function AppTopbar({ onMenuToggle }) {
 
           <div className="hidden items-center gap-3 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 shadow-sm sm:flex">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-zinc-950 text-xs font-black uppercase text-white">
-              {user?.username?.[0] || user?.email?.[0] || 'U'}
+              {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
             </div>
             <div className="min-w-0">
               <p className="max-w-[11rem] truncate text-sm font-semibold text-zinc-950">

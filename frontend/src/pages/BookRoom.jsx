@@ -20,6 +20,11 @@ import {
   extractReservationError,
   isConflictError,
 } from '../services/reservationService';
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  translateKnownValue,
+} from '../utils/localization';
 
 const EMPTY_GUEST = {
   name: '',
@@ -28,13 +33,6 @@ const EMPTY_GUEST = {
   idNumber: '',
   nationality: '',
 };
-
-const tOr = (t, key, fallback, options) => {
-  const value = t(key, options);
-  return value === key ? fallback : value;
-};
-
-const formatMoney = (value) => `$${Number(value ?? 0).toFixed(2)}`;
 
 function Field({
   id,
@@ -63,7 +61,7 @@ function Field({
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-11 pr-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+          className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
         />
       </div>
     </div>
@@ -71,6 +69,8 @@ function Field({
 }
 
 function ConflictBanner({ message, room, onSearchAlternatives }) {
+  const { t } = useTranslation();
+
   return (
     <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-5">
       <div className="flex items-start gap-4">
@@ -79,25 +79,26 @@ function ConflictBanner({ message, room, onSearchAlternatives }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-lg font-black tracking-tight text-rose-950">
-            Room conflict detected
+            {t('roomAlreadyBooked')}
           </p>
           <p className="mt-2 text-sm font-medium leading-6 text-rose-900/85">
             {message}
           </p>
           <div className="mt-4 rounded-[1.25rem] border border-rose-100 bg-white px-4 py-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-500">
-              Recommended Next Step
+              {t('whatYouCanDo')}
             </p>
             <p className="mt-2 text-sm font-medium text-zinc-700">
-              Search for alternative rooms using the same stay dates.
-              {room?.roomNumber ? ` Room ${room.roomNumber} is no longer available.` : ''}
+              {room?.roomNumber
+                ? t('tryDifferentDatesRoom', { room: room.roomNumber })
+                : t('searchAlternativeRooms')}
             </p>
             <button
               type="button"
               onClick={onSearchAlternatives}
               className="mt-4 inline-flex items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-700"
             >
-              Search Alternative Rooms
+              {t('searchAlternativeBtn')}
             </button>
           </div>
         </div>
@@ -110,7 +111,7 @@ export default function BookRoom() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const room = location.state?.room ?? null;
   const roomId = room?.id ?? Number(searchParams.get('roomId'));
@@ -131,7 +132,9 @@ export default function BookRoom() {
   const [conflictError, setConflictError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const setField = (field, value) => setGuest((prev) => ({ ...prev, [field]: value }));
+  const setField = (field, value) => {
+    setGuest((prev) => ({ ...prev, [field]: value }));
+  };
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
@@ -153,58 +156,42 @@ export default function BookRoom() {
     setConflictError(null);
 
     if (!checkIn || !checkOut) {
-      setValidationError(
-        tOr(t, 'pleaseSelectDates', 'Please select check-in and check-out dates.')
-      );
+      setValidationError(t('pleaseSelectDates'));
       return;
     }
 
     if (checkOut <= checkIn) {
-      setValidationError(
-        tOr(t, 'checkoutAfterCheckin', 'Check-out date must be after check-in date.')
-      );
+      setValidationError(t('checkoutAfterCheckin'));
       return;
     }
 
     if (!guest.name.trim()) {
-      setValidationError(
-        tOr(t, 'guestNameRequired', 'Guest full name is required.')
-      );
+      setValidationError(t('guestNameRequired'));
       return;
     }
 
     if (!guest.email.trim()) {
-      setValidationError(
-        tOr(t, 'guestEmailRequired', 'Guest email address is required.')
-      );
+      setValidationError(t('guestEmailRequired'));
       return;
     }
 
     if (!guest.phone.trim()) {
-      setValidationError(
-        tOr(t, 'guestPhoneRequired', 'Guest phone number is required.')
-      );
+      setValidationError(t('guestPhoneRequired'));
       return;
     }
 
     if (!guest.idNumber.trim()) {
-      setValidationError(
-        tOr(t, 'guestIdRequired', 'Guest ID or passport number is required.')
-      );
+      setValidationError(t('guestIdRequired'));
       return;
     }
 
     if (!guest.nationality.trim()) {
-      setValidationError(
-        tOr(t, 'guestNationalityRequired', 'Guest nationality is required.')
-      );
+      setValidationError(t('guestNationalityRequired'));
       return;
     }
 
     if (!roomId) {
-      setValidationError(
-        tOr(t, 'noRoomError', 'No room selected. Please go back and select a room.')
-      );
+      setValidationError(t('noRoomError'));
       return;
     }
 
@@ -232,11 +219,13 @@ export default function BookRoom() {
           checkOut,
         },
       });
-    } catch (err) {
-      if (isConflictError(err)) {
-        setConflictError(extractReservationError(err));
+    } catch (error) {
+      const message = extractReservationError(error);
+
+      if (isConflictError(error)) {
+        setConflictError(message);
       } else {
-        setValidationError(extractReservationError(err));
+        setValidationError(message);
       }
     } finally {
       setSubmitting(false);
@@ -247,14 +236,14 @@ export default function BookRoom() {
     return (
       <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
         <DashboardPanel
-          title="No Room Selected"
-          description="This booking flow needs a room context from the room search results."
+          title={t('bookRoomPage.noRoomPanelTitle')}
+          description={t('bookRoomPage.noRoomPanelDescription')}
         >
           <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
             <BedDouble className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">No room selected</p>
+            <p className="mt-4 text-lg font-black text-zinc-950">{t('noRoomSelected')}</p>
             <p className="mt-2 text-sm font-medium text-zinc-500">
-              Return to room search and start the booking from an available room card.
+              {t('bookRoomPage.noRoomMessage')}
             </p>
             <button
               type="button"
@@ -262,7 +251,7 @@ export default function BookRoom() {
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Room Search
+              {t('backToRoomSearch')}
             </button>
           </div>
         </DashboardPanel>
@@ -273,37 +262,35 @@ export default function BookRoom() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow="Reservation Creation"
-        title={tOr(t, 'bookARoom', 'Book a Room')}
-        description={tOr(
-          t,
-          'fillGuestDetails',
-          'Confirm the stay window, capture guest information, and create the reservation.'
-        )}
+        eyebrow={t('bookRoomPage.heroEyebrow')}
+        title={t('bookARoom')}
+        description={t('fillGuestDetails')}
         meta={[
-          room ? `Room ${room.roomNumber}` : `Room ID ${roomId}`,
-          `${nights || 0} night${nights === 1 ? '' : 's'}`,
-          formatMoney(totalPrice),
+          room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`,
+          t('nightsCount', { count: nights || 0 }),
+          formatLocalizedCurrency(totalPrice, i18n.language),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
-            Booking Snapshot
+            {t('bookRoomPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Room
+                {t('bookRoomPage.snapshotRoom')}
               </p>
               <p className="mt-2 text-lg font-black">
-                {room ? `Room ${room.roomNumber}` : `Room ID ${roomId}`}
+                {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Total
+                {t('bookRoomPage.snapshotTotal')}
               </p>
-              <p className="mt-2 text-lg font-black">{formatMoney(totalPrice)}</p>
+              <p className="mt-2 text-lg font-black">
+                {formatLocalizedCurrency(totalPrice, i18n.language)}
+              </p>
             </div>
           </div>
         </div>
@@ -320,8 +307,8 @@ export default function BookRoom() {
           )}
 
           <DashboardPanel
-            title="Guest and Stay Details"
-            description="Validate the date range and complete the required guest identity fields before confirming the booking."
+            title={t('bookRoomPage.formTitle')}
+            description={t('bookRoomPage.formDescription')}
           >
             {validationError && (
               <div className="mb-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
@@ -332,7 +319,7 @@ export default function BookRoom() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                  Stay Window
+                  {t('bookRoomPage.stayWindow')}
                 </p>
                 <DateRangePicker
                   checkIn={checkIn}
@@ -348,22 +335,22 @@ export default function BookRoom() {
                 />
                 {nights > 0 && (
                   <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-700">
-                    {nights} night{nights === 1 ? '' : 's'} selected for this stay.
+                    {t('bookRoomPage.nightsSelected', { count: nights })}
                   </div>
                 )}
               </div>
 
               <div className="space-y-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                  Guest Profile
+                  {t('bookRoomPage.guestProfile')}
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <Field
                       id="guest-name"
-                      label={tOr(t, 'fullName', 'Full Name')}
+                      label={t('fullName')}
                       required
-                      placeholder={tOr(t, 'guestFullNamePlaceholder', 'e.g. John Smith')}
+                      placeholder={t('guestFullNamePlaceholder')}
                       value={guest.name}
                       onChange={(value) => setField('name', value)}
                       icon={UserRound}
@@ -372,10 +359,10 @@ export default function BookRoom() {
 
                   <Field
                     id="guest-email"
-                    label={tOr(t, 'emailAddress', 'Email Address')}
+                    label={t('emailAddress')}
                     required
                     type="email"
-                    placeholder={tOr(t, 'guestEmailPlaceholder', 'guest@example.com')}
+                    placeholder={t('guestEmailPlaceholder')}
                     value={guest.email}
                     onChange={(value) => setField('email', value)}
                     icon={Mail}
@@ -383,10 +370,10 @@ export default function BookRoom() {
 
                   <Field
                     id="guest-phone"
-                    label={tOr(t, 'phoneNumber', 'Phone Number')}
+                    label={t('phoneNumber')}
                     required
                     type="tel"
-                    placeholder={tOr(t, 'phonePlaceholder', '+1 555 000 0000')}
+                    placeholder={t('phonePlaceholder')}
                     value={guest.phone}
                     onChange={(value) => setField('phone', value)}
                     icon={Phone}
@@ -394,9 +381,9 @@ export default function BookRoom() {
 
                   <Field
                     id="guest-id-number"
-                    label={tOr(t, 'idPassport', 'ID / Passport Number')}
+                    label={t('idPassport')}
                     required
-                    placeholder={tOr(t, 'idPlaceholder', 'e.g. A12345678')}
+                    placeholder={t('idPlaceholder')}
                     value={guest.idNumber}
                     onChange={(value) => setField('idNumber', value)}
                     icon={IdCard}
@@ -404,9 +391,9 @@ export default function BookRoom() {
 
                   <Field
                     id="guest-nationality"
-                    label={tOr(t, 'nationality', 'Nationality')}
+                    label={t('nationality')}
                     required
-                    placeholder={tOr(t, 'nationalityPlaceholder', 'e.g. Saudi Arabian')}
+                    placeholder={t('nationalityPlaceholder')}
                     value={guest.nationality}
                     onChange={(value) => setField('nationality', value)}
                     icon={Globe2}
@@ -421,7 +408,7 @@ export default function BookRoom() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back
+                  {t('back')}
                 </button>
                 <button
                   type="submit"
@@ -429,8 +416,8 @@ export default function BookRoom() {
                   className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                 >
                   {submitting
-                    ? 'Creating Reservation...'
-                    : `Confirm Booking - ${formatMoney(totalPrice)}`}
+                    ? t('bookRoomPage.creatingReservation')
+                    : t('confirmBookingPrice', { price: Number(totalPrice ?? 0).toFixed(2) })}
                 </button>
               </div>
             </form>
@@ -439,8 +426,8 @@ export default function BookRoom() {
 
         <div className="space-y-6">
           <DashboardPanel
-            title="Booking Summary"
-            description="Current room, dates, pricing, and room details for the reservation being created."
+            title={t('bookRoomPage.summaryTitle')}
+            description={t('bookRoomPage.summaryDescription')}
           >
             <div className="space-y-5">
               <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
@@ -451,62 +438,73 @@ export default function BookRoom() {
 
               <div>
                 <p className="text-2xl font-black tracking-tight text-zinc-950">
-                  {room ? `Room ${room.roomNumber}` : `Room #${roomId}`}
+                  {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
                 </p>
                 <p className="mt-1 text-sm font-medium text-zinc-500">
-                  {room?.roomType?.name || 'Room type unavailable'}
-                  {room?.floor ? ` | Floor ${room.floor}` : ''}
+                  {translateKnownValue(room?.roomType?.name, t) || t('bookRoomPage.roomTypeUnavailable')}
+                  {room?.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                 </p>
-                {room?.roomType?.description && (
-                  <p className="mt-3 text-sm font-medium leading-6 text-zinc-500">
-                    {room.roomType.description}
-                  </p>
-                )}
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                    Dates
+                    {t('common.dates')}
                   </p>
                   <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
                     <CalendarRange className="h-4 w-4 text-zinc-400" />
-                    {checkIn} to {checkOut}
+                    {formatLocalizedDate(checkIn, i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}{' '}
+                    -{' '}
+                    {formatLocalizedDate(checkOut, i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </p>
                 </div>
                 <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                    Capacity
+                    {t('bookRoomPage.capacityLabel')}
                   </p>
                   <p className="mt-2 text-sm font-bold text-zinc-950">
-                    Up to {room?.roomType?.maxGuests ?? '-'} guests
+                    {t('upToGuests', { count: room?.roomType?.maxGuests ?? 0 })}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4">
                 <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">Rate per night</span>
-                  <span className="font-bold text-zinc-950">{formatMoney(roomRate)}</span>
+                  <span className="font-medium text-zinc-500">{t('bookRoomPage.ratePerNight')}</span>
+                  <span className="font-bold text-zinc-950">
+                    {formatLocalizedCurrency(roomRate, i18n.language)}
+                  </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">Nights</span>
+                  <span className="font-medium text-zinc-500">{t('nightsLabel')}</span>
                   <span className="font-bold text-zinc-950">{nights || '-'}</span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">Subtotal</span>
-                  <span className="font-bold text-zinc-950">{formatMoney(subtotal)}</span>
+                  <span className="font-medium text-zinc-500">{t('subtotal')}</span>
+                  <span className="font-bold text-zinc-950">
+                    {formatLocalizedCurrency(subtotal, i18n.language)}
+                  </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">Taxes (10%)</span>
-                  <span className="font-bold text-zinc-950">{formatMoney(taxes)}</span>
+                  <span className="font-medium text-zinc-500">{t('taxes10')}</span>
+                  <span className="font-bold text-zinc-950">
+                    {formatLocalizedCurrency(taxes, i18n.language)}
+                  </span>
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-4 border-t border-zinc-200 pt-4">
                   <span className="text-sm font-black uppercase tracking-[0.18em] text-zinc-500">
-                    Total
+                    {t('total')}
                   </span>
                   <span className="text-2xl font-black text-zinc-950">
-                    {formatMoney(totalPrice)}
+                    {formatLocalizedCurrency(totalPrice, i18n.language)}
                   </span>
                 </div>
               </div>
@@ -523,7 +521,7 @@ export default function BookRoom() {
                         key={amenity}
                         className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
                       >
-                        {amenity}
+                        {translateKnownValue(amenity, t)}
                       </span>
                     ))}
                 </div>

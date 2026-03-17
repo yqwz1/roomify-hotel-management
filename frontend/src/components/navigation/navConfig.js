@@ -61,7 +61,7 @@ export const getRoleDisplayLabel = (roles = [], t) => {
 const NAVIGATION_CONFIG = [
   {
     id: 'overview',
-    translationKey: null,
+    translationKey: 'navOverview',
     fallbackLabel: 'Overview',
     roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
     items: [
@@ -90,7 +90,7 @@ const NAVIGATION_CONFIG = [
   },
   {
     id: 'front-desk',
-    translationKey: null,
+    translationKey: 'navFrontDesk',
     fallbackLabel: 'Front Desk',
     roles: [ROLE_MANAGER, ROLE_STAFF],
     items: [
@@ -126,7 +126,7 @@ const NAVIGATION_CONFIG = [
   },
   {
     id: 'reservations',
-    translationKey: null,
+    translationKey: 'navReservations',
     fallbackLabel: 'Reservations',
     roles: [ROLE_MANAGER, ROLE_STAFF],
     items: [
@@ -177,7 +177,7 @@ const NAVIGATION_CONFIG = [
   },
   {
     id: 'finance',
-    translationKey: null,
+    translationKey: 'navFinance',
     fallbackLabel: 'Finance',
     roles: [ROLE_MANAGER, ROLE_STAFF],
     items: [
@@ -192,7 +192,7 @@ const NAVIGATION_CONFIG = [
   },
   {
     id: 'staff-access',
-    translationKey: null,
+    translationKey: 'navStaffAccess',
     fallbackLabel: 'Staff & Access',
     roles: [ROLE_MANAGER],
     items: [
@@ -207,7 +207,7 @@ const NAVIGATION_CONFIG = [
   },
   {
     id: 'support',
-    translationKey: null,
+    translationKey: 'navSupport',
     fallbackLabel: 'Support',
     roles: [ROLE_GUEST],
     items: [

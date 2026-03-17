@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowRight, CalendarDays, Search, UserRound } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
 import { LtrText } from './LtrText';
 import { extractApiErrorMessage } from '../utils/apiError';
 import { cn } from '../lib/utils';
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  translateKnownValue,
+} from '../utils/localization';
 
 const isConfirmationQuery = (value) => String(value ?? '').trim().toUpperCase().startsWith('RSV-');
 
@@ -36,23 +42,13 @@ const toUiReservation = (record, fallbackIndex) => {
   };
 };
 
-const formatDate = (iso) => {
-  if (!iso) return '-';
-  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
-const money = (value) => `$${Number(value ?? 0).toFixed(2)}`;
-
 export default function ReservationLookupPanel({
   onSelect,
   className = '',
   initialQuery = '',
   autoSearch = true,
 }) {
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -76,14 +72,14 @@ export default function ReservationLookupPanel({
         setResults(Array.isArray(data) ? data : []);
         setSearched(true);
       } catch (err) {
-        setError(extractApiErrorMessage(err, 'Failed to search reservations. Please try again.'));
+        setError(extractApiErrorMessage(err, t('errors.searchFailed')));
         setResults([]);
         setSearched(true);
       } finally {
         setLoading(false);
       }
     },
-    [query]
+    [query, t]
   );
 
   useEffect(() => {
@@ -110,19 +106,21 @@ export default function ReservationLookupPanel({
               <Search className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="text-lg font-black tracking-tight text-zinc-950">Reservation Lookup</h2>
+              <h2 className="text-lg font-black tracking-tight text-zinc-950">
+                {t('reservationLookupPanel.title')}
+              </h2>
               <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
-                Search by confirmation number or guest name. Guest-name search returns the first matching reservation.
+                {t('reservationLookupPanel.description')}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Confirmation-first
+              {t('reservationLookupPanel.chipConfirmation')}
             </span>
             <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Staff lookup
+              {t('reservationLookupPanel.chipStaff')}
             </span>
           </div>
         </div>
@@ -131,7 +129,7 @@ export default function ReservationLookupPanel({
       <div className="px-5 py-5 sm:px-6">
         <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               id="lookup-query"
               type="text"
@@ -142,8 +140,8 @@ export default function ReservationLookupPanel({
                 setSearchedByGuestName(false);
                 setError(null);
               }}
-              placeholder="RSV-XXXXXXXXXXXX or guest name"
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-11 pr-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              placeholder={t('reservationLookupPanel.placeholder')}
+              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
 
@@ -152,7 +150,7 @@ export default function ReservationLookupPanel({
             disabled={loading || !query.trim()}
             className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
           >
-            {loading ? 'Searching...' : 'Search Reservation'}
+            {loading ? t('common.searching') : t('common.searchReservation')}
           </button>
         </form>
 
@@ -164,9 +162,9 @@ export default function ReservationLookupPanel({
 
         {!loading && searched && !reservation && (
           <div className="mt-4 rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-10 text-center">
-            <p className="text-sm font-bold text-zinc-950">No reservation found</p>
+            <p className="text-sm font-bold text-zinc-950">{t('reservationLookupPanel.emptyTitle')}</p>
             <p className="mt-2 text-sm font-medium text-zinc-500">
-              Try a confirmation number or a more specific guest name.
+              {t('reservationLookupPanel.emptyDescription')}
             </p>
           </div>
         )}
@@ -175,7 +173,7 @@ export default function ReservationLookupPanel({
           <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-zinc-50">
             {searchedByGuestName && (
               <div className="border-b border-amber-100 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-amber-900">
-                Guest-name search returns the first matching reservation
+                {t('reservationLookupPanel.guestNameWarning')}
               </div>
             )}
 
@@ -189,10 +187,10 @@ export default function ReservationLookupPanel({
                       </span>
                       <div className="min-w-0">
                         <p className="truncate text-base font-black tracking-tight text-zinc-950">
-                          {reservation.guestName ?? 'Guest'}
+                          {reservation.guestName ?? t('common.guest')}
                         </p>
                         <p className="truncate text-sm font-medium text-zinc-500">
-                          {reservation.guestEmail || 'No guest email provided'}
+                          {reservation.guestEmail || t('common.noGuestEmailProvided')}
                         </p>
                       </div>
                     </div>
@@ -200,7 +198,7 @@ export default function ReservationLookupPanel({
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          Confirmation
+                          {t('checkInPage.confirmation')}
                         </p>
                         <p className="mt-2 text-sm font-bold text-zinc-950">
                           <LtrText>{reservation.confirmationNumber}</LtrText>
@@ -209,29 +207,39 @@ export default function ReservationLookupPanel({
 
                       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          Room
+                          {t('common.room')}
                         </p>
                         <p className="mt-2 text-sm font-bold text-zinc-950">
-                          Room {reservation.roomNumber} | {reservation.roomTypeName}
+                          {t('roomNum', { number: reservation.roomNumber })} | {translateKnownValue(reservation.roomTypeName, t)}
                         </p>
                       </div>
 
                       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          Stay Dates
+                          {t('modifyReservationPage.stayDates')}
                         </p>
                         <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
                           <CalendarDays className="h-4 w-4 text-zinc-400" />
-                          {formatDate(reservation.checkInDate)} to {formatDate(reservation.checkOutDate)}
+                          {formatLocalizedDate(reservation.checkInDate, i18n.language, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}{' '}
+                          -{' '}
+                          {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
                         </p>
                       </div>
 
                       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          Reservation Total
+                          {t('checkInPage.reservationTotal')}
                         </p>
                         <p className="mt-2 text-sm font-bold text-zinc-950">
-                          {money(reservation.totalPrice)}
+                          {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                         </p>
                       </div>
                     </div>
@@ -245,7 +253,7 @@ export default function ReservationLookupPanel({
                   onClick={() => onSelect?.(reservation)}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
                 >
-                  Select Reservation
+                  {t('common.selectReservation')}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

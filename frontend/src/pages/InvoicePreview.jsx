@@ -23,47 +23,45 @@ import {
   getBill,
   getReservationByConfirmationNumber,
 } from '../services/reservationService';
+import { useTranslation } from 'react-i18next';
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  formatLocalizedDateTime,
+  getBooleanLabel,
+  getInvoiceDeliveryStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
-const formatDate = (iso) => {
-  if (!iso) return '-';
-  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
-const money = (value) => `$${Number(value ?? 0).toFixed(2)}`;
-
-function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta }) {
+function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
   if (!invoiceFinalized) {
     return (
-      <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-amber-900">
-        Invoice not finalized
+        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-amber-900">
+        {t('invoicePreviewPage.notFinalized')}
       </span>
     );
   }
 
   if (deliveryStatus === 'LOADING') {
     return (
-      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-        Loading delivery status
+        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+        {t('invoicePreviewPage.loadingDelivery')}
       </span>
     );
   }
 
   if (deliveryStatus === 'SENT') {
     return (
-      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
-        Delivered by email
+        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
+        {t('invoicePreviewPage.delivered')}
       </span>
     );
   }
 
   if (deliveryStatus === 'FAILED') {
     return (
-      <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
-        Delivery failed
+        <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        {t('invoicePreviewPage.deliveryFailed')}
         {deliveryMeta?.errorMessage ? `: ${deliveryMeta.errorMessage}` : ''}
       </span>
     );
@@ -71,26 +69,26 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta }) {
 
   if (deliveryStatus === 'ERROR') {
     return (
-      <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
-        Delivery status unavailable
+        <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        {t('invoicePreviewPage.deliveryUnavailable')}
       </span>
     );
   }
 
   return (
     <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-      Delivery pending
+      {t('invoicePreviewPage.deliveryPending')}
     </span>
   );
 }
 
-function InvoiceLedger({ bill }) {
+function InvoiceLedger({ bill, t, language }) {
   if (!bill) {
     return (
       <div className="rounded-[1.35rem] border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
-        <p className="text-sm font-bold text-zinc-950">No invoice data loaded</p>
+        <p className="text-sm font-bold text-zinc-950">{t('invoicePreviewPage.noDataTitle')}</p>
         <p className="mt-2 text-sm font-medium text-zinc-500">
-          Select a reservation to review the invoice ledger.
+          {t('invoicePreviewPage.noDataDescription')}
         </p>
       </div>
     );
@@ -102,10 +100,10 @@ function InvoiceLedger({ bill }) {
         <thead className="bg-zinc-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
-              Description
+              {t('invoicePreviewPage.descriptionLabel')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
-              Amount
+              {t('invoicePreviewPage.amountLabel')}
             </th>
           </tr>
         </thead>
@@ -117,18 +115,20 @@ function InvoiceLedger({ bill }) {
             return (
               <tr key={`${item?.label ?? 'line'}-${index}`}>
                 <td className="px-4 py-3 text-sm font-medium text-zinc-700">
-                  {item?.label || 'Line item'}
+                  {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
-                  {credit ? `-${money(amount)}` : money(amount)}
+                  {credit
+                    ? `-${formatLocalizedCurrency(amount, language)}`
+                    : formatLocalizedCurrency(amount, language)}
                 </td>
               </tr>
             );
           })}
           <tr className="bg-zinc-50">
-            <td className="px-4 py-3 text-sm font-bold text-zinc-950">Total</td>
+            <td className="px-4 py-3 text-sm font-bold text-zinc-950">{t('common.total')}</td>
             <td className="px-4 py-3 text-right text-lg font-black text-zinc-950">
-              {money(bill.balanceDue)}
+              {formatLocalizedCurrency(bill.balanceDue, language)}
             </td>
           </tr>
         </tbody>
@@ -139,6 +139,7 @@ function InvoiceLedger({ bill }) {
 
 export default function InvoicePreview() {
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const [selected, setSelected] = useState(null);
   const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -214,14 +215,14 @@ export default function InvoicePreview() {
     try {
       setGenerating(true);
       await generateInvoice(selected.id);
-      setToast({ message: 'Invoice generated successfully.', type: 'success' });
+      setToast({ message: t('invoicePreviewPage.generateSuccess'), type: 'success' });
       await fetchInvoiceData(selected.confirmationNumber);
     } catch (err) {
       setToast({ message: extractReservationError(err), type: 'error' });
     } finally {
       setGenerating(false);
     }
-  }, [fetchInvoiceData, generating, invoiceFinalized, selected]);
+  }, [fetchInvoiceData, generating, invoiceFinalized, selected, t]);
 
   const handleDownload = useCallback(async () => {
     if (!selected?.id || !invoiceFinalized || downloading) return;
@@ -238,11 +239,11 @@ export default function InvoicePreview() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      setToast({ message: 'Unable to download the invoice.', type: 'error' });
+      setToast({ message: t('invoicePreviewPage.downloadFailed'), type: 'error' });
     } finally {
       setDownloading(false);
     }
-  }, [downloading, invoiceFinalized, selected]);
+  }, [downloading, invoiceFinalized, selected, t]);
 
   const handlePrint = useCallback(async () => {
     if (!selected?.id || !invoiceFinalized) return;
@@ -255,9 +256,9 @@ export default function InvoicePreview() {
         printWindow.focus();
       }
     } catch {
-      setToast({ message: 'Unable to open the invoice for printing.', type: 'error' });
+      setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
     }
-  }, [invoiceFinalized, selected]);
+  }, [invoiceFinalized, selected, t]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
@@ -268,32 +269,32 @@ export default function InvoicePreview() {
       />
 
       <DashboardHero
-        eyebrow="Billing Workflow"
-        title="Invoice Preview"
-        description="Search for a reservation, generate the invoice when needed, and then print or download the final document."
+        eyebrow={t('invoicePreviewPage.heroEyebrow')}
+        title={t('invoicePreview')}
+        description={t('invoicePreviewPage.description')}
         meta={[
-          'Reservation-first billing',
-          selected ? `Selected ${selected.confirmationNumber}` : 'Awaiting selection',
-          invoiceFinalized ? 'Invoice ready' : 'Invoice pending',
+          t('invoicePreviewPage.reservationFirst'),
+          selected ? selected.confirmationNumber : t('common.pending'),
+          invoiceFinalized ? t('invoicePreviewPage.invoiceReady') : t('invoicePreviewPage.invoicePending'),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
-            Invoice State
+            {t('invoicePreviewPage.stateTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Finalized
+                {t('common.finalized')}
               </p>
-              <p className="mt-2 text-lg font-black">{invoiceFinalized ? 'Yes' : 'No'}</p>
+              <p className="mt-2 text-lg font-black">{getBooleanLabel(invoiceFinalized, t)}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Delivery
+                {t('common.delivery')}
               </p>
               <p className="mt-2 text-lg font-black">
-                {invoiceFinalized ? deliveryStatus : 'Pending'}
+                {invoiceFinalized ? getInvoiceDeliveryStatusLabel(deliveryStatus, t) : t('common.pending')}
               </p>
             </div>
           </div>
@@ -305,15 +306,11 @@ export default function InvoicePreview() {
 
         {!selected && !loading ? (
           <DashboardPanel
-            title="Select a Reservation"
-            description="Load a reservation before generating or previewing its invoice."
+            title={t('invoicePreviewPage.selectTitle')}
+            description={t('invoicePreviewPage.selectDescription')}
           >
             <div className="grid gap-3 md:grid-cols-3">
-              {[
-                'Invoice generation is a separate action and must happen before print or download.',
-                'Delivery status is only available after the invoice is finalized.',
-                'Use the confirmation number when possible for the most reliable invoice lookup.',
-              ].map((item) => (
+              {t('invoicePreviewPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
                   className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
@@ -326,14 +323,15 @@ export default function InvoicePreview() {
         ) : (
           <div className="space-y-6">
             <DashboardPanel
-              title="Invoice Controls"
-              description="Generate the invoice first, then print or download the final document."
+              title={t('invoicePreviewPage.controlsTitle')}
+              description={t('invoicePreviewPage.controlsDescription')}
               action={
                 selected ? (
                   <DeliveryBadge
                     deliveryStatus={deliveryStatus}
                     invoiceFinalized={invoiceFinalized}
                     deliveryMeta={deliveryMeta}
+                    t={t}
                   />
                 ) : null
               }
@@ -341,7 +339,7 @@ export default function InvoicePreview() {
               {loading ? (
                 <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-5 py-10 text-center">
                   <p className="text-sm font-medium text-zinc-500">
-                    Loading invoice data...
+                    {t('invoicePreviewPage.loadingData')}
                   </p>
                 </div>
               ) : error ? (
@@ -353,25 +351,35 @@ export default function InvoicePreview() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                       <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                        Guest
+                        {t('common.guest')}
                       </p>
                       <p className="mt-2 text-lg font-black text-zinc-950">
                         {selected?.guestName || '-'}
                       </p>
                       <p className="mt-1 text-sm font-medium text-zinc-500">
-                        {selected?.guestEmail || 'No guest email provided'}
+                        {selected?.guestEmail || t('common.noGuestEmailProvided')}
                       </p>
                     </div>
                     <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                       <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                        Reservation
+                        {t('reservationDetails')}
                       </p>
                       <p className="mt-2 text-sm font-bold text-zinc-950">
                         <LtrText>{selected?.confirmationNumber}</LtrText>
                       </p>
                       <p className="mt-1 text-sm font-medium text-zinc-500">
-                        Room {selected?.roomNumber} | {formatDate(selected?.checkInDate)} to{' '}
-                        {formatDate(selected?.checkOutDate)}
+                        {t('roomNumber', { number: selected?.roomNumber })} |{' '}
+                        {formatLocalizedDate(selected?.checkInDate, i18n.language, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}{' '}
+                        -{' '}
+                        {formatLocalizedDate(selected?.checkOutDate, i18n.language, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -385,7 +393,7 @@ export default function InvoicePreview() {
                         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                       >
                         <FilePlus2 className="h-4 w-4" />
-                        {generating ? 'Generating Invoice...' : 'Generate Invoice'}
+                        {generating ? t('invoicePreviewPage.generating') : t('invoicePreviewPage.generate')}
                       </button>
                     ) : (
                       <>
@@ -395,7 +403,7 @@ export default function InvoicePreview() {
                           className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
                         >
                           <Printer className="h-4 w-4" />
-                          Print Invoice
+                          {t('invoicePreviewPage.print')}
                         </button>
                         <button
                           type="button"
@@ -404,7 +412,7 @@ export default function InvoicePreview() {
                           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                         >
                           <Download className="h-4 w-4" />
-                          {downloading ? 'Downloading...' : 'Download PDF'}
+                          {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
                         </button>
                       </>
                     )}
@@ -414,38 +422,42 @@ export default function InvoicePreview() {
             </DashboardPanel>
 
             <DashboardPanel
-              title="Invoice Ledger"
-              description="Review the charge lines, taxes, and total before printing or downloading."
+              title={t('invoicePreviewPage.ledgerTitle')}
+              description={t('invoicePreviewPage.ledgerDescription')}
             >
-              <InvoiceLedger bill={bill} />
+              <InvoiceLedger bill={bill} t={t} language={i18n.language} />
             </DashboardPanel>
 
             <DashboardPanel
-              title="Billing Signals"
-              description="Operational status for invoice delivery and finalization."
+              title={t('invoicePreviewPage.signalsTitle')}
+              description={t('invoicePreviewPage.signalsDescription')}
             >
               <div className="grid gap-3 md:grid-cols-3">
                 {[
                   {
                     icon: Receipt,
-                    title: 'Finalization',
+                    title: t('invoicePreviewPage.finalizationTitle'),
                     description: invoiceFinalized
-                      ? 'The invoice is finalized and locked for downstream actions.'
-                      : 'The invoice has not been generated yet.',
+                      ? t('invoicePreviewPage.finalizationReady')
+                      : t('invoicePreviewPage.finalizationPending'),
                   },
                   {
                     icon: Send,
-                    title: 'Delivery',
+                    title: t('invoicePreviewPage.deliveryTitle'),
                     description: invoiceFinalized
-                      ? `Current delivery status: ${deliveryStatus}.`
-                      : 'Delivery status will appear after invoice generation.',
+                      ? t('invoicePreviewPage.deliveryDescriptionReady', {
+                          status: getInvoiceDeliveryStatusLabel(deliveryStatus, t),
+                        })
+                      : t('invoicePreviewPage.deliveryDescriptionPending'),
                   },
                   {
                     icon: Mail,
-                    title: 'Email Metadata',
+                    title: t('invoicePreviewPage.metadataTitle'),
                     description: deliveryMeta?.sentAt
-                      ? `Last sent at ${new Date(deliveryMeta.sentAt).toLocaleString()}.`
-                      : 'No delivery timestamp is currently available.',
+                      ? t('invoicePreviewPage.metadataAvailable', {
+                          time: formatLocalizedDateTime(deliveryMeta.sentAt, i18n.language),
+                        })
+                      : t('invoicePreviewPage.metadataPending'),
                   },
                 ].map((item) => {
                   const Icon = item.icon;

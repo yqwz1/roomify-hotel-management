@@ -2,36 +2,35 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import { getRooms, extractErrorMessage } from '../services/roomService';
 import { getStaff } from '../services/staffService';
+import { localizeKnownServerMessage } from '../utils/localization';
 
 const STATUS_ORDER = ['AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
 const STATUS_META = {
   AVAILABLE: {
-    label: 'Available',
     tone: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     bar: 'bg-emerald-500',
   },
   OCCUPIED: {
-    label: 'Occupied',
     tone: 'bg-zinc-950 text-white border-zinc-950',
     bar: 'bg-zinc-950',
   },
   NEEDS_CLEANING: {
-    label: 'Needs Cleaning',
     tone: 'bg-amber-50 text-amber-900 border-amber-200',
     bar: 'bg-amber-500',
   },
   UNDER_MAINTENANCE: {
-    label: 'Under Maintenance',
     tone: 'bg-rose-50 text-rose-900 border-rose-200',
     bar: 'bg-rose-500',
   },
 };
 
 const getDashboardError = (reason) => {
-  if (!reason) return 'Failed to load dashboard data.';
-  if (reason.response?.data?.message) return reason.response.data.message;
-  return extractErrorMessage(reason);
+  if (!reason) return localizeKnownServerMessage('Something went wrong. Please try again.');
+  if (reason.response?.data?.message) {
+    return localizeKnownServerMessage(reason.response.data.message);
+  }
+  return localizeKnownServerMessage(extractErrorMessage(reason));
 };
 
 export const useManagerDashboard = () => {
@@ -64,21 +63,21 @@ export const useManagerDashboard = () => {
         setRooms(roomsResult.value);
       } else {
         setRooms([]);
-        issues.push('Room inventory could not be loaded.');
+        issues.push('rooms');
       }
 
       if (roomTypesResult.status === 'fulfilled') {
         setRoomTypes(roomTypesResult.value.data);
       } else {
         setRoomTypes([]);
-        issues.push('Room type summary could not be loaded.');
+        issues.push('roomTypes');
       }
 
       if (staffResult.status === 'fulfilled') {
         setStaff(staffResult.value);
       } else {
         setStaff([]);
-        issues.push('Staff summary could not be loaded.');
+        issues.push('staff');
       }
 
       if (
@@ -118,10 +117,8 @@ export const useManagerDashboard = () => {
     const occupiedRooms = statusCountsMap.OCCUPIED ?? 0;
     const cleaningRooms = statusCountsMap.NEEDS_CLEANING ?? 0;
     const maintenanceRooms = statusCountsMap.UNDER_MAINTENANCE ?? 0;
-
     const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
     const readinessRate = totalRooms > 0 ? Math.round((availableRooms / totalRooms) * 100) : 0;
-
     const activeStaff = staff.filter((member) => member.active).length;
     const inactiveStaff = Math.max(staff.length - activeStaff, 0);
 
@@ -166,43 +163,19 @@ export const useManagerDashboard = () => {
       .sort((a, b) => b.count - a.count);
 
     const roomTypeMix = roomTypes
-      .map((roomType) => {
-        const assignedRooms = rooms.filter((room) => room.roomType?.id === roomType.id).length;
-        return {
-          id: roomType.id,
-          name: roomType.name,
-          basePrice: roomType.basePrice,
-          maxGuests: roomType.maxGuests,
-          assignedRooms,
-        };
-      })
+      .map((roomType) => ({
+        id: roomType.id,
+        name: roomType.name,
+        basePrice: roomType.basePrice,
+        maxGuests: roomType.maxGuests,
+        assignedRooms: rooms.filter((room) => room.roomType?.id === roomType.id).length,
+      }))
       .sort((a, b) => b.assignedRooms - a.assignedRooms || a.name.localeCompare(b.name));
 
     const alerts = [];
-
-    if (maintenanceRooms > 0) {
-      alerts.push({
-        title: 'Rooms blocked for maintenance',
-        detail: `${maintenanceRooms} room${maintenanceRooms === 1 ? '' : 's'} need follow-up before they can return to inventory.`,
-        href: '/room-status',
-      });
-    }
-
-    if (cleaningRooms > 0) {
-      alerts.push({
-        title: 'Housekeeping queue needs attention',
-        detail: `${cleaningRooms} room${cleaningRooms === 1 ? '' : 's'} are still waiting for cleaning clearance.`,
-        href: '/room-status',
-      });
-    }
-
-    if (inactiveStaff > 0) {
-      alerts.push({
-        title: 'Inactive staff accounts detected',
-        detail: `${inactiveStaff} staff account${inactiveStaff === 1 ? '' : 's'} are inactive and may need review.`,
-        href: '/staff',
-      });
-    }
+    if (maintenanceRooms > 0) alerts.push({ type: 'maintenance', count: maintenanceRooms, href: '/room-status' });
+    if (cleaningRooms > 0) alerts.push({ type: 'cleaning', count: cleaningRooms, href: '/room-status' });
+    if (inactiveStaff > 0) alerts.push({ type: 'inactiveStaff', count: inactiveStaff, href: '/staff' });
 
     return {
       totalRooms,

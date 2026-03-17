@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   CheckCircle2,
@@ -9,36 +10,31 @@ import {
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { getRooms, updateRoomStatus, extractErrorMessage } from '../services/roomService';
+import {
+  formatLocalizedCurrency,
+  getRoomStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
-const STATUSES = [
-  'ALL',
-  'AVAILABLE',
-  'OCCUPIED',
-  'NEEDS_CLEANING',
-  'UNDER_MAINTENANCE',
-];
+const STATUSES = ['ALL', 'AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
 const STATUS_META = {
   AVAILABLE: {
-    label: 'Available',
     color: 'border-emerald-200 bg-emerald-50 text-emerald-900',
     icon: CheckCircle2,
     actions: ['OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'],
   },
   OCCUPIED: {
-    label: 'Occupied',
     color: 'border-zinc-300 bg-zinc-100 text-zinc-700',
     icon: AlertCircle,
     actions: [],
   },
   NEEDS_CLEANING: {
-    label: 'Needs Cleaning',
     color: 'border-amber-200 bg-amber-50 text-amber-900',
     icon: Sparkles,
     actions: ['AVAILABLE', 'UNDER_MAINTENANCE'],
   },
   UNDER_MAINTENANCE: {
-    label: 'Under Maintenance',
     color: 'border-rose-200 bg-rose-50 text-rose-900',
     icon: Wrench,
     actions: ['AVAILABLE'],
@@ -65,6 +61,7 @@ function LoadingCard() {
 }
 
 export default function RoomStatus() {
+  const { t, i18n } = useTranslation();
   const [rooms, setRooms] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,49 +116,49 @@ export default function RoomStatus() {
     );
   }, [rooms, searchQuery]);
 
-  const summary = useMemo(() => {
-    return rooms.reduce(
-      (acc, room) => {
-        if (acc[room.status] != null) {
-          acc[room.status] += 1;
+  const summary = useMemo(
+    () =>
+      rooms.reduce(
+        (acc, room) => {
+          if (acc[room.status] != null) acc[room.status] += 1;
+          return acc;
+        },
+        {
+          AVAILABLE: 0,
+          OCCUPIED: 0,
+          NEEDS_CLEANING: 0,
+          UNDER_MAINTENANCE: 0,
         }
-        return acc;
-      },
-      {
-        AVAILABLE: 0,
-        OCCUPIED: 0,
-        NEEDS_CLEANING: 0,
-        UNDER_MAINTENANCE: 0,
-      }
-    );
-  }, [rooms]);
+      ),
+    [rooms]
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow="Operations Control"
-        title="Room Status"
-        description="Track room readiness across the property and apply valid state transitions from a single workspace."
+        eyebrow={t('roomStatusPage.heroEyebrow')}
+        title={t('roomStatus')}
+        description={t('roomStatusPage.description')}
         meta={[
-          `${rooms.length} rooms loaded`,
-          `${summary.NEEDS_CLEANING} cleaning`,
-          `${summary.UNDER_MAINTENANCE} maintenance`,
+          t('roomStatusPage.roomsLoaded', { count: rooms.length }),
+          t('roomStatusPage.cleaningCount', { count: summary.NEEDS_CLEANING }),
+          t('roomStatusPage.maintenanceCount', { count: summary.UNDER_MAINTENANCE }),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
-            Status Snapshot
+            {t('roomStatusPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Available
+                {t('roomStatusAvailable')}
               </p>
               <p className="mt-2 text-lg font-black">{summary.AVAILABLE}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Occupied
+                {t('roomStatusOccupied')}
               </p>
               <p className="mt-2 text-lg font-black">{summary.OCCUPIED}</p>
             </div>
@@ -170,8 +167,8 @@ export default function RoomStatus() {
       </DashboardHero>
 
       <DashboardPanel
-        title="Room Filters"
-        description="Focus the board by room status or search for a specific room number."
+        title={t('roomStatusPage.filtersTitle')}
+        description={t('roomStatusPage.filtersDescription')}
       >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap gap-2">
@@ -186,19 +183,19 @@ export default function RoomStatus() {
                     : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-white'
                 }`}
               >
-                {status === 'ALL' ? 'All Rooms' : STATUS_META[status].label}
+                {status === 'ALL' ? t('roomStatusPage.allRooms') : getRoomStatusLabel(status, t)}
               </button>
             ))}
           </div>
 
           <div className="relative w-full xl:w-72">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
-              placeholder="Search by room number"
+              placeholder={t('roomStatusPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-11 pr-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
         </div>
@@ -211,8 +208,8 @@ export default function RoomStatus() {
       </DashboardPanel>
 
       <DashboardPanel
-        title="Room Board"
-        description="Update status only through valid backend transitions. Occupied rooms remain locked until checkout."
+        title={t('roomStatusPage.boardTitle')}
+        description={t('roomStatusPage.boardDescription')}
       >
         {loading && (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -225,9 +222,9 @@ export default function RoomStatus() {
         {!loading && filteredRooms.length === 0 && (
           <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
             <Search className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">No rooms found</p>
+            <p className="mt-4 text-lg font-black text-zinc-950">{t('roomStatusPage.noRoomsTitle')}</p>
             <p className="mt-2 text-sm font-medium text-zinc-500">
-              Adjust the room number search or change the status filter.
+              {t('roomStatusPage.noRoomsDescription')}
             </p>
           </div>
         )}
@@ -247,13 +244,13 @@ export default function RoomStatus() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                        {room.roomType?.name || 'Room Type'}
+                        {translateKnownValue(room.roomType?.name || t('roomStatusPage.roomTypeFallback'), t)}
                       </p>
                       <p className="mt-2 text-3xl font-black tracking-tight text-zinc-950">
                         {room.roomNumber}
                       </p>
                       <p className="mt-1 text-sm font-medium text-zinc-500">
-                        Floor {room.floor ?? '-'}
+                        {t('floorNum', { floor: room.floor ?? '-' })}
                       </p>
                     </div>
 
@@ -267,16 +264,16 @@ export default function RoomStatus() {
                   <div
                     className={`mt-5 inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] ${meta.color}`}
                   >
-                    {meta.label}
+                    {getRoomStatusLabel(room.status, t)}
                   </div>
 
                   {room.roomType?.basePrice != null && (
                     <div className="mt-5 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                        Base Rate
+                        {t('roomStatusPage.baseRate')}
                       </p>
                       <p className="mt-2 text-sm font-bold text-zinc-950">
-                        ${Number(room.roomType.basePrice).toFixed(2)} / night
+                        {formatLocalizedCurrency(room.roomType.basePrice, i18n.language)} / {t('perNight')}
                       </p>
                     </div>
                   )}
@@ -284,7 +281,7 @@ export default function RoomStatus() {
                   <div className="mt-5 flex flex-wrap gap-2">
                     {actions.length === 0 ? (
                       <div className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-500">
-                        Managed automatically by reservation flow
+                        {t('roomStatusPage.managedAutomatically')}
                       </div>
                     ) : (
                       actions.map((nextStatus) => (
@@ -296,8 +293,8 @@ export default function RoomStatus() {
                           className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
                         >
                           {updatingRoomId === room.id
-                            ? 'Updating...'
-                            : STATUS_META[nextStatus].label}
+                            ? t('roomStatusPage.updating')
+                            : getRoomStatusLabel(nextStatus, t)}
                         </button>
                       ))
                     )}

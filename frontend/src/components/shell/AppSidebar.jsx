@@ -14,6 +14,7 @@ export default function AppSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const brandName = t('brandName');
 
   const roles = user?.roles ?? [];
   const sections = getNavigationSections(roles, t);
@@ -41,10 +42,10 @@ export default function AppSidebar({ isOpen, onClose }) {
             <div className="flex items-center justify-between gap-3">
               <Link to={homePath} onClick={onClose} className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-amber-200/70">
-                  Roomify
+                  {brandName}
                 </p>
                 <p className="mt-1 truncate text-2xl font-black tracking-tight text-white">
-                  Hotel Console
+                  {t('hotelConsole')}
                 </p>
               </Link>
 
@@ -52,7 +53,7 @@ export default function AppSidebar({ isOpen, onClose }) {
                 type="button"
                 onClick={onClose}
                 className="rounded-full p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white md:hidden"
-                aria-label="Close navigation"
+                aria-label={t('closeNavigation')}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -60,11 +61,11 @@ export default function AppSidebar({ isOpen, onClose }) {
 
             <div className="mt-5 rounded-3xl border border-white/10 bg-white/5 p-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-zinc-400">
-                Property Operations
+                {t('propertyOperations')}
               </p>
               <p className="mt-2 text-sm font-semibold text-white">{roleLabel}</p>
               <p className="mt-1 truncate text-sm text-zinc-400">
-                {user?.email || user?.username || translateWithFallback(t, 'user', 'User')}
+                {user?.email || user?.username || t('user')}
               </p>
             </div>
           </div>
@@ -125,12 +126,12 @@ export default function AppSidebar({ isOpen, onClose }) {
 
           <div className="border-t border-white/10 px-5 py-4">
             <div className="flex items-center gap-3 rounded-3xl bg-white/5 px-3 py-3">
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black uppercase text-zinc-950">
-                {user?.username?.[0] || user?.email?.[0] || 'U'}
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black uppercase text-zinc-950">
+                {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">
-                  {user?.username || user?.email || translateWithFallback(t, 'user', 'User')}
+                  {user?.username || user?.email || t('user')}
                 </p>
                 <p className="truncate text-xs text-zinc-400">{roleLabel}</p>
               </div>
@@ -140,9 +141,4 @@ export default function AppSidebar({ isOpen, onClose }) {
       </aside>
     </>
   );
-}
-
-function translateWithFallback(t, translationKey, fallbackLabel) {
-  const translated = t(translationKey);
-  return translated === translationKey ? fallbackLabel : translated;
 }

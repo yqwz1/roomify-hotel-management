@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { getReservationStatusLabel } from '../utils/localization';
 
 /**
  * StatusPill
@@ -32,7 +33,7 @@ export default function StatusPill({ status, size = 'md' }) {
             className={`inline-flex items-center gap-1.5 rounded-full font-semibold ring-1 ring-inset ${cfg.classes} ${textSize}`}
         >
             <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} aria-hidden="true" />
-            {t(status?.toLowerCase().replace('_', '')) || cfg.label}
+            {getReservationStatusLabel(status, t) || cfg.label}
         </span>
     );
 }

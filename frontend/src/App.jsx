@@ -1,3 +1,4 @@
+import './i18n'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthProvider'
 import Home from './pages/Home'

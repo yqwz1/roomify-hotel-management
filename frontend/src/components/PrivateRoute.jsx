@@ -2,6 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 import PropTypes from 'prop-types';
 import Spinner from './Spinner';
+import { useTranslation } from 'react-i18next';
 
 /**
  * PrivateRoute component
@@ -14,6 +15,7 @@ import Spinner from './Spinner';
 const PrivateRoute = ({ children, allowedRoles = null }) => {
     const { isAuthenticated, loading, user } = useAuth();
     const location = useLocation();
+    const { t } = useTranslation();
 
     // Show loading spinner while checking authentication status
     if (loading) {
@@ -21,7 +23,7 @@ const PrivateRoute = ({ children, allowedRoles = null }) => {
             <div className="h-full flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <Spinner size="lg" />
-                    <p className="mt-4 text-gray-600">Loading...</p>
+                    <p className="mt-4 text-gray-600">{t('loadingMessage')}</p>
                 </div>
             </div>
         );

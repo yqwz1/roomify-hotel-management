@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Booking%20Support`;
 
-const ActionCard = ({ icon: Icon, title, description, onClick, href }) => {
+const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }) => {
     const className = 'group flex h-full w-full items-center justify-between rounded-3xl border border-zinc-200 bg-white p-5 text-start transition-all hover:border-black hover:shadow-md';
 
     if (href) {
@@ -23,7 +23,7 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href }) => {
                     </div>
                 </div>
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
-                    Open
+                    {openLabel}
                 </span>
             </a>
         );
@@ -41,7 +41,7 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href }) => {
                 </div>
             </div>
             <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
-                Open
+                {openLabel}
             </span>
         </button>
     );
@@ -59,20 +59,22 @@ export default function Bookings() {
     }, [hasRole]);
 
     const intro = roleView === 'staff'
-        ? 'Use the operational reservation tools below for check-in, checkout, and reservation updates.'
+        ? t('bookingsPage.introStaff')
         : roleView === 'guest'
-            ? 'Use this page to reach guest booking help, your dashboard, and hotel support.'
-            : 'Sign in for hotel tools or contact the hotel with your confirmation number for booking assistance.';
+            ? t('bookingsPage.introGuest')
+            : t('bookingsPage.introPublic');
+
+    const openLabel = t('openLabel');
 
     return (
         <div className="h-full bg-zinc-50 p-6 lg:p-8">
             <div className="mx-auto max-w-6xl space-y-6">
                 <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                        {t('bookings') || 'Bookings'}
+                        {t('bookings')}
                     </p>
                     <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black">
-                        {t('bookings') || 'Bookings'}
+                        {t('bookings')}
                     </h1>
                     <p className="mt-3 max-w-3xl text-sm font-medium text-zinc-500">{intro}</p>
                 </div>
@@ -81,7 +83,7 @@ export default function Bookings() {
                     <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
                         <div className="flex items-center gap-3">
                             <CalendarDays className="h-5 w-5 text-zinc-700" />
-                            <h2 className="text-lg font-extrabold text-black">Booking Actions</h2>
+                            <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.actionsTitle')}</h2>
                         </div>
 
                         <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -89,26 +91,30 @@ export default function Bookings() {
                                 <>
                                     <ActionCard
                                         icon={Search}
-                                        title={t('checkInTitle') || 'Check-In'}
-                                        description="Look up a reservation and handle guest arrivals."
+                                        title={t('checkInTitle')}
+                                        description={t('bookingsPage.actionDescriptions.checkIn')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/check-in')}
                                     />
                                     <ActionCard
                                         icon={CalendarDays}
-                                        title={t('modifyReservationTitle') || 'Modify Reservation'}
-                                        description="Update room assignments and reservation dates."
+                                        title={t('modifyReservationTitle')}
+                                        description={t('bookingsPage.actionDescriptions.modify')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/reservations/modify')}
                                     />
                                     <ActionCard
                                         icon={ShieldCheck}
-                                        title={t('checkoutTitle') || 'Checkout'}
-                                        description="Review bills and complete departures."
+                                        title={t('checkoutTitle')}
+                                        description={t('bookingsPage.actionDescriptions.checkout')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/checkout')}
                                     />
                                     <ActionCard
                                         icon={Home}
-                                        title={t('roomSearch') || 'Room Search'}
-                                        description="Find available rooms for new reservations."
+                                        title={t('roomSearch')}
+                                        description={t('bookingsPage.actionDescriptions.search')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/search')}
                                     />
                                 </>
@@ -116,26 +122,30 @@ export default function Bookings() {
                                 <>
                                     <ActionCard
                                         icon={CalendarDays}
-                                        title={t('myDashboard') || 'My Dashboard'}
-                                        description="Open your guest dashboard and booking assistance tools."
+                                        title={t('myDashboard')}
+                                        description={t('bookingsPage.actionDescriptions.dashboard')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/guest/dashboard')}
                                     />
                                     <ActionCard
                                         icon={Home}
-                                        title={t('browseRoomsBtn') || 'Browse Rooms'}
-                                        description="Return to the public hotel pages and offers."
+                                        title={t('browseRoomsBtn')}
+                                        description={t('bookingsPage.actionDescriptions.browse')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/')}
                                     />
                                     <ActionCard
                                         icon={LifeBuoy}
-                                        title={t('helpSupport') || 'Help & Support'}
-                                        description="Email the hotel team with your confirmation number."
+                                        title={t('helpSupport')}
+                                        description={t('bookingsPage.actionDescriptions.support')}
+                                        openLabel={openLabel}
                                         href={SUPPORT_LINK}
                                     />
                                     <ActionCard
                                         icon={LogIn}
-                                        title={t('signIn') || 'Sign In'}
-                                        description="Switch accounts or return to the login screen."
+                                        title={t('signIn')}
+                                        description={t('bookingsPage.actionDescriptions.signIn')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/login')}
                                     />
                                 </>
@@ -143,26 +153,30 @@ export default function Bookings() {
                                 <>
                                     <ActionCard
                                         icon={LogIn}
-                                        title={t('signIn') || 'Sign In'}
-                                        description="Access the hotel dashboard and reservation tools."
+                                        title={t('signIn')}
+                                        description={t('bookingsPage.actionDescriptions.signIn')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/login')}
                                     />
                                     <ActionCard
                                         icon={Home}
-                                        title={t('browseRoomsBtn') || 'Browse Rooms'}
-                                        description="Return to the public Roomify landing page."
+                                        title={t('browseRoomsBtn')}
+                                        description={t('bookingsPage.actionDescriptions.browse')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate('/')}
                                     />
                                     <ActionCard
                                         icon={LifeBuoy}
-                                        title={t('helpSupport') || 'Help & Support'}
-                                        description="Contact the hotel team directly about an existing reservation."
+                                        title={t('helpSupport')}
+                                        description={t('bookingsPage.actionDescriptions.support')}
+                                        openLabel={openLabel}
                                         href={SUPPORT_LINK}
                                     />
                                     <ActionCard
                                         icon={CalendarDays}
-                                        title="Guest Dashboard"
-                                        description={isAuthenticated ? 'Open your current guest dashboard.' : 'Guest dashboard becomes available after sign-in.'}
+                                        title={t('guestDashboardTitle')}
+                                        description={isAuthenticated ? t('bookingsPage.actionDescriptions.guestDashboardAuth') : t('bookingsPage.actionDescriptions.guestDashboardPublic')}
+                                        openLabel={openLabel}
                                         onClick={() => navigate(isAuthenticated ? '/guest/dashboard' : '/login')}
                                     />
                                 </>
@@ -173,14 +187,10 @@ export default function Bookings() {
                     <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
                         <div className="flex items-center gap-3">
                             <ShieldCheck className="h-5 w-5 text-zinc-700" />
-                            <h2 className="text-lg font-extrabold text-black">Before You Contact Support</h2>
+                            <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.supportTitle')}</h2>
                         </div>
                         <div className="mt-5 space-y-3">
-                            {[
-                                'Keep your confirmation number available when requesting changes.',
-                                'Include the guest name and stay dates so the hotel can locate the reservation quickly.',
-                                'Use signed-in hotel tools for operational actions; guest requests still require hotel assistance.',
-                            ].map((item) => (
+                            {t('bookingsPage.supportTips', { returnObjects: true }).map((item) => (
                                 <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
                                     {item}
                                 </div>

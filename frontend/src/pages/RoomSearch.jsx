@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   BedDouble,
@@ -8,21 +9,18 @@ import {
   Users,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useSearch } from '../hooks/useSearch';
 import DateRangePicker from '../components/DateRangePicker';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useSearch } from '../hooks/useSearch';
+import {
+  formatLocalizedCurrency,
+  getRoomStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
 const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
-
-const SORT_OPTIONS = [
-  { label: 'Price: Low to High', sortBy: 'PRICE', sortDirection: 'ASC' },
-  { label: 'Price: High to Low', sortBy: 'PRICE', sortDirection: 'DESC' },
-  { label: 'Type: A to Z', sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
-  { label: 'Type: Z to A', sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
-];
 
 const STATUS_STYLES = {
   AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
@@ -30,13 +28,6 @@ const STATUS_STYLES = {
   NEEDS_CLEANING: 'border-amber-200 bg-amber-50 text-amber-900',
   UNDER_MAINTENANCE: 'border-rose-200 bg-rose-50 text-rose-900',
 };
-
-const tOr = (t, key, fallback, options) => {
-  const value = t(key, options);
-  return value === key ? fallback : value;
-};
-
-const formatMoney = (value) => `$${Number(value ?? 0).toFixed(2)}`;
 
 function SearchSkeletonCard() {
   return (
@@ -55,7 +46,18 @@ function SearchSkeletonCard() {
 export default function RoomSearch() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const pageTx = 'roomSearchPage';
+
+  const sortOptions = useMemo(
+    () => [
+      { label: t('sortPriceAsc'), sortBy: 'PRICE', sortDirection: 'ASC' },
+      { label: t('sortPriceDesc'), sortBy: 'PRICE', sortDirection: 'DESC' },
+      { label: t('sortTypeAsc'), sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
+      { label: t('sortTypeDesc'), sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
+    ],
+    [t]
+  );
 
   const todayDate = new Date();
   const today = todayDate.toISOString().split('T')[0];
@@ -71,19 +73,13 @@ export default function RoomSearch() {
       recoveredCheckOut > recoveredCheckIn
   );
 
-  const [checkIn, setCheckIn] = useState(() =>
-    hasRecoveredDates ? recoveredCheckIn : today
-  );
-  const [checkOut, setCheckOut] = useState(() =>
-    hasRecoveredDates ? recoveredCheckOut : tomorrow
-  );
+  const [checkIn, setCheckIn] = useState(() => (hasRecoveredDates ? recoveredCheckIn : today));
+  const [checkOut, setCheckOut] = useState(() => (hasRecoveredDates ? recoveredCheckOut : tomorrow));
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [sortOptionIndex, setSortOptionIndex] = useState(0);
 
-  const { results, totalResults, loading, error, hasSearched, search, clearError } =
-    useSearch();
-
-  const sortOption = SORT_OPTIONS[sortOptionIndex];
+  const { results, totalResults, loading, error, hasSearched, search, clearError } = useSearch();
+  const sortOption = sortOptions[sortOptionIndex];
 
   useEffect(() => {
     if (!hasRecoveredDates) return;
@@ -91,10 +87,10 @@ export default function RoomSearch() {
     search({
       checkIn: recoveredCheckIn,
       checkOut: recoveredCheckOut,
-      sortBy: SORT_OPTIONS[0].sortBy,
-      sortDirection: SORT_OPTIONS[0].sortDirection,
+      sortBy: sortOptions[0].sortBy,
+      sortDirection: sortOptions[0].sortDirection,
     });
-  }, [hasRecoveredDates, recoveredCheckIn, recoveredCheckOut, search]);
+  }, [hasRecoveredDates, recoveredCheckIn, recoveredCheckOut, search, sortOptions]);
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
@@ -109,11 +105,14 @@ export default function RoomSearch() {
     }, null);
   }, [results]);
 
-  const roomTypeOptions = useMemo(() => {
-    return [...new Set(results.map((room) => room.roomType?.name).filter(Boolean))].map(
-      (name) => ({ value: name, label: name })
-    );
-  }, [results]);
+  const roomTypeOptions = useMemo(
+    () =>
+      [...new Set(results.map((room) => room.roomType?.name).filter(Boolean))].map((name) => ({
+        value: name,
+        label: name,
+      })),
+    [results]
+  );
 
   const handleSearch = () => {
     if (!checkIn || !checkOut) return;
@@ -139,36 +138,36 @@ export default function RoomSearch() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow="Front Desk Search"
-        title={tOr(t, 'roomSearchTitle', 'Room Search')}
-        description={tOr(
-          t,
-          'roomSearchDesc',
-          'Search live room availability by date, guest capacity, room type, and price range.'
-        )}
+        eyebrow={t(`${pageTx}.heroEyebrow`)}
+        title={t('roomSearchTitle')}
+        description={t('roomSearchDesc')}
         meta={[
-          `${nights || 0} night${nights === 1 ? '' : 's'}`,
-          hasSearched ? `${totalResults} results` : 'Awaiting search',
-          hasRecoveredDates ? 'Recovered booking context' : 'Manual search',
+          t('nightsCount', { count: nights || 0 }),
+          hasSearched ? t(`${pageTx}.matchedCount`, { count: totalResults }) : t('common.pending'),
+          hasRecoveredDates ? t(`${pageTx}.recoveredContext`) : t(`${pageTx}.manualSearch`),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
-            Search Snapshot
+            {t(`${pageTx}.snapshotTitle`)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Dates
+                {t('common.dates')}
               </p>
-              <p className="mt-2 text-lg font-black">{checkIn} to {checkOut}</p>
+              <p className="mt-2 text-lg font-black">
+                {checkIn} - {checkOut}
+              </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                Starting Rate
+                {t(`${pageTx}.startingRate`)}
               </p>
               <p className="mt-2 text-lg font-black">
-                {startingPrice == null ? 'Not loaded' : formatMoney(startingPrice)}
+                {startingPrice == null
+                  ? t(`${pageTx}.notLoaded`)
+                  : formatLocalizedCurrency(startingPrice, i18n.language)}
               </p>
             </div>
           </div>
@@ -178,8 +177,8 @@ export default function RoomSearch() {
       <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
         <div className="space-y-6">
           <DashboardPanel
-            title="Search Controls"
-            description="Set the stay window, choose a sort rule, and request live availability from the backend."
+            title={t(`${pageTx}.searchControlsTitle`)}
+            description={t(`${pageTx}.searchControlsDescription`)}
           >
             <div className="space-y-5">
               {error && (
@@ -191,7 +190,7 @@ export default function RoomSearch() {
                       onClick={clearError}
                       className="text-xs font-bold uppercase tracking-[0.18em] text-rose-800"
                     >
-                      Dismiss
+                      {t('dismissError')}
                     </button>
                   </div>
                 </div>
@@ -209,7 +208,7 @@ export default function RoomSearch() {
                   htmlFor="room-search-sort"
                   className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
                 >
-                  Sort Results
+                  {t(`${pageTx}.sortResults`)}
                 </label>
                 <select
                   id="room-search-sort"
@@ -217,7 +216,7 @@ export default function RoomSearch() {
                   onChange={(event) => setSortOptionIndex(Number(event.target.value))}
                   className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
-                  {SORT_OPTIONS.map((option, index) => (
+                  {sortOptions.map((option, index) => (
                     <option key={`${option.sortBy}-${option.sortDirection}`} value={index}>
                       {option.label}
                     </option>
@@ -232,7 +231,7 @@ export default function RoomSearch() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
               >
                 <Search className="h-4 w-4" />
-                {loading ? 'Searching Rooms...' : 'Search Rooms'}
+                {loading ? t(`${pageTx}.searchingRooms`) : t('searchRoomsButton')}
               </button>
             </div>
           </DashboardPanel>
@@ -250,16 +249,16 @@ export default function RoomSearch() {
 
         <div className="space-y-6">
           <DashboardPanel
-            title="Search Results"
+            title={t(`${pageTx}.searchResultsTitle`)}
             description={
               hasSearched
-                ? `${totalResults} room${totalResults === 1 ? '' : 's'} matched the current search.`
-                : 'Run a room search to see live availability.'
+                ? t(`${pageTx}.matchedCount`, { count: totalResults })
+                : t(`${pageTx}.runSearchPrompt`)
             }
             action={
               hasSearched && results.length > 0 ? (
                 <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                  {nights} night{nights === 1 ? '' : 's'} stay
+                  {t(`${pageTx}.stayBadge`, { count: nights })}
                 </span>
               ) : null
             }
@@ -267,9 +266,9 @@ export default function RoomSearch() {
             {!hasSearched && !loading && (
               <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
                 <CalendarRange className="mx-auto h-10 w-10 text-zinc-400" />
-                <p className="mt-4 text-lg font-black text-zinc-950">Ready to search</p>
+                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.readyTitle`)}</p>
                 <p className="mt-2 text-sm font-medium text-zinc-500">
-                  Choose the date range and filters, then request live room availability.
+                  {t(`${pageTx}.readyDescription`)}
                 </p>
               </div>
             )}
@@ -285,9 +284,9 @@ export default function RoomSearch() {
             {!loading && hasSearched && results.length === 0 && !error && (
               <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
                 <SlidersHorizontal className="mx-auto h-10 w-10 text-zinc-400" />
-                <p className="mt-4 text-lg font-black text-zinc-950">No rooms available</p>
+                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.unavailableTitle`)}</p>
                 <p className="mt-2 text-sm font-medium text-zinc-500">
-                  Try different dates, expand the price range, or remove a room type filter.
+                  {t(`${pageTx}.unavailableDescription`)}
                 </p>
               </div>
             )}
@@ -319,11 +318,11 @@ export default function RoomSearch() {
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-xl font-black tracking-tight text-zinc-950">
-                              Room {room.roomNumber}
+                              {t('roomNumber', { number: room.roomNumber })}
                             </p>
                             <p className="mt-1 text-sm font-medium text-zinc-500">
-                              {room.roomType?.name || 'Room type unavailable'}
-                              {room.floor ? ` | Floor ${room.floor}` : ''}
+                              {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
+                              {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                             </p>
                           </div>
                           <span
@@ -332,7 +331,7 @@ export default function RoomSearch() {
                               'border-zinc-200 bg-zinc-50 text-zinc-500'
                             }`}
                           >
-                            {room.status || 'UNKNOWN'}
+                            {getRoomStatusLabel(room.status, t)}
                           </span>
                         </div>
 
@@ -348,12 +347,12 @@ export default function RoomSearch() {
                               key={amenity}
                               className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
                             >
-                              {amenity}
+                              {translateKnownValue(amenity, t)}
                             </span>
                           ))}
                           {amenities.length > 3 && (
                             <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600">
-                              +{amenities.length - 3} more
+                              {t(`${pageTx}.moreAmenities`, { count: amenities.length - 3 })}
                             </span>
                           )}
                         </div>
@@ -361,19 +360,19 @@ export default function RoomSearch() {
                         <div className="grid grid-cols-2 gap-3">
                           <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                              Rate
+                              {t(`${pageTx}.rateLabel`)}
                             </p>
                             <p className="mt-2 text-sm font-bold text-zinc-950">
-                              {formatMoney(basePrice)} / night
+                              {formatLocalizedCurrency(basePrice, i18n.language)} / {t('perNight')}
                             </p>
                           </div>
                           <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                              Capacity
+                              {t(`${pageTx}.capacityLabel`)}
                             </p>
                             <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
                               <Users className="h-4 w-4 text-zinc-400" />
-                              Up to {room.roomType?.maxGuests ?? '-'}
+                              {t('upToGuests', { count: room.roomType?.maxGuests ?? '-' })}
                             </p>
                           </div>
                         </div>
@@ -381,10 +380,10 @@ export default function RoomSearch() {
                         <div className="flex items-center justify-between border-t border-zinc-100 pt-4">
                           <div>
                             <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                              Stay total
+                              {t('common.stayTotal')}
                             </p>
                             <p className="mt-1 text-lg font-black text-zinc-950">
-                              {formatMoney(totalCost)}
+                              {formatLocalizedCurrency(totalCost, i18n.language)}
                             </p>
                           </div>
 
@@ -393,7 +392,7 @@ export default function RoomSearch() {
                             onClick={() => handleBookNow(room)}
                             className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
                           >
-                            Book Room
+                            {t(`${pageTx}.bookRoomCta`)}
                             <ArrowRight className="h-4 w-4" />
                           </button>
                         </div>

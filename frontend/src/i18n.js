@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import supplementalResources from './i18nSupplemental';
 
 const resources = {
   "en": {
@@ -800,32 +801,69 @@ const resources = {
       "cancelSuccess": "تم إلغاء الحجز {{conf}}.",
       "noRoomsAvailableForDates": "\u0644\u0627 \u062a\u0648\u062c\u062f \u063a\u0631\u0641 \u0645\u062a\u0627\u062d\u0629 \u0644\u0647\u0630\u0647 \u0627\u0644\u062a\u0648\u0627\u0631\u064a\u062e.",
       "staffEmailPlaceholder": "staff@example.com",
-      "guestEmailPlaceholder": "guest@example.com",
+      "guestEmailPlaceholder": "الضيف@مثال.فندق",
       "staffFullNamePlaceholder": "\u0645\u062b\u0627\u0644: \u0623\u062d\u0645\u062f \u0639\u0644\u064a",
       "guestFullNamePlaceholder": "\u0645\u062b\u0627\u0644: \u0623\u062d\u0645\u062f \u0639\u0644\u064a"
     }
   }
 };
 
+const STORAGE_KEY = 'roomify-language';
+
+const mergedResources = Object.entries(resources).reduce(
+  (accumulator, [language, resource]) => ({
+    ...accumulator,
+    [language]: {
+      ...resource,
+      translation: {
+        ...resource.translation,
+        ...(supplementalResources[language]?.translation ?? {}),
+      },
+    },
+  }),
+  {}
+);
+
+const applyDocumentLanguage = (language) => {
+  if (typeof document === 'undefined') return;
+
+  const normalizedLanguage = language?.startsWith('ar') ? 'ar' : 'en';
+  const isRtl = normalizedLanguage === 'ar';
+
+  document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+  document.documentElement.lang = normalizedLanguage;
+  document.body?.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources,
+    resources: mergedResources,
     fallbackLng: 'en',
+    supportedLngs: ['en', 'ar'],
+    load: 'languageOnly',
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      lookupLocalStorage: STORAGE_KEY,
+      caches: ['localStorage'],
+    },
     interpolation: {
       escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
     },
   });
 
 i18n.on('languageChanged', (lng) => {
-  const isRtl = lng.startsWith('ar');
-  document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-  document.documentElement.lang = lng;
+  const normalizedLanguage = lng?.startsWith('ar') ? 'ar' : 'en';
+  if (typeof window !== 'undefined') {
+    window.localStorage?.setItem(STORAGE_KEY, normalizedLanguage);
+  }
+  applyDocumentLanguage(normalizedLanguage);
 });
 
-const initialLng = i18n.language || 'en';
-document.documentElement.dir = initialLng.startsWith('ar') ? 'rtl' : 'ltr';
-document.documentElement.lang = initialLng;
+applyDocumentLanguage(i18n.resolvedLanguage || i18n.language || 'en');
 
 export default i18n;
