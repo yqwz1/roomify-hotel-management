@@ -22,6 +22,7 @@ class RoomServiceTest {
 
     private RoomRepository roomRepository;
     private RoomTypeRepository roomTypeRepository;
+    private HousekeepingNotificationService housekeepingNotificationService;
     private RoomService roomService;
 
     private Room room;
@@ -30,7 +31,13 @@ class RoomServiceTest {
     void setUp() {
         roomRepository = mock(RoomRepository.class);
         roomTypeRepository = mock(RoomTypeRepository.class);
-        roomService = new RoomService(roomRepository, roomTypeRepository);
+        housekeepingNotificationService = mock(HousekeepingNotificationService.class);
+
+        roomService = new RoomService(
+                roomRepository,
+                roomTypeRepository,
+                housekeepingNotificationService
+        );
 
         RoomType type = new RoomType();
         type.setId(1L);
@@ -46,7 +53,6 @@ class RoomServiceTest {
         room.setStatus(RoomStatus.NEEDS_CLEANING);
     }
 
-    // ✅ Valid transition: NEEDS_CLEANING -> AVAILABLE
     @Test
     void shouldAllowValidStatusTransition() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
@@ -55,9 +61,9 @@ class RoomServiceTest {
         roomService.updateStatus(1L, "AVAILABLE");
 
         assertEquals(RoomStatus.AVAILABLE, room.getStatus());
+        verify(housekeepingNotificationService, times(1)).notifyRoomReady("101");
     }
 
-    // ❌ Invalid transition: AVAILABLE -> OCCUPIED
     @Test
     void shouldThrowExceptionForInvalidStatusTransition() {
         room.setStatus(RoomStatus.AVAILABLE);
@@ -68,7 +74,6 @@ class RoomServiceTest {
         );
     }
 
-    // ❌ Occupied rooms cannot be manually changed
     @Test
     void shouldBlockManualChangesForOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
@@ -79,7 +84,6 @@ class RoomServiceTest {
         );
     }
 
-    // ❌ Delete OCCUPIED room should fail
     @Test
     void shouldNotDeleteOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
@@ -90,7 +94,6 @@ class RoomServiceTest {
         );
     }
 
-    // ✅ Delete AVAILABLE room should succeed
     @Test
     void shouldDeleteAvailableRoom() {
         room.setStatus(RoomStatus.AVAILABLE);
@@ -101,7 +104,6 @@ class RoomServiceTest {
         verify(roomRepository, times(1)).delete(room);
     }
 
-    // ❌ Room not found
     @Test
     void shouldThrowIfRoomNotFound() {
         when(roomRepository.findById(1L)).thenReturn(Optional.empty());

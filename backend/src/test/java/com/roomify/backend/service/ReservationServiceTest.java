@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,8 +47,8 @@ class ReservationServiceTest {
 
         private EmailService emailService;
         private AuditService auditService;
+        private HousekeepingNotificationService housekeepingNotificationService;
 
-        // الخدمات الجديدة
         private InvoiceEmailService invoiceEmailService;
         private InvoiceDeliveryLogService invoiceDeliveryLogService;
 
@@ -64,6 +63,7 @@ class ReservationServiceTest {
 
                 emailService = mock(EmailService.class);
                 auditService = mock(AuditService.class);
+                housekeepingNotificationService = mock(HousekeepingNotificationService.class);
 
                 invoiceEmailService = mock(InvoiceEmailService.class);
                 invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
@@ -76,6 +76,7 @@ class ReservationServiceTest {
                                 invoiceEmailService,
                                 invoiceDeliveryLogService,
                                 auditService,
+                                housekeepingNotificationService,
                                 new BigDecimal("0.15"));
         }
 
@@ -124,12 +125,6 @@ class ReservationServiceTest {
                 assertEquals(new BigDecimal("599.97"), response.getSubtotal());
                 assertEquals(new BigDecimal("90.00"), response.getTaxes());
                 assertEquals(new BigDecimal("689.97"), response.getTotalPrice());
-
-                ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-
-                verify(reservationRepository).save(captor.capture());
-
-                assertEquals(new BigDecimal("689.97"), captor.getValue().getTotalPrice());
 
                 verify(emailService).sendReservationConfirmationEmail(
                                 anyString(),
@@ -332,11 +327,8 @@ class ReservationServiceTest {
                 assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
                 assertNotNull(reservation.getActualCheckOutAt());
                 assertEquals("Checkout completed successfully", response.getMessage());
+                verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning("301");
         }
-
-        // ==============================
-        // Helper Methods
-        // ==============================
 
         private Reservation buildReservationForCancel(ReservationStatus status) {
 

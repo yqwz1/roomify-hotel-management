@@ -13,6 +13,7 @@ import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,11 +22,14 @@ public class RoomService {
 
         private final RoomRepository roomRepository;
         private final RoomTypeRepository roomTypeRepository;
+        private final HousekeepingNotificationService housekeepingNotificationService;
 
         public RoomService(RoomRepository roomRepository,
-                        RoomTypeRepository roomTypeRepository) {
+                        RoomTypeRepository roomTypeRepository,
+                        HousekeepingNotificationService housekeepingNotificationService) {
                 this.roomRepository = roomRepository;
                 this.roomTypeRepository = roomTypeRepository;
+                this.housekeepingNotificationService = housekeepingNotificationService;
         }
 
         /**
@@ -33,7 +37,6 @@ public class RoomService {
          */
         public RoomResponse create(RoomRequest request) {
 
-                // Check room number uniqueness
                 if (roomRepository.existsByRoomNumber(request.getRoomNumber())) {
                         throw new DuplicateResourceException(
                                         "Room with number '" + request.getRoomNumber() + "' already exists");
@@ -81,6 +84,39 @@ public class RoomService {
         }
 
         /**
+         * Get valid next statuses for a room.
+         */
+        public List<RoomStatus> getValidNextStatuses(Long id) {
+                Room room = roomRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
+
+                return getValidNextStatuses(room.getStatus());
+        }
+
+        /**
+         * Reusable transition engine output.
+         */
+        public List<RoomStatus> getValidNextStatuses(RoomStatus current) {
+                if (current == RoomStatus.NEEDS_CLEANING) {
+                        return List.of(RoomStatus.AVAILABLE);
+                }
+
+                if (current == RoomStatus.AVAILABLE) {
+                        return List.of(RoomStatus.UNDER_MAINTENANCE);
+                }
+
+                if (current == RoomStatus.UNDER_MAINTENANCE) {
+                        return List.of(RoomStatus.AVAILABLE);
+                }
+
+                if (current == RoomStatus.OCCUPIED) {
+                        return Collections.emptyList();
+                }
+
+                return Collections.emptyList();
+        }
+
+        /**
          * Update room details (NOT status transitions).
          */
         public RoomResponse update(Long id, RoomRequest request) {
@@ -119,7 +155,7 @@ public class RoomService {
 
                 RoomStatus newStatus = RoomStatus.valueOf(status);
 
-                validateStatusTransition(room.getStatus(), newStatus);
+                validateStatusTransition(room.getStatus(), newStatus, room.getRoomNumber());
 
                 room.setStatus(newStatus);
 
@@ -146,60 +182,40 @@ public class RoomService {
          * Validate allowed room status transitions.
          */
         private void validateStatusTransition(RoomStatus current,
-                        RoomStatus target) {
+                        RoomStatus target,
+                        String roomNumber) {
 
-                // Occupied rooms cannot be manually modified
                 if (current == RoomStatus.OCCUPIED) {
                         throw new IllegalStateException(
                                         "Occupied rooms cannot be manually modified");
                 }
 
-                boolean validTransition = false;
+                List<RoomStatus> allowedTargets = getValidNextStatuses(current);
 
-                // NeedsCleaning → Available
-                if (current == RoomStatus.NEEDS_CLEANING
-                                && target == RoomStatus.AVAILABLE) {
-                        validTransition = true;
-                }
-
-                // Available → UnderMaintenance
-                if (current == RoomStatus.AVAILABLE
-                                && target == RoomStatus.UNDER_MAINTENANCE) {
-                        validTransition = true;
-                }
-
-                // UnderMaintenance → Available
-                if (current == RoomStatus.UNDER_MAINTENANCE
-                                && target == RoomStatus.AVAILABLE) {
-                        validTransition = true;
-                }
-
-                if (!validTransition) {
+                if (!allowedTargets.contains(target)) {
                         throw new IllegalStateException(
                                         "Invalid room status transition: "
                                                         + current + " -> " + target);
                 }
 
-                // Hook for housekeeping or maintenance notifications
-                housekeepingHook(current, target);
+                housekeepingHook(current, target, roomNumber);
         }
 
         /**
          * Hook for housekeeping / maintenance notifications.
          */
         private void housekeepingHook(RoomStatus current,
-                        RoomStatus target) {
+                        RoomStatus target,
+                        String roomNumber) {
 
                 if (current == RoomStatus.NEEDS_CLEANING
                                 && target == RoomStatus.AVAILABLE) {
-
-                        System.out.println("Housekeeping finished cleaning. Room is now available.");
+                        housekeepingNotificationService.notifyRoomReady(roomNumber);
                 }
 
                 if (current == RoomStatus.AVAILABLE
                                 && target == RoomStatus.UNDER_MAINTENANCE) {
-
-                        System.out.println("Room moved to maintenance.");
+                        System.out.println("Maintenance update: Room " + roomNumber + " moved to maintenance.");
                 }
         }
 
