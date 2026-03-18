@@ -10,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
+const DEFAULT_ADMIN_EMAIL = 'admin@roomify.com';
+const DEFAULT_ADMIN_PASSWORD = 'password123';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ const LoginPage = () => {
   const brandName = t('brandName');
 
   const [formData, setFormData] = useState({
-    email: '',
+    email: DEFAULT_ADMIN_EMAIL,
     password: '',
   });
   const [errors, setErrors] = useState({ email: '', password: '' });
@@ -106,8 +108,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex h-full font-sans">
-      <div className="hidden bg-black p-12 lg:flex lg:w-[45%] lg:flex-col lg:justify-between">
+    <div className="flex min-h-screen items-stretch -mt-16 overflow-y-auto pt-16 font-sans">
+      <div className="hidden bg-black p-10 lg:flex lg:min-h-[calc(100vh-4rem)] lg:w-[45%] lg:flex-col lg:justify-between xl:p-12">
         <div className="flex items-center">
           <span className="font-heading text-3xl font-black tracking-tighter text-white">{brandName}</span>
         </div>
@@ -145,14 +147,14 @@ const LoginPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-zinc-50 px-5 py-12 sm:px-8">
+      <div className="flex min-h-[calc(100vh-4rem)] flex-1 items-center justify-center bg-zinc-50 px-5 py-8 sm:px-8 lg:px-10">
         <div className="w-full max-w-sm">
-          <div className="mb-10 flex items-center justify-center lg:hidden">
+          <div className="mb-8 flex items-center justify-center lg:hidden">
             <span className="font-heading text-3xl font-black tracking-tighter text-black">{brandName}</span>
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="mb-10 text-center">
+            <div className="mb-8 text-center">
               <h2 className="mb-2 text-3xl font-extrabold tracking-tight text-black" role="heading" aria-level="1">
                 {t('signInToAccount')}
               </h2>
@@ -187,6 +189,9 @@ const LoginPage = () => {
                 {errors.email && (
                   <p className="mt-1 ps-2 text-xs font-bold text-red-500">{errors.email}</p>
                 )}
+                <p className="ps-2 text-xs leading-5 text-zinc-400" dir="ltr">
+                  Default admin: {DEFAULT_ADMIN_EMAIL} / {DEFAULT_ADMIN_PASSWORD}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -231,7 +236,7 @@ const LoginPage = () => {
               </Button>
             </form>
 
-            <div className="mt-8 rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
               <div className="mb-3 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100">
                   <Mail className="h-5 w-5 text-zinc-700" />
