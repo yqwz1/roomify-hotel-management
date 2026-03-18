@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,9 +50,6 @@ class ReservationServiceTest {
         private EmailService emailService;
         private AuditService auditService;
         private HousekeepingNotificationService housekeepingNotificationService;
-
-        private InvoiceEmailService invoiceEmailService;
-        private InvoiceDeliveryLogService invoiceDeliveryLogService;
 
         private ReservationService reservationService;
 
