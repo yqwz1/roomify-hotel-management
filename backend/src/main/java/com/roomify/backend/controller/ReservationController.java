@@ -6,6 +6,7 @@ import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
+import com.roomify.backend.dto.ReservationPaymentRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
@@ -101,5 +102,20 @@ public class ReservationController {
             @RequestParam(defaultValue = "0.00") BigDecimal discountAmount) {
         BillResponse bill = billingService.calculateBill(confirmationNumber, serviceCharges, discountAmount);
         return ResponseEntity.ok(bill);
+    }
+
+    @PostMapping("/{confirmationNumber}/bill/payments")
+    public ResponseEntity<BillResponse> recordPayment(
+            @PathVariable String confirmationNumber,
+            @Valid @RequestBody ReservationPaymentRequest request) {
+        BillResponse response = billingService.recordPayment(confirmationNumber, request.getAmount());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{confirmationNumber}/bill/close")
+    public ResponseEntity<BillResponse> closeBill(
+            @PathVariable String confirmationNumber) {
+        BillResponse response = billingService.closeBill(confirmationNumber);
+        return ResponseEntity.ok(response);
     }
 }

@@ -287,10 +287,11 @@ class ReservationServiceTest {
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
                                 .thenReturn(Optional.of(reservation));
 
-                ResourceConflictException ex = assertThrows(
-                                ResourceConflictException.class,
+                PaymentValidationException ex = assertThrows(
+                                PaymentValidationException.class,
                                 () -> reservationService.checkOut("RSV-ABC123DEF456"));
 
+                assertEquals("PAYMENT_BALANCE_DUE", ex.getCode());
                 assertTrue(ex.getMessage().contains("Outstanding balance must be 0.00 before checkout"));
         }
 

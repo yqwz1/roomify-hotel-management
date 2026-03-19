@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.roomify.backend.dto.BillLineItem;
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
 
@@ -50,6 +51,94 @@ public class BillingService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
+        return buildBillResponse(reservation, normalized, serviceCharges, discountAmount, true);
+    }
+
+    public BillResponse recordPayment(String confirmationNumber, BigDecimal amount) {
+        String normalized = normaliseConfirmationNumber(confirmationNumber);
+        Reservation reservation = reservationRepository.findByConfirmationNumber(normalized)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be greater than 0");
+        }
+
+        BigDecimal paymentAmount = amount.setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal totalPrice = sanitise(reservation.getTotalPrice());
+        BigDecimal totalPaid = sanitise(reservation.getTotalPaid());
+        BigDecimal currentOutstanding = calculateOutstanding(totalPrice, totalPaid);
+        BigDecimal projectedPaid = totalPaid.add(paymentAmount).setScale(MONEY_SCALE, ROUNDING);
+
+        // Overpayment is blocked by design: paid amount can never exceed total price.
+        if (projectedPaid.compareTo(totalPrice) > 0) {
+            throw new PaymentValidationException(
+                    "PAYMENT_OVERPAYMENT_BLOCKED",
+                    "Overpayment is not allowed. Remaining balance is " + currentOutstanding,
+                    PaymentStatusResolver.resolve(totalPaid, currentOutstanding, reservation.isInvoiceFinalized()),
+                    currentOutstanding,
+                    reservation.isInvoiceFinalized());
+        }
+
+        BigDecimal projectedOutstanding = calculateOutstanding(totalPrice, projectedPaid);
+        // Bill auto-closes when full payment is reached.
+        boolean isFullyPaid = projectedOutstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)) == 0;
+
+        reservation.setTotalPaid(projectedPaid);
+        reservation.setOutstandingBalance(projectedOutstanding);
+        reservation.setInvoiceFinalized(isFullyPaid);
+        reservationRepository.save(reservation);
+
+        String metadata = String.format(
+                "paid=%s totalPaid=%s outstanding=%s finalized=%s",
+                paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid);
+        auditService.log("PAYMENT_RECORDED", normalized, metadata);
+
+        log.info(
+                "Payment recorded for {} | amount={} totalPaid={} outstanding={} finalized={}",
+                normalized, paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid);
+
+        return buildBillResponse(reservation, normalized, BigDecimal.ZERO, BigDecimal.ZERO, false);
+    }
+
+    public BillResponse closeBill(String confirmationNumber) {
+        String normalized = normaliseConfirmationNumber(confirmationNumber);
+        Reservation reservation = reservationRepository.findByConfirmationNumber(normalized)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        BigDecimal totalPrice = sanitise(reservation.getTotalPrice());
+        BigDecimal totalPaid = sanitise(reservation.getTotalPaid());
+        BigDecimal outstanding = calculateOutstanding(totalPrice, totalPaid);
+
+        // Manual close is allowed only when no remaining balance exists.
+        if (outstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)) > 0) {
+            throw new PaymentValidationException(
+                    "PAYMENT_BALANCE_DUE",
+                    "Outstanding balance must be 0.00 before bill close. Current outstanding: " + outstanding,
+                    PaymentStatusResolver.resolve(totalPaid, outstanding, reservation.isInvoiceFinalized()),
+                    outstanding,
+                    reservation.isInvoiceFinalized());
+        }
+
+        reservation.setTotalPaid(totalPaid);
+        reservation.setOutstandingBalance(outstanding);
+        reservation.setInvoiceFinalized(true);
+        reservationRepository.save(reservation);
+
+        auditService.log("BILL_CLOSED", normalized, "finalized=true");
+        log.info("Bill closed for {} | totalPaid={} outstanding={}", normalized, totalPaid, outstanding);
+
+        return buildBillResponse(reservation, normalized, BigDecimal.ZERO, BigDecimal.ZERO, false);
+    }
+
+    private BillResponse buildBillResponse(
+            Reservation reservation,
+            String normalizedConfirmation,
+            BigDecimal serviceCharges,
+            BigDecimal discountAmount,
+            boolean auditBillCalculated) {
+
         BigDecimal safeServiceCharges = sanitise(serviceCharges);
         BigDecimal safeDiscount = sanitise(discountAmount);
 
@@ -72,10 +161,10 @@ public class BillingService {
 
         BigDecimal balanceDue = nonNegative(vatBase.add(vatAmount).subtract(safeDiscount));
         BigDecimal totalPaid = sanitise(reservation.getTotalPaid());
-        BigDecimal outstandingBalance = sanitise(reservation.getOutstandingBalance());
+        BigDecimal outstandingBalance = calculateOutstanding(sanitise(reservation.getTotalPrice()), totalPaid);
         String paymentStatus = PaymentStatusResolver.resolve(
-                reservation.getTotalPaid(),
-                reservation.getOutstandingBalance(),
+                totalPaid,
+                outstandingBalance,
                 reservation.isInvoiceFinalized());
 
         List<BillLineItem> lineItems = buildLineItems(
@@ -84,11 +173,12 @@ public class BillingService {
         String metadata = String.format(
                 "nights=%d roomCharge=%s svcCharges=%s vatAmount=%s discount=%s balanceDue=%s",
                 nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
-        auditService.log("BILL_CALCULATED", normalized, metadata);
-
-        log.info(
-                "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={}",
-                normalized, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+        if (auditBillCalculated) {
+            auditService.log("BILL_CALCULATED", normalizedConfirmation, metadata);
+            log.info(
+                    "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={}",
+                    normalizedConfirmation, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+        }
 
         BillResponse response = new BillResponse(
                 reservation.getConfirmationNumber(),
@@ -163,5 +253,12 @@ public class BillingService {
         return scaled.compareTo(BigDecimal.ZERO) < 0
                 ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
                 : scaled;
+    }
+
+    private BigDecimal calculateOutstanding(BigDecimal totalPrice, BigDecimal totalPaid) {
+        BigDecimal outstanding = sanitise(totalPrice).subtract(sanitise(totalPaid)).setScale(MONEY_SCALE, ROUNDING);
+        return outstanding.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
+                : outstanding;
     }
 }
