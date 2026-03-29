@@ -1,4 +1,6 @@
 import api from './api';
+import i18n from '../i18n';
+import { localizeKnownServerMessage } from '../utils/localization';
 
 /**
  * Real login function using Axios to communicate with backend
@@ -16,13 +18,13 @@ export const login = async (email, password) => {
     } catch (error) {
         // Handle error response from backend
         if (error.response && error.response.data && error.response.data.message) {
-            throw new Error(error.response.data.message);
+            throw new Error(localizeKnownServerMessage(error.response.data.message, i18n.t.bind(i18n)));
         }
         // Fallback error message (or backend strictly returns string body)
         if (error.response && error.response.data && typeof error.response.data === 'string') {
-            throw new Error(error.response.data);
+            throw new Error(localizeKnownServerMessage(error.response.data, i18n.t.bind(i18n)));
         }
-        throw new Error('Login failed. Please check your credentials and try again.');
+        throw new Error(i18n.t('loginFailedDefault'));
     }
 };
 

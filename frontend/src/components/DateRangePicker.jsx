@@ -24,7 +24,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Check-In */}
             <div className="flex flex-col gap-1">
                 <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                    {t('checkInLabel') || 'Check-In'}
+                    {t('checkInLabel')}
                 </label>
                 <input
                     id="check-in-date"
@@ -42,7 +42,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             {/* Check-Out */}
             <div className="flex flex-col gap-1">
                 <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                    {t('checkOutLabel') || 'Check-Out'}
+                    {t('checkOutLabel')}
                 </label>
                 <input
                     id="check-out-date"

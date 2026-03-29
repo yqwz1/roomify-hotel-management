@@ -1,425 +1,472 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Search, CreditCard, Receipt } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import LoadingState from '../components/common/LoadingState';
-import SuccessState from '../components/common/SuccessState';
-import ErrorState from '../components/common/ErrorState';
-import ConfirmationToast from '../components/ConfirmationToast';
+import { useCallback, useMemo, useState } from 'react';
 import {
-    searchReservations,
-    getBill,
-    checkOutReservation,
-    extractReservationError,
+  AlertTriangle,
+  CheckCircle2,
+  CreditCard,
+  DoorClosed,
+  Receipt,
+} from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import ConfirmationToast from '../components/ConfirmationToast';
+import ReservationLookupPanel from '../components/ReservationLookupPanel';
+import StatusPill from '../components/StatusPill';
+import { LtrText } from '../components/LtrText';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useTranslation } from 'react-i18next';
+import {
+  checkOutReservation,
+  extractReservationError,
+  getBill,
 } from '../services/reservationService';
+import {
+  normalizeReservationStatusLabel,
+  reservationStatusRules,
+} from '../domain/reservations/statusRules';
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  getReservationStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
-const formatDateAr = (iso) => {
-    if (!iso) return '-';
-    return new Date(`${iso}T12:00:00`).toLocaleDateString('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
+function BillBreakdown({ bill, t, language }) {
+  if (!bill) {
+    return (
+      <div className="rounded-[1.35rem] border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
+        <p className="text-sm font-bold text-zinc-950">{t('checkoutPage.noBillTitle')}</p>
+        <p className="mt-2 text-sm font-medium text-zinc-500">
+          {t('checkoutPage.noBillDescription')}
+        </p>
+      </div>
+    );
+  }
 
-const formatAmount = (val) => {
-    const n = Number(val ?? 0);
-    return `$${n.toFixed(2)}`;
-};
+  const rows = [
+    {
+      label: t('checkoutPage.roomChargeLabel', {
+        count: bill.nights ?? 0,
+        rate: formatLocalizedCurrency(bill.roomRate, language),
+      }),
+      value: formatLocalizedCurrency(bill.roomCharge, language),
+    },
+    {
+      label: t('checkoutPage.serviceCharges'),
+      value: formatLocalizedCurrency(bill.serviceCharges, language),
+      hidden: !Number(bill.serviceCharges),
+    },
+    {
+      label: t('checkoutPage.vatLabel', {
+        rate: (Number(bill.vatRate ?? 0) * 100).toFixed(0),
+      }),
+      value: formatLocalizedCurrency(bill.vatAmount, language),
+    },
+    {
+      label: t('checkoutPage.discounts'),
+      value: `-${formatLocalizedCurrency(bill.discountAmount, language)}`,
+      hidden: !Number(bill.discountAmount),
+      muted: true,
+    },
+  ].filter((row) => !row.hidden);
 
-const FinalBillSection = ({ bill }) => {
-    if (!bill) {
-        return (
-            <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
-                <CardContent className="p-8">
-                    <p className="text-center text-zinc-500">لا توجد تفاصيل فاتورة متاحة</p>
-                </CardContent>
-            </Card>
-        );
+  return (
+    <div className="space-y-3">
+      {rows.map((row) => (
+        <div key={row.label} className="flex items-center justify-between gap-4">
+          <span className={`text-sm font-medium ${row.muted ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            {row.label}
+          </span>
+          <span className="text-sm font-bold text-zinc-950">{row.value}</span>
+        </div>
+      ))}
+
+      <div className="border-t border-zinc-200 pt-3">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-sm font-bold text-zinc-950">{t('checkoutPage.grossBalance')}</span>
+          <span className="text-base font-black text-zinc-950">
+            {formatLocalizedCurrency(bill.balanceDue, language)}
+          </span>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-4">
+          <span className="text-sm font-medium text-emerald-700">{t('checkoutPage.totalPaidLabel')}</span>
+          <span className="text-sm font-bold text-emerald-700">
+            -{formatLocalizedCurrency(bill.totalPaid, language)}
+          </span>
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-4 border-t border-zinc-200 pt-3">
+          <span className="text-sm font-bold text-zinc-950">{t('checkoutPage.outstandingBalanceLabel')}</span>
+          <span
+            className={`text-lg font-black ${
+              Number(bill.outstandingBalance ?? bill.balanceDue ?? 0) > 0
+                ? 'text-rose-900'
+                : 'text-emerald-700'
+            }`}
+          >
+            {formatLocalizedCurrency(bill.outstandingBalance ?? bill.balanceDue, language)}
+          </span>
+        </div>
+      </div>
+
+      {Array.isArray(bill.lineItems) && bill.lineItems.length > 0 && (
+        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+            {t('checkoutPage.lineItems')}
+          </p>
+          <div className="mt-3 space-y-2">
+            {bill.lineItems.map((item, index) => {
+              const amount = Number(item?.amount ?? 0);
+              const credit = Boolean(item?.credit);
+
+              return (
+                <div
+                  key={`${item?.label ?? 'line'}-${index}`}
+                  className="flex items-center justify-between gap-4 text-sm"
+                >
+                  <span className="font-medium text-zinc-600">
+                    {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
+                  </span>
+                  <span className="font-bold text-zinc-950">
+                    {credit ? `-${formatLocalizedCurrency(amount, language)}` : formatLocalizedCurrency(amount, language)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Checkout() {
+  const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const [selected, setSelected] = useState(null);
+  const [bill, setBill] = useState(null);
+  const [billLoading, setBillLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const initialQuery = useMemo(
+    () => String(location.state?.initialQuery ?? '').trim(),
+    [location.state?.initialQuery]
+  );
+
+  const fetchBill = useCallback(async (confirmationNumber) => {
+    if (!confirmationNumber) return;
+
+    setBillLoading(true);
+    setCheckoutError(null);
+    try {
+      const result = await getBill(confirmationNumber);
+      setBill(result);
+    } catch (err) {
+      setBill(null);
+      const message = extractReservationError(err);
+      setCheckoutError(message);
+      setToast({ message, type: 'error' });
+    } finally {
+      setBillLoading(false);
+    }
+  }, []);
+
+  const handleSelect = async (reservation) => {
+    setSelected(reservation);
+    setBill(null);
+    setCheckoutSuccess(false);
+    await fetchBill(reservation.confirmationNumber);
+  };
+
+  const handleReset = () => {
+    setSelected(null);
+    setBill(null);
+    setCheckoutError(null);
+    setCheckoutSuccess(false);
+  };
+
+  const handleCheckout = async () => {
+    if (!selected?.confirmationNumber || checkoutLoading) return;
+
+    const outstandingBalance = Number(
+      bill?.outstandingBalance ?? bill?.balanceDue ?? 0
+    );
+
+    if (outstandingBalance > 0) {
+      setCheckoutError(
+        t('checkoutPage.outstandingError', {
+          amount: formatLocalizedCurrency(outstandingBalance, i18n.language),
+        })
+      );
+      return;
     }
 
-    const {
-        roomRate,
-        nights,
-        roomCharge,
-        serviceCharges,
-        vatRate,
-        vatAmount,
-        discountAmount,
-        balanceDue,
-        totalPaid,
-        outstandingBalance,
-        paymentStatus,
-        lineItems
-    } = bill;
+    setCheckoutLoading(true);
+    setCheckoutError(null);
 
-    const hasUnpaidBalance = Number(outstandingBalance ?? balanceDue ?? 0) > 0;
-    const statusLabel = paymentStatus === 'PAID' ? 'مكتمل الدفع' : (hasUnpaidBalance ? 'رصيد غير مدفوع' : 'جاهز للخروج');
-    const statusClass = hasUnpaidBalance || paymentStatus === 'FAILED'
-        ? 'bg-rose-100 text-rose-900 border-rose-200'
-        : 'bg-emerald-100 text-emerald-900 border-emerald-200';
+    try {
+      await checkOutReservation(selected.confirmationNumber);
+      setCheckoutSuccess(true);
+      setToast({
+        message: t('checkoutPage.successToast', { name: selected.guestName }),
+        type: 'success',
+      });
+      setSelected((prev) => (prev ? { ...prev, status: 'CHECKED_OUT' } : prev));
+    } catch (err) {
+      const message = extractReservationError(err);
+      setCheckoutError(message);
+      setToast({ message, type: 'error' });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
-    return (
-        <Card className="mt-6 border-zinc-200 shadow-sm rounded-3xl">
-            <CardHeader>
-                <CardTitle className="flex items-center text-lg font-heading text-zinc-900">
-                    <Receipt className="ms-2 h-5 w-5 text-zinc-500" />
-                    ملخص الفاتورة النهائية
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-3 text-sm">
-                    {/* Fixed fields approach mapping to Java BillResponse */}
-                    <div className="flex justify-between">
-                        <span className="text-zinc-600">رسوم الغرفة ({nights} ليالي × {formatAmount(roomRate)})</span>
-                        <span className="font-bold text-zinc-900">{formatAmount(roomCharge)}</span>
-                    </div>
+  const outstandingBalance = Number(
+    bill?.outstandingBalance ?? bill?.balanceDue ?? 0
+  );
+  const canCheckOut =
+    selected &&
+    reservationStatusRules.canCheckOut(selected.status) &&
+    !billLoading &&
+    outstandingBalance === 0;
 
-                    {Number(serviceCharges) > 0 && (
-                        <div className="flex justify-between">
-                            <span className="text-zinc-600">رسوم إضافية (الخدمات)</span>
-                            <span className="font-bold text-zinc-900">{formatAmount(serviceCharges)}</span>
-                        </div>
-                    )}
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <ConfirmationToast
+        message={toast?.message}
+        type={toast?.type}
+        onClose={() => setToast(null)}
+      />
 
-                    <div className="flex justify-between">
-                        <span className="text-zinc-600">ضريبة القيمة المضافة ({(Number(vatRate) * 100).toFixed(0)}%)</span>
-                        <span className="font-bold text-zinc-900">{formatAmount(vatAmount)}</span>
-                    </div>
-
-                    {Number(discountAmount) > 0 && (
-                        <div className="flex justify-between text-zinc-500">
-                            <span>الخصومات</span>
-                            <span className="font-bold text-zinc-600">-{formatAmount(discountAmount)}</span>
-                        </div>
-                    )}
-
-                    <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
-                        <span className="text-base font-bold text-zinc-900">الإجمالي الكلي قبل الدفع</span>
-                        <span className="text-xl font-black text-zinc-900">
-                            {formatAmount(balanceDue)}
-                        </span>
-                    </div>
-
-                    <div className="flex justify-between text-emerald-700 mt-2">
-                        <span>المبلغ المدفوع</span>
-                        <span className="font-bold">-{formatAmount(totalPaid)}</span>
-                    </div>
-
-                    <div className="border-t border-zinc-200 pt-3 mt-3 flex justify-between items-center">
-                        <span className="text-base font-bold text-zinc-900">الرصيد المتبقي</span>
-                        <span className={`text-xl font-black ${hasUnpaidBalance ? 'text-rose-900' : 'text-emerald-700'}`}>
-                            {formatAmount(outstandingBalance ?? balanceDue)}
-                        </span>
-                    </div>
-
-                    {lineItems && lineItems.length > 0 && (
-                        <div className="mt-4 border-t border-zinc-200 pt-3">
-                            <p className="font-bold text-zinc-700 mb-2">تفاصيل إضافية:</p>
-                            {lineItems.map((item, idx) => {
-                                const amount = Number(item?.amount ?? 0);
-                                const credit = !!item?.credit;
-                                const label = item?.label ?? '';
-                                return (
-                                    <div key={idx} className="flex justify-between text-xs mb-1">
-                                        <span className={credit ? 'text-zinc-500' : 'text-zinc-600'}>
-                                            {label}
-                                        </span>
-                                        <span className={`font-bold ${credit ? 'text-zinc-600' : 'text-zinc-900'}`}>
-                                            {credit ? `-${formatAmount(amount)}` : formatAmount(amount)}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    <div
-                        className={`mt-4 flex justify-between items-center p-3 rounded-2xl border ${statusClass}`}
-                    >
-                        <span className="font-bold">حالة الدفع</span>
-                        <span className="px-3 py-1 rounded-full text-xs font-bold">{statusLabel}</span>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
-
-const Checkout = () => {
-    const location = useLocation();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchLoading, setSearchLoading] = useState(false);
-    const [searchError, setSearchError] = useState(null);
-    const [selected, setSelected] = useState(null);
-    const [bill, setBill] = useState(null);
-    const [billLoading, setBillLoading] = useState(false);
-    const [checkoutLoading, setCheckoutLoading] = useState(false);
-    const [checkoutSuccess, setCheckoutSuccess] = useState(false);
-    const [checkoutError, setCheckoutError] = useState(null);
-    const [toast, setToast] = useState(null);
-
-    const fetchBill = useCallback(async (confirmationNumber) => {
-        if (!confirmationNumber) return;
-        setBillLoading(true);
-        setBill(null);
-        try {
-            const data = await getBill(confirmationNumber);
-            setBill(data);
-        } catch (err) {
-            setBill(null);
-            setToast({ message: extractReservationError(err), type: 'error' });
-        } finally {
-            setBillLoading(false);
-        }
-    }, []);
-
-    const runSearch = useCallback(async (q) => {
-        const trimmed = q?.trim();
-        if (!trimmed) return;
-
-        setSearchLoading(true);
-        setSearchError(null);
-        setSelected(null);
-        setBill(null);
-        setCheckoutSuccess(false);
-        setCheckoutError(null);
-
-        try {
-            const results = await searchReservations(trimmed);
-            const reservation = Array.isArray(results) ? results[0] : null;
-            if (!reservation) {
-                setSearchError('لم يتم العثور على حجز مطابق. جرّب اسم ضيف أو رقم تأكيد آخر.');
-                return;
-            }
-            setSelected(reservation);
-            await fetchBill(reservation.confirmationNumber);
-        } catch (err) {
-            setSearchError(extractReservationError(err));
-        } finally {
-            setSearchLoading(false);
-        }
-    }, [fetchBill]);
-
-    const handleSearch = async (e) => {
-        e.preventDefault();
-        await runSearch(searchQuery);
-    };
-
-    useEffect(() => {
-        const initialQuery = String(location.state?.initialQuery ?? '').trim();
-        if (!initialQuery) return;
-        setSearchQuery(initialQuery);
-        runSearch(initialQuery);
-    }, [location.state?.initialQuery, runSearch]);
-
-    const handleCheckout = async () => {
-        if (!selected?.confirmationNumber || checkoutLoading) return;
-        const balance = Number(bill?.balanceDue ?? 0);
-        if (balance > 0) {
-            setCheckoutError('يوجد رصيد غير مدفوع. يرجى دفع المبلغ المتبقي قبل إتمام الخروج.');
-            return;
-        }
-
-        setCheckoutLoading(true);
-        setCheckoutError(null);
-
-        try {
-            await checkOutReservation(selected.confirmationNumber);
-            setCheckoutSuccess(true);
-            setToast({
-                message: `تم تسجيل خروج ${selected.guestName} بنجاح.`,
-                type: 'success',
-            });
-            setSelected(null);
-            setBill(null);
-            setSearchQuery('');
-        } catch (err) {
-            const msg = extractReservationError(err);
-            setCheckoutError(msg);
-            setToast({ message: msg, type: 'error' });
-        } finally {
-            setCheckoutLoading(false);
-        }
-    };
-
-    const handleReset = () => {
-        setSelected(null);
-        setBill(null);
-        setSearchError(null);
-        setCheckoutError(null);
-        setCheckoutSuccess(false);
-        setSearchQuery('');
-    };
-
-    const balanceDue = Number(bill?.balanceDue ?? 0);
-    const hasUnpaidBalance = balanceDue > 0;
-    const isCheckoutDisabled =
-        !selected ||
-        billLoading ||
-        checkoutLoading ||
-        hasUnpaidBalance;
-
-    return (
-        <div className="p-6 max-w-4xl mx-auto space-y-6" dir="rtl">
-            <ConfirmationToast
-                message={toast?.message}
-                type={toast?.type}
-                onClose={() => setToast(null)}
-            />
-
-            <div className="flex justify-between items-center">
-                <h1
-                    className="text-3xl font-bold font-heading text-rose-900"
-                    style={{ fontFamily: "'Khat Alharf Alyadawi', system-ui, sans-serif" }}
-                >
-                    تسجيل الخروج للضيف
-                </h1>
+      <DashboardHero
+        eyebrow={t('checkoutPage.heroEyebrow')}
+        title={t('checkoutTitle')}
+        description={t('checkoutPage.description')}
+        meta={[
+          t('checkoutPage.billingRequired'),
+          selected ? `${t('checkInPage.reservation')}: ${selected.confirmationNumber}` : t('checkInPage.awaitingSelection'),
+          checkoutSuccess ? t('checkoutPage.departureCompleted') : t('checkoutPage.openWorkflow'),
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            {t('checkoutPage.gateTitle')}
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                {t('checkoutPage.outstanding')}
+              </p>
+              <p className="mt-2 text-lg font-black">
+                {bill ? formatLocalizedCurrency(outstandingBalance, i18n.language) : t('checkoutPage.noBill')}
+              </p>
             </div>
-
-            <Card className="rounded-3xl border-zinc-200 shadow-sm">
-                <CardHeader>
-                    <CardTitle className="text-lg font-heading text-zinc-900">البحث عن حجز الضيف</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSearch} className="flex gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute end-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
-                            <Input
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    setSearchError(null);
-                                }}
-                                placeholder="ابحث باسم الضيف أو رقم التأكيد (مثلاً RSV-...)"
-                                className="pe-10 rounded-full border-zinc-300 focus-visible:ring-rose-900"
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            disabled={searchLoading || !searchQuery?.trim()}
-                            className="rounded-full bg-rose-900 hover:bg-rose-900/90 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {searchLoading ? 'جاري البحث...' : 'بحث'}
-                        </Button>
-                    </form>
-                    <p className="mt-3 text-xs text-zinc-500">
-                        Guest-name search returns the first matching reservation. Use the confirmation number when available.
-                    </p>
-                    {searchError && (
-                        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                            <p className="text-sm font-medium text-rose-900">{searchError}</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {searchLoading && (
-                <LoadingState message="جاري البحث عن الحجز..." />
-            )}
-
-            {!searchLoading && selected && (
-                <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <Card className="rounded-3xl border-zinc-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-lg font-heading text-zinc-900">
-                                معلومات الضيف
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-sm text-zinc-500 block">اسم الضيف</label>
-                                    <div className="font-bold text-lg text-black">
-                                        {selected.guestName ?? bill?.guestName ?? '-'}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-sm text-zinc-500 block">رقم الغرفة</label>
-                                        <div className="font-bold text-zinc-900">
-                                            {selected.roomNumber ?? bill?.roomNumber ?? '-'}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm text-zinc-500 block">تاريخ الدخول</label>
-                                        <div className="font-bold text-zinc-900">
-                                            {formatDateAr(bill?.checkInDate ?? selected.checkInDate)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <div>
-                        {billLoading ? (
-                            <LoadingState message="جاري تحميل الفاتورة النهائية..." />
-                        ) : (
-                            <FinalBillSection bill={bill} />
-                        )}
-
-                        {checkoutError && (
-                            <div className="mt-6">
-                                <ErrorState
-                                    title="تعذر إتمام الخروج"
-                                    message={checkoutError}
-                                    onRetry={() => setCheckoutError(null)}
-                                />
-                            </div>
-                        )}
-
-                        {hasUnpaidBalance && !checkoutError && (
-                            <div className="mt-6 rounded-3xl border border-rose-200 bg-rose-50 p-5">
-                                <p className="text-rose-900 font-bold">يوجد رصيد غير مدفوع</p>
-                                <p className="text-sm text-rose-800 mt-1">
-                                    يرجى دفع المبلغ المتبقي ({formatAmount(balanceDue)}) قبل إتمام تسجيل الخروج.
-                                </p>
-                            </div>
-                        )}
-
-                        <div className="mt-6 flex justify-end gap-3">
-                            <Button
-                                variant="outline"
-                                className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-                                onClick={handleReset}
-                                disabled={checkoutLoading}
-                            >
-                                إلغاء
-                            </Button>
-                            <Button
-                                onClick={handleCheckout}
-                                disabled={isCheckoutDisabled}
-                                className="flex items-center gap-2 rounded-full bg-rose-900 hover:bg-rose-900/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <CreditCard className="h-4 w-4 ms-2" />
-                                {checkoutLoading
-                                    ? 'جاري المعالجة...'
-                                    : hasUnpaidBalance
-                                        ? 'يجب دفع الرصيد المتبقي أولاً'
-                                        : 'إتمام الخروج والدفع'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {checkoutSuccess && !selected && (
-                <SuccessState
-                    title="تم تسجيل الخروج بنجاح!"
-                    message="تم إتمام عملية تسجيل الخروج والدفع للضيف بنجاح."
-                />
-            )}
-
-            {!searchLoading && !selected && !checkoutSuccess && searchQuery && (
-                <div className="rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 p-12 text-center">
-                    <p className="text-zinc-600 font-medium">ابحث عن حجز الضيف لمشاهدة الفاتورة وإتمام الخروج</p>
-                </div>
-            )}
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                {t('checkoutPage.status')}
+              </p>
+              <p className="mt-2 text-lg font-black">
+                {selected ? getReservationStatusLabel(selected.status, t) : t('common.pending')}
+              </p>
+            </div>
+          </div>
         </div>
-    );
-};
+      </DashboardHero>
 
-export default Checkout;
+      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+
+        {!selected ? (
+          <DashboardPanel
+            title={t('checkoutPage.selectTitle')}
+            description={t('checkoutPage.selectDescription')}
+          >
+            <div className="grid gap-3 md:grid-cols-3">
+              {t('checkoutPage.tips', { returnObjects: true }).map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </DashboardPanel>
+        ) : (
+          <div className="space-y-6">
+            <DashboardPanel
+              title={t('checkoutPage.summaryTitle')}
+              description={t('checkoutPage.summaryDescription')}
+              action={<StatusPill status={selected.status} />}
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    {t('common.guest')}
+                  </p>
+                  <p className="mt-2 text-lg font-black text-zinc-950">{selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                    {selected.guestEmail || t('common.noGuestEmailProvided')}
+                  </p>
+                </div>
+                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    {t('checkInPage.confirmation')}
+                  </p>
+                  <p className="mt-2 text-lg font-black text-zinc-950">
+                    <LtrText>{selected.confirmationNumber}</LtrText>
+                  </p>
+                </div>
+                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    {t('common.stay')}
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-zinc-950">
+                    {formatLocalizedDate(selected.checkInDate, i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}{' '}
+                    -{' '}
+                    {formatLocalizedDate(selected.checkOutDate, i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                    {t('roomNumber', { number: selected.roomNumber })} | {translateKnownValue(selected.roomTypeName, t)}
+                  </p>
+                </div>
+                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    {t('checkoutPage.outstandingBalanceLabel')}
+                  </p>
+                  <p
+                    className={`mt-2 text-lg font-black ${
+                      outstandingBalance > 0 ? 'text-rose-900' : 'text-emerald-700'
+                    }`}
+                  >
+                    {bill ? formatLocalizedCurrency(outstandingBalance, i18n.language) : t('loadingMessage')}
+                  </p>
+                </div>
+              </div>
+
+              {!reservationStatusRules.canCheckOut(selected.status) && (
+                <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                  {t('checkoutPage.statusBlocked', {
+                    status: getReservationStatusLabel(selected.status, t) || normalizeReservationStatusLabel(selected.status),
+                  })}
+                </div>
+              )}
+
+              {reservationStatusRules.canCheckOut(selected.status) &&
+                outstandingBalance > 0 && (
+                  <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                    {t('checkoutPage.outstandingBlocked')}
+                  </div>
+                )}
+
+              {checkoutSuccess && (
+                <div className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+                  {t('checkoutPage.successBanner')}
+                </div>
+              )}
+            </DashboardPanel>
+
+            <DashboardPanel
+              title={t('checkoutPage.finalBillTitle')}
+              description={t('checkoutPage.finalBillDescription')}
+              action={
+                billLoading ? (
+                  <span className="text-sm font-medium text-zinc-500">{t('checkoutPage.loadingBill')}</span>
+                ) : null
+              }
+            >
+              <BillBreakdown bill={bill} t={t} language={i18n.language} />
+
+              {checkoutError && (
+                <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                  {checkoutError}
+                </div>
+              )}
+            </DashboardPanel>
+
+            <DashboardPanel
+              title={t('checkoutPage.controlsTitle')}
+              description={t('checkoutPage.controlsDescription')}
+            >
+              <div className="grid gap-3 md:grid-cols-3">
+                {[
+                  {
+                    icon: Receipt,
+                    title: t('checkoutPage.billReviewTitle'),
+                    description: t('checkoutPage.billReviewDescription'),
+                  },
+                  {
+                    icon: AlertTriangle,
+                    title: t('checkoutPage.balanceGuardTitle'),
+                    description: t('checkoutPage.balanceGuardDescription'),
+                  },
+                  {
+                    icon: DoorClosed,
+                    title: t('checkoutPage.departureTitle'),
+                    description: t('checkoutPage.departureDescription'),
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <p className="mt-3 text-sm font-bold text-zinc-950">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+                        {item.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={checkoutLoading}
+                  className="inline-flex w-full items-center justify-center rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                >
+                  {t('checkoutPage.resetWorkflow')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCheckout}
+                  disabled={!canCheckOut || checkoutLoading}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                >
+                  {checkoutLoading ? (
+                    t('checkoutPage.processing')
+                  ) : checkoutSuccess ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      {t('checkoutPage.complete')}
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" />
+                      {t('checkoutPage.action')}
+                    </>
+                  )}
+                </button>
+              </div>
+            </DashboardPanel>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

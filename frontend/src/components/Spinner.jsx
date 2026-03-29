@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Spinner component for loading states
  * Displays an animated spinning loader
  */
 const Spinner = ({ size = 'md', className = '' }) => {
+    const { t } = useTranslation();
     const sizeClasses = {
         sm: 'h-4 w-4 border-2',
         md: 'h-8 w-8 border-3',
@@ -19,9 +21,9 @@ const Spinner = ({ size = 'md', className = '' }) => {
             <div
                 className={`${spinnerSize} border-blue-600 border-t-transparent rounded-full animate-spin`}
                 role="status"
-                aria-label="Loading"
+                aria-label={t('loadingLabel')}
             >
-                <span className="sr-only">Loading...</span>
+                <span className="sr-only">{t('loadingMessage')}</span>
             </div>
         </div>
     );

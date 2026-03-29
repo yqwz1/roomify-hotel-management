@@ -1,158 +1,357 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import LoadingState from '../components/common/LoadingState'
-import ErrorState from '../components/common/ErrorState'
-import StatusPill from '../components/StatusPill'
-import { LtrText } from '../components/LtrText'
-import { getReservationByConfirmationNumber, extractReservationError } from '../services/reservationService'
-import { reservationStatusRules } from '../domain/reservations/statusRules'
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowRightLeft,
+  CalendarDays,
+  CreditCard,
+  FileText,
+  Hotel,
+  Receipt,
+  UserRound,
+  XCircle,
+} from 'lucide-react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import ErrorState from '../components/common/ErrorState';
+import LoadingState from '../components/common/LoadingState';
+import StatusPill from '../components/StatusPill';
+import { LtrText } from '../components/LtrText';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
+import {
+  extractReservationError,
+  getReservationByConfirmationNumber,
+} from '../services/reservationService';
+import { reservationStatusRules } from '../domain/reservations/statusRules';
+import {
+  formatLocalizedCurrency,
+  formatLocalizedDate,
+  getReservationStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
-const formatDate = (iso) => {
-  if (!iso) return '—'
-  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
+function ActionButton({
+  icon: Icon,
+  title,
+  description,
+  onClick,
+  disabled = false,
+  tone = 'default',
+}) {
+  const toneClass =
+    tone === 'danger'
+      ? 'border-rose-200 bg-rose-50 text-rose-900 hover:border-rose-300 hover:bg-rose-100'
+      : 'border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-300 hover:bg-white';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-[1.35rem] border p-4 text-left transition disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 ${toneClass}`}
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
+        <Icon className="h-4 w-4" />
+      </span>
+      <p className="mt-3 text-sm font-bold">{title}</p>
+      <p className="mt-1 text-sm font-medium leading-6 opacity-80">{description}</p>
+    </button>
+  );
 }
 
-const money = (v) => `$${Number(v ?? 0).toFixed(2)}`
-
 export default function ReservationDetails() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { confirmationNumber: routeConfirmation } = useParams()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { confirmationNumber: routeConfirmation } = useParams();
+  const { t, i18n } = useTranslation();
 
   const confirmationNumber = useMemo(() => {
-    const fromState = location.state?.confirmationNumber
-    return String(fromState ?? routeConfirmation ?? '').trim()
-  }, [location.state?.confirmationNumber, routeConfirmation])
+    const fromState = location.state?.confirmationNumber;
+    return String(fromState ?? routeConfirmation ?? '').trim();
+  }, [location.state?.confirmationNumber, routeConfirmation]);
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [reservation, setReservation] = useState(null)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reservation, setReservation] = useState(null);
 
   useEffect(() => {
     const run = async () => {
       if (!confirmationNumber) {
-        setError('Missing confirmation number.')
-        setLoading(false)
-        return
+        setError(t('reservationDetailsPage.missingConfirmation'));
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const r = await getReservationByConfirmationNumber(confirmationNumber)
-        setReservation(r)
+        const result = await getReservationByConfirmationNumber(confirmationNumber);
+        setReservation(result);
       } catch (err) {
-        setError(extractReservationError(err))
+        setError(extractReservationError(err));
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    run()
-  }, [confirmationNumber])
+    };
 
-  if (loading) return <LoadingState message="Loading reservation details..." />
-  if (error) return <ErrorState title="Could not load reservation" message={error} onRetry={() => navigate(0)} />
-  if (!reservation) return <ErrorState title="Reservation not found" message="No reservation data is available." />
+    run();
+  }, [confirmationNumber, t]);
+
+  if (loading) {
+    return <LoadingState message={t('reservationDetailsPage.loading')} />;
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        title={t('reservationDetailsPage.errorTitle')}
+        message={error}
+        onRetry={() => navigate(0)}
+      />
+    );
+  }
+
+  if (!reservation) {
+    return (
+      <ErrorState
+        title={t('reservationDetailsPage.emptyTitle')}
+        message={t('reservationDetailsPage.emptyDescription')}
+      />
+    );
+  }
+
+  const guestName = reservation.guestName || reservation.guest?.name || t('common.guest');
+  const guestEmail = reservation.guestEmail || reservation.guest?.email || t('common.noGuestEmailProvided');
+  const roomNumber = reservation.roomNumber || reservation.room?.roomNumber || '-';
+  const roomTypeName = reservation.roomTypeName || reservation.room?.roomTypeName || t('unassigned');
+  const floor = reservation.floor || reservation.room?.floor || '-';
+  const nights = reservation.nights ?? reservation.dates?.nights ?? 0;
+  const totalPrice = reservation.totalPrice ?? reservation.pricing?.totalPrice ?? 0;
 
   return (
-    <div className="h-full bg-zinc-50 p-6 lg:p-8">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-extrabold text-black">Reservation Details</h1>
-            <p className="mt-1 text-sm font-medium text-zinc-500">
-              Confirmation <span className="font-mono font-bold text-zinc-700"><LtrText>{reservation.confirmationNumber}</LtrText></span>
-            </p>
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <DashboardHero
+        eyebrow={t('reservationDetailsPage.heroEyebrow')}
+        title={t('reservationDetailsPage.heroTitle')}
+        description={t('reservationDetailsPage.heroDescription')}
+        meta={[
+          getReservationStatusLabel(reservation.status, t),
+          t('roomNumber', { number: roomNumber }),
+          t('nightsCount', { count: nights }),
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            {t('reservationDetailsPage.confirmationNumber')}
+          </p>
+          <p className="mt-4 text-2xl font-black">
+            <LtrText>{reservation.confirmationNumber}</LtrText>
+          </p>
+          <div className="mt-4 flex items-center gap-3">
+            <StatusPill status={reservation.status} />
           </div>
-          <StatusPill status={reservation.status} />
+        </div>
+      </DashboardHero>
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-6">
+          <DashboardPanel
+            title={t('reservationDetailsPage.overviewTitle')}
+            description={t('reservationDetailsPage.overviewDescription')}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <UserRound className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('common.guest')}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">{guestName}</p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">{guestEmail}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <Hotel className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('common.room')}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">
+                      {t('roomNumber', { number: roomNumber })}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                      {translateKnownValue(roomTypeName, t)} | {t('floorNum', { floor })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <CalendarDays className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('reservationDetailsPage.stayWindow')}
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-zinc-950">
+                      {formatLocalizedDate(reservation.checkInDate, i18n.language, {
+                        weekday: 'short',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                      {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
+                        weekday: 'short',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <Receipt className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('reservationDetailsPage.financials')}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">
+                      {formatLocalizedCurrency(totalPrice, i18n.language)}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                      {t('nightsCount', { count: nights })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DashboardPanel>
+
+          <DashboardPanel
+            title={t('reservationDetailsPage.actionCenterTitle')}
+            description={t('reservationDetailsPage.actionCenterDescription')}
+          >
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <ActionButton
+                icon={CreditCard}
+                title={t('reservationDetailsPage.checkInTitle')}
+                description={t('reservationDetailsPage.checkInDescription')}
+                onClick={() =>
+                  navigate('/check-in', {
+                    state: { initialQuery: reservation.confirmationNumber },
+                  })
+                }
+                disabled={!reservationStatusRules.canCheckIn(reservation.status)}
+              />
+              <ActionButton
+                icon={ArrowRightLeft}
+                title={t('reservationDetailsPage.modifyTitle')}
+                description={t('reservationDetailsPage.modifyDescription')}
+                onClick={() =>
+                  navigate('/reservations/modify', {
+                    state: { initialQuery: reservation.confirmationNumber },
+                  })
+                }
+                disabled={!reservationStatusRules.canModify(reservation.status)}
+              />
+              <ActionButton
+                icon={XCircle}
+                title={t('reservationDetailsPage.cancelTitle')}
+                description={t('reservationDetailsPage.cancelDescription')}
+                onClick={() =>
+                  navigate('/reservations/cancel', {
+                    state: { initialQuery: reservation.confirmationNumber },
+                  })
+                }
+                disabled={!reservationStatusRules.canCancel(reservation.status)}
+                tone="danger"
+              />
+              <ActionButton
+                icon={Receipt}
+                title={t('checkoutTitle')}
+                description={t('reservationDetailsPage.checkoutDescription')}
+                onClick={() =>
+                  navigate('/checkout', {
+                    state: { initialQuery: reservation.confirmationNumber },
+                  })
+                }
+                disabled={!reservationStatusRules.canCheckOut(reservation.status)}
+              />
+              <ActionButton
+                icon={FileText}
+                title={t('reservationDetailsPage.invoiceTitle')}
+                description={t('reservationDetailsPage.invoiceDescription')}
+                onClick={() =>
+                  navigate('/invoice-preview', {
+                    state: { confirmationNumber: reservation.confirmationNumber },
+                  })
+                }
+              />
+            </div>
+          </DashboardPanel>
         </div>
 
-        <Card className="rounded-3xl border-zinc-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-black">Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Guest</dt>
-                <dd className="mt-1 font-bold text-black">{reservation.guestName || '—'}</dd>
-                <dd className="text-zinc-500">{reservation.guestEmail || '—'}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Room</dt>
-                <dd className="mt-1 font-bold text-black">Room {reservation.roomNumber || '—'}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Check-in</dt>
-                <dd className="mt-1 font-bold text-black">{formatDate(reservation.checkInDate)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Check-out</dt>
-                <dd className="mt-1 font-bold text-black">{formatDate(reservation.checkOutDate)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Nights</dt>
-                <dd className="mt-1 font-bold text-black">{reservation.nights ?? '—'}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Total</dt>
-                <dd className="mt-1 font-extrabold text-rose-900">{money(reservation.totalPrice)}</dd>
-              </div>
+        <div className="space-y-6">
+          <DashboardPanel
+            title={t('reservationDetailsPage.factsTitle')}
+            description={t('reservationDetailsPage.factsDescription')}
+            action={<StatusPill status={reservation.status} />}
+          >
+            <dl className="space-y-4">
+              {[
+                {
+                  label: t('reservationDetailsPage.confirmationNumber'),
+                  value: <LtrText>{reservation.confirmationNumber}</LtrText>,
+                },
+                { label: t('reservationDetailsPage.guestName'), value: guestName },
+                { label: t('reservationDetailsPage.guestEmail'), value: guestEmail },
+                {
+                  label: t('reservationDetailsPage.roomNumber'),
+                  value: t('roomNumber', { number: roomNumber }),
+                },
+                {
+                  label: t('reservationDetailsPage.roomType'),
+                  value: translateKnownValue(roomTypeName, t),
+                },
+                {
+                  label: t('reservationDetailsPage.nightlyRate'),
+                  value: formatLocalizedCurrency(reservation.roomRate, i18n.language),
+                },
+                { label: t('subtotal'), value: formatLocalizedCurrency(reservation.subtotal, i18n.language) },
+                { label: t('taxes10'), value: formatLocalizedCurrency(reservation.taxes, i18n.language) },
+                {
+                  label: t('reservationDetailsPage.totalPrice'),
+                  value: formatLocalizedCurrency(totalPrice, i18n.language),
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3"
+                >
+                  <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
+                  <dd className="text-sm font-bold text-zinc-950">{item.value}</dd>
+                </div>
+              ))}
             </dl>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="outline"
-                className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-                onClick={() => navigate('/invoice-preview', { state: { confirmationNumber: reservation.confirmationNumber } })}
-              >
-                View Invoice
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-                onClick={() => navigate('/checkout', { state: { initialQuery: reservation.confirmationNumber } })}
-                disabled={!reservationStatusRules.canCheckOut(reservation.status)}
-                title={!reservationStatusRules.canCheckOut(reservation.status) ? 'Checkout is only available for CHECKED_IN reservations.' : undefined}
-              >
-                Go to Checkout
-              </Button>
-              <Button
-                className="rounded-full bg-black hover:bg-zinc-800 text-white"
-                onClick={() => navigate('/check-in', { state: { initialQuery: reservation.confirmationNumber } })}
-                disabled={!reservationStatusRules.canCheckIn(reservation.status)}
-                title={!reservationStatusRules.canCheckIn(reservation.status) ? 'Check-in is only available for CONFIRMED reservations.' : undefined}
-              >
-                Go to Check-In
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-                onClick={() => navigate('/reservations/modify', { state: { initialQuery: reservation.confirmationNumber } })}
-                disabled={!reservationStatusRules.canModify(reservation.status)}
-              >
-                Modify
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
-                onClick={() => navigate('/reservations/cancel', { state: { initialQuery: reservation.confirmationNumber } })}
-                disabled={!reservationStatusRules.canCancel(reservation.status)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </DashboardPanel>
+        </div>
       </div>
     </div>
-  )
+  );
 }
-

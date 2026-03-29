@@ -9,6 +9,7 @@ export default function Header({ onMenuToggle }) {
   const { isAuthenticated, user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const brandName = t('brandName');
 
   const handleLogout = () => {
     logout();
@@ -16,11 +17,11 @@ export default function Header({ onMenuToggle }) {
   };
 
   const roleLabel = hasRole('ROLE_MANAGER')
-    ? 'Manager'
+    ? t('roleManager')
     : hasRole('ROLE_STAFF')
-      ? 'Staff'
+      ? t('roleStaff')
       : hasRole('ROLE_GUEST')
-        ? 'Guest'
+        ? t('roleGuest')
         : null;
 
   return (
@@ -30,11 +31,12 @@ export default function Header({ onMenuToggle }) {
         {/* Left: hamburger + brand */}
         <div className="flex items-center gap-3">
           {/* Hamburger – only visible on mobile when authenticated */}
-          {isAuthenticated && (
+          {isAuthenticated && onMenuToggle && (
             <button
+              type="button"
               onClick={onMenuToggle}
               className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition"
-              aria-label="Open navigation menu"
+              aria-label={t('openNavigation')}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -42,7 +44,7 @@ export default function Header({ onMenuToggle }) {
 
           <Link to="/" className="text-black">
             <span className="text-2xl font-black tracking-tighter">
-              Roomify
+              {brandName}
             </span>
           </Link>
         </div>
@@ -50,7 +52,7 @@ export default function Header({ onMenuToggle }) {
         {/* Center: Nav links – desktop only */}
         <nav className="hidden md:flex items-center gap-8">
           <NavLink to="/" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
-            {t('dashboard') || 'Home'}
+            {t('homeNav')}
           </NavLink>
           {!isAuthenticated && (
             <NavLink to="/bookings" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
@@ -59,7 +61,7 @@ export default function Header({ onMenuToggle }) {
           )}
           {isAuthenticated && hasRole('ROLE_MANAGER') && (
             <NavLink to="/rooms-management" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
-              {t('roomsManagement') || t('rooms')}
+              {t('roomsManagement')}
             </NavLink>
           )}
         </nav>
@@ -74,7 +76,7 @@ export default function Header({ onMenuToggle }) {
                 to="/login"
                 className="px-6 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-bold"
               >
-                {t('signIn') || 'Sign In'}
+                {t('signIn')}
               </Link>
             </div>
           ) : (
@@ -83,12 +85,12 @@ export default function Header({ onMenuToggle }) {
               <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-white border border-zinc-200 rounded-full">
                 <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                   <span className="text-[10px] font-bold text-white uppercase">
-                    {user?.username?.[0] || user?.email?.[0] || 'U'}
+                    {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
                   </span>
                 </div>
                 <span className="text-sm font-medium text-black max-w-[120px] truncate">
-                  {user?.username || t('user')}
-                </span>
+                {user?.username || t('user')}
+              </span>
                 {roleLabel && (
                   <span className="text-xs text-zinc-400 border-s border-zinc-200 ps-2">{roleLabel}</span>
                 )}

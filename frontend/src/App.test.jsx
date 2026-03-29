@@ -27,9 +27,12 @@ beforeAll(() => {
 describe('App', () => {
   it('renders title', async () => {
     render(<App />)
-    // "Roomify" is in Header
     expect(screen.getAllByText(/Roomify/i).length).toBeGreaterThan(0)
-    // "Welcome to Roomify" is in Home page
-    expect(screen.getByText('Welcome to Roomify')).toBeTruthy()
+    expect(
+      screen.getByRole('heading', {
+        name: /Run rooms, reservations, staff, and billing from one polished PMS\./i,
+      })
+    ).toBeTruthy()
+    expect(screen.getAllByRole('link', { name: /Sign In/i }).length).toBeGreaterThan(0)
   })
 })

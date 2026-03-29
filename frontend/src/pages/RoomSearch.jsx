@@ -1,363 +1,410 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowRight,
+  BedDouble,
+  CalendarRange,
+  Search,
+  SlidersHorizontal,
+  Users,
+} from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSearch } from '../hooks/useSearch';
 import DateRangePicker from '../components/DateRangePicker';
 import RoomFilters from '../components/RoomFilters';
-import ErrorBanner from '../components/ErrorBanner';
-import { useTranslation } from 'react-i18next';
+import DashboardHero from '../components/dashboard/DashboardHero';
+import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useSearch } from '../hooks/useSearch';
+import {
+  formatLocalizedCurrency,
+  getRoomStatusLabel,
+  translateKnownValue,
+} from '../utils/localization';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
 
-const STATUS_COLORS = {
-    AVAILABLE: 'border border-zinc-300 bg-white text-black',
-    OCCUPIED: 'bg-black text-white',
-    NEEDS_CLEANING: 'bg-zinc-200 text-black',
-    UNDER_MAINTENANCE: 'bg-zinc-100 text-zinc-600',
+const STATUS_STYLES = {
+  AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  OCCUPIED: 'border-zinc-300 bg-zinc-100 text-zinc-700',
+  NEEDS_CLEANING: 'border-amber-200 bg-amber-50 text-amber-900',
+  UNDER_MAINTENANCE: 'border-rose-200 bg-rose-50 text-rose-900',
 };
 
-const STATUS_LABELS = {
-    AVAILABLE: 'available',
-    OCCUPIED: 'occupied',
-    NEEDS_CLEANING: 'needsCleaning',
-    UNDER_MAINTENANCE: 'underMaintenance',
-};
-
-// Room type → display icon
-const typeIcon = (name = '') => {
-    const n = name.toLowerCase();
-    if (n.includes('suite')) return '🛎️';
-    if (n.includes('family')) return '👨‍👩‍👧‍👦';
-    if (n.includes('deluxe')) return '🌟';
-    return '🛏️';
-};
-
-// Sort options shown in the UI
-const SORT_OPTIONS = [
-    { labelKey: 'sortPriceAsc', defaultLabel: 'Price: Low → High', sortBy: 'PRICE', sortDirection: 'ASC' },
-    { labelKey: 'sortPriceDesc', defaultLabel: 'Price: High → Low', sortBy: 'PRICE', sortDirection: 'DESC' },
-    { labelKey: 'sortTypeAsc', defaultLabel: 'Type A → Z', sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
-    { labelKey: 'sortTypeDesc', defaultLabel: 'Type Z → A', sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
-];
-
-// ─── Skeleton card for loading state ─────────────────────────────────────────
-function SkeletonCard() {
-    return (
-        <div className="flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-sm animate-pulse">
-            <div className="h-40 rounded-t-3xl bg-zinc-100" />
-            <div className="flex flex-col gap-4 p-6">
-                <div className="h-5 w-2/3 rounded-full bg-zinc-200" />
-                <div className="h-4 w-1/2 rounded-full bg-zinc-100" />
-                <div className="h-12 w-full rounded-full bg-zinc-200 mt-auto" />
-            </div>
-        </div>
-    );
+function SearchSkeletonCard() {
+  return (
+    <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
+      <div className="h-40 bg-zinc-100" />
+      <div className="space-y-4 p-5">
+        <div className="h-5 w-1/2 rounded-full bg-zinc-200" />
+        <div className="h-4 w-2/3 rounded-full bg-zinc-100" />
+        <div className="h-4 w-1/3 rounded-full bg-zinc-100" />
+        <div className="h-12 rounded-full bg-zinc-200" />
+      </div>
+    </div>
+  );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-/**
- * RoomSearch  –  /search
- * Staff / Manager view: search available rooms by date + filters via live API.
- * Endpoint: GET /api/rooms/search (public — no auth header needed).
- * "Book Now" navigates to /book?roomId=<id> with dates in state.
- */
 export default function RoomSearch() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, i18n } = useTranslation();
+  const pageTx = 'roomSearchPage';
 
-    const todayDate = new Date();
-    const today = todayDate.toISOString().split('T')[0];
-    const tomorrowDate = new Date(todayDate);
-    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-    const tomorrow = tomorrowDate.toISOString().split('T')[0];
+  const sortOptions = useMemo(
+    () => [
+      { label: t('sortPriceAsc'), sortBy: 'PRICE', sortDirection: 'ASC' },
+      { label: t('sortPriceDesc'), sortBy: 'PRICE', sortDirection: 'DESC' },
+      { label: t('sortTypeAsc'), sortBy: 'ROOM_TYPE', sortDirection: 'ASC' },
+      { label: t('sortTypeDesc'), sortBy: 'ROOM_TYPE', sortDirection: 'DESC' },
+    ],
+    [t]
+  );
 
-    const recoveredCheckIn = String(location.state?.checkIn ?? '').trim();
-    const recoveredCheckOut = String(location.state?.checkOut ?? '').trim();
-    const hasRecoveredDates = Boolean(
-        recoveredCheckIn &&
-        recoveredCheckOut &&
-        recoveredCheckOut > recoveredCheckIn
-    );
+  const todayDate = new Date();
+  const today = todayDate.toISOString().split('T')[0];
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = tomorrowDate.toISOString().split('T')[0];
 
-    const [checkIn, setCheckIn] = useState(() => (hasRecoveredDates ? recoveredCheckIn : today));
-    const [checkOut, setCheckOut] = useState(() => (hasRecoveredDates ? recoveredCheckOut : tomorrow));
-    const [filters, setFilters] = useState(EMPTY_FILTERS);
-    const [sortOption, setSortOption] = useState(SORT_OPTIONS[0]);
+  const recoveredCheckIn = String(location.state?.checkIn ?? '').trim();
+  const recoveredCheckOut = String(location.state?.checkOut ?? '').trim();
+  const hasRecoveredDates = Boolean(
+    recoveredCheckIn &&
+      recoveredCheckOut &&
+      recoveredCheckOut > recoveredCheckIn
+  );
 
-    const {
-        results,
-        totalResults,
-        loading,
-        error,
-        hasSearched,
-        search,
-        clearError,
-    } = useSearch();
+  const [checkIn, setCheckIn] = useState(() => (hasRecoveredDates ? recoveredCheckIn : today));
+  const [checkOut, setCheckOut] = useState(() => (hasRecoveredDates ? recoveredCheckOut : tomorrow));
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [sortOptionIndex, setSortOptionIndex] = useState(0);
 
-    useEffect(() => {
-        if (!hasRecoveredDates) {
-            return;
-        }
+  const { results, totalResults, loading, error, hasSearched, search, clearError } = useSearch();
+  const sortOption = sortOptions[sortOptionIndex];
 
-        search({
-            checkIn: recoveredCheckIn,
-            checkOut: recoveredCheckOut,
-            sortBy: SORT_OPTIONS[0].sortBy,
-            sortDirection: SORT_OPTIONS[0].sortDirection,
-        });
-    }, [hasRecoveredDates, recoveredCheckIn, recoveredCheckOut, search]);
+  useEffect(() => {
+    if (!hasRecoveredDates) return;
 
-    // ── Derived ──────────────────────────────────────────────────────────────
-    const nights = useMemo(() => {
-        if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
-        return Math.round((new Date(checkOut) - new Date(checkIn)) / 86_400_000);
-    }, [checkIn, checkOut]);
+    search({
+      checkIn: recoveredCheckIn,
+      checkOut: recoveredCheckOut,
+      sortBy: sortOptions[0].sortBy,
+      sortDirection: sortOptions[0].sortDirection,
+    });
+  }, [hasRecoveredDates, recoveredCheckIn, recoveredCheckOut, search, sortOptions]);
 
-    // ── Handlers ─────────────────────────────────────────────────────────────
-    const handleSearch = () => {
-        if (!checkIn || !checkOut) return;
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
+    return Math.round((new Date(checkOut) - new Date(checkIn)) / 86400000);
+  }, [checkIn, checkOut]);
 
-        search({
-            checkIn,
-            checkOut,
-            roomType: filters.type || undefined,
-            minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
-            maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
-            guestCapacity: filters.guestCapacity ? Number(filters.guestCapacity) : undefined,
-            sortBy: sortOption.sortBy,
-            sortDirection: sortOption.sortDirection,
-        });
-    };
+  const startingPrice = useMemo(() => {
+    if (!results.length) return null;
+    return results.reduce((lowest, room) => {
+      const price = Number(room.roomType?.basePrice ?? 0);
+      return lowest === null || price < lowest ? price : lowest;
+    }, null);
+  }, [results]);
 
-    const handleFiltersChange = (newFilters) => {
-        setFilters(newFilters);
-    };
+  const roomTypeOptions = useMemo(
+    () =>
+      [...new Set(results.map((room) => room.roomType?.name).filter(Boolean))].map((name) => ({
+        value: name,
+        label: name,
+      })),
+    [results]
+  );
 
-    const handleClearFilters = () => {
-        setFilters(EMPTY_FILTERS);
-    };
+  const handleSearch = () => {
+    if (!checkIn || !checkOut) return;
 
-    const handleBookNow = (room) => {
-        navigate(`/book?roomId=${room.id}`, {
-            state: { checkIn, checkOut, room },
-        });
-    };
+    search({
+      checkIn,
+      checkOut,
+      roomType: filters.type || undefined,
+      minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
+      maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+      guestCapacity: filters.guestCapacity ? Number(filters.guestCapacity) : undefined,
+      sortBy: sortOption.sortBy,
+      sortDirection: sortOption.sortDirection,
+    });
+  };
 
-    // ─────────────────────────────────────────────────────────────────────────
-    return (
-        <div className="h-full bg-zinc-50 p-6 lg:p-8">
+  const handleBookNow = (room) => {
+    navigate(`/book?roomId=${room.id}`, {
+      state: { checkIn, checkOut, room },
+    });
+  };
 
-            {/* ── Header ── */}
-            <div className="mb-8">
-                <h1 className="text-4xl font-extrabold text-black tracking-tight">{t('roomSearchTitle') || 'Room Search'}</h1>
-                <p className="mt-2 text-sm font-medium text-zinc-500">
-                    {t('roomSearchDesc') || 'Find available rooms for your guests — live availability from the database.'}
-                </p>
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <DashboardHero
+        eyebrow={t(`${pageTx}.heroEyebrow`)}
+        title={t('roomSearchTitle')}
+        description={t('roomSearchDesc')}
+        meta={[
+          t('nightsCount', { count: nights || 0 }),
+          hasSearched ? t(`${pageTx}.matchedCount`, { count: totalResults }) : t('common.pending'),
+          hasRecoveredDates ? t(`${pageTx}.recoveredContext`) : t(`${pageTx}.manualSearch`),
+        ]}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+            {t(`${pageTx}.snapshotTitle`)}
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                {t('common.dates')}
+              </p>
+              <p className="mt-2 text-lg font-black">
+                {checkIn} - {checkOut}
+              </p>
             </div>
-
-            {/* ── Error Banner ── */}
-            <div className="mb-4">
-                <ErrorBanner message={error} onClose={clearError} />
+            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                {t(`${pageTx}.startingRate`)}
+              </p>
+              <p className="mt-2 text-lg font-black">
+                {startingPrice == null
+                  ? t(`${pageTx}.notLoaded`)
+                  : formatLocalizedCurrency(startingPrice, i18n.language)}
+              </p>
             </div>
-
-            {/* ── Date Picker + Sort + Search Button ── */}
-            <div className="mb-6 rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
-                <h2 className="mb-4 text-sm font-bold text-zinc-500 uppercase tracking-widest">{t('selectStayDates') || 'Select Stay Dates'}</h2>
-
-                <DateRangePicker
-                    checkIn={checkIn}
-                    checkOut={checkOut}
-                    onCheckInChange={setCheckIn}
-                    onCheckOutChange={setCheckOut}
-                />
-
-                {nights > 0 && (
-                    <p className="mt-3 text-sm text-black font-bold">
-                        📆 {t('nightsSelected', { count: nights }) || `${nights} night(s) selected`}
-                    </p>
-                )}
-
-                {/* Sort selector + Search button */}
-                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                        <label htmlFor="sort-select" className="text-xs font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">
-                            {t('sortBy') || 'Sort by:'}
-                        </label>
-                        <select
-                            id="sort-select"
-                            value={SORT_OPTIONS.indexOf(sortOption)}
-                            onChange={(e) => setSortOption(SORT_OPTIONS[Number(e.target.value)])}
-                            className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-bold text-black focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
-                        >
-                            {SORT_OPTIONS.map((opt, i) => (
-                                <option key={opt.labelKey} value={i}>{t(opt.labelKey) || opt.defaultLabel}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <button
-                        onClick={handleSearch}
-                        disabled={loading || !checkIn || !checkOut || checkOut <= checkIn}
-                        className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-400 w-full sm:w-auto"
-                    >
-                        {loading ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                </svg>
-                                {t('searching') || 'Searching…'}
-                            </span>
-                        ) : (t('searchRoomsButton') || '🔍 Search Rooms')}
-                    </button>
-                </div>
-            </div>
-
-            {/* ── Filters ── */}
-            <div className="mb-6">
-                <RoomFilters
-                    filters={filters}
-                    onFiltersChange={handleFiltersChange}
-                    onClear={handleClearFilters}
-                    showStatus={false}
-                    showFloor={false}
-                    showGuestCapacity={true}
-                />
-            </div>
-
-            {/* ── Results Header ── */}
-            {hasSearched && !loading && (
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-xl font-extrabold text-black">
-                        {t('roomsFound', { count: totalResults }) || `${totalResults} Available Room(s) Found`}
-                    </h2>
-                    {nights > 0 && totalResults > 0 && (
-                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                            {t('pricesShownPerNight', { count: nights }) || `Prices shown per night · ${nights}-night stay`}
-                        </p>
-                    )}
-                </div>
-            )}
-
-            {/* ── Loading Skeletons ── */}
-            {loading && (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
-                </div>
-            )}
-
-            {/* ── No search yet ── */}
-            {!loading && !hasSearched && (
-                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent py-24 text-center">
-                    <span className="mb-6 text-6xl">🏨</span>
-                    <p className="text-xl font-bold text-black">{t('readyToSearch') || 'Ready to search'}</p>
-                    <p className="mt-2 text-sm font-medium text-zinc-500">
-                        {t('searchInstructions') || 'Select your dates and click Search Rooms to see live availability.'}
-                    </p>
-                </div>
-            )}
-
-            {/* ── No results ── */}
-            {!loading && hasSearched && results.length === 0 && !error && (
-                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-zinc-300 bg-transparent py-20 text-center">
-                    <span className="mb-6 text-5xl">🔍</span>
-                    <p className="text-xl font-bold text-black">{t('noRoomsAvailable') || 'No rooms available'}</p>
-                    <p className="mt-2 text-sm font-medium text-zinc-500">
-                        {t('tryDifferentDates') || 'Try different dates, adjust the price range, or remove type filters.'}
-                    </p>
-                </div>
-            )}
-
-            {/* ── Room Cards Grid ── */}
-            {!loading && results.length > 0 && (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {results.map((room) => {
-                        const amenities = room.roomType?.amenities
-                            ? room.roomType.amenities.split(',').map((a) => a.trim()).filter(Boolean)
-                            : [];
-                        const totalCost = nights > 0 && room.roomType?.basePrice
-                            ? (room.roomType.basePrice * nights).toFixed(2)
-                            : null;
-
-                        return (
-                            <div
-                                key={room.id}
-                                className="flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
-                            >
-                                {/* Image / icon */}
-                                <div className="flex h-40 items-center justify-center rounded-t-3xl bg-zinc-100">
-                                    <span className="text-5xl drop-shadow-sm">{typeIcon(room.roomType?.name)}</span>
-                                </div>
-
-                                <div className="flex flex-1 flex-col p-6 sm:p-8">
-                                    {/* Title & Status badge */}
-                                    <div className="mb-4 flex items-start justify-between gap-2">
-                                        <div>
-                                            <h3 className="text-2xl font-extrabold text-black">{t('roomNum', { number: room.roomNumber }) || `Room ${room.roomNumber}`}</h3>
-                                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mt-1">
-                                                {room.floor ? `${t('floorNum', { floor: room.floor }) || `Floor ${room.floor}`} · ` : ''}{room.roomType?.name ?? '—'}
-                                            </p>
-                                        </div>
-                                        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${STATUS_COLORS[room.status] ?? 'bg-zinc-100 text-zinc-600'}`}>
-                                            {t(STATUS_LABELS[room.status]) || room.status}
-                                        </span>
-                                    </div>
-
-                                    {/* Description */}
-                                    {room.roomType?.description && (
-                                        <p className="mb-5 text-sm font-medium text-zinc-500 line-clamp-2">
-                                            {room.roomType.description}
-                                        </p>
-                                    )}
-
-                                    {/* Amenity tags */}
-                                    {amenities.length > 0 && (
-                                        <div className="mb-5 flex flex-wrap gap-2">
-                                            {amenities.slice(0, 3).map((a) => (
-                                                <span key={a} className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-bold text-black">{a}</span>
-                                            ))}
-                                            {amenities.length > 3 && (
-                                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-500">
-                                                    +{amenities.length - 3}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Price & capacity */}
-                                    <div className="mt-auto flex items-end justify-between border-t border-zinc-100 pt-5">
-                                        <div>
-                                            <span className="text-3xl font-extrabold text-black">
-                                                ${room.roomType?.basePrice?.toFixed(2) ?? '—'}
-                                            </span>
-                                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">/ {t('perNight') || 'night'}</span>
-                                            {totalCost && (
-                                                <p className="text-xs font-bold text-black mt-1">
-                                                    {t('totalCost') || 'Total:'} ${totalCost}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {room.roomType?.maxGuests && (
-                                            <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-bold text-black">
-                                                👥 {t('upToGuests', { count: room.roomType.maxGuests }) || `up to ${room.roomType.maxGuests}`}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Book Now */}
-                                    <button
-                                        onClick={() => handleBookNow(room)}
-                                        className="mt-6 w-full rounded-full bg-black py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-zinc-400"
-                                    >
-                                        {t('bookNow') || 'Book Now'}
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+          </div>
         </div>
-    );
+      </DashboardHero>
+
+      <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+        <div className="space-y-6">
+          <DashboardPanel
+            title={t(`${pageTx}.searchControlsTitle`)}
+            description={t(`${pageTx}.searchControlsDescription`)}
+          >
+            <div className="space-y-5">
+              {error && (
+                <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                  <div className="flex items-start justify-between gap-3">
+                    <span>{error}</span>
+                    <button
+                      type="button"
+                      onClick={clearError}
+                      className="text-xs font-bold uppercase tracking-[0.18em] text-rose-800"
+                    >
+                      {t('dismissError')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <DateRangePicker
+                checkIn={checkIn}
+                checkOut={checkOut}
+                onCheckInChange={setCheckIn}
+                onCheckOutChange={setCheckOut}
+              />
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="room-search-sort"
+                  className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
+                >
+                  {t(`${pageTx}.sortResults`)}
+                </label>
+                <select
+                  id="room-search-sort"
+                  value={sortOptionIndex}
+                  onChange={(event) => setSortOptionIndex(Number(event.target.value))}
+                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                >
+                  {sortOptions.map((option, index) => (
+                    <option key={`${option.sortBy}-${option.sortDirection}`} value={index}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSearch}
+                disabled={loading || !checkIn || !checkOut || checkOut <= checkIn}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+              >
+                <Search className="h-4 w-4" />
+                {loading ? t(`${pageTx}.searchingRooms`) : t('searchRoomsButton')}
+              </button>
+            </div>
+          </DashboardPanel>
+
+          <RoomFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClear={() => setFilters(EMPTY_FILTERS)}
+            roomTypeOptions={roomTypeOptions}
+            showStatus={false}
+            showFloor={false}
+            showGuestCapacity={true}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <DashboardPanel
+            title={t(`${pageTx}.searchResultsTitle`)}
+            description={
+              hasSearched
+                ? t(`${pageTx}.matchedCount`, { count: totalResults })
+                : t(`${pageTx}.runSearchPrompt`)
+            }
+            action={
+              hasSearched && results.length > 0 ? (
+                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                  {t(`${pageTx}.stayBadge`, { count: nights })}
+                </span>
+              ) : null
+            }
+          >
+            {!hasSearched && !loading && (
+              <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
+                <CalendarRange className="mx-auto h-10 w-10 text-zinc-400" />
+                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.readyTitle`)}</p>
+                <p className="mt-2 text-sm font-medium text-zinc-500">
+                  {t(`${pageTx}.readyDescription`)}
+                </p>
+              </div>
+            )}
+
+            {loading && (
+              <div className="grid gap-5 md:grid-cols-2">
+                {[...Array(4)].map((_, index) => (
+                  <SearchSkeletonCard key={index} />
+                ))}
+              </div>
+            )}
+
+            {!loading && hasSearched && results.length === 0 && !error && (
+              <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
+                <SlidersHorizontal className="mx-auto h-10 w-10 text-zinc-400" />
+                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.unavailableTitle`)}</p>
+                <p className="mt-2 text-sm font-medium text-zinc-500">
+                  {t(`${pageTx}.unavailableDescription`)}
+                </p>
+              </div>
+            )}
+
+            {!loading && results.length > 0 && (
+              <div className="grid gap-5 md:grid-cols-2">
+                {results.map((room) => {
+                  const basePrice = Number(room.roomType?.basePrice ?? 0);
+                  const totalCost = nights > 0 ? basePrice * nights : basePrice;
+                  const amenities = room.roomType?.amenities
+                    ? room.roomType.amenities
+                        .split(',')
+                        .map((item) => item.trim())
+                        .filter(Boolean)
+                    : [];
+
+                  return (
+                    <article
+                      key={room.id}
+                      className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-28px_rgba(15,23,42,0.24)]"
+                    >
+                      <div className="flex h-40 items-center justify-center bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
+                        <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
+                          <BedDouble className="h-7 w-7" />
+                        </span>
+                      </div>
+
+                      <div className="space-y-4 p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xl font-black tracking-tight text-zinc-950">
+                              {t('roomNumber', { number: room.roomNumber })}
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-zinc-500">
+                              {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
+                              {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                              STATUS_STYLES[room.status] ||
+                              'border-zinc-200 bg-zinc-50 text-zinc-500'
+                            }`}
+                          >
+                            {getRoomStatusLabel(room.status, t)}
+                          </span>
+                        </div>
+
+                        {room.roomType?.description && (
+                          <p className="text-sm font-medium leading-6 text-zinc-500">
+                            {room.roomType.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-2">
+                          {amenities.slice(0, 3).map((amenity) => (
+                            <span
+                              key={amenity}
+                              className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
+                            >
+                              {translateKnownValue(amenity, t)}
+                            </span>
+                          ))}
+                          {amenities.length > 3 && (
+                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600">
+                              {t(`${pageTx}.moreAmenities`, { count: amenities.length - 3 })}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                              {t(`${pageTx}.rateLabel`)}
+                            </p>
+                            <p className="mt-2 text-sm font-bold text-zinc-950">
+                              {formatLocalizedCurrency(basePrice, i18n.language)} / {t('perNight')}
+                            </p>
+                          </div>
+                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                              {t(`${pageTx}.capacityLabel`)}
+                            </p>
+                            <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
+                              <Users className="h-4 w-4 text-zinc-400" />
+                              {t('upToGuests', { count: room.roomType?.maxGuests ?? '-' })}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between border-t border-zinc-100 pt-4">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                              {t('common.stayTotal')}
+                            </p>
+                            <p className="mt-1 text-lg font-black text-zinc-950">
+                              {formatLocalizedCurrency(totalCost, i18n.language)}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleBookNow(room)}
+                            className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+                          >
+                            {t(`${pageTx}.bookRoomCta`)}
+                            <ArrowRight className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </DashboardPanel>
+        </div>
+      </div>
+    </div>
+  );
 }

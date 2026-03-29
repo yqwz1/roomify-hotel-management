@@ -1,21 +1,23 @@
 import { useTranslation } from 'react-i18next';
 
 export const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
+
+  const resolvedLanguage = i18n?.resolvedLanguage ?? i18n?.language ?? 'en';
+  const isArabic = resolvedLanguage.startsWith('ar');
 
   const toggleLanguage = () => {
-    const currentLang = i18n?.language ?? 'en';
-    const newLang = currentLang.startsWith('ar') ? 'en' : 'ar';
-    i18n?.changeLanguage?.(newLang);
-    // Note: the i18n 'languageChanged' event listener in i18n.js handles the html dir toggle.
+    i18n?.changeLanguage?.(isArabic ? 'en' : 'ar');
   };
 
   return (
-    <button 
+    <button
+      type="button"
       onClick={toggleLanguage}
-      className="px-4 py-2 font-sans font-medium text-sm text-black border border-zinc-200 rounded-full hover:bg-zinc-100 transition-colors"
+      aria-label={isArabic ? t('switchToEnglish') : t('switchToArabic')}
+      className="rounded-full border border-zinc-200 px-4 py-2 font-sans text-sm font-medium text-black transition-colors hover:bg-zinc-100"
     >
-      {(i18n?.language ?? 'en').startsWith('ar') ? 'English' : 'عربي'}
+      {isArabic ? t('languageNameEnglish') : t('languageNameArabic')}
     </button>
   );
 };

@@ -1,26 +1,15 @@
-import { useState } from 'react'
 import Header from './Header'
-import Sidebar from './Sidebar'
+import AppShell from './shell/AppShell'
 
 export default function Layout({ children, showSidebar = false }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  if (showSidebar) {
+    return <AppShell>{children}</AppShell>
+  }
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-50 overflow-hidden font-sans">
-      <Header onMenuToggle={() => setSidebarOpen(prev => !prev)} />
-
-      <div className="flex flex-1 overflow-hidden">
-        {showSidebar && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <main className={`flex-1 overflow-y-auto ${showSidebar ? 'md:ps-0' : ''}`}>
-          {children}
-        </main>
-      </div>
+    <div className="flex min-h-screen flex-col overflow-hidden bg-zinc-50 font-sans">
+      <Header />
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   )
 }

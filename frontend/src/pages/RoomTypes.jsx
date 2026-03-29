@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { useTranslation } from 'react-i18next';
+import { formatLocalizedCurrency, translateKnownValue } from '../utils/localization';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
 
@@ -43,7 +44,7 @@ function SkeletonRow() {
 }
 
 export default function RoomTypes() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { roomTypes, loading, error, fetchRoomTypes, createRoomType, updateRoomType, deleteRoomType } = useRoomTypes();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +147,7 @@ export default function RoomTypes() {
         setIsSubmitting(false);
 
         if (result.success) {
-            setSuccessMessage(editingId ? (t('roomTypeUpdated') || "Room Type updated successfully!") : (t('roomTypeCreated') || "Room Type created successfully!"));
+            setSuccessMessage(editingId ? t('roomTypeUpdated') : t('roomTypeCreated'));
             setIsSheetOpen(false);
             resetForm();
             // Clear success message after 3 seconds
@@ -160,10 +161,10 @@ export default function RoomTypes() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm(t('confirmDeleteRoomType') || "Are you sure you want to delete this room type?")) {
+        if (window.confirm(t('confirmDeleteRoomType'))) {
             const result = await deleteRoomType(id);
             if (result.success) {
-                setSuccessMessage(t('roomTypeDeleted') || "Room Type deleted successfully!");
+                setSuccessMessage(t('roomTypeDeleted'));
                 setTimeout(() => setSuccessMessage(null), 3000);
             } else {
                 setPageError(result.error);
@@ -176,18 +177,18 @@ export default function RoomTypes() {
         <div className="h-full bg-zinc-50 p-6 lg:p-8 space-y-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between max-w-7xl mx-auto">
                 <div>
-                    <h1 className="text-4xl font-extrabold tracking-tight text-black">{t('roomTypesTitle') || 'Room Types'}</h1>
-                    <p className="text-zinc-500 mt-2 font-medium text-sm">{t('roomTypesDesc') || "Manage your hotel's room categories and pricing."}</p>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-black">{t('roomTypesTitle')}</h1>
+                    <p className="text-zinc-500 mt-2 font-medium text-sm">{t('roomTypesDesc')}</p>
                 </div>
                 <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto rounded-full bg-black hover:bg-zinc-800 text-white font-bold px-6 py-6 transition-all shadow-md hover:shadow-lg">
-                    <Plus className="h-5 w-5" /> {t('createNewBtn') || 'Create New'}
+                    <Plus className="h-5 w-5" /> {t('createNewBtn')}
                 </Button>
             </div>
 
             {successMessage && (
                 <Alert className="bg-green-50 border-green-200 text-green-800">
                     <Info className="h-4 w-4 text-green-600" />
-                    <AlertTitle>{t('success') || 'Success'}</AlertTitle>
+                    <AlertTitle>{t('success')}</AlertTitle>
                     <AlertDescription>{successMessage}</AlertDescription>
                 </Alert>
             )}
@@ -195,14 +196,14 @@ export default function RoomTypes() {
             {(error || pageError) && (
                 <Alert variant="destructive">
                     <Info className="h-4 w-4" />
-                    <AlertTitle>{t('error') || 'Error'}</AlertTitle>
+                    <AlertTitle>{t('error')}</AlertTitle>
                     <AlertDescription>{pageError || error}</AlertDescription>
                 </Alert>
             )}
 
             <Card className="border border-zinc-200 rounded-3xl shadow-sm overflow-hidden max-w-7xl mx-auto bg-white">
                 <CardHeader className="pb-4 pt-8 px-8 border-b border-zinc-100">
-                    <CardTitle className="text-xl font-bold text-black">{t('allRoomTypes') || 'All Room Types'}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-black">{t('allRoomTypes')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
@@ -210,11 +211,11 @@ export default function RoomTypes() {
                             <table className="w-full caption-bottom text-sm text-start">
                                 <thead className="[&_tr]:border-b">
                                     <tr className="border-b border-zinc-100">
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails') || 'Details'}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities') || 'Amenities'}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice') || 'Price'}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests') || 'Max Guests'}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions') || 'Actions'}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -228,11 +229,11 @@ export default function RoomTypes() {
                                 <Box className="h-10 w-10 text-zinc-400" />
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-xl font-bold text-black">{t('noRoomTypesYet') || 'No room types yet'}</p>
-                                <p className="text-sm font-medium text-zinc-500">{t('getStartedRoomType') || 'Get started by creating your first room type.'}</p>
+                                <p className="text-xl font-bold text-black">{t('noRoomTypesYet')}</p>
+                                <p className="text-sm font-medium text-zinc-500">{t('getStartedRoomType')}</p>
                             </div>
                             <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-4 rounded-full bg-black hover:bg-zinc-800 text-white font-bold px-6">
-                                <Plus className="h-4 w-4" /> {t('createNowBtn') || 'Create Now'}
+                                <Plus className="h-4 w-4" /> {t('createNowBtn')}
                             </Button>
                         </div>
                     ) : (
@@ -240,11 +241,11 @@ export default function RoomTypes() {
                             <table className="w-full caption-bottom text-sm text-start">
                                 <thead className="[&_tr]:border-b [&_tr]:border-zinc-100">
                                     <tr className="transition-colors hover:bg-zinc-50/50 data-[state=selected]:bg-zinc-50">
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails') || 'Details'}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities') || 'Amenities'}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice') || 'Price'}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests') || 'Max Guests'}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions') || 'Actions'}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="[&_tr:last-child]:border-0">
@@ -258,13 +259,13 @@ export default function RoomTypes() {
                                                 <div className="flex flex-wrap gap-2">
                                                     {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
                                                         <span key={idx} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-black drop-shadow-sm">
-                                                            {amenity.trim()}
+                                                            {translateKnownValue(amenity.trim(), t)}
                                                         </span>
                                                     )) : <span className="text-zinc-400 text-xs font-medium">-</span>}
                                                 </div>
                                             </td>
                                             <td className="p-6 align-middle text-end font-mono">
-                                                <span className="font-extrabold text-black">${rt.basePrice?.toFixed(2)}</span>
+                                                <span className="font-extrabold text-black">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
                                             </td>
                                             <td className="p-6 align-middle text-end font-bold text-black">
                                                 {rt.maxGuests}
@@ -300,9 +301,9 @@ export default function RoomTypes() {
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="sm:max-w-xl overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>{editingId ? (t('editRoomType') || 'Edit Room Type') : (t('createRoomType') || 'Create Room Type')}</SheetTitle>
+                        <SheetTitle>{editingId ? t('editRoomType') : t('createRoomType')}</SheetTitle>
                         <SheetDescription>
-                            {editingId ? (t('updateRoomTypeDesc') || 'Update details of the room type.') : (t('createRoomTypeDesc') || 'Add a new category of rooms to your hotel.')}
+                            {editingId ? t('updateRoomTypeDesc') : t('createRoomTypeDesc')}
                         </SheetDescription>
                     </SheetHeader>
 
@@ -316,13 +317,13 @@ export default function RoomTypes() {
                         )}
 
                         <div className="space-y-3">
-                            <Label htmlFor="name" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('nameLabel') || 'Name'} <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="name" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('nameLabel')} <span className="text-red-500">*</span></Label>
                             <Input
                                 id="name"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                placeholder={t('namePlaceholder') || "e.g. Deluxe Suite"}
+                                placeholder={t('namePlaceholder')}
                                 className={`rounded-full border px-5 py-6 text-base font-bold text-black focus-visible:ring-black focus-visible:ring-offset-1 ${validationErrors.name ? "border-red-500" : "border-zinc-200"}`}
                                 required
                             />
@@ -331,7 +332,7 @@ export default function RoomTypes() {
 
                         <div className="grid grid-cols-2 gap-5">
                             <div className="space-y-3">
-                                <Label htmlFor="basePrice" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('basePriceLabel') || 'Base Price ($)'} <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="basePrice" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('basePriceLabel')} <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="basePrice"
                                     name="basePrice"
@@ -346,7 +347,7 @@ export default function RoomTypes() {
                             </div>
 
                             <div className="space-y-3">
-                                <Label htmlFor="maxGuests" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('maxGuestsLabel') || 'Max Guests'} <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="maxGuests" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('maxGuestsLabel')} <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="maxGuests"
                                     name="maxGuests"
@@ -363,7 +364,7 @@ export default function RoomTypes() {
                         </div>
 
                         <div className="space-y-4">
-                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('amenitiesLabel') || 'Amenities'}</Label>
+                            <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('amenitiesLabel')}</Label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {COMMON_AMENITIES.map((amenity) => (
                                     <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-black cursor-pointer p-3 border border-zinc-200 rounded-2xl hover:bg-zinc-50 transition-colors">
@@ -373,33 +374,33 @@ export default function RoomTypes() {
                                             checked={formData.amenities.includes(amenity)}
                                             onChange={() => handleAmenityToggle(amenity)}
                                         />
-                                        <span>{amenity}</span>
+                                        <span>{translateKnownValue(amenity, t)}</span>
                                     </label>
                                 ))}
                             </div>
                         </div>
 
                         <div className="space-y-3">
-                            <Label htmlFor="description" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('descLabel') || 'Description'}</Label>
+                            <Label htmlFor="description" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('descLabel')}</Label>
                             <Input
                                 id="description"
                                 name="description"
                                 value={formData.description}
                                 onChange={handleInputChange}
-                                placeholder={t('descPlaceholder') || "Optional description..."}
+                                placeholder={t('descPlaceholder')}
                                 className="rounded-full border border-zinc-200 px-5 py-6 text-base font-medium text-black focus-visible:ring-black focus-visible:ring-offset-1"
                             />
                         </div>
 
                         <SheetFooter className="mt-10 mb-4 flex gap-3">
-                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full py-6 font-bold flex-1">{t('cancel') || 'Cancel'}</Button>
+                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full py-6 font-bold flex-1">{t('cancel')}</Button>
                             <Button type="submit" disabled={isSubmitting} className="rounded-full py-6 font-bold flex-1 bg-black text-white hover:bg-zinc-800">
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? (t('updatingMsg') || 'Updating...') : (t('creatingMsg') || 'Creating...')}
+                                        <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? t('updatingMsg') : t('creatingMsg')}
                                     </>
                                 ) : (
-                                    editingId ? (t('updateRoomTypeBtn') || 'Update Room Type') : (t('createRoomTypeBtn') || 'Create Room Type')
+                                    editingId ? t('updateRoomTypeBtn') : t('createRoomTypeBtn')
                                 )}
                             </Button>
                         </SheetFooter>
