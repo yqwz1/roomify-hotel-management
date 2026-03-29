@@ -191,6 +191,79 @@ class BillingIntegrationTest {
                 .andExpect(jsonPath("$.lineItems").isArray());
     }
 
+    @Test
+    @DisplayName("POST /{confirmationNumber}/bill/payments records partial payment and keeps invoice open")
+    void recordPaymentMarksReservationPartiallyPaid() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("amount", "200.00");
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalPaid").value(200.00))
+                .andExpect(jsonPath("$.outstandingBalance").value(460.00))
+                .andExpect(jsonPath("$.invoiceFinalized").value(false))
+                .andExpect(jsonPath("$.paymentStatus").value("PARTIALLY_PAID"));
+    }
+
+    @Test
+    @DisplayName("POST /{confirmationNumber}/bill/payments blocks overpayment by design")
+    void recordPaymentBlocksOverpayment() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("amount", "1000.00");
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("PAYMENT_OVERPAYMENT_BLOCKED"));
+    }
+
+    @Test
+    @DisplayName("POST /{confirmationNumber}/bill/close blocks close while outstanding is positive")
+    void closeBillBlockedWhenOutstandingIsPositive() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/close", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("PAYMENT_BALANCE_DUE"));
+    }
+
+    @Test
+    @DisplayName("POST /{confirmationNumber}/bill/close succeeds after full payment")
+    void closeBillAfterFullPaymentSucceeds() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("amount", "660.00");
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paymentStatus").value("PAID"));
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/close", confirmationNumber)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.invoiceFinalized").value(true))
+                .andExpect(jsonPath("$.outstandingBalance").value(0.00))
+                .andExpect(jsonPath("$.paymentStatus").value("PAID"));
+    }
+
     private String createReservation(String token, LocalDate checkIn, LocalDate checkOut) throws Exception {
         Map<String, Object> guest = new HashMap<>();
         guest.put("name", "Test Guest");

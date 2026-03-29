@@ -14,14 +14,14 @@ public final class PaymentStatusResolver {
         BigDecimal safePaid = safeMoney(totalPaid);
         BigDecimal safeOutstanding = safeMoney(outstandingBalance);
 
-        if (!invoiceFinalized) {
-            return "PAYMENT_PENDING";
-        }
         if (safeOutstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) == 0) {
             return "PAID";
         }
         if (safePaid.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
             return "PARTIALLY_PAID";
+        }
+        if (!invoiceFinalized) {
+            return "PAYMENT_PENDING";
         }
         return "UNPAID";
     }
