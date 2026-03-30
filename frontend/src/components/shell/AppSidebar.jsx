@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { cn } from '../../lib/utils';
 import {
-  getDefaultRouteForRoles,
   getNavigationSections,
   getRoleDisplayLabel,
   isNavItemActive,
@@ -18,7 +17,7 @@ export default function AppSidebar({ isOpen, onClose }) {
 
   const roles = user?.roles ?? [];
   const sections = getNavigationSections(roles, t);
-  const homePath = getDefaultRouteForRoles(roles);
+  const homePath = '/';
   const roleLabel = getRoleDisplayLabel(roles, t);
 
   return (

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import {
-  getDefaultRouteForRoles,
   getPageMeta,
   getRoleDisplayLabel,
 } from '../navigation/navConfig';
@@ -16,7 +15,7 @@ export default function AppTopbar({ onMenuToggle }) {
   const { user, logout } = useAuth();
 
   const roles = user?.roles ?? [];
-  const homePath = getDefaultRouteForRoles(roles);
+  const homePath = '/';
   const pageMeta = getPageMeta(location.pathname, roles, t);
   const roleLabel = getRoleDisplayLabel(roles, t);
   const brandName = t('brandName');

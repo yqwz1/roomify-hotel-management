@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthProvider';
 import { Menu, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { getDefaultRouteForRoles } from './navigation/navConfig';
 
 
 export default function Header({ onMenuToggle }) {
@@ -10,6 +11,8 @@ export default function Header({ onMenuToggle }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const brandName = t('brandName');
+  const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
+  const dashboardLabel = hasRole('ROLE_GUEST') ? t('myDashboard') : t('dashboard');
 
   const handleLogout = () => {
     logout();
@@ -54,9 +57,12 @@ export default function Header({ onMenuToggle }) {
           <NavLink to="/" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
             {t('homeNav')}
           </NavLink>
-          {!isAuthenticated && (
-            <NavLink to="/bookings" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
-              {t('bookings')}
+          <NavLink to="/bookings" className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
+            {t('bookings')}
+          </NavLink>
+          {isAuthenticated && (
+            <NavLink to={dashboardPath} className={({ isActive }) => `text-sm font-medium transition ${isActive ? 'text-rose-900' : 'text-zinc-500 hover:text-black'}`}>
+              {dashboardLabel}
             </NavLink>
           )}
           {isAuthenticated && hasRole('ROLE_MANAGER') && (
