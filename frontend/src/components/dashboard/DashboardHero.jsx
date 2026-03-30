@@ -17,7 +17,7 @@ export default function DashboardHero({
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(251,191,36,0.18),transparent_24%)]" />
 
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
         <div className="max-w-3xl">
           {eyebrow && (
             <p className="text-xs font-black uppercase tracking-[0.3em] text-amber-200/80">
@@ -47,7 +47,7 @@ export default function DashboardHero({
         </div>
 
         {children && (
-          <div className="relative w-full max-w-md lg:w-auto">
+          <div className="relative w-full max-w-md xl:w-auto">
             {children}
           </div>
         )}

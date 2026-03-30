@@ -27,14 +27,14 @@ export default function DashboardMetricCard({
     <div className={cn('relative overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className={cn('text-xs font-black uppercase tracking-[0.22em]', toneStyles.label)}>
+          <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label)}>
             {label}
           </p>
-          <p className={cn('mt-3 text-3xl font-black tracking-tight sm:text-[2rem]', toneStyles.value)}>
+          <p className={cn('mt-3 break-words text-2xl font-black tracking-tight sm:text-[2rem]', toneStyles.value)}>
             {value}
           </p>
           {hint && (
-            <p className={cn('mt-2 text-sm font-medium', toneStyles.hint)}>
+            <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint)}>
               {hint}
             </p>
           )}

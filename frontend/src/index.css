@@ -28,7 +28,8 @@ html, body, #root {
 body {
   margin: 0;
   font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow: hidden; /* Main layout handles scrolling */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
 

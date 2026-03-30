@@ -24,7 +24,7 @@ export default function AppSidebar({ isOpen, onClose }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           aria-hidden="true"
           onClick={onClose}
         />
@@ -32,7 +32,7 @@ export default function AppSidebar({ isOpen, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 start-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-[#191511] text-zinc-100 shadow-2xl transition-transform duration-300 md:static md:z-0 md:max-w-none md:translate-x-0',
+          'fixed inset-y-0 start-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-[#191511] text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -51,7 +51,7 @@ export default function AppSidebar({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white md:hidden"
+                className="rounded-full p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white lg:hidden"
                 aria-label={t('closeNavigation')}
               >
                 <X className="h-5 w-5" />

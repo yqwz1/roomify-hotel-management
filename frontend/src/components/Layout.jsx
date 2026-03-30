@@ -7,9 +7,9 @@ export default function Layout({ children, showSidebar = false }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col overflow-hidden bg-zinc-50 font-sans">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-zinc-50 font-sans">
       <Header />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   )
 }
