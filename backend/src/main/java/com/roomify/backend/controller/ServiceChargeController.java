@@ -1,14 +1,13 @@
 package com.roomify.backend.controller;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import com.roomify.backend.entity.ServiceCharge;
-import com.roomify.backend.repository.ServiceChargeRepository;
 import com.roomify.backend.service.ServiceChargeService;
 
 @RestController
@@ -17,15 +16,14 @@ import com.roomify.backend.service.ServiceChargeService;
 public class ServiceChargeController {
 
     private final ServiceChargeService service;
-    private final ServiceChargeRepository repository;
 
-    // ✅ GET by reservation
+    @PreAuthorize("hasAuthority('STAFF')")
     @GetMapping
     public List<ServiceCharge> getByReservation(@RequestParam Long reservationId) {
-        return repository.findByReservationId(reservationId);
+        return service.getByReservation(reservationId);
     }
 
-    // ✅ ADD
+    @PreAuthorize("hasAuthority('STAFF')")
     @PostMapping
     public ResponseEntity<?> add(
             @RequestParam Long reservationId,
@@ -44,7 +42,7 @@ public class ServiceChargeController {
         }
     }
 
-    // ✅ UPDATE
+    @PreAuthorize("hasAuthority('STAFF')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable Long id,
@@ -62,7 +60,7 @@ public class ServiceChargeController {
         }
     }
 
-    // ✅ DELETE
+    @PreAuthorize("hasAuthority('STAFF')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 
