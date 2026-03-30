@@ -12,8 +12,9 @@ import {
 export default function AppSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const brandName = t('brandName');
+  const isRtl = i18n.dir() === 'rtl';
 
   const roles = user?.roles ?? [];
   const sections = getNavigationSections(roles, t);
@@ -32,8 +33,9 @@ export default function AppSidebar({ isOpen, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 start-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-[#191511] text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-[#191511] text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
+          isRtl ? 'left-auto right-0' : 'left-0 right-auto',
+          isOpen ? 'translate-x-0' : isRtl ? 'translate-x-full' : '-translate-x-full'
         )}
       >
         <div className="flex h-full flex-col">
