@@ -28,6 +28,10 @@ public final class PaymentStatusResolver {
             return "PARTIALLY_PAID";
         }
 
+        if (!invoiceFinalized) {
+            return "PAYMENT_PENDING";
+        }
+
         return "UNPAID";
     }
 
