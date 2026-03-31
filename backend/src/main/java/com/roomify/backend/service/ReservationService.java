@@ -21,6 +21,7 @@ import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -37,553 +38,538 @@ import com.roomify.backend.repository.RoomRepository;
 @Transactional
 public class ReservationService {
 
-        private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
-        private static final int MONEY_SCALE = 2;
-        private static final int CONFIRMATION_MAX_ATTEMPTS = 10;
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
+    private static final int MONEY_SCALE = 2;
+    private static final int CONFIRMATION_MAX_ATTEMPTS = 10;
 
-        private final ReservationRepository reservationRepository;
-        private final GuestRepository guestRepository;
-        private final RoomRepository roomRepository;
-        private final EmailService emailService;
-        private final AuditService auditService;
-        private final HousekeepingNotificationService housekeepingNotificationService;
-        private final BigDecimal taxRate;
+    private final ReservationRepository reservationRepository;
+    private final GuestRepository guestRepository;
+    private final RoomRepository roomRepository;
+    private final EmailService emailService;
+    private final AuditService auditService;
+    private final HousekeepingNotificationService housekeepingNotificationService;
+    private final BigDecimal taxRate;
+    private final InvoiceEmailService invoiceEmailService;
+    private final InvoiceDeliveryLogService invoiceDeliveryLogService;
 
-        public ReservationService(
-                        ReservationRepository reservationRepository,
-                        GuestRepository guestRepository,
-                        RoomRepository roomRepository,
-                        EmailService emailService,
-                        AuditService auditService,
-                        HousekeepingNotificationService housekeepingNotificationService,
-                        @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            GuestRepository guestRepository,
+            RoomRepository roomRepository,
+            EmailService emailService,
+            InvoiceEmailService invoiceEmailService,
+            InvoiceDeliveryLogService invoiceDeliveryLogService,
+            AuditService auditService,
+            HousekeepingNotificationService housekeepingNotificationService,
+            @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
 
-                this.reservationRepository = reservationRepository;
-                this.guestRepository = guestRepository;
-                this.roomRepository = roomRepository;
-                this.emailService = emailService;
-                this.auditService = auditService;
-                this.housekeepingNotificationService = housekeepingNotificationService;
-                this.taxRate = taxRate;
+        this.reservationRepository = reservationRepository;
+        this.guestRepository = guestRepository;
+        this.roomRepository = roomRepository;
+        this.emailService = emailService;
+        this.invoiceEmailService = invoiceEmailService;
+        this.invoiceDeliveryLogService = invoiceDeliveryLogService;
+        this.auditService = auditService;
+        this.housekeepingNotificationService = housekeepingNotificationService;
+        this.taxRate = taxRate;
+    }
+
+    // =============================
+    // CREATE RESERVATION
+    // =============================
+
+    public ReservationResponse create(ReservationCreateRequest request) {
+
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+
+        long nights = ChronoUnit.DAYS.between(
+                request.getCheckInDate(),
+                request.getCheckOutDate());
+
+        if (nights <= 0) {
+            throw new ResourceConflictException("Check-out must be after check-in");
         }
 
-        // =============================
-        // CREATE RESERVATION
-        // =============================
+        if (!reservationRepository.findOverlappingReservations(
+                request.getRoomId(),
+                request.getCheckInDate(),
+                request.getCheckOutDate()).isEmpty()) {
 
-        public ReservationResponse create(ReservationCreateRequest request) {
-
-                Room room = roomRepository.findById(request.getRoomId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
-
-                long nights = ChronoUnit.DAYS.between(
-                                request.getCheckInDate(),
-                                request.getCheckOutDate());
-
-                if (nights <= 0) {
-                        throw new ResourceConflictException("Check-out must be after check-in");
-                }
-
-                if (!reservationRepository.findOverlappingReservations(
-                                request.getRoomId(),
-                                request.getCheckInDate(),
-                                request.getCheckOutDate()).isEmpty()) {
-
-                        throw new ResourceConflictException("Room already booked for selected dates");
-                }
-
-                Guest guest = resolveOrCreateGuest(request.getGuest());
-
-                BigDecimal roomRate = room.getRoomType()
-                                .getBasePrice()
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                BigDecimal taxes = subtotal.multiply(taxRate)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                BigDecimal totalPrice = subtotal.add(taxes)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                Reservation reservation = new Reservation();
-
-                reservation.setGuest(guest);
-                reservation.setRoom(room);
-                reservation.setCheckInDate(request.getCheckInDate());
-                reservation.setCheckOutDate(request.getCheckOutDate());
-                ReservationStatus initialStatus = request.getStatus() != null
-                                ? request.getStatus()
-                                : ReservationStatus.PENDING;
-                reservation.setStatus(initialStatus);
-                reservation.setTotalPrice(totalPrice);
-                reservation.setTotalPaid(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP));
-                reservation.setOutstandingBalance(totalPrice);
-                reservation.setInvoiceFinalized(false);
-                reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
-
-                Reservation saved = reservationRepository.save(reservation);
-
-                ReservationResponse response = toResponse(saved, nights, roomRate, subtotal, taxes);
-
-                sendReservationConfirmationEmail(saved, response);
-
-                return response;
+            throw new ResourceConflictException("Room already booked for selected dates");
         }
 
-        // =============================
-        // MODIFY RESERVATION
-        // =============================
+        Guest guest = resolveOrCreateGuest(request.getGuest());
 
-        public ReservationActionPlaceholderResponse modify(Long id, ReservationModifyRequest request) {
+        BigDecimal roomRate = room.getRoomType()
+                .getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                Reservation reservation = findReservationById(id);
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                if (reservation.getStatus() == ReservationStatus.CANCELLED
-                                || reservation.getStatus() == ReservationStatus.CHECKED_IN
-                                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
-                        throw new ResourceConflictException(
-                                        "Cannot modify reservation in status: " + reservation.getStatus());
-                }
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                String oldRoom = reservation.getRoom().getRoomNumber();
-                String oldCheckIn = reservation.getCheckInDate().toString();
-                String oldCheckOut = reservation.getCheckOutDate().toString();
+        BigDecimal totalPrice = subtotal.add(taxes)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                Room targetRoom = reservation.getRoom();
-                if (request.getRoomId() != null && !request.getRoomId().equals(targetRoom.getId())) {
-                        targetRoom = roomRepository.findById(request.getRoomId())
-                                        .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
-                }
+        Reservation reservation = new Reservation();
 
-                LocalDate newCheckIn = request.getCheckInDate() != null
-                                ? request.getCheckInDate()
-                                : reservation.getCheckInDate();
-                LocalDate newCheckOut = request.getCheckOutDate() != null
-                                ? request.getCheckOutDate()
-                                : reservation.getCheckOutDate();
+        reservation.setGuest(guest);
+        reservation.setRoom(room);
+        reservation.setCheckInDate(request.getCheckInDate());
+        reservation.setCheckOutDate(request.getCheckOutDate());
+        ReservationStatus initialStatus = request.getStatus() != null
+                ? request.getStatus()
+                : ReservationStatus.PENDING;
+        reservation.setStatus(initialStatus);
+        reservation.setTotalPrice(totalPrice);
+        reservation.setTotalPaid(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP));
+        reservation.setOutstandingBalance(totalPrice);
+        reservation.setPaymentStatus(PaymentStatus.UNPAID);
+        reservation.setInvoiceFinalized(false);
+        reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
 
-                if (!newCheckOut.isAfter(newCheckIn)) {
-                        throw new ResourceConflictException("Check-out must be after check-in");
-                }
+        Reservation saved = reservationRepository.save(reservation);
 
-                if (!reservationRepository.findOverlappingForUpdate(
-                                targetRoom.getId(),
-                                newCheckIn,
-                                newCheckOut,
-                                reservation.getId()).isEmpty()) {
-                        throw new ResourceConflictException("Selected room is not available for the requested dates");
-                }
+        ReservationResponse response = toResponse(saved, nights, roomRate, subtotal, taxes);
 
-                long nights = ChronoUnit.DAYS.between(newCheckIn, newCheckOut);
+        sendReservationConfirmationEmail(saved, response);
 
-                BigDecimal roomRate = targetRoom.getRoomType()
-                                .getBasePrice()
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        return response;
+    }
 
-                BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    // =============================
+    // MODIFY RESERVATION
+    // =============================
 
-                BigDecimal taxes = subtotal.multiply(taxRate)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    public ReservationActionPlaceholderResponse modify(Long id, ReservationModifyRequest request) {
 
-                BigDecimal totalPrice = subtotal.add(taxes)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        Reservation reservation = findReservationById(id);
 
-                String modificationReason = request.getModificationReason() == null
-                                ? null
-                                : request.getModificationReason().trim();
-
-                reservation.setRoom(targetRoom);
-                reservation.setCheckInDate(newCheckIn);
-                reservation.setCheckOutDate(newCheckOut);
-                reservation.setTotalPrice(totalPrice);
-                reservation.setOutstandingBalance(calculateOutstandingBalance(totalPrice, reservation.getTotalPaid()));
-                reservation.setModificationReason(modificationReason);
-                reservation.setModifiedAt(LocalDateTime.now());
-
-                Reservation saved = reservationRepository.save(reservation);
-
-                try {
-
-                        emailService.sendReservationModificationEmail(
-                                        reservation.getGuest().getEmail(),
-                                        oldRoom,
-                                        reservation.getRoom().getRoomNumber(),
-                                        oldCheckIn,
-                                        reservation.getCheckInDate().toString(),
-                                        oldCheckOut,
-                                        reservation.getCheckOutDate().toString(),
-                                        reservation.getTotalPrice().toString(),
-                                        reservation.getConfirmationNumber());
-
-                } catch (RuntimeException ex) {
-                        log.warn("Failed to send modification email for reservation {}", reservation.getId(), ex);
-                }
-
-                auditService.log(
-                                "RESERVATION_MODIFIED",
-                                "Reservation#" + saved.getId(),
-                                "confirmation=" + saved.getConfirmationNumber());
-
-                return toPlaceholderResponse(saved, "modify",
-                                "Reservation modified");
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot modify reservation in status: " + reservation.getStatus());
         }
 
-        // =============================
-        // CANCEL RESERVATION
-        // =============================
+        String oldRoom = reservation.getRoom().getRoomNumber();
+        String oldCheckIn = reservation.getCheckInDate().toString();
+        String oldCheckOut = reservation.getCheckOutDate().toString();
 
-        public ReservationActionPlaceholderResponse cancel(Long id, ReservationCancelRequest request) {
-
-                Reservation reservation = findReservationById(id);
-
-                if (reservation.getStatus() == ReservationStatus.CHECKED_IN
-                                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
-                        throw new ResourceConflictException(
-                                        "Cannot cancel reservation that is already checked in or checked out");
-                }
-
-                String cancellationReason = null;
-                if (request != null && request.getCancellationReason() != null) {
-                        String trimmedReason = request.getCancellationReason().trim();
-                        if (!trimmedReason.isEmpty()) {
-                                cancellationReason = trimmedReason;
-                        }
-                }
-
-                reservation.setStatus(ReservationStatus.CANCELLED);
-                reservation.setCancellationReason(cancellationReason);
-                reservation.setCancellationAt(LocalDateTime.now());
-                reservation.setModifiedAt(LocalDateTime.now());
-
-                Reservation saved = reservationRepository.save(reservation);
-
-                try {
-
-                        emailService.sendReservationCancellationEmail(
-                                        reservation.getGuest().getEmail(),
-                                        reservation.getGuest().getName(),
-                                        reservation.getRoom().getRoomNumber(),
-                                        reservation.getCheckInDate().toString(),
-                                        reservation.getCheckOutDate().toString(),
-                                        reservation.getTotalPrice().toString(),
-                                        reservation.getConfirmationNumber());
-
-                } catch (RuntimeException ex) {
-                        log.warn("Failed to send cancellation email for reservation {}", reservation.getId(), ex);
-                }
-
-                auditService.log(
-                                "RESERVATION_CANCELLED",
-                                "Reservation#" + saved.getId(),
-                                "confirmation=" + saved.getConfirmationNumber());
-
-                return toPlaceholderResponse(saved, "cancel",
-                                "Reservation cancelled");
+        Room targetRoom = reservation.getRoom();
+        if (request.getRoomId() != null && !request.getRoomId().equals(targetRoom.getId())) {
+            targetRoom = roomRepository.findById(request.getRoomId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
         }
 
-        // =============================
-        // CHECK-IN
-        // =============================
+        LocalDate newCheckIn = request.getCheckInDate() != null
+                ? request.getCheckInDate()
+                : reservation.getCheckInDate();
+        LocalDate newCheckOut = request.getCheckOutDate() != null
+                ? request.getCheckOutDate()
+                : reservation.getCheckOutDate();
 
-        public ReservationResponse checkIn(String confirmationNumber) {
-
-                Reservation reservation = reservationRepository
-                                .findByConfirmationNumber(
-                                                confirmationNumber.trim().toUpperCase())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found with confirmation number: "
-                                                                + confirmationNumber));
-
-                if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-                        throw new ResourceConflictException("Only CONFIRMED reservations can be checked in");
-                }
-
-                if (LocalDate.now().isBefore(reservation.getCheckInDate())) {
-                        throw new ResourceConflictException("Cannot check in before scheduled check-in date");
-                }
-
-                Room room = reservation.getRoom();
-
-                if (room.getStatus() != RoomStatus.AVAILABLE) {
-                        throw new ResourceConflictException("Room not ready");
-                }
-
-                room.setStatus(RoomStatus.OCCUPIED);
-                reservation.setStatus(ReservationStatus.CHECKED_IN);
-                reservation.setActualCheckInDate(LocalDate.now());
-                reservation.setModifiedAt(LocalDateTime.now());
-
-                roomRepository.save(room);
-                reservationRepository.save(reservation);
-
-                auditService.log(
-                                "ROOM_STATUS_CHANGE",
-                                "Room",
-                                "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in");
-
-                long nights = ChronoUnit.DAYS.between(
-                                reservation.getCheckInDate(),
-                                reservation.getCheckOutDate());
-
-                BigDecimal rate = room.getRoomType()
-                                .getBasePrice()
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                BigDecimal taxes = subtotal.multiply(taxRate)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-                return toResponse(reservation, nights, rate, subtotal, taxes);
+        if (!newCheckOut.isAfter(newCheckIn)) {
+            throw new ResourceConflictException("Check-out must be after check-in");
         }
 
-        // =============================
-        // CHECK-OUT
-        // =============================
-
-        public ReservationActionPlaceholderResponse checkOut(String confirmationNumber) {
-
-                Reservation reservation = reservationRepository
-                                .findByConfirmationNumber(
-                                                confirmationNumber.trim().toUpperCase())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found with confirmation number: "
-                                                                + confirmationNumber));
-
-                if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
-                        return toPlaceholderResponse(
-                                        reservation,
-                                        "check-out",
-                                        "Checkout already completed");
-                }
-
-                if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
-                        throw new ResourceConflictException("Only CHECKED_IN reservations can be checked out");
-                }
-
-                Room room = reservation.getRoom();
-                if (room.getStatus() != RoomStatus.OCCUPIED) {
-                        throw new ResourceConflictException("Room must be OCCUPIED before checkout");
-                }
-
-                if (!reservation.isInvoiceFinalized()) {
-                        throw new PaymentValidationException(
-                                        "PAYMENT_NOT_FINALIZED",
-                                        "Payment must be finalized before checkout",
-                                        resolvePaymentStatus(reservation),
-                                        safeMoney(reservation.getOutstandingBalance()),
-                                        reservation.isInvoiceFinalized());
-                }
-
-                BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
-                if (outstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
-                        throw new PaymentValidationException(
-                                        "PAYMENT_BALANCE_DUE",
-                                        "Outstanding balance must be 0.00 before checkout. Current outstanding: "
-                                                        + outstanding,
-                                        resolvePaymentStatus(reservation),
-                                        outstanding,
-                                        reservation.isInvoiceFinalized());
-                }
-
-                reservation.setStatus(ReservationStatus.CHECKED_OUT);
-                reservation.setActualCheckOutAt(LocalDateTime.now());
-                reservation.setModifiedAt(LocalDateTime.now());
-
-                room.setStatus(RoomStatus.NEEDS_CLEANING);
-
-                roomRepository.save(room);
-                reservationRepository.save(reservation);
-
-                triggerHousekeepingEvent(room);
-
-                auditService.log(
-                                "ROOM_STATUS_CHANGE",
-                                "Room",
-                                "Room " + room.getRoomNumber()
-                                                + " status changed to NEEDS_CLEANING after checkout");
-
-                log.info("Room {} set to NEEDS_CLEANING after checkout",
-                                room.getRoomNumber());
-
-                return toPlaceholderResponse(
-                                reservation,
-                                "check-out",
-                                "Checkout completed successfully");
+        if (!reservationRepository.findOverlappingForUpdate(
+                targetRoom.getId(),
+                newCheckIn,
+                newCheckOut,
+                reservation.getId()).isEmpty()) {
+            throw new ResourceConflictException("Selected room is not available for the requested dates");
         }
 
-        // =============================
-        // GET BY CONFIRMATION NUMBER
-        // =============================
+        long nights = ChronoUnit.DAYS.between(newCheckIn, newCheckOut);
 
-        public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
+        BigDecimal roomRate = targetRoom.getRoomType()
+                .getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                Reservation reservation = reservationRepository
-                                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found with confirmation number: "
-                                                                + confirmationNumber));
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                long nights = ChronoUnit.DAYS.between(
-                                reservation.getCheckInDate(),
-                                reservation.getCheckOutDate());
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                BigDecimal rate = reservation.getRoom().getRoomType()
-                                .getBasePrice()
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal totalPrice = subtotal.add(taxes)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-                BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        String modificationReason = request.getModificationReason().trim();
 
-                BigDecimal taxes = subtotal.multiply(taxRate)
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        reservation.setRoom(targetRoom);
+        reservation.setCheckInDate(newCheckIn);
+        reservation.setCheckOutDate(newCheckOut);
+        reservation.setTotalPrice(totalPrice);
+        reservation.setOutstandingBalance(calculateOutstandingBalance(totalPrice, reservation.getTotalPaid()));
+        reservation.setModificationReason(modificationReason);
+        reservation.setModifiedAt(LocalDateTime.now());
 
-                return toResponse(reservation, nights, rate, subtotal, taxes);
+        Reservation saved = reservationRepository.save(reservation);
+
+        try {
+
+            emailService.sendReservationModificationEmail(
+                    reservation.getGuest().getEmail(),
+                    oldRoom,
+                    reservation.getRoom().getRoomNumber(),
+                    oldCheckIn,
+                    reservation.getCheckInDate().toString(),
+                    oldCheckOut,
+                    reservation.getCheckOutDate().toString(),
+                    reservation.getTotalPrice().toString(),
+                    reservation.getConfirmationNumber());
+
+        } catch (RuntimeException ex) {
+            log.warn("Failed to send modification email for reservation {}", reservation.getId(), ex);
         }
 
-        // =============================
-        // HELPERS
-        // =============================
+        auditService.log(
+                "RESERVATION_MODIFIED",
+                "Reservation#" + saved.getId(),
+                "confirmation=" + saved.getConfirmationNumber());
 
-        private void triggerHousekeepingEvent(Room room) {
+        return toPlaceholderResponse(saved, "modify", "Reservation modified");
+    }
 
-                housekeepingNotificationService.notifyCheckoutNeedsCleaning(
-                                room.getRoomNumber());
+    // =============================
+    // CANCEL RESERVATION
+    // =============================
 
-                log.info("Housekeeping routing verified for checkout: room {}",
-                                room.getRoomNumber());
+    public ReservationActionPlaceholderResponse cancel(Long id, ReservationCancelRequest request) {
+
+        Reservation reservation = findReservationById(id);
+
+        if (reservation.getStatus() == ReservationStatus.CHECKED_IN
+                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            throw new ResourceConflictException(
+                    "Cannot cancel reservation that is already checked in or checked out");
         }
 
-        private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
-
-                Optional<Guest> guest = guestRepository.findByEmailIgnoreCase(request.getEmail());
-
-                if (guest.isPresent()) {
-                        return guest.get();
-                }
-
-                Guest newGuest = new Guest(
-                                request.getName(),
-                                request.getEmail(),
-                                request.getPhone(),
-                                request.getIdNumber(),
-                                request.getNationality());
-
-                return guestRepository.save(newGuest);
+        String cancellationReason = null;
+        if (request != null && request.getCancellationReason() != null) {
+            String trimmedReason = request.getCancellationReason().trim();
+            if (!trimmedReason.isEmpty()) {
+                cancellationReason = trimmedReason;
+            }
         }
 
-        private String generateUniqueConfirmationNumber() {
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setCancellationReason(cancellationReason);
+        reservation.setCancellationAt(LocalDateTime.now());
+        reservation.setModifiedAt(LocalDateTime.now());
 
-                for (int i = 0; i < CONFIRMATION_MAX_ATTEMPTS; i++) {
+        Reservation saved = reservationRepository.save(reservation);
 
-                        String number = "RSV-" +
-                                        UUID.randomUUID().toString()
-                                                        .replace("-", "")
-                                                        .substring(0, 10)
-                                                        .toUpperCase();
+        try {
 
-                        if (!reservationRepository.existsByConfirmationNumber(number)) {
-                                return number;
-                        }
-                }
+            emailService.sendReservationCancellationEmail(
+                    reservation.getGuest().getEmail(),
+                    reservation.getGuest().getName(),
+                    reservation.getRoom().getRoomNumber(),
+                    reservation.getCheckInDate().toString(),
+                    reservation.getCheckOutDate().toString(),
+                    reservation.getTotalPrice().toString(),
+                    reservation.getConfirmationNumber());
 
-                throw new IllegalStateException("Unable to generate confirmation number");
+        } catch (RuntimeException ex) {
+            log.warn("Failed to send cancellation email for reservation {}", reservation.getId(), ex);
         }
 
-        private Reservation findReservationById(Long id) {
+        auditService.log(
+                "RESERVATION_CANCELLED",
+                "Reservation#" + saved.getId(),
+                "confirmation=" + saved.getConfirmationNumber());
 
-                return reservationRepository.findById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found with id: " + id));
+        return toPlaceholderResponse(saved, "cancel", "Reservation cancelled");
+    }
+
+    // =============================
+    // CHECK-IN
+    // =============================
+
+    public ReservationResponse checkIn(String confirmationNumber) {
+
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new ResourceConflictException("Only CONFIRMED reservations can be checked in");
         }
 
-        private void sendReservationConfirmationEmail(
-                        Reservation reservation,
-                        ReservationResponse response) {
-
-                try {
-
-                        emailService.sendReservationConfirmationEmail(
-                                        reservation.getGuest().getEmail(),
-                                        reservation.getGuest().getName(),
-                                        response);
-
-                } catch (RuntimeException ex) {
-
-                        throw new EmailDeliveryException(
-                                        "Failed to send confirmation email", ex);
-                }
+        if (LocalDate.now().isBefore(reservation.getCheckInDate())) {
+            throw new ResourceConflictException("Cannot check in before scheduled check-in date");
         }
 
-        private ReservationActionPlaceholderResponse toPlaceholderResponse(
-                        Reservation reservation,
-                        String action,
-                        String message) {
+        Room room = reservation.getRoom();
 
-                        return new ReservationActionPlaceholderResponse(
-                                reservation.getId(),
-                                action,
-                                message,
-                                true,
-                                reservation.getStatus(),
-                                resolvePaymentStatus(reservation),
-                                safeMoney(reservation.getOutstandingBalance()),
-                                reservation.isInvoiceFinalized());
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new ResourceConflictException("Room not ready");
         }
 
-        private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
-                BigDecimal safeTotal = safeMoney(total);
-                BigDecimal safePaid = safeMoney(paid);
-                BigDecimal outstanding = safeTotal.subtract(safePaid).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                return outstanding.compareTo(BigDecimal.ZERO) < 0
-                                ? BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)
-                                : outstanding;
+        room.setStatus(RoomStatus.OCCUPIED);
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservation.setActualCheckInDate(LocalDate.now());
+        reservation.setModifiedAt(LocalDateTime.now());
+
+        roomRepository.save(room);
+        reservationRepository.save(reservation);
+
+        auditService.log(
+                "ROOM_STATUS_CHANGE",
+                "Room",
+                "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in");
+
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate());
+
+        BigDecimal rate = room.getRoomType()
+                .getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights, rate, subtotal, taxes);
+    }
+
+    // =============================
+    // CHECK-OUT
+    // =============================
+
+    public ReservationActionPlaceholderResponse checkOut(String confirmationNumber) {
+
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            return toPlaceholderResponse(
+                    reservation,
+                    "check-out",
+                    "Checkout already completed");
         }
 
-        private BigDecimal safeMoney(BigDecimal value) {
-                if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
-                        return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                }
-                return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new ResourceConflictException("Only CHECKED_IN reservations can be checked out");
         }
 
-        private String resolvePaymentStatus(Reservation reservation) {
-                return PaymentStatusResolver.resolve(
-                                reservation.getTotalPaid(),
-                                reservation.getOutstandingBalance(),
-                                reservation.isInvoiceFinalized());
+        Room room = reservation.getRoom();
+        if (room.getStatus() != RoomStatus.OCCUPIED) {
+            throw new ResourceConflictException("Room must be OCCUPIED before checkout");
         }
 
-        private ReservationResponse toResponse(
-                        Reservation reservation,
-                        long nights,
-                        BigDecimal rate,
-                        BigDecimal subtotal,
-                        BigDecimal taxes) {
-
-                return new ReservationResponse(
-                                reservation.getId(),
-                                reservation.getConfirmationNumber(),
-                                reservation.getStatus(),
-                                reservation.getRoom().getId(),
-                                reservation.getRoom().getRoomNumber(),
-                                reservation.getGuest().getId(),
-                                reservation.getGuest().getName(),
-                                reservation.getGuest().getEmail(),
-                                reservation.getCheckInDate(),
-                                reservation.getCheckOutDate(),
-                                nights,
-                                rate,
-                                subtotal,
-                                taxes,
-                                reservation.getTotalPrice(),
-                                safeMoney(reservation.getTotalPaid()),
-                                safeMoney(reservation.getOutstandingBalance()),
-                                reservation.isInvoiceFinalized(),
-                                resolvePaymentStatus(reservation));
+        if (!reservation.isInvoiceFinalized()) {
+            throw new PaymentValidationException(
+                    "PAYMENT_NOT_FINALIZED",
+                    "Payment must be finalized before checkout",
+                    resolvePaymentStatusForValidation(reservation),
+                    safeMoney(reservation.getOutstandingBalance()),
+                    reservation.isInvoiceFinalized());
         }
+
+        BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
+        if (outstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
+            throw new PaymentValidationException(
+                    "PAYMENT_BALANCE_DUE",
+                    "Outstanding balance must be 0.00 before checkout. Current outstanding: " + outstanding,
+                    resolvePaymentStatusForValidation(reservation),
+                    outstanding,
+                    reservation.isInvoiceFinalized());
+        }
+
+        reservation.setStatus(ReservationStatus.CHECKED_OUT);
+        reservation.setActualCheckOutAt(LocalDateTime.now());
+        reservation.setModifiedAt(LocalDateTime.now());
+
+        room.setStatus(RoomStatus.NEEDS_CLEANING);
+
+        roomRepository.save(room);
+        reservationRepository.save(reservation);
+
+        triggerHousekeepingEvent(room);
+
+        auditService.log(
+                "ROOM_STATUS_CHANGE",
+                "Room",
+                "Room " + room.getRoomNumber()
+                        + " status changed to NEEDS_CLEANING after checkout");
+
+        log.info("Room {} set to NEEDS_CLEANING after checkout", room.getRoomNumber());
+
+        return toPlaceholderResponse(
+                reservation,
+                "check-out",
+                "Checkout completed successfully");
+    }
+
+    // =============================
+    // GET BY CONFIRMATION NUMBER
+    // =============================
+
+    public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
+
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        long nights = ChronoUnit.DAYS.between(
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate());
+
+        BigDecimal rate = reservation.getRoom().getRoomType()
+                .getBasePrice()
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        BigDecimal taxes = subtotal.multiply(taxRate)
+                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        return toResponse(reservation, nights, rate, subtotal, taxes);
+    }
+
+    // =============================
+    // HELPERS
+    // =============================
+
+    private void triggerHousekeepingEvent(Room room) {
+        housekeepingNotificationService.notifyCheckoutNeedsCleaning(room.getRoomNumber());
+        log.info("Housekeeping routing verified for checkout: room {}", room.getRoomNumber());
+    }
+
+    private Guest resolveOrCreateGuest(ReservationGuestRequest request) {
+        Optional<Guest> guest = guestRepository.findByEmailIgnoreCase(request.getEmail());
+
+        if (guest.isPresent()) {
+            return guest.get();
+        }
+
+        Guest newGuest = new Guest(
+                request.getName(),
+                request.getEmail(),
+                request.getPhone(),
+                request.getIdNumber(),
+                request.getNationality());
+
+        return guestRepository.save(newGuest);
+    }
+
+    private String generateUniqueConfirmationNumber() {
+        for (int i = 0; i < CONFIRMATION_MAX_ATTEMPTS; i++) {
+            String number = "RSV-" +
+                    UUID.randomUUID().toString()
+                            .replace("-", "")
+                            .substring(0, 10)
+                            .toUpperCase();
+
+            if (!reservationRepository.existsByConfirmationNumber(number)) {
+                return number;
+            }
+        }
+
+        throw new IllegalStateException("Unable to generate confirmation number");
+    }
+
+    private Reservation findReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with id: " + id));
+    }
+
+    private void sendReservationConfirmationEmail(
+            Reservation reservation,
+            ReservationResponse response) {
+
+        try {
+            emailService.sendReservationConfirmationEmail(
+                    reservation.getGuest().getEmail(),
+                    reservation.getGuest().getName(),
+                    response);
+
+        } catch (RuntimeException ex) {
+            throw new EmailDeliveryException("Failed to send confirmation email", ex);
+        }
+    }
+
+    private ReservationActionPlaceholderResponse toPlaceholderResponse(
+            Reservation reservation,
+            String action,
+            String message) {
+
+        return new ReservationActionPlaceholderResponse(
+                reservation.getId(),
+                action,
+                message,
+                true,
+                reservation.getStatus());
+    }
+
+    private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
+        BigDecimal safeTotal = safeMoney(total);
+        BigDecimal safePaid = safeMoney(paid);
+        BigDecimal outstanding = safeTotal.subtract(safePaid).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        return outstanding.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)
+                : outstanding;
+    }
+
+    private BigDecimal safeMoney(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        }
+        return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    }
+
+    private String resolvePaymentStatusForValidation(Reservation reservation) {
+        BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
+
+        if (!reservation.isInvoiceFinalized()) {
+            return "PAYMENT_PENDING";
+        }
+
+        if (outstanding.compareTo(BigDecimal.ZERO) > 0) {
+            return "PARTIALLY_PAID";
+        }
+
+        return "PAID";
+    }
+
+    private ReservationResponse toResponse(
+            Reservation reservation,
+            long nights,
+            BigDecimal rate,
+            BigDecimal subtotal,
+            BigDecimal taxes) {
+
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getConfirmationNumber(),
+                reservation.getStatus(),
+                reservation.getRoom().getId(),
+                reservation.getRoom().getRoomNumber(),
+                reservation.getGuest().getId(),
+                reservation.getGuest().getName(),
+                reservation.getGuest().getEmail(),
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate(),
+                nights,
+                rate,
+                subtotal,
+                taxes,
+                reservation.getTotalPrice());
+    }
 }

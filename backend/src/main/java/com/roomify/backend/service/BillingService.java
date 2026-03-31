@@ -75,7 +75,9 @@ public class BillingService {
             throw new PaymentValidationException(
                     "PAYMENT_OVERPAYMENT_BLOCKED",
                     "Overpayment is not allowed. Remaining balance is " + currentOutstanding,
-                    PaymentStatusResolver.resolve(totalPaid, currentOutstanding, reservation.isInvoiceFinalized()),
+                    reservation.getPaymentStatus() != null
+                            ? reservation.getPaymentStatus().name()
+                            : "UNPAID",
                     currentOutstanding,
                     reservation.isInvoiceFinalized());
         }
@@ -86,17 +88,26 @@ public class BillingService {
 
         reservation.setTotalPaid(projectedPaid);
         reservation.setOutstandingBalance(projectedOutstanding);
+        reservation.setPaymentStatus(isFullyPaid
+                ? com.roomify.backend.entity.PaymentStatus.PAID
+                : com.roomify.backend.entity.PaymentStatus.PARTIALLY_PAID);
         reservation.setInvoiceFinalized(isFullyPaid);
         reservationRepository.save(reservation);
 
         String metadata = String.format(
-                "paid=%s totalPaid=%s outstanding=%s finalized=%s",
-                paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid);
+                "paid=%s totalPaid=%s outstanding=%s finalized=%s paymentStatus=%s",
+                paymentAmount,
+                projectedPaid,
+                projectedOutstanding,
+                isFullyPaid,
+                reservation.getPaymentStatus());
+
         auditService.log("PAYMENT_RECORDED", normalized, metadata);
 
         log.info(
-                "Payment recorded for {} | amount={} totalPaid={} outstanding={} finalized={}",
-                normalized, paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid);
+                "Payment recorded for {} | amount={} totalPaid={} outstanding={} finalized={} paymentStatus={}",
+                normalized, paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid,
+                reservation.getPaymentStatus());
 
         return buildBillResponse(reservation, normalized, BigDecimal.ZERO, BigDecimal.ZERO, false);
     }
@@ -116,18 +127,22 @@ public class BillingService {
             throw new PaymentValidationException(
                     "PAYMENT_BALANCE_DUE",
                     "Outstanding balance must be 0.00 before bill close. Current outstanding: " + outstanding,
-                    PaymentStatusResolver.resolve(totalPaid, outstanding, reservation.isInvoiceFinalized()),
+                    reservation.getPaymentStatus() != null
+                            ? reservation.getPaymentStatus().name()
+                            : "UNPAID",
                     outstanding,
                     reservation.isInvoiceFinalized());
         }
 
         reservation.setTotalPaid(totalPaid);
         reservation.setOutstandingBalance(outstanding);
+        reservation.setPaymentStatus(com.roomify.backend.entity.PaymentStatus.PAID);
         reservation.setInvoiceFinalized(true);
         reservationRepository.save(reservation);
 
-        auditService.log("BILL_CLOSED", normalized, "finalized=true");
-        log.info("Bill closed for {} | totalPaid={} outstanding={}", normalized, totalPaid, outstanding);
+        auditService.log("BILL_CLOSED", normalized, "finalized=true paymentStatus=" + reservation.getPaymentStatus());
+        log.info("Bill closed for {} | totalPaid={} outstanding={} paymentStatus={}",
+                normalized, totalPaid, outstanding, reservation.getPaymentStatus());
 
         return buildBillResponse(reservation, normalized, BigDecimal.ZERO, BigDecimal.ZERO, false);
     }
@@ -162,22 +177,23 @@ public class BillingService {
         BigDecimal balanceDue = nonNegative(vatBase.add(vatAmount).subtract(safeDiscount));
         BigDecimal totalPaid = sanitise(reservation.getTotalPaid());
         BigDecimal outstandingBalance = calculateOutstanding(sanitise(reservation.getTotalPrice()), totalPaid);
-        String paymentStatus = PaymentStatusResolver.resolve(
-                totalPaid,
-                outstandingBalance,
-                reservation.isInvoiceFinalized());
+        String paymentStatus = reservation.getPaymentStatus() != null
+                ? reservation.getPaymentStatus().name()
+                : "UNPAID";
 
         List<BillLineItem> lineItems = buildLineItems(
                 nights, roomRate, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
 
         String metadata = String.format(
-                "nights=%d roomCharge=%s svcCharges=%s vatAmount=%s discount=%s balanceDue=%s",
-                nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+                "nights=%d roomCharge=%s svcCharges=%s vatAmount=%s discount=%s balanceDue=%s paymentStatus=%s",
+                nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue, paymentStatus);
+
         if (auditBillCalculated) {
             auditService.log("BILL_CALCULATED", normalizedConfirmation, metadata);
             log.info(
-                    "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={}",
-                    normalizedConfirmation, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount, balanceDue);
+                    "Bill calculated for {} | nights={} roomCharge={} svcCharges={} vat={} discount={} balanceDue={} paymentStatus={}",
+                    normalizedConfirmation, nights, roomCharge, safeServiceCharges, vatAmount, safeDiscount,
+                    balanceDue, paymentStatus);
         }
 
         BillResponse response = new BillResponse(
