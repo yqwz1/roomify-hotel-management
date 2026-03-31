@@ -28,11 +28,7 @@ public final class PaymentStatusResolver {
             return "PARTIALLY_PAID";
         }
 
-        if (safePaid.compareTo(zero) == 0) {
-            return invoiceFinalized ? "UNPAID" : "PAYMENT_PENDING";
-        }
-
-        return "PAYMENT_PENDING";
+        return invoiceFinalized ? "UNPAID" : "PAYMENT_PENDING";
     }
 
     private static BigDecimal safeMoney(BigDecimal value) {
