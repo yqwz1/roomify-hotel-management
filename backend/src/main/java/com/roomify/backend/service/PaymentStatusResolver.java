@@ -10,20 +10,25 @@ public final class PaymentStatusResolver {
     private PaymentStatusResolver() {
     }
 
-    public static String resolve(BigDecimal totalPaid, BigDecimal outstandingBalance, boolean invoiceFinalized) {
+    public static String resolve(
+            BigDecimal totalPaid,
+            BigDecimal outstandingBalance,
+            boolean invoiceFinalized) {
+
         BigDecimal safePaid = safeMoney(totalPaid);
         BigDecimal safeOutstanding = safeMoney(outstandingBalance);
 
-        if (safeOutstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) == 0) {
-            return "PAID";
-        }
-        if (safePaid.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
-            return "PARTIALLY_PAID";
-        }
+        // ✅ FIX 1: إعطاء أولوية لحالة الفاتورة
         if (!invoiceFinalized) {
             return "PAYMENT_PENDING";
         }
-        return "UNPAID";
+
+        if (safeOutstanding.compareTo(
+                BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
+            return "PARTIALLY_PAID";
+        }
+
+        return "PAID";
     }
 
     private static BigDecimal safeMoney(BigDecimal value) {
