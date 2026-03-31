@@ -58,10 +58,9 @@ public class PaymentService {
 
         BigDecimal totalPrice = sanitize(reservation.getTotalPrice());
         BigDecimal totalPaid = sanitize(reservation.getTotalPaid());
-        BigDecimal remainingBalance = sanitize(reservation.getOutstandingBalance());
+        BigDecimal remainingBalance = calculateOutstanding(totalPrice, totalPaid);
 
-        if (reservation.getPaymentStatus() == PaymentStatus.PAID
-                || remainingBalance.compareTo(BigDecimal.ZERO) == 0
+        if (remainingBalance.compareTo(BigDecimal.ZERO) == 0
                 || totalPaid.compareTo(totalPrice) >= 0) {
             logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Bill already fully paid");
             throw new ResourceConflictException("This bill is already fully paid and cannot receive new payments");
@@ -88,16 +87,11 @@ public class PaymentService {
             }
 
             BigDecimal newTotalPaid = totalPaid.add(amount).setScale(MONEY_SCALE, ROUNDING);
-            BigDecimal newRemainingBalance = totalPrice.subtract(newTotalPaid).setScale(MONEY_SCALE, ROUNDING);
+            BigDecimal newRemainingBalance = calculateOutstanding(totalPrice, newTotalPaid);
 
-            if (newRemainingBalance.compareTo(BigDecimal.ZERO) < 0) {
-                newRemainingBalance = BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
-            }
-
-            PaymentStatus reservationPaymentStatus =
-                    newRemainingBalance.compareTo(BigDecimal.ZERO) == 0
-                            ? PaymentStatus.PAID
-                            : PaymentStatus.PARTIALLY_PAID;
+            PaymentStatus reservationPaymentStatus = newRemainingBalance.compareTo(BigDecimal.ZERO) == 0
+                    ? PaymentStatus.PAID
+                    : PaymentStatus.PARTIALLY_PAID;
 
             reservation.setTotalPaid(newTotalPaid);
             reservation.setOutstandingBalance(newRemainingBalance);
@@ -144,7 +138,7 @@ public class PaymentService {
         } catch (RuntimeException ex) {
             payment.setPaymentStatus(PaymentStatus.FAILED);
             payment.setFailureReason(ex.getMessage());
-            Payment failed = paymentRepository.save(payment);
+            paymentRepository.save(payment);
 
             auditService.log(
                     "PAYMENT_FAILED",
@@ -200,5 +194,15 @@ public class PaymentService {
             throw new IllegalArgumentException("Confirmation number is required");
         }
         return confirmationNumber.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private BigDecimal calculateOutstanding(BigDecimal totalPrice, BigDecimal totalPaid) {
+        BigDecimal outstanding = sanitize(totalPrice)
+                .subtract(sanitize(totalPaid))
+                .setScale(MONEY_SCALE, ROUNDING);
+
+        return outstanding.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
+                : outstanding;
     }
 }
