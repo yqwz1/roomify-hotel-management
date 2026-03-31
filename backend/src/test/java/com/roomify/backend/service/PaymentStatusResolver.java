@@ -15,20 +15,22 @@ public final class PaymentStatusResolver {
             BigDecimal outstandingBalance,
             boolean invoiceFinalized) {
 
-        BigDecimal safePaid = safeMoney(totalPaid);
         BigDecimal safeOutstanding = safeMoney(outstandingBalance);
-
         BigDecimal zero = BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        if (!invoiceFinalized) {
+            return "PAYMENT_PENDING";
+        }
+
+        if (safeOutstanding.compareTo(zero) > 0) {
+            return "PARTIALLY_PAID";
+        }
 
         if (safeOutstanding.compareTo(zero) == 0) {
             return "PAID";
         }
 
-        if (safePaid.compareTo(zero) > 0) {
-            return "PARTIALLY_PAID";
-        }
-
-        return invoiceFinalized ? "UNPAID" : "PAYMENT_PENDING";
+        return "UNPAID";
     }
 
     private static BigDecimal safeMoney(BigDecimal value) {
