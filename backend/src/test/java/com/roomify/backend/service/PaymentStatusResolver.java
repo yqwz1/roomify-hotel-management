@@ -1,42 +1,60 @@
 package com.roomify.backend.service;
 
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
-public final class PaymentStatusResolver {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    private static final int MONEY_SCALE = 2;
+class PaymentStatusResolverTest {
 
-    private PaymentStatusResolver() {
+    @Test
+    void shouldReturnPaymentPending_whenNoPaymentAndNotFinalized() {
+        String status = PaymentStatusResolver.resolve(
+                BigDecimal.ZERO,
+                new BigDecimal("500.00"),
+                false);
+
+        assertEquals("PAYMENT_PENDING", status);
     }
 
-    public static String resolve(
-            BigDecimal totalPaid,
-            BigDecimal outstandingBalance,
-            boolean invoiceFinalized) {
+    @Test
+    void shouldReturnUnpaid_whenNoPaymentAndFinalized() {
+        String status = PaymentStatusResolver.resolve(
+                BigDecimal.ZERO,
+                new BigDecimal("500.00"),
+                true);
 
-        BigDecimal safeOutstanding = safeMoney(outstandingBalance);
-        BigDecimal zero = BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        if (!invoiceFinalized) {
-            return "PAYMENT_PENDING";
-        }
-
-        if (safeOutstanding.compareTo(zero) > 0) {
-            return "PARTIALLY_PAID";
-        }
-
-        if (safeOutstanding.compareTo(zero) == 0) {
-            return "PAID";
-        }
-
-        return "UNPAID";
+        assertEquals("UNPAID", status);
     }
 
-    private static BigDecimal safeMoney(BigDecimal value) {
-        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
-            return BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        }
-        return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+    @Test
+    void shouldReturnPartiallyPaid_whenPartialPaymentExists() {
+        String status = PaymentStatusResolver.resolve(
+                new BigDecimal("200.00"),
+                new BigDecimal("300.00"),
+                false);
+
+        assertEquals("PARTIALLY_PAID", status);
+    }
+
+    @Test
+    void shouldReturnPaid_whenOutstandingIsZero_andFinalized() {
+        String status = PaymentStatusResolver.resolve(
+                new BigDecimal("500.00"),
+                BigDecimal.ZERO,
+                true);
+
+        assertEquals("PAID", status);
+    }
+
+    @Test
+    void shouldReturnPaid_whenOutstandingIsZero_evenIfNotFinalized() {
+        String status = PaymentStatusResolver.resolve(
+                new BigDecimal("500.00"),
+                BigDecimal.ZERO,
+                false);
+
+        assertEquals("PAID", status);
     }
 }

@@ -39,6 +39,8 @@ class BillingServiceTest {
         billingService = new BillingService(reservationRepository, auditService, new BigDecimal("0.15"));
     }
 
+    // ====== Tests لحساب الفاتورة ======
+
     @Test
     void calculateBillShouldReturnBasicItemisedBreakdown() {
         Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
@@ -122,6 +124,8 @@ class BillingServiceTest {
         assertEquals(new BigDecimal("0.00"), response.getBalanceDue());
     }
 
+    // ====== Tests للدفعات ======
+
     @Test
     void recordPaymentShouldMarkAsPartiallyPaidAndUpdateOutstanding() {
         Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
@@ -178,6 +182,58 @@ class BillingServiceTest {
         assertEquals(true, response.isInvoiceFinalized());
     }
 
+    // ====== Tests Edge Cases (جديدة) ======
+
+    @Test
+    void recordPaymentShouldRemainPartiallyPaid_whenMultiplePartialPayments() {
+        Reservation reservation = buildReservation("200.00",
+                LocalDate.of(2026, 3, 20),
+                LocalDate.of(2026, 3, 23));
+
+        reservation.setTotalPrice(new BigDecimal("690.00"));
+        reservation.setTotalPaid(new BigDecimal("100.00"));
+        reservation.setOutstandingBalance(new BigDecimal("590.00"));
+        reservation.setInvoiceFinalized(false);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // أول دفعة
+        billingService.recordPayment("RSV-ABC123", new BigDecimal("200.00"));
+
+        // ثاني دفعة
+        BillResponse response = billingService.recordPayment("RSV-ABC123", new BigDecimal("100.00"));
+
+        assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
+        assertEquals(false, response.isInvoiceFinalized());
+    }
+
+    @Test
+    void recordPaymentShouldReturnPaid_whenOutstandingBecomesZeroExactly() {
+        Reservation reservation = buildReservation("200.00",
+                LocalDate.of(2026, 3, 20),
+                LocalDate.of(2026, 3, 23));
+
+        reservation.setTotalPrice(new BigDecimal("690.00"));
+        reservation.setTotalPaid(new BigDecimal("600.00"));
+        reservation.setOutstandingBalance(new BigDecimal("90.00"));
+        reservation.setInvoiceFinalized(false);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        BillResponse response = billingService.recordPayment("RSV-ABC123", new BigDecimal("90.00"));
+
+        assertEquals("PAID", response.getPaymentStatus());
+        assertEquals(true, response.isInvoiceFinalized());
+    }
+
+    // ====== Tests لإغلاق الفاتورة ======
+
     @Test
     void closeBillShouldBlockWhenOutstandingBalanceExists() {
         Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
@@ -213,6 +269,8 @@ class BillingServiceTest {
         assertEquals("PAID", response.getPaymentStatus());
         assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
     }
+
+    // ====== Helper ======
 
     private Reservation buildReservation(String roomRate, LocalDate checkIn, LocalDate checkOut) {
         Guest guest = new Guest("Guest", "guest@example.com", "0500000000", "ID-77", "SA");
