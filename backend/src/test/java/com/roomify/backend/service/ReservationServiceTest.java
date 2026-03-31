@@ -17,7 +17,6 @@ import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,6 +30,7 @@ import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -44,359 +44,367 @@ import com.roomify.backend.repository.RoomRepository;
 
 class ReservationServiceTest {
 
-        private ReservationRepository reservationRepository;
-        private GuestRepository guestRepository;
-        private RoomRepository roomRepository;
+    private ReservationRepository reservationRepository;
+    private GuestRepository guestRepository;
+    private RoomRepository roomRepository;
 
-        private EmailService emailService;
-        private AuditService auditService;
-        private HousekeepingNotificationService housekeepingNotificationService;
+    private EmailService emailService;
+    private InvoiceEmailService invoiceEmailService;
+    private InvoiceDeliveryLogService invoiceDeliveryLogService;
+    private AuditService auditService;
+    private HousekeepingNotificationService housekeepingNotificationService;
 
-        private ReservationService reservationService;
+    private ReservationService reservationService;
 
-        @BeforeEach
-        void setUp() {
+    @BeforeEach
+    void setUp() {
 
-                reservationRepository = mock(ReservationRepository.class);
-                guestRepository = mock(GuestRepository.class);
-                roomRepository = mock(RoomRepository.class);
+        reservationRepository = mock(ReservationRepository.class);
+        guestRepository = mock(GuestRepository.class);
+        roomRepository = mock(RoomRepository.class);
 
-                emailService = mock(EmailService.class);
-                auditService = mock(AuditService.class);
-                housekeepingNotificationService = mock(HousekeepingNotificationService.class);
+        emailService = mock(EmailService.class);
+        invoiceEmailService = mock(InvoiceEmailService.class);
+        invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
+        auditService = mock(AuditService.class);
+        housekeepingNotificationService = mock(HousekeepingNotificationService.class);
 
-                reservationService = new ReservationService(
-                                reservationRepository,
-                                guestRepository,
-                                roomRepository,
-                                emailService,
-                                auditService,
-                                housekeepingNotificationService,
-                                new BigDecimal("0.15"));
-        }
+        reservationService = new ReservationService(
+                reservationRepository,
+                guestRepository,
+                roomRepository,
+                emailService,
+                invoiceEmailService,
+                invoiceDeliveryLogService,
+                auditService,
+                housekeepingNotificationService,
+                new BigDecimal("0.15"));
+    }
 
-        @Test
-        void createShouldCalculateNightsTaxesAndTotalUsingConfiguredTaxRate() {
+    @Test
+    void createShouldCalculateNightsTaxesAndTotalUsingConfiguredTaxRate() {
 
-                Room room = buildRoom(10L, "301", "199.99");
+        Room room = buildRoom(10L, "301", "199.99");
 
-                ReservationCreateRequest request = buildCreateRequest(
-                                10L,
-                                LocalDate.of(2026, 3, 10),
-                                LocalDate.of(2026, 3, 13),
-                                ReservationStatus.CONFIRMED);
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 13),
+                ReservationStatus.CONFIRMED);
 
-                when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
 
-                when(reservationRepository.findOverlappingReservations(
-                                eq(10L),
-                                eq(LocalDate.of(2026, 3, 10)),
-                                eq(LocalDate.of(2026, 3, 13))))
-                                .thenReturn(Collections.emptyList());
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 13))))
+                .thenReturn(Collections.emptyList());
 
-                when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
-                                .thenReturn(Optional.empty());
+        when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
+                .thenReturn(Optional.empty());
 
-                when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
-                        Guest guest = invocation.getArgument(0);
-                        guest.setId(21L);
-                        return guest;
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
+            Guest guest = invocation.getArgument(0);
+            guest.setId(21L);
+            return guest;
+        });
+
+        when(reservationRepository.existsByConfirmationNumber(anyString()))
+                .thenReturn(false);
+
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> {
+                    Reservation reservation = invocation.getArgument(0);
+                    reservation.setId(71L);
+                    return reservation;
                 });
 
-                when(reservationRepository.existsByConfirmationNumber(anyString()))
-                                .thenReturn(false);
+        ReservationResponse response = reservationService.create(request);
 
-                when(reservationRepository.save(any(Reservation.class)))
-                                .thenAnswer(invocation -> {
-                                        Reservation reservation = invocation.getArgument(0);
-                                        reservation.setId(71L);
-                                        return reservation;
-                                });
+        assertEquals(3L, response.getNights());
+        assertEquals(new BigDecimal("199.99"), response.getRoomRate());
+        assertEquals(new BigDecimal("599.97"), response.getSubtotal());
+        assertEquals(new BigDecimal("90.00"), response.getTaxes());
+        assertEquals(new BigDecimal("689.97"), response.getTotalPrice());
 
-                ReservationResponse response = reservationService.create(request);
+        verify(emailService).sendReservationConfirmationEmail(
+                anyString(),
+                anyString(),
+                any(ReservationResponse.class));
+    }
 
-                assertEquals(3L, response.getNights());
-                assertEquals(new BigDecimal("199.99"), response.getRoomRate());
-                assertEquals(new BigDecimal("599.97"), response.getSubtotal());
-                assertEquals(new BigDecimal("90.00"), response.getTaxes());
-                assertEquals(new BigDecimal("689.97"), response.getTotalPrice());
+    @Test
+    void createShouldThrowConflictWhenDateRangeHasZeroNights() {
 
-                verify(emailService).sendReservationConfirmationEmail(
-                                anyString(),
-                                anyString(),
-                                any(ReservationResponse.class));
-        }
+        Room room = buildRoom(10L, "301", "120.00");
 
-        @Test
-        void createShouldThrowConflictWhenDateRangeHasZeroNights() {
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 10),
+                ReservationStatus.PENDING);
 
-                Room room = buildRoom(10L, "301", "120.00");
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
 
-                ReservationCreateRequest request = buildCreateRequest(
-                                10L,
-                                LocalDate.of(2026, 3, 10),
-                                LocalDate.of(2026, 3, 10),
-                                ReservationStatus.PENDING);
+        assertThrows(ResourceConflictException.class,
+                () -> reservationService.create(request));
+    }
 
-                when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+    @Test
+    void createShouldDefaultStatusToPendingWhenStatusIsMissing() {
 
-                assertThrows(ResourceConflictException.class,
-                                () -> reservationService.create(request));
-        }
+        Room room = buildRoom(10L, "301", "120.00");
 
-        @Test
-        void createShouldDefaultStatusToPendingWhenStatusIsMissing() {
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 12),
+                null);
 
-                Room room = buildRoom(10L, "301", "120.00");
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
 
-                ReservationCreateRequest request = buildCreateRequest(
-                                10L,
-                                LocalDate.of(2026, 3, 10),
-                                LocalDate.of(2026, 3, 12),
-                                null);
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 12))))
+                .thenReturn(Collections.emptyList());
 
-                when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
+                .thenReturn(Optional.empty());
 
-                when(reservationRepository.findOverlappingReservations(
-                                eq(10L),
-                                eq(LocalDate.of(2026, 3, 10)),
-                                eq(LocalDate.of(2026, 3, 12))))
-                                .thenReturn(Collections.emptyList());
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
+            Guest guest = invocation.getArgument(0);
+            guest.setId(21L);
+            return guest;
+        });
 
-                when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
-                                .thenReturn(Optional.empty());
+        when(reservationRepository.existsByConfirmationNumber(anyString()))
+                .thenReturn(false);
 
-                when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
-                        Guest guest = invocation.getArgument(0);
-                        guest.setId(21L);
-                        return guest;
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> {
+                    Reservation reservation = invocation.getArgument(0);
+                    reservation.setId(71L);
+                    return reservation;
                 });
 
-                when(reservationRepository.existsByConfirmationNumber(anyString()))
-                                .thenReturn(false);
+        ReservationResponse response = reservationService.create(request);
 
-                when(reservationRepository.save(any(Reservation.class)))
-                                .thenAnswer(invocation -> {
-                                        Reservation reservation = invocation.getArgument(0);
-                                        reservation.setId(71L);
-                                        return reservation;
-                                });
+        assertEquals(ReservationStatus.PENDING, response.getStatus());
 
-                ReservationResponse response = reservationService.create(request);
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository).save(captor.capture());
+        assertEquals(ReservationStatus.PENDING, captor.getValue().getStatus());
+        assertEquals(PaymentStatus.UNPAID, captor.getValue().getPaymentStatus());
+    }
 
-                assertEquals(ReservationStatus.PENDING, response.getStatus());
+    @Test
+    void modifyShouldReturnConflictWhenRequestedDatesOverlap() {
 
-                ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-                verify(reservationRepository).save(captor.capture());
-                assertEquals(ReservationStatus.PENDING, captor.getValue().getStatus());
-        }
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
 
-        @Test
-        void modifyShouldReturnConflictWhenRequestedDatesOverlap() {
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
 
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+        when(reservationRepository.findOverlappingForUpdate(
+                eq(10L),
+                eq(LocalDate.of(2026, 4, 2)),
+                eq(LocalDate.of(2026, 4, 5)),
+                eq(71L)))
+                .thenReturn(List.of(new Reservation()));
 
-                when(reservationRepository.findById(71L))
-                                .thenReturn(Optional.of(reservation));
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.modify(
+                        71L,
+                        new ReservationModifyRequest(
+                                null,
+                                LocalDate.of(2026, 4, 2),
+                                LocalDate.of(2026, 4, 5),
+                                "Shift dates")));
 
-                when(reservationRepository.findOverlappingForUpdate(
-                                eq(10L),
-                                eq(LocalDate.of(2026, 4, 2)),
-                                eq(LocalDate.of(2026, 4, 5)),
-                                eq(71L)))
-                                .thenReturn(List.of(new Reservation()));
+        assertEquals(
+                "Selected room is not available for the requested dates",
+                ex.getMessage());
 
-                ResourceConflictException ex = assertThrows(
-                                ResourceConflictException.class,
-                                () -> reservationService.modify(
-                                                71L,
-                                                new ReservationModifyRequest(
-                                                                null,
-                                                                LocalDate.of(2026, 4, 2),
-                                                                LocalDate.of(2026, 4, 5),
-                                                                "Shift dates")));
+        verify(reservationRepository, never()).save(any());
+        verifyNoInteractions(emailService);
+    }
 
-                assertEquals(
-                                "Selected room is not available for the requested dates",
-                                ex.getMessage());
+    @Test
+    void cancelShouldStoreNullReasonWhenRequestReasonIsBlank() {
 
-                verify(reservationRepository, never()).save(any());
-                verifyNoInteractions(emailService);
-        }
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
 
-        @Test
-        void cancelShouldStoreNullReasonWhenRequestReasonIsBlank() {
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
 
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+        when(reservationRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-                when(reservationRepository.findById(71L))
-                                .thenReturn(Optional.of(reservation));
+        reservationService.cancel(71L, new ReservationCancelRequest("   "));
 
-                when(reservationRepository.save(any()))
-                                .thenAnswer(invocation -> invocation.getArgument(0));
+        assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
+        assertNull(reservation.getCancellationReason());
+        assertNotNull(reservation.getCancellationAt());
+    }
 
-                reservationService.cancel(71L, new ReservationCancelRequest("   "));
+    @Test
+    void checkInShouldThrowConflictWhenReservationIsNotConfirmed() {
 
-                assertEquals(ReservationStatus.CANCELLED, reservation.getStatus());
-                assertNull(reservation.getCancellationReason());
-                assertNotNull(reservation.getCancellationAt());
-        }
+        Reservation reservation = buildReservationForCancel(ReservationStatus.PENDING);
 
-        @Test
-        void checkInShouldThrowConflictWhenReservationIsNotConfirmed() {
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
 
-                Reservation reservation = buildReservationForCancel(ReservationStatus.PENDING);
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.checkIn("RSV-ABC123DEF456"));
 
-                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
-                                .thenReturn(Optional.of(reservation));
+        assertEquals(
+                "Only CONFIRMED reservations can be checked in",
+                ex.getMessage());
+    }
 
-                ResourceConflictException ex = assertThrows(
-                                ResourceConflictException.class,
-                                () -> reservationService.checkIn("RSV-ABC123DEF456"));
+    @Test
+    void checkOutShouldThrowConflictWhenInvoiceIsNotFinalized() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setInvoiceFinalized(false);
 
-                assertEquals(
-                                "Only CONFIRMED reservations can be checked in",
-                                ex.getMessage());
-        }
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
 
-        @Test
-        void checkOutShouldThrowConflictWhenInvoiceIsNotFinalized() {
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
-                reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
-                reservation.setOutstandingBalance(BigDecimal.ZERO);
-                reservation.setInvoiceFinalized(false);
+        PaymentValidationException ex = assertThrows(
+                PaymentValidationException.class,
+                () -> reservationService.checkOut("RSV-ABC123DEF456"));
 
-                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
-                                .thenReturn(Optional.of(reservation));
+        assertEquals("Payment must be finalized before checkout", ex.getMessage());
+    }
 
-                PaymentValidationException ex = assertThrows(
-                                PaymentValidationException.class,
-                                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+    @Test
+    void checkOutShouldThrowConflictWhenOutstandingIsPositive() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setOutstandingBalance(new BigDecimal("25.00"));
+        reservation.setInvoiceFinalized(true);
 
-                assertEquals("Payment must be finalized before checkout", ex.getMessage());
-        }
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
 
-        @Test
-        void checkOutShouldThrowConflictWhenOutstandingIsPositive() {
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
-                reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
-                reservation.setOutstandingBalance(new BigDecimal("25.00"));
-                reservation.setInvoiceFinalized(true);
+        PaymentValidationException ex = assertThrows(
+                PaymentValidationException.class,
+                () -> reservationService.checkOut("RSV-ABC123DEF456"));
 
-                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
-                                .thenReturn(Optional.of(reservation));
+        assertEquals("PAYMENT_BALANCE_DUE", ex.getCode());
+        assertTrue(ex.getMessage().contains("Outstanding balance must be 0.00 before checkout"));
+    }
 
-                PaymentValidationException ex = assertThrows(
-                                PaymentValidationException.class,
-                                () -> reservationService.checkOut("RSV-ABC123DEF456"));
+    @Test
+    void checkOutShouldReturnIdempotentResponseWhenAlreadyCheckedOut() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_OUT);
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
 
-                assertEquals("PAYMENT_BALANCE_DUE", ex.getCode());
-                assertTrue(ex.getMessage().contains("Outstanding balance must be 0.00 before checkout"));
-        }
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
 
-        @Test
-        void checkOutShouldReturnIdempotentResponseWhenAlreadyCheckedOut() {
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_OUT);
-                reservation.setInvoiceFinalized(true);
-                reservation.setOutstandingBalance(BigDecimal.ZERO);
+        ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
 
-                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
-                                .thenReturn(Optional.of(reservation));
+        assertEquals("check-out", response.getAction());
+        assertEquals("Checkout already completed", response.getMessage());
+        verify(reservationRepository, never()).save(any());
+        verify(roomRepository, never()).save(any());
+    }
 
-                ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
+    @Test
+    void checkOutShouldSucceedAndPersistCheckoutTimestamp() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
 
-                assertEquals("check-out", response.getAction());
-                assertEquals("Checkout already completed", response.getMessage());
-                verify(reservationRepository, never()).save(any());
-                verify(roomRepository, never()).save(any());
-        }
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        @Test
-        void checkOutShouldSucceedAndPersistCheckoutTimestamp() {
-                Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
-                reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
-                reservation.setInvoiceFinalized(true);
-                reservation.setOutstandingBalance(BigDecimal.ZERO);
+        ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
 
-                when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
-                                .thenReturn(Optional.of(reservation));
-                when(reservationRepository.save(any(Reservation.class)))
-                                .thenAnswer(invocation -> invocation.getArgument(0));
-                when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        assertEquals(ReservationStatus.CHECKED_OUT, reservation.getStatus());
+        assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
+        assertNotNull(reservation.getActualCheckOutAt());
+        assertEquals("Checkout completed successfully", response.getMessage());
+        verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning("301");
+    }
 
-                ReservationActionPlaceholderResponse response = reservationService.checkOut("RSV-ABC123DEF456");
+    private Reservation buildReservationForCancel(ReservationStatus status) {
 
-                assertEquals(ReservationStatus.CHECKED_OUT, reservation.getStatus());
-                assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
-                assertNotNull(reservation.getActualCheckOutAt());
-                assertEquals("Checkout completed successfully", response.getMessage());
-                verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning("301");
-        }
+        Guest guest = new Guest(
+                "Guest",
+                "guest@example.com",
+                "0500000000",
+                "ID-77",
+                "USA");
 
-        private Reservation buildReservationForCancel(ReservationStatus status) {
+        guest.setId(21L);
 
-                Guest guest = new Guest(
-                                "Guest",
-                                "guest@example.com",
-                                "0500000000",
-                                "ID-77",
-                                "USA");
+        Room room = buildRoom(10L, "301", "150.00");
 
-                guest.setId(21L);
+        Reservation reservation = new Reservation();
 
-                Room room = buildRoom(10L, "301", "150.00");
+        reservation.setId(71L);
+        reservation.setGuest(guest);
+        reservation.setRoom(room);
+        reservation.setCheckInDate(LocalDate.of(2026, 4, 1));
+        reservation.setCheckOutDate(LocalDate.of(2026, 4, 3));
+        reservation.setStatus(status);
+        reservation.setConfirmationNumber("RSV-ABC123DEF456");
+        reservation.setTotalPrice(new BigDecimal("517.50"));
+        reservation.setTotalPaid(BigDecimal.ZERO);
+        reservation.setOutstandingBalance(new BigDecimal("517.50"));
+        reservation.setPaymentStatus(PaymentStatus.UNPAID);
+        reservation.setInvoiceFinalized(false);
 
-                Reservation reservation = new Reservation();
+        return reservation;
+    }
 
-                reservation.setId(71L);
-                reservation.setGuest(guest);
-                reservation.setRoom(room);
-                reservation.setCheckInDate(LocalDate.of(2026, 4, 1));
-                reservation.setCheckOutDate(LocalDate.of(2026, 4, 3));
-                reservation.setStatus(status);
-                reservation.setConfirmationNumber("RSV-ABC123DEF456");
-                reservation.setTotalPrice(new BigDecimal("517.50"));
-                reservation.setTotalPaid(BigDecimal.ZERO);
-                reservation.setOutstandingBalance(new BigDecimal("517.50"));
-                reservation.setInvoiceFinalized(false);
+    private Room buildRoom(Long roomId, String roomNumber, String basePrice) {
 
-                return reservation;
-        }
+        RoomType roomType = new RoomType(
+                "Deluxe",
+                new BigDecimal(basePrice),
+                2,
+                "WiFi",
+                "Deluxe room");
 
-        private Room buildRoom(Long roomId, String roomNumber, String basePrice) {
+        roomType.setId(5L);
 
-                RoomType roomType = new RoomType(
-                                "Deluxe",
-                                new BigDecimal(basePrice),
-                                2,
-                                "WiFi",
-                                "Deluxe room");
+        Room room = new Room(roomNumber, roomType, 3, RoomStatus.AVAILABLE);
 
-                roomType.setId(5L);
+        room.setId(roomId);
 
-                Room room = new Room(roomNumber, roomType, 3, RoomStatus.AVAILABLE);
+        return room;
+    }
 
-                room.setId(roomId);
+    private ReservationCreateRequest buildCreateRequest(
+            Long roomId,
+            LocalDate checkIn,
+            LocalDate checkOut,
+            ReservationStatus status) {
 
-                return room;
-        }
-
-        private ReservationCreateRequest buildCreateRequest(
-                        Long roomId,
-                        LocalDate checkIn,
-                        LocalDate checkOut,
-                        ReservationStatus status) {
-
-                return new ReservationCreateRequest(
-                                roomId,
-                                checkIn,
-                                checkOut,
-                                status,
-                                new ReservationGuestRequest(
-                                                "Guest",
-                                                "guest@example.com",
-                                                "0500000000",
-                                                "ID-77",
-                                                "USA"));
-        }
+        return new ReservationCreateRequest(
+                roomId,
+                checkIn,
+                checkOut,
+                status,
+                new ReservationGuestRequest(
+                        "Guest",
+                        "guest@example.com",
+                        "0500000000",
+                        "ID-77",
+                        "USA"));
+    }
 }

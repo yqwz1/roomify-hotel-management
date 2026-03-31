@@ -1,0 +1,204 @@
+package com.roomify.backend.service;
+
+import com.roomify.backend.dto.PaymentRequest;
+import com.roomify.backend.dto.PaymentResponse;
+import com.roomify.backend.entity.Payment;
+import com.roomify.backend.entity.PaymentMethod;
+import com.roomify.backend.entity.PaymentStatus;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class PaymentService {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+    private static final int MONEY_SCALE = 2;
+    private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
+
+    private final ReservationRepository reservationRepository;
+    private final PaymentRepository paymentRepository;
+    private final AuditService auditService;
+
+    public PaymentService(
+            ReservationRepository reservationRepository,
+            PaymentRepository paymentRepository,
+            AuditService auditService) {
+        this.reservationRepository = reservationRepository;
+        this.paymentRepository = paymentRepository;
+        this.auditService = auditService;
+    }
+
+    public PaymentResponse createPayment(PaymentRequest request) {
+        String confirmationNumber = normalize(request.getConfirmationNumber());
+
+        Reservation reservation = reservationRepository.findByConfirmationNumber(confirmationNumber)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+
+        BigDecimal amount = sanitize(request.getAmount());
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Invalid payment amount");
+            throw new ResourceConflictException("Payment amount must be greater than 0");
+        }
+
+        BigDecimal totalPrice = sanitize(reservation.getTotalPrice());
+        BigDecimal totalPaid = sanitize(reservation.getTotalPaid());
+        BigDecimal remainingBalance = sanitize(reservation.getOutstandingBalance());
+
+        if (reservation.getPaymentStatus() == PaymentStatus.PAID
+                || remainingBalance.compareTo(BigDecimal.ZERO) == 0
+                || totalPaid.compareTo(totalPrice) >= 0) {
+            logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Bill already fully paid");
+            throw new ResourceConflictException("This bill is already fully paid and cannot receive new payments");
+        }
+
+        if (amount.compareTo(remainingBalance) > 0) {
+            logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Overpayment blocked");
+            throw new ResourceConflictException(
+                    "Payment exceeds remaining balance. Remaining balance is " + remainingBalance);
+        }
+
+        Payment payment = new Payment();
+        payment.setReservation(reservation);
+        payment.setAmount(amount);
+        payment.setPaymentMethod(request.getPaymentMethod());
+
+        String gatewayReference = null;
+
+        try {
+            switch (request.getPaymentMethod()) {
+                case CASH -> handleCashPayment(payment);
+                case CARD -> handleCardPayment(payment);
+                case ONLINE -> gatewayReference = handleOnlinePayment(payment);
+            }
+
+            BigDecimal newTotalPaid = totalPaid.add(amount).setScale(MONEY_SCALE, ROUNDING);
+            BigDecimal newRemainingBalance = totalPrice.subtract(newTotalPaid).setScale(MONEY_SCALE, ROUNDING);
+
+            if (newRemainingBalance.compareTo(BigDecimal.ZERO) < 0) {
+                newRemainingBalance = BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
+            }
+
+            PaymentStatus reservationPaymentStatus =
+                    newRemainingBalance.compareTo(BigDecimal.ZERO) == 0
+                            ? PaymentStatus.PAID
+                            : PaymentStatus.PARTIALLY_PAID;
+
+            reservation.setTotalPaid(newTotalPaid);
+            reservation.setOutstandingBalance(newRemainingBalance);
+            reservation.setPaymentStatus(reservationPaymentStatus);
+            reservation.setInvoiceFinalized(newRemainingBalance.compareTo(BigDecimal.ZERO) == 0);
+
+            payment.setPaymentStatus(PaymentStatus.PAID);
+            payment.setGatewayReference(gatewayReference);
+
+            Payment savedPayment = paymentRepository.save(payment);
+            reservationRepository.save(reservation);
+
+            String metadata = String.format(
+                    "amount=%s method=%s totalPaid=%s remainingBalance=%s paymentStatus=%s",
+                    amount,
+                    request.getPaymentMethod(),
+                    newTotalPaid,
+                    newRemainingBalance,
+                    reservationPaymentStatus);
+
+            auditService.log("PAYMENT_SUCCESS", confirmationNumber, metadata);
+
+            log.info(
+                    "Payment success for {} | method={} amount={} totalPaid={} remainingBalance={}",
+                    confirmationNumber,
+                    request.getPaymentMethod(),
+                    amount,
+                    newTotalPaid,
+                    newRemainingBalance);
+
+            return new PaymentResponse(
+                    savedPayment.getId(),
+                    confirmationNumber,
+                    savedPayment.getAmount(),
+                    savedPayment.getPaymentMethod(),
+                    reservation.getPaymentStatus(),
+                    reservation.getTotalPaid(),
+                    reservation.getOutstandingBalance(),
+                    reservation.isInvoiceFinalized(),
+                    savedPayment.getGatewayReference(),
+                    "Payment processed successfully",
+                    savedPayment.getCreatedAt());
+
+        } catch (RuntimeException ex) {
+            payment.setPaymentStatus(PaymentStatus.FAILED);
+            payment.setFailureReason(ex.getMessage());
+            Payment failed = paymentRepository.save(payment);
+
+            auditService.log(
+                    "PAYMENT_FAILED",
+                    confirmationNumber,
+                    "method=" + request.getPaymentMethod() + " amount=" + amount + " reason=" + ex.getMessage());
+
+            log.warn(
+                    "Payment failed for {} | method={} amount={} reason={}",
+                    confirmationNumber,
+                    request.getPaymentMethod(),
+                    amount,
+                    ex.getMessage());
+
+            throw ex;
+        }
+    }
+
+    private void handleCashPayment(Payment payment) {
+        payment.setPaymentStatus(PaymentStatus.PAID);
+    }
+
+    private void handleCardPayment(Payment payment) {
+        payment.setPaymentStatus(PaymentStatus.PAID);
+    }
+
+    private String handleOnlinePayment(Payment payment) {
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        return "ONLINE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    private void logFailedAttempt(String confirmationNumber, PaymentMethod method, BigDecimal amount, String reason) {
+        auditService.log(
+                "PAYMENT_FAILED",
+                confirmationNumber,
+                "method=" + method + " amount=" + amount + " reason=" + reason);
+        log.warn(
+                "Payment blocked for {} | method={} amount={} reason={}",
+                confirmationNumber,
+                method,
+                amount,
+                reason);
+    }
+
+    private BigDecimal sanitize(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
+        }
+        return value.setScale(MONEY_SCALE, ROUNDING);
+    }
+
+    private String normalize(String confirmationNumber) {
+        if (confirmationNumber == null || confirmationNumber.isBlank()) {
+            throw new IllegalArgumentException("Confirmation number is required");
+        }
+        return confirmationNumber.trim().toUpperCase(Locale.ROOT);
+    }
+}

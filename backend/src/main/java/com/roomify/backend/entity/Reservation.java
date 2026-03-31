@@ -100,6 +100,11 @@ public class Reservation {
     @Column(name = "outstanding_balance", nullable = false, precision = 10, scale = 2)
     private BigDecimal outstandingBalance = BigDecimal.ZERO;
 
+    @NotNull(message = "Payment status is required")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false, length = 20)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
     @Column(name = "invoice_finalized", nullable = false)
     private boolean invoiceFinalized = false;
 
@@ -136,6 +141,9 @@ public class Reservation {
         }
         if (outstandingBalance == null || outstandingBalance.compareTo(BigDecimal.ZERO) < 0) {
             outstandingBalance = totalPrice != null ? totalPrice : BigDecimal.ZERO;
+        }
+        if (paymentStatus == null) {
+            paymentStatus = PaymentStatus.UNPAID;
         }
     }
 
@@ -286,6 +294,14 @@ public class Reservation {
 
     public void setOutstandingBalance(BigDecimal outstandingBalance) {
         this.outstandingBalance = outstandingBalance;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public boolean isInvoiceFinalized() {
