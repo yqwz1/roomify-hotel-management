@@ -18,17 +18,21 @@ public final class PaymentStatusResolver {
         BigDecimal safePaid = safeMoney(totalPaid);
         BigDecimal safeOutstanding = safeMoney(outstandingBalance);
 
-        // ✅ FIX 1: إعطاء أولوية لحالة الفاتورة
-        if (!invoiceFinalized) {
-            return "PAYMENT_PENDING";
+        BigDecimal zero = BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        if (safeOutstanding.compareTo(zero) == 0) {
+            return "PAID";
         }
 
-        if (safeOutstanding.compareTo(
-                BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
+        if (safePaid.compareTo(zero) > 0 && safeOutstanding.compareTo(zero) > 0) {
             return "PARTIALLY_PAID";
         }
 
-        return "PAID";
+        if (safePaid.compareTo(zero) == 0) {
+            return invoiceFinalized ? "UNPAID" : "PAYMENT_PENDING";
+        }
+
+        return "PAYMENT_PENDING";
     }
 
     private static BigDecimal safeMoney(BigDecimal value) {
