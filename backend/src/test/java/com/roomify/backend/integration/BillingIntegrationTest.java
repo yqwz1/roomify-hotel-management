@@ -32,6 +32,7 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -62,6 +63,8 @@ class BillingIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
+    private PaymentRepository paymentRepository;
+    @Autowired
     private GuestRepository guestRepository;
     @Autowired
     private RoomRepository roomRepository;
@@ -87,6 +90,7 @@ class BillingIntegrationTest {
         staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
         guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
+        paymentRepository.deleteAll();
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
@@ -209,6 +213,10 @@ class BillingIntegrationTest {
                 .andExpect(jsonPath("$.outstandingBalance").value(460.00))
                 .andExpect(jsonPath("$.invoiceFinalized").value(false))
                 .andExpect(jsonPath("$.paymentStatus").value("PARTIALLY_PAID"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+                1L,
+                paymentRepository.countByReservation_ConfirmationNumber(confirmationNumber));
     }
 
     @Test

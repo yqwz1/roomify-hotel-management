@@ -28,6 +28,7 @@ import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.EmailLogRepository;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -76,6 +77,9 @@ class ReservationIntegrationTest {
         private ReservationRepository reservationRepository;
 
         @Autowired
+        private PaymentRepository paymentRepository;
+
+        @Autowired
         private GuestRepository guestRepository;
 
         @Autowired
@@ -112,6 +116,7 @@ class ReservationIntegrationTest {
                 staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
                 guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
+                paymentRepository.deleteAll();
                 reservationRepository.deleteAll();
                 roomRepository.deleteAll();
                 roomTypeRepository.deleteAll();

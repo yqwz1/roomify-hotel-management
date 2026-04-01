@@ -15,9 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.roomify.backend.dto.BillLineItem;
 import com.roomify.backend.dto.BillResponse;
+import com.roomify.backend.entity.Payment;
+import com.roomify.backend.entity.PaymentMethod;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 
 @Service
