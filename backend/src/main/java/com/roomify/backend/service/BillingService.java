@@ -15,9 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.roomify.backend.dto.BillLineItem;
 import com.roomify.backend.dto.BillResponse;
+import com.roomify.backend.entity.Payment;
+import com.roomify.backend.entity.PaymentMethod;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 
 @Service
@@ -29,14 +33,17 @@ public class BillingService {
     private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
 
     private final ReservationRepository reservationRepository;
+    private final PaymentRepository paymentRepository;
     private final AuditService auditService;
     private final BigDecimal vatRate;
 
     public BillingService(
             ReservationRepository reservationRepository,
+            PaymentRepository paymentRepository,
             AuditService auditService,
             @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
         this.reservationRepository = reservationRepository;
+        this.paymentRepository = paymentRepository;
         this.auditService = auditService;
         this.vatRate = vatRate;
     }
@@ -86,11 +93,16 @@ public class BillingService {
         // Bill auto-closes when full payment is reached.
         boolean isFullyPaid = projectedOutstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)) == 0;
 
+        Payment payment = new Payment();
+        payment.setReservation(reservation);
+        payment.setAmount(paymentAmount);
+        payment.setPaymentMethod(PaymentMethod.CASH);
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        paymentRepository.save(payment);
+
         reservation.setTotalPaid(projectedPaid);
         reservation.setOutstandingBalance(projectedOutstanding);
-        reservation.setPaymentStatus(isFullyPaid
-                ? com.roomify.backend.entity.PaymentStatus.PAID
-                : com.roomify.backend.entity.PaymentStatus.PARTIALLY_PAID);
+        reservation.setPaymentStatus(isFullyPaid ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID);
         reservation.setInvoiceFinalized(isFullyPaid);
         reservationRepository.save(reservation);
 

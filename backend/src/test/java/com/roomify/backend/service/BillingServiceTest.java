@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,19 +25,26 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 
 class BillingServiceTest {
 
     private ReservationRepository reservationRepository;
+    private PaymentRepository paymentRepository;
     private AuditService auditService;
     private BillingService billingService;
 
     @BeforeEach
     void setUp() {
         reservationRepository = mock(ReservationRepository.class);
+        paymentRepository = mock(PaymentRepository.class);
         auditService = mock(AuditService.class);
-        billingService = new BillingService(reservationRepository, auditService, new BigDecimal("0.15"));
+        billingService = new BillingService(
+                reservationRepository,
+                paymentRepository,
+                auditService,
+                new BigDecimal("0.15"));
     }
 
     @Test
@@ -139,6 +147,7 @@ class BillingServiceTest {
         assertEquals(new BigDecimal("340.00"), response.getOutstandingBalance());
         assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
         assertEquals(false, response.isInvoiceFinalized());
+        verify(paymentRepository, times(1)).save(any());
     }
 
     @Test
@@ -176,6 +185,7 @@ class BillingServiceTest {
         assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
         assertEquals("PAID", response.getPaymentStatus());
         assertEquals(true, response.isInvoiceFinalized());
+        verify(paymentRepository, times(1)).save(any());
     }
 
     @Test
