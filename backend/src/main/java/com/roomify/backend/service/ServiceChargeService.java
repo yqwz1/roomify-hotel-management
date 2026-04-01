@@ -87,11 +87,23 @@ public class ServiceChargeService {
         BigDecimal diff = newTotal.subtract(oldTotal);
         updateReservationTotal(charge.getReservation(), diff);
 
+        // 🔥 Audit Log
+        auditService.log(
+                "UPDATE_SERVICE_CHARGE",
+                "Reservation#" + charge.getReservation().getId(),
+                "Service=" + charge.getService().getName() +
+                        ", NewQuantity=" + quantity +
+                        ", NewTotal=" + newTotal);
+
         return charge;
     }
 
     // ✅ DELETE
-    public void removeCharge(Long chargeId) {
+    public void removeCharge(Long chargeId, String reason) {
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException("Reason is required for deletion");
+        }
 
         ServiceCharge charge = chargeRepo.findById(chargeId)
                 .orElseThrow(() -> new RuntimeException("Charge not found"));
@@ -103,6 +115,13 @@ public class ServiceChargeService {
                 charge.getTotal().negate());
 
         chargeRepo.delete(charge);
+
+        // 🔥 Audit Log
+        auditService.log(
+                "DELETE_SERVICE_CHARGE",
+                "Reservation#" + charge.getReservation().getId(),
+                "Service=" + charge.getService().getName() +
+                        ", Reason=" + reason);
     }
 
     // 🔥 VALIDATION
@@ -114,6 +133,10 @@ public class ServiceChargeService {
 
         if (reservation.isInvoiceFinalized()) {
             throw new RuntimeException("Bill is not editable");
+        }
+
+        if (reservation.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new RuntimeException("Paid bills cannot be modified");
         }
     }
 

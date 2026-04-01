@@ -61,10 +61,12 @@ public class ServiceChargeController {
 
     @PreAuthorize("hasAuthority('STAFF')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(
+            @PathVariable Long id,
+            @RequestParam String reason) {
 
         try {
-            service.removeCharge(id);
+            service.removeCharge(id, reason);
             return ResponseEntity.ok("Service charge removed");
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
