@@ -6,6 +6,7 @@ import com.roomify.backend.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -18,37 +19,41 @@ public class InvoiceService {
     private final EmailService emailService;
     private final InvoiceDeliveryLogService deliveryLogService;
 
-    /**
-     * Generate invoice for a reservation
-     */
+    @Transactional
     public void generateInvoice(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.isInvoiceFinalized()) {
+            throw new RuntimeException("Invoice already finalized for this reservation");
+        }
 
         String invoiceNumber = generateInvoiceNumber();
 
         byte[] pdf = invoicePdfService.generateInvoice(reservation, invoiceNumber);
 
         sendInvoiceEmail(reservation, pdf, invoiceNumber);
+
+        reservation.setInvoiceFinalized(true);
+
+        reservationRepository.save(reservation);
     }
 
-    /**
-     * Download invoice PDF
-     */
     public byte[] getInvoicePdf(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (!reservation.isInvoiceFinalized()) {
+            throw new RuntimeException("Invoice not generated yet");
+        }
 
         String invoiceNumber = generateInvoiceNumber();
 
         return invoicePdfService.generateInvoice(reservation, invoiceNumber);
     }
 
-    /**
-     * Send invoice email
-     */
     private void sendInvoiceEmail(
             Reservation reservation,
             byte[] pdf,
@@ -64,7 +69,9 @@ public class InvoiceService {
                     pdf,
                     invoiceNumber);
 
-            deliveryLogService.logSuccess(email, confirmationNumber);
+            deliveryLogService.logSuccess(
+                    email,
+                    confirmationNumber);
 
         } catch (Exception ex) {
 
@@ -75,9 +82,6 @@ public class InvoiceService {
         }
     }
 
-    /**
-     * Generate unique invoice number
-     */
     private String generateInvoiceNumber() {
 
         return "INV-" + UUID.randomUUID()
