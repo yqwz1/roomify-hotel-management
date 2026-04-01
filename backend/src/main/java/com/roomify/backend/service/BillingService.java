@@ -289,7 +289,3 @@ public class BillingService {
                                 : outstanding;
         }
 }
-String paymentStatus = PaymentStatusResolver.resolve(
-        totalPaid,
-        outstandingBalance,
-        reservation.isInvoiceFinalized());
