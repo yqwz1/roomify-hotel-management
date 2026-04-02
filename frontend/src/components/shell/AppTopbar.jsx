@@ -31,7 +31,7 @@ export default function AppTopbar({ onMenuToggle }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/5 bg-[#f7f3ed]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-[#e7ddd0] bg-[#f7f3ed]/90 backdrop-blur-xl">
       <div className="flex min-h-20 items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
@@ -44,9 +44,9 @@ export default function AppTopbar({ onMenuToggle }) {
           </button>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-amber-900/55">
+            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-zinc-500">
               <span className="truncate">{pageMeta.sectionLabel}</span>
-              <span className="text-zinc-300">•</span>
+              <span className="text-zinc-300">&middot;</span>
               <span className="truncate">{roleLabel}</span>
             </div>
 

@@ -33,7 +33,7 @@ export default function AppSidebar({ isOpen, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-[#191511] text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
+          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-zinc-950 text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
           isOpen ? 'translate-x-0' : isRtl ? 'translate-x-full' : '-translate-x-full'
         )}
@@ -42,7 +42,7 @@ export default function AppSidebar({ isOpen, onClose }) {
           <div className="border-b border-white/10 px-5 py-5">
             <div className="flex items-center justify-between gap-3">
               <Link to={homePath} onClick={onClose} className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-amber-200/70">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">
                   {brandName}
                 </p>
                 <p className="mt-1 truncate text-2xl font-black tracking-tight text-white">

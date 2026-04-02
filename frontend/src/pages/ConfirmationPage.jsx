@@ -68,7 +68,7 @@ export default function ConfirmationPage() {
               <CheckCircle2 className="h-6 w-6" />
             </span>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200/80">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-300">
                 {t('bookingConfirmed')}
               </p>
               <p className="mt-2 text-2xl font-black">

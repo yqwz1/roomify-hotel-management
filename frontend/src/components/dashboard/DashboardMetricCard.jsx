@@ -9,15 +9,15 @@ export default function DashboardMetricCard({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        card: 'border-black/5 bg-[#1f1812] text-white shadow-[0_20px_50px_-26px_rgba(31,24,18,0.9)]',
+        card: 'border-white/10 bg-zinc-950 text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
         icon: 'bg-white/10 text-white',
-        label: 'text-white/68',
-        hint: 'text-white/55',
+        label: 'text-zinc-400',
+        hint: 'text-zinc-500',
         value: 'text-white',
       }
     : {
         card: 'border-black/5 bg-white text-zinc-950 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
-        icon: 'bg-amber-100 text-amber-900',
+        icon: 'bg-zinc-100 text-zinc-950',
         label: 'text-zinc-500',
         hint: 'text-zinc-400',
         value: 'text-zinc-950',
