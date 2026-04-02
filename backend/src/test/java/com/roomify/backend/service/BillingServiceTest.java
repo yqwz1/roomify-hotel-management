@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
 
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Payment;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -29,16 +30,19 @@ import com.roomify.backend.repository.ReservationRepository;
 class BillingServiceTest {
 
         private ReservationRepository reservationRepository;
+        private PaymentRepository paymentRepository;
         private AuditService auditService;
         private BillingService billingService;
 
         @BeforeEach
         void setUp() {
                 reservationRepository = mock(ReservationRepository.class);
+                paymentRepository = mock(PaymentRepository.class);
                 auditService = mock(AuditService.class);
 
                 billingService = new BillingService(
                                 reservationRepository,
+                                paymentRepository,
                                 auditService,
                                 new BigDecimal("0.15"));
         }
@@ -180,7 +184,7 @@ class BillingServiceTest {
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
 
-                when(reservationRepository.save(any(Reservation.class)))
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
                                 .thenAnswer(invocation -> invocation.getArgument(0));
 
                 BillResponse response = billingService.recordPayment(
@@ -192,7 +196,8 @@ class BillingServiceTest {
                 assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
                 assertFalse(response.isInvoiceFinalized());
 
-                verify(reservationRepository).save(any(Reservation.class));
+                verify(reservationRepository).saveAndFlush(any(Reservation.class));
+                verify(paymentRepository).saveAndFlush(any(Payment.class));
         }
 
         @Test
@@ -231,7 +236,7 @@ class BillingServiceTest {
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
 
-                when(reservationRepository.save(any(Reservation.class)))
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
                                 .thenAnswer(invocation -> invocation.getArgument(0));
 
                 BillResponse response = billingService.recordPayment(
