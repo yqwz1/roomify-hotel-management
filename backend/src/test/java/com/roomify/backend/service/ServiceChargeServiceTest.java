@@ -37,6 +37,9 @@ public class ServiceChargeServiceTest {
     @Mock
     private AuditService auditService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ServiceChargeService serviceChargeService;
 
@@ -71,6 +74,22 @@ public class ServiceChargeServiceTest {
     void testRemoveChargeWithoutReason_ThrowsException() {
         assertThrows(RuntimeException.class, () -> serviceChargeService.removeCharge(100L, null));
         assertThrows(RuntimeException.class, () -> serviceChargeService.removeCharge(100L, "  "));
+    }
+
+    @Test
+    void testAddChargeSuccess_TriggersNotification() {
+        when(reservationRepo.findById(1L)).thenReturn(Optional.of(reservation));
+        when(serviceRepo.findById(10L)).thenReturn(Optional.of(hotelService));
+        when(chargeRepo.save(any(ServiceCharge.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ServiceCharge created = serviceChargeService.addCharge(1L, 10L, 2);
+
+        assertEquals(BigDecimal.valueOf(100), created.getTotal());
+        verify(notificationService).notifyServiceRequestCreated(
+                eq(reservation),
+                eq(hotelService),
+                eq(2),
+                eq(BigDecimal.valueOf(100)));
     }
 
     @Test
