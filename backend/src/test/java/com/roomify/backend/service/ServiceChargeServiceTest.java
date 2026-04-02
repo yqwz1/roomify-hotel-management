@@ -99,7 +99,7 @@ public class ServiceChargeServiceTest {
         
         verify(chargeRepo, times(1)).delete(serviceCharge);
         verify(auditService, times(1)).log(eq("DELETE_SERVICE_CHARGE"), anyString(), anyString());
-        assertEquals(BigDecimal.valueOf(50), reservation.getTotalPrice());
+        assertEquals(new BigDecimal("50.00"), reservation.getTotalPrice());
     }
 
     @Test
@@ -110,8 +110,8 @@ public class ServiceChargeServiceTest {
         
         verify(chargeRepo, times(1)).save(serviceCharge);
         verify(auditService, times(1)).log(eq("UPDATE_SERVICE_CHARGE"), anyString(), anyString());
-        assertEquals(BigDecimal.valueOf(100), serviceCharge.getTotal());
-        assertEquals(BigDecimal.valueOf(150), reservation.getTotalPrice());
+        assertEquals(new BigDecimal("100"), serviceCharge.getTotal());
+        assertEquals(new BigDecimal("150.00"), reservation.getTotalPrice());
     }
 
 }

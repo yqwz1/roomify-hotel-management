@@ -33,14 +33,17 @@ public class BillingService {
         private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
 
         private final ReservationRepository reservationRepository;
+        private final PaymentRepository paymentRepository;
         private final AuditService auditService;
         private final BigDecimal vatRate;
 
         public BillingService(
                         ReservationRepository reservationRepository,
+                        PaymentRepository paymentRepository,
                         AuditService auditService,
                         @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
                 this.reservationRepository = reservationRepository;
+                this.paymentRepository = paymentRepository;
                 this.auditService = auditService;
                 this.vatRate = vatRate;
         }
@@ -98,7 +101,14 @@ public class BillingService {
                 reservation.setTotalPaid(projectedPaid);
                 reservation.setOutstandingBalance(projectedOutstanding);
                 reservation.setInvoiceFinalized(isFullyPaid);
-                reservationRepository.save(reservation);
+                reservationRepository.saveAndFlush(reservation);
+
+                Payment payment = new Payment();
+                payment.setReservation(reservation);
+                payment.setAmount(paymentAmount);
+                payment.setPaymentMethod(PaymentMethod.CASH);
+                payment.setPaymentStatus(PaymentStatus.PAID);
+                paymentRepository.saveAndFlush(payment);
 
                 String metadata = String.format(
                                 "paid=%s totalPaid=%s outstanding=%s finalized=%s",
