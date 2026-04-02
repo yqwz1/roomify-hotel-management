@@ -64,11 +64,15 @@ public class ServiceChargeService {
     }
 
     public ServiceCharge updateQuantity(Long chargeId, int quantity) {
+        if (quantity <= 0) {
+            throw new RuntimeException("Quantity must be greater than 0");
+        }
         ServiceCharge charge = chargeRepo.findById(chargeId)
                 .orElseThrow(() -> new RuntimeException("Charge not found"));
 
         validateReservation(charge.getReservation());
 
+        int oldQuantity = charge.getQuantity();
         BigDecimal oldTotal = charge.getTotal();
         charge.setQuantity(quantity);
 
@@ -82,9 +86,11 @@ public class ServiceChargeService {
         auditService.log(
                 "UPDATE_SERVICE_CHARGE",
                 "Reservation#" + charge.getReservation().getId(),
-                "Service=" + charge.getService().getName()
-                        + ", NewQuantity=" + quantity
-                        + ", NewTotal=" + newTotal);
+                "Service=" + charge.getService().getName() +
+                        ", OldQuantity=" + oldQuantity +
+                        ", NewQuantity=" + quantity +
+                        ", OldTotal=" + oldTotal +
+                        ", NewTotal=" + newTotal);
 
         return charge;
     }
@@ -105,7 +111,10 @@ public class ServiceChargeService {
         auditService.log(
                 "DELETE_SERVICE_CHARGE",
                 "Reservation#" + charge.getReservation().getId(),
-                "Service=" + charge.getService().getName() + ", Reason=" + reason);
+                "Service=" + charge.getService().getName() +
+                        ", RemovedQuantity=" + charge.getQuantity() +
+                        ", RemovedAmount=" + charge.getTotal() +
+                        ", Reason=" + reason);
     }
 
     private void validateReservation(Reservation reservation) {
@@ -123,8 +132,33 @@ public class ServiceChargeService {
     }
 
     private void updateReservationTotal(Reservation reservation, BigDecimal amount) {
-        reservation.setTotalPrice(reservation.getTotalPrice().add(amount));
-        reservation.setOutstandingBalance(reservation.getOutstandingBalance().add(amount));
+
+        BigDecimal newTotal = reservation.getTotalPrice().add(amount)
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+
+        reservation.setTotalPrice(newTotal);
+
+        BigDecimal totalPaid = reservation.getTotalPaid() != null
+                ? reservation.getTotalPaid().setScale(2, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP);
+
+        BigDecimal newOutstanding = newTotal.subtract(totalPaid)
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+
+        if (newOutstanding.compareTo(BigDecimal.ZERO) < 0) {
+            newOutstanding = BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP);
+        }
+
+        reservation.setOutstandingBalance(newOutstanding);
+
+        if (newOutstanding.compareTo(BigDecimal.ZERO) == 0 && newTotal.compareTo(BigDecimal.ZERO) > 0) {
+            reservation.setPaymentStatus(PaymentStatus.PAID);
+        } else if (totalPaid.compareTo(BigDecimal.ZERO) > 0) {
+            reservation.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+        } else {
+            reservation.setPaymentStatus(PaymentStatus.UNPAID);
+        }
+
         reservationRepo.save(reservation);
     }
 }

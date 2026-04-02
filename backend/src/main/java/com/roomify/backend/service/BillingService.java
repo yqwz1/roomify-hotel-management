@@ -107,15 +107,14 @@ public class BillingService {
                 reservation.setTotalPaid(projectedPaid);
                 reservation.setOutstandingBalance(projectedOutstanding);
                 reservation.setInvoiceFinalized(isFullyPaid);
+                reservationRepository.saveAndFlush(reservation);
 
                 Payment payment = new Payment();
                 payment.setReservation(reservation);
                 payment.setAmount(paymentAmount);
                 payment.setPaymentMethod(PaymentMethod.CASH);
                 payment.setPaymentStatus(PaymentStatus.PAID);
-
-                paymentRepository.save(payment);
-                reservationRepository.save(reservation);
+                paymentRepository.saveAndFlush(payment);
 
                 String metadata = String.format(
                                 "paid=%s totalPaid=%s outstanding=%s finalized=%s",

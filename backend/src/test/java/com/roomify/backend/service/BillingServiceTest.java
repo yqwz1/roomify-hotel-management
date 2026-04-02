@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
 
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Payment;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -186,7 +187,7 @@ class BillingServiceTest {
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
 
-                when(reservationRepository.save(any(Reservation.class)))
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
                                 .thenAnswer(invocation -> invocation.getArgument(0));
 
                 BillResponse response = billingService.recordPayment(
@@ -198,7 +199,8 @@ class BillingServiceTest {
                 assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
                 assertFalse(response.isInvoiceFinalized());
 
-                verify(reservationRepository).save(any(Reservation.class));
+                verify(reservationRepository).saveAndFlush(any(Reservation.class));
+                verify(paymentRepository).saveAndFlush(any(Payment.class));
                 verify(notificationService).notifyIncompletePayment(
                                 eq("RSV-ABC123"),
                                 eq(new BigDecimal("250.00")),
@@ -244,7 +246,7 @@ class BillingServiceTest {
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
 
-                when(reservationRepository.save(any(Reservation.class)))
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
                                 .thenAnswer(invocation -> invocation.getArgument(0));
 
                 BillResponse response = billingService.recordPayment(
