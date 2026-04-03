@@ -113,6 +113,11 @@ const supplementalResources = {
       invoiceDeliveryStatusFailed: 'Failed',
       invoiceDeliveryStatusError: 'Unavailable',
       invoiceDeliveryStatusUnknown: 'Unknown',
+      paymentStatusUnpaid: 'Unpaid',
+      paymentStatusPartiallyPaid: 'Partially paid',
+      paymentStatusPaid: 'Paid',
+      paymentStatusFailed: 'Payment failed',
+      paymentStatusPending: 'Payment pending',
       invoiceLineRoomCharge: 'Room charge',
       invoiceLineServiceCharges: 'Service charges',
       invoiceLineVat: 'VAT',
@@ -258,10 +263,20 @@ const supplementalResources = {
         grossBalance: 'Gross balance',
         totalPaidLabel: 'Total paid',
         outstandingBalanceLabel: 'Outstanding balance',
+        paymentStatusLabel: 'Payment status',
         lineItems: 'Line Items',
         lineItemFallback: 'Line item',
         outstandingError:
           'Outstanding balance remains on this reservation ({{amount}}).',
+        billRequiredBlocked: 'Load the latest bill before checkout can be completed.',
+        billLoadFailed: 'The final bill could not be loaded. Retry before completing checkout.',
+        invoiceNotFinalizedBlocked:
+          'Checkout is blocked until the invoice is finalized.',
+        paymentPendingBlocked:
+          'Payment is still pending on this reservation. Resolve payment before checkout.',
+        paymentFailedBlocked:
+          'A payment failure is recorded on this reservation. Checkout remains blocked.',
+        retryBill: 'Retry Bill Load',
         successToast: 'Checkout completed for {{name}}.',
       },
       managerDashboardPage: {
@@ -606,6 +621,19 @@ const supplementalResources = {
         generateSuccess: 'Invoice generated successfully.',
         downloadFailed: 'Unable to download the invoice.',
         printFailed: 'Unable to open the invoice for printing.',
+        retryLoadData: 'Retry Invoice Load',
+        previewTitle: 'Invoice Preview',
+        previewDescription:
+          'Use the embedded preview for demos or open the live PDF in a separate tab.',
+        previewLoading: 'Loading invoice preview...',
+        previewErrorTitle: 'Invoice preview unavailable',
+        previewErrorDescription:
+          'The invoice document could not be opened right now. Retry or use the direct PDF actions.',
+        previewEmptyTitle: 'Generate the invoice first',
+        previewEmptyDescription:
+          'The preview and document actions become available after invoice finalization.',
+        openDocument: 'Open PDF',
+        previewFrameTitle: 'Invoice PDF preview',
         descriptionLabel: 'Description',
         amountLabel: 'Amount',
       },
@@ -707,6 +735,12 @@ const supplementalResources = {
         managedAutomatically:
           'Managed automatically by reservation flow',
         updating: 'Updating...',
+        occupiedLocked: 'Occupied rooms remain locked until checkout completes.',
+        accessDeniedTitle: 'Room status unavailable',
+        accessDeniedDescription:
+          'Your current session cannot access the room-status controls exposed by the backend.',
+        refreshRooms: 'Refresh Room Board',
+        successToast: 'Room {{roomNumber}} moved to {{status}}.',
       },
       staffPage: {
         heroEyebrow: 'Access control',
@@ -998,6 +1032,11 @@ const supplementalResources = {
       invoiceDeliveryStatusFailed: 'فشل الإرسال',
       invoiceDeliveryStatusError: 'غير متاح',
       invoiceDeliveryStatusUnknown: 'غير معروف',
+      paymentStatusUnpaid: 'غير مدفوع',
+      paymentStatusPartiallyPaid: 'مدفوع جزئيًا',
+      paymentStatusPaid: 'مدفوع',
+      paymentStatusFailed: 'فشل الدفع',
+      paymentStatusPending: 'الدفع قيد الانتظار',
       invoiceLineRoomCharge: 'رسوم الغرفة',
       invoiceLineServiceCharges: 'رسوم الخدمات',
       invoiceLineVat: 'ضريبة القيمة المضافة',
@@ -1143,10 +1182,20 @@ const supplementalResources = {
         grossBalance: 'إجمالي الرصيد',
         totalPaidLabel: 'إجمالي المدفوع',
         outstandingBalanceLabel: 'الرصيد المتبقي',
+        paymentStatusLabel: 'حالة الدفع',
         lineItems: 'بنود الفاتورة',
         lineItemFallback: 'بند',
         outstandingError:
           'لا يزال هناك رصيد مستحق على هذا الحجز ({{amount}}).',
+        billRequiredBlocked: 'يجب تحميل أحدث فاتورة قبل إتمام المغادرة.',
+        billLoadFailed: 'تعذر تحميل الفاتورة النهائية. أعد المحاولة قبل إتمام المغادرة.',
+        invoiceNotFinalizedBlocked:
+          'المغادرة محجوبة حتى يتم اعتماد الفاتورة.',
+        paymentPendingBlocked:
+          'ما زالت حالة الدفع معلقة لهذا الحجز. عالج الدفع قبل المغادرة.',
+        paymentFailedBlocked:
+          'تم تسجيل فشل في الدفع لهذا الحجز. تبقى المغادرة محجوبة.',
+        retryBill: 'إعادة تحميل الفاتورة',
         successToast: 'تمت المغادرة بنجاح للحجز الخاص بـ {{name}}.',
       },
       managerDashboardPage: {
@@ -1486,6 +1535,19 @@ const supplementalResources = {
         generateSuccess: 'تم إنشاء الفاتورة بنجاح.',
         downloadFailed: 'تعذر تنزيل الفاتورة.',
         printFailed: 'تعذر فتح الفاتورة للطباعة.',
+        retryLoadData: 'إعادة تحميل الفاتورة',
+        previewTitle: 'معاينة الفاتورة',
+        previewDescription:
+          'استخدم المعاينة المضمنة في العرض التوضيحي أو افتح ملف PDF المباشر في تبويب منفصل.',
+        previewLoading: 'جار تحميل معاينة الفاتورة...',
+        previewErrorTitle: 'تعذر عرض معاينة الفاتورة',
+        previewErrorDescription:
+          'تعذر فتح مستند الفاتورة حاليًا. أعد المحاولة أو استخدم إجراءات PDF المباشرة.',
+        previewEmptyTitle: 'أنشئ الفاتورة أولاً',
+        previewEmptyDescription:
+          'تصبح المعاينة وإجراءات المستند متاحة بعد اعتماد الفاتورة.',
+        openDocument: 'فتح PDF',
+        previewFrameTitle: 'معاينة PDF للفواتير',
         descriptionLabel: 'الوصف',
         amountLabel: 'المبلغ',
       },
@@ -1585,6 +1647,12 @@ const supplementalResources = {
         managedAutomatically:
           'تتم إدارته تلقائيًا عبر مسار الحجز',
         updating: 'جار التحديث...',
+        occupiedLocked: 'تبقى الغرف المشغولة مقفلة حتى اكتمال المغادرة.',
+        accessDeniedTitle: 'تعذر الوصول إلى حالة الغرف',
+        accessDeniedDescription:
+          'جلسة المستخدم الحالية لا تملك صلاحية الوصول إلى عناصر التحكم بحالة الغرف من الخادم.',
+        refreshRooms: 'تحديث لوحة الغرف',
+        successToast: 'تم نقل الغرفة {{roomNumber}} إلى {{status}}.',
       },
       staffPage: {
         heroEyebrow: 'التحكم بالصلاحيات',

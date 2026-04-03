@@ -179,7 +179,7 @@ const NAVIGATION_CONFIG = [
         translationKey: 'roomStatus',
         fallbackLabel: 'Room Status',
         icon: Sparkles,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
     ],
   },

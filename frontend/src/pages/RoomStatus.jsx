@@ -7,9 +7,16 @@ import {
   Sparkles,
   Wrench,
 } from 'lucide-react';
+import ConfirmationToast from '../components/ConfirmationToast';
+import ErrorState from '../components/common/ErrorState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
-import { getRooms, updateRoomStatus, extractErrorMessage } from '../services/roomService';
+import {
+  extractErrorMessage,
+  getRooms,
+  getValidNextStatuses,
+  updateRoomStatus,
+} from '../services/roomService';
 import {
   formatLocalizedCurrency,
   getRoomStatusLabel,
@@ -22,23 +29,37 @@ const STATUS_META = {
   AVAILABLE: {
     color: 'border-emerald-200 bg-emerald-50 text-emerald-900',
     icon: CheckCircle2,
-    actions: ['OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'],
   },
   OCCUPIED: {
     color: 'border-zinc-300 bg-zinc-100 text-zinc-700',
     icon: AlertCircle,
-    actions: [],
   },
   NEEDS_CLEANING: {
     color: 'border-amber-200 bg-amber-50 text-amber-900',
     icon: Sparkles,
-    actions: ['AVAILABLE', 'UNDER_MAINTENANCE'],
   },
   UNDER_MAINTENANCE: {
     color: 'border-rose-200 bg-rose-50 text-rose-900',
     icon: Wrench,
-    actions: ['AVAILABLE'],
   },
+};
+
+const attachValidNextStatuses = async (rooms) => {
+  const hydrated = await Promise.all(
+    rooms.map(async (room) => {
+      try {
+        const validNextStatuses = await getValidNextStatuses(room.id);
+        return { ...room, validNextStatuses };
+      } catch (err) {
+        if (err?.response?.status === 403) {
+          throw err;
+        }
+        return { ...room, validNextStatuses: [] };
+      }
+    })
+  );
+
+  return hydrated;
 };
 
 function LoadingCard() {
@@ -67,6 +88,7 @@ export default function RoomStatus() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [updatingRoomId, setUpdatingRoomId] = useState(null);
 
   const fetchRooms = async (statusFilter = filter) => {
@@ -75,8 +97,10 @@ export default function RoomStatus() {
     try {
       const params = statusFilter !== 'ALL' ? { status: statusFilter } : {};
       const data = await getRooms(params);
-      setRooms(data);
+      const roomsWithTransitions = await attachValidNextStatuses(data);
+      setRooms(roomsWithTransitions);
     } catch (err) {
+      setRooms([]);
       setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
@@ -95,11 +119,27 @@ export default function RoomStatus() {
 
     try {
       const updated = await updateRoomStatus(roomId, nextStatus);
+      let validNextStatuses = [];
+      try {
+        validNextStatuses = await getValidNextStatuses(updated.id);
+      } catch (transitionErr) {
+        if (transitionErr?.response?.status === 403) {
+          throw transitionErr;
+        }
+      }
+      const hydratedRoom = { ...updated, validNextStatuses };
       setRooms((prev) => {
-        if (filter !== 'ALL' && updated.status !== filter) {
+        if (filter !== 'ALL' && hydratedRoom.status !== filter) {
           return prev.filter((room) => room.id !== roomId);
         }
-        return prev.map((room) => (room.id === roomId ? updated : room));
+        return prev.map((room) => (room.id === roomId ? hydratedRoom : room));
+      });
+      setToast({
+        message: t('roomStatusPage.successToast', {
+          roomNumber: updated.roomNumber,
+          status: getRoomStatusLabel(updated.status, t),
+        }),
+        type: 'success',
       });
     } catch (err) {
       setError(extractErrorMessage(err));
@@ -135,6 +175,12 @@ export default function RoomStatus() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <ConfirmationToast
+        message={toast?.message}
+        type={toast?.type}
+        onClose={() => setToast(null)}
+      />
+
       <DashboardHero
         eyebrow={t('roomStatusPage.heroEyebrow')}
         title={t('roomStatus')}
@@ -219,7 +265,15 @@ export default function RoomStatus() {
           </div>
         )}
 
-        {!loading && filteredRooms.length === 0 && (
+        {!loading && error && rooms.length === 0 && (
+          <ErrorState
+            title={t('roomStatusPage.accessDeniedTitle')}
+            message={error || t('roomStatusPage.accessDeniedDescription')}
+            onRetry={() => fetchRooms()}
+          />
+        )}
+
+        {!loading && !error && filteredRooms.length === 0 && (
           <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
             <Search className="mx-auto h-10 w-10 text-zinc-400" />
             <p className="mt-4 text-lg font-black text-zinc-950">{t('roomStatusPage.noRoomsTitle')}</p>
@@ -234,7 +288,7 @@ export default function RoomStatus() {
             {filteredRooms.map((room) => {
               const meta = STATUS_META[room.status] || STATUS_META.AVAILABLE;
               const Icon = meta.icon;
-              const actions = meta.actions;
+              const actions = room.validNextStatuses ?? [];
 
               return (
                 <article
@@ -281,7 +335,9 @@ export default function RoomStatus() {
                   <div className="mt-5 flex flex-wrap gap-2">
                     {actions.length === 0 ? (
                       <div className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-500">
-                        {t('roomStatusPage.managedAutomatically')}
+                        {room.status === 'OCCUPIED'
+                          ? t('roomStatusPage.occupiedLocked')
+                          : t('roomStatusPage.managedAutomatically')}
                       </div>
                     ) : (
                       actions.map((nextStatus) => (

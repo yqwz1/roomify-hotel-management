@@ -31,6 +31,11 @@ export const getRoomById = async (id) => {
   return response.data;
 };
 
+export const getValidNextStatuses = async (id) => {
+  const response = await api.get(`/rooms/${id}/valid-next-statuses`);
+  return response.data;
+};
+
 export const createRoom = async (data) => {
   const response = await api.post('/rooms', data);
   return response.data;

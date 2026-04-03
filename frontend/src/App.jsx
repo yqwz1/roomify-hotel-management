@@ -176,7 +176,7 @@ const AppContent = () => {
         <Route
           path="/room-status"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
               <Layout showSidebar={true}><RoomStatus /></Layout>
             </ProtectedRoute>
           }
