@@ -14,28 +14,35 @@ public class InvoiceDeliveryLogService {
     private final InvoiceDeliveryLogRepository repository;
 
     /**
-     * Log successful email delivery
+     * Log successful delivery
      */
-    public void logSuccess(String email, String confirmationNumber) {
+    public void logSuccess(
+            String email,
+            String subject,
+            String confirmationNumber) {
 
         repository.save(
                 new InvoiceDeliveryLog(
                         email,
-                        "Invoice",
+                        subject,
                         confirmationNumber,
                         InvoiceDeliveryStatus.SENT,
                         null));
     }
 
     /**
-     * Log failed email delivery
+     * Log failed delivery
      */
-    public void logFailure(String email, String confirmationNumber, String error) {
+    public void logFailure(
+            String email,
+            String subject,
+            String confirmationNumber,
+            String error) {
 
         repository.save(
                 new InvoiceDeliveryLog(
                         email,
-                        "Invoice",
+                        subject,
                         confirmationNumber,
                         InvoiceDeliveryStatus.FAILED,
                         error));

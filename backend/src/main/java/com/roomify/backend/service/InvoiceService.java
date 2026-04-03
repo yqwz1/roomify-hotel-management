@@ -28,14 +28,13 @@ public class InvoiceService {
             throw new RuntimeException("Invoice already finalized for this reservation");
         }
 
-        String invoiceNumber = generateInvoiceNumber();
+        String invoiceNumber = getOrCreateInvoiceNumber(reservation);
 
         byte[] pdf = invoicePdfService.generateInvoice(reservation, invoiceNumber);
 
         sendInvoiceEmail(reservation, pdf, invoiceNumber);
 
         reservation.setInvoiceFinalized(true);
-
         reservationRepository.save(reservation);
     }
 
@@ -48,9 +47,26 @@ public class InvoiceService {
             throw new RuntimeException("Invoice not generated yet");
         }
 
-        String invoiceNumber = generateInvoiceNumber();
+        String invoiceNumber = getOrCreateInvoiceNumber(reservation);
 
         return invoicePdfService.generateInvoice(reservation, invoiceNumber);
+    }
+
+    private String getOrCreateInvoiceNumber(Reservation reservation) {
+
+        if (reservation.getInvoiceNumber() != null && !reservation.getInvoiceNumber().isBlank()) {
+            return reservation.getInvoiceNumber();
+        }
+
+        String invoiceNumber = "INV-" + UUID.randomUUID()
+                .toString()
+                .substring(0, 8)
+                .toUpperCase();
+
+        reservation.setInvoiceNumber(invoiceNumber);
+        reservationRepository.save(reservation);
+
+        return invoiceNumber;
     }
 
     private void sendInvoiceEmail(
@@ -70,12 +86,14 @@ public class InvoiceService {
 
             deliveryLogService.logSuccess(
                     email,
+                    "Invoice",
                     confirmationNumber);
 
         } catch (Exception ex) {
 
             deliveryLogService.logFailure(
                     email,
+                    "Invoice",
                     confirmationNumber,
                     ex.getMessage());
         }
@@ -92,16 +110,5 @@ public class InvoiceService {
         String confirmationNumber = reservation.getConfirmationNumber();
 
         return deliveryLogService.getLatestByConfirmationNumber(confirmationNumber);
-    }
-
-    /**
-     * Generate unique invoice number
-     */
-    private String generateInvoiceNumber() {
-
-        return "INV-" + UUID.randomUUID()
-                .toString()
-                .substring(0, 8)
-                .toUpperCase();
     }
 }
