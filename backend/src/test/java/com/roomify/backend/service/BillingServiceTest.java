@@ -32,6 +32,7 @@ class BillingServiceTest {
         private ReservationRepository reservationRepository;
         private PaymentRepository paymentRepository;
         private AuditService auditService;
+        private NotificationService notificationService;
         private BillingService billingService;
 
         @BeforeEach
@@ -39,11 +40,13 @@ class BillingServiceTest {
                 reservationRepository = mock(ReservationRepository.class);
                 paymentRepository = mock(PaymentRepository.class);
                 auditService = mock(AuditService.class);
+                notificationService = mock(NotificationService.class);
 
                 billingService = new BillingService(
                                 reservationRepository,
                                 paymentRepository,
                                 auditService,
+                                notificationService,
                                 new BigDecimal("0.15"));
         }
 
@@ -198,6 +201,10 @@ class BillingServiceTest {
 
                 verify(reservationRepository).saveAndFlush(any(Reservation.class));
                 verify(paymentRepository).saveAndFlush(any(Payment.class));
+                verify(notificationService).notifyIncompletePayment(
+                                eq("RSV-ABC123"),
+                                eq(new BigDecimal("250.00")),
+                                eq(new BigDecimal("340.00")));
         }
 
         @Test
@@ -221,6 +228,9 @@ class BillingServiceTest {
 
                 assertEquals("PAYMENT_OVERPAYMENT_BLOCKED", ex.getCode());
                 assertEquals(new BigDecimal("10.00"), ex.getOutstandingBalance());
+                verify(notificationService).notifyPaymentFailed(
+                                eq("RSV-ABC123"),
+                                contains("Overpayment blocked"));
         }
 
         @Test

@@ -1,31 +1,33 @@
 package com.roomify.backend.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import com.roomify.backend.entity.*;
-import com.roomify.backend.repository.*;
-
+import com.roomify.backend.entity.HotelService;
+import com.roomify.backend.entity.PaymentStatus;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.ServiceCharge;
+import com.roomify.backend.repository.HotelServiceRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.ServiceChargeRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ServiceChargeService {
 
     private final ServiceChargeRepository chargeRepo;
-    private final HotelServiceRepository serviceRepo; // ✅ FIXED
+    private final HotelServiceRepository serviceRepo;
     private final ReservationRepository reservationRepo;
     private final AuditService auditService;
+    private final NotificationService notificationService;
 
-    // ✅ GET BY RESERVATION
     public List<ServiceCharge> getByReservation(Long reservationId) {
         return chargeRepo.findByReservationId(reservationId);
     }
 
-    // ✅ ADD
     public ServiceCharge addCharge(Long reservationId, Long serviceId, int quantity) {
-
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
@@ -44,34 +46,27 @@ public class ServiceChargeService {
         charge.setPrice(service.getPrice());
         charge.setQuantity(quantity);
 
-        BigDecimal total = service.getPrice()
-                .multiply(BigDecimal.valueOf(quantity));
-
+        BigDecimal total = service.getPrice().multiply(BigDecimal.valueOf(quantity));
         charge.setTotal(total);
-
         chargeRepo.save(charge);
 
-        // 🔥 تحديث الفاتورة
         updateReservationTotal(reservation, total);
 
-        // 🔥 Audit Log
         auditService.log(
                 "ADD_SERVICE_CHARGE",
                 "Reservation#" + reservation.getId(),
-                "Service=" + service.getName() +
-                        ", Quantity=" + quantity +
-                        ", Amount=" + total);
+                "Service=" + service.getName()
+                        + ", Quantity=" + quantity
+                        + ", Amount=" + total);
 
+        notificationService.notifyServiceRequestCreated(reservation, service, quantity, total);
         return charge;
     }
 
-    // ✅ UPDATE
     public ServiceCharge updateQuantity(Long chargeId, int quantity) {
-
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
-
         ServiceCharge charge = chargeRepo.findById(chargeId)
                 .orElseThrow(() -> new RuntimeException("Charge not found"));
 
@@ -79,20 +74,15 @@ public class ServiceChargeService {
 
         int oldQuantity = charge.getQuantity();
         BigDecimal oldTotal = charge.getTotal();
-
         charge.setQuantity(quantity);
 
-        BigDecimal newTotal = charge.getPrice()
-                .multiply(BigDecimal.valueOf(quantity));
-
+        BigDecimal newTotal = charge.getPrice().multiply(BigDecimal.valueOf(quantity));
         charge.setTotal(newTotal);
-
         chargeRepo.save(charge);
 
         BigDecimal diff = newTotal.subtract(oldTotal);
         updateReservationTotal(charge.getReservation(), diff);
 
-        // 🔥 Audit Log
         auditService.log(
                 "UPDATE_SERVICE_CHARGE",
                 "Reservation#" + charge.getReservation().getId(),
@@ -105,9 +95,7 @@ public class ServiceChargeService {
         return charge;
     }
 
-    // ✅ DELETE
     public void removeCharge(Long chargeId, String reason) {
-
         if (reason == null || reason.trim().isEmpty()) {
             throw new RuntimeException("Reason is required for deletion");
         }
@@ -117,13 +105,9 @@ public class ServiceChargeService {
 
         validateReservation(charge.getReservation());
 
-        updateReservationTotal(
-                charge.getReservation(),
-                charge.getTotal().negate());
-
+        updateReservationTotal(charge.getReservation(), charge.getTotal().negate());
         chargeRepo.delete(charge);
 
-        // 🔥 Audit Log
         auditService.log(
                 "DELETE_SERVICE_CHARGE",
                 "Reservation#" + charge.getReservation().getId(),
@@ -133,9 +117,7 @@ public class ServiceChargeService {
                         ", Reason=" + reason);
     }
 
-    // 🔥 VALIDATION
     private void validateReservation(Reservation reservation) {
-
         if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
             throw new RuntimeException("Checked-out guests are blocked");
         }
@@ -149,7 +131,6 @@ public class ServiceChargeService {
         }
     }
 
-    // 🔥 UPDATE BILL
     private void updateReservationTotal(Reservation reservation, BigDecimal amount) {
 
         BigDecimal newTotal = reservation.getTotalPrice().add(amount)
