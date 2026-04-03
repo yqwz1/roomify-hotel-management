@@ -51,6 +51,7 @@ public class ServiceChargeServiceTest {
     void setUp() {
         reservation = new Reservation();
         reservation.setId(1L);
+        reservation.setConfirmationNumber("CONF-123");
         reservation.setStatus(ReservationStatus.CHECKED_IN);
         reservation.setPaymentStatus(PaymentStatus.UNPAID);
         reservation.setInvoiceFinalized(false);
