@@ -42,11 +42,10 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationResponse> listVisibleForCurrentUser(Boolean readState) {
         NotificationViewer viewer = resolveViewer();
-        return notificationRepository.findVisibleForRoleAndDepartment(
-                        viewer.role(),
-                        viewer.department(),
-                        readState)
+        return notificationRepository.findByTargetRoleOrderByCreatedAtDesc(viewer.role())
                 .stream()
+                .filter(notification -> matchesDepartment(notification.getTargetDepartment(), viewer.department()))
+                .filter(notification -> readState == null || notification.isRead() == readState)
                 .map(NotificationResponse::from)
                 .toList();
     }
@@ -54,9 +53,11 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public long unreadCountForCurrentUser() {
         NotificationViewer viewer = resolveViewer();
-        return notificationRepository.countUnreadForRoleAndDepartment(
-                viewer.role(),
-                viewer.department());
+        return notificationRepository.findByTargetRoleOrderByCreatedAtDesc(viewer.role())
+                .stream()
+                .filter(notification -> !notification.isRead())
+                .filter(notification -> matchesDepartment(notification.getTargetDepartment(), viewer.department()))
+                .count();
     }
 
     public NotificationResponse markAsRead(Long notificationId) {
@@ -76,6 +77,30 @@ public class NotificationService {
 
             auditService.log(
                     "NOTIFICATION_READ",
+                    "Notification#" + notification.getId(),
+                    "actor=" + viewer.actor());
+        }
+
+        return NotificationResponse.from(notification);
+    }
+
+    public NotificationResponse markAsUnread(Long notificationId) {
+        NotificationViewer viewer = resolveViewer();
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
+
+        if (!canView(notification, viewer.role(), viewer.department())) {
+            throw new AccessDeniedException("You cannot update this notification");
+        }
+
+        if (notification.isRead()) {
+            notification.setRead(false);
+            notification.setReadAt(null);
+            notificationRepository.save(notification);
+
+            auditService.log(
+                    "NOTIFICATION_UNREAD",
                     "Notification#" + notification.getId(),
                     "actor=" + viewer.actor());
         }
@@ -182,7 +207,7 @@ public class NotificationService {
             return new NotificationRoute(Role.STAFF, "HOUSEKEEPING");
         }
         if (category == ServiceCategory.FOOD) {
-            return new NotificationRoute(Role.STAFF, "F&B");
+            return new NotificationRoute(Role.STAFF, null);
         }
         return new NotificationRoute(Role.MANAGER, null);
     }
@@ -224,13 +249,7 @@ public class NotificationService {
         if (notification.getTargetRole() != role) {
             return false;
         }
-
-        if (notification.getTargetDepartment() == null) {
-            return true;
-        }
-
-        return department != null
-                && notification.getTargetDepartment().equalsIgnoreCase(department);
+        return matchesDepartment(notification.getTargetDepartment(), department);
     }
 
     private String normalize(String value) {
@@ -238,6 +257,34 @@ public class NotificationService {
             return null;
         }
         return value.trim();
+    }
+
+    private boolean matchesDepartment(String targetDepartment, String viewerDepartment) {
+        String normalizedTarget = normalizeDepartmentKey(targetDepartment);
+        if (normalizedTarget == null) {
+            return true;
+        }
+
+        String normalizedViewer = normalizeDepartmentKey(viewerDepartment);
+        if (normalizedViewer == null) {
+            return false;
+        }
+
+        return normalizedTarget.equals(normalizedViewer)
+                || normalizedTarget.contains(normalizedViewer)
+                || normalizedViewer.contains(normalizedTarget);
+    }
+
+    private String normalizeDepartmentKey(String value) {
+        String normalized = normalize(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        return normalized
+                .toUpperCase(Locale.ROOT)
+                .replace("&", " AND ")
+                .replaceAll("[^A-Z0-9]+", "");
     }
 
     private record NotificationRoute(Role role, String department) {

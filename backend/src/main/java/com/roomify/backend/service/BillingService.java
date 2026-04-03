@@ -103,9 +103,14 @@ public class BillingService {
 
                 BigDecimal projectedOutstanding = calculateOutstanding(totalPrice, projectedPaid);
                 boolean isFullyPaid = projectedOutstanding.compareTo(BigDecimal.ZERO) == 0;
+                PaymentStatus projectedStatus = isFullyPaid ? PaymentStatus.PAID
+                                : (projectedPaid.compareTo(BigDecimal.ZERO) > 0
+                                                ? PaymentStatus.PARTIALLY_PAID
+                                                : PaymentStatus.UNPAID);
 
                 reservation.setTotalPaid(projectedPaid);
                 reservation.setOutstandingBalance(projectedOutstanding);
+                reservation.setPaymentStatus(projectedStatus);
                 reservation.setInvoiceFinalized(isFullyPaid);
                 reservationRepository.saveAndFlush(reservation);
 
@@ -162,6 +167,9 @@ public class BillingService {
 
                 reservation.setTotalPaid(totalPaid);
                 reservation.setOutstandingBalance(outstanding);
+                reservation.setPaymentStatus(totalPaid.compareTo(BigDecimal.ZERO) > 0
+                                ? PaymentStatus.PAID
+                                : PaymentStatus.UNPAID);
                 reservation.setInvoiceFinalized(true);
                 reservationRepository.save(reservation);
 
