@@ -32,14 +32,17 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
     private final AuditService auditService;
+    private final NotificationService notificationService;
 
     public PaymentService(
             ReservationRepository reservationRepository,
             PaymentRepository paymentRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            NotificationService notificationService) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.auditService = auditService;
+        this.notificationService = notificationService;
     }
 
     public PaymentResponse createPayment(PaymentRequest request) {
@@ -53,6 +56,7 @@ public class PaymentService {
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Invalid payment amount");
+            notificationService.notifyPaymentFailed(confirmationNumber, "Invalid payment amount");
             throw new ResourceConflictException("Payment amount must be greater than 0");
         }
 
@@ -63,11 +67,15 @@ public class PaymentService {
         if (remainingBalance.compareTo(BigDecimal.ZERO) == 0
                 || totalPaid.compareTo(totalPrice) >= 0) {
             logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Bill already fully paid");
+            notificationService.notifyPaymentFailed(confirmationNumber, "Bill already fully paid");
             throw new ResourceConflictException("This bill is already fully paid and cannot receive new payments");
         }
 
         if (amount.compareTo(remainingBalance) > 0) {
             logFailedAttempt(confirmationNumber, request.getPaymentMethod(), amount, "Overpayment blocked");
+            notificationService.notifyPaymentFailed(
+                    confirmationNumber,
+                    "Overpayment blocked. Remaining balance is " + remainingBalance);
             throw new ResourceConflictException(
                     "Payment exceeds remaining balance. Remaining balance is " + remainingBalance);
         }
@@ -113,6 +121,12 @@ public class PaymentService {
                     reservationPaymentStatus);
 
             auditService.log("PAYMENT_SUCCESS", confirmationNumber, metadata);
+            if (reservationPaymentStatus == PaymentStatus.PARTIALLY_PAID) {
+                notificationService.notifyIncompletePayment(
+                        confirmationNumber,
+                        amount,
+                        newRemainingBalance);
+            }
 
             log.info(
                     "Payment success for {} | method={} amount={} totalPaid={} remainingBalance={}",
@@ -144,6 +158,7 @@ public class PaymentService {
                     "PAYMENT_FAILED",
                     confirmationNumber,
                     "method=" + request.getPaymentMethod() + " amount=" + amount + " reason=" + ex.getMessage());
+            notificationService.notifyPaymentFailed(confirmationNumber, ex.getMessage());
 
             log.warn(
                     "Payment failed for {} | method={} amount={} reason={}",
