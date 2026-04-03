@@ -54,7 +54,7 @@ public class ServiceChargeService {
 
         auditService.log(
                 "ADD_SERVICE_CHARGE",
-                "Reservation#" + reservation.getId(),
+                reservation.getConfirmationNumber(),
                 "Service=" + service.getName()
                         + ", Quantity=" + quantity
                         + ", Amount=" + total);
@@ -85,7 +85,7 @@ public class ServiceChargeService {
 
         auditService.log(
                 "UPDATE_SERVICE_CHARGE",
-                "Reservation#" + charge.getReservation().getId(),
+                charge.getReservation().getConfirmationNumber(),
                 "Service=" + charge.getService().getName() +
                         ", OldQuantity=" + oldQuantity +
                         ", NewQuantity=" + quantity +
@@ -110,7 +110,7 @@ public class ServiceChargeService {
 
         auditService.log(
                 "DELETE_SERVICE_CHARGE",
-                "Reservation#" + charge.getReservation().getId(),
+                charge.getReservation().getConfirmationNumber(),
                 "Service=" + charge.getService().getName() +
                         ", RemovedQuantity=" + charge.getQuantity() +
                         ", RemovedAmount=" + charge.getTotal() +
@@ -133,7 +133,8 @@ public class ServiceChargeService {
 
     private void updateReservationTotal(Reservation reservation, BigDecimal amount) {
 
-        BigDecimal newTotal = reservation.getTotalPrice().add(amount)
+        BigDecimal currentTotal = reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO;
+        BigDecimal newTotal = currentTotal.add(amount)
                 .setScale(2, java.math.RoundingMode.HALF_UP);
 
         reservation.setTotalPrice(newTotal);

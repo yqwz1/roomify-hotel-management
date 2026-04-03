@@ -23,6 +23,7 @@ public class ServiceChargeController {
         return service.getByReservation(reservationId);
     }
 
+    @PreAuthorize("hasAuthority('STAFF')")
     @PostMapping
     public ResponseEntity<?> add(
             @RequestParam Long reservationId,
