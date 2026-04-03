@@ -5,31 +5,35 @@ import {
   CreditCard,
   DoorClosed,
   Receipt,
+  Wallet,
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ConfirmationToast from '../components/ConfirmationToast';
-import ReservationLookupPanel from '../components/ReservationLookupPanel';
-import StatusPill from '../components/StatusPill';
-import { Button } from '../components/ui/button';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
+import ModalFrame from '../components/common/ModalFrame';
+import ReservationLookupPanel from '../components/ReservationLookupPanel';
+import StatusPill from '../components/StatusPill';
+import { Button } from '../components/ui/button';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
-import { useTranslation } from 'react-i18next';
+import {
+  normalizeReservationStatusLabel,
+  reservationStatusRules,
+} from '../domain/reservations/statusRules';
+import { createPayment, extractPaymentError } from '../services/paymentService';
 import {
   checkOutReservation,
   extractReservationError,
   getBill,
 } from '../services/reservationService';
 import {
-  normalizeReservationStatusLabel,
-  reservationStatusRules,
-} from '../domain/reservations/statusRules';
-import {
   formatLocalizedCurrency,
   formatLocalizedDate,
+  formatLocalizedDateTime,
   getPaymentStatusLabel,
   getReservationStatusLabel,
   translateKnownValue,
@@ -43,9 +47,17 @@ const PAYMENT_STATUS_STYLES = {
   FAILED: 'border-rose-200 bg-rose-50 text-rose-900',
 };
 
+const PAYMENT_METHODS = ['CASH', 'CARD', 'ONLINE'];
 const PAYMENT_BLOCKING_STATUSES = new Set(['UNPAID', 'PARTIALLY_PAID', 'FAILED', 'PAYMENT_PENDING']);
 
 const normalizePaymentStatus = (status) => String(status ?? '').trim().toUpperCase();
+const humanizePaymentMethod = (method) =>
+  String(method ?? '')
+    .toLowerCase()
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 
 function PaymentStatusBadge({ status, t }) {
   const normalized = normalizePaymentStatus(status);
@@ -63,7 +75,6 @@ function PaymentStatusBadge({ status, t }) {
 
 function BillBreakdown({ bill, t, language }) {
   const paymentStatus = normalizePaymentStatus(bill.paymentStatus);
-
   const rows = [
     {
       label: t('checkoutPage.roomChargeLabel', {
@@ -139,9 +150,7 @@ function BillBreakdown({ bill, t, language }) {
             <span className="text-sm font-bold text-zinc-950">{t('checkoutPage.outstandingBalanceLabel')}</span>
             <span
               className={`text-lg font-black ${
-                Number(bill.outstandingBalance ?? bill.balanceDue ?? 0) > 0
-                  ? 'text-rose-900'
-                  : 'text-emerald-700'
+                Number(bill.outstandingBalance ?? bill.balanceDue ?? 0) > 0 ? 'text-rose-900' : 'text-emerald-700'
               }`}
             >
               {formatLocalizedCurrency(bill.outstandingBalance ?? bill.balanceDue, language)}
@@ -149,7 +158,7 @@ function BillBreakdown({ bill, t, language }) {
           </div>
         </div>
 
-        {Array.isArray(bill.lineItems) && bill.lineItems.length > 0 && (
+        {Array.isArray(bill.lineItems) && bill.lineItems.length > 0 ? (
           <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
               {t('checkoutPage.lineItems')}
@@ -160,10 +169,7 @@ function BillBreakdown({ bill, t, language }) {
                 const credit = Boolean(item?.credit);
 
                 return (
-                  <div
-                    key={`${item?.label ?? 'line'}-${index}`}
-                    className="flex items-center justify-between gap-4 text-sm"
-                  >
+                  <div key={`${item?.label ?? 'line'}-${index}`} className="flex items-center justify-between gap-4 text-sm">
                     <span className="font-medium text-zinc-600">
                       {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
                     </span>
@@ -175,9 +181,187 @@ function BillBreakdown({ bill, t, language }) {
               })}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function PaymentReceiptCard({ payment, t, language }) {
+  return (
+    <div className="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 p-5" data-testid="payment-receipt">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptTitle')}
+          </p>
+          <p className="mt-2 text-lg font-black text-emerald-950">
+            {formatLocalizedCurrency(payment.amount, language)}
+          </p>
+          <p className="mt-1 text-sm font-medium text-emerald-900/80">
+            {payment.message || t('checkoutPage.paymentRecorded')}
+          </p>
+        </div>
+        <PaymentStatusBadge status={payment.paymentStatus} t={t} />
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptMethod')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-emerald-950">{humanizePaymentMethod(payment.paymentMethod)}</p>
+        </div>
+        <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptRemaining')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-emerald-950">
+            {formatLocalizedCurrency(payment.remainingBalance, language)}
+          </p>
+        </div>
+        <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptTotalPaid')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-emerald-950">
+            {formatLocalizedCurrency(payment.totalPaid, language)}
+          </p>
+        </div>
+        <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptCapturedAt')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-emerald-950">
+            {formatLocalizedDateTime(payment.createdAt, language, { dateStyle: 'medium', timeStyle: 'short' })}
+          </p>
+        </div>
+      </div>
+
+      {payment.gatewayReference ? (
+        <div className="mt-4 rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+            {t('checkoutPage.receiptReference')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-emerald-950">
+            <LtrText>{payment.gatewayReference}</LtrText>
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, submitting }) {
+  const [amount, setAmount] = useState(String(Number(outstandingBalance ?? 0).toFixed(2)));
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [formError, setFormError] = useState(null);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError(null);
+
+    const numericAmount = Number(amount);
+    if (!amount.trim() || Number.isNaN(numericAmount)) {
+      setFormError(t('checkoutPage.paymentAmountRequired'));
+      return;
+    }
+    if (numericAmount <= 0) {
+      setFormError(t('checkoutPage.paymentAmountPositive'));
+      return;
+    }
+    if (numericAmount > Number(outstandingBalance ?? 0)) {
+      setFormError(
+        t('checkoutPage.paymentAmountExceeded', {
+          amount: formatLocalizedCurrency(outstandingBalance, language),
+        })
+      );
+      return;
+    }
+
+    const result = await onSubmit({
+      amount: numericAmount.toFixed(2),
+      paymentMethod,
+    });
+
+    if (result.success) {
+      onClose();
+      return;
+    }
+
+    setFormError(result.error);
+  };
+
+  return (
+    <ModalFrame
+      title={t('checkoutPage.paymentModalTitle')}
+      description={t('checkoutPage.paymentModalDescription')}
+      onClose={onClose}
+      closeLabel={t('closeDialog')}
+      widthClassName="max-w-xl"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            {t('checkoutPage.outstandingBalanceLabel')}
+          </p>
+          <p className="mt-2 text-2xl font-black text-zinc-950">
+            {formatLocalizedCurrency(outstandingBalance, language)}
+          </p>
+        </div>
+
+        {formError ? (
+          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+            {formError}
+          </div>
+        ) : null}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              {t('checkoutPage.paymentAmountLabel')}
+            </span>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              {t('checkoutPage.paymentMethodLabel')}
+            </span>
+            <select
+              value={paymentMethod}
+              onChange={(event) => setPaymentMethod(event.target.value)}
+              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+            >
+              {PAYMENT_METHODS.map((method) => (
+                <option key={method} value={method}>
+                  {humanizePaymentMethod(method)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+          {t('checkoutPage.paymentModalNote')}
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={onClose} className="h-12 border-zinc-200">
+            {t('cancel')}
+          </Button>
+          <Button type="submit" disabled={submitting} className="h-12 bg-zinc-950 text-white hover:bg-zinc-800">
+            {submitting ? t('checkoutPage.paymentSubmitting') : t('checkoutPage.paymentSubmit')}
+          </Button>
+        </div>
+      </form>
+    </ModalFrame>
   );
 }
 
@@ -191,6 +375,10 @@ export default function Checkout() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
+  const [paymentReceipt, setPaymentReceipt] = useState(null);
   const [toast, setToast] = useState(null);
 
   const initialQuery = useMemo(
@@ -220,6 +408,10 @@ export default function Checkout() {
   const handleSelect = async (reservation) => {
     setSelected(reservation);
     setCheckoutSuccess(false);
+    setCheckoutError(null);
+    setPaymentModalOpen(false);
+    setPaymentError(null);
+    setPaymentReceipt(null);
     await fetchBill(reservation.confirmationNumber);
   };
 
@@ -229,6 +421,9 @@ export default function Checkout() {
     setBillError(null);
     setCheckoutError(null);
     setCheckoutSuccess(false);
+    setPaymentModalOpen(false);
+    setPaymentError(null);
+    setPaymentReceipt(null);
   };
 
   const handleRetryBill = useCallback(async () => {
@@ -236,41 +431,9 @@ export default function Checkout() {
     await fetchBill(selected.confirmationNumber);
   }, [billLoading, fetchBill, selected?.confirmationNumber]);
 
-  const handleCheckout = async () => {
-    if (!selected?.confirmationNumber || checkoutLoading) return;
-
-    if (blockingMessage) {
-      setCheckoutError(blockingMessage);
-      return;
-    }
-
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-
-    try {
-      await checkOutReservation(selected.confirmationNumber);
-      setCheckoutSuccess(true);
-      setToast({
-        message: t('checkoutPage.successToast', { name: selected.guestName }),
-        type: 'success',
-      });
-      setSelected((prev) => (prev ? { ...prev, status: 'CHECKED_OUT' } : prev));
-    } catch (err) {
-      const message = extractReservationError(err);
-      setCheckoutError(message);
-      setToast({ message, type: 'error' });
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  const outstandingBalance = Number(
-    bill?.outstandingBalance ?? bill?.balanceDue ?? 0
-  );
+  const outstandingBalance = Number(bill?.outstandingBalance ?? bill?.balanceDue ?? 0);
   const paymentStatus = normalizePaymentStatus(bill?.paymentStatus);
-  const reservationCanCheckout = selected
-    ? reservationStatusRules.canCheckOut(selected.status)
-    : false;
+  const reservationCanCheckout = selected ? reservationStatusRules.canCheckOut(selected.status) : false;
 
   const blockingMessage = useMemo(() => {
     if (!selected) return null;
@@ -310,21 +473,93 @@ export default function Checkout() {
     t,
   ]);
 
-  const canCheckOut = Boolean(
+  const canCheckOut = Boolean(selected && bill && !billLoading && !checkoutLoading && !blockingMessage);
+  const canRecordPayment = Boolean(
     selected &&
       bill &&
       !billLoading &&
-      !checkoutLoading &&
-      !blockingMessage
+      !billError &&
+      selected.status === 'CHECKED_IN' &&
+      outstandingBalance > 0 &&
+      !checkoutSuccess
   );
+
+  const handlePaymentSubmit = async ({ amount, paymentMethod }) => {
+    if (!selected?.confirmationNumber || paymentLoading) {
+      return { success: false, error: t('checkoutPage.paymentUnavailable') };
+    }
+
+    setPaymentLoading(true);
+    setPaymentError(null);
+
+    try {
+      const result = await createPayment({
+        confirmationNumber: selected.confirmationNumber,
+        amount,
+        paymentMethod,
+      });
+
+      setPaymentReceipt(result);
+      await fetchBill(selected.confirmationNumber);
+      setToast({
+        message: t('checkoutPage.paymentSuccessToast', {
+          amount: formatLocalizedCurrency(result.amount, i18n.language),
+        }),
+        type: 'success',
+      });
+
+      return { success: true };
+    } catch (err) {
+      const message = extractPaymentError(err);
+      setPaymentError(message);
+      return { success: false, error: message };
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!selected?.confirmationNumber || checkoutLoading) return;
+
+    if (blockingMessage) {
+      setCheckoutError(blockingMessage);
+      return;
+    }
+
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+
+    try {
+      await checkOutReservation(selected.confirmationNumber);
+      setCheckoutSuccess(true);
+      setToast({
+        message: t('checkoutPage.successToast', { name: selected.guestName }),
+        type: 'success',
+      });
+      setSelected((prev) => (prev ? { ...prev, status: 'CHECKED_OUT' } : prev));
+    } catch (err) {
+      const message = extractReservationError(err);
+      setCheckoutError(message);
+      setToast({ message, type: 'error' });
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-      <ConfirmationToast
-        message={toast?.message}
-        type={toast?.type}
-        onClose={() => setToast(null)}
-      />
+      <ConfirmationToast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
+
+      {paymentModalOpen ? (
+        <PaymentDialog
+          outstandingBalance={outstandingBalance}
+          language={i18n.language}
+          t={t}
+          onClose={() => setPaymentModalOpen(false)}
+          onSubmit={handlePaymentSubmit}
+          submitting={paymentLoading}
+        />
+      ) : null}
 
       <DashboardHero
         eyebrow={t('checkoutPage.heroEyebrow')}
@@ -365,10 +600,7 @@ export default function Checkout() {
         <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
 
         {!selected ? (
-          <DashboardPanel
-            title={t('checkoutPage.selectTitle')}
-            description={t('checkoutPage.selectDescription')}
-          >
+          <DashboardPanel title={t('checkoutPage.selectTitle')} description={t('checkoutPage.selectDescription')}>
             <div className="grid gap-3 md:grid-cols-3">
               {t('checkoutPage.tips', { returnObjects: true }).map((item) => (
                 <div
@@ -389,26 +621,20 @@ export default function Checkout() {
             >
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                    {t('common.guest')}
-                  </p>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.guest')}</p>
                   <p className="mt-2 text-lg font-black text-zinc-950">{selected.guestName}</p>
                   <p className="mt-1 text-sm font-medium text-zinc-500">
                     {selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                    {t('checkInPage.confirmation')}
-                  </p>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.confirmation')}</p>
                   <p className="mt-2 text-lg font-black text-zinc-950">
                     <LtrText>{selected.confirmationNumber}</LtrText>
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                    {t('common.stay')}
-                  </p>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.stay')}</p>
                   <p className="mt-2 text-sm font-bold text-zinc-950">
                     {formatLocalizedDate(selected.checkInDate, i18n.language, {
                       month: 'short',
@@ -430,11 +656,7 @@ export default function Checkout() {
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
                     {t('checkoutPage.outstandingBalanceLabel')}
                   </p>
-                  <p
-                    className={`mt-2 text-lg font-black ${
-                      outstandingBalance > 0 ? 'text-rose-900' : 'text-emerald-700'
-                    }`}
-                  >
+                  <p className={`mt-2 text-lg font-black ${outstandingBalance > 0 ? 'text-rose-900' : 'text-emerald-700'}`}>
                     {bill
                       ? formatLocalizedCurrency(outstandingBalance, i18n.language)
                       : billLoading
@@ -444,17 +666,17 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {!checkoutSuccess && blockingMessage && (
+              {!checkoutSuccess && blockingMessage ? (
                 <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
                   {blockingMessage}
                 </div>
-              )}
+              ) : null}
 
-              {checkoutSuccess && (
+              {checkoutSuccess ? (
                 <div className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
                   {t('checkoutPage.successBanner')}
                 </div>
-              )}
+              ) : null}
             </DashboardPanel>
 
             <DashboardPanel
@@ -471,25 +693,95 @@ export default function Checkout() {
               {billLoading ? (
                 <LoadingState message={t('checkoutPage.loadingBill')} />
               ) : billError ? (
-                <ErrorState
-                  title={t('checkoutPage.billLoadFailed')}
-                  message={billError}
-                  onRetry={handleRetryBill}
-                />
+                <ErrorState title={t('checkoutPage.billLoadFailed')} message={billError} onRetry={handleRetryBill} />
               ) : !bill ? (
-                <EmptyState
-                  title={t('checkoutPage.noBillTitle')}
-                  message={t('checkoutPage.noBillDescription')}
-                />
+                <EmptyState title={t('checkoutPage.noBillTitle')} message={t('checkoutPage.noBillDescription')} />
               ) : (
                 <>
                   <BillBreakdown bill={bill} t={t} language={i18n.language} />
-                  {!checkoutSuccess && blockingMessage && (
+                  {!checkoutSuccess && blockingMessage ? (
                     <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
                       {blockingMessage}
                     </div>
-                  )}
+                  ) : null}
                 </>
+              )}
+            </DashboardPanel>
+
+            <DashboardPanel
+              title={t('checkoutPage.paymentPanelTitle')}
+              description={t('checkoutPage.paymentPanelDescription')}
+            >
+              {billLoading ? (
+                <LoadingState message={t('checkoutPage.paymentPreparing')} />
+              ) : billError ? (
+                <ErrorState title={t('checkoutPage.billLoadFailed')} message={billError} onRetry={handleRetryBill} />
+              ) : !bill ? (
+                <EmptyState
+                  title={t('checkoutPage.paymentEmptyTitle')}
+                  message={t('checkoutPage.paymentEmptyDescription')}
+                  icon={Wallet}
+                />
+              ) : (
+                <div className="space-y-5">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('checkoutPage.paymentPanelOutstanding')}
+                      </p>
+                      <p className="mt-2 text-lg font-black text-zinc-950">
+                        {formatLocalizedCurrency(outstandingBalance, i18n.language)}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('checkoutPage.paymentStatusLabel')}
+                      </p>
+                      <div className="mt-3">
+                        <PaymentStatusBadge status={paymentStatus} t={t} />
+                      </div>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('common.finalized')}
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                        {bill.invoiceFinalized ? t('common.yes') : t('common.no')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-medium text-zinc-500">
+                      {outstandingBalance > 0 ? t('checkoutPage.paymentPanelHint') : t('checkoutPage.paymentSettledHint')}
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() => setPaymentModalOpen(true)}
+                      disabled={!canRecordPayment || paymentLoading}
+                      className="h-12 bg-zinc-950 text-white hover:bg-zinc-800"
+                    >
+                      <Wallet className="h-4 w-4" />
+                      {t('checkoutPage.openPaymentModal')}
+                    </Button>
+                  </div>
+
+                  {paymentError ? (
+                    <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                      {paymentError}
+                    </div>
+                  ) : null}
+
+                  {paymentReceipt ? (
+                    <PaymentReceiptCard payment={paymentReceipt} t={t} language={i18n.language} />
+                  ) : (
+                    <EmptyState
+                      title={t('checkoutPage.receiptEmptyTitle')}
+                      message={t('checkoutPage.receiptEmptyDescription')}
+                      icon={Receipt}
+                    />
+                  )}
+                </div>
               )}
             </DashboardPanel>
 
@@ -517,10 +809,7 @@ export default function Checkout() {
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div
-                      key={item.title}
-                      className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
-                    >
+                    <div key={item.title} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                       <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                         <Icon className="h-4 w-4" />
                       </span>
@@ -533,11 +822,11 @@ export default function Checkout() {
                 })}
               </div>
 
-              {checkoutError && (
+              {checkoutError ? (
                 <div className="mt-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
                   {checkoutError}
                 </div>
-              )}
+              ) : null}
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <Button
