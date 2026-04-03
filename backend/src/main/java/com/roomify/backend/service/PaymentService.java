@@ -32,16 +32,19 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AuditService auditService;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public PaymentService(
             ReservationRepository reservationRepository,
             PaymentRepository paymentRepository,
             AuditService auditService,
-            NotificationService notificationService) {
+            NotificationService notificationService,
+            EmailService emailService) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.auditService = auditService;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     public PaymentResponse createPayment(PaymentRequest request) {

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.*;
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Payment;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -198,6 +199,7 @@ class BillingServiceTest {
                 assertEquals(new BigDecimal("340.00"), response.getOutstandingBalance());
                 assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
                 assertFalse(response.isInvoiceFinalized());
+                assertEquals(PaymentStatus.PARTIALLY_PAID, reservation.getPaymentStatus());
 
                 verify(reservationRepository).saveAndFlush(any(Reservation.class));
                 verify(paymentRepository).saveAndFlush(any(Payment.class));
@@ -257,6 +259,7 @@ class BillingServiceTest {
                 assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
                 assertEquals("PAID", response.getPaymentStatus());
                 assertTrue(response.isInvoiceFinalized());
+                assertEquals(PaymentStatus.PAID, reservation.getPaymentStatus());
         }
 
         @Test
@@ -280,6 +283,7 @@ class BillingServiceTest {
                 assertTrue(response.isInvoiceFinalized());
                 assertEquals("PAID", response.getPaymentStatus());
                 assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
+                assertEquals(PaymentStatus.PAID, reservation.getPaymentStatus());
         }
 
         private Reservation buildReservation(

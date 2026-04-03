@@ -2,6 +2,7 @@ package com.roomify.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
@@ -21,6 +22,7 @@ import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -84,6 +86,31 @@ class NotificationServiceTest {
     }
 
     @Test
+    void markAsUnreadShouldToggleReadStateAndClearTimestamp() {
+        authenticateAs("staff@roomify.com", "ROLE_STAFF");
+
+        User user = new User("staff@roomify.com", "hash", Role.STAFF, true);
+        Staff staff = new Staff(user, "Staff User", "FRONT_DESK");
+        user.setStaff(staff);
+
+        Notification notification = baseNotification();
+        notification.setTargetRole(Role.STAFF);
+        notification.setTargetDepartment("FRONT_DESK");
+        notification.setRead(true);
+        notification.setReadAt(LocalDateTime.now());
+
+        when(userRepository.findByEmail("staff@roomify.com")).thenReturn(Optional.of(user));
+        when(notificationRepository.findById(10L)).thenReturn(Optional.of(notification));
+        when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        NotificationResponse response = notificationService.markAsUnread(10L);
+
+        assertEquals(false, response.isRead());
+        assertNull(response.getReadAt());
+        verify(auditService).log(eq("NOTIFICATION_UNREAD"), eq("Notification#10"), contains("staff@roomify.com"));
+    }
+
+    @Test
     void markAsReadShouldRejectOtherDepartment() {
         authenticateAs("staff@roomify.com", "ROLE_STAFF");
 
@@ -106,16 +133,20 @@ class NotificationServiceTest {
         authenticateAs("staff@roomify.com", "ROLE_STAFF");
 
         User user = new User("staff@roomify.com", "hash", Role.STAFF, true);
-        Staff staff = new Staff(user, "Staff User", "FRONT_DESK");
+        Staff staff = new Staff(user, "Staff User", "Front Desk");
         user.setStaff(staff);
 
-        Notification notification = baseNotification();
-        notification.setTargetRole(Role.STAFF);
-        notification.setTargetDepartment("FRONT_DESK");
+        Notification visible = baseNotification();
+        visible.setTargetRole(Role.STAFF);
+        visible.setTargetDepartment("FRONT_DESK");
+
+        Notification hidden = baseNotification();
+        hidden.setTargetRole(Role.STAFF);
+        hidden.setTargetDepartment("HOUSEKEEPING");
 
         when(userRepository.findByEmail("staff@roomify.com")).thenReturn(Optional.of(user));
-        when(notificationRepository.findVisibleForRoleAndDepartment(Role.STAFF, "FRONT_DESK", false))
-                .thenReturn(List.of(notification));
+        when(notificationRepository.findByTargetRoleOrderByCreatedAtDesc(Role.STAFF))
+                .thenReturn(List.of(visible, hidden));
 
         List<NotificationResponse> result = notificationService.listVisibleForCurrentUser(false);
 
@@ -143,6 +174,29 @@ class NotificationServiceTest {
         Notification created = captor.getValue();
         assertEquals(Role.STAFF, created.getTargetRole());
         assertEquals("HOUSEKEEPING", created.getTargetDepartment());
+        assertEquals(NotificationEventType.SERVICE_REQUEST_CREATED, created.getEventType());
+    }
+
+    @Test
+    void notifyServiceRequestCreatedShouldRouteFoodToAllStaff() {
+        Notification saved = baseNotification();
+        when(notificationRepository.save(any(Notification.class))).thenReturn(saved);
+
+        Reservation reservation = new Reservation();
+        reservation.setConfirmationNumber("RSV-123");
+
+        HotelService service = new HotelService();
+        service.setName("Dinner");
+        service.setCategory(ServiceCategory.FOOD);
+
+        notificationService.notifyServiceRequestCreated(reservation, service, 1, new BigDecimal("80.00"));
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        Notification created = captor.getValue();
+        assertEquals(Role.STAFF, created.getTargetRole());
+        assertNull(created.getTargetDepartment());
         assertEquals(NotificationEventType.SERVICE_REQUEST_CREATED, created.getEventType());
     }
 

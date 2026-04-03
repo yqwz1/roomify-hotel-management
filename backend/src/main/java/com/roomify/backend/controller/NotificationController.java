@@ -39,4 +39,9 @@ public class NotificationController {
     public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Long id) {
         return ResponseEntity.ok(notificationService.markAsRead(id));
     }
+
+    @PatchMapping("/{id}/unread")
+    public ResponseEntity<NotificationResponse> markAsUnread(@PathVariable Long id) {
+        return ResponseEntity.ok(notificationService.markAsUnread(id));
+    }
 }
