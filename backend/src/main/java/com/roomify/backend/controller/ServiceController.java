@@ -1,6 +1,7 @@
 package com.roomify.backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class ServiceController {
 
     private final HotelServiceRepository repository;
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
     public HotelService create(@RequestBody HotelService service) {
         return repository.save(service);
@@ -25,6 +27,7 @@ public class ServiceController {
         return repository.findAll();
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @PutMapping("/{id}")
     public HotelService update(@PathVariable Long id, @RequestBody HotelService s) {
 
@@ -39,6 +42,7 @@ public class ServiceController {
         return repository.save(existing);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         repository.deleteById(id);

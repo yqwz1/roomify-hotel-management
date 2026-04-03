@@ -1,22 +1,22 @@
 package com.roomify.backend.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.Payment;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -24,222 +24,299 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 
 class BillingServiceTest {
 
-    private ReservationRepository reservationRepository;
-    private AuditService auditService;
-    private BillingService billingService;
+        private ReservationRepository reservationRepository;
+        private PaymentRepository paymentRepository;
+        private AuditService auditService;
+        private BillingService billingService;
 
-    @BeforeEach
-    void setUp() {
-        reservationRepository = mock(ReservationRepository.class);
-        auditService = mock(AuditService.class);
-        billingService = new BillingService(reservationRepository, auditService, new BigDecimal("0.15"));
-    }
+        @BeforeEach
+        void setUp() {
+                reservationRepository = mock(ReservationRepository.class);
+                paymentRepository = mock(PaymentRepository.class);
+                auditService = mock(AuditService.class);
 
-    @Test
-    void calculateBillShouldReturnBasicItemisedBreakdown() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                billingService = new BillingService(
+                                reservationRepository,
+                                paymentRepository,
+                                auditService,
+                                new BigDecimal("0.15"));
+        }
 
-        BillResponse response = billingService.calculateBill(" rsv-abc123 ", BigDecimal.ZERO, BigDecimal.ZERO);
+        @Test
+        void calculateBillShouldReturnBasicItemisedBreakdown() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 23));
 
-        assertEquals(3L, response.getNights());
-        assertEquals(new BigDecimal("200.00"), response.getRoomRate());
-        assertEquals(new BigDecimal("600.00"), response.getRoomCharge());
-        assertEquals(new BigDecimal("0.00"), response.getServiceCharges());
-        assertEquals(new BigDecimal("90.00"), response.getVatAmount());
-        assertEquals(new BigDecimal("0.00"), response.getDiscountAmount());
-        assertEquals(new BigDecimal("690.00"), response.getBalanceDue());
-        assertEquals(3, response.getLineItems().size());
-        verify(auditService).log(eq("BILL_CALCULATED"), eq("RSV-ABC123"), contains("balanceDue=690.00"));
-    }
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-    @Test
-    void calculateBillShouldIncludeServicesAndDiscount() {
-        Reservation reservation = buildReservation("180.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 22));
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                BillResponse response = billingService.calculateBill(
+                                " rsv-abc123 ",
+                                BigDecimal.ZERO,
+                                BigDecimal.ZERO);
 
-        BillResponse response = billingService.calculateBill(
-                "RSV-ABC123",
-                new BigDecimal("40.00"),
-                new BigDecimal("25.00"));
+                assertEquals(3L, response.getNights());
+                assertEquals(new BigDecimal("200.00"), response.getRoomRate());
+                assertEquals(new BigDecimal("600.00"), response.getRoomCharge());
+                assertEquals(new BigDecimal("0.00"), response.getServiceCharges());
+                assertEquals(new BigDecimal("90.00"), response.getVatAmount());
+                assertEquals(new BigDecimal("0.00"), response.getDiscountAmount());
+                assertEquals(new BigDecimal("690.00"), response.getBalanceDue());
+                assertEquals(3, response.getLineItems().size());
 
-        assertEquals(new BigDecimal("360.00"), response.getRoomCharge());
-        assertEquals(new BigDecimal("40.00"), response.getServiceCharges());
-        assertEquals(new BigDecimal("60.00"), response.getVatAmount());
-        assertEquals(new BigDecimal("25.00"), response.getDiscountAmount());
-        assertEquals(new BigDecimal("435.00"), response.getBalanceDue());
-        assertEquals(5, response.getLineItems().size());
-    }
+                verify(auditService).log(
+                                eq("BILL_CALCULATED"),
+                                eq("RSV-ABC123"),
+                                contains("balanceDue=690.00"));
+        }
 
-    @Test
-    void calculateBillShouldNormaliseNegativeInputsToZero() {
-        Reservation reservation = buildReservation("150.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 22));
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+        @Test
+        void calculateBillShouldIncludeServicesAndDiscount() {
+                Reservation reservation = buildReservation(
+                                "180.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 22));
 
-        BillResponse response = billingService.calculateBill(
-                "RSV-ABC123",
-                new BigDecimal("-10.00"),
-                new BigDecimal("-5.00"));
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        assertEquals(new BigDecimal("0.00"), response.getServiceCharges());
-        assertEquals(new BigDecimal("0.00"), response.getDiscountAmount());
-        assertEquals(new BigDecimal("345.00"), response.getBalanceDue());
-    }
+                BillResponse response = billingService.calculateBill(
+                                "RSV-ABC123",
+                                new BigDecimal("40.00"),
+                                new BigDecimal("25.00"));
 
-    @Test
-    void calculateBillShouldThrowWhenReservationIsMissing() {
-        when(reservationRepository.findByConfirmationNumber("RSV-MISSING")).thenReturn(Optional.empty());
+                assertEquals(new BigDecimal("360.00"), response.getRoomCharge());
+                assertEquals(new BigDecimal("40.00"), response.getServiceCharges());
+                assertEquals(new BigDecimal("60.00"), response.getVatAmount());
+                assertEquals(new BigDecimal("25.00"), response.getDiscountAmount());
+                assertEquals(new BigDecimal("435.00"), response.getBalanceDue());
+                assertEquals(5, response.getLineItems().size());
+        }
 
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> billingService.calculateBill("RSV-MISSING", BigDecimal.ZERO, BigDecimal.ZERO));
-    }
+        @Test
+        void calculateBillShouldNormaliseNegativeInputsToZero() {
+                Reservation reservation = buildReservation(
+                                "150.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 22));
 
-    @Test
-    void calculateBillShouldThrowWhenNightsAreZeroOrNegative() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 20));
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> billingService.calculateBill("RSV-ABC123", BigDecimal.ZERO, BigDecimal.ZERO));
-    }
+                BillResponse response = billingService.calculateBill(
+                                "RSV-ABC123",
+                                new BigDecimal("-10.00"),
+                                new BigDecimal("-5.00"));
 
-    @Test
-    void calculateBillShouldNeverReturnNegativeBalance() {
-        Reservation reservation = buildReservation("150.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 22));
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                assertEquals(new BigDecimal("0.00"), response.getServiceCharges());
+                assertEquals(new BigDecimal("0.00"), response.getDiscountAmount());
+                assertEquals(new BigDecimal("345.00"), response.getBalanceDue());
+        }
 
-        BillResponse response = billingService.calculateBill(
-                "RSV-ABC123",
-                BigDecimal.ZERO,
-                new BigDecimal("1000.00"));
+        @Test
+        void calculateBillShouldThrowWhenReservationIsMissing() {
+                when(reservationRepository.findByConfirmationNumber("RSV-MISSING"))
+                                .thenReturn(Optional.empty());
 
-        assertEquals(new BigDecimal("0.00"), response.getBalanceDue());
-    }
+                assertThrows(
+                                ResourceNotFoundException.class,
+                                () -> billingService.calculateBill(
+                                                "RSV-MISSING",
+                                                BigDecimal.ZERO,
+                                                BigDecimal.ZERO));
+        }
 
-    @Test
-    void recordPaymentShouldMarkAsPartiallyPaidAndUpdateOutstanding() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        reservation.setTotalPrice(new BigDecimal("690.00"));
-        reservation.setTotalPaid(new BigDecimal("100.00"));
-        reservation.setOutstandingBalance(new BigDecimal("590.00"));
-        reservation.setInvoiceFinalized(false);
+        @Test
+        void calculateBillShouldThrowWhenNightsAreZeroOrNegative() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 20));
 
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        BillResponse response = billingService.recordPayment("RSV-ABC123", new BigDecimal("250.00"));
+                assertThrows(
+                                IllegalArgumentException.class,
+                                () -> billingService.calculateBill(
+                                                "RSV-ABC123",
+                                                BigDecimal.ZERO,
+                                                BigDecimal.ZERO));
+        }
 
-        assertEquals(new BigDecimal("350.00"), response.getTotalPaid());
-        assertEquals(new BigDecimal("340.00"), response.getOutstandingBalance());
-        assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
-        assertEquals(false, response.isInvoiceFinalized());
-    }
+        @Test
+        void calculateBillShouldNeverReturnNegativeBalance() {
+                Reservation reservation = buildReservation(
+                                "150.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 22));
 
-    @Test
-    void recordPaymentShouldBlockOverpayment() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        reservation.setTotalPrice(new BigDecimal("690.00"));
-        reservation.setTotalPaid(new BigDecimal("680.00"));
-        reservation.setOutstandingBalance(new BigDecimal("10.00"));
-        reservation.setInvoiceFinalized(false);
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                BillResponse response = billingService.calculateBill(
+                                "RSV-ABC123",
+                                BigDecimal.ZERO,
+                                new BigDecimal("1000.00"));
 
-        PaymentValidationException ex = assertThrows(
-                PaymentValidationException.class,
-                () -> billingService.recordPayment("RSV-ABC123", new BigDecimal("20.00")));
+                assertEquals(new BigDecimal("0.00"), response.getBalanceDue());
+        }
 
-        assertEquals("PAYMENT_OVERPAYMENT_BLOCKED", ex.getCode());
-        assertEquals(new BigDecimal("10.00"), ex.getOutstandingBalance());
-    }
+        @Test
+        void recordPaymentShouldMarkAsPartiallyPaidAndUpdateOutstanding() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 23));
 
-    @Test
-    void recordPaymentShouldAutoFinalizeAfterFullPayment() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        reservation.setTotalPrice(new BigDecimal("690.00"));
-        reservation.setTotalPaid(new BigDecimal("500.00"));
-        reservation.setOutstandingBalance(new BigDecimal("190.00"));
-        reservation.setInvoiceFinalized(false);
+                reservation.setTotalPrice(new BigDecimal("690.00"));
+                reservation.setTotalPaid(new BigDecimal("100.00"));
+                reservation.setOutstandingBalance(new BigDecimal("590.00"));
+                reservation.setInvoiceFinalized(false);
 
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        BillResponse response = billingService.recordPayment("RSV-ABC123", new BigDecimal("190.00"));
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertEquals(new BigDecimal("690.00"), response.getTotalPaid());
-        assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
-        assertEquals("PAID", response.getPaymentStatus());
-        assertEquals(true, response.isInvoiceFinalized());
-    }
+                BillResponse response = billingService.recordPayment(
+                                "RSV-ABC123",
+                                new BigDecimal("250.00"));
 
-    @Test
-    void closeBillShouldBlockWhenOutstandingBalanceExists() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        reservation.setTotalPrice(new BigDecimal("690.00"));
-        reservation.setTotalPaid(new BigDecimal("500.00"));
-        reservation.setOutstandingBalance(new BigDecimal("190.00"));
-        reservation.setInvoiceFinalized(false);
+                assertEquals(new BigDecimal("350.00"), response.getTotalPaid());
+                assertEquals(new BigDecimal("340.00"), response.getOutstandingBalance());
+                assertEquals("PARTIALLY_PAID", response.getPaymentStatus());
+                assertFalse(response.isInvoiceFinalized());
 
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
+                verify(reservationRepository).saveAndFlush(any(Reservation.class));
+                verify(paymentRepository).saveAndFlush(any(Payment.class));
+        }
 
-        PaymentValidationException ex = assertThrows(
-                PaymentValidationException.class,
-                () -> billingService.closeBill("RSV-ABC123"));
+        @Test
+        void recordPaymentShouldBlockOverpayment() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 23));
 
-        assertEquals("PAYMENT_BALANCE_DUE", ex.getCode());
-        assertEquals(new BigDecimal("190.00"), ex.getOutstandingBalance());
-    }
+                reservation.setTotalPrice(new BigDecimal("690.00"));
+                reservation.setTotalPaid(new BigDecimal("680.00"));
 
-    @Test
-    void closeBillShouldFinalizeWhenFullyPaid() {
-        Reservation reservation = buildReservation("200.00", LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 23));
-        reservation.setTotalPrice(new BigDecimal("690.00"));
-        reservation.setTotalPaid(new BigDecimal("690.00"));
-        reservation.setOutstandingBalance(new BigDecimal("0.00"));
-        reservation.setInvoiceFinalized(false);
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        when(reservationRepository.findByConfirmationNumber("RSV-ABC123")).thenReturn(Optional.of(reservation));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                PaymentValidationException ex = assertThrows(
+                                PaymentValidationException.class,
+                                () -> billingService.recordPayment(
+                                                "RSV-ABC123",
+                                                new BigDecimal("20.00")));
 
-        BillResponse response = billingService.closeBill("RSV-ABC123");
+                assertEquals("PAYMENT_OVERPAYMENT_BLOCKED", ex.getCode());
+                assertEquals(new BigDecimal("10.00"), ex.getOutstandingBalance());
+        }
 
-        assertEquals(true, response.isInvoiceFinalized());
-        assertEquals("PAID", response.getPaymentStatus());
-        assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
-    }
+        @Test
+        void recordPaymentShouldAutoFinalizeAfterFullPayment() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 23));
 
-    private Reservation buildReservation(String roomRate, LocalDate checkIn, LocalDate checkOut) {
-        Guest guest = new Guest("Guest", "guest@example.com", "0500000000", "ID-77", "SA");
-        guest.setId(10L);
+                reservation.setTotalPrice(new BigDecimal("690.00"));
+                reservation.setTotalPaid(new BigDecimal("500.00"));
 
-        RoomType roomType = new RoomType("Suite", new BigDecimal(roomRate), 2, "WiFi", "Suite");
-        roomType.setId(5L);
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
 
-        Room room = new Room("201", roomType, 2, RoomStatus.AVAILABLE);
-        room.setId(20L);
+                when(reservationRepository.saveAndFlush(any(Reservation.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Reservation reservation = new Reservation();
-        reservation.setId(30L);
-        reservation.setGuest(guest);
-        reservation.setRoom(room);
-        reservation.setCheckInDate(checkIn);
-        reservation.setCheckOutDate(checkOut);
-        reservation.setStatus(ReservationStatus.CONFIRMED);
-        reservation.setConfirmationNumber("RSV-ABC123");
-        long nights = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
-        BigDecimal roomCharge = new BigDecimal(roomRate).multiply(BigDecimal.valueOf(nights));
-        BigDecimal vatAmount = roomCharge.multiply(new BigDecimal("0.15"));
-        BigDecimal totalPrice = roomCharge.add(vatAmount).setScale(2);
-        reservation.setTotalPrice(totalPrice);
-        reservation.setTotalPaid(BigDecimal.ZERO.setScale(2));
-        reservation.setOutstandingBalance(totalPrice);
-        reservation.setInvoiceFinalized(false);
-        return reservation;
-    }
+                BillResponse response = billingService.recordPayment(
+                                "RSV-ABC123",
+                                new BigDecimal("190.00"));
+
+                assertEquals(new BigDecimal("690.00"), response.getTotalPaid());
+                assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
+                assertEquals("PAID", response.getPaymentStatus());
+                assertTrue(response.isInvoiceFinalized());
+        }
+
+        @Test
+        void closeBillShouldFinalizeWhenFullyPaid() {
+                Reservation reservation = buildReservation(
+                                "200.00",
+                                LocalDate.of(2026, 3, 20),
+                                LocalDate.of(2026, 3, 23));
+
+                reservation.setTotalPrice(new BigDecimal("690.00"));
+                reservation.setTotalPaid(new BigDecimal("690.00"));
+
+                when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
+                                .thenReturn(Optional.of(reservation));
+
+                when(reservationRepository.save(any(Reservation.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+
+                BillResponse response = billingService.closeBill("RSV-ABC123");
+
+                assertTrue(response.isInvoiceFinalized());
+                assertEquals("PAID", response.getPaymentStatus());
+                assertEquals(new BigDecimal("0.00"), response.getOutstandingBalance());
+        }
+
+        private Reservation buildReservation(
+                        String roomRate,
+                        LocalDate checkIn,
+                        LocalDate checkOut) {
+
+                Guest guest = new Guest(
+                                "Guest",
+                                "guest@example.com",
+                                "0500000000",
+                                "ID-77",
+                                "SA");
+
+                RoomType roomType = new RoomType(
+                                "Suite",
+                                new BigDecimal(roomRate),
+                                2,
+                                "WiFi",
+                                "Suite");
+
+                Room room = new Room("201", roomType, 2, RoomStatus.AVAILABLE);
+
+                Reservation reservation = new Reservation();
+                reservation.setGuest(guest);
+                reservation.setRoom(room);
+                reservation.setCheckInDate(checkIn);
+                reservation.setCheckOutDate(checkOut);
+                reservation.setStatus(ReservationStatus.CONFIRMED);
+                reservation.setConfirmationNumber("RSV-ABC123");
+
+                long nights = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
+
+                BigDecimal roomCharge = new BigDecimal(roomRate)
+                                .multiply(BigDecimal.valueOf(nights));
+
+                BigDecimal vatAmount = roomCharge.multiply(new BigDecimal("0.15"));
+
+                BigDecimal totalPrice = roomCharge
+                                .add(vatAmount)
+                                .setScale(2, RoundingMode.HALF_UP);
+
+                reservation.setTotalPrice(totalPrice);
+                reservation.setTotalPaid(new BigDecimal("0.00"));
+                reservation.setOutstandingBalance(totalPrice);
+                reservation.setInvoiceFinalized(false);
+
+                return reservation;
+        }
 }

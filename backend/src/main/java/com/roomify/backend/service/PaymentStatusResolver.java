@@ -10,19 +10,28 @@ public final class PaymentStatusResolver {
     private PaymentStatusResolver() {
     }
 
-    public static String resolve(BigDecimal totalPaid, BigDecimal outstandingBalance, boolean invoiceFinalized) {
+    public static String resolve(
+            BigDecimal totalPaid,
+            BigDecimal outstandingBalance,
+            boolean invoiceFinalized) {
+
         BigDecimal safePaid = safeMoney(totalPaid);
         BigDecimal safeOutstanding = safeMoney(outstandingBalance);
 
-        if (safeOutstanding.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) == 0) {
+        BigDecimal zero = BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        if (safeOutstanding.compareTo(zero) == 0) {
             return "PAID";
         }
-        if (safePaid.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0) {
+
+        if (safePaid.compareTo(zero) > 0) {
             return "PARTIALLY_PAID";
         }
+
         if (!invoiceFinalized) {
             return "PAYMENT_PENDING";
         }
+
         return "UNPAID";
     }
 
