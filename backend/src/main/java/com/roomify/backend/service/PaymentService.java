@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -32,14 +31,17 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
     private final AuditService auditService;
+    private final EmailService emailService;
 
     public PaymentService(
             ReservationRepository reservationRepository,
             PaymentRepository paymentRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            EmailService emailService) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.auditService = auditService;
+        this.emailService = emailService;
     }
 
     public PaymentResponse createPayment(PaymentRequest request) {
@@ -122,6 +124,8 @@ public class PaymentService {
                     newTotalPaid,
                     newRemainingBalance);
 
+            sendReceiptEmailGracefully(savedPayment, reservation);
+
             return new PaymentResponse(
                     savedPayment.getId(),
                     confirmationNumber,
@@ -153,6 +157,44 @@ public class PaymentService {
                     ex.getMessage());
 
             throw ex;
+        }
+    }
+
+    private void sendReceiptEmailGracefully(Payment payment, Reservation reservation) {
+
+        String receiptNumber = "RCT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
+        String invoiceNumber = reservation.getInvoiceNumber() != null && !reservation.getInvoiceNumber().isBlank()
+                ? reservation.getInvoiceNumber()
+                : "INV-" + reservation.getConfirmationNumber();
+
+        String paymentDate = payment.getCreatedAt().toString();
+
+        try {
+
+            emailService.sendReceiptEmail(
+                    reservation.getGuest().getEmail(),
+                    reservation.getGuest().getName(),
+                    reservation.getConfirmationNumber(),
+                    receiptNumber,
+                    invoiceNumber,
+                    payment.getPaymentMethod().name(),
+                    paymentDate,
+                    payment.getAmount().setScale(MONEY_SCALE, ROUNDING).toPlainString());
+
+            auditService.log(
+                    "RECEIPT_EMAIL_SENT",
+                    reservation.getConfirmationNumber(),
+                    "receiptNumber=" + receiptNumber + " invoiceNumber=" + invoiceNumber);
+
+        } catch (Exception ex) {
+
+            auditService.log(
+                    "RECEIPT_EMAIL_FAILED",
+                    reservation.getConfirmationNumber(),
+                    "receiptNumber=" + receiptNumber + " invoiceNumber=" + invoiceNumber + " reason=" + ex.getMessage());
+
+            log.warn("Receipt email failed but payment is successful: {}", ex.getMessage());
         }
     }
 

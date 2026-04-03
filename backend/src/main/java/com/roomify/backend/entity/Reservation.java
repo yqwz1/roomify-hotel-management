@@ -70,6 +70,9 @@ public class Reservation {
     @Column(name = "confirmation_number", nullable = false, unique = true, length = 100)
     private String confirmationNumber;
 
+    @Column(name = "invoice_number", unique = true, length = 100)
+    private String invoiceNumber;
+
     @Column(name = "actual_check_in_date")
     private LocalDate actualCheckInDate;
 
@@ -230,6 +233,14 @@ public class Reservation {
 
     public void setConfirmationNumber(String confirmationNumber) {
         this.confirmationNumber = confirmationNumber;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
     }
 
     public LocalDate getActualCheckInDate() {

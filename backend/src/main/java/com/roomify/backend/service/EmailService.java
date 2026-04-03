@@ -24,6 +24,7 @@ public class EmailService {
 
         private final JavaMailSender mailSender;
         private final EmailLogService emailLogService;
+        private final InvoiceDeliveryLogService invoiceDeliveryLogService;
         private final TemplateEngine templateEngine;
 
         @Value("${app.email.from:no-reply@roomify.com}")
@@ -110,6 +111,63 @@ public class EmailService {
 
                 } catch (Exception ex) {
                         throw new RuntimeException("Failed to send invoice email", ex);
+                }
+        }
+
+        // ===============================
+        // RECEIPT EMAIL
+        // ===============================
+
+        public void sendReceiptEmail(
+                        String to,
+                        String guestName,
+                        String confirmationNumber,
+                        String receiptNumber,
+                        String invoiceNumber,
+                        String paymentMethod,
+                        String paymentDate,
+                        String amount) {
+
+                Context context = new Context();
+
+                context.setVariable("guest", guestName);
+                context.setVariable("confirmationNumber", confirmationNumber);
+                context.setVariable("receiptNumber", receiptNumber);
+                context.setVariable("invoiceNumber", invoiceNumber);
+                context.setVariable("paymentMethod", paymentMethod);
+                context.setVariable("paymentDate", paymentDate);
+                context.setVariable("amount", amount);
+
+                String subject = "Payment Receipt - " + receiptNumber;
+
+                try {
+
+                        MimeMessage message = mailSender.createMimeMessage();
+                        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+                        helper.setTo(to);
+                        helper.setFrom(fromAddress);
+                        helper.setSubject(subject);
+
+                        String htmlBody = templateEngine.process("email/receipt-email", context);
+                        helper.setText(htmlBody, true);
+
+                        mailSender.send(message);
+
+                        invoiceDeliveryLogService.logSuccess(
+                                        to,
+                                        "Receipt",
+                                        confirmationNumber);
+
+                } catch (MailException | MessagingException ex) {
+
+                        invoiceDeliveryLogService.logFailure(
+                                        to,
+                                        "Receipt",
+                                        confirmationNumber,
+                                        ex.getMessage());
+
+                        throw new RuntimeException("Receipt email failed", ex);
                 }
         }
 
