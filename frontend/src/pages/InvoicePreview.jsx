@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Download,
   FilePlus2,
@@ -10,6 +10,10 @@ import {
 import { useLocation } from 'react-router-dom';
 import ConfirmationToast from '../components/ConfirmationToast';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
+import { Button } from '../components/ui/button';
+import EmptyState from '../components/common/EmptyState';
+import ErrorState from '../components/common/ErrorState';
+import LoadingState from '../components/common/LoadingState';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -149,6 +153,9 @@ export default function InvoicePreview() {
   const [deliveryMeta, setDeliveryMeta] = useState({ errorMessage: null, sentAt: null });
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(null);
 
   const initialQuery = useMemo(
     () =>
@@ -160,6 +167,43 @@ export default function InvoicePreview() {
 
   const invoiceFinalized = Boolean(bill?.invoiceFinalized);
 
+  useEffect(() => () => {
+    if (previewUrl) {
+      window.URL.revokeObjectURL(previewUrl);
+    }
+  }, [previewUrl]);
+
+  const resetPreview = useCallback(() => {
+    setPreviewLoading(false);
+    setPreviewError(null);
+    setPreviewUrl((current) => {
+      if (current) window.URL.revokeObjectURL(current);
+      return null;
+    });
+  }, []);
+
+  const loadPreview = useCallback(async (reservationId) => {
+    if (!reservationId) return null;
+
+    setPreviewLoading(true);
+    setPreviewError(null);
+
+    try {
+      const blob = await getInvoicePdf(reservationId);
+      const url = window.URL.createObjectURL(blob);
+      setPreviewUrl((current) => {
+        if (current) window.URL.revokeObjectURL(current);
+        return url;
+      });
+      return url;
+    } catch {
+      setPreviewError(t('invoicePreviewPage.previewErrorDescription'));
+      return null;
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, [t]);
+
   const fetchInvoiceData = useCallback(async (confirmationNumber) => {
     if (!confirmationNumber) return;
 
@@ -168,6 +212,7 @@ export default function InvoicePreview() {
     setBill(null);
     setDeliveryStatus('LOADING');
     setDeliveryMeta({ errorMessage: null, sentAt: null });
+    resetPreview();
 
     try {
       const reservation = await getReservationByConfirmationNumber(confirmationNumber);
@@ -195,15 +240,18 @@ export default function InvoicePreview() {
           setDeliveryStatus('ERROR');
         }
       }
+
+      await loadPreview(reservation.id);
     } catch (err) {
       setError(extractReservationError(err));
       setSelected(null);
       setBill(null);
       setDeliveryStatus('IDLE');
+      resetPreview();
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadPreview, resetPreview]);
 
   const handleSelect = async (reservation) => {
     await fetchInvoiceData(reservation.confirmationNumber);
@@ -224,33 +272,43 @@ export default function InvoicePreview() {
     }
   }, [fetchInvoiceData, generating, invoiceFinalized, selected, t]);
 
+  const handleRetryData = useCallback(async () => {
+    const confirmationNumber = selected?.confirmationNumber || initialQuery;
+    if (!confirmationNumber || loading) return;
+    await fetchInvoiceData(confirmationNumber);
+  }, [fetchInvoiceData, initialQuery, loading, selected?.confirmationNumber]);
+
+  const handleRetryPreview = useCallback(async () => {
+    if (!selected?.id || previewLoading) return;
+    await loadPreview(selected.id);
+  }, [loadPreview, previewLoading, selected?.id]);
+
   const handleDownload = useCallback(async () => {
     if (!selected?.id || !invoiceFinalized || downloading) return;
 
     try {
       setDownloading(true);
-      const blob = await getInvoicePdf(selected.id);
-      const url = window.URL.createObjectURL(blob);
+      const url = previewUrl || (await loadPreview(selected.id));
+      if (!url) throw new Error('Preview unavailable');
       const link = document.createElement('a');
       link.href = url;
       link.download = `invoice-${selected.confirmationNumber}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
     } catch {
       setToast({ message: t('invoicePreviewPage.downloadFailed'), type: 'error' });
     } finally {
       setDownloading(false);
     }
-  }, [downloading, invoiceFinalized, selected, t]);
+  }, [downloading, invoiceFinalized, loadPreview, previewUrl, selected, t]);
 
   const handlePrint = useCallback(async () => {
     if (!selected?.id || !invoiceFinalized) return;
 
     try {
-      const blob = await getInvoicePdf(selected.id);
-      const url = window.URL.createObjectURL(blob);
+      const url = previewUrl || (await loadPreview(selected.id));
+      if (!url) throw new Error('Preview unavailable');
       const printWindow = window.open(url);
       if (printWindow) {
         printWindow.focus();
@@ -258,7 +316,7 @@ export default function InvoicePreview() {
     } catch {
       setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
     }
-  }, [invoiceFinalized, selected, t]);
+  }, [invoiceFinalized, loadPreview, previewUrl, selected, t]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
@@ -279,17 +337,17 @@ export default function InvoicePreview() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {t('invoicePreviewPage.stateTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('common.finalized')}
               </p>
               <p className="mt-2 text-lg font-black">{getBooleanLabel(invoiceFinalized, t)}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('common.delivery')}
               </p>
@@ -337,15 +395,13 @@ export default function InvoicePreview() {
               }
             >
               {loading ? (
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-5 py-10 text-center">
-                  <p className="text-sm font-medium text-zinc-500">
-                    {t('invoicePreviewPage.loadingData')}
-                  </p>
-                </div>
+                <LoadingState message={t('invoicePreviewPage.loadingData')} />
               ) : error ? (
-                <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
-                  {error}
-                </div>
+                <ErrorState
+                  title={t('invoicePreviewPage.controlsTitle')}
+                  message={error}
+                  onRetry={handleRetryData}
+                />
               ) : (
                 <>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -386,38 +442,94 @@ export default function InvoicePreview() {
 
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                     {!invoiceFinalized ? (
-                      <button
+                      <Button
                         type="button"
                         onClick={handleGenerate}
                         disabled={!selected?.id || generating}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                        className="h-14 w-full bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
                       >
                         <FilePlus2 className="h-4 w-4" />
                         {generating ? t('invoicePreviewPage.generating') : t('invoicePreviewPage.generate')}
-                      </button>
+                      </Button>
                     ) : (
                       <>
-                        <button
+                        <Button
                           type="button"
+                          variant="outline"
                           onClick={handlePrint}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                          className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
                         >
                           <Printer className="h-4 w-4" />
                           {t('invoicePreviewPage.print')}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={handleDownload}
                           disabled={downloading}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                          className="h-14 w-full bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
                         >
                           <Download className="h-4 w-4" />
                           {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>
                 </>
+              )}
+            </DashboardPanel>
+
+            <DashboardPanel
+              title={t('invoicePreviewPage.previewTitle')}
+              description={t('invoicePreviewPage.previewDescription')}
+            >
+              {!invoiceFinalized ? (
+                <EmptyState
+                  title={t('invoicePreviewPage.previewEmptyTitle')}
+                  message={t('invoicePreviewPage.previewEmptyDescription')}
+                />
+              ) : previewLoading ? (
+                <LoadingState message={t('invoicePreviewPage.previewLoading')} />
+              ) : previewError ? (
+                <ErrorState
+                  title={t('invoicePreviewPage.previewErrorTitle')}
+                  message={previewError}
+                  onRetry={handleRetryPreview}
+                />
+              ) : previewUrl ? (
+                <div className="space-y-4">
+                  <div className="overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-zinc-50">
+                    <iframe
+                      title={t('invoicePreviewPage.previewFrameTitle')}
+                      src={previewUrl}
+                      className="h-[28rem] w-full bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}
+                      className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                    >
+                      {t('invoicePreviewPage.openDocument')}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleDownload}
+                      disabled={downloading}
+                      className="h-12 bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                    >
+                      <Download className="h-4 w-4" />
+                      {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <ErrorState
+                  title={t('invoicePreviewPage.previewErrorTitle')}
+                  message={t('invoicePreviewPage.previewErrorDescription')}
+                  onRetry={handleRetryPreview}
+                />
               )}
             </DashboardPanel>
 

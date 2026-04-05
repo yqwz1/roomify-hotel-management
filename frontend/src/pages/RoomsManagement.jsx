@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Plus, Trash2, Waves, X } from 'lucide-react';
+import { Pencil, Plus, Trash2, Waves } from 'lucide-react';
+import ModalFrame from '../components/common/ModalFrame';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -29,30 +30,6 @@ const buildApiFilters = (filters) => {
   if (filters.floor) params.floor = Number(filters.floor);
   return params;
 };
-
-function ModalFrame({ title, description, children, onClose, closeLabel }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-      <div className="w-full max-w-lg rounded-[2rem] border border-black/5 bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5">
-          <div>
-            <h2 className="text-2xl font-black tracking-tight text-zinc-950">{title}</h2>
-            {description && <p className="mt-1 text-sm font-medium text-zinc-500">{description}</p>}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-50 hover:text-black"
-            aria-label={closeLabel}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="px-6 py-6">{children}</div>
-      </div>
-    </div>
-  );
-}
 
 function AddRoomModal({ roomTypes, onSave, onClose }) {
   const { t } = useTranslation();
@@ -413,17 +390,17 @@ export default function RoomsManagement() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {t('roomsManagementPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('roomsManagementPage.cleaning')}
               </p>
               <p className="mt-2 text-lg font-black">{summary.NEEDS_CLEANING}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('roomsManagementPage.maintenance')}
               </p>

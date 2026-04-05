@@ -91,6 +91,14 @@ const INVOICE_DELIVERY_STATUS_KEYS = {
   UNKNOWN: 'invoiceDeliveryStatusUnknown',
 };
 
+const PAYMENT_STATUS_KEYS = {
+  UNPAID: 'paymentStatusUnpaid',
+  PARTIALLY_PAID: 'paymentStatusPartiallyPaid',
+  PAID: 'paymentStatusPaid',
+  FAILED: 'paymentStatusFailed',
+  PAYMENT_PENDING: 'paymentStatusPending',
+};
+
 const KNOWN_VALUE_KEYS = {
   'Standard Room': 'roomTypeValueStandard',
   'Deluxe Room': 'roomTypeValueDeluxe',
@@ -161,6 +169,9 @@ export const getRoleCodeLabel = (role, t) =>
 
 export const getInvoiceDeliveryStatusLabel = (status, t) =>
   translateWithFallback(t, INVOICE_DELIVERY_STATUS_KEYS[status], humanizeStatus(status));
+
+export const getPaymentStatusLabel = (status, t) =>
+  translateWithFallback(t, PAYMENT_STATUS_KEYS[status], humanizeStatus(status));
 
 export const translateKnownValue = (value, t) => {
   const normalized = String(value ?? '').trim();

@@ -1,61 +1,166 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   BedDouble,
-  Building2,
+  CalendarRange,
   ClipboardCheck,
+  Download,
+  LineChart,
   Receipt,
-  Settings2,
-  Sparkles,
+  RefreshCw,
+  Search,
   Tag,
+  TrendingUp,
   Users,
-  Wrench,
 } from 'lucide-react';
+import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
+import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
+import { useRoomTypes } from '../hooks/useRoomTypes';
+import { exportDashboardReport, extractDashboardError } from '../services/dashboardService';
 import {
   formatLocalizedCurrency,
-  getRoomStatusLabel,
+  formatLocalizedDate,
+  formatLocalizedDateTime,
+  formatLocalizedNumber,
+  getReservationStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+
+const EXPORTABLE_STATUSES = ['PENDING', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED'];
+
+const toIsoDate = (value) => value.toISOString().split('T')[0];
+
+const addDays = (date, amount) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+};
+
+const getDefaultRange = () => {
+  const end = new Date();
+  const start = addDays(end, -13);
+
+  return {
+    startDate: toIsoDate(start),
+    endDate: toIsoDate(end),
+  };
+};
+
+const formatPercent = (value) => `${Math.round(Number(value ?? 0) * 100)}%`;
+
+function TrendBars({
+  points,
+  title,
+  description,
+  emptyTitle,
+  emptyMessage,
+  colorClassName,
+  maxValue,
+  formatValue,
+  formatSubtitle,
+  testId,
+}) {
+  if (!Array.isArray(points) || points.length === 0) {
+    return <EmptyState title={emptyTitle} message={emptyMessage} icon={LineChart} />;
+  }
+
+  return (
+    <div className="space-y-4" data-testid={testId}>
+      <div>
+        <p className="text-sm font-bold text-zinc-950">{title}</p>
+        <p className="mt-1 text-sm font-medium text-zinc-500">{description}</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {points.map((point) => {
+          const value = Number(point.value ?? 0);
+          const height = maxValue > 0 ? Math.max((value / maxValue) * 100, value > 0 ? 12 : 6) : 6;
+
+          return (
+            <div
+              key={point.key}
+              className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+            >
+              <div className="flex h-28 items-end">
+                <div className="w-full rounded-3xl bg-white/80 p-2 shadow-sm">
+                  <div className="flex h-20 items-end">
+                    <div
+                      className={`w-full rounded-2xl ${colorClassName}`}
+                      style={{ height: `${height}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-sm font-black text-zinc-950">{formatValue(value)}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                {point.label}
+              </p>
+              <p className="mt-2 text-sm font-medium text-zinc-500">
+                {formatSubtitle(point)}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function ManagerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const {
-    loading,
-    error,
-    loadIssues,
-    totalRooms,
-    availableRooms,
-    cleaningRooms,
-    maintenanceRooms,
-    occupancyRate,
-    readinessRate,
-    roomTypeCount,
-    activeStaff,
-    statusCounts,
-    floorSummary,
-    departmentSummary,
-    roomTypeMix,
-    alerts,
-  } = useManagerDashboard();
-
   const pageTx = 'managerDashboardPage';
   const welcomeName = user?.username || t('managerFallback') || t('roleManager');
+
+  const [draftRange, setDraftRange] = useState(getDefaultRange);
+  const [appliedRange, setAppliedRange] = useState(getDefaultRange);
+  const [filterError, setFilterError] = useState(null);
+  const [exportFilters, setExportFilters] = useState({
+    roomTypeId: '',
+    status: '',
+  });
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(null);
+  const [exportResult, setExportResult] = useState(null);
+  const [exportUrl, setExportUrl] = useState(null);
+
+  const {
+    metrics,
+    occupancyTrend,
+    revenueTrend,
+    roomTypeDistribution,
+    loading,
+    error,
+    reload,
+  } = useManagerDashboard(appliedRange);
+  const { roomTypes, fetchRoomTypes } = useRoomTypes();
+
+  useEffect(() => {
+    fetchRoomTypes();
+  }, [fetchRoomTypes]);
+
+  useEffect(() => {
+    if (!exportUrl) return undefined;
+
+    return () => {
+      URL.revokeObjectURL(exportUrl);
+    };
+  }, [exportUrl]);
 
   const quickActions = useMemo(
     () => [
       {
-        icon: BedDouble,
+        icon: Search,
         title: t(`${pageTx}.quickActionItems.newBookingTitle`),
         description: t(`${pageTx}.quickActionItems.newBookingDescription`),
         onClick: () => navigate('/search'),
@@ -65,12 +170,6 @@ export default function ManagerDashboard() {
         title: t(`${pageTx}.quickActionItems.checkInTitle`),
         description: t(`${pageTx}.quickActionItems.checkInDescription`),
         onClick: () => navigate('/check-in'),
-      },
-      {
-        icon: Settings2,
-        title: t(`${pageTx}.quickActionItems.roomsTitle`),
-        description: t(`${pageTx}.quickActionItems.roomsDescription`),
-        onClick: () => navigate('/rooms-management'),
       },
       {
         icon: Tag,
@@ -90,16 +189,162 @@ export default function ManagerDashboard() {
         description: t(`${pageTx}.quickActionItems.invoicesDescription`),
         onClick: () => navigate('/invoice-preview'),
       },
+      {
+        icon: BedDouble,
+        title: t(`${pageTx}.quickActionItems.roomsTitle`),
+        description: t(`${pageTx}.quickActionItems.roomsDescription`),
+        onClick: () => navigate('/rooms-management'),
+      },
     ],
     [navigate, t]
   );
 
-  const loadIssueMessages = loadIssues.map((issue) => {
-    if (issue === 'rooms') return t(`${pageTx}.issueRooms`);
-    if (issue === 'roomTypes') return t(`${pageTx}.issueRoomTypes`);
-    if (issue === 'staff') return t(`${pageTx}.issueStaff`);
-    return issue;
-  });
+  const metricCards = useMemo(() => {
+    if (!metrics) return [];
+
+    return [
+      {
+        icon: CalendarRange,
+        label: t(`${pageTx}.metrics.totalReservationsLabel`),
+        value: formatLocalizedNumber(metrics.totalReservations, i18n.language),
+        hint: t(`${pageTx}.metrics.totalReservationsHint`),
+      },
+      {
+        icon: ClipboardCheck,
+        label: t(`${pageTx}.metrics.activeReservationsLabel`),
+        value: formatLocalizedNumber(metrics.activeReservations, i18n.language),
+        hint: t(`${pageTx}.metrics.activeReservationsHint`),
+      },
+      {
+        icon: Receipt,
+        label: t(`${pageTx}.metrics.revenueLabel`),
+        value: formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }),
+        hint: t(`${pageTx}.metrics.revenueHint`),
+        tone: 'dark',
+      },
+      {
+        icon: TrendingUp,
+        label: t(`${pageTx}.metrics.occupancyLabel`),
+        value: formatPercent(metrics.occupancyRate),
+        hint: t(`${pageTx}.metrics.occupancyHint`),
+      },
+      {
+        icon: BedDouble,
+        label: t(`${pageTx}.metrics.averageStayLabel`),
+        value: t(`${pageTx}.averageStayValue`, {
+          count: Number(metrics.averageStayNights ?? 0).toFixed(1),
+        }),
+        hint: t(`${pageTx}.metrics.averageStayHint`),
+      },
+    ];
+  }, [i18n.language, metrics, t]);
+
+  const occupancyPoints = useMemo(
+    () =>
+      occupancyTrend.map((point) => ({
+        key: String(point.date),
+        label: formatLocalizedDate(point.date, i18n.language, {
+          month: 'short',
+          day: 'numeric',
+        }),
+        value: Number(point.occupancyRate ?? 0),
+        occupiedRooms: Number(point.occupiedRooms ?? 0),
+        totalRooms: Number(point.totalRooms ?? 0),
+      })),
+    [i18n.language, occupancyTrend]
+  );
+
+  const revenuePoints = useMemo(
+    () =>
+      revenueTrend.map((point) => ({
+        key: String(point.date),
+        label: formatLocalizedDate(point.date, i18n.language, {
+          month: 'short',
+          day: 'numeric',
+        }),
+        value: Number(point.revenue ?? 0),
+        reservationCount: Number(point.reservationCount ?? 0),
+      })),
+    [i18n.language, revenueTrend]
+  );
+
+  const maxOccupancy = useMemo(
+    () => occupancyPoints.reduce((max, point) => Math.max(max, point.value), 0),
+    [occupancyPoints]
+  );
+  const maxRevenue = useMemo(
+    () => revenuePoints.reduce((max, point) => Math.max(max, point.value), 0),
+    [revenuePoints]
+  );
+
+  const handleRangeChange = (field, value) => {
+    setDraftRange((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleApplyRange = () => {
+    if (!draftRange.startDate || !draftRange.endDate) {
+      setFilterError(t(`${pageTx}.filtersRequired`));
+      return;
+    }
+
+    if (draftRange.endDate < draftRange.startDate) {
+      setFilterError(t(`${pageTx}.filtersInvalid`));
+      return;
+    }
+
+    setFilterError(null);
+    setAppliedRange(draftRange);
+  };
+
+  const handleResetRange = () => {
+    const nextRange = getDefaultRange();
+    setFilterError(null);
+    setDraftRange(nextRange);
+    setAppliedRange(nextRange);
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    setExportError(null);
+
+    try {
+      const payload = {
+        startDate: appliedRange.startDate,
+        endDate: appliedRange.endDate,
+        exportFormat: 'JSON',
+      };
+
+      if (exportFilters.roomTypeId) {
+        payload.roomTypeId = Number(exportFilters.roomTypeId);
+      }
+
+      if (exportFilters.status) {
+        payload.status = exportFilters.status;
+      }
+
+      const result = await exportDashboardReport(payload);
+      const nextBlob = new Blob([JSON.stringify(result, null, 2)], {
+        type: 'application/json',
+      });
+      const nextUrl = URL.createObjectURL(nextBlob);
+
+      setExportUrl((current) => {
+        if (current) {
+          URL.revokeObjectURL(current);
+        }
+        return nextUrl;
+      });
+      setExportResult(result);
+    } catch (err) {
+      setExportError(extractDashboardError(err));
+      setExportResult(null);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -115,7 +360,19 @@ export default function ManagerDashboard() {
         <ErrorState
           title={t(`${pageTx}.errorTitle`)}
           message={error}
-          onRetry={() => window.location.reload()}
+          onRetry={reload}
+        />
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="p-6 lg:p-8">
+        <EmptyState
+          title={t(`${pageTx}.emptyTitle`)}
+          message={t(`${pageTx}.emptyDescription`)}
+          icon={LineChart}
         />
       </div>
     );
@@ -128,73 +385,155 @@ export default function ManagerDashboard() {
         title={t('managerDashboardTitle')}
         description={t(`${pageTx}.description`, { name: welcomeName })}
         meta={[
-          t(`${pageTx}.metaOccupied`, { count: occupancyRate }),
-          t(`${pageTx}.metaReadyRooms`, { count: availableRooms }),
-          t(`${pageTx}.metaActiveStaff`, { count: activeStaff }),
+          t(`${pageTx}.metaRange`, {
+            start: formatLocalizedDate(appliedRange.startDate, i18n.language, {
+              month: 'short',
+              day: 'numeric',
+            }),
+            end: formatLocalizedDate(appliedRange.endDate, i18n.language, {
+              month: 'short',
+              day: 'numeric',
+            }),
+          }),
+          t(`${pageTx}.metaOccupancy`, { value: formatPercent(metrics.occupancyRate) }),
+          t(`${pageTx}.metaRevenue`, {
+            value: formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }),
+          }),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {t(`${pageTx}.focusTitle`)}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                {t(`${pageTx}.readiness`)}
+                {t(`${pageTx}.focusReservations`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{readinessRate}%</p>
+              <p className="mt-2 text-3xl font-black">
+                {formatLocalizedNumber(metrics.activeReservations, i18n.language)}
+              </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
-                {t(`${pageTx}.cleaningQueue`)}
+                {t(`${pageTx}.focusAvgStay`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{cleaningRooms}</p>
+              <p className="mt-2 text-3xl font-black">
+                {Number(metrics.averageStayNights ?? 0).toFixed(1)}
+              </p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      {loadIssueMessages.length > 0 && (
-        <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
-          {loadIssueMessages.join(' ')}
+      <DashboardPanel
+        title={t(`${pageTx}.controlsTitle`)}
+        description={t(`${pageTx}.controlsDescription`)}
+        action={
+          <Button type="button" variant="outline" onClick={reload} className="border-zinc-200">
+            <RefreshCw className="h-4 w-4" />
+            {t('retry')}
+          </Button>
+        }
+      >
+        <div className="grid gap-6 xl:grid-cols-[1fr_1.1fr]">
+          <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.startDateLabel`)}
+                </span>
+                <input
+                  type="date"
+                  value={draftRange.startDate}
+                  onChange={(event) => handleRangeChange('startDate', event.target.value)}
+                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                />
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.endDateLabel`)}
+                </span>
+                <input
+                  type="date"
+                  value={draftRange.endDate}
+                  onChange={(event) => handleRangeChange('endDate', event.target.value)}
+                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                />
+              </label>
+            </div>
+
+            {filterError ? (
+              <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                {filterError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button type="button" onClick={handleApplyRange} className="h-12 bg-zinc-950 text-white hover:bg-zinc-800">
+                {t(`${pageTx}.applyFilters`)}
+              </Button>
+              <Button type="button" variant="outline" onClick={handleResetRange} className="h-12 border-zinc-200">
+                {t(`${pageTx}.resetFilters`)}
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              {t(`${pageTx}.controlsSummaryTitle`)}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.controlsSummaryReservations`)}
+                </p>
+                <p className="mt-2 text-2xl font-black text-zinc-950">
+                  {formatLocalizedNumber(metrics.totalReservations, i18n.language)}
+                </p>
+              </div>
+              <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.controlsSummaryRevenue`)}
+                </p>
+                <p className="mt-2 text-2xl font-black text-zinc-950">
+                  {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              </div>
+              <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.controlsSummaryOccupancy`)}
+                </p>
+                <p className="mt-2 text-2xl font-black text-zinc-950">
+                  {formatPercent(metrics.occupancyRate)}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </DashboardPanel>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <DashboardMetricCard
-          icon={Building2}
-          label={t(`${pageTx}.metrics.totalRoomsLabel`)}
-          value={String(totalRooms)}
-          hint={t(`${pageTx}.metrics.totalRoomsHint`)}
-        />
-        <DashboardMetricCard
-          icon={BedDouble}
-          label={t(`${pageTx}.metrics.availableNowLabel`)}
-          value={String(availableRooms)}
-          hint={t(`${pageTx}.metrics.availableNowHint`)}
-        />
-        <DashboardMetricCard
-          icon={Sparkles}
-          label={t(`${pageTx}.metrics.needsCleaningLabel`)}
-          value={String(cleaningRooms)}
-          hint={t(`${pageTx}.metrics.needsCleaningHint`)}
-        />
-        <DashboardMetricCard
-          icon={Wrench}
-          label={t(`${pageTx}.metrics.maintenanceLabel`)}
-          value={String(maintenanceRooms)}
-          hint={t(`${pageTx}.metrics.maintenanceHint`)}
-        />
-        <DashboardMetricCard
-          icon={Users}
-          label={t(`${pageTx}.metrics.activeStaffLabel`)}
-          value={String(activeStaff)}
-          hint={t(`${pageTx}.metrics.activeStaffHint`, { count: roomTypeCount })}
-          tone="dark"
-        />
+        {metricCards.map((card) => (
+          <DashboardMetricCard
+            key={card.label}
+            icon={card.icon}
+            label={card.label}
+            value={card.value}
+            hint={card.hint}
+            tone={card.tone}
+          />
+        ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <DashboardPanel
           title={t(`${pageTx}.quickActionsTitle`)}
           description={t(`${pageTx}.quickActionsDescription`)}
@@ -207,188 +546,228 @@ export default function ManagerDashboard() {
         </DashboardPanel>
 
         <DashboardPanel
-          title={t(`${pageTx}.alertsTitle`)}
-          description={t(`${pageTx}.alertsDescription`)}
-        >
-          {alerts.length > 0 ? (
-            <div className="space-y-3">
-              {alerts.map((alert) => {
-                const prefix = `${pageTx}.alert${alert.type[0].toUpperCase()}${alert.type.slice(1)}`;
-
-                return (
-                  <button
-                    key={`${alert.type}-${alert.count}`}
-                    type="button"
-                    onClick={() => navigate(alert.href)}
-                    className="w-full rounded-[1.4rem] border border-rose-100 bg-rose-50 px-4 py-4 text-start transition hover:border-rose-200 hover:bg-rose-100/80"
-                  >
-                    <p className="text-sm font-bold text-rose-950">{t(`${prefix}Title`)}</p>
-                    <p className="mt-1 text-sm font-medium leading-6 text-rose-900/80">
-                      {t(`${prefix}Detail`, { count: alert.count })}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 px-4 py-5">
-              <p className="text-sm font-bold text-emerald-900">
-                {t(`${pageTx}.noAlertsTitle`)}
-              </p>
-              <p className="mt-1 text-sm font-medium text-emerald-800/80">
-                {t(`${pageTx}.noAlertsDescription`)}
-              </p>
-            </div>
-          )}
-        </DashboardPanel>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <DashboardPanel
-          title={t(`${pageTx}.roomBreakdownTitle`)}
-          description={t(`${pageTx}.roomBreakdownDescription`)}
+          title={t(`${pageTx}.exportTitle`)}
+          description={t(`${pageTx}.exportDescription`)}
         >
           <div className="space-y-4">
-            {statusCounts.map((item) => {
-              const width = totalRooms > 0
-                ? `${Math.max((item.count / totalRooms) * 100, item.count > 0 ? 6 : 0)}%`
-                : '0%';
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.exportRoomTypeLabel`)}
+                </span>
+                <select
+                  value={exportFilters.roomTypeId}
+                  onChange={(event) =>
+                    setExportFilters((current) => ({ ...current, roomTypeId: event.target.value }))
+                  }
+                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                >
+                  <option value="">{t(`${pageTx}.allRoomTypes`)}</option>
+                  {roomTypes.map((roomType) => (
+                    <option key={roomType.id} value={roomType.id}>
+                      {translateKnownValue(roomType.name, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-              return (
-                <div key={item.status}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${item.tone}`}>
-                        {getRoomStatusLabel(item.status, t)}
-                      </span>
-                      <p className="text-sm font-medium text-zinc-500">
-                        {t(`${pageTx}.roomCount`, { count: item.count })}
-                      </p>
-                    </div>
-                    <p className="text-sm font-black text-zinc-950">
-                      {totalRooms > 0 ? `${Math.round((item.count / totalRooms) * 100)}%` : '0%'}
+              <label className="space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  {t(`${pageTx}.exportStatusLabel`)}
+                </span>
+                <select
+                  value={exportFilters.status}
+                  onChange={(event) =>
+                    setExportFilters((current) => ({ ...current, status: event.target.value }))
+                  }
+                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                >
+                  <option value="">{t(`${pageTx}.allStatuses`)}</option>
+                  {EXPORTABLE_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {getReservationStatusLabel(status, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+              {t(`${pageTx}.exportNote`)}
+            </div>
+
+            {exportError ? (
+              <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                {exportError}
+              </div>
+            ) : null}
+
+            {exportResult ? (
+              <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                      {t(`${pageTx}.exportGeneratedAt`)}
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-emerald-950">
+                      {formatLocalizedDateTime(exportResult.generatedAt, i18n.language, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </p>
                   </div>
-                  <div className="mt-3 h-2 rounded-full bg-zinc-100">
-                    <div className={`h-2 rounded-full ${item.bar}`} style={{ width }} />
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                      {t(`${pageTx}.exportRecords`)}
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-emerald-950">
+                      {formatLocalizedNumber(exportResult.totalRecords, i18n.language)}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </DashboardPanel>
 
-        <DashboardPanel
-          title={t(`${pageTx}.floorReadinessTitle`)}
-          description={t(`${pageTx}.floorReadinessDescription`)}
-        >
-          <div className="grid gap-3 md:grid-cols-2">
-            {floorSummary.map((floor) => {
-              const floorLabel = typeof floor.floor === 'number'
-                ? t(`${pageTx}.floorLabel`, { floor: floor.floor })
-                : t('unassigned');
-
-              return (
-                <div key={String(floor.floor)} className="rounded-[1.4rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                        {floorLabel}
-                      </p>
-                      <p className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
-                        {t(`${pageTx}.floorRooms`, { count: floor.total })}
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-600 shadow-sm">
-                      {t(`${pageTx}.floorReady`, { count: floor.available })}
-                    </span>
+                {exportUrl ? (
+                  <div className="mt-4">
+                    <Button asChild className="bg-emerald-700 text-white hover:bg-emerald-800">
+                      <a href={exportUrl} download={`roomify-report-${appliedRange.startDate}-${appliedRange.endDate}.json`}>
+                        <Download className="h-4 w-4" />
+                        {t(`${pageTx}.downloadExport`)}
+                      </a>
+                    </Button>
                   </div>
+                ) : null}
+              </div>
+            ) : null}
 
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    <div className="rounded-2xl bg-white px-3 py-2 text-center">
-                      <p>{t(`${pageTx}.occupiedShort`)}</p>
-                      <p className="mt-1 text-base font-black text-zinc-950">{floor.occupied}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white px-3 py-2 text-center">
-                      <p>{t(`${pageTx}.cleaningShort`)}</p>
-                      <p className="mt-1 text-base font-black text-zinc-950">{floor.cleaning}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white px-3 py-2 text-center">
-                      <p>{t(`${pageTx}.repairShort`)}</p>
-                      <p className="mt-1 text-base font-black text-zinc-950">{floor.maintenance}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <Button
+              type="button"
+              onClick={handleExport}
+              disabled={exporting}
+              className="h-12 bg-zinc-950 text-white hover:bg-zinc-800"
+            >
+              <Download className="h-4 w-4" />
+              {exporting ? t(`${pageTx}.exporting`) : t(`${pageTx}.exportAction`)}
+            </Button>
           </div>
         </DashboardPanel>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-6 xl:grid-cols-2">
         <DashboardPanel
-          title={t(`${pageTx}.staffingTitle`)}
-          description={t(`${pageTx}.staffingDescription`)}
+          title={t(`${pageTx}.occupancyTrendTitle`)}
+          description={t(`${pageTx}.occupancyTrendDescription`)}
         >
-          <div className="space-y-3">
-            {departmentSummary.length > 0 ? (
-              departmentSummary.map((department) => (
-                <div key={department.department} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-bold text-zinc-950">
-                      {translateKnownValue(department.department, t)}
-                    </p>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-600 shadow-sm">
-                      {t(`${pageTx}.staffCount`, { count: department.count })}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm font-medium text-zinc-500">
-                {t(`${pageTx}.noStaffingData`)}
-              </p>
-            )}
-          </div>
+          <TrendBars
+            points={occupancyPoints}
+            title={t(`${pageTx}.occupancyTrendTitle`)}
+            description={t(`${pageTx}.occupancyTrendDescription`)}
+            emptyTitle={t(`${pageTx}.occupancyEmptyTitle`)}
+            emptyMessage={t(`${pageTx}.occupancyEmptyDescription`)}
+            colorClassName="bg-emerald-500"
+            maxValue={maxOccupancy}
+            formatValue={(value) => formatPercent(value)}
+            formatSubtitle={(point) =>
+              t(`${pageTx}.occupancyPoint`, {
+                occupied: point.occupiedRooms,
+                total: point.totalRooms,
+              })
+            }
+            testId="occupancy-trend"
+          />
         </DashboardPanel>
 
         <DashboardPanel
-          title={t(`${pageTx}.mixTitle`)}
-          description={t(`${pageTx}.mixDescription`)}
+          title={t(`${pageTx}.revenueTrendTitle`)}
+          description={t(`${pageTx}.revenueTrendDescription`)}
         >
-          <div className="space-y-3">
-            {roomTypeMix.length > 0 ? (
-              roomTypeMix.map((roomType) => (
-                <div key={roomType.id} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-zinc-950">
-                        {translateKnownValue(roomType.name, t)}
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
-                        {t(`${pageTx}.mixLine`, {
-                          guests: roomType.maxGuests,
-                          rate: formatLocalizedCurrency(roomType.basePrice, i18n.language, {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          }),
-                        })}
-                      </p>
-                    </div>
-                    <span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-700 shadow-sm">
-                      {t(`${pageTx}.assignedRooms`, { count: roomType.assignedRooms })}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm font-medium text-zinc-500">
-                {t(`${pageTx}.noRoomTypeData`)}
-              </p>
-            )}
-          </div>
+          <TrendBars
+            points={revenuePoints}
+            title={t(`${pageTx}.revenueTrendTitle`)}
+            description={t(`${pageTx}.revenueTrendDescription`)}
+            emptyTitle={t(`${pageTx}.revenueEmptyTitle`)}
+            emptyMessage={t(`${pageTx}.revenueEmptyDescription`)}
+            colorClassName="bg-zinc-950"
+            maxValue={maxRevenue}
+            formatValue={(value) =>
+              formatLocalizedCurrency(value, i18n.language, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })
+            }
+            formatSubtitle={(point) =>
+              t(`${pageTx}.revenuePoint`, { count: point.reservationCount })
+            }
+            testId="revenue-trend"
+          />
         </DashboardPanel>
       </div>
+
+      <DashboardPanel
+        title={t(`${pageTx}.distributionTitle`)}
+        description={t(`${pageTx}.distributionDescription`)}
+      >
+        {roomTypeDistribution.length === 0 ? (
+          <EmptyState
+            title={t(`${pageTx}.distributionEmptyTitle`)}
+            message={t(`${pageTx}.distributionEmptyDescription`)}
+            icon={LineChart}
+          />
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {roomTypeDistribution.map((item) => (
+              <div
+                key={item.roomTypeName}
+                className="rounded-[1.4rem] border border-zinc-200 bg-zinc-50 p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-black text-zinc-950">
+                      {translateKnownValue(item.roomTypeName, t)}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                      {t(`${pageTx}.distributionRate`, {
+                        rate: formatLocalizedCurrency(item.basePrice, i18n.language, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }),
+                      })}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-zinc-700 shadow-sm">
+                    {formatPercent(item.occupancyRate)}
+                  </span>
+                </div>
+
+                <div className="mt-4 h-3 rounded-full bg-white">
+                  <div
+                    className="h-3 rounded-full bg-zinc-950"
+                    style={{ width: `${Math.max(Number(item.occupancyRate ?? 0) * 100, item.occupiedRooms ? 6 : 0)}%` }}
+                  />
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.1rem] border border-white bg-white p-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                      {t(`${pageTx}.distributionTotalRooms`)}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">
+                      {formatLocalizedNumber(item.totalRooms, i18n.language)}
+                    </p>
+                  </div>
+                  <div className="rounded-[1.1rem] border border-white bg-white p-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                      {t(`${pageTx}.distributionOccupiedRooms`)}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">
+                      {formatLocalizedNumber(item.occupiedRooms, i18n.language)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </DashboardPanel>
     </div>
   );
 }

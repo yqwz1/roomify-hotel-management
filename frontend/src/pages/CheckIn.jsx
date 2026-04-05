@@ -116,11 +116,11 @@ export default function CheckIn() {
         meta={heroMeta}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {t('checkInPage.gateTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('checkInPage.checklist')}
               </p>
@@ -128,7 +128,7 @@ export default function CheckIn() {
                 {completedCount}/{CHECKLIST_ITEMS.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('checkInPage.reservation')}
               </p>

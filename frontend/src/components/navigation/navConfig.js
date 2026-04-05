@@ -1,15 +1,16 @@
 import {
   BedDouble,
+  CalendarDays,
   ClipboardCheck,
   DoorClosedLocked,
   FileText,
+  House,
   LayoutDashboard,
   Receipt,
   Search,
   Settings2,
   Sparkles,
   Tag,
-  UserCog,
   Users,
 } from 'lucide-react';
 
@@ -65,6 +66,13 @@ const NAVIGATION_CONFIG = [
     fallbackLabel: 'Overview',
     roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
     items: [
+      {
+        path: '/',
+        translationKey: 'homeNav',
+        fallbackLabel: 'Home',
+        icon: House,
+        roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+      },
       {
         path: '/manager/dashboard',
         translationKey: 'managerDashboardTitle',
@@ -171,7 +179,7 @@ const NAVIGATION_CONFIG = [
         translationKey: 'roomStatus',
         fallbackLabel: 'Room Status',
         icon: Sparkles,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
     ],
   },
@@ -209,14 +217,14 @@ const NAVIGATION_CONFIG = [
     id: 'support',
     translationKey: 'navSupport',
     fallbackLabel: 'Support',
-    roles: [ROLE_GUEST],
+    roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
     items: [
       {
         path: '/bookings',
         translationKey: 'bookings',
         fallbackLabel: 'Booking Help',
-        icon: UserCog,
-        roles: [ROLE_GUEST],
+        icon: CalendarDays,
+        roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
       },
     ],
   },

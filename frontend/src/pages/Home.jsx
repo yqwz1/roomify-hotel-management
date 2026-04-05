@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, BedDouble, CalendarClock, Receipt, Users } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 import { checkHealth } from '../services/healthService';
@@ -18,31 +18,42 @@ export default function Home() {
   const { isAuthenticated, user } = useAuth();
   const { t } = useTranslation();
   const brandName = t('brandName');
+  const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
+  const dashboardLabel = user?.roles?.includes('ROLE_GUEST') ? t('myDashboard') : t('dashboard');
   const [health, setHealth] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      return undefined;
-    }
-
+    let isMounted = true;
     const fetchHealth = async () => {
       try {
         const data = await checkHealth();
+        if (!isMounted) {
+          return;
+        }
+
         setHealth(data);
         setStatusFetchedAt(data?.timestamp || Date.now());
       } catch {
+        if (!isMounted) {
+          return;
+        }
+
         setHealth(null);
         setStatusFetchedAt(Date.now());
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchHealth();
-    return undefined;
-  }, [isAuthenticated]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const features = useMemo(
     () => [
@@ -70,10 +81,6 @@ export default function Home() {
     [t]
   );
 
-  if (isAuthenticated) {
-    return <Navigate to={getDefaultRouteForRoles(user?.roles ?? [])} replace />;
-  }
-
   return (
     <div className="flex min-h-full flex-col bg-zinc-50">
       <div className="flex-1 px-5 py-8 sm:px-8 lg:px-10">
@@ -94,10 +101,10 @@ export default function Home() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                to="/login"
+                to={isAuthenticated ? dashboardPath : '/login'}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black transition hover:bg-zinc-100"
               >
-                {t('home.cta')}
+                {isAuthenticated ? dashboardLabel : t('home.cta')}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link

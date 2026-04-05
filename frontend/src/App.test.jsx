@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import App from './App.jsx'
 
 // Mock health check service
@@ -27,12 +27,15 @@ beforeAll(() => {
 describe('App', () => {
   it('renders title', async () => {
     render(<App />)
-    expect(screen.getAllByText(/Roomify/i).length).toBeGreaterThan(0)
-    expect(
-      screen.getByRole('heading', {
-        name: /Run rooms, reservations, staff, and billing from one polished PMS\./i,
-      })
-    ).toBeTruthy()
-    expect(screen.getAllByRole('link', { name: /Sign In/i }).length).toBeGreaterThan(0)
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Roomify/i).length).toBeGreaterThan(0)
+      expect(
+        screen.getByRole('heading', {
+          name: /Run rooms, reservations, staff, and billing from one polished PMS\./i,
+        })
+      ).toBeTruthy()
+      expect(screen.getAllByRole('link', { name: /Sign In/i }).length).toBeGreaterThan(0)
+    })
   })
 })

@@ -1,96 +1,60 @@
-import { useEffect, useMemo, useState } from 'react';
-import api from '../services/api';
-import { getRooms, extractErrorMessage } from '../services/roomService';
-import { getStaff } from '../services/staffService';
-import { localizeKnownServerMessage } from '../utils/localization';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  extractDashboardError,
+  getDashboardMetrics,
+  getOccupancyTrend,
+  getRevenueTrend,
+  getRoomTypeDistribution,
+} from '../services/dashboardService';
 
-const STATUS_ORDER = ['AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
-
-const STATUS_META = {
-  AVAILABLE: {
-    tone: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-    bar: 'bg-emerald-500',
-  },
-  OCCUPIED: {
-    tone: 'bg-zinc-950 text-white border-zinc-950',
-    bar: 'bg-zinc-950',
-  },
-  NEEDS_CLEANING: {
-    tone: 'bg-amber-50 text-amber-900 border-amber-200',
-    bar: 'bg-amber-500',
-  },
-  UNDER_MAINTENANCE: {
-    tone: 'bg-rose-50 text-rose-900 border-rose-200',
-    bar: 'bg-rose-500',
-  },
-};
-
-const getDashboardError = (reason) => {
-  if (!reason) return localizeKnownServerMessage('Something went wrong. Please try again.');
-  if (reason.response?.data?.message) {
-    return localizeKnownServerMessage(reason.response.data.message);
-  }
-  return localizeKnownServerMessage(extractErrorMessage(reason));
-};
-
-export const useManagerDashboard = () => {
-  const [rooms, setRooms] = useState([]);
-  const [roomTypes, setRoomTypes] = useState([]);
-  const [staff, setStaff] = useState([]);
+export const useManagerDashboard = ({ startDate, endDate }) => {
+  const [metrics, setMetrics] = useState(null);
+  const [occupancyTrend, setOccupancyTrend] = useState([]);
+  const [revenueTrend, setRevenueTrend] = useState([]);
+  const [roomTypeDistribution, setRoomTypeDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [loadIssues, setLoadIssues] = useState([]);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const reload = useCallback(() => {
+    setReloadToken((value) => value + 1);
+  }, []);
 
   useEffect(() => {
     let ignore = false;
 
     const loadDashboard = async () => {
+      if (!startDate || !endDate) return;
+
       setLoading(true);
       setError(null);
-      setLoadIssues([]);
 
-      const [roomsResult, roomTypesResult, staffResult] = await Promise.allSettled([
-        getRooms(),
-        api.get('/room-types'),
-        getStaff(),
-      ]);
+      try {
+        const [nextMetrics, nextOccupancy, nextRevenue, nextDistribution] = await Promise.all([
+          getDashboardMetrics({ startDate, endDate }),
+          getOccupancyTrend({ startDate, endDate }),
+          getRevenueTrend({ startDate, endDate }),
+          getRoomTypeDistribution(),
+        ]);
 
-      if (ignore) return;
+        if (ignore) return;
 
-      const issues = [];
-
-      if (roomsResult.status === 'fulfilled') {
-        setRooms(roomsResult.value);
-      } else {
-        setRooms([]);
-        issues.push('rooms');
+        setMetrics(nextMetrics);
+        setOccupancyTrend(Array.isArray(nextOccupancy) ? nextOccupancy : []);
+        setRevenueTrend(Array.isArray(nextRevenue) ? nextRevenue : []);
+        setRoomTypeDistribution(Array.isArray(nextDistribution) ? nextDistribution : []);
+      } catch (err) {
+        if (ignore) return;
+        setError(extractDashboardError(err));
+        setMetrics(null);
+        setOccupancyTrend([]);
+        setRevenueTrend([]);
+        setRoomTypeDistribution([]);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
       }
-
-      if (roomTypesResult.status === 'fulfilled') {
-        setRoomTypes(roomTypesResult.value.data);
-      } else {
-        setRoomTypes([]);
-        issues.push('roomTypes');
-      }
-
-      if (staffResult.status === 'fulfilled') {
-        setStaff(staffResult.value);
-      } else {
-        setStaff([]);
-        issues.push('staff');
-      }
-
-      if (
-        roomsResult.status === 'rejected' &&
-        roomTypesResult.status === 'rejected' &&
-        staffResult.status === 'rejected'
-      ) {
-        setError(getDashboardError(roomsResult.reason));
-      } else {
-        setLoadIssues(issues);
-      }
-
-      setLoading(false);
     };
 
     loadDashboard();
@@ -98,111 +62,15 @@ export const useManagerDashboard = () => {
     return () => {
       ignore = true;
     };
-  }, []);
-
-  const snapshot = useMemo(() => {
-    const totalRooms = rooms.length;
-    const statusCountsMap = rooms.reduce((acc, room) => {
-      acc[room.status] = (acc[room.status] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    const statusCounts = STATUS_ORDER.map((status) => ({
-      status,
-      count: statusCountsMap[status] ?? 0,
-      ...STATUS_META[status],
-    }));
-
-    const availableRooms = statusCountsMap.AVAILABLE ?? 0;
-    const occupiedRooms = statusCountsMap.OCCUPIED ?? 0;
-    const cleaningRooms = statusCountsMap.NEEDS_CLEANING ?? 0;
-    const maintenanceRooms = statusCountsMap.UNDER_MAINTENANCE ?? 0;
-    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
-    const readinessRate = totalRooms > 0 ? Math.round((availableRooms / totalRooms) * 100) : 0;
-    const activeStaff = staff.filter((member) => member.active).length;
-    const inactiveStaff = Math.max(staff.length - activeStaff, 0);
-
-    const floorSummary = Object.entries(
-      rooms.reduce((acc, room) => {
-        const key = room.floor ?? 'Unassigned';
-
-        if (!acc[key]) {
-          acc[key] = {
-            floor: key,
-            total: 0,
-            available: 0,
-            occupied: 0,
-            cleaning: 0,
-            maintenance: 0,
-          };
-        }
-
-        acc[key].total += 1;
-        if (room.status === 'AVAILABLE') acc[key].available += 1;
-        if (room.status === 'OCCUPIED') acc[key].occupied += 1;
-        if (room.status === 'NEEDS_CLEANING') acc[key].cleaning += 1;
-        if (room.status === 'UNDER_MAINTENANCE') acc[key].maintenance += 1;
-
-        return acc;
-      }, {})
-    )
-      .map(([, value]) => value)
-      .sort((a, b) => {
-        if (typeof a.floor === 'number' && typeof b.floor === 'number') return a.floor - b.floor;
-        return String(a.floor).localeCompare(String(b.floor));
-      });
-
-    const departmentSummary = Object.entries(
-      staff.reduce((acc, member) => {
-        const key = member.department?.trim() || 'Unassigned';
-        acc[key] = (acc[key] ?? 0) + 1;
-        return acc;
-      }, {})
-    )
-      .map(([department, count]) => ({ department, count }))
-      .sort((a, b) => b.count - a.count);
-
-    const roomTypeMix = roomTypes
-      .map((roomType) => ({
-        id: roomType.id,
-        name: roomType.name,
-        basePrice: roomType.basePrice,
-        maxGuests: roomType.maxGuests,
-        assignedRooms: rooms.filter((room) => room.roomType?.id === roomType.id).length,
-      }))
-      .sort((a, b) => b.assignedRooms - a.assignedRooms || a.name.localeCompare(b.name));
-
-    const alerts = [];
-    if (maintenanceRooms > 0) alerts.push({ type: 'maintenance', count: maintenanceRooms, href: '/room-status' });
-    if (cleaningRooms > 0) alerts.push({ type: 'cleaning', count: cleaningRooms, href: '/room-status' });
-    if (inactiveStaff > 0) alerts.push({ type: 'inactiveStaff', count: inactiveStaff, href: '/staff' });
-
-    return {
-      totalRooms,
-      availableRooms,
-      occupiedRooms,
-      cleaningRooms,
-      maintenanceRooms,
-      occupancyRate,
-      readinessRate,
-      roomTypeCount: roomTypes.length,
-      activeStaff,
-      inactiveStaff,
-      statusCounts,
-      floorSummary,
-      departmentSummary,
-      roomTypeMix,
-      alerts,
-    };
-  }, [roomTypes, rooms, staff]);
+  }, [endDate, reloadToken, startDate]);
 
   return {
-    rooms,
-    roomTypes,
-    staff,
+    metrics,
+    occupancyTrend,
+    revenueTrend,
+    roomTypeDistribution,
     loading,
     error,
-    loadIssues,
-    ...snapshot,
+    reload,
   };
 };

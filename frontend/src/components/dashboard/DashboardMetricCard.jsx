@@ -9,15 +9,15 @@ export default function DashboardMetricCard({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        card: 'border-black/5 bg-[#1f1812] text-white shadow-[0_20px_50px_-26px_rgba(31,24,18,0.9)]',
+        card: 'border-white/10 bg-zinc-950 text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
         icon: 'bg-white/10 text-white',
-        label: 'text-white/68',
-        hint: 'text-white/55',
+        label: 'text-zinc-400',
+        hint: 'text-zinc-500',
         value: 'text-white',
       }
     : {
         card: 'border-black/5 bg-white text-zinc-950 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
-        icon: 'bg-amber-100 text-amber-900',
+        icon: 'bg-zinc-100 text-zinc-950',
         label: 'text-zinc-500',
         hint: 'text-zinc-400',
         value: 'text-zinc-950',
@@ -27,14 +27,14 @@ export default function DashboardMetricCard({
     <div className={cn('relative overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className={cn('text-xs font-black uppercase tracking-[0.22em]', toneStyles.label)}>
+          <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label)}>
             {label}
           </p>
-          <p className={cn('mt-3 text-3xl font-black tracking-tight sm:text-[2rem]', toneStyles.value)}>
+          <p className={cn('mt-3 break-words text-2xl font-black tracking-tight sm:text-[2rem]', toneStyles.value)}>
             {value}
           </p>
           {hint && (
-            <p className={cn('mt-2 text-sm font-medium', toneStyles.hint)}>
+            <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint)}>
               {hint}
             </p>
           )}

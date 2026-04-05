@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import {
-  getDefaultRouteForRoles,
   getPageMeta,
   getRoleDisplayLabel,
 } from '../navigation/navConfig';
@@ -16,7 +15,7 @@ export default function AppTopbar({ onMenuToggle }) {
   const { user, logout } = useAuth();
 
   const roles = user?.roles ?? [];
-  const homePath = getDefaultRouteForRoles(roles);
+  const homePath = '/';
   const pageMeta = getPageMeta(location.pathname, roles, t);
   const roleLabel = getRoleDisplayLabel(roles, t);
   const brandName = t('brandName');
@@ -32,28 +31,28 @@ export default function AppTopbar({ onMenuToggle }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/5 bg-[#f7f3ed]/90 backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 border-b border-[#e7ddd0] bg-[#f7f3ed]/90 backdrop-blur-xl">
+      <div className="flex min-h-20 items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-zinc-200 bg-white p-2.5 text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black md:hidden"
+            className="rounded-2xl border border-zinc-200 bg-white p-2.5 text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black lg:hidden"
             aria-label={t('openNavigation')}
           >
             <Menu className="h-5 w-5" />
           </button>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-amber-900/55">
+            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-zinc-500">
               <span className="truncate">{pageMeta.sectionLabel}</span>
-              <span className="text-zinc-300">•</span>
+              <span className="text-zinc-300">&middot;</span>
               <span className="truncate">{roleLabel}</span>
             </div>
 
             <div className="mt-1 flex min-w-0 items-center gap-3">
               <div className="min-w-0">
-                <h1 className="truncate text-2xl font-black tracking-tight text-zinc-950">
+                <h1 className="truncate text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
                   {pageMeta.title}
                 </h1>
                 <p className="truncate text-sm font-medium text-zinc-500">
@@ -63,7 +62,7 @@ export default function AppTopbar({ onMenuToggle }) {
 
               <Link
                 to={homePath}
-                className="hidden rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black md:inline-flex"
+                className="hidden rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black lg:inline-flex"
               >
                 {brandName}
               </Link>
@@ -74,7 +73,7 @@ export default function AppTopbar({ onMenuToggle }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
 
-          <div className="hidden items-center gap-3 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 shadow-sm sm:flex">
+          <div className="hidden items-center gap-3 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 shadow-sm xl:flex">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-zinc-950 text-xs font-black uppercase text-white">
               {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
             </div>

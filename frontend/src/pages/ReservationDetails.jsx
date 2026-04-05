@@ -140,7 +140,7 @@ export default function ReservationDetails() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-200/80">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {t('reservationDetailsPage.confirmationNumber')}
           </p>
           <p className="mt-4 text-2xl font-black">

@@ -10,10 +10,10 @@ export default function DashboardQuickAction({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        wrapper: 'border-white/12 bg-white/8 text-white hover:bg-white/12',
+        wrapper: 'border-white/10 bg-white/5 text-white hover:bg-white/10',
         iconWrap: 'bg-white/10 text-white',
-        description: 'text-white/68',
-        arrow: 'text-white/45 group-hover:text-white',
+        description: 'text-zinc-300',
+        arrow: 'text-zinc-500 group-hover:text-white',
       }
     : {
         wrapper: 'border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-300 hover:bg-white',
