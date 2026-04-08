@@ -133,4 +133,29 @@ describe('InvoicePreview', () => {
     expect(screen.getByText(/Generate the invoice first/i)).toBeInTheDocument();
     expect(getInvoicePdf).not.toHaveBeenCalled();
   });
+
+  it('explicitly surfaces ATTEMPT delivery status and normalizes service charge labels', async () => {
+    const user = userEvent.setup();
+
+    getReservationByConfirmationNumber.mockResolvedValue(reservation);
+    getBill.mockResolvedValue({
+      balanceDue: 250,
+      invoiceFinalized: true,
+      lineItems: [{ label: 'Additional Service Charges', amount: 35, credit: false }],
+    });
+    getInvoiceDeliveryStatus.mockResolvedValue({
+      status: 'ATTEMPT',
+      errorMessage: null,
+      sentAt: null,
+    });
+    getInvoicePdf.mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' }));
+
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Load Invoice Reservation' }));
+
+    await screen.findByTitle(/Invoice PDF preview/i);
+    expect(screen.getAllByText(/Attempting/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Service charges/i)).toBeInTheDocument();
+  });
 });

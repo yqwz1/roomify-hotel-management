@@ -13,6 +13,7 @@ import ConfirmationToast from '../components/ConfirmationToast';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
+import SuccessState from '../components/common/SuccessState';
 import ModalFrame from '../components/common/ModalFrame';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
@@ -36,6 +37,7 @@ import {
   formatLocalizedDateTime,
   getPaymentStatusLabel,
   getReservationStatusLabel,
+  translateBillLineItemLabel,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -171,7 +173,7 @@ function BillBreakdown({ bill, t, language }) {
                 return (
                   <div key={`${item?.label ?? 'line'}-${index}`} className="flex items-center justify-between gap-4 text-sm">
                     <span className="font-medium text-zinc-600">
-                      {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
+                      {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                     </span>
                     <span className="font-bold text-zinc-950">
                       {credit ? `-${formatLocalizedCurrency(amount, language)}` : formatLocalizedCurrency(amount, language)}
@@ -673,8 +675,11 @@ export default function Checkout() {
               ) : null}
 
               {checkoutSuccess ? (
-                <div className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
-                  {t('checkoutPage.successBanner')}
+                <div className="mt-4">
+                  <SuccessState
+                    title={t('checkoutPage.complete')}
+                    message={t('checkoutPage.successBanner')}
+                  />
                 </div>
               ) : null}
             </DashboardPanel>
@@ -697,14 +702,7 @@ export default function Checkout() {
               ) : !bill ? (
                 <EmptyState title={t('checkoutPage.noBillTitle')} message={t('checkoutPage.noBillDescription')} />
               ) : (
-                <>
-                  <BillBreakdown bill={bill} t={t} language={i18n.language} />
-                  {!checkoutSuccess && blockingMessage ? (
-                    <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
-                      {blockingMessage}
-                    </div>
-                  ) : null}
-                </>
+                <BillBreakdown bill={bill} t={t} language={i18n.language} />
               )}
             </DashboardPanel>
 

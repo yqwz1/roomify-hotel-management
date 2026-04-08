@@ -34,6 +34,11 @@ const toUiReservation = (record, fallbackIndex) => {
     subtotal: isLegacy ? record?.subtotal : record?.pricing?.subtotal,
     taxes: isLegacy ? record?.taxes : record?.pricing?.taxes,
     totalPrice: isLegacy ? record?.totalPrice : record?.pricing?.totalPrice,
+    guestPhone: isLegacy ? record?.guestPhone ?? record?.phone : record?.guest?.phone,
+    guestIdNumber: isLegacy ? record?.guestIdNumber ?? record?.idNumber : record?.guest?.idNumber,
+    guestNationality: isLegacy ? record?.guestNationality ?? record?.nationality : record?.guest?.nationality,
+    maxGuests: isLegacy ? record?.maxGuests : record?.room?.maxGuests,
+    amenities: isLegacy ? record?.amenities : record?.room?.amenities,
     guest: record?.guest,
     room: record?.room,
     dates: record?.dates,
@@ -95,6 +100,51 @@ export default function ReservationLookupPanel({
   const reservation = useMemo(
     () => (results.length > 0 ? toUiReservation(results[0], 0) : null),
     [results]
+  );
+  const guestMetadata = useMemo(
+    () =>
+      reservation
+        ? [
+            {
+              label: t('phoneNumber'),
+              value: reservation.guestPhone,
+            },
+            {
+              label: t('nationality'),
+              value: reservation.guestNationality,
+            },
+            {
+              label: t('idPassport'),
+              value: reservation.guestIdNumber ? <LtrText>{reservation.guestIdNumber}</LtrText> : null,
+            },
+          ].filter((item) => item.value)
+        : [],
+    [reservation, t]
+  );
+  const roomMetadata = useMemo(
+    () =>
+      reservation
+        ? [
+            {
+              label: t('maxGuestsLabel'),
+              value:
+                reservation.maxGuests != null
+                  ? t('upToGuests', { count: reservation.maxGuests })
+                  : null,
+            },
+            {
+              label: t('amenitiesLabel'),
+              value: reservation.amenities
+                ? reservation.amenities
+                    .split(',')
+                    .map((item) => translateKnownValue(item.trim(), t))
+                    .filter(Boolean)
+                    .join(' · ')
+                : null,
+            },
+          ].filter((item) => item.value)
+        : [],
+    [reservation, t]
   );
 
   return (
@@ -212,6 +262,16 @@ export default function ReservationLookupPanel({
                         <p className="mt-2 text-sm font-bold text-zinc-950">
                           {t('roomNum', { number: reservation.roomNumber })} | {translateKnownValue(reservation.roomTypeName, t)}
                         </p>
+                        {roomMetadata.length ? (
+                          <dl className="mt-2 space-y-1 text-xs font-medium text-zinc-500">
+                            {roomMetadata.map((item) => (
+                              <div key={item.label} className="flex flex-wrap items-center gap-1">
+                                <dt className="font-bold text-zinc-600">{item.label}:</dt>
+                                <dd>{item.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
                       </div>
 
                       <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
@@ -241,6 +301,16 @@ export default function ReservationLookupPanel({
                         <p className="mt-2 text-sm font-bold text-zinc-950">
                           {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                         </p>
+                        {guestMetadata.length ? (
+                          <dl className="mt-2 space-y-1 text-xs font-medium text-zinc-500">
+                            {guestMetadata.map((item) => (
+                              <div key={item.label} className="flex flex-wrap items-center gap-1">
+                                <dt className="font-bold text-zinc-600">{item.label}:</dt>
+                                <dd>{item.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
                       </div>
                     </div>
                   </div>

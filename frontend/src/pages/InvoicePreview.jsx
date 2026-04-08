@@ -34,7 +34,7 @@ import {
   formatLocalizedDateTime,
   getBooleanLabel,
   getInvoiceDeliveryStatusLabel,
-  translateKnownValue,
+  translateBillLineItemLabel,
 } from '../utils/localization';
 
 function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
@@ -58,6 +58,14 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
     return (
         <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
         {t('invoicePreviewPage.delivered')}
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'ATTEMPT') {
+    return (
+      <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-sky-900">
+        {getInvoiceDeliveryStatusLabel(deliveryStatus, t)}
       </span>
     );
   }
@@ -89,12 +97,11 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 function InvoiceLedger({ bill, t, language }) {
   if (!bill) {
     return (
-      <div className="rounded-[1.35rem] border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
-        <p className="text-sm font-bold text-zinc-950">{t('invoicePreviewPage.noDataTitle')}</p>
-        <p className="mt-2 text-sm font-medium text-zinc-500">
-          {t('invoicePreviewPage.noDataDescription')}
-        </p>
-      </div>
+      <EmptyState
+        title={t('invoicePreviewPage.noDataTitle')}
+        message={t('invoicePreviewPage.noDataDescription')}
+        icon={Receipt}
+      />
     );
   }
 
@@ -119,7 +126,7 @@ function InvoiceLedger({ bill, t, language }) {
             return (
               <tr key={`${item?.label ?? 'line'}-${index}`}>
                 <td className="px-4 py-3 text-sm font-medium text-zinc-700">
-                  {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
+                  {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
                   {credit

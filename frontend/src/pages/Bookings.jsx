@@ -50,7 +50,7 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }
 export default function Bookings() {
     const navigate = useNavigate();
     const { isAuthenticated, hasRole } = useAuth();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const roleView = useMemo(() => {
         if (hasRole('ROLE_MANAGER') || hasRole('ROLE_STAFF')) return 'staff';
@@ -65,6 +65,11 @@ export default function Bookings() {
             : t('bookingsPage.introPublic');
 
     const openLabel = t('openLabel');
+    const supportTips = t('bookingsPage.supportTips', { returnObjects: true });
+    const showSupportTips =
+        !i18n.language?.startsWith('ar') &&
+        Array.isArray(supportTips) &&
+        supportTips.length > 0;
 
     return (
         <div className="h-full bg-zinc-50 p-6 lg:p-8">
@@ -184,19 +189,21 @@ export default function Bookings() {
                         </div>
                     </div>
 
-                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <ShieldCheck className="h-5 w-5 text-zinc-700" />
-                            <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.supportTitle')}</h2>
+                    {showSupportTips ? (
+                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <ShieldCheck className="h-5 w-5 text-zinc-700" />
+                                <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.supportTitle')}</h2>
+                            </div>
+                            <div className="mt-5 space-y-3">
+                                {supportTips.map((item) => (
+                                    <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="mt-5 space-y-3">
-                            {t('bookingsPage.supportTips', { returnObjects: true }).map((item) => (
-                                <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
-                                    {item}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    ) : null}
                 </div>
             </div>
         </div>

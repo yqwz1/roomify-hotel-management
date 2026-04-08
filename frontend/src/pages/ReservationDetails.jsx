@@ -25,6 +25,8 @@ import { reservationStatusRules } from '../domain/reservations/statusRules';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
+  getBooleanLabel,
+  getPaymentStatusLabel,
   getReservationStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
@@ -126,6 +128,34 @@ export default function ReservationDetails() {
   const floor = reservation.floor || reservation.room?.floor || '-';
   const nights = reservation.nights ?? reservation.dates?.nights ?? 0;
   const totalPrice = reservation.totalPrice ?? reservation.pricing?.totalPrice ?? 0;
+  const totalPaid = reservation.totalPaid;
+  const outstandingBalance = reservation.outstandingBalance;
+  const paymentStatus = reservation.paymentStatus;
+  const invoiceFinalized =
+    typeof reservation.invoiceFinalized === 'boolean' ? reservation.invoiceFinalized : null;
+  const financialFacts = [
+    {
+      label: t('checkoutPage.paymentStatusLabel'),
+      value: paymentStatus ? getPaymentStatusLabel(paymentStatus, t) : null,
+    },
+    {
+      label: t('checkoutPage.totalPaidLabel'),
+      value:
+        totalPaid != null ? formatLocalizedCurrency(totalPaid, i18n.language) : null,
+    },
+    {
+      label: t('checkoutPage.outstandingBalanceLabel'),
+      value:
+        outstandingBalance != null
+          ? formatLocalizedCurrency(outstandingBalance, i18n.language)
+          : null,
+    },
+    {
+      label: t('common.finalized'),
+      value:
+        invoiceFinalized != null ? getBooleanLabel(invoiceFinalized, t) : null,
+    },
+  ].filter((item) => item.value != null);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
@@ -235,8 +265,16 @@ export default function ReservationDetails() {
                       {formatLocalizedCurrency(totalPrice, i18n.language)}
                     </p>
                     <p className="mt-1 text-sm font-medium text-zinc-500">
-                      {t('nightsCount', { count: nights })}
+                      {paymentStatus
+                        ? `${t('checkoutPage.paymentStatusLabel')}: ${getPaymentStatusLabel(paymentStatus, t)}`
+                        : t('nightsCount', { count: nights })}
                     </p>
+                    {outstandingBalance != null ? (
+                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                        {t('checkoutPage.outstandingBalanceLabel')}: {' '}
+                        {formatLocalizedCurrency(outstandingBalance, i18n.language)}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -339,6 +377,7 @@ export default function ReservationDetails() {
                   label: t('reservationDetailsPage.totalPrice'),
                   value: formatLocalizedCurrency(totalPrice, i18n.language),
                 },
+                ...financialFacts,
               ].map((item) => (
                 <div
                   key={item.label}

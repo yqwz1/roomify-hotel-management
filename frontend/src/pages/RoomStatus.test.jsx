@@ -110,4 +110,31 @@ describe('RoomStatus', () => {
       expect(getRooms).toHaveBeenCalledTimes(2);
     });
   });
+
+  it('shows an unavailable-actions state when valid next statuses cannot be loaded', async () => {
+    getRooms.mockResolvedValue([
+      {
+        id: 3,
+        roomNumber: '103',
+        floor: 1,
+        status: 'AVAILABLE',
+        roomType: { name: 'Standard Room', basePrice: 100 },
+      },
+    ]);
+
+    getValidNextStatuses.mockRejectedValue(new Error('Network error'));
+
+    render(<RoomStatus />);
+
+    const roomNumber = await screen.findByText('103');
+    const roomCard = roomNumber.closest('article');
+
+    expect(roomCard).not.toBeNull();
+    expect(within(roomCard).getByText(/Allowed actions unavailable/i)).toBeInTheDocument();
+    expect(
+      within(roomCard).getByText(/could not load valid next statuses for this room right now/i)
+    ).toBeInTheDocument();
+    expect(within(roomCard).queryByText(/Managed automatically/i)).not.toBeInTheDocument();
+    expect(within(roomCard).queryByRole('button', { name: /Under Maintenance/i })).not.toBeInTheDocument();
+  });
 });
