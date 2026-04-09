@@ -548,6 +548,24 @@ public class ReservationService {
         return "PAID";
     }
 
+    public java.util.List<ReservationResponse> getAllReservations() {
+        return reservationRepository.findAll().stream().map(reservation -> {
+            long nights = java.time.temporal.ChronoUnit.DAYS.between(
+                    reservation.getCheckInDate(),
+                    reservation.getCheckOutDate()
+            );
+            BigDecimal rate = reservation.getRoom().getRoomType()
+                    .getBasePrice()
+                    .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+            BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
+                    .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+            BigDecimal taxes = subtotal.multiply(taxRate)
+                    .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+            return toResponse(reservation, nights, rate, subtotal, taxes);
+        }).toList();
+    }
+
     private ReservationResponse toResponse(
             Reservation reservation,
             long nights,
@@ -570,6 +588,10 @@ public class ReservationService {
                 rate,
                 subtotal,
                 taxes,
-                reservation.getTotalPrice());
+                reservation.getTotalPrice(),
+                reservation.getTotalPaid(),
+                reservation.getOutstandingBalance(),
+                reservation.isInvoiceFinalized(),
+                reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : PaymentStatus.PENDING.name());
     }
 }

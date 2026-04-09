@@ -191,6 +191,15 @@ const AppContent = () => {
         />
 
         <Route
+          path="/reservations"
+          element={
+            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+              <Layout showSidebar={true}><ReservationDetails /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/reservations/:confirmationNumber"
           element={
             <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>

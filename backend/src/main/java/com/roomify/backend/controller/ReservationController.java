@@ -49,6 +49,11 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping
+    public ResponseEntity<java.util.List<ReservationResponse>> getAllReservations() {
+        return ResponseEntity.ok(reservationService.getAllReservations());
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ReservationLookupResponse> search(
             @RequestParam(required = false) String confirmation,

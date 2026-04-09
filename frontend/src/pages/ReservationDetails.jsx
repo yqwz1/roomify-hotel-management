@@ -9,6 +9,7 @@ import {
   Receipt,
   UserRound,
   XCircle,
+  Eye,
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ErrorState from '../components/common/ErrorState';
@@ -20,6 +21,7 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import {
   extractReservationError,
   getReservationByConfirmationNumber,
+  getAllReservations,
 } from '../services/reservationService';
 import { reservationStatusRules } from '../domain/reservations/statusRules';
 import {
@@ -74,20 +76,20 @@ export default function ReservationDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reservation, setReservation] = useState(null);
+  const [reservationsList, setReservationsList] = useState(null);
 
   useEffect(() => {
     const run = async () => {
-      if (!confirmationNumber) {
-        setError(t('reservationDetailsPage.missingConfirmation'));
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       setError(null);
       try {
-        const result = await getReservationByConfirmationNumber(confirmationNumber);
-        setReservation(result);
+        if (!confirmationNumber) {
+          const result = await getAllReservations();
+          setReservationsList(result);
+        } else {
+          const result = await getReservationByConfirmationNumber(confirmationNumber);
+          setReservation(result);
+        }
       } catch (err) {
         setError(extractReservationError(err));
       } finally {
@@ -112,7 +114,56 @@ export default function ReservationDetails() {
     );
   }
 
-  if (!reservation) {
+  if (!confirmationNumber && reservationsList) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+        <DashboardHero
+          eyebrow={t('bookings')}
+          title={t('bookings')}
+          description={t('reservationLookupPanel.description')}
+        />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {reservationsList.map((res) => (
+            <div key={res.id || res.confirmationNumber} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-black">
+              <div className="mb-4 flex items-start justify-between">
+                <div>
+                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.confirmation')}</p>
+                   <p className="mt-1 text-sm font-bold"><LtrText>{res.confirmationNumber}</LtrText></p>
+                </div>
+                <StatusPill status={res.status} size="sm" />
+              </div>
+              <div className="mb-4 space-y-2">
+                 <p className="text-sm font-medium text-zinc-600">
+                    <UserRound className="mr-2 inline h-4 w-4"/>
+                    {res.guestName || res.guest?.name || t('common.guest')}
+                 </p>
+                 <p className="text-sm font-medium text-zinc-600">
+                    <Hotel className="mr-2 inline h-4 w-4"/>
+                    {t('roomNum', { number: res.roomNumber || res.room?.roomNumber || t('unassigned') })}
+                 </p>
+                 <p className="text-sm font-medium text-zinc-600">
+                    <Receipt className="mr-2 inline h-4 w-4"/>
+                    {res.paymentStatus ? getPaymentStatusLabel(res.paymentStatus, t) : t('nightsCount', { count: res.nights })}
+                 </p>
+              </div>
+              <button 
+                 onClick={() => navigate(`/reservations/${res.confirmationNumber}`)}
+                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-100 py-2.5 text-sm font-bold transition hover:bg-zinc-200 text-zinc-900">
+                 <Eye className="h-4 w-4" /> {t('common.selectReservation')}
+              </button>
+            </div>
+          ))}
+          {reservationsList.length === 0 && (
+             <div className="col-span-full py-12 text-center text-sm font-medium text-zinc-500">
+                {t('reservationLookupPanel.emptyDescription')}
+             </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!reservation && confirmationNumber) {
     return (
       <ErrorState
         title={t('reservationDetailsPage.emptyTitle')}

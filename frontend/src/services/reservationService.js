@@ -12,6 +12,11 @@ export const createReservation = async (data) => {
     return response.data;
 };
 
+export const getAllReservations = async () => {
+    const response = await api.get('/reservations');
+    return response.data;
+};
+
 export const getReservationByConfirmationNumber = async (confirmationNumber) => {
     const response = await api.get(`/reservations/${confirmationNumber}`);
     return response.data;
