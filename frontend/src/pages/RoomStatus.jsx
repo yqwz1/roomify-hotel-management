@@ -281,7 +281,7 @@ export default function RoomStatus() {
 
         {!loading && error && rooms.length === 0 && (
           <ErrorState
-            title={t('roomStatusPage.accessDeniedTitle')}
+            title={t('roomStatusPage.loadFailedTitle')}
             message={error || t('roomStatusPage.accessDeniedDescription')}
             onRetry={() => fetchRooms()}
           />
@@ -349,9 +349,9 @@ export default function RoomStatus() {
                   <div className="mt-5 flex flex-wrap gap-2">
                     {actionsUnavailable ? (
                       <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        <p className="font-bold">Allowed actions unavailable</p>
+                        <p className="font-bold">{t('roomStatusPage.actionsUnavailableTitle')}</p>
                         <p className="mt-1 font-medium text-amber-900/80">
-                          We could not load valid next statuses for this room right now.
+                          {t('roomStatusPage.actionsUnavailableDescription')}
                         </p>
                       </div>
                     ) : !hasActions ? (

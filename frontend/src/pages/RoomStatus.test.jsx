@@ -103,6 +103,7 @@ describe('RoomStatus', () => {
 
     render(<RoomStatus />);
 
+    expect(await screen.findByText(/Unable to load room status/i)).toBeInTheDocument();
     await screen.findAllByText('Forbidden');
     await user.click(screen.getByRole('button', { name: /Try again/i }));
 
@@ -131,9 +132,7 @@ describe('RoomStatus', () => {
 
     expect(roomCard).not.toBeNull();
     expect(within(roomCard).getByText(/Allowed actions unavailable/i)).toBeInTheDocument();
-    expect(
-      within(roomCard).getByText(/could not load valid next statuses for this room right now/i)
-    ).toBeInTheDocument();
+    expect(within(roomCard).getByText(/could not load valid next statuses for this room right now/i)).toBeInTheDocument();
     expect(within(roomCard).queryByText(/Managed automatically/i)).not.toBeInTheDocument();
     expect(within(roomCard).queryByRole('button', { name: /Under Maintenance/i })).not.toBeInTheDocument();
   });

@@ -233,10 +233,14 @@ const supplementalResources = {
         outstandingBlocked:
           'Outstanding balance must be settled before checkout can be completed.',
         successBanner:
-          'The guest has been checked out successfully. You can load another reservation or review the invoice.',
+          'The guest has been checked out successfully. Review the updated room status, then continue straight to the invoice preview.',
         roomStatusTitle: 'Room status updated',
         roomStatusDescription:
           'Room {{roomNumber}} is now marked {{status}} for turnover after checkout.',
+        nextStepTitle: 'Next step',
+        nextStepDescription:
+          'Open the invoice preview with this reservation already loaded so you can download, print, and confirm delivery status without searching again.',
+        openInvoicePreview: 'Open Invoice Preview',
         finalBillTitle: 'Final Bill',
         finalBillDescription:
           'Review the reservation billing details before closing the stay.',
@@ -629,7 +633,7 @@ const supplementalResources = {
         ],
         controlsTitle: 'Invoice Controls',
         controlsDescription:
-          'Generate the invoice first, then print or download the final document.',
+          'Generate the invoice first, then print, download, or open the final document.',
         loadingData: 'Loading invoice data...',
         generate: 'Generate Invoice',
         generating: 'Generating Invoice...',
@@ -664,11 +668,11 @@ const supplementalResources = {
         deliveryPending: 'Delivery pending',
         generateSuccess: 'Invoice generated successfully.',
         downloadFailed: 'Unable to download the invoice.',
-        printFailed: 'Unable to open the invoice for printing.',
+        printFailed: 'Unable to prepare the invoice for printing.',
         retryLoadData: 'Retry Invoice Load',
         previewTitle: 'Invoice Preview',
         previewDescription:
-          'Use the embedded preview for demos or open the live PDF in a separate tab.',
+          'Use the embedded preview for demos, print directly from this screen, or open the live PDF in a separate tab.',
         previewLoading: 'Loading invoice preview...',
         previewErrorTitle: 'Invoice preview unavailable',
         previewErrorDescription:
@@ -780,9 +784,13 @@ const supplementalResources = {
           'Managed automatically by reservation flow',
         updating: 'Updating...',
         occupiedLocked: 'Occupied rooms remain locked until checkout completes.',
+        loadFailedTitle: 'Unable to load room status',
         accessDeniedTitle: 'Room status unavailable',
         accessDeniedDescription:
           'Your current session cannot access the room-status controls exposed by the backend.',
+        actionsUnavailableTitle: 'Allowed actions unavailable',
+        actionsUnavailableDescription:
+          'We could not load valid next statuses for this room right now.',
         refreshRooms: 'Refresh Room Board',
         successToast: 'Room {{roomNumber}} moved to {{status}}.',
       },
@@ -1200,10 +1208,14 @@ const supplementalResources = {
         outstandingBlocked:
           'يجب تسوية الرصيد المستحق قبل إتمام المغادرة.',
         successBanner:
-          'تم تسجيل مغادرة الضيف بنجاح. يمكنك تحميل حجز آخر أو مراجعة الفاتورة.',
+          'تم تسجيل مغادرة الضيف بنجاح. راجع حالة الغرفة المحدثة ثم تابع مباشرة إلى معاينة الفاتورة.',
         roomStatusTitle: 'تم تحديث حالة الغرفة',
         roomStatusDescription:
           'تم وضع الغرفة {{roomNumber}} الآن في حالة {{status}} بعد تسجيل المغادرة.',
+        nextStepTitle: 'الخطوة التالية',
+        nextStepDescription:
+          'افتح معاينة الفاتورة مع تحميل هذا الحجز تلقائيًا حتى تتمكن من التنزيل والطباعة ومراجعة حالة التسليم دون البحث مرة أخرى.',
+        openInvoicePreview: 'فتح معاينة الفاتورة',
         finalBillTitle: 'الفاتورة النهائية',
         finalBillDescription:
           'راجع تفاصيل فاتورة الحجز قبل إغلاق الإقامة.',
@@ -1641,7 +1653,7 @@ const supplementalResources = {
         ],
         controlsTitle: 'عناصر التحكم بالفاتورة',
         controlsDescription:
-          'أنشئ الفاتورة أولاً ثم اطبع المستند النهائي أو نزّله.',
+          'أنشئ الفاتورة أولاً ثم اطبع المستند النهائي أو نزّله أو افتحه.',
         loadingData: 'جار تحميل بيانات الفاتورة...',
         generate: 'إنشاء الفاتورة',
         generating: 'جار إنشاء الفاتورة...',
@@ -1676,11 +1688,11 @@ const supplementalResources = {
         deliveryPending: 'التسليم قيد الانتظار',
         generateSuccess: 'تم إنشاء الفاتورة بنجاح.',
         downloadFailed: 'تعذر تنزيل الفاتورة.',
-        printFailed: 'تعذر فتح الفاتورة للطباعة.',
+        printFailed: 'تعذر تجهيز الفاتورة للطباعة.',
         retryLoadData: 'إعادة تحميل الفاتورة',
         previewTitle: 'معاينة الفاتورة',
         previewDescription:
-          'استخدم المعاينة المضمنة في العرض التوضيحي أو افتح ملف PDF المباشر في تبويب منفصل.',
+          'استخدم المعاينة المضمنة في العرض التوضيحي، أو اطبع مباشرة من هذه الشاشة، أو افتح ملف PDF المباشر في تبويب منفصل.',
         previewLoading: 'جار تحميل معاينة الفاتورة...',
         previewErrorTitle: 'تعذر عرض معاينة الفاتورة',
         previewErrorDescription:
@@ -1790,9 +1802,13 @@ const supplementalResources = {
           'تتم إدارته تلقائيًا عبر مسار الحجز',
         updating: 'جار التحديث...',
         occupiedLocked: 'تبقى الغرف المشغولة مقفلة حتى اكتمال المغادرة.',
+        loadFailedTitle: 'تعذر تحميل حالة الغرف',
         accessDeniedTitle: 'تعذر الوصول إلى حالة الغرف',
         accessDeniedDescription:
           'جلسة المستخدم الحالية لا تملك صلاحية الوصول إلى عناصر التحكم بحالة الغرف من الخادم.',
+        actionsUnavailableTitle: 'تعذر تحميل الإجراءات المتاحة',
+        actionsUnavailableDescription:
+          'تعذر تحميل الحالات التالية الصالحة لهذه الغرفة الآن.',
         refreshRooms: 'تحديث لوحة الغرف',
         successToast: 'تم نقل الغرفة {{roomNumber}} إلى {{status}}.',
       },

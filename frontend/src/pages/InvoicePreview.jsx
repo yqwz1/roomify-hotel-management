@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Download,
   FilePlus2,
@@ -163,6 +163,7 @@ export default function InvoicePreview() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(null);
+  const printFrameRef = useRef(null);
 
   const initialQuery = useMemo(
     () =>
@@ -179,6 +180,17 @@ export default function InvoicePreview() {
       window.URL.revokeObjectURL(previewUrl);
     }
   }, [previewUrl]);
+
+  const clearPrintFrame = useCallback(() => {
+    if (!printFrameRef.current) return;
+
+    printFrameRef.current.remove();
+    printFrameRef.current = null;
+  }, []);
+
+  useEffect(() => () => {
+    clearPrintFrame();
+  }, [clearPrintFrame]);
 
   const resetPreview = useCallback(() => {
     setPreviewLoading(false);
@@ -316,14 +328,36 @@ export default function InvoicePreview() {
     try {
       const url = previewUrl || (await loadPreview(selected.id));
       if (!url) throw new Error('Preview unavailable');
-      const printWindow = window.open(url);
-      if (printWindow) {
-        printWindow.focus();
-      }
+
+      clearPrintFrame();
+
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('title', 'invoice-print-frame');
+      iframe.className = 'pointer-events-none fixed bottom-0 right-0 h-0 w-0 border-0 opacity-0';
+      iframe.onload = () => {
+        const frameWindow = iframe.contentWindow;
+        if (!frameWindow) {
+          clearPrintFrame();
+          setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
+          return;
+        }
+
+        frameWindow.focus();
+        window.setTimeout(() => {
+          try {
+            frameWindow.print();
+          } catch {
+            setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
+          }
+        }, 0);
+      };
+      iframe.src = url;
+      printFrameRef.current = iframe;
+      document.body.appendChild(iframe);
     } catch {
       setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
     }
-  }, [invoiceFinalized, loadPreview, previewUrl, selected, t]);
+  }, [clearPrintFrame, invoiceFinalized, loadPreview, previewUrl, selected, t]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
@@ -519,6 +553,15 @@ export default function InvoicePreview() {
                       className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
                     >
                       {t('invoicePreviewPage.openDocument')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePrint}
+                      className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                    >
+                      <Printer className="h-4 w-4" />
+                      {t('invoicePreviewPage.print')}
                     </Button>
                     <Button
                       type="button"
