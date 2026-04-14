@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Checkout from './Checkout';
-import { getBill } from '../services/reservationService';
+import { checkOutReservation, getBill } from '../services/reservationService';
 import { createPayment } from '../services/paymentService';
 
 const mockReservation = {
@@ -309,5 +309,42 @@ describe('Checkout', () => {
 
     expect((await screen.findAllByText('Gateway rejected payment')).length).toBeGreaterThan(0);
     expect(screen.queryByTestId('payment-receipt')).not.toBeInTheDocument();
+  });
+
+  it('shows the room turnover status after a successful checkout', async () => {
+    const user = userEvent.setup();
+
+    getBill.mockResolvedValue({
+      nights: 2,
+      roomRate: 120,
+      roomCharge: 240,
+      serviceCharges: 0,
+      vatRate: 0.15,
+      vatAmount: 36,
+      discountAmount: 0,
+      balanceDue: 276,
+      totalPaid: 276,
+      outstandingBalance: 0,
+      invoiceFinalized: true,
+      paymentStatus: 'PAID',
+      lineItems: [],
+    });
+
+    checkOutReservation.mockResolvedValue({
+      action: 'check-out',
+      currentStatus: 'CHECKED_OUT',
+    });
+
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Select Reservation' }));
+    await user.click(screen.getByRole('button', { name: /Complete Checkout/i }));
+
+    await waitFor(() => {
+      expect(checkOutReservation).toHaveBeenCalledWith(mockReservation.confirmationNumber);
+    });
+
+    expect(await screen.findByText(/Room status updated/i)).toBeInTheDocument();
+    expect(screen.getByText(/Room 201 is now marked Needs Cleaning/i)).toBeInTheDocument();
   });
 });

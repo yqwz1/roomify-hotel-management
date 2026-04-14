@@ -64,4 +64,53 @@ describe('ReservationLookupPanel', () => {
     expect(screen.getByText(/WiFi/i)).toBeInTheDocument();
     expect(screen.getByText(/Air Conditioning/i)).toBeInTheDocument();
   });
+
+  it('shows selectable guest-name matches instead of collapsing to the first reservation', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+
+    searchReservations.mockResolvedValue([
+      {
+        id: 1,
+        confirmationNumber: 'RSV-LOOK-111111',
+        status: 'CHECKED_IN',
+        guestName: 'Jane Doe',
+        guestEmail: 'jane.one@example.com',
+        roomNumber: '401',
+        checkInDate: '2026-03-10',
+        checkOutDate: '2026-03-12',
+      },
+      {
+        id: 2,
+        confirmationNumber: 'RSV-LOOK-222222',
+        status: 'CONFIRMED',
+        guestName: 'Jane Doe',
+        guestEmail: 'jane.two@example.com',
+        roomNumber: '402',
+        checkInDate: '2026-04-10',
+        checkOutDate: '2026-04-12',
+      },
+    ]);
+
+    render(<ReservationLookupPanel onSelect={onSelect} autoSearch={false} />);
+
+    await user.type(screen.getByRole('textbox'), 'Jane');
+    await user.click(screen.getByRole('button', { name: /Search Reservation/i }));
+
+    expect(await screen.findByText(/2 reservations matched this guest search/i)).toBeInTheDocument();
+    expect(screen.getByText('RSV-LOOK-111111')).toBeInTheDocument();
+    expect(screen.getByText('RSV-LOOK-222222')).toBeInTheDocument();
+    expect(onSelect).not.toHaveBeenCalled();
+
+    const selectButtons = screen.getAllByRole('button', { name: /Select Reservation/i });
+    await user.click(selectButtons[1]);
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 2,
+        confirmationNumber: 'RSV-LOOK-222222',
+        roomNumber: '402',
+      })
+    );
+  });
 });

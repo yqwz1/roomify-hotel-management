@@ -36,6 +36,7 @@ import {
   formatLocalizedDate,
   formatLocalizedDateTime,
   getPaymentStatusLabel,
+  getRoomStatusLabel,
   getReservationStatusLabel,
   translateBillLineItemLabel,
   translateKnownValue,
@@ -680,6 +681,26 @@ export default function Checkout() {
                     title={t('checkoutPage.complete')}
                     message={t('checkoutPage.successBanner')}
                   />
+                  {selected ? (
+                    <div className="mt-4 rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">
+                            {t('checkoutPage.roomStatusTitle')}
+                          </p>
+                          <p className="mt-2 text-sm font-medium text-emerald-900">
+                            {t('checkoutPage.roomStatusDescription', {
+                              roomNumber: selected.roomNumber,
+                              status: getRoomStatusLabel('NEEDS_CLEANING', t),
+                            })}
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
+                          {getRoomStatusLabel('NEEDS_CLEANING', t)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </DashboardPanel>

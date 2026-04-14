@@ -188,7 +188,7 @@ const supplementalResources = {
           'Use the lookup panel to load a reservation before validating the arrival checklist.',
         tips: [
           'Search by confirmation number when available for the most reliable lookup.',
-          'Guest-name search returns only the first matching reservation.',
+          'Guest-name search can return multiple reservations, so select the correct stay before continuing.',
           'Check-in is allowed only after every pre-arrival item is marked complete.',
         ],
         summaryTitle: 'Arrival Summary',
@@ -234,6 +234,9 @@ const supplementalResources = {
           'Outstanding balance must be settled before checkout can be completed.',
         successBanner:
           'The guest has been checked out successfully. You can load another reservation or review the invoice.',
+        roomStatusTitle: 'Room status updated',
+        roomStatusDescription:
+          'Room {{roomNumber}} is now marked {{status}} for turnover after checkout.',
         finalBillTitle: 'Final Bill',
         finalBillDescription:
           'Review the reservation billing details before closing the stay.',
@@ -837,7 +840,7 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'Reservation Lookup',
         description:
-          'Search by confirmation number or guest name. Guest-name search returns the first matching reservation.',
+          'Search by confirmation number or guest name. When a guest-name search returns multiple stays, select the exact reservation before continuing.',
         chipConfirmation: 'Confirmation-first',
         chipStaff: 'Staff lookup',
         placeholder: 'RSV-XXXXXXXXXXXX or guest name',
@@ -845,7 +848,11 @@ const supplementalResources = {
         emptyDescription:
           'Try a confirmation number or a more specific guest name.',
         guestNameWarning:
-          'Guest-name search returns the first matching reservation',
+          'Guest-name search matched this reservation. Confirm the details before continuing.',
+        multipleMatchesTitle:
+          '{{count}} reservations matched this guest search',
+        multipleMatchesDescription:
+          'Select the exact reservation to avoid checking in or checking out the wrong stay.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'Missing confirmation number.',
@@ -1148,7 +1155,7 @@ const supplementalResources = {
           'استخدم لوحة البحث لتحميل الحجز قبل التحقق من قائمة الوصول.',
         tips: [
           'ابحث باستخدام رقم التأكيد متى ما كان متاحًا للحصول على أدق نتيجة.',
-          'البحث باسم الضيف يعرض أول حجز مطابق فقط.',
+          'قد يعرض البحث باسم الضيف عدة حجوزات، لذا اختر الإقامة الصحيحة قبل المتابعة.',
           'لا يُسمح بتسجيل الوصول إلا بعد إكمال جميع عناصر ما قبل الوصول.',
         ],
         summaryTitle: 'ملخص الوصول',
@@ -1194,6 +1201,9 @@ const supplementalResources = {
           'يجب تسوية الرصيد المستحق قبل إتمام المغادرة.',
         successBanner:
           'تم تسجيل مغادرة الضيف بنجاح. يمكنك تحميل حجز آخر أو مراجعة الفاتورة.',
+        roomStatusTitle: 'تم تحديث حالة الغرفة',
+        roomStatusDescription:
+          'تم وضع الغرفة {{roomNumber}} الآن في حالة {{status}} بعد تسجيل المغادرة.',
         finalBillTitle: 'الفاتورة النهائية',
         finalBillDescription:
           'راجع تفاصيل فاتورة الحجز قبل إغلاق الإقامة.',
@@ -1838,7 +1848,7 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'البحث عن الحجز',
         description:
-          'ابحث برقم التأكيد أو باسم الضيف. البحث باسم الضيف يعرض أول حجز مطابق فقط.',
+          'ابحث برقم التأكيد أو باسم الضيف. إذا أعاد البحث باسم الضيف عدة إقامات، فاختر الحجز الصحيح قبل المتابعة.',
         chipConfirmation: 'الأولوية لرقم التأكيد',
         chipStaff: 'بحث الموظفين',
         placeholder: 'RSV-XXXXXXXXXXXX أو اسم الضيف',
@@ -1846,7 +1856,11 @@ const supplementalResources = {
         emptyDescription:
           'جرّب رقم تأكيد أو اسم ضيف أكثر تحديدًا.',
         guestNameWarning:
-          'البحث باسم الضيف يعرض أول حجز مطابق',
+          'تمت مطابقة هذا الحجز عبر اسم الضيف. تحقق من التفاصيل قبل المتابعة.',
+        multipleMatchesTitle:
+          'تم العثور على {{count}} حجوزات مطابقة لهذا البحث',
+        multipleMatchesDescription:
+          'اختر الحجز الصحيح لتجنب تسجيل الوصول أو المغادرة للحجز الخطأ.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'رقم التأكيد مفقود.',

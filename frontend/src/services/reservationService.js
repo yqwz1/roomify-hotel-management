@@ -50,19 +50,33 @@ export const searchReservations = async (query) => {
     if (!trimmed) return [];
 
     const isConfirmation = trimmed.toUpperCase().startsWith('RSV-');
-    const params = isConfirmation ? { confirmation: trimmed } : { guestName: trimmed };
-    const lookupResponse = await api.get('/reservations/search', { params });
-    const lookup = lookupResponse.data;
+    if (isConfirmation) {
+        const lookupResponse = await api.get('/reservations/search', {
+            params: { confirmation: trimmed },
+        });
+        const lookup = lookupResponse.data;
 
-    let id = null;
-    try {
-        const full = await getReservationByConfirmationNumber(lookup.confirmationNumber);
-        id = full.id;
-    } catch {
-        // Allow UI lookup rendering even if id enrichment fails.
+        let id = null;
+        try {
+            const full = await getReservationByConfirmationNumber(lookup.confirmationNumber);
+            id = full.id;
+        } catch {
+            // Allow UI lookup rendering even if id enrichment fails.
+        }
+
+        return [{ ...lookup, id }];
     }
 
-    return [{ ...lookup, id }];
+    const reservations = await getAllReservations();
+    const normalizedQuery = trimmed.toLowerCase();
+
+    return reservations.filter((reservation) => {
+        const guestName = String(
+            reservation?.guestName ?? reservation?.guest?.name ?? ''
+        ).toLowerCase();
+
+        return guestName.includes(normalizedQuery);
+    });
 };
 
 export const checkInReservation = async (confirmationNumber) => {
