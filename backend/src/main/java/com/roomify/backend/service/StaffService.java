@@ -1,6 +1,7 @@
 package com.roomify.backend.service;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.mail.MailException;
 import org.springframework.security.core.Authentication;
@@ -73,17 +74,34 @@ public class StaffService {
 
     @Transactional(readOnly = true)
     public List<StaffResponse> searchStaff(String search, Role role, String department, Boolean active) {
-        return staffRepository.searchStaff(
-                normalize(search),
-                role,
-                normalize(department),
-                active).stream()
+        String normalizedSearch = normalize(search);
+        String normalizedDepartment = normalize(department);
+
+        return staffRepository.findAll().stream()
+                .filter(staff -> matchesSearch(staff, normalizedSearch))
+                .filter(staff -> role == null || (staff.getUser() != null && staff.getUser().getRole() == role))
+                .filter(staff -> normalizedDepartment == null || normalizedDepartment.equals(staff.getDepartment()))
+                .filter(staff -> active == null || staff.isActive() == active)
                 .map(StaffResponse::from)
                 .toList();
     }
 
     private String normalize(String value) {
         return (value == null || value.isBlank()) ? null : value;
+    }
+
+    private boolean matchesSearch(Staff staff, String search) {
+        if (search == null) {
+            return true;
+        }
+
+        String keyword = search.toLowerCase(Locale.ROOT);
+        String name = staff.getName() != null ? staff.getName().toLowerCase(Locale.ROOT) : "";
+        String email = staff.getUser() != null && staff.getUser().getEmail() != null
+                ? staff.getUser().getEmail().toLowerCase(Locale.ROOT)
+                : "";
+
+        return name.contains(keyword) || email.contains(keyword);
     }
 
     public StaffResponse updateStaff(Long id, StaffUpdateRequest request) {

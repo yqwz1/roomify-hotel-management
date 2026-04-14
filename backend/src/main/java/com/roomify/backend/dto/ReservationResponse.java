@@ -4,6 +4,7 @@ import com.roomify.backend.entity.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReservationResponse {
 
@@ -26,6 +27,8 @@ public class ReservationResponse {
     private BigDecimal outstandingBalance;
     private boolean invoiceFinalized;
     private String paymentStatus;
+    private LocalDate actualCheckInDate;
+    private LocalDateTime actualCheckOutAt;
 
     public ReservationResponse() {
     }
@@ -259,5 +262,21 @@ public class ReservationResponse {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public LocalDate getActualCheckInDate() {
+        return actualCheckInDate;
+    }
+
+    public void setActualCheckInDate(LocalDate actualCheckInDate) {
+        this.actualCheckInDate = actualCheckInDate;
+    }
+
+    public LocalDateTime getActualCheckOutAt() {
+        return actualCheckOutAt;
+    }
+
+    public void setActualCheckOutAt(LocalDateTime actualCheckOutAt) {
+        this.actualCheckOutAt = actualCheckOutAt;
     }
 }

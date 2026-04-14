@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.roomify.backend.dto.StaffCreateRequest;
 import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.dto.StaffResponse;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.StaffRepository;
@@ -120,5 +122,24 @@ class StaffServiceTest {
 
         assertFalse(staff.isActive());
         assertFalse(user.isActive());
+    }
+
+    @Test
+    @DisplayName("Should return staff without requiring a search keyword")
+    void shouldReturnStaffWithoutSearchKeyword() {
+        User aliceUser = new User("alice@roomify.com", "hash", Role.STAFF, true);
+        Staff alice = new Staff(aliceUser, "Alice", "Front Desk");
+        aliceUser.setStaff(alice);
+
+        User bobUser = new User("bob@roomify.com", "hash", Role.MANAGER, true);
+        Staff bob = new Staff(bobUser, "Bob", "Management");
+        bobUser.setStaff(bob);
+
+        when(staffRepository.findAll()).thenReturn(List.of(alice, bob));
+
+        List<StaffResponse> responses = staffService.searchStaff(null, Role.STAFF, null, true);
+
+        assertEquals(1, responses.size());
+        assertEquals("alice@roomify.com", responses.getFirst().getEmail());
     }
 }

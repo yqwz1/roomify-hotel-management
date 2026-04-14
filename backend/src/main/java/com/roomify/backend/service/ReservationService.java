@@ -507,13 +507,17 @@ public class ReservationService {
             Reservation reservation,
             String action,
             String message) {
+        ReservationFinancialService.ReservationFinancialSummary summary = financialService.summarize(reservation);
 
         return new ReservationActionPlaceholderResponse(
                 reservation.getId(),
                 action,
                 message,
                 true,
-                reservation.getStatus());
+                reservation.getStatus(),
+                summary.paymentStatus().name(),
+                summary.outstandingBalance(),
+                summary.invoiceFinalized());
     }
 
     private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
@@ -559,8 +563,7 @@ public class ReservationService {
     private ReservationResponse toResponse(
             Reservation reservation,
             ReservationFinancialService.ReservationFinancialSummary summary) {
-
-        return new ReservationResponse(
+        ReservationResponse response = new ReservationResponse(
                 reservation.getId(),
                 reservation.getConfirmationNumber(),
                 reservation.getStatus(),
@@ -580,5 +583,8 @@ public class ReservationService {
                 summary.outstandingBalance(),
                 summary.invoiceFinalized(),
                 summary.paymentStatus().name());
+        response.setActualCheckInDate(reservation.getActualCheckInDate());
+        response.setActualCheckOutAt(reservation.getActualCheckOutAt());
+        return response;
     }
 }

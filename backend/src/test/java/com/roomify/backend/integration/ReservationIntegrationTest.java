@@ -157,7 +157,8 @@ class ReservationIntegrationTest {
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id").value(created.id()))
-                                .andExpect(jsonPath("$.status").value("CHECKED_IN"));
+                                .andExpect(jsonPath("$.status").value("CHECKED_IN"))
+                                .andExpect(jsonPath("$.actualCheckInDate").value(LocalDate.now().toString()));
 
                 Reservation updated = reservationRepository.findById(created.id()).orElseThrow();
                 Room room = roomRepository.findById(room1Id).orElseThrow();
@@ -239,7 +240,10 @@ class ReservationIntegrationTest {
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.action").value("check-out"))
-                                .andExpect(jsonPath("$.currentStatus").value("CHECKED_OUT"));
+                                .andExpect(jsonPath("$.currentStatus").value("CHECKED_OUT"))
+                                .andExpect(jsonPath("$.invoiceFinalized").value(true))
+                                .andExpect(jsonPath("$.paymentStatus").value("PAID"))
+                                .andExpect(jsonPath("$.outstandingBalance").value(0.00));
 
                 Reservation checkedOut = reservationRepository.findById(created.id()).orElseThrow();
                 Room room = roomRepository.findById(room1Id).orElseThrow();

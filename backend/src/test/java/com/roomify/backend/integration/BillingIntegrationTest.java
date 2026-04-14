@@ -28,14 +28,20 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
+import com.roomify.backend.entity.AuditLog;
+import com.roomify.backend.entity.Notification;
+import com.roomify.backend.entity.NotificationEventType;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.NotificationRepository;
 import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
+import com.roomify.backend.user.Role;
 
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -71,6 +77,10 @@ class BillingIntegrationTest {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
     @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+    @Autowired
     private JavaMailSender javaMailSender;
 
     private ObjectMapper objectMapper;
@@ -95,6 +105,8 @@ class BillingIntegrationTest {
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
         guestRepository.deleteAll();
+        notificationRepository.deleteAll();
+        auditLogRepository.deleteAll();
         reset(javaMailSender);
         Mockito.when(javaMailSender.createMimeMessage())
                 .thenAnswer(inv -> new MimeMessage(Session.getInstance(new Properties())));
@@ -234,6 +246,42 @@ class BillingIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("PAYMENT_OVERPAYMENT_BLOCKED"));
+    }
+
+    @Test
+    @DisplayName("POST /api/payments persists failed-payment notifications and audit logs on rollback")
+    void directPaymentsOverpaymentStillPersistsNotificationAndAudit() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("confirmationNumber", confirmationNumber);
+        request.put("amount", "1000.00");
+        request.put("paymentMethod", "CARD");
+
+        mockMvc.perform(post("/api/payments")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Payment exceeds remaining balance. Remaining balance is 690.00"));
+
+        Notification managerNotification = notificationRepository.findByTargetRoleOrderByCreatedAtDesc(Role.MANAGER)
+                .stream()
+                .filter(notification -> notification.getEventType() == NotificationEventType.PAYMENT_FAILED)
+                .filter(notification -> confirmationNumber.equals(notification.getReferenceId()))
+                .findFirst()
+                .orElseThrow();
+
+        org.junit.jupiter.api.Assertions.assertEquals("Payment failed", managerNotification.getTitle());
+
+        AuditLog failedAudit = auditLogRepository.findAll().stream()
+                .filter(log -> "PAYMENT_FAILED".equals(log.getAction()))
+                .filter(log -> confirmationNumber.equals(log.getTarget()))
+                .findFirst()
+                .orElseThrow();
+
+        org.junit.jupiter.api.Assertions.assertTrue(failedAudit.getMetadata().contains("Overpayment blocked"));
     }
 
     @Test
