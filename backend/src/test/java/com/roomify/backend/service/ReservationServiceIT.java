@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
         "roomify.jwt.expiration=3600000",
-        "roomify.reservations.tax-rate=0.10"
+        "roomify.billing.vat-rate=0.15"
 })
 @Transactional
 class ReservationServiceIT {

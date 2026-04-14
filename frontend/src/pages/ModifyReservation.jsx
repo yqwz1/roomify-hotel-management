@@ -19,6 +19,8 @@ import {
   translateKnownValue,
 } from '../utils/localization';
 
+const VAT_RATE = 0.15;
+
 function ModifyModal({ reservation, onClose, onSave }) {
   const { t, i18n } = useTranslation();
   const [checkIn, setCheckIn] = useState(reservation.checkInDate);
@@ -87,7 +89,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
   const nightlyRate = Number(selectedRoom?.roomType?.basePrice || reservation.roomRate || 0);
   const subtotal = nightlyRate * nights;
-  const taxes = subtotal * 0.1;
+  const taxes = subtotal * VAT_RATE;
   const totalPrice = subtotal + taxes;
 
   const unchanged =
@@ -261,7 +263,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
                   <span>{formatLocalizedCurrency(subtotal, i18n.language)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>{t('taxes10')}</span>
+                  <span>{t('taxes15')}</span>
                   <span>{formatLocalizedCurrency(taxes, i18n.language)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-amber-200 pt-2 font-bold">
@@ -508,7 +510,7 @@ export default function ModifyReservation() {
                 disabled={!reservationStatusRules.canModify(selected.status)}
                 className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
               >
-                {t('modifyDatesButton')}
+                {t('modifyReservationPage.saveChangesCta')}
               </button>
             </DashboardPanel>
           </div>

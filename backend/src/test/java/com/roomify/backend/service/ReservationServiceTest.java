@@ -53,6 +53,7 @@ class ReservationServiceTest {
     private InvoiceDeliveryLogService invoiceDeliveryLogService;
     private AuditService auditService;
     private HousekeepingNotificationService housekeepingNotificationService;
+    private ReservationFinancialService financialService;
 
     private ReservationService reservationService;
 
@@ -68,6 +69,7 @@ class ReservationServiceTest {
         invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
         auditService = mock(AuditService.class);
         housekeepingNotificationService = mock(HousekeepingNotificationService.class);
+        financialService = new ReservationFinancialService(new BigDecimal("0.15"));
 
         reservationService = new ReservationService(
                 reservationRepository,
@@ -78,6 +80,7 @@ class ReservationServiceTest {
                 invoiceDeliveryLogService,
                 auditService,
                 housekeepingNotificationService,
+                financialService,
                 new BigDecimal("0.15"));
     }
 
@@ -270,7 +273,7 @@ class ReservationServiceTest {
     void checkOutShouldThrowConflictWhenInvoiceIsNotFinalized() {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
         reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
-        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setOutstandingBalance(reservation.getTotalPrice());
         reservation.setInvoiceFinalized(false);
 
         when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
@@ -288,6 +291,8 @@ class ReservationServiceTest {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
         reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
         reservation.setOutstandingBalance(new BigDecimal("25.00"));
+        reservation.setTotalPaid(new BigDecimal("320.00"));
+        reservation.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
         reservation.setInvoiceFinalized(true);
 
         when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
@@ -324,6 +329,8 @@ class ReservationServiceTest {
         reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
         reservation.setInvoiceFinalized(true);
         reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setTotalPaid(reservation.getTotalPrice());
+        reservation.setPaymentStatus(PaymentStatus.PAID);
 
         when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
                 .thenReturn(Optional.of(reservation));
@@ -362,9 +369,9 @@ class ReservationServiceTest {
         reservation.setCheckOutDate(LocalDate.of(2026, 4, 3));
         reservation.setStatus(status);
         reservation.setConfirmationNumber("RSV-ABC123DEF456");
-        reservation.setTotalPrice(new BigDecimal("517.50"));
+        reservation.setTotalPrice(new BigDecimal("345.00"));
         reservation.setTotalPaid(BigDecimal.ZERO);
-        reservation.setOutstandingBalance(new BigDecimal("517.50"));
+        reservation.setOutstandingBalance(new BigDecimal("345.00"));
         reservation.setPaymentStatus(PaymentStatus.UNPAID);
         reservation.setInvoiceFinalized(false);
 

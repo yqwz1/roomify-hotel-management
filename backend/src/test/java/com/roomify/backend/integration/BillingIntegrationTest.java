@@ -50,7 +50,7 @@ import jakarta.mail.internet.MimeMessage;
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
         "roomify.jwt.expiration=3600000",
-        "roomify.reservations.tax-rate=0.10"
+        "roomify.billing.vat-rate=0.15"
 })
 class BillingIntegrationTest {
 
@@ -204,13 +204,13 @@ class BillingIntegrationTest {
         Map<String, Object> request = new HashMap<>();
         request.put("amount", "200.00");
 
-        mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
+                mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
                         .header("Authorization", "Bearer " + managerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalPaid").value(200.00))
-                .andExpect(jsonPath("$.outstandingBalance").value(460.00))
+                .andExpect(jsonPath("$.outstandingBalance").value(490.00))
                 .andExpect(jsonPath("$.invoiceFinalized").value(false))
                 .andExpect(jsonPath("$.paymentStatus").value("PARTIALLY_PAID"));
 
@@ -255,7 +255,7 @@ class BillingIntegrationTest {
                 managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
 
         Map<String, Object> request = new HashMap<>();
-        request.put("amount", "660.00");
+        request.put("amount", "690.00");
 
         mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
                         .header("Authorization", "Bearer " + managerToken)

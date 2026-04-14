@@ -64,4 +64,26 @@ public class InvoiceController {
 
         return ResponseEntity.ok(body);
     }
+
+    @PostMapping("/{reservationId}/email")
+    public ResponseEntity<Map<String, Object>> sendInvoiceEmail(
+            @PathVariable Long reservationId) {
+
+        Optional<InvoiceDeliveryLog> latestLog = invoiceService.sendInvoiceEmailForReservation(reservationId);
+
+        if (latestLog.isEmpty()) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", "UNKNOWN");
+            return ResponseEntity.ok(body);
+        }
+
+        InvoiceDeliveryLog log = latestLog.get();
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", log.getStatus().name());
+        body.put("errorMessage", log.getErrorMessage());
+        body.put("sentAt", log.getCreatedAt());
+
+        return ResponseEntity.ok(body);
+    }
 }

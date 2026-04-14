@@ -89,6 +89,7 @@ public class EmailService {
                         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
                         helper.setTo(recipient);
+                        helper.setFrom(fromAddress);
                         helper.setSubject("Roomify Invoice " + invoiceNumber);
 
                         helper.setText("""
@@ -157,14 +158,14 @@ public class EmailService {
 
                         invoiceDeliveryLogService.logSuccess(
                                         to,
-                                        "Receipt",
+                                        InvoiceDeliveryLogService.RECEIPT_SUBJECT,
                                         confirmationNumber);
 
                 } catch (MailException | MessagingException ex) {
 
                         invoiceDeliveryLogService.logFailure(
                                         to,
-                                        "Receipt",
+                                        InvoiceDeliveryLogService.RECEIPT_SUBJECT,
                                         confirmationNumber,
                                         ex.getMessage());
 

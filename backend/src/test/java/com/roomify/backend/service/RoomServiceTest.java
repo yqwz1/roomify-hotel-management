@@ -4,6 +4,7 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.CannotDeleteException;
+import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -69,7 +70,7 @@ class RoomServiceTest {
         room.setStatus(RoomStatus.AVAILABLE);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(ResourceConflictException.class, () ->
                 roomService.updateStatus(1L, "OCCUPIED")
         );
     }
@@ -79,7 +80,7 @@ class RoomServiceTest {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(ResourceConflictException.class, () ->
                 roomService.updateStatus(1L, "AVAILABLE")
         );
     }

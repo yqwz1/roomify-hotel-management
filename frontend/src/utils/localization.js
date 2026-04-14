@@ -93,6 +93,7 @@ const INVOICE_DELIVERY_STATUS_KEYS = {
 };
 
 const PAYMENT_STATUS_KEYS = {
+  PENDING: 'paymentStatusPending',
   UNPAID: 'paymentStatusUnpaid',
   PARTIALLY_PAID: 'paymentStatusPartiallyPaid',
   PAID: 'paymentStatusPaid',

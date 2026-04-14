@@ -401,4 +401,39 @@ class RoomIntegrationTest {
                                 .header("Authorization", "Bearer " + guestToken))
                                 .andExpect(status().isForbidden());
         }
+
+        @Test
+        void getValidNextStatusesReturnsOnlyAllowedTransitions() throws Exception {
+                Long roomId = roomRepository.save(
+                                new com.roomify.backend.entity.Room(
+                                                "321",
+                                                roomTypeRepository.findById(roomTypeId).orElseThrow(),
+                                                3,
+                                                com.roomify.backend.entity.RoomStatus.NEEDS_CLEANING))
+                                .getId();
+
+                mockMvc.perform(get("/api/rooms/" + roomId + "/valid-next-statuses")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0]").value("AVAILABLE"));
+        }
+
+        @Test
+        void occupiedRoomManualStatusChangeReturnsConflict() throws Exception {
+                Long roomId = roomRepository.save(
+                                new com.roomify.backend.entity.Room(
+                                                "654",
+                                                roomTypeRepository.findById(roomTypeId).orElseThrow(),
+                                                6,
+                                                com.roomify.backend.entity.RoomStatus.OCCUPIED))
+                                .getId();
+
+                mockMvc.perform(put("/api/rooms/" + roomId + "/status")
+                                .param("status", "AVAILABLE")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isConflict())
+                                .andExpect(jsonPath("$.message")
+                                                .value("Occupied rooms can only change status through the checkout flow"));
+        }
 }

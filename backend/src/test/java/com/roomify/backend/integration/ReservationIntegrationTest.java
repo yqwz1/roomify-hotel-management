@@ -63,7 +63,7 @@ import org.springframework.web.context.WebApplicationContext;
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
                 "roomify.jwt.expiration=3600000",
-                "roomify.reservations.tax-rate=0.10"
+                "roomify.billing.vat-rate=0.15"
 })
 class ReservationIntegrationTest {
 
@@ -281,6 +281,8 @@ class ReservationIntegrationTest {
                 Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
                 reservation.setInvoiceFinalized(true);
                 reservation.setOutstandingBalance(new BigDecimal("10.00"));
+                reservation.setTotalPaid(reservation.getTotalPrice().subtract(new BigDecimal("10.00")));
+                reservation.setPaymentStatus(com.roomify.backend.entity.PaymentStatus.PARTIALLY_PAID);
                 reservationRepository.save(reservation);
 
                 mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
@@ -316,7 +318,7 @@ class ReservationIntegrationTest {
                                 .andExpect(status().isConflict())
                                 .andExpect(jsonPath("$.error").value("Payment Required"))
                                 .andExpect(jsonPath("$.code").value("PAYMENT_NOT_FINALIZED"))
-                                .andExpect(jsonPath("$.details.paymentStatus").value("PAYMENT_PENDING"))
+                                .andExpect(jsonPath("$.details.paymentStatus").value("UNPAID"))
                                 .andExpect(jsonPath("$.message").value("Payment must be finalized before checkout"));
         }
 
@@ -700,7 +702,7 @@ class ReservationIntegrationTest {
                 assertEquals(room1Id, modified.getRoom().getId());
                 assertEquals(LocalDate.now().plusDays(7), modified.getCheckInDate());
                 assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
-                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("660.00")));
+                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("690.00")));
         }
 
         @Test
@@ -728,7 +730,7 @@ class ReservationIntegrationTest {
                 assertEquals(room2Id, modified.getRoom().getId());
                 assertEquals(LocalDate.now().plusDays(6), modified.getCheckInDate());
                 assertEquals(LocalDate.now().plusDays(8), modified.getCheckOutDate());
-                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("660.00")));
+                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("690.00")));
         }
 
         @Test
@@ -757,7 +759,7 @@ class ReservationIntegrationTest {
                 assertEquals(LocalDate.now().plusDays(7), modified.getCheckInDate());
                 assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
                 assertEquals("Guest requested upgrade", modified.getModificationReason());
-                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("990.00")));
+                assertEquals(0, modified.getTotalPrice().compareTo(new BigDecimal("1035.00")));
         }
 
         @Test

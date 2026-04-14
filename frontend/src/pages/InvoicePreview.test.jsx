@@ -12,6 +12,7 @@ import {
   generateInvoice,
   getInvoiceDeliveryStatus,
   getInvoicePdf,
+  sendInvoiceEmail,
 } from '../services/invoiceService';
 
 const reservation = {
@@ -86,6 +87,7 @@ vi.mock('../services/invoiceService', () => ({
   generateInvoice: vi.fn(),
   getInvoiceDeliveryStatus: vi.fn(),
   getInvoicePdf: vi.fn(),
+  sendInvoiceEmail: vi.fn(),
 }));
 
 describe('InvoicePreview', () => {
@@ -211,6 +213,41 @@ describe('InvoicePreview', () => {
 
     expect(await screen.findByTitle(/Invoice PDF preview/i)).toBeInTheDocument();
     expect(screen.getByText(/Invoice generated successfully/i)).toBeInTheDocument();
+  });
+
+  it('sends the invoice email from the finalized preview and updates delivery state', async () => {
+    const user = userEvent.setup();
+
+    getReservationByConfirmationNumber.mockResolvedValue(reservation);
+    getBill.mockResolvedValue({
+      balanceDue: 250,
+      invoiceFinalized: true,
+      lineItems: [{ label: 'Room charge', amount: 250, credit: false }],
+    });
+    getInvoiceDeliveryStatus.mockResolvedValue({
+      status: 'UNKNOWN',
+      errorMessage: null,
+      sentAt: null,
+    });
+    getInvoicePdf.mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' }));
+    sendInvoiceEmail.mockResolvedValue({
+      status: 'SENT',
+      errorMessage: null,
+      sentAt: '2026-03-12T10:00:00Z',
+    });
+
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Load Invoice Reservation' }));
+    await screen.findByTitle(/Invoice PDF preview/i);
+    await user.click(screen.getByRole('button', { name: /Email Invoice/i }));
+
+    await waitFor(() => {
+      expect(sendInvoiceEmail).toHaveBeenCalledWith(reservation.id);
+    });
+
+    expect(await screen.findByText(/Invoice email sent successfully/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Sent/i).length).toBeGreaterThan(0);
   });
 
   it('explicitly surfaces ATTEMPT delivery status and normalizes service charge labels', async () => {

@@ -24,6 +24,7 @@ public class InvoicePdfService {
 
         private final QRCodeHelper qrCodeHelper;
         private final ZatcaQrService zatcaQrService;
+        private final ReservationFinancialService financialService;
 
         @Value("${roomify.billing.vat-rate}")
         private BigDecimal vatRate;
@@ -33,6 +34,7 @@ public class InvoicePdfService {
                         String invoiceNumber) {
 
                 try {
+                        ReservationFinancialService.ReservationFinancialSummary summary = financialService.summarize(reservation);
 
                         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -103,7 +105,7 @@ public class InvoicePdfService {
                         table.addCell(reservation.getRoom().getRoomNumber());
                         table.addCell(reservation.getCheckInDate().toString());
                         table.addCell(reservation.getCheckOutDate().toString());
-                        table.addCell(reservation.getTotalPrice().toString());
+                        table.addCell(summary.totalPrice().toString());
 
                         document.add(table);
 
@@ -113,13 +115,14 @@ public class InvoicePdfService {
                         // VAT Calculation
                         // ======================
 
-                        BigDecimal vat = reservation.getTotalPrice().multiply(vatRate);
-                        BigDecimal total = reservation.getTotalPrice().add(vat);
+                        BigDecimal subtotal = summary.subtotal();
+                        BigDecimal vat = summary.taxes();
+                        BigDecimal total = summary.totalPrice();
 
                         Table totals = new Table(2);
 
                         totals.addCell("Subtotal");
-                        totals.addCell(reservation.getTotalPrice().toString());
+                        totals.addCell(subtotal.toString());
 
                         totals.addCell("VAT " + vatRate.multiply(new BigDecimal("100")) + "%");
                         totals.addCell(vat.toString());

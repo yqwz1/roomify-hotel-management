@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   CheckCircle2,
@@ -95,9 +96,14 @@ function LoadingCard() {
 
 export default function RoomStatus() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const initialFilter = String(location.state?.initialFilter ?? 'ALL').toUpperCase();
+  const initialQuery = String(location.state?.initialQuery ?? '');
   const [rooms, setRooms] = useState([]);
-  const [filter, setFilter] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState(
+    STATUSES.includes(initialFilter) ? initialFilter : 'ALL'
+  );
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);

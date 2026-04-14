@@ -21,6 +21,7 @@ import {
   generateInvoice,
   getInvoiceDeliveryStatus,
   getInvoicePdf,
+  sendInvoiceEmail,
 } from '../services/invoiceService';
 import {
   extractReservationError,
@@ -159,6 +160,7 @@ export default function InvoicePreview() {
   const [deliveryStatus, setDeliveryStatus] = useState('IDLE');
   const [deliveryMeta, setDeliveryMeta] = useState({ errorMessage: null, sentAt: null });
   const [generating, setGenerating] = useState(false);
+  const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -223,6 +225,27 @@ export default function InvoicePreview() {
     }
   }, [t]);
 
+  const loadDeliveryStatus = useCallback(async (reservationId) => {
+    try {
+      const delivery = await getInvoiceDeliveryStatus(reservationId);
+      setDeliveryStatus(delivery?.status || 'UNKNOWN');
+      setDeliveryMeta({
+        errorMessage: delivery?.errorMessage ?? null,
+        sentAt: delivery?.sentAt ?? null,
+      });
+      return delivery;
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setDeliveryStatus('UNKNOWN');
+        setDeliveryMeta({ errorMessage: null, sentAt: null });
+        return null;
+      }
+
+      setDeliveryStatus('ERROR');
+      return null;
+    }
+  }, []);
+
   const fetchInvoiceData = useCallback(async (confirmationNumber) => {
     if (!confirmationNumber) return;
 
@@ -245,20 +268,7 @@ export default function InvoicePreview() {
         return;
       }
 
-      try {
-        const delivery = await getInvoiceDeliveryStatus(reservation.id);
-        setDeliveryStatus(delivery?.status || 'UNKNOWN');
-        setDeliveryMeta({
-          errorMessage: delivery?.errorMessage ?? null,
-          sentAt: delivery?.sentAt ?? null,
-        });
-      } catch (err) {
-        if (err?.response?.status === 404) {
-          setDeliveryStatus('UNKNOWN');
-        } else {
-          setDeliveryStatus('ERROR');
-        }
-      }
+      await loadDeliveryStatus(reservation.id);
 
       await loadPreview(reservation.id);
     } catch (err) {
@@ -270,7 +280,7 @@ export default function InvoicePreview() {
     } finally {
       setLoading(false);
     }
-  }, [loadPreview, resetPreview]);
+  }, [loadDeliveryStatus, loadPreview, resetPreview]);
 
   const handleSelect = async (reservation) => {
     await fetchInvoiceData(reservation.confirmationNumber);
@@ -290,6 +300,36 @@ export default function InvoicePreview() {
       setGenerating(false);
     }
   }, [fetchInvoiceData, generating, invoiceFinalized, selected, t]);
+
+  const handleSendEmail = useCallback(async () => {
+    if (!selected?.id || !invoiceFinalized || emailing) return;
+
+    try {
+      setEmailing(true);
+      const delivery = await sendInvoiceEmail(selected.id);
+      const status = delivery?.status || 'UNKNOWN';
+      setDeliveryStatus(status);
+      setDeliveryMeta({
+        errorMessage: delivery?.errorMessage ?? null,
+        sentAt: delivery?.sentAt ?? null,
+      });
+
+      if (status === 'SENT') {
+        setToast({ message: t('invoicePreviewPage.emailSuccess'), type: 'success' });
+      } else {
+        setToast({
+          message: t('invoicePreviewPage.emailFailedToast', {
+            error: delivery?.errorMessage ?? t('invoicePreviewPage.deliveryUnavailable'),
+          }),
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      setToast({ message: extractReservationError(err), type: 'error' });
+    } finally {
+      setEmailing(false);
+    }
+  }, [emailing, invoiceFinalized, selected?.id, t]);
 
   const handleRetryData = useCallback(async () => {
     const confirmationNumber = selected?.confirmationNumber || initialQuery;
@@ -494,6 +534,20 @@ export default function InvoicePreview() {
                       </Button>
                     ) : (
                       <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleSendEmail}
+                          disabled={emailing}
+                          className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                        >
+                          <Mail className="h-4 w-4" />
+                          {emailing
+                            ? t('invoicePreviewPage.sendingEmail')
+                            : deliveryStatus === 'FAILED'
+                              ? t('invoicePreviewPage.retryEmail')
+                              : t('invoicePreviewPage.emailInvoice')}
+                        </Button>
                         <Button
                           type="button"
                           variant="outline"

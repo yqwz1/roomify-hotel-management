@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2, Waves } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ModalFrame from '../components/common/ModalFrame';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -277,12 +278,12 @@ function UpdateStatusModal({ room, onSave, onClose }) {
 
 export default function RoomsManagement() {
   const { t, i18n } = useTranslation();
-  const { rooms, loading, error, fetchRooms, addRoom, changeStatus, removeRoom, clearError } = useRooms();
+  const navigate = useNavigate();
+  const { rooms, loading, error, fetchRooms, addRoom, removeRoom, clearError } = useRooms();
   const { roomTypes, fetchRoomTypes } = useRoomTypes();
 
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [statusModal, setStatusModal] = useState(null);
   const [bannerError, setBannerError] = useState(null);
 
   useEffect(() => {
@@ -349,14 +350,6 @@ export default function RoomsManagement() {
 
   const handleAddRoom = async (data) => {
     const result = await addRoom(data);
-    if (result.success) {
-      fetchRooms(buildApiFilters(filters));
-    }
-    return result;
-  };
-
-  const handleChangeStatus = async (id, status) => {
-    const result = await changeStatus(id, status);
     if (result.success) {
       fetchRooms(buildApiFilters(filters));
     }
@@ -446,6 +439,7 @@ export default function RoomsManagement() {
         statusOptions={statusOptions}
         roomTypeOptions={roomTypeOptions}
         floorOptions={floorOptions}
+        showPriceRange={false}
       />
 
       <DashboardPanel
@@ -548,11 +542,18 @@ export default function RoomsManagement() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setStatusModal(room)}
+                            onClick={() =>
+                              navigate('/room-status', {
+                                state: {
+                                  initialFilter: room.status,
+                                  initialQuery: room.roomNumber,
+                                },
+                              })
+                            }
                             className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
                           >
                             <Pencil className="h-4 w-4" />
-                            {t('roomsManagementPage.statusButton')}
+                            {t('roomsManagementPage.openStatusBoard')}
                           </button>
                           <button
                             type="button"
@@ -581,13 +582,6 @@ export default function RoomsManagement() {
         />
       )}
 
-      {statusModal && (
-        <UpdateStatusModal
-          room={statusModal}
-          onSave={handleChangeStatus}
-          onClose={() => setStatusModal(null)}
-        />
-      )}
     </div>
   );
 }
