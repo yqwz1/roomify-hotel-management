@@ -91,6 +91,22 @@ npm test -- --run
 npm run build
 ```
 
+## Demo Prep
+
+- Recommended startup:
+  - macOS: `./start-roomify-mac.sh`
+  - Windows PowerShell: `.\start-roomify-windows.ps1`
+- Script behavior:
+  - starts `postgres` and `mailpit`
+  - waits for infra readiness
+  - starts backend with `DB_PORT=5433` and `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`
+  - waits for backend health
+  - prints the exact manual frontend command
+- Manual frontend step after the script reports ready:
+  - `cd frontend && npm run dev`
+- Mail UI: [http://127.0.0.1:8025](http://127.0.0.1:8025)
+- Browser smoke runbook: [docs/demo-smoke-runbook.md](/C:/Users/mohmm/Desktop/UNI/kazme/roomify-hotel-management/docs/demo-smoke-runbook.md)
+
 ## Known Issues
 
 - Frontend test suite reports non-blocking React `act(...)` warnings in `App.test.jsx`.

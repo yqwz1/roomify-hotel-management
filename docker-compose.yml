@@ -14,6 +14,15 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - roomify-network
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: roomify-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - roomify-network
   backend:
     build:
       context: ./backend
@@ -23,9 +32,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://roomify-postgres:5432/roomify
       SPRING_DATASOURCE_USERNAME: roomify_user
       SPRING_DATASOURCE_PASSWORD: roomify_pass
+      SPRING_MAIL_HOST: roomify-mailpit
+      SPRING_MAIL_PORT: 1025
+      ROOMIFY_DEMO_BOOTSTRAP_ENABLED: "true"
       SERVER_PORT: 8080
     depends_on:
       - postgres
+      - mailpit
     ports:
       - "8080:8080"
     networks:

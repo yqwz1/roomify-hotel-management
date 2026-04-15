@@ -1,108 +1,268 @@
 param()
 
-Write-Host "Starting Roomify Automation Script (Windows/PowerShell)..." -ForegroundColor Cyan
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-# ==========================================
-# 1. Docker & Database Check
-# ==========================================
-try {
-    $dockerInfo = docker info 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[X] Docker does not seem to be running." -ForegroundColor Red
-        Write-Host "[>] Please open Docker Desktop, wait for it to start, and run this script again." -ForegroundColor Yellow
-        exit 1
-    }
-} catch {
-    Write-Host "[X] Docker is not installed or not running in the current PATH." -ForegroundColor Red
+# Reliable local demo startup for Windows PowerShell.
+# Starts Docker infra, launches the backend with demo bootstrap enabled,
+# waits for readiness, and prints the exact next manual frontend step.
+
+$RepoRoot = $PSScriptRoot
+$BackendDir = Join-Path $RepoRoot 'backend'
+$FrontendDir = Join-Path $RepoRoot 'frontend'
+$ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
+$BackendLog = Join-Path $BackendDir 'demo-backend.log'
+$BackendPidFile = Join-Path $BackendDir 'demo-backend.pid'
+
+$DbPort = 5433
+$BackendPort = 8080
+$MailpitSmtpPort = 1025
+$MailpitHttpPort = 8025
+$BackendHealthUrl = "http://127.0.0.1:$BackendPort/api/health"
+$AppUrl = 'http://localhost:3000'
+$LoginUrl = "$AppUrl/login"
+$MailpitUrl = "http://127.0.0.1:$MailpitHttpPort"
+$DemoCredentials = 'admin@roomify.com / password123'
+
+function Write-Info {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor Cyan
+}
+
+function Write-Ok {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor Green
+}
+
+function Stop-Script {
+    param([string]$Message)
+    Write-Host "ERROR: $Message" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "[+] Docker is running. Starting PostgreSQL..." -ForegroundColor Green
-docker compose up -d postgres
+function Test-RequiredCommand {
+    param(
+        [string]$CommandName,
+        [string]$Message
+    )
 
-Write-Host "Waiting for PostgreSQL to be ready on port 5433..." -ForegroundColor Yellow
-$postgresReady = $false
-for ($i = 0; $i -lt 30; $i++) {
-    $connection = Test-NetConnection -ComputerName "localhost" -Port 5433 -InformationLevel Quiet -WarningAction SilentlyContinue
-    if ($connection) {
-        $postgresReady = $true
-        break
+    if (-not (Get-Command $CommandName -ErrorAction SilentlyContinue)) {
+        Stop-Script $Message
     }
-    Start-Sleep -Seconds 1
 }
 
-if (-not $postgresReady) {
-    Write-Host "[X] Timed out waiting for PostgreSQL to start. Please check Docker logs." -ForegroundColor Red
-    exit 1
-}
-Write-Host "[+] PostgreSQL is fully ready and accepting connections!" -ForegroundColor Green
+function Assert-File {
+    param(
+        [string]$Path,
+        [string]$Message
+    )
 
-# ==========================================
-# 2. Process Cleanup & Backend Startup
-# ==========================================
-Write-Host "Checking for port 8080 conflicts..." -ForegroundColor Cyan
-$blockingProcess = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue
-if ($blockingProcess) {
-    Write-Host "[!] Port 8080 is in use. Terminating existing process..." -ForegroundColor Yellow
-    foreach ($proc in $blockingProcess) {
-        Stop-Process -Id $proc.OwningProcess -Force -ErrorAction SilentlyContinue
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        Stop-Script $Message
     }
-    Start-Sleep -Seconds 2
 }
 
-$backendProcess = $null
-$frontendProcess = $null
+function Test-TcpPort {
+    param(
+        [string]$TargetHost,
+        [int]$Port
+    )
 
-try {
-    Write-Host "Starting Spring Boot Backend..." -ForegroundColor Cyan
-    Push-Location backend
-    $env:DB_PORT="5433"
-    
-    # Start Maven via Start-Process
-    $backendProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\mvnw.cmd spring-boot:run" -PassThru -WindowStyle Hidden -RedirectStandardOutput "backend.log" -RedirectStandardError "backend_err.log"
-    Pop-Location
-    Write-Host "[+] Backend starting in background (PID: $($backendProcess.Id)). Logs at backend/backend.log" -ForegroundColor Green
+    $client = $null
 
-    # Give backend a head start
-    Start-Sleep -Seconds 3
+    try {
+        $client = [System.Net.Sockets.TcpClient]::new()
+        $async = $client.BeginConnect($TargetHost, $Port, $null, $null)
+        $connected = $async.AsyncWaitHandle.WaitOne(1000, $false)
 
-# ==========================================
-# 3. Frontend Startup
-# ==========================================
-    Write-Host "Starting Vite React Frontend..." -ForegroundColor Cyan
-    Push-Location frontend
-    $frontendProcess = Start-Process -FilePath "cmd.exe" -ArgumentList "/c npm run dev" -PassThru -WindowStyle Hidden -RedirectStandardOutput "frontend.log" -RedirectStandardError "frontend_err.log"
-    Pop-Location
-    Write-Host "[+] Frontend starting in background (PID: $($frontendProcess.Id)). Logs at frontend/frontend.log" -ForegroundColor Green
+        if (-not $connected) {
+            return $false
+        }
 
-    Write-Host ""
-    Write-Host "[*] Roomify is up and running!" -ForegroundColor Magenta
-    Write-Host "[>] Backend Logs: Get-Content backend\backend.log -Wait -Tail 10" -ForegroundColor Cyan
-    Write-Host "[>] Frontend Logs: Get-Content frontend\frontend.log -Wait -Tail 10" -ForegroundColor Cyan
-    Write-Host "[!] Press [Ctrl+C] to gracefully stop all services." -ForegroundColor Yellow
+        $client.EndConnect($async)
+        return $true
+    }
+    catch {
+        return $false
+    }
+    finally {
+        if ($client) {
+            $client.Dispose()
+        }
+    }
+}
 
-    # Keep script alive to wait for Ctrl+C
-    while ($true) {
+function Wait-ForTcp {
+    param(
+        [string]$Name,
+        [string]$TargetHost,
+        [int]$Port,
+        [int]$TimeoutSeconds = 60
+    )
+
+    for ($elapsed = 0; $elapsed -lt $TimeoutSeconds; $elapsed++) {
+        if (Test-TcpPort -TargetHost $TargetHost -Port $Port) {
+            return
+        }
+
         Start-Sleep -Seconds 1
+    }
+
+    Stop-Script "$Name did not become reachable on ${TargetHost}:$Port within ${TimeoutSeconds}s."
+}
+
+function Stop-BackendProcess {
+    param([System.Diagnostics.Process]$Process)
+
+    if ($null -eq $Process) {
+        if (Test-Path -LiteralPath $BackendPidFile) {
+            Remove-Item -LiteralPath $BackendPidFile -Force
+        }
+        return
+    }
+
+    try {
+        if (-not $Process.HasExited) {
+            taskkill /T /F /PID $Process.Id | Out-Null
+        }
+    }
+    catch {
+    }
+
+    if (Test-Path -LiteralPath $BackendPidFile) {
+        Remove-Item -LiteralPath $BackendPidFile -Force
+    }
+}
+
+function Show-BackendLogTail {
+    if (Test-Path -LiteralPath $BackendLog) {
+        Write-Host ''
+        Write-Host 'Last backend log lines:' -ForegroundColor Yellow
+        Get-Content -LiteralPath $BackendLog -Tail 40
+    }
+}
+
+function Wait-ForBackend {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [int]$TimeoutSeconds = 120
+    )
+
+    for ($elapsed = 0; $elapsed -lt $TimeoutSeconds; $elapsed++) {
+        $Process.Refresh()
+        if ($Process.HasExited) {
+            Show-BackendLogTail
+            Stop-BackendProcess -Process $Process
+            Stop-Script 'Backend process exited before it became ready.'
+        }
+
+        try {
+            $response = Invoke-WebRequest -Uri $BackendHealthUrl -TimeoutSec 2 -UseBasicParsing
+            if ($response.StatusCode -eq 200 -and $response.Content -match '"status"\s*:\s*"ok"') {
+                return
+            }
+        }
+        catch {
+        }
+
+        Start-Sleep -Seconds 1
+    }
+
+    Show-BackendLogTail
+    Stop-BackendProcess -Process $Process
+    Stop-Script "Backend did not become ready at $BackendHealthUrl within ${TimeoutSeconds}s."
+}
+
+function Write-ReadySummary {
+    Write-Host ''
+    Write-Host 'Ready checklist' -ForegroundColor White
+    Write-Host '- Postgres: ready'
+    Write-Host '- Mailpit: ready'
+    Write-Host '- Backend: ready'
+    Write-Host "- Frontend: run manually with ``Set-Location `"$FrontendDir`"; npm run dev``"
+    Write-Host "- App: $AppUrl"
+    Write-Host "- Login: $LoginUrl"
+    Write-Host "- Mail inbox: $MailpitUrl"
+    Write-Host "- Demo credentials: $DemoCredentials"
+    Write-Host "- Backend log: $BackendLog"
+    Write-Host "- Backend PID file: $BackendPidFile"
+}
+
+Test-RequiredCommand -CommandName 'docker' -Message 'Docker is required but was not found in PATH.'
+Assert-File -Path $ComposeFile -Message "docker-compose.yml was not found in $RepoRoot."
+Assert-File -Path (Join-Path $BackendDir 'mvnw.cmd') -Message "The backend Maven wrapper is missing at $BackendDir\mvnw.cmd."
+Assert-File -Path (Join-Path $FrontendDir 'package.json') -Message "frontend\package.json is missing at $FrontendDir\package.json."
+
+try {
+    & docker compose version *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Stop-Script "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
+    }
+}
+catch {
+    Stop-Script "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
+}
+
+try {
+    & docker info *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Stop-Script 'Docker is not running. Start Docker Desktop and retry.'
+    }
+}
+catch {
+    Stop-Script 'Docker is not running. Start Docker Desktop and retry.'
+}
+
+Write-Info 'Starting demo infrastructure with docker compose...'
+Push-Location $RepoRoot
+try {
+    & docker compose up -d postgres mailpit
+    if ($LASTEXITCODE -ne 0) {
+        Stop-Script 'docker compose up failed. Check Docker and whether ports 5433, 1025, or 8025 are already in use.'
     }
 }
 finally {
-# ==========================================
-# 4. Cleanup on Exit
-# ==========================================
-    Write-Host ""
-    Write-Host "Shutting down Roomify services..." -ForegroundColor Yellow
-    
-    if ($frontendProcess -and -not $frontendProcess.HasExited) {
-        Write-Host "Killing Frontend (PID: $($frontendProcess.Id))..." -ForegroundColor Cyan
-        # Using taskkill with /T to kill the process tree (since we used cmd /c)
-        taskkill /T /F /PID $frontendProcess.Id 2>&1 | Out-Null
-    }
-    
-    if ($backendProcess -and -not $backendProcess.HasExited) {
-        Write-Host "Killing Backend (PID: $($backendProcess.Id))..." -ForegroundColor Cyan
-        taskkill /T /F /PID $backendProcess.Id 2>&1 | Out-Null
-    }
-    
-    Write-Host "[+] Cleanup complete. No dangling ports! Goodbye." -ForegroundColor Green
+    Pop-Location
 }
+
+Write-Info "Waiting for Postgres on 127.0.0.1:$DbPort..."
+Wait-ForTcp -Name 'Postgres' -TargetHost '127.0.0.1' -Port $DbPort -TimeoutSeconds 60
+Write-Ok 'Postgres is ready.'
+
+Write-Info "Waiting for Mailpit SMTP on 127.0.0.1:$MailpitSmtpPort..."
+Wait-ForTcp -Name 'Mailpit SMTP' -TargetHost '127.0.0.1' -Port $MailpitSmtpPort -TimeoutSeconds 60
+
+Write-Info "Waiting for Mailpit UI on 127.0.0.1:$MailpitHttpPort..."
+Wait-ForTcp -Name 'Mailpit UI' -TargetHost '127.0.0.1' -Port $MailpitHttpPort -TimeoutSeconds 60
+Write-Ok 'Mailpit is ready.'
+
+$listener = Get-NetTCPConnection -LocalPort $BackendPort -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($listener) {
+    Stop-Script "Port $BackendPort is already in use. Stop the existing backend process and try again."
+}
+
+Write-Info "Starting backend with DB_PORT=$DbPort and ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true..."
+if (Test-Path -LiteralPath $BackendPidFile) {
+    Remove-Item -LiteralPath $BackendPidFile -Force
+}
+'' | Set-Content -LiteralPath $BackendLog
+
+$env:DB_PORT = "$DbPort"
+$env:ROOMIFY_DEMO_BOOTSTRAP_ENABLED = 'true'
+$backendCommand = ".\mvnw.cmd spring-boot:run >> `"$BackendLog`" 2>&1"
+$backendProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $backendCommand -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
+$backendProcess.Id | Set-Content -LiteralPath $BackendPidFile
+
+Start-Sleep -Seconds 1
+$backendProcess.Refresh()
+if ($backendProcess.HasExited) {
+    Show-BackendLogTail
+    Stop-BackendProcess -Process $backendProcess
+    Stop-Script "Backend failed to start. See $BackendLog."
+}
+
+Write-Info "Waiting for backend health at $BackendHealthUrl..."
+Wait-ForBackend -Process $backendProcess -TimeoutSeconds 120
+Write-Ok 'Backend is ready.'
+
+Write-ReadySummary
