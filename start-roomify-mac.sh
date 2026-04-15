@@ -97,6 +97,19 @@ tail_backend_log() {
     fi
 }
 
+cleanup_stale_backend_pid() {
+    if [[ ! -f "$BACKEND_PID_FILE" ]]; then
+        return
+    fi
+
+    local recorded_pid
+    recorded_pid="$(cat "$BACKEND_PID_FILE" 2>/dev/null || true)"
+
+    if [[ -z "$recorded_pid" ]] || ! kill -0 "$recorded_pid" >/dev/null 2>&1; then
+        rm -f "$BACKEND_PID_FILE"
+    fi
+}
+
 stop_backend_process() {
     local pid="$1"
 
@@ -119,12 +132,60 @@ stop_backend_process() {
     rm -f "$BACKEND_PID_FILE"
 }
 
-start_backend() {
-    if port_in_use "$BACKEND_PORT"; then
-        fail "Port ${BACKEND_PORT} is already in use. Stop the existing backend process and try again."
+stop_processes_on_port() {
+    local port="$1"
+    local found_pids=""
+
+    if command -v lsof >/dev/null 2>&1; then
+        found_pids="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u || true)"
+    elif command -v fuser >/dev/null 2>&1; then
+        found_pids="$(fuser -n tcp "$port" 2>/dev/null | tr ' ' '\n' | sort -u || true)"
+    else
+        fail "Cannot free port ${port} automatically because neither lsof nor fuser is available."
     fi
 
-    rm -f "$BACKEND_PID_FILE"
+    if [[ -z "$found_pids" ]]; then
+        cleanup_stale_backend_pid
+        return
+    fi
+
+    log "Port ${port} is in use. Stopping existing process..."
+
+    while IFS= read -r pid; do
+        [[ -z "$pid" ]] && continue
+
+        pkill -TERM -P "$pid" >/dev/null 2>&1 || true
+        kill -TERM "$pid" >/dev/null 2>&1 || true
+    done <<< "$found_pids"
+
+    sleep 2
+
+    while IFS= read -r pid; do
+        [[ -z "$pid" ]] && continue
+
+        if kill -0 "$pid" >/dev/null 2>&1; then
+            pkill -KILL -P "$pid" >/dev/null 2>&1 || true
+            kill -KILL "$pid" >/dev/null 2>&1 || true
+        fi
+    done <<< "$found_pids"
+
+    local elapsed=0
+    while port_in_use "$port" && (( elapsed < 10 )); do
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+
+    if port_in_use "$port"; then
+        fail "Port ${port} is still in use after attempting cleanup."
+    fi
+
+    cleanup_stale_backend_pid
+    log "Existing process stopped."
+    log "Continuing Roomify startup..."
+}
+
+start_backend() {
+    cleanup_stale_backend_pid
     : >"$BACKEND_LOG"
 
     (
@@ -214,6 +275,8 @@ main() {
     log "Waiting for Mailpit UI on 127.0.0.1:${MAILPIT_HTTP_PORT}..."
     wait_for_tcp "Mailpit UI" "127.0.0.1" "$MAILPIT_HTTP_PORT" 60
     log "Mailpit is ready."
+
+    stop_processes_on_port "$BACKEND_PORT"
 
     log "Starting backend with DB_PORT=${DB_PORT} and ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true..."
     start_backend

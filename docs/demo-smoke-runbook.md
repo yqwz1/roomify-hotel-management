@@ -20,6 +20,7 @@ Use this runbook for the repeatable local demo path. It assumes the repo is runn
 1. Start backend demo stack:
    - macOS: `./start-roomify-mac.sh`
    - Windows PowerShell: `.\start-roomify-windows.ps1`
+   - the script will stop any current listener on port `8080` before starting Roomify
 2. Confirm the script prints:
    - `Postgres: ready`
    - `Mailpit: ready`

@@ -134,6 +134,25 @@ function Stop-BackendProcess {
     }
 }
 
+function Clear-StaleBackendPidFile {
+    if (-not (Test-Path -LiteralPath $BackendPidFile)) {
+        return
+    }
+
+    $recordedPid = (Get-Content -LiteralPath $BackendPidFile -ErrorAction SilentlyContinue | Select-Object -First 1)
+    $parsedPid = 0
+
+    if (-not [int]::TryParse([string]$recordedPid, [ref]$parsedPid)) {
+        Remove-Item -LiteralPath $BackendPidFile -Force
+        return
+    }
+
+    $existingProcess = Get-Process -Id $parsedPid -ErrorAction SilentlyContinue
+    if (-not $existingProcess) {
+        Remove-Item -LiteralPath $BackendPidFile -Force
+    }
+}
+
 function Show-BackendLogTail {
     if (Test-Path -LiteralPath $BackendLog) {
         Write-Host ''
@@ -188,6 +207,40 @@ function Write-ReadySummary {
     Write-Host "- Backend PID file: $BackendPidFile"
 }
 
+function Stop-ProcessesOnPort {
+    param([int]$Port)
+
+    $listeners = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty OwningProcess -Unique
+
+    if (-not $listeners) {
+        Clear-StaleBackendPidFile
+        return
+    }
+
+    Write-Info "Port $Port is in use. Stopping existing process..."
+
+    foreach ($owningProcessId in $listeners) {
+        try {
+            taskkill /T /F /PID $owningProcessId | Out-Null
+        }
+        catch {
+        }
+    }
+
+    Start-Sleep -Seconds 2
+
+    $stillListening = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($stillListening) {
+        Stop-Script "Port $Port is still in use after attempting cleanup."
+    }
+
+    Clear-StaleBackendPidFile
+    Write-Ok 'Existing process stopped.'
+    Write-Info 'Continuing Roomify startup...'
+}
+
 Test-RequiredCommand -CommandName 'docker' -Message 'Docker is required but was not found in PATH.'
 Assert-File -Path $ComposeFile -Message "docker-compose.yml was not found in $RepoRoot."
 Assert-File -Path (Join-Path $BackendDir 'mvnw.cmd') -Message "The backend Maven wrapper is missing at $BackendDir\mvnw.cmd."
@@ -236,15 +289,10 @@ Write-Info "Waiting for Mailpit UI on 127.0.0.1:$MailpitHttpPort..."
 Wait-ForTcp -Name 'Mailpit UI' -TargetHost '127.0.0.1' -Port $MailpitHttpPort -TimeoutSeconds 60
 Write-Ok 'Mailpit is ready.'
 
-$listener = Get-NetTCPConnection -LocalPort $BackendPort -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($listener) {
-    Stop-Script "Port $BackendPort is already in use. Stop the existing backend process and try again."
-}
+Stop-ProcessesOnPort -Port $BackendPort
 
 Write-Info "Starting backend with DB_PORT=$DbPort and ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true..."
-if (Test-Path -LiteralPath $BackendPidFile) {
-    Remove-Item -LiteralPath $BackendPidFile -Force
-}
+Clear-StaleBackendPidFile
 '' | Set-Content -LiteralPath $BackendLog
 
 $env:DB_PORT = "$DbPort"

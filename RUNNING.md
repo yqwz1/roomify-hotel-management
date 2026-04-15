@@ -10,6 +10,7 @@ Use the platform startup script first. It is the recommended way to start the re
 Each script does all of the following:
 - Starts `postgres` and `mailpit` with `docker compose`
 - Waits for PostgreSQL, Mailpit SMTP, and Mailpit UI
+- Frees backend port `8080` automatically if another local process is already listening there
 - Starts the backend with `DB_PORT=5433` and `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`
 - Waits for backend health at `http://127.0.0.1:8080/api/health`
 - Prints the ready checklist and the exact manual frontend command
@@ -106,7 +107,7 @@ Quick smoke:
 
 ### Port already in use
 
-The scripts fail fast if the backend port is already occupied. Stop the conflicting process and run the script again.
+The scripts now try to stop any existing listener on port `8080` automatically before starting Roomify. This is aggressive and intended for local demo use.
 
 ### Backend won't start — "Unable to determine Dialect"
 The database isn't running. Make sure Docker Desktop is open and rerun the startup script.

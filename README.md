@@ -99,6 +99,7 @@ npm run build
 - Script behavior:
   - starts `postgres` and `mailpit`
   - waits for infra readiness
+  - aggressively frees backend port `8080` before starting Roomify
   - starts backend with `DB_PORT=5433` and `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`
   - waits for backend health
   - prints the exact manual frontend command
