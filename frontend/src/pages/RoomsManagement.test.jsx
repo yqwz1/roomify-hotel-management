@@ -6,6 +6,9 @@ import RoomsManagement from './RoomsManagement';
 const mockNavigate = vi.fn();
 const fetchRooms = vi.fn();
 const fetchRoomTypes = vi.fn();
+const addRoom = vi.fn();
+const editRoom = vi.fn();
+const removeRoom = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -52,6 +55,7 @@ vi.mock('../hooks/useRooms', () => ({
         floor: 2,
         status: 'OCCUPIED',
         roomType: {
+          id: 1,
           name: 'Deluxe',
           basePrice: 200,
           maxGuests: 2,
@@ -62,15 +66,19 @@ vi.mock('../hooks/useRooms', () => ({
     loading: false,
     error: null,
     fetchRooms,
-    addRoom: vi.fn(),
-    removeRoom: vi.fn(),
+    addRoom,
+    editRoom,
+    removeRoom,
     clearError: vi.fn(),
   }),
 }));
 
 vi.mock('../hooks/useRoomTypes', () => ({
   useRoomTypes: () => ({
-    roomTypes: [{ id: 1, name: 'Deluxe' }],
+    roomTypes: [
+      { id: 1, name: 'Deluxe' },
+      { id: 2, name: 'Suite' },
+    ],
     fetchRoomTypes,
   }),
 }));
@@ -78,6 +86,9 @@ vi.mock('../hooks/useRoomTypes', () => ({
 describe('RoomsManagement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    addRoom.mockResolvedValue({ success: true });
+    editRoom.mockResolvedValue({ success: true });
+    removeRoom.mockResolvedValue({ success: true });
   });
 
   it('removes price filters and routes room status changes to the dedicated status board', async () => {
@@ -96,5 +107,36 @@ describe('RoomsManagement', () => {
         initialQuery: '201',
       },
     });
+  });
+
+  it('lets managers edit a room directly from the inventory table', async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(<RoomsManagement />);
+
+    await user.click(screen.getByRole('button', { name: /Edit/i }));
+
+    const roomNumberInput = container.querySelector('#room-number');
+    const floorInput = container.querySelector('#room-floor');
+    const roomTypeSelect = container.querySelector('#room-type');
+
+    expect(roomNumberInput).not.toBeNull();
+    expect(floorInput).not.toBeNull();
+    expect(roomTypeSelect).not.toBeNull();
+
+    await user.clear(roomNumberInput);
+    await user.type(roomNumberInput, '202');
+    await user.clear(floorInput);
+    await user.type(floorInput, '4');
+    await user.selectOptions(roomTypeSelect, '2');
+    await user.click(screen.getByRole('button', { name: /Save Room/i }));
+
+    expect(editRoom).toHaveBeenCalledWith(7, {
+      roomNumber: '202',
+      roomTypeId: 2,
+      floor: 4,
+      status: 'OCCUPIED',
+    });
+    expect(fetchRooms).toHaveBeenCalled();
   });
 });

@@ -36,8 +36,8 @@ vi.mock('../components/ConfirmationToast', () => ({
   default: ({ message }) => (message ? <div>{message}</div> : null),
 }));
 
-vi.mock('../components/ReservationLookupPanel', () => ({
-  default: ({ onSelect, initialQuery }) => {
+vi.mock('../components/ReservationLookupPanel', () => {
+  function MockReservationLookupPanel({ onSelect, initialQuery }) {
     useEffect(() => {
       if (initialQuery === reservation.confirmationNumber) {
         onSelect(reservation);
@@ -51,8 +51,12 @@ vi.mock('../components/ReservationLookupPanel', () => ({
         Load Invoice Reservation
       </button>
     );
-  },
-}));
+  }
+
+  return {
+    default: MockReservationLookupPanel,
+  };
+});
 
 vi.mock('../components/LtrText', () => ({
   LtrText: ({ children }) => <span>{children}</span>,

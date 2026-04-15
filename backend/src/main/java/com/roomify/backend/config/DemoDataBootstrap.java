@@ -12,6 +12,9 @@ import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import com.roomify.backend.service.ReservationFinancialService;
+import com.roomify.backend.user.Role;
+import com.roomify.backend.user.User;
+import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +24,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataBootstrap.class);
 
+    private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
+    private static final String DEMO_ADMIN_PASSWORD = "password123";
     private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
     private static final String DEMO_GUEST_ID = "ROOMIFY-DEMO-GUEST";
 
@@ -40,22 +46,30 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private final GuestRepository guestRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationFinancialService reservationFinancialService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DemoDataBootstrap(
             RoomTypeRepository roomTypeRepository,
             RoomRepository roomRepository,
             GuestRepository guestRepository,
             ReservationRepository reservationRepository,
-            ReservationFinancialService reservationFinancialService) {
+            ReservationFinancialService reservationFinancialService,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         this.roomTypeRepository = roomTypeRepository;
         this.roomRepository = roomRepository;
         this.guestRepository = guestRepository;
         this.reservationRepository = reservationRepository;
         this.reservationFinancialService = reservationFinancialService;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(ApplicationArguments args) {
+        upsertDemoAdminUser();
+
         RoomType demoStandard = upsertRoomType(new RoomTypeSpec(
                 "Demo Standard",
                 new BigDecimal("430.00"),
@@ -95,6 +109,19 @@ public class DemoDataBootstrap implements ApplicationRunner {
         reservations.forEach(spec -> upsertReservation(spec, demoGuest, today));
 
         log.info("Demo bootstrap refreshed 6 demo rooms and {} demo reservations for {}", reservations.size(), today);
+    }
+
+    private void upsertDemoAdminUser() {
+        String encodedPassword = passwordEncoder.encode(DEMO_ADMIN_PASSWORD);
+        User adminUser = userRepository.findByEmailIgnoreCase(DEMO_ADMIN_EMAIL)
+                .orElseGet(() -> new User(DEMO_ADMIN_EMAIL, encodedPassword, Role.MANAGER, true));
+        adminUser.setEmail(DEMO_ADMIN_EMAIL);
+        adminUser.setPasswordHash(encodedPassword);
+        adminUser.setRole(Role.MANAGER);
+        adminUser.setActive(true);
+        adminUser.setFailedAttempts(0);
+        adminUser.setLockUntil(null);
+        userRepository.save(adminUser);
     }
 
     private RoomType upsertRoomType(RoomTypeSpec spec) {

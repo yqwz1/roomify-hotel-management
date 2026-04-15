@@ -494,7 +494,7 @@ export default function BookRoom() {
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">{t('taxes10')}</span>
+                  <span className="font-medium text-zinc-500">{t('taxes15')}</span>
                   <span className="font-bold text-zinc-950">
                     {formatLocalizedCurrency(taxes, i18n.language)}
                   </span>

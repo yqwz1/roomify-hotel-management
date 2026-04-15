@@ -32,16 +32,23 @@ const buildApiFilters = (filters) => {
   return params;
 };
 
-function AddRoomModal({ roomTypes, onSave, onClose }) {
+const buildRoomForm = (roomTypes, initialRoom) => ({
+  roomNumber: initialRoom?.roomNumber ?? '',
+  roomTypeId: initialRoom?.roomType?.id ?? roomTypes[0]?.id ?? '',
+  floor: initialRoom?.floor ?? 1,
+  status: initialRoom?.status ?? 'AVAILABLE',
+});
+
+function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({
-    roomNumber: '',
-    roomTypeId: roomTypes[0]?.id ?? '',
-    floor: 1,
-    status: 'AVAILABLE',
-  });
+  const isEditing = Boolean(initialRoom);
+  const [form, setForm] = useState(() => buildRoomForm(roomTypes, initialRoom));
   const [formError, setFormError] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setForm(buildRoomForm(roomTypes, initialRoom));
+  }, [initialRoom, roomTypes]);
 
   const setField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -81,8 +88,16 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
 
   return (
     <ModalFrame
-      title={t('roomsManagementPage.addRoomTitle')}
-      description={t('roomsManagementPage.addRoomDescription')}
+      title={
+        isEditing
+          ? t('roomsManagementPage.updateRoomTitle', { room: initialRoom.roomNumber })
+          : t('roomsManagementPage.addRoomTitle')
+      }
+      description={
+        isEditing
+          ? t('roomsManagementPage.updateRoomDescription')
+          : t('roomsManagementPage.addRoomDescription')
+      }
       onClose={onClose}
       closeLabel={t('closeDialog')}
     >
@@ -98,6 +113,8 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
             {t('roomNumLabel')}
           </label>
           <input
+            id="room-number"
+            aria-label={t('roomNumLabel')}
             value={form.roomNumber}
             onChange={(event) => setField('roomNumber', event.target.value)}
             placeholder={t('roomNumPlaceholder')}
@@ -110,6 +127,8 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
             {t('roomType')}
           </label>
           <select
+            id="room-type"
+            aria-label={t('roomType')}
             value={form.roomTypeId}
             onChange={(event) => setField('roomTypeId', event.target.value)}
             className={inputClassName}
@@ -128,6 +147,8 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
               {t('floor')}
             </label>
             <input
+              id="room-floor"
+              aria-label={t('floor')}
               type="number"
               min="1"
               value={form.floor}
@@ -136,22 +157,46 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              {t('initialStatusLabel')}
-            </label>
-            <select
-              value={form.status}
-              onChange={(event) => setField('status', event.target.value)}
-              className={inputClassName}
-            >
-              {BACKEND_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {getRoomStatusLabel(status, t)}
-                </option>
-              ))}
-            </select>
-          </div>
+          {isEditing ? (
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                {t('roomsManagementPage.currentStatus')}
+              </label>
+              <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span
+                    className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
+                      STATUS_STYLES[form.status]
+                    }`}
+                  >
+                    {getRoomStatusLabel(form.status, t)}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                    {t('roomsManagementPage.statusManagedOnBoard')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                {t('initialStatusLabel')}
+              </label>
+              <select
+                id="room-status"
+                aria-label={t('initialStatusLabel')}
+                value={form.status}
+                onChange={(event) => setField('status', event.target.value)}
+                className={inputClassName}
+              >
+                {BACKEND_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {getRoomStatusLabel(status, t)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
@@ -175,116 +220,17 @@ function AddRoomModal({ roomTypes, onSave, onClose }) {
   );
 }
 
-function UpdateStatusModal({ room, onSave, onClose }) {
-  const { t } = useTranslation();
-  const [selectedStatus, setSelectedStatus] = useState(room.status);
-  const [modalError, setModalError] = useState(null);
-  const [saving, setSaving] = useState(false);
-
-  const inputClassName =
-    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setModalError(null);
-
-    if (selectedStatus === room.status) {
-      onClose();
-      return;
-    }
-
-    setSaving(true);
-    const result = await onSave(room.id, selectedStatus);
-    setSaving(false);
-
-    if (result.success) {
-      onClose();
-      return;
-    }
-
-    setModalError(result.error);
-  };
-
-  return (
-    <ModalFrame
-      title={t('roomsManagementPage.updateRoomTitle', { room: room.roomNumber })}
-      description={t('roomsManagementPage.updateRoomDescription')}
-      onClose={onClose}
-      closeLabel={t('closeDialog')}
-    >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {modalError && (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
-            {modalError}
-          </div>
-        )}
-
-        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-            {t('roomsManagementPage.currentStatus')}
-          </p>
-          <div
-            className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] ${
-              STATUS_STYLES[room.status]
-            }`}
-          >
-            {getRoomStatusLabel(room.status, t)}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-            {t('roomsManagementPage.newStatus')}
-          </label>
-          <select
-            value={selectedStatus}
-            onChange={(event) => setSelectedStatus(event.target.value)}
-            className={inputClassName}
-          >
-            {BACKEND_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {getRoomStatusLabel(status, t)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {selectedStatus === 'AVAILABLE' && room.status === 'OCCUPIED' && (
-          <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            {t('roomsManagementPage.transitionWarning')}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
-          >
-            {t('cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
-          >
-            {saving ? t('updatingMsg') : t('roomsManagementPage.updateStatus')}
-          </button>
-        </div>
-      </form>
-    </ModalFrame>
-  );
-}
-
 export default function RoomsManagement() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { rooms, loading, error, fetchRooms, addRoom, removeRoom, clearError } = useRooms();
+  const { rooms, loading, error, fetchRooms, addRoom, editRoom, removeRoom, clearError } = useRooms();
   const { roomTypes, fetchRoomTypes } = useRoomTypes();
 
   const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const [editingRoom, setEditingRoom] = useState(null);
   const [bannerError, setBannerError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     fetchRooms();
@@ -348,9 +294,37 @@ export default function RoomsManagement() {
     fetchRooms();
   };
 
-  const handleAddRoom = async (data) => {
-    const result = await addRoom(data);
+  const handleCloseRoomModal = () => {
+    setShowRoomModal(false);
+    setEditingRoom(null);
+  };
+
+  const handleOpenCreate = () => {
+    setBannerError(null);
+    setSuccessMessage(null);
+    setEditingRoom(null);
+    setShowRoomModal(true);
+  };
+
+  const handleOpenEdit = (room) => {
+    setBannerError(null);
+    setSuccessMessage(null);
+    setEditingRoom(room);
+    setShowRoomModal(true);
+  };
+
+  const handleSaveRoom = async (data) => {
+    const result = editingRoom
+      ? await editRoom(editingRoom.id, { ...data, status: editingRoom.status })
+      : await addRoom(data);
+
     if (result.success) {
+      setSuccessMessage(
+        editingRoom
+          ? t('roomsManagementPage.roomUpdated', { room: data.roomNumber })
+          : t('roomsManagementPage.roomCreated', { room: data.roomNumber })
+      );
+      handleCloseRoomModal();
       fetchRooms(buildApiFilters(filters));
     }
     return result;
@@ -367,6 +341,7 @@ export default function RoomsManagement() {
       return;
     }
 
+    setSuccessMessage(null);
     fetchRooms(buildApiFilters(filters));
   };
 
@@ -406,7 +381,7 @@ export default function RoomsManagement() {
       <div className="flex justify-end">
         <button
           type="button"
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenCreate}
           className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
         >
           <Plus className="h-4 w-4" />
@@ -429,6 +404,12 @@ export default function RoomsManagement() {
               {t('dismissError')}
             </button>
           </div>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+          {successMessage}
         </div>
       )}
 
@@ -542,6 +523,14 @@ export default function RoomsManagement() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
+                            onClick={() => handleOpenEdit(room)}
+                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            {t('roomsManagementPage.editButton')}
+                          </button>
+                          <button
+                            type="button"
                             onClick={() =>
                               navigate('/room-status', {
                                 state: {
@@ -552,7 +541,6 @@ export default function RoomsManagement() {
                             }
                             className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
                           >
-                            <Pencil className="h-4 w-4" />
                             {t('roomsManagementPage.openStatusBoard')}
                           </button>
                           <button
@@ -574,11 +562,12 @@ export default function RoomsManagement() {
         )}
       </DashboardPanel>
 
-      {showAddModal && (
-        <AddRoomModal
+      {showRoomModal && (
+        <RoomFormModal
           roomTypes={roomTypes}
-          onSave={handleAddRoom}
-          onClose={() => setShowAddModal(false)}
+          initialRoom={editingRoom}
+          onSave={handleSaveRoom}
+          onClose={handleCloseRoomModal}
         />
       )}
 

@@ -9,6 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
+import com.roomify.backend.user.Role;
+import com.roomify.backend.user.Staff;
+import com.roomify.backend.user.User;
+import com.roomify.backend.user.UserRepository;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,6 +50,12 @@ class AuthIntegrationTest {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -53,6 +64,7 @@ class AuthIntegrationTest {
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -69,6 +81,26 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.email").value("admin@roomify.com"))
                 .andExpect(jsonPath("$.username").value("Admin"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_MANAGER"));
+    }
+
+    @Test
+    void loginWithPersistedStaffCredentialsReturnsStaffRole() throws Exception {
+        User user = new User("staff.member@roomify.com", passwordEncoder.encode("Strong@Pass123"), Role.STAFF, true);
+        Staff staff = new Staff(user, "Staff Member", "Front Desk");
+        user.setStaff(staff);
+        userRepository.save(user);
+
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", "staff.member@roomify.com",
+                "password", "Strong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("staff.member@roomify.com"))
+                .andExpect(jsonPath("$.username").value("Staff Member"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_STAFF"));
     }
 
     @Test

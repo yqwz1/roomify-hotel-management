@@ -423,7 +423,7 @@ export default function ReservationDetails() {
                   value: formatLocalizedCurrency(reservation.roomRate, i18n.language),
                 },
                 { label: t('subtotal'), value: formatLocalizedCurrency(reservation.subtotal, i18n.language) },
-                { label: t('taxes10'), value: formatLocalizedCurrency(reservation.taxes, i18n.language) },
+                { label: t('taxes15'), value: formatLocalizedCurrency(reservation.taxes, i18n.language) },
                 {
                   label: t('reservationDetailsPage.totalPrice'),
                   value: formatLocalizedCurrency(totalPrice, i18n.language),

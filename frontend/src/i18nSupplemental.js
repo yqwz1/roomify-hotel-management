@@ -422,6 +422,22 @@ const supplementalResources = {
         distributionRate: 'Base rate {{rate}}',
         distributionTotalRooms: 'Total rooms',
         distributionOccupiedRooms: 'Occupied rooms',
+        notificationsTitle: 'Recent Notifications',
+        notificationsDescription:
+          'Show the most recent manager-facing alerts directly in the dashboard during the demo.',
+        notificationsLoading: 'Loading recent notifications...',
+        notificationsEmptyTitle: 'No notifications yet',
+        notificationsEmptyDescription:
+          'Manager alerts will appear here after payment failures and other routed events.',
+        auditTitle: 'Recent Audit Log',
+        auditDescription:
+          'Show recent system actions without leaving the dashboard.',
+        auditLoading: 'Loading recent audit activity...',
+        auditEmptyTitle: 'No audit entries yet',
+        auditEmptyDescription:
+          'Audit entries will appear here after reservation, payment, and room actions.',
+        readLabel: 'Read',
+        newLabel: 'New',
       },
       staffDashboardPage: {
         loading: "Loading tonight's available inventory...",
@@ -736,8 +752,9 @@ const supplementalResources = {
           'Create a room record using an existing room type and an initial operational status.',
         updateRoomTitle: 'Update Room {{room}}',
         updateRoomDescription:
-          'Choose the next operational status. The backend still enforces transition rules.',
+          'Edit the room number, room type, and floor here. Operational status still changes from the status board.',
         currentStatus: 'Current Status',
+        statusManagedOnBoard: 'Use status board for transitions',
         newStatus: 'New Status',
         transitionWarning:
           'The backend will reject an occupied room returning directly to available. Move it through needs cleaning first.',
@@ -758,10 +775,13 @@ const supplementalResources = {
         tableCapacity: 'Capacity',
         tableAmenities: 'Amenities',
         tableActions: 'Actions',
+        editButton: 'Edit',
         statusButton: 'Status',
         openStatusBoard: 'Open Status Board',
         deleteButton: 'Delete',
         deleteConfirm: 'Delete Room {{room}}? This cannot be undone.',
+        roomCreated: 'Room {{room}} created successfully.',
+        roomUpdated: 'Room {{room}} updated successfully.',
         saveRoom: 'Save Room',
         savingRoom: 'Saving Room...',
         updateStatus: 'Update Status',
@@ -1403,6 +1423,22 @@ const supplementalResources = {
         distributionRate: 'Base rate {{rate}}',
         distributionTotalRooms: 'Total rooms',
         distributionOccupiedRooms: 'Occupied rooms',
+        notificationsTitle: 'أحدث الإشعارات',
+        notificationsDescription:
+          'اعرض أحدث التنبيهات الموجهة للمدير مباشرة من لوحة التحكم أثناء العرض.',
+        notificationsLoading: 'جارٍ تحميل الإشعارات الحديثة...',
+        notificationsEmptyTitle: 'لا توجد إشعارات بعد',
+        notificationsEmptyDescription:
+          'ستظهر تنبيهات المدير هنا بعد فشل الدفعات وغيرها من الأحداث الموجهة.',
+        auditTitle: 'أحدث سجل تدقيق',
+        auditDescription:
+          'اعرض آخر الإجراءات النظامية بدون مغادرة لوحة التحكم.',
+        auditLoading: 'جارٍ تحميل نشاط التدقيق...',
+        auditEmptyTitle: 'لا توجد سجلات تدقيق بعد',
+        auditEmptyDescription:
+          'ستظهر سجلات التدقيق هنا بعد إجراءات الحجوزات والمدفوعات والغرف.',
+        readLabel: 'مقروء',
+        newLabel: 'جديد',
         alertsTitle: 'تنبيهات تشغيلية',
         alertsDescription:
           'الحالات التي تعيق المخزون أو التوظيف أو جاهزية الخدمة حاليًا.',
@@ -1763,8 +1799,9 @@ const supplementalResources = {
           'أنشئ سجل غرفة باستخدام نوع غرفة موجود وحالة تشغيلية ابتدائية.',
         updateRoomTitle: 'تحديث الغرفة {{room}}',
         updateRoomDescription:
-          'اختر الحالة التشغيلية التالية. ما يزال الخادم يفرض قواعد الانتقال.',
+          'عدّل رقم الغرفة ونوعها والطابق من هنا. تبقى تغييرات الحالة من لوحة الحالات.',
         currentStatus: 'الحالة الحالية',
+        statusManagedOnBoard: 'لوحة الحالات لإدارة الانتقالات',
         newStatus: 'الحالة الجديدة',
         transitionWarning:
           'سيرفض الخادم عودة الغرفة المشغولة مباشرة إلى متاحة. انقلها أولًا إلى تحتاج تنظيفًا.',
@@ -1783,10 +1820,13 @@ const supplementalResources = {
         tableCapacity: 'السعة',
         tableAmenities: 'المزايا',
         tableActions: 'الإجراءات',
+        editButton: 'تعديل',
         statusButton: 'الحالة',
         openStatusBoard: 'فتح لوحة الحالات',
         deleteButton: 'حذف',
         deleteConfirm: 'حذف الغرفة {{room}}؟ لا يمكن التراجع عن ذلك.',
+        roomCreated: 'تم إنشاء الغرفة {{room}} بنجاح.',
+        roomUpdated: 'تم تحديث الغرفة {{room}} بنجاح.',
         saveRoom: 'حفظ الغرفة',
         savingRoom: 'جار حفظ الغرفة...',
         updateStatus: 'تحديث الحالة',

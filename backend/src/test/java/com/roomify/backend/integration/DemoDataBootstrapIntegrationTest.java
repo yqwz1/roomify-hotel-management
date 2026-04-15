@@ -15,12 +15,15 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
+import com.roomify.backend.user.User;
+import com.roomify.backend.user.UserRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -50,6 +53,12 @@ class DemoDataBootstrapIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void sameDaySearchReturnsDemoAvailability() throws Exception {
@@ -90,5 +99,13 @@ class DemoDataBootstrapIntegrationTest {
         assertEquals(LocalDate.now(), resetReservation.getCheckInDate());
         assertEquals(LocalDate.now().plusDays(1), resetReservation.getCheckOutDate());
         assertTrue(resetReservation.getTotalPrice().signum() > 0);
+    }
+
+    @Test
+    void demoBootstrapKeepsDocumentedManagerLoginUsable() {
+        User adminUser = userRepository.findByEmailIgnoreCase("admin@roomify.com").orElseThrow();
+
+        assertTrue(adminUser.isActive());
+        assertTrue(passwordEncoder.matches("password123", adminUser.getPasswordHash()));
     }
 }

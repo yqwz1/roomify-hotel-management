@@ -186,7 +186,7 @@ export default function ConfirmationPage() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">{t('taxes10')}</span>
+                <span className="text-zinc-500">{t('taxes15')}</span>
                 <span className="font-bold text-black">
                   {formatLocalizedCurrency(reservation.taxes, i18n.language)}
                 </span>

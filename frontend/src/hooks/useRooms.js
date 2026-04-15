@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import {
     getRooms,
     createRoom,
+    updateRoom,
     updateRoomStatus,
     deleteRoom,
     extractErrorMessage,
@@ -57,6 +58,24 @@ export const useRooms = () => {
         }
     };
 
+    const editRoom = async (id, data) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const updated = await updateRoom(id, data);
+            setRooms((prev) =>
+                prev.map((room) => (room.id === updated.id ? updated : room))
+            );
+            return { success: true, data: updated };
+        } catch (err) {
+            const msg = extractErrorMessage(err);
+            setError(msg);
+            return { success: false, error: msg };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // ── Update Status ────────────────────────────────────────────────────────
     const changeStatus = async (id, status) => {
         setLoading(true);
@@ -102,6 +121,7 @@ export const useRooms = () => {
         error,
         fetchRooms,
         addRoom,
+        editRoom,
         changeStatus,
         removeRoom,
         clearError,
