@@ -347,6 +347,56 @@ class ReservationServiceTest {
         verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning("301");
     }
 
+    @Test
+    void getAllReservationsWithoutFiltersShouldUseUnfilteredRepositoryPath() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAll()).thenReturn(List.of(reservation));
+
+        List<ReservationResponse> response = reservationService.getAllReservations(
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAll();
+        verify(reservationRepository, never()).findAllByOptionalFilters(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void getAllReservationsWithFiltersShouldUseFilteredRepositoryPath() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        LocalDate checkIn = LocalDate.of(2026, 4, 1);
+        LocalDate checkOut = LocalDate.of(2026, 4, 3);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq("RSV-ABC123DEF456"),
+                eq("Guest"),
+                eq(ReservationStatus.CONFIRMED),
+                eq(checkIn),
+                eq(checkOut)))
+                .thenReturn(List.of(reservation));
+
+        List<ReservationResponse> response = reservationService.getAllReservations(
+                " rsv-abc123def456 ",
+                " Guest ",
+                ReservationStatus.CONFIRMED,
+                checkIn,
+                checkOut);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                "RSV-ABC123DEF456",
+                "Guest",
+                ReservationStatus.CONFIRMED,
+                checkIn,
+                checkOut);
+        verify(reservationRepository, never()).findAll();
+    }
+
     private Reservation buildReservationForCancel(ReservationStatus status) {
 
         Guest guest = new Guest(
