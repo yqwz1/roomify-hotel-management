@@ -2,6 +2,8 @@ package com.roomify.backend.service;
 
 import com.roomify.backend.entity.InvoiceDeliveryLog;
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.exception.ResourceConflictException;
+import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,16 +19,20 @@ public class InvoiceService {
     private final InvoicePdfService invoicePdfService;
     private final EmailService emailService;
     private final InvoiceDeliveryLogService deliveryLogService;
+    private final AuditService auditService;
+    private final ReservationFinancialService financialService;
 
     @Transactional
     public void generateInvoice(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
         if (reservation.isInvoiceFinalized()) {
-            throw new RuntimeException("Invoice already finalized for this reservation");
+            throw new ResourceConflictException("Invoice already finalized for this reservation");
         }
+
+        financialService.syncReservation(reservation);
 
         String invoiceNumber = getOrCreateInvoiceNumber(reservation);
 
@@ -36,15 +42,18 @@ public class InvoiceService {
 
         reservation.setInvoiceFinalized(true);
         reservationRepository.save(reservation);
+        auditService.log("INVOICE_GENERATED", reservation.getConfirmationNumber(), "invoiceNumber=" + invoiceNumber);
     }
 
     public byte[] getInvoicePdf(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+
+        financialService.syncReservation(reservation);
 
         if (!reservation.isInvoiceFinalized()) {
-            throw new RuntimeException("Invoice not generated yet");
+            throw new ResourceConflictException("Invoice not generated yet");
         }
 
         String invoiceNumber = getOrCreateInvoiceNumber(reservation);
@@ -76,6 +85,10 @@ public class InvoiceService {
 
         String email = reservation.getGuest().getEmail();
         String confirmationNumber = reservation.getConfirmationNumber();
+        auditService.log(
+                "INVOICE_EMAIL_ATTEMPT",
+                confirmationNumber,
+                "invoiceNumber=" + invoiceNumber + " recipient=" + email);
 
         try {
 
@@ -86,17 +99,46 @@ public class InvoiceService {
 
             deliveryLogService.logSuccess(
                     email,
-                    "Invoice",
+                    InvoiceDeliveryLogService.INVOICE_SUBJECT,
                     confirmationNumber);
+            auditService.log(
+                    "INVOICE_EMAIL_SENT",
+                    confirmationNumber,
+                    "invoiceNumber=" + invoiceNumber + " recipient=" + email);
 
         } catch (Exception ex) {
 
             deliveryLogService.logFailure(
                     email,
-                    "Invoice",
+                    InvoiceDeliveryLogService.INVOICE_SUBJECT,
                     confirmationNumber,
                     ex.getMessage());
+            auditService.log(
+                    "INVOICE_EMAIL_FAILED",
+                    confirmationNumber,
+                    "invoiceNumber=" + invoiceNumber + " recipient=" + email + " reason=" + ex.getMessage());
         }
+    }
+
+    @Transactional
+    public Optional<InvoiceDeliveryLog> sendInvoiceEmailForReservation(Long reservationId) {
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+
+        if (financialService.syncReservation(reservation)) {
+            reservationRepository.save(reservation);
+        }
+
+        if (!reservation.isInvoiceFinalized()) {
+            throw new ResourceConflictException("Invoice email is only available after the bill is finalized");
+        }
+
+        String invoiceNumber = getOrCreateInvoiceNumber(reservation);
+        byte[] pdf = invoicePdfService.generateInvoice(reservation, invoiceNumber);
+        sendInvoiceEmail(reservation, pdf, invoiceNumber);
+
+        return deliveryLogService.getLatestInvoiceByConfirmationNumber(reservation.getConfirmationNumber());
     }
 
     /**
@@ -105,10 +147,10 @@ public class InvoiceService {
     public Optional<InvoiceDeliveryLog> getLatestDeliveryStatus(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
         String confirmationNumber = reservation.getConfirmationNumber();
 
-        return deliveryLogService.getLatestByConfirmationNumber(confirmationNumber);
+        return deliveryLogService.getLatestInvoiceByConfirmationNumber(confirmationNumber);
     }
 }

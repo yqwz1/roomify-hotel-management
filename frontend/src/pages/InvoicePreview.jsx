@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Download,
   FilePlus2,
@@ -21,6 +21,7 @@ import {
   generateInvoice,
   getInvoiceDeliveryStatus,
   getInvoicePdf,
+  sendInvoiceEmail,
 } from '../services/invoiceService';
 import {
   extractReservationError,
@@ -34,7 +35,7 @@ import {
   formatLocalizedDateTime,
   getBooleanLabel,
   getInvoiceDeliveryStatusLabel,
-  translateKnownValue,
+  translateBillLineItemLabel,
 } from '../utils/localization';
 
 function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
@@ -58,6 +59,14 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
     return (
         <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
         {t('invoicePreviewPage.delivered')}
+      </span>
+    );
+  }
+
+  if (deliveryStatus === 'ATTEMPT') {
+    return (
+      <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-sky-900">
+        {getInvoiceDeliveryStatusLabel(deliveryStatus, t)}
       </span>
     );
   }
@@ -89,12 +98,11 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 function InvoiceLedger({ bill, t, language }) {
   if (!bill) {
     return (
-      <div className="rounded-[1.35rem] border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
-        <p className="text-sm font-bold text-zinc-950">{t('invoicePreviewPage.noDataTitle')}</p>
-        <p className="mt-2 text-sm font-medium text-zinc-500">
-          {t('invoicePreviewPage.noDataDescription')}
-        </p>
-      </div>
+      <EmptyState
+        title={t('invoicePreviewPage.noDataTitle')}
+        message={t('invoicePreviewPage.noDataDescription')}
+        icon={Receipt}
+      />
     );
   }
 
@@ -119,7 +127,7 @@ function InvoiceLedger({ bill, t, language }) {
             return (
               <tr key={`${item?.label ?? 'line'}-${index}`}>
                 <td className="px-4 py-3 text-sm font-medium text-zinc-700">
-                  {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
+                  {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
                   {credit
@@ -152,10 +160,12 @@ export default function InvoicePreview() {
   const [deliveryStatus, setDeliveryStatus] = useState('IDLE');
   const [deliveryMeta, setDeliveryMeta] = useState({ errorMessage: null, sentAt: null });
   const [generating, setGenerating] = useState(false);
+  const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(null);
+  const printFrameRef = useRef(null);
 
   const initialQuery = useMemo(
     () =>
@@ -172,6 +182,17 @@ export default function InvoicePreview() {
       window.URL.revokeObjectURL(previewUrl);
     }
   }, [previewUrl]);
+
+  const clearPrintFrame = useCallback(() => {
+    if (!printFrameRef.current) return;
+
+    printFrameRef.current.remove();
+    printFrameRef.current = null;
+  }, []);
+
+  useEffect(() => () => {
+    clearPrintFrame();
+  }, [clearPrintFrame]);
 
   const resetPreview = useCallback(() => {
     setPreviewLoading(false);
@@ -204,6 +225,27 @@ export default function InvoicePreview() {
     }
   }, [t]);
 
+  const loadDeliveryStatus = useCallback(async (reservationId) => {
+    try {
+      const delivery = await getInvoiceDeliveryStatus(reservationId);
+      setDeliveryStatus(delivery?.status || 'UNKNOWN');
+      setDeliveryMeta({
+        errorMessage: delivery?.errorMessage ?? null,
+        sentAt: delivery?.sentAt ?? null,
+      });
+      return delivery;
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setDeliveryStatus('UNKNOWN');
+        setDeliveryMeta({ errorMessage: null, sentAt: null });
+        return null;
+      }
+
+      setDeliveryStatus('ERROR');
+      return null;
+    }
+  }, []);
+
   const fetchInvoiceData = useCallback(async (confirmationNumber) => {
     if (!confirmationNumber) return;
 
@@ -226,20 +268,7 @@ export default function InvoicePreview() {
         return;
       }
 
-      try {
-        const delivery = await getInvoiceDeliveryStatus(reservation.id);
-        setDeliveryStatus(delivery?.status || 'UNKNOWN');
-        setDeliveryMeta({
-          errorMessage: delivery?.errorMessage ?? null,
-          sentAt: delivery?.sentAt ?? null,
-        });
-      } catch (err) {
-        if (err?.response?.status === 404) {
-          setDeliveryStatus('UNKNOWN');
-        } else {
-          setDeliveryStatus('ERROR');
-        }
-      }
+      await loadDeliveryStatus(reservation.id);
 
       await loadPreview(reservation.id);
     } catch (err) {
@@ -251,7 +280,7 @@ export default function InvoicePreview() {
     } finally {
       setLoading(false);
     }
-  }, [loadPreview, resetPreview]);
+  }, [loadDeliveryStatus, loadPreview, resetPreview]);
 
   const handleSelect = async (reservation) => {
     await fetchInvoiceData(reservation.confirmationNumber);
@@ -271,6 +300,36 @@ export default function InvoicePreview() {
       setGenerating(false);
     }
   }, [fetchInvoiceData, generating, invoiceFinalized, selected, t]);
+
+  const handleSendEmail = useCallback(async () => {
+    if (!selected?.id || !invoiceFinalized || emailing) return;
+
+    try {
+      setEmailing(true);
+      const delivery = await sendInvoiceEmail(selected.id);
+      const status = delivery?.status || 'UNKNOWN';
+      setDeliveryStatus(status);
+      setDeliveryMeta({
+        errorMessage: delivery?.errorMessage ?? null,
+        sentAt: delivery?.sentAt ?? null,
+      });
+
+      if (status === 'SENT') {
+        setToast({ message: t('invoicePreviewPage.emailSuccess'), type: 'success' });
+      } else {
+        setToast({
+          message: t('invoicePreviewPage.emailFailedToast', {
+            error: delivery?.errorMessage ?? t('invoicePreviewPage.deliveryUnavailable'),
+          }),
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      setToast({ message: extractReservationError(err), type: 'error' });
+    } finally {
+      setEmailing(false);
+    }
+  }, [emailing, invoiceFinalized, selected?.id, t]);
 
   const handleRetryData = useCallback(async () => {
     const confirmationNumber = selected?.confirmationNumber || initialQuery;
@@ -309,14 +368,36 @@ export default function InvoicePreview() {
     try {
       const url = previewUrl || (await loadPreview(selected.id));
       if (!url) throw new Error('Preview unavailable');
-      const printWindow = window.open(url);
-      if (printWindow) {
-        printWindow.focus();
-      }
+
+      clearPrintFrame();
+
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('title', 'invoice-print-frame');
+      iframe.className = 'pointer-events-none fixed bottom-0 right-0 h-0 w-0 border-0 opacity-0';
+      iframe.onload = () => {
+        const frameWindow = iframe.contentWindow;
+        if (!frameWindow) {
+          clearPrintFrame();
+          setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
+          return;
+        }
+
+        frameWindow.focus();
+        window.setTimeout(() => {
+          try {
+            frameWindow.print();
+          } catch {
+            setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
+          }
+        }, 0);
+      };
+      iframe.src = url;
+      printFrameRef.current = iframe;
+      document.body.appendChild(iframe);
     } catch {
       setToast({ message: t('invoicePreviewPage.printFailed'), type: 'error' });
     }
-  }, [invoiceFinalized, loadPreview, previewUrl, selected, t]);
+  }, [clearPrintFrame, invoiceFinalized, loadPreview, previewUrl, selected, t]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
@@ -456,6 +537,20 @@ export default function InvoicePreview() {
                         <Button
                           type="button"
                           variant="outline"
+                          onClick={handleSendEmail}
+                          disabled={emailing}
+                          className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                        >
+                          <Mail className="h-4 w-4" />
+                          {emailing
+                            ? t('invoicePreviewPage.sendingEmail')
+                            : deliveryStatus === 'FAILED'
+                              ? t('invoicePreviewPage.retryEmail')
+                              : t('invoicePreviewPage.emailInvoice')}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
                           onClick={handlePrint}
                           className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
                         >
@@ -512,6 +607,15 @@ export default function InvoicePreview() {
                       className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
                     >
                       {t('invoicePreviewPage.openDocument')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePrint}
+                      className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                    >
+                      <Printer className="h-4 w-4" />
+                      {t('invoicePreviewPage.print')}
                     </Button>
                     <Button
                       type="button"

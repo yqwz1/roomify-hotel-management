@@ -17,3 +17,7 @@ export const getInvoiceDeliveryStatus = async (reservationId) => {
   return response.data
 }
 
+export const sendInvoiceEmail = async (reservationId) => {
+  const response = await api.post(`/invoices/${reservationId}/email`)
+  return response.data
+}

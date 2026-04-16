@@ -48,6 +48,7 @@ public class ReservationService {
     private final EmailService emailService;
     private final AuditService auditService;
     private final HousekeepingNotificationService housekeepingNotificationService;
+    private final ReservationFinancialService financialService;
     private final BigDecimal taxRate;
     private final InvoiceEmailService invoiceEmailService;
     private final InvoiceDeliveryLogService invoiceDeliveryLogService;
@@ -61,7 +62,8 @@ public class ReservationService {
             InvoiceDeliveryLogService invoiceDeliveryLogService,
             AuditService auditService,
             HousekeepingNotificationService housekeepingNotificationService,
-            @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
+            ReservationFinancialService financialService,
+            @Value("${roomify.billing.vat-rate:0.15}") BigDecimal taxRate) {
 
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
@@ -71,6 +73,7 @@ public class ReservationService {
         this.invoiceDeliveryLogService = invoiceDeliveryLogService;
         this.auditService = auditService;
         this.housekeepingNotificationService = housekeepingNotificationService;
+        this.financialService = financialService;
         this.taxRate = taxRate;
     }
 
@@ -133,7 +136,7 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
 
-        ReservationResponse response = toResponse(saved, nights, roomRate, subtotal, taxes);
+        ReservationResponse response = toResponse(saved, financialService.summarize(saved));
 
         sendReservationConfirmationEmail(saved, response);
 
@@ -340,7 +343,7 @@ public class ReservationService {
         BigDecimal taxes = subtotal.multiply(taxRate)
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
-        return toResponse(reservation, nights, rate, subtotal, taxes);
+        return toResponse(reservation, financialService.summarize(reservation));
     }
 
     // =============================
@@ -368,6 +371,10 @@ public class ReservationService {
         Room room = reservation.getRoom();
         if (room.getStatus() != RoomStatus.OCCUPIED) {
             throw new ResourceConflictException("Room must be OCCUPIED before checkout");
+        }
+
+        if (financialService.syncReservation(reservation)) {
+            reservationRepository.save(reservation);
         }
 
         if (!reservation.isInvoiceFinalized()) {
@@ -401,6 +408,11 @@ public class ReservationService {
         triggerHousekeepingEvent(room);
 
         auditService.log(
+                "CHECKOUT_COMPLETED",
+                reservation.getConfirmationNumber(),
+                "room=" + room.getRoomNumber() + " roomStatus=NEEDS_CLEANING");
+
+        auditService.log(
                 "ROOM_STATUS_CHANGE",
                 "Room",
                 "Room " + room.getRoomNumber()
@@ -425,21 +437,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
-        long nights = ChronoUnit.DAYS.between(
-                reservation.getCheckInDate(),
-                reservation.getCheckOutDate());
-
-        BigDecimal rate = reservation.getRoom().getRoomType()
-                .getBasePrice()
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        BigDecimal taxes = subtotal.multiply(taxRate)
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        return toResponse(reservation, nights, rate, subtotal, taxes);
+        return toResponse(reservation, financialService.summarize(reservation));
     }
 
     // =============================
@@ -509,13 +507,17 @@ public class ReservationService {
             Reservation reservation,
             String action,
             String message) {
+        ReservationFinancialService.ReservationFinancialSummary summary = financialService.summarize(reservation);
 
         return new ReservationActionPlaceholderResponse(
                 reservation.getId(),
                 action,
                 message,
                 true,
-                reservation.getStatus());
+                reservation.getStatus(),
+                summary.paymentStatus().name(),
+                summary.outstandingBalance(),
+                summary.invoiceFinalized());
     }
 
     private BigDecimal calculateOutstandingBalance(BigDecimal total, BigDecimal paid) {
@@ -537,25 +539,31 @@ public class ReservationService {
     private String resolvePaymentStatusForValidation(Reservation reservation) {
         BigDecimal outstanding = safeMoney(reservation.getOutstandingBalance());
 
-        if (!reservation.isInvoiceFinalized()) {
-            return "PAYMENT_PENDING";
+        if (reservation.getPaymentStatus() == PaymentStatus.FAILED) {
+            return PaymentStatus.FAILED.name();
         }
 
         if (outstanding.compareTo(BigDecimal.ZERO) > 0) {
-            return "PARTIALLY_PAID";
+            return reservation.getTotalPaid() != null
+                    && safeMoney(reservation.getTotalPaid())
+                            .compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)) > 0
+                                    ? PaymentStatus.PARTIALLY_PAID.name()
+                                    : PaymentStatus.UNPAID.name();
         }
 
-        return "PAID";
+        return PaymentStatus.PAID.name();
+    }
+
+    public java.util.List<ReservationResponse> getAllReservations() {
+        return reservationRepository.findAll().stream()
+                .map(reservation -> toResponse(reservation, financialService.summarize(reservation)))
+                .toList();
     }
 
     private ReservationResponse toResponse(
             Reservation reservation,
-            long nights,
-            BigDecimal rate,
-            BigDecimal subtotal,
-            BigDecimal taxes) {
-
-        return new ReservationResponse(
+            ReservationFinancialService.ReservationFinancialSummary summary) {
+        ReservationResponse response = new ReservationResponse(
                 reservation.getId(),
                 reservation.getConfirmationNumber(),
                 reservation.getStatus(),
@@ -566,10 +574,17 @@ public class ReservationService {
                 reservation.getGuest().getEmail(),
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                nights,
-                rate,
-                subtotal,
-                taxes,
-                reservation.getTotalPrice());
+                summary.nights(),
+                summary.roomRate(),
+                summary.subtotal(),
+                summary.taxes(),
+                summary.totalPrice(),
+                summary.totalPaid(),
+                summary.outstandingBalance(),
+                summary.invoiceFinalized(),
+                summary.paymentStatus().name());
+        response.setActualCheckInDate(reservation.getActualCheckInDate());
+        response.setActualCheckOutAt(reservation.getActualCheckOutAt());
+        return response;
     }
 }

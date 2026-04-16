@@ -3,6 +3,8 @@ package com.roomify.backend.service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.roomify.backend.entity.AuditLog;
 import com.roomify.backend.repository.AuditLogRepository;
@@ -23,6 +25,7 @@ public class AuditService {
      * @param target   The affected resource
      * @param metadata Extra contextual data
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(String action, String target, String metadata) {
 
         try {
@@ -47,6 +50,7 @@ public class AuditService {
     /**
      * Writes an audit log entry with explicit actor.
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(String actor, String action, String target, String metadata) {
 
         try {

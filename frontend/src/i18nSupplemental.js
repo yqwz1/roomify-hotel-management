@@ -109,6 +109,7 @@ const supplementalResources = {
       loginEmailPlaceholder: 'name@example.com',
       invoiceDeliveryStatusIdle: 'Pending',
       invoiceDeliveryStatusLoading: 'Checking',
+      invoiceDeliveryStatusAttempt: 'Attempting',
       invoiceDeliveryStatusSent: 'Sent',
       invoiceDeliveryStatusFailed: 'Failed',
       invoiceDeliveryStatusError: 'Unavailable',
@@ -187,7 +188,7 @@ const supplementalResources = {
           'Use the lookup panel to load a reservation before validating the arrival checklist.',
         tips: [
           'Search by confirmation number when available for the most reliable lookup.',
-          'Guest-name search returns only the first matching reservation.',
+          'Guest-name search can return multiple reservations, so select the correct stay before continuing.',
           'Check-in is allowed only after every pre-arrival item is marked complete.',
         ],
         summaryTitle: 'Arrival Summary',
@@ -232,7 +233,14 @@ const supplementalResources = {
         outstandingBlocked:
           'Outstanding balance must be settled before checkout can be completed.',
         successBanner:
-          'The guest has been checked out successfully. You can load another reservation or review the invoice.',
+          'The guest has been checked out successfully. Review the updated room status, then continue straight to the invoice preview.',
+        roomStatusTitle: 'Room status updated',
+        roomStatusDescription:
+          'Room {{roomNumber}} is now marked {{status}} for turnover after checkout.',
+        nextStepTitle: 'Next step',
+        nextStepDescription:
+          'Open the invoice preview with this reservation already loaded so you can download, print, and confirm delivery status without searching again.',
+        openInvoicePreview: 'Open Invoice Preview',
         finalBillTitle: 'Final Bill',
         finalBillDescription:
           'Review the reservation billing details before closing the stay.',
@@ -414,6 +422,22 @@ const supplementalResources = {
         distributionRate: 'Base rate {{rate}}',
         distributionTotalRooms: 'Total rooms',
         distributionOccupiedRooms: 'Occupied rooms',
+        notificationsTitle: 'Recent Notifications',
+        notificationsDescription:
+          'Show the most recent manager-facing alerts directly in the dashboard during the demo.',
+        notificationsLoading: 'Loading recent notifications...',
+        notificationsEmptyTitle: 'No notifications yet',
+        notificationsEmptyDescription:
+          'Manager alerts will appear here after payment failures and other routed events.',
+        auditTitle: 'Recent Audit Log',
+        auditDescription:
+          'Show recent system actions without leaving the dashboard.',
+        auditLoading: 'Loading recent audit activity...',
+        auditEmptyTitle: 'No audit entries yet',
+        auditEmptyDescription:
+          'Audit entries will appear here after reservation, payment, and room actions.',
+        readLabel: 'Read',
+        newLabel: 'New',
       },
       staffDashboardPage: {
         loading: "Loading tonight's available inventory...",
@@ -568,6 +592,7 @@ const supplementalResources = {
         pricingDescription:
           'Preview the updated subtotal, taxes, and total before saving.',
         statusMeta: 'Awaiting selection',
+        saveChangesCta: 'Save Reservation Changes',
       },
       cancelReservationPage: {
         destructiveAction: 'Destructive Action',
@@ -625,10 +650,13 @@ const supplementalResources = {
         ],
         controlsTitle: 'Invoice Controls',
         controlsDescription:
-          'Generate the invoice first, then print or download the final document.',
+          'Generate the invoice first, then print, download, or open the final document.',
         loadingData: 'Loading invoice data...',
         generate: 'Generate Invoice',
         generating: 'Generating Invoice...',
+        emailInvoice: 'Email Invoice',
+        retryEmail: 'Retry Email',
+        sendingEmail: 'Sending Email...',
         print: 'Print Invoice',
         download: 'Download PDF',
         downloading: 'Downloading...',
@@ -659,12 +687,14 @@ const supplementalResources = {
         deliveryUnavailable: 'Delivery status unavailable',
         deliveryPending: 'Delivery pending',
         generateSuccess: 'Invoice generated successfully.',
+        emailSuccess: 'Invoice email sent successfully.',
+        emailFailedToast: 'Invoice email failed: {{error}}',
         downloadFailed: 'Unable to download the invoice.',
-        printFailed: 'Unable to open the invoice for printing.',
+        printFailed: 'Unable to prepare the invoice for printing.',
         retryLoadData: 'Retry Invoice Load',
         previewTitle: 'Invoice Preview',
         previewDescription:
-          'Use the embedded preview for demos or open the live PDF in a separate tab.',
+          'Use the embedded preview for demos, print directly from this screen, or open the live PDF in a separate tab.',
         previewLoading: 'Loading invoice preview...',
         previewErrorTitle: 'Invoice preview unavailable',
         previewErrorDescription:
@@ -722,8 +752,9 @@ const supplementalResources = {
           'Create a room record using an existing room type and an initial operational status.',
         updateRoomTitle: 'Update Room {{room}}',
         updateRoomDescription:
-          'Choose the next operational status. The backend still enforces transition rules.',
+          'Edit the room number, room type, and floor here. Operational status still changes from the status board.',
         currentStatus: 'Current Status',
+        statusManagedOnBoard: 'Use status board for transitions',
         newStatus: 'New Status',
         transitionWarning:
           'The backend will reject an occupied room returning directly to available. Move it through needs cleaning first.',
@@ -735,7 +766,7 @@ const supplementalResources = {
           '{{count}} rooms shown in the current filter state.',
         noRoomsTitle: 'No rooms match the filters',
         noRoomsDescription:
-          'Adjust the status, type, floor, or price range filters to expand the inventory list.',
+          'Adjust the status, type, or floor filters to expand the inventory list.',
         tableRoom: 'Room',
         tableFloor: 'Floor',
         tableType: 'Type',
@@ -744,9 +775,13 @@ const supplementalResources = {
         tableCapacity: 'Capacity',
         tableAmenities: 'Amenities',
         tableActions: 'Actions',
+        editButton: 'Edit',
         statusButton: 'Status',
+        openStatusBoard: 'Open Status Board',
         deleteButton: 'Delete',
         deleteConfirm: 'Delete Room {{room}}? This cannot be undone.',
+        roomCreated: 'Room {{room}} created successfully.',
+        roomUpdated: 'Room {{room}} updated successfully.',
         saveRoom: 'Save Room',
         savingRoom: 'Saving Room...',
         updateStatus: 'Update Status',
@@ -776,9 +811,13 @@ const supplementalResources = {
           'Managed automatically by reservation flow',
         updating: 'Updating...',
         occupiedLocked: 'Occupied rooms remain locked until checkout completes.',
+        loadFailedTitle: 'Unable to load room status',
         accessDeniedTitle: 'Room status unavailable',
         accessDeniedDescription:
           'Your current session cannot access the room-status controls exposed by the backend.',
+        actionsUnavailableTitle: 'Allowed actions unavailable',
+        actionsUnavailableDescription:
+          'We could not load valid next statuses for this room right now.',
         refreshRooms: 'Refresh Room Board',
         successToast: 'Room {{roomNumber}} moved to {{status}}.',
       },
@@ -836,7 +875,7 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'Reservation Lookup',
         description:
-          'Search by confirmation number or guest name. Guest-name search returns the first matching reservation.',
+          'Search by confirmation number or guest name. When a guest-name search returns multiple stays, select the exact reservation before continuing.',
         chipConfirmation: 'Confirmation-first',
         chipStaff: 'Staff lookup',
         placeholder: 'RSV-XXXXXXXXXXXX or guest name',
@@ -844,7 +883,11 @@ const supplementalResources = {
         emptyDescription:
           'Try a confirmation number or a more specific guest name.',
         guestNameWarning:
-          'Guest-name search returns the first matching reservation',
+          'Guest-name search matched this reservation. Confirm the details before continuing.',
+        multipleMatchesTitle:
+          '{{count}} reservations matched this guest search',
+        multipleMatchesDescription:
+          'Select the exact reservation to avoid checking in or checking out the wrong stay.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'Missing confirmation number.',
@@ -1068,6 +1111,7 @@ const supplementalResources = {
       loginEmailPlaceholder: 'الاسم@مثال.فندق',
       invoiceDeliveryStatusIdle: 'قيد الانتظار',
       invoiceDeliveryStatusLoading: 'جار التحقق',
+      invoiceDeliveryStatusAttempt: 'جارِ المحاولة',
       invoiceDeliveryStatusSent: 'تم الإرسال',
       invoiceDeliveryStatusFailed: 'فشل الإرسال',
       invoiceDeliveryStatusError: 'غير متاح',
@@ -1146,7 +1190,7 @@ const supplementalResources = {
           'استخدم لوحة البحث لتحميل الحجز قبل التحقق من قائمة الوصول.',
         tips: [
           'ابحث باستخدام رقم التأكيد متى ما كان متاحًا للحصول على أدق نتيجة.',
-          'البحث باسم الضيف يعرض أول حجز مطابق فقط.',
+          'قد يعرض البحث باسم الضيف عدة حجوزات، لذا اختر الإقامة الصحيحة قبل المتابعة.',
           'لا يُسمح بتسجيل الوصول إلا بعد إكمال جميع عناصر ما قبل الوصول.',
         ],
         summaryTitle: 'ملخص الوصول',
@@ -1191,7 +1235,14 @@ const supplementalResources = {
         outstandingBlocked:
           'يجب تسوية الرصيد المستحق قبل إتمام المغادرة.',
         successBanner:
-          'تم تسجيل مغادرة الضيف بنجاح. يمكنك تحميل حجز آخر أو مراجعة الفاتورة.',
+          'تم تسجيل مغادرة الضيف بنجاح. راجع حالة الغرفة المحدثة ثم تابع مباشرة إلى معاينة الفاتورة.',
+        roomStatusTitle: 'تم تحديث حالة الغرفة',
+        roomStatusDescription:
+          'تم وضع الغرفة {{roomNumber}} الآن في حالة {{status}} بعد تسجيل المغادرة.',
+        nextStepTitle: 'الخطوة التالية',
+        nextStepDescription:
+          'افتح معاينة الفاتورة مع تحميل هذا الحجز تلقائيًا حتى تتمكن من التنزيل والطباعة ومراجعة حالة التسليم دون البحث مرة أخرى.',
+        openInvoicePreview: 'فتح معاينة الفاتورة',
         finalBillTitle: 'الفاتورة النهائية',
         finalBillDescription:
           'راجع تفاصيل فاتورة الحجز قبل إغلاق الإقامة.',
@@ -1372,6 +1423,22 @@ const supplementalResources = {
         distributionRate: 'Base rate {{rate}}',
         distributionTotalRooms: 'Total rooms',
         distributionOccupiedRooms: 'Occupied rooms',
+        notificationsTitle: 'أحدث الإشعارات',
+        notificationsDescription:
+          'اعرض أحدث التنبيهات الموجهة للمدير مباشرة من لوحة التحكم أثناء العرض.',
+        notificationsLoading: 'جارٍ تحميل الإشعارات الحديثة...',
+        notificationsEmptyTitle: 'لا توجد إشعارات بعد',
+        notificationsEmptyDescription:
+          'ستظهر تنبيهات المدير هنا بعد فشل الدفعات وغيرها من الأحداث الموجهة.',
+        auditTitle: 'أحدث سجل تدقيق',
+        auditDescription:
+          'اعرض آخر الإجراءات النظامية بدون مغادرة لوحة التحكم.',
+        auditLoading: 'جارٍ تحميل نشاط التدقيق...',
+        auditEmptyTitle: 'لا توجد سجلات تدقيق بعد',
+        auditEmptyDescription:
+          'ستظهر سجلات التدقيق هنا بعد إجراءات الحجوزات والمدفوعات والغرف.',
+        readLabel: 'مقروء',
+        newLabel: 'جديد',
         alertsTitle: 'تنبيهات تشغيلية',
         alertsDescription:
           'الحالات التي تعيق المخزون أو التوظيف أو جاهزية الخدمة حاليًا.',
@@ -1572,6 +1639,7 @@ const supplementalResources = {
         pricingDescription:
           'عاين المجموع الفرعي والضرائب والإجمالي قبل الحفظ.',
         statusMeta: 'بانتظار الاختيار',
+        saveChangesCta: 'حفظ تغييرات الحجز',
       },
       cancelReservationPage: {
         destructiveAction: 'إجراء غير قابل للتراجع',
@@ -1629,10 +1697,13 @@ const supplementalResources = {
         ],
         controlsTitle: 'عناصر التحكم بالفاتورة',
         controlsDescription:
-          'أنشئ الفاتورة أولاً ثم اطبع المستند النهائي أو نزّله.',
+          'أنشئ الفاتورة أولاً ثم اطبع المستند النهائي أو نزّله أو افتحه.',
         loadingData: 'جار تحميل بيانات الفاتورة...',
         generate: 'إنشاء الفاتورة',
         generating: 'جار إنشاء الفاتورة...',
+        emailInvoice: 'إرسال الفاتورة',
+        retryEmail: 'إعادة إرسال الفاتورة',
+        sendingEmail: 'جار إرسال الفاتورة...',
         print: 'طباعة الفاتورة',
         download: 'تنزيل PDF',
         downloading: 'جار التنزيل...',
@@ -1663,12 +1734,14 @@ const supplementalResources = {
         deliveryUnavailable: 'تعذر الحصول على حالة التسليم',
         deliveryPending: 'التسليم قيد الانتظار',
         generateSuccess: 'تم إنشاء الفاتورة بنجاح.',
+        emailSuccess: 'تم إرسال الفاتورة عبر البريد بنجاح.',
+        emailFailedToast: 'فشل إرسال الفاتورة: {{error}}',
         downloadFailed: 'تعذر تنزيل الفاتورة.',
-        printFailed: 'تعذر فتح الفاتورة للطباعة.',
+        printFailed: 'تعذر تجهيز الفاتورة للطباعة.',
         retryLoadData: 'إعادة تحميل الفاتورة',
         previewTitle: 'معاينة الفاتورة',
         previewDescription:
-          'استخدم المعاينة المضمنة في العرض التوضيحي أو افتح ملف PDF المباشر في تبويب منفصل.',
+          'استخدم المعاينة المضمنة في العرض التوضيحي، أو اطبع مباشرة من هذه الشاشة، أو افتح ملف PDF المباشر في تبويب منفصل.',
         previewLoading: 'جار تحميل معاينة الفاتورة...',
         previewErrorTitle: 'تعذر عرض معاينة الفاتورة',
         previewErrorDescription:
@@ -1726,8 +1799,9 @@ const supplementalResources = {
           'أنشئ سجل غرفة باستخدام نوع غرفة موجود وحالة تشغيلية ابتدائية.',
         updateRoomTitle: 'تحديث الغرفة {{room}}',
         updateRoomDescription:
-          'اختر الحالة التشغيلية التالية. ما يزال الخادم يفرض قواعد الانتقال.',
+          'عدّل رقم الغرفة ونوعها والطابق من هنا. تبقى تغييرات الحالة من لوحة الحالات.',
         currentStatus: 'الحالة الحالية',
+        statusManagedOnBoard: 'لوحة الحالات لإدارة الانتقالات',
         newStatus: 'الحالة الجديدة',
         transitionWarning:
           'سيرفض الخادم عودة الغرفة المشغولة مباشرة إلى متاحة. انقلها أولًا إلى تحتاج تنظيفًا.',
@@ -1737,7 +1811,7 @@ const supplementalResources = {
         inventoryTableDescription_other: 'تظهر {{count}} غرف وفق الفلاتر الحالية.',
         noRoomsTitle: 'لا توجد غرف تطابق الفلاتر',
         noRoomsDescription:
-          'عدّل فلاتر الحالة أو النوع أو الطابق أو نطاق السعر لتوسيع القائمة.',
+          'عدّل فلاتر الحالة أو النوع أو الطابق لتوسيع القائمة.',
         tableRoom: 'الغرفة',
         tableFloor: 'الطابق',
         tableType: 'النوع',
@@ -1746,9 +1820,13 @@ const supplementalResources = {
         tableCapacity: 'السعة',
         tableAmenities: 'المزايا',
         tableActions: 'الإجراءات',
+        editButton: 'تعديل',
         statusButton: 'الحالة',
+        openStatusBoard: 'فتح لوحة الحالات',
         deleteButton: 'حذف',
         deleteConfirm: 'حذف الغرفة {{room}}؟ لا يمكن التراجع عن ذلك.',
+        roomCreated: 'تم إنشاء الغرفة {{room}} بنجاح.',
+        roomUpdated: 'تم تحديث الغرفة {{room}} بنجاح.',
         saveRoom: 'حفظ الغرفة',
         savingRoom: 'جار حفظ الغرفة...',
         updateStatus: 'تحديث الحالة',
@@ -1778,9 +1856,13 @@ const supplementalResources = {
           'تتم إدارته تلقائيًا عبر مسار الحجز',
         updating: 'جار التحديث...',
         occupiedLocked: 'تبقى الغرف المشغولة مقفلة حتى اكتمال المغادرة.',
+        loadFailedTitle: 'تعذر تحميل حالة الغرف',
         accessDeniedTitle: 'تعذر الوصول إلى حالة الغرف',
         accessDeniedDescription:
           'جلسة المستخدم الحالية لا تملك صلاحية الوصول إلى عناصر التحكم بحالة الغرف من الخادم.',
+        actionsUnavailableTitle: 'تعذر تحميل الإجراءات المتاحة',
+        actionsUnavailableDescription:
+          'تعذر تحميل الحالات التالية الصالحة لهذه الغرفة الآن.',
         refreshRooms: 'تحديث لوحة الغرف',
         successToast: 'تم نقل الغرفة {{roomNumber}} إلى {{status}}.',
       },
@@ -1836,7 +1918,7 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'البحث عن الحجز',
         description:
-          'ابحث برقم التأكيد أو باسم الضيف. البحث باسم الضيف يعرض أول حجز مطابق فقط.',
+          'ابحث برقم التأكيد أو باسم الضيف. إذا أعاد البحث باسم الضيف عدة إقامات، فاختر الحجز الصحيح قبل المتابعة.',
         chipConfirmation: 'الأولوية لرقم التأكيد',
         chipStaff: 'بحث الموظفين',
         placeholder: 'RSV-XXXXXXXXXXXX أو اسم الضيف',
@@ -1844,7 +1926,11 @@ const supplementalResources = {
         emptyDescription:
           'جرّب رقم تأكيد أو اسم ضيف أكثر تحديدًا.',
         guestNameWarning:
-          'البحث باسم الضيف يعرض أول حجز مطابق',
+          'تمت مطابقة هذا الحجز عبر اسم الضيف. تحقق من التفاصيل قبل المتابعة.',
+        multipleMatchesTitle:
+          'تم العثور على {{count}} حجوزات مطابقة لهذا البحث',
+        multipleMatchesDescription:
+          'اختر الحجز الصحيح لتجنب تسجيل الوصول أو المغادرة للحجز الخطأ.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'رقم التأكيد مفقود.',

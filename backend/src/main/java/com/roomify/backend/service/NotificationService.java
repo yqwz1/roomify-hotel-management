@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -153,6 +154,7 @@ public class NotificationService {
                 confirmationNumber);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyPaymentFailed(String confirmationNumber, String reason) {
         createNotification(
                 NotificationEventType.PAYMENT_FAILED,

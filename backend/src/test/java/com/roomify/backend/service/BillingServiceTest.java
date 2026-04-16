@@ -34,6 +34,7 @@ class BillingServiceTest {
         private PaymentRepository paymentRepository;
         private AuditService auditService;
         private NotificationService notificationService;
+        private ReservationFinancialService financialService;
         private BillingService billingService;
 
         @BeforeEach
@@ -42,12 +43,14 @@ class BillingServiceTest {
                 paymentRepository = mock(PaymentRepository.class);
                 auditService = mock(AuditService.class);
                 notificationService = mock(NotificationService.class);
+                financialService = new ReservationFinancialService(new BigDecimal("0.15"));
 
                 billingService = new BillingService(
                                 reservationRepository,
                                 paymentRepository,
                                 auditService,
                                 notificationService,
+                                financialService,
                                 new BigDecimal("0.15"));
         }
 
@@ -183,6 +186,7 @@ class BillingServiceTest {
                 reservation.setTotalPrice(new BigDecimal("690.00"));
                 reservation.setTotalPaid(new BigDecimal("100.00"));
                 reservation.setOutstandingBalance(new BigDecimal("590.00"));
+                reservation.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
                 reservation.setInvoiceFinalized(false);
 
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
@@ -218,6 +222,8 @@ class BillingServiceTest {
 
                 reservation.setTotalPrice(new BigDecimal("690.00"));
                 reservation.setTotalPaid(new BigDecimal("680.00"));
+                reservation.setOutstandingBalance(new BigDecimal("10.00"));
+                reservation.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
 
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
@@ -244,6 +250,8 @@ class BillingServiceTest {
 
                 reservation.setTotalPrice(new BigDecimal("690.00"));
                 reservation.setTotalPaid(new BigDecimal("500.00"));
+                reservation.setOutstandingBalance(new BigDecimal("190.00"));
+                reservation.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
 
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
@@ -271,6 +279,8 @@ class BillingServiceTest {
 
                 reservation.setTotalPrice(new BigDecimal("690.00"));
                 reservation.setTotalPaid(new BigDecimal("690.00"));
+                reservation.setOutstandingBalance(new BigDecimal("0.00"));
+                reservation.setPaymentStatus(PaymentStatus.PAID);
 
                 when(reservationRepository.findByConfirmationNumber("RSV-ABC123"))
                                 .thenReturn(Optional.of(reservation));
@@ -329,6 +339,7 @@ class BillingServiceTest {
                 reservation.setTotalPrice(totalPrice);
                 reservation.setTotalPaid(new BigDecimal("0.00"));
                 reservation.setOutstandingBalance(totalPrice);
+                reservation.setPaymentStatus(PaymentStatus.UNPAID);
                 reservation.setInvoiceFinalized(false);
 
                 return reservation;

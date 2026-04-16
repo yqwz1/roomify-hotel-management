@@ -4,13 +4,9 @@ import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,16 +28,14 @@ import java.util.Locale;
 @Transactional(readOnly = true)
 public class ReservationLookupService {
 
-        private static final int MONEY_SCALE = 2;
-
         private final ReservationRepository reservationRepository;
-        private final BigDecimal taxRate;
+        private final ReservationFinancialService financialService;
 
         public ReservationLookupService(
                         ReservationRepository reservationRepository,
-                        @Value("${roomify.reservations.tax-rate:0.10}") BigDecimal taxRate) {
+                        ReservationFinancialService financialService) {
                 this.reservationRepository = reservationRepository;
-                this.taxRate = taxRate;
+                this.financialService = financialService;
         }
 
         /**
@@ -84,14 +78,7 @@ public class ReservationLookupService {
         // ─── Mapping ─────────────────────────────────────────────────────────────
 
         private ReservationLookupResponse toResponse(Reservation r) {
-                long nights = ChronoUnit.DAYS.between(r.getCheckInDate(), r.getCheckOutDate());
-
-                BigDecimal roomRate = r.getRoom().getRoomType().getBasePrice()
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
-                                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                BigDecimal taxes = subtotal.multiply(taxRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-                BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                ReservationFinancialService.ReservationFinancialSummary summary = financialService.summarize(r);
 
                 ReservationLookupResponse.RoomInfo roomInfo = new ReservationLookupResponse.RoomInfo(
                                 r.getRoom().getId(),
@@ -104,7 +91,7 @@ public class ReservationLookupService {
                 ReservationLookupResponse.DateInfo dateInfo = new ReservationLookupResponse.DateInfo(
                                 r.getCheckInDate(),
                                 r.getCheckOutDate(),
-                                nights);
+                                summary.nights());
 
                 ReservationLookupResponse.GuestInfo guestInfo = new ReservationLookupResponse.GuestInfo(
                                 r.getGuest().getId(),
@@ -115,7 +102,7 @@ public class ReservationLookupService {
                                 r.getGuest().getNationality());
 
                 ReservationLookupResponse.PricingInfo pricingInfo = new ReservationLookupResponse.PricingInfo(
-                                roomRate, subtotal, taxes, totalPrice);
+                                summary.roomRate(), summary.subtotal(), summary.taxes(), summary.totalPrice());
 
                 return new ReservationLookupResponse(
                                 r.getConfirmationNumber(),

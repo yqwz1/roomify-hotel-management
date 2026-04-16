@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,6 +9,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import ConfirmationToast from '../components/ConfirmationToast';
+import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -44,17 +46,28 @@ const STATUS_META = {
   },
 };
 
+const ACTION_STATUS_READY = 'ready';
+const ACTION_STATUS_UNAVAILABLE = 'unavailable';
+
 const attachValidNextStatuses = async (rooms) => {
   const hydrated = await Promise.all(
     rooms.map(async (room) => {
       try {
         const validNextStatuses = await getValidNextStatuses(room.id);
-        return { ...room, validNextStatuses };
+        return {
+          ...room,
+          validNextStatuses,
+          validNextStatusesStatus: ACTION_STATUS_READY,
+        };
       } catch (err) {
         if (err?.response?.status === 403) {
           throw err;
         }
-        return { ...room, validNextStatuses: [] };
+        return {
+          ...room,
+          validNextStatuses: [],
+          validNextStatusesStatus: ACTION_STATUS_UNAVAILABLE,
+        };
       }
     })
   );
@@ -83,9 +96,14 @@ function LoadingCard() {
 
 export default function RoomStatus() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const initialFilter = String(location.state?.initialFilter ?? 'ALL').toUpperCase();
+  const initialQuery = String(location.state?.initialQuery ?? '');
   const [rooms, setRooms] = useState([]);
-  const [filter, setFilter] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState(
+    STATUSES.includes(initialFilter) ? initialFilter : 'ALL'
+  );
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
@@ -120,14 +138,16 @@ export default function RoomStatus() {
     try {
       const updated = await updateRoomStatus(roomId, nextStatus);
       let validNextStatuses = [];
+      let validNextStatusesStatus = ACTION_STATUS_READY;
       try {
         validNextStatuses = await getValidNextStatuses(updated.id);
       } catch (transitionErr) {
         if (transitionErr?.response?.status === 403) {
           throw transitionErr;
         }
+        validNextStatusesStatus = ACTION_STATUS_UNAVAILABLE;
       }
-      const hydratedRoom = { ...updated, validNextStatuses };
+      const hydratedRoom = { ...updated, validNextStatuses, validNextStatusesStatus };
       setRooms((prev) => {
         if (filter !== 'ALL' && hydratedRoom.status !== filter) {
           return prev.filter((room) => room.id !== roomId);
@@ -246,7 +266,7 @@ export default function RoomStatus() {
           </div>
         </div>
 
-        {error && (
+        {error && rooms.length > 0 && (
           <div className="mt-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
             {error}
           </div>
@@ -267,20 +287,18 @@ export default function RoomStatus() {
 
         {!loading && error && rooms.length === 0 && (
           <ErrorState
-            title={t('roomStatusPage.accessDeniedTitle')}
+            title={t('roomStatusPage.loadFailedTitle')}
             message={error || t('roomStatusPage.accessDeniedDescription')}
             onRetry={() => fetchRooms()}
           />
         )}
 
         {!loading && !error && filteredRooms.length === 0 && (
-          <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-            <Search className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">{t('roomStatusPage.noRoomsTitle')}</p>
-            <p className="mt-2 text-sm font-medium text-zinc-500">
-              {t('roomStatusPage.noRoomsDescription')}
-            </p>
-          </div>
+          <EmptyState
+            title={t('roomStatusPage.noRoomsTitle')}
+            message={t('roomStatusPage.noRoomsDescription')}
+            icon={Search}
+          />
         )}
 
         {!loading && filteredRooms.length > 0 && (
@@ -289,6 +307,8 @@ export default function RoomStatus() {
               const meta = STATUS_META[room.status] || STATUS_META.AVAILABLE;
               const Icon = meta.icon;
               const actions = room.validNextStatuses ?? [];
+              const actionsUnavailable = room.validNextStatusesStatus === ACTION_STATUS_UNAVAILABLE;
+              const hasActions = !actionsUnavailable && actions.length > 0;
 
               return (
                 <article
@@ -333,7 +353,14 @@ export default function RoomStatus() {
                   )}
 
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {actions.length === 0 ? (
+                    {actionsUnavailable ? (
+                      <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        <p className="font-bold">{t('roomStatusPage.actionsUnavailableTitle')}</p>
+                        <p className="mt-1 font-medium text-amber-900/80">
+                          {t('roomStatusPage.actionsUnavailableDescription')}
+                        </p>
+                      </div>
+                    ) : !hasActions ? (
                       <div className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-500">
                         {room.status === 'OCCUPIED'
                           ? t('roomStatusPage.occupiedLocked')

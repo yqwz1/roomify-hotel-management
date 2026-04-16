@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Receipt</title>
+</head>
+<body>
+    <h2>Payment Receipt</h2>
+    <p>Dear <span th:text="${guest}">Guest</span>,</p>
+    <p>We have recorded your payment successfully. Here are your receipt details:</p>
+    <ul>
+        <li><strong>Confirmation Number:</strong> <span th:text="${confirmationNumber}">RSV-XXXXXXXXXX</span></li>
+        <li><strong>Receipt Number:</strong> <span th:text="${receiptNumber}">RCT-XXXXXXXX</span></li>
+        <li><strong>Invoice Number:</strong> <span th:text="${invoiceNumber}">INV-XXXXXXXX</span></li>
+        <li><strong>Payment Method:</strong> <span th:text="${paymentMethod}">CARD</span></li>
+        <li><strong>Payment Date:</strong> <span th:text="${paymentDate}">2026-04-14T23:00:00</span></li>
+        <li><strong>Amount:</strong> $<span th:text="${amount}">0.00</span></li>
+    </ul>
+    <p>Thank you for choosing Roomify.</p>
+</body>
+</html>

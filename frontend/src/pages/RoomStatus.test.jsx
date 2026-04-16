@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import RoomStatus from './RoomStatus';
 import {
   getRooms,
@@ -42,6 +43,13 @@ describe('RoomStatus', () => {
     vi.resetAllMocks();
   });
 
+  const renderPage = () =>
+    render(
+      <MemoryRouter>
+        <RoomStatus />
+      </MemoryRouter>
+    );
+
   it('shows only backend-provided next statuses and reports update success', async () => {
     const user = userEvent.setup();
 
@@ -75,7 +83,7 @@ describe('RoomStatus', () => {
       roomType: { name: 'Standard Room', basePrice: 100 },
     });
 
-    render(<RoomStatus />);
+    renderPage();
 
     const roomNumber = await screen.findByText('101');
     const roomCard = roomNumber.closest('article');
@@ -101,13 +109,39 @@ describe('RoomStatus', () => {
       .mockRejectedValueOnce(new Error('Forbidden'))
       .mockResolvedValueOnce([]);
 
-    render(<RoomStatus />);
+    renderPage();
 
+    expect(await screen.findByText(/Unable to load room status/i)).toBeInTheDocument();
     await screen.findAllByText('Forbidden');
     await user.click(screen.getByRole('button', { name: /Try again/i }));
 
     await waitFor(() => {
       expect(getRooms).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('shows an unavailable-actions state when valid next statuses cannot be loaded', async () => {
+    getRooms.mockResolvedValue([
+      {
+        id: 3,
+        roomNumber: '103',
+        floor: 1,
+        status: 'AVAILABLE',
+        roomType: { name: 'Standard Room', basePrice: 100 },
+      },
+    ]);
+
+    getValidNextStatuses.mockRejectedValue(new Error('Network error'));
+
+    renderPage();
+
+    const roomNumber = await screen.findByText('103');
+    const roomCard = roomNumber.closest('article');
+
+    expect(roomCard).not.toBeNull();
+    expect(within(roomCard).getByText(/Allowed actions unavailable/i)).toBeInTheDocument();
+    expect(within(roomCard).getByText(/could not load valid next statuses for this room right now/i)).toBeInTheDocument();
+    expect(within(roomCard).queryByText(/Managed automatically/i)).not.toBeInTheDocument();
+    expect(within(roomCard).queryByRole('button', { name: /Under Maintenance/i })).not.toBeInTheDocument();
   });
 });

@@ -7,12 +7,13 @@ import {
   Receipt,
   Wallet,
 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ConfirmationToast from '../components/ConfirmationToast';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
+import SuccessState from '../components/common/SuccessState';
 import ModalFrame from '../components/common/ModalFrame';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
@@ -35,7 +36,9 @@ import {
   formatLocalizedDate,
   formatLocalizedDateTime,
   getPaymentStatusLabel,
+  getRoomStatusLabel,
   getReservationStatusLabel,
+  translateBillLineItemLabel,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -171,7 +174,7 @@ function BillBreakdown({ bill, t, language }) {
                 return (
                   <div key={`${item?.label ?? 'line'}-${index}`} className="flex items-center justify-between gap-4 text-sm">
                     <span className="font-medium text-zinc-600">
-                      {item?.label ? translateKnownValue(item.label, t) : t('checkoutPage.lineItemFallback')}
+                      {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                     </span>
                     <span className="font-bold text-zinc-950">
                       {credit ? `-${formatLocalizedCurrency(amount, language)}` : formatLocalizedCurrency(amount, language)}
@@ -368,6 +371,7 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
 export default function Checkout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [bill, setBill] = useState(null);
   const [billLoading, setBillLoading] = useState(false);
@@ -673,8 +677,58 @@ export default function Checkout() {
               ) : null}
 
               {checkoutSuccess ? (
-                <div className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
-                  {t('checkoutPage.successBanner')}
+                <div className="mt-4">
+                  <SuccessState
+                    title={t('checkoutPage.complete')}
+                    message={t('checkoutPage.successBanner')}
+                  />
+                  {selected ? (
+                    <div className="mt-4 space-y-4">
+                      <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">
+                              {t('checkoutPage.roomStatusTitle')}
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-emerald-900">
+                              {t('checkoutPage.roomStatusDescription', {
+                                roomNumber: selected.roomNumber,
+                                status: getRoomStatusLabel('NEEDS_CLEANING', t),
+                              })}
+                            </p>
+                          </div>
+                          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
+                            {getRoomStatusLabel('NEEDS_CLEANING', t)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
+                              {t('checkoutPage.nextStepTitle')}
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-zinc-700">
+                              {t('checkoutPage.nextStepDescription')}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() =>
+                              navigate('/invoice-preview', {
+                                state: { confirmationNumber: selected.confirmationNumber },
+                              })
+                            }
+                            className="h-12 bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                          >
+                            <Receipt className="h-4 w-4" />
+                            {t('checkoutPage.openInvoicePreview')}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </DashboardPanel>
@@ -697,14 +751,7 @@ export default function Checkout() {
               ) : !bill ? (
                 <EmptyState title={t('checkoutPage.noBillTitle')} message={t('checkoutPage.noBillDescription')} />
               ) : (
-                <>
-                  <BillBreakdown bill={bill} t={t} language={i18n.language} />
-                  {!checkoutSuccess && blockingMessage ? (
-                    <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
-                      {blockingMessage}
-                    </div>
-                  ) : null}
-                </>
+                <BillBreakdown bill={bill} t={t} language={i18n.language} />
               )}
             </DashboardPanel>
 

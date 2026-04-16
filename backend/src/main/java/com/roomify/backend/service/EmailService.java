@@ -72,7 +72,8 @@ public class EmailService {
                                         ex.getMessage(),
                                         confirmationNumber);
 
-                        throw new RuntimeException("Email sending failed", ex);
+                        // Intentionally eating the exception so it doesn't rollback the reservation transaction
+                        org.slf4j.LoggerFactory.getLogger(EmailService.class).error("Email sending failed for subject '{}'", subject, ex);
                 }
         }
 
@@ -88,6 +89,7 @@ public class EmailService {
                         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
                         helper.setTo(recipient);
+                        helper.setFrom(fromAddress);
                         helper.setSubject("Roomify Invoice " + invoiceNumber);
 
                         helper.setText("""
@@ -156,14 +158,14 @@ public class EmailService {
 
                         invoiceDeliveryLogService.logSuccess(
                                         to,
-                                        "Receipt",
+                                        InvoiceDeliveryLogService.RECEIPT_SUBJECT,
                                         confirmationNumber);
 
                 } catch (MailException | MessagingException ex) {
 
                         invoiceDeliveryLogService.logFailure(
                                         to,
-                                        "Receipt",
+                                        InvoiceDeliveryLogService.RECEIPT_SUBJECT,
                                         confirmationNumber,
                                         ex.getMessage());
 
@@ -203,6 +205,12 @@ public class EmailService {
                         String guestName,
                         ReservationResponse reservation) {
 
+                String subject = "Reservation Confirmation";
+                if (emailLogService.isEmailAlreadySent(reservation.getConfirmationNumber(), subject)) {
+                    org.slf4j.LoggerFactory.getLogger(EmailService.class).info("Confirmation email already sent for {}, skipping.", reservation.getConfirmationNumber());
+                    return;
+                }
+
                 Context context = new Context();
 
                 context.setVariable("guest", guestName);
@@ -215,7 +223,7 @@ public class EmailService {
 
                 sendHtmlEmail(
                                 to,
-                                "Reservation Confirmation",
+                                subject,
                                 "email/confirmation-email",
                                 context,
                                 reservation.getConfirmationNumber());

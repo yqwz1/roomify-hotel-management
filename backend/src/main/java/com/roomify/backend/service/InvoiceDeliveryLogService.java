@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class InvoiceDeliveryLogService {
 
+    public static final String INVOICE_SUBJECT = "Invoice";
+    public static final String RECEIPT_SUBJECT = "Receipt";
+
     private final InvoiceDeliveryLogRepository repository;
 
     /**
@@ -50,5 +53,11 @@ public class InvoiceDeliveryLogService {
 
     public Optional<InvoiceDeliveryLog> getLatestByConfirmationNumber(String confirmationNumber) {
         return repository.findFirstByConfirmationNumberOrderByCreatedAtDesc(confirmationNumber);
+    }
+
+    public Optional<InvoiceDeliveryLog> getLatestInvoiceByConfirmationNumber(String confirmationNumber) {
+        return repository.findFirstByConfirmationNumberAndSubjectOrderByCreatedAtDesc(
+                confirmationNumber,
+                INVOICE_SUBJECT);
     }
 }

@@ -106,7 +106,7 @@ public class Reservation {
     @NotNull(message = "Payment status is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 20)
-    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Column(name = "invoice_finalized", nullable = false)
     private boolean invoiceFinalized = false;
@@ -146,7 +146,7 @@ public class Reservation {
             outstandingBalance = totalPrice != null ? totalPrice : BigDecimal.ZERO;
         }
         if (paymentStatus == null) {
-            paymentStatus = PaymentStatus.UNPAID;
+            paymentStatus = PaymentStatus.PENDING;
         }
     }
 

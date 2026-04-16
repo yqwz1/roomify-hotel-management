@@ -85,6 +85,7 @@ const ROLE_CODE_KEYS = {
 const INVOICE_DELIVERY_STATUS_KEYS = {
   IDLE: 'invoiceDeliveryStatusIdle',
   LOADING: 'invoiceDeliveryStatusLoading',
+  ATTEMPT: 'invoiceDeliveryStatusAttempt',
   SENT: 'invoiceDeliveryStatusSent',
   FAILED: 'invoiceDeliveryStatusFailed',
   ERROR: 'invoiceDeliveryStatusError',
@@ -92,6 +93,7 @@ const INVOICE_DELIVERY_STATUS_KEYS = {
 };
 
 const PAYMENT_STATUS_KEYS = {
+  PENDING: 'paymentStatusPending',
   UNPAID: 'paymentStatusUnpaid',
   PARTIALLY_PAID: 'paymentStatusPartiallyPaid',
   PAID: 'paymentStatusPaid',
@@ -172,6 +174,86 @@ export const getInvoiceDeliveryStatusLabel = (status, t) =>
 
 export const getPaymentStatusLabel = (status, t) =>
   translateWithFallback(t, PAYMENT_STATUS_KEYS[status], humanizeStatus(status));
+
+const translateKnownLineItemPrefix = (normalized, t, pattern, key) => {
+  const match = normalized.match(pattern);
+  if (!match) return null;
+
+  const translated = translateWithFallback(t, key, normalized);
+  const suffix = match[1] ?? '';
+  return `${translated}${suffix}`;
+};
+
+export const translateBillLineItemLabel = (label, t) => {
+  const normalized = String(label ?? '').trim();
+  if (!normalized) return '-';
+
+  const exactKey = KNOWN_VALUE_KEYS[normalized];
+  if (exactKey) {
+    return translateWithFallback(t, exactKey, normalized);
+  }
+
+  const roomChargeMatch = normalized.match(/^Room Charge(?:\s*\((.+)\))?$/i);
+  if (roomChargeMatch) {
+    const details = roomChargeMatch[1];
+    if (!details) {
+      return translateWithFallback(t, 'invoiceLineRoomCharge', normalized);
+    }
+
+    const parsedStayDetails = details.match(/^(\d+)\s+night(?:s)?\s+x\s+(.+)$/i);
+    if (parsedStayDetails) {
+      const [, count, rate] = parsedStayDetails;
+      return translateWithFallback(
+        t,
+        'checkoutPage.roomChargeLabel',
+        `${translateWithFallback(t, 'invoiceLineRoomCharge', 'Room charge')} (${details})`,
+        { count: Number(count), rate }
+      );
+    }
+
+    return `${translateWithFallback(t, 'invoiceLineRoomCharge', 'Room charge')} (${details})`;
+  }
+
+  const vatMatch = normalized.match(/^VAT(?:\s*\((.+)\))?$/i);
+  if (vatMatch) {
+    const details = vatMatch[1];
+    if (!details) {
+      return translateWithFallback(t, 'invoiceLineVat', normalized);
+    }
+
+    const parsedRate = details.replace(/%/g, '').trim();
+    if (parsedRate) {
+      return translateWithFallback(
+        t,
+        'checkoutPage.vatLabel',
+        `${translateWithFallback(t, 'invoiceLineVat', 'VAT')} (${details})`,
+        { rate: parsedRate }
+      );
+    }
+
+    return `${translateWithFallback(t, 'invoiceLineVat', 'VAT')} (${details})`;
+  }
+
+  return (
+    translateKnownLineItemPrefix(
+      normalized,
+      t,
+      /^Additional Service Charges(.*)$/i,
+      'invoiceLineServiceCharges'
+    ) ??
+    translateKnownLineItemPrefix(normalized, t, /^Service Charges?(.*)$/i, 'invoiceLineServiceCharges') ??
+    translateKnownLineItemPrefix(normalized, t, /^Discounts?(.*)$/i, 'invoiceLineDiscount') ??
+    translateKnownLineItemPrefix(normalized, t, /^Balance Due(.*)$/i, 'invoiceLineBalanceDue') ??
+    translateKnownLineItemPrefix(
+      normalized,
+      t,
+      /^Outstanding Balance(.*)$/i,
+      'invoiceLineOutstandingBalance'
+    ) ??
+    translateKnownLineItemPrefix(normalized, t, /^Total Paid(.*)$/i, 'invoiceLineTotalPaid') ??
+    normalized
+  );
+};
 
 export const translateKnownValue = (value, t) => {
   const normalized = String(value ?? '').trim();

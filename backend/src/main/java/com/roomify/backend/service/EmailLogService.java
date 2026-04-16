@@ -28,4 +28,15 @@ public class EmailLogService {
 
         repository.save(log);
     }
+
+    public boolean isEmailAlreadySent(String confirmationNumber, String subject) {
+        if (confirmationNumber == null || confirmationNumber.trim().isEmpty()) {
+            return false;
+        }
+        return repository.existsByConfirmationNumberAndSubjectAndStatus(
+                confirmationNumber,
+                subject,
+                EmailDeliveryStatus.SENT
+        );
+    }
 }

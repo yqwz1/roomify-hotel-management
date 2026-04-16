@@ -8,6 +8,7 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.CannotDeleteException;
 import com.roomify.backend.exception.DuplicateResourceException;
+import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -186,16 +187,17 @@ public class RoomService {
                         String roomNumber) {
 
                 if (current == RoomStatus.OCCUPIED) {
-                        throw new IllegalStateException(
-                                        "Occupied rooms cannot be manually modified");
+                        throw new ResourceConflictException(
+                                        "Occupied rooms can only change status through the checkout flow");
                 }
 
                 List<RoomStatus> allowedTargets = getValidNextStatuses(current);
 
                 if (!allowedTargets.contains(target)) {
-                        throw new IllegalStateException(
+                        throw new ResourceConflictException(
                                         "Invalid room status transition: "
-                                                        + current + " -> " + target);
+                                                        + current + " -> " + target
+                                                        + ". Allowed next statuses: " + allowedTargets);
                 }
 
                 housekeepingHook(current, target, roomNumber);

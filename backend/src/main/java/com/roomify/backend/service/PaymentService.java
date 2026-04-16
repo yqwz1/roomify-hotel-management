@@ -33,18 +33,21 @@ public class PaymentService {
     private final AuditService auditService;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final ReservationFinancialService financialService;
 
     public PaymentService(
             ReservationRepository reservationRepository,
             PaymentRepository paymentRepository,
             AuditService auditService,
             NotificationService notificationService,
-            EmailService emailService) {
+            EmailService emailService,
+            ReservationFinancialService financialService) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.auditService = auditService;
         this.notificationService = notificationService;
         this.emailService = emailService;
+        this.financialService = financialService;
     }
 
     public PaymentResponse createPayment(PaymentRequest request) {
@@ -53,6 +56,10 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findByConfirmationNumber(confirmationNumber)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
+
+        if (financialService.syncReservation(reservation)) {
+            reservationRepository.save(reservation);
+        }
 
         BigDecimal amount = sanitize(request.getAmount());
 
@@ -240,10 +247,7 @@ public class PaymentService {
     }
 
     private BigDecimal sanitize(BigDecimal value) {
-        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
-            return BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
-        }
-        return value.setScale(MONEY_SCALE, ROUNDING);
+        return financialService.sanitize(value);
     }
 
     private String normalize(String confirmationNumber) {
@@ -254,12 +258,6 @@ public class PaymentService {
     }
 
     private BigDecimal calculateOutstanding(BigDecimal totalPrice, BigDecimal totalPaid) {
-        BigDecimal outstanding = sanitize(totalPrice)
-                .subtract(sanitize(totalPaid))
-                .setScale(MONEY_SCALE, ROUNDING);
-
-        return outstanding.compareTo(BigDecimal.ZERO) < 0
-                ? BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)
-                : outstanding;
+        return financialService.calculateOutstanding(totalPrice, totalPaid);
     }
 }

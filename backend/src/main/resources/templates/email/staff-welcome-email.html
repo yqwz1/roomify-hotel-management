@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Roomify Staff Portal</title>
+</head>
+<body>
+    <h2>Welcome to Roomify</h2>
+    <p>Hello <span th:text="${name}">Staff Member</span>,</p>
+    <p>Your staff account has been created.</p>
+    <ul>
+        <li><strong>Email:</strong> <span th:text="${email}">staff@roomify.com</span></li>
+        <li><strong>Temporary Password:</strong> <span th:text="${password}">TempPass123!</span></li>
+    </ul>
+    <p>Please sign in and update your password as soon as possible.</p>
+</body>
+</html>
