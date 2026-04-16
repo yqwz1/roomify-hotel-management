@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
 
 import jakarta.persistence.LockModeType;
 
@@ -32,6 +33,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Query("SELECT r FROM Reservation r JOIN r.guest g " +
                         "WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%'))")
         List<Reservation> findByGuestNameContainingIgnoreCase(@Param("name") String name);
+
+        @Query("""
+                        SELECT r
+                        FROM Reservation r
+                        JOIN r.guest g
+                        WHERE (:confirmation IS NULL OR UPPER(r.confirmationNumber) = :confirmation)
+                          AND (:guestName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :guestName, '%')))
+                          AND (:status IS NULL OR r.status = :status)
+                          AND (:checkInDate IS NULL OR r.checkInDate = :checkInDate)
+                          AND (:checkOutDate IS NULL OR r.checkOutDate = :checkOutDate)
+                        """)
+        List<Reservation> findAllByOptionalFilters(
+                        @Param("confirmation") String confirmation,
+                        @Param("guestName") String guestName,
+                        @Param("status") ReservationStatus status,
+                        @Param("checkInDate") LocalDate checkInDate,
+                        @Param("checkOutDate") LocalDate checkOutDate);
 
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +

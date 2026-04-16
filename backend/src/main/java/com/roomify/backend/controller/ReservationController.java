@@ -8,14 +8,17 @@ import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationPaymentRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,8 +53,19 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<java.util.List<ReservationResponse>> getAllReservations() {
-        return ResponseEntity.ok(reservationService.getAllReservations());
+    public ResponseEntity<java.util.List<ReservationResponse>> getAllReservations(
+            @RequestParam(required = false) String confirmation,
+            @RequestParam(required = false) String guestName,
+            @RequestParam(required = false) ReservationStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate) {
+        return ResponseEntity.ok(
+                reservationService.getAllReservations(
+                        confirmation,
+                        guestName,
+                        status,
+                        checkInDate,
+                        checkOutDate));
     }
 
     @GetMapping("/search")
