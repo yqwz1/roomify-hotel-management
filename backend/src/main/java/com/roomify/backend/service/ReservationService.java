@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationFilterRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
@@ -431,6 +431,7 @@ public class ReservationService {
     // GET BY CONFIRMATION NUMBER
     // =============================
 
+    @Transactional(readOnly = true)
     public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
 
         Reservation reservation = reservationRepository
@@ -555,51 +556,41 @@ public class ReservationService {
         return PaymentStatus.PAID.name();
     }
 
+    @Transactional(readOnly = true)
     public java.util.List<ReservationResponse> getAllReservations() {
-        return getAllReservations(null, null, null, null, null);
+        return getAllReservations(new ReservationFilterRequest());
     }
 
-    public java.util.List<ReservationResponse> getAllReservations(
-            String confirmation,
-            String guestName,
-            ReservationStatus status,
-            LocalDate checkInDate,
-            LocalDate checkOutDate) {
+    @Transactional(readOnly = true)
+    public java.util.List<ReservationResponse> getAllReservations(ReservationFilterRequest filters) {
 
-        String normalizedConfirmation = normalizeUppercase(confirmation);
-        String normalizedGuestName = normalizeBlankToNull(guestName);
+        ReservationFilterRequest effectiveFilters = filters != null ? filters : new ReservationFilterRequest();
 
-        boolean hasNoFilters = normalizedConfirmation == null
-                && normalizedGuestName == null
-                && status == null
-                && checkInDate == null
-                && checkOutDate == null;
-
-        java.util.List<Reservation> reservations = hasNoFilters
-                ? reservationRepository.findAll()
-                : reservationRepository.findAllByOptionalFilters(
-                        normalizedConfirmation,
-                        normalizedGuestName,
-                        status,
-                        checkInDate,
-                        checkOutDate);
+        java.util.List<Reservation> reservations = reservationRepository.findAllByOptionalFilters(
+                effectiveFilters.normalizedConfirmation(),
+                effectiveFilters.normalizedGuestName(),
+                effectiveFilters.getStatus(),
+                effectiveFilters.getCheckInDate(),
+                effectiveFilters.getCheckOutDate());
 
         return reservations.stream()
                 .map(reservation -> toResponse(reservation, financialService.summarize(reservation)))
                 .toList();
     }
 
-    private String normalizeUppercase(String value) {
-        String normalized = normalizeBlankToNull(value);
-        return normalized == null ? null : normalized.toUpperCase(Locale.ROOT);
-    }
-
-    private String normalizeBlankToNull(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+    @Transactional(readOnly = true)
+    public java.util.List<ReservationResponse> getAllReservations(
+            String confirmation,
+            String guestName,
+            ReservationStatus status,
+            LocalDate checkInDate,
+            LocalDate checkOutDate) {
+        return getAllReservations(new ReservationFilterRequest(
+                confirmation,
+                guestName,
+                status,
+                checkInDate,
+                checkOutDate));
     }
 
     private ReservationResponse toResponse(
