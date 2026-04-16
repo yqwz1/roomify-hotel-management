@@ -15,6 +15,12 @@ Endpoint: `GET /api/reservations`
 - If a parameter is omitted (or blank for string params), it is ignored.
 - If no parameters are provided, behavior is unchanged: returns the same unfiltered reservation list as before.
 
+## Guest-Name Multi-Match Behavior
+- `GET /api/reservations?guestName=...` returns all matching reservations for explicit staff selection.
+- Guest-name matches are sorted by `checkInDate DESC`, then `confirmationNumber ASC`, so repeated searches stay stable.
+- `GET /api/reservations/search?guestName=...` is treated as a single-result lookup only.
+- If that single-result lookup finds multiple matches, the backend returns `409 Conflict` and the client should fall back to the filtered list endpoint above.
+
 ## Example Queries
 - `GET /api/reservations`
 - `GET /api/reservations?confirmation=RSV-ABC123DEF456`
@@ -24,4 +30,6 @@ Endpoint: `GET /api/reservations`
 
 ## Frontend Integration Notes
 - Frontend can start sending any subset of these query params immediately.
+- Guest-name search should call `GET /api/reservations?guestName=...` instead of fetching the full list and filtering in the browser.
+- Confirmation-first search can stay on `GET /api/reservations/search?confirmation=...` for exact lookup flows.
 - Existing consumers that call `GET /api/reservations` with no params are fully compatible.

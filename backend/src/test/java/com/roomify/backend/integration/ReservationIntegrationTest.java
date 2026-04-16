@@ -138,6 +138,171 @@ class ReservationIntegrationTest {
         }
 
         @Test
+        void getAllReservationsAppliesGuestNameFilterAndReturnsAllMatches() throws Exception {
+                CreatedReservation earlierJane = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(3),
+                                LocalDate.now().plusDays(5),
+                                "CONFIRMED",
+                                "Jane Doe");
+                CreatedReservation laterJane = createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(10),
+                                LocalDate.now().plusDays(12),
+                                "CONFIRMED",
+                                "Jane Doe");
+                createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(15),
+                                LocalDate.now().plusDays(17),
+                                "CONFIRMED",
+                                "John Example");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("guestName", "Jane"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(2, json.size());
+                assertEquals(laterJane.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals(earlierJane.confirmationNumber(), json.get(1).get("confirmationNumber").asText());
+                assertEquals("Jane Doe", json.get(0).get("guestName").asText());
+                assertEquals("Jane Doe", json.get(1).get("guestName").asText());
+        }
+
+        @Test
+        void lookupByGuestNameReturnsSingleReservationWhenMatchIsUnique() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(4),
+                                LocalDate.now().plusDays(6),
+                                "CONFIRMED",
+                                "Unique Guest");
+
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("guestName", "Unique"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.confirmationNumber").value(created.confirmationNumber()))
+                                .andExpect(jsonPath("$.guest.name").value("Unique Guest"))
+                                .andExpect(jsonPath("$.status").value("CONFIRMED"));
+        }
+
+        @Test
+        void lookupByGuestNameReturnsConflictWhenMultipleReservationsMatch() throws Exception {
+                createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(3),
+                                LocalDate.now().plusDays(5),
+                                "CONFIRMED",
+                                "Jane Doe");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(10),
+                                LocalDate.now().plusDays(12),
+                                "CONFIRMED",
+                                "Jane Doe");
+
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("guestName", "Jane"))
+                                .andExpect(status().isConflict())
+                                .andExpect(jsonPath("$.message").value(
+                                                "Multiple reservations found for guest name: Jane. Use the reservation list filters or a confirmation number to select the exact stay."));
+        }
+
+        @Test
+        void getAllReservationsAppliesStatusAndDateFilters() throws Exception {
+                CreatedReservation target = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(20),
+                                LocalDate.now().plusDays(22),
+                                "CONFIRMED",
+                                "Status Match");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(20),
+                                LocalDate.now().plusDays(22),
+                                "PENDING",
+                                "Pending Same Dates");
+                createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(24),
+                                LocalDate.now().plusDays(26),
+                                "CONFIRMED",
+                                "Confirmed Other Dates");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("status", "CONFIRMED")
+                                .param("checkInDate", LocalDate.now().plusDays(20).toString())
+                                .param("checkOutDate", LocalDate.now().plusDays(22).toString()))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(target.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("CONFIRMED", json.get(0).get("status").asText());
+        }
+
+        @Test
+        void getAllReservationsAppliesCombinedFilters() throws Exception {
+                CreatedReservation target = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(30),
+                                LocalDate.now().plusDays(32),
+                                "CONFIRMED",
+                                "Jane Combined");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(30),
+                                LocalDate.now().plusDays(32),
+                                "CONFIRMED",
+                                "John Combined");
+                createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(34),
+                                LocalDate.now().plusDays(36),
+                                "CONFIRMED",
+                                "Jane Combined");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("guestName", "Jane")
+                                .param("status", "CONFIRMED")
+                                .param("checkInDate", LocalDate.now().plusDays(30).toString())
+                                .param("checkOutDate", LocalDate.now().plusDays(32).toString()))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(target.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("Jane Combined", json.get(0).get("guestName").asText());
+        }
+
+        @Test
         void lookupThenCheckInSuccessUpdatesStatusRoomAndWritesAudit() throws Exception {
                 CreatedReservation created = createReservation(
                                 managerToken,
@@ -862,13 +1027,29 @@ class ReservationIntegrationTest {
                         LocalDate checkIn,
                         LocalDate checkOut,
                         String status) throws Exception {
+                return createReservation(
+                                token,
+                                roomId,
+                                checkIn,
+                                checkOut,
+                                status,
+                                "Guest " + UUID.randomUUID().toString().substring(0, 6));
+        }
+
+        private CreatedReservation createReservation(
+                        String token,
+                        Long roomId,
+                        LocalDate checkIn,
+                        LocalDate checkOut,
+                        String status,
+                        String guestName) throws Exception {
 
                 Map<String, Object> request = buildCreateReservationRequest(
                                 roomId,
                                 checkIn.toString(),
                                 checkOut.toString(),
                                 status,
-                                "Guest " + UUID.randomUUID().toString().substring(0, 6),
+                                guestName,
                                 "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
                                 "0500000000",
                                 "ID-" + UUID.randomUUID().toString().substring(0, 8),

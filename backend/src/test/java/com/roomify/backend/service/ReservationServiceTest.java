@@ -348,10 +348,16 @@ class ReservationServiceTest {
     }
 
     @Test
-    void getAllReservationsWithoutFiltersShouldUseUnfilteredRepositoryPath() {
+    void getAllReservationsWithoutFiltersShouldStillUseFilteredRepositoryPath() {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
 
-        when(reservationRepository.findAll()).thenReturn(List.of(reservation));
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
 
         List<ReservationResponse> response = reservationService.getAllReservations(
                 null,
@@ -361,8 +367,8 @@ class ReservationServiceTest {
                 null);
 
         assertEquals(1, response.size());
-        verify(reservationRepository).findAll();
-        verify(reservationRepository, never()).findAllByOptionalFilters(any(), any(), any(), any(), any());
+        verify(reservationRepository).findAllByOptionalFilters(null, null, null, null, null);
+        verify(reservationRepository, never()).findAll();
     }
 
     @Test

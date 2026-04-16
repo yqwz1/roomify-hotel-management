@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import com.roomify.backend.entity.ReservationStatus;
 import jakarta.persistence.LockModeType;
 
 @Repository
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
         Optional<Reservation> findByConfirmationNumber(String confirmationNumber);
 
@@ -26,30 +27,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
         List<Reservation> findByRoom_Id(Long roomId);
 
-        /**
-         * Case-insensitive partial match on the guest's name.
-         * Used by the staff lookup endpoint when searching by guest name.
-         */
-        @Query("SELECT r FROM Reservation r JOIN r.guest g " +
-                        "WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-        List<Reservation> findByGuestNameContainingIgnoreCase(@Param("name") String name);
-
-        @Query("""
-                        SELECT r
-                        FROM Reservation r
-                        JOIN r.guest g
-                        WHERE (:confirmation IS NULL OR UPPER(r.confirmationNumber) = :confirmation)
-                          AND (:guestName IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :guestName, '%')))
-                          AND (:status IS NULL OR r.status = :status)
-                          AND (:checkInDate IS NULL OR r.checkInDate = :checkInDate)
-                          AND (:checkOutDate IS NULL OR r.checkOutDate = :checkOutDate)
-                        """)
-        List<Reservation> findAllByOptionalFilters(
-                        @Param("confirmation") String confirmation,
-                        @Param("guestName") String guestName,
-                        @Param("status") ReservationStatus status,
-                        @Param("checkInDate") LocalDate checkInDate,
-                        @Param("checkOutDate") LocalDate checkOutDate);
+        default List<Reservation> findAllByOptionalFilters(
+                        String confirmation,
+                        String guestName,
+                        ReservationStatus status,
+                        LocalDate checkInDate,
+                        LocalDate checkOutDate) {
+                return findAll(
+                                ReservationSpecification.build(
+                                                confirmation,
+                                                guestName,
+                                                status,
+                                                checkInDate,
+                                                checkOutDate),
+                                ReservationSpecification.filteredSort());
+        }
 
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
