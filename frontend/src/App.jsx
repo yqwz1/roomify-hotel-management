@@ -12,8 +12,15 @@ import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
+import GuestBillingStatus from './pages/GuestBillingStatus'
 import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
+import {
+  GUEST_BILLING_STATUS_PATH,
+  ROLE_GUEST,
+  ROLE_MANAGER,
+  ROLE_STAFF,
+} from './components/navigation/navConfig'
 
 // Day 1 Sprint — new pages (mock data, no API)
 import RoomsManagement from './pages/RoomsManagement'
@@ -32,6 +39,12 @@ import ReservationDetails from './pages/ReservationDetails'
 
 import Layout from './components/Layout';
 
+const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
+const STAFF_ONLY_ROLES = [ROLE_STAFF];
+const GUEST_ONLY_ROLES = [ROLE_GUEST];
+const STAFF_AND_MANAGER_ROLES = [ROLE_MANAGER, ROLE_STAFF];
+const AUTHENTICATED_ROLES = [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
+
 /**
  * AppContent component - handles routing logic
  */
@@ -49,7 +62,7 @@ const AppContent = () => {
         <Route
           path="/room-types"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><RoomTypes /></Layout>
             </ProtectedRoute>
           }
@@ -58,7 +71,7 @@ const AppContent = () => {
         <Route
           path="/staff"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><Staff /></Layout>
             </ProtectedRoute>
           }
@@ -67,7 +80,7 @@ const AppContent = () => {
         <Route
           path="/rooms"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><Rooms /></Layout>
             </ProtectedRoute>
           }
@@ -77,7 +90,7 @@ const AppContent = () => {
         <Route
           path="/manager/dashboard"
           element={
-            <PrivateRoute allowedRoles={['ROLE_MANAGER']}>
+            <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><ManagerDashboard /></Layout>
             </PrivateRoute>
           }
@@ -85,7 +98,7 @@ const AppContent = () => {
         <Route
           path="/staff/dashboard"
           element={
-            <PrivateRoute allowedRoles={['ROLE_STAFF']}>
+            <PrivateRoute allowedRoles={STAFF_ONLY_ROLES}>
               <Layout showSidebar={true}><StaffDashboard /></Layout>
             </PrivateRoute>
           }
@@ -93,7 +106,7 @@ const AppContent = () => {
         <Route
           path="/guest/dashboard"
           element={
-            <PrivateRoute allowedRoles={['ROLE_GUEST']}>
+            <PrivateRoute allowedRoles={GUEST_ONLY_ROLES}>
               <Layout showSidebar={true}><GuestDashboard /></Layout>
             </PrivateRoute>
           }
@@ -103,7 +116,7 @@ const AppContent = () => {
         <Route
           path="/rooms-management"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><RoomsManagement /></Layout>
             </ProtectedRoute>
           }
@@ -112,7 +125,7 @@ const AppContent = () => {
         <Route
           path="/search"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
               <Layout showSidebar={true}><RoomSearch /></Layout>
             </ProtectedRoute>
           }
@@ -121,7 +134,7 @@ const AppContent = () => {
         <Route
           path="/book"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><BookRoom /></Layout>
             </ProtectedRoute>
           }
@@ -130,7 +143,7 @@ const AppContent = () => {
         <Route
           path="/confirmation"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><ConfirmationPage /></Layout>
             </ProtectedRoute>
           }
@@ -140,7 +153,7 @@ const AppContent = () => {
         <Route
           path="/check-in"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><CheckIn /></Layout>
             </ProtectedRoute>
           }
@@ -149,7 +162,7 @@ const AppContent = () => {
         <Route
           path="/reservations/modify"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><ModifyReservation /></Layout>
             </ProtectedRoute>
           }
@@ -158,7 +171,7 @@ const AppContent = () => {
         <Route
           path="/reservations/cancel"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><CancelReservation /></Layout>
             </ProtectedRoute>
           }
@@ -168,7 +181,7 @@ const AppContent = () => {
         <Route
           path="/checkout"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><Checkout /></Layout>
             </ProtectedRoute>
           }
@@ -176,7 +189,7 @@ const AppContent = () => {
         <Route
           path="/room-status"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><RoomStatus /></Layout>
             </ProtectedRoute>
           }
@@ -184,7 +197,7 @@ const AppContent = () => {
         <Route
           path="/invoice-preview"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><InvoicePreview /></Layout>
             </ProtectedRoute>
           }
@@ -193,7 +206,7 @@ const AppContent = () => {
         <Route
           path="/reservations"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><ReservationDetails /></Layout>
             </ProtectedRoute>
           }
@@ -202,8 +215,17 @@ const AppContent = () => {
         <Route
           path="/reservations/:confirmationNumber"
           element={
-            <ProtectedRoute allowedRoles={['ROLE_MANAGER', 'ROLE_STAFF']}>
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><ReservationDetails /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={GUEST_BILLING_STATUS_PATH}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestBillingStatus /></Layout>
             </ProtectedRoute>
           }
         />

@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
@@ -60,5 +60,51 @@ describe('AppSidebar', () => {
 
     expect(sidebar?.className).toContain('right-0');
     expect(sidebar?.className).toContain('translate-x-full');
+  });
+
+  it('renders the requested guest navigation labels', () => {
+    currentDir = 'ltr';
+    mockUseAuth.mockReturnValue({
+      user: {
+        roles: ['ROLE_GUEST'],
+        username: 'Guest',
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AppSidebar isOpen={true} onClose={() => {}} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getAllByText('My Stay').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Browse Rooms').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Get Help').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Billing Status').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Guest Dashboard')).not.toBeInTheDocument();
+  });
+
+  it('renders the requested staff navigation labels', () => {
+    currentDir = 'ltr';
+    mockUseAuth.mockReturnValue({
+      user: {
+        roles: ['ROLE_STAFF'],
+        username: 'Agent',
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AppSidebar isOpen={true} onClose={() => {}} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getAllByText('Front Desk').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Reservations').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Arrivals').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Departures').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Billing').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Staff Dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByText('Room Search')).not.toBeInTheDocument();
   });
 });
