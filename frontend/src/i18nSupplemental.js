@@ -11,6 +11,13 @@ const supplementalResources = {
       navFinance: 'Finance',
       navStaffAccess: 'Staff & Access',
       navSupport: 'Support',
+      navMyStay: 'My Stay',
+      navBrowseRooms: 'Browse Rooms',
+      navGetHelp: 'Get Help',
+      navBillingStatus: 'Billing Status',
+      navArrivals: 'Arrivals',
+      navDepartures: 'Departures',
+      navBilling: 'Billing',
       reservationDetailsTitle: 'Reservation Details',
       languageNameEnglish: 'English',
       languageNameArabic: 'Arabic',
@@ -547,6 +554,13 @@ const supplementalResources = {
           'For room changes or date changes, contact the hotel directly so staff can verify live availability.',
         ],
       },
+      guestBillingStatusPage: {
+        description:
+          'Billing updates will appear here once guest-facing billing services are connected.',
+        emptyTitle: 'Billing details are not available yet',
+        emptyMessage:
+          'Use Get Help to contact the hotel for invoice or balance questions until online guest billing is enabled.',
+      },
       modifyReservationPage: {
         reservationUpdate: 'Reservation Update',
         currentBookingTitle: 'Current Booking',
@@ -1013,6 +1027,13 @@ const supplementalResources = {
       navFinance: 'المالية',
       navStaffAccess: 'الموظفون والصلاحيات',
       navSupport: 'الدعم',
+      navMyStay: 'إقامتي',
+      navBrowseRooms: 'تصفح الغرف',
+      navGetHelp: 'الحصول على المساعدة',
+      navBillingStatus: 'حالة الفاتورة',
+      navArrivals: 'الوصول',
+      navDepartures: 'المغادرة',
+      navBilling: 'الفوترة',
       reservationDetailsTitle: 'تفاصيل الحجز',
       languageNameEnglish: 'الإنجليزية',
       languageNameArabic: 'العربية',
@@ -1593,6 +1614,13 @@ const supplementalResources = {
           'ابدأ بصفحة الحجوزات حتى تصل إلى مسار الدعم الصحيح بسرعة.',
           'بالنسبة لتغيير الغرف أو التواريخ، تواصل مع الفندق مباشرة حتى يتمكن الموظفون من التحقق من التوفر المباشر.',
         ],
+      },
+      guestBillingStatusPage: {
+        description:
+          'ستظهر تحديثات الفاتورة هنا عند ربط خدمات الفوترة المخصصة للضيوف.',
+        emptyTitle: 'تفاصيل الفاتورة غير متاحة بعد',
+        emptyMessage:
+          'استخدم الحصول على المساعدة للتواصل مع الفندق بشأن الفاتورة أو الرصيد إلى أن تتوفر فوترة الضيوف عبر الإنترنت.',
       },
       modifyReservationPage: {
         reservationUpdate: 'تحديث الحجز',

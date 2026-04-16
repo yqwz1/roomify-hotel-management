@@ -6,6 +6,7 @@ import {
   FileText,
   House,
   LayoutDashboard,
+  LifeBuoy,
   Receipt,
   Search,
   Settings2,
@@ -17,6 +18,7 @@ import {
 export const ROLE_MANAGER = 'ROLE_MANAGER';
 export const ROLE_STAFF = 'ROLE_STAFF';
 export const ROLE_GUEST = 'ROLE_GUEST';
+export const GUEST_BILLING_STATUS_PATH = '/guest/billing-status';
 
 const ROLE_PRIORITY = [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
 
@@ -59,19 +61,19 @@ export const getRoleDisplayLabel = (roles = [], t) => {
   }
 };
 
-const NAVIGATION_CONFIG = [
+const MANAGER_NAVIGATION_CONFIG = [
   {
     id: 'overview',
     translationKey: 'navOverview',
     fallbackLabel: 'Overview',
-    roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/',
         translationKey: 'homeNav',
         fallbackLabel: 'Home',
         icon: House,
-        roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+        roles: [ROLE_MANAGER],
       },
       {
         path: '/manager/dashboard',
@@ -80,55 +82,41 @@ const NAVIGATION_CONFIG = [
         icon: LayoutDashboard,
         roles: [ROLE_MANAGER],
       },
-      {
-        path: '/staff/dashboard',
-        translationKey: 'staffDashboardTitle',
-        fallbackLabel: 'Staff Dashboard',
-        icon: LayoutDashboard,
-        roles: [ROLE_STAFF],
-      },
-      {
-        path: '/guest/dashboard',
-        translationKey: 'guestDashboardTitle',
-        fallbackLabel: 'Guest Dashboard',
-        icon: LayoutDashboard,
-        roles: [ROLE_GUEST],
-      },
     ],
   },
   {
     id: 'front-desk',
     translationKey: 'navFrontDesk',
     fallbackLabel: 'Front Desk',
-    roles: [ROLE_MANAGER, ROLE_STAFF],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/search',
         translationKey: 'roomSearch',
         fallbackLabel: 'Room Search',
         icon: Search,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
       {
         path: '/book',
         translationKey: 'bookRoom',
         fallbackLabel: 'Book Room',
         icon: BedDouble,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
       {
         path: '/check-in',
         translationKey: 'checkInTitle',
         fallbackLabel: 'Check-In',
         icon: ClipboardCheck,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
       {
         path: '/checkout',
         translationKey: 'checkoutTitle',
         fallbackLabel: 'Checkout',
         icon: DoorClosedLocked,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
     ],
   },
@@ -136,21 +124,21 @@ const NAVIGATION_CONFIG = [
     id: 'reservations',
     translationKey: 'navReservations',
     fallbackLabel: 'Reservations',
-    roles: [ROLE_MANAGER, ROLE_STAFF],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/reservations/modify',
         translationKey: 'modifyReservationTitle',
         fallbackLabel: 'Modify Reservation',
         icon: FileText,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
       {
         path: '/reservations/cancel',
         translationKey: 'cancelReservationTitle',
         fallbackLabel: 'Cancel Reservation',
         icon: FileText,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
     ],
   },
@@ -158,7 +146,7 @@ const NAVIGATION_CONFIG = [
     id: 'rooms',
     translationKey: 'rooms',
     fallbackLabel: 'Rooms',
-    roles: [ROLE_MANAGER, ROLE_STAFF],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/rooms-management',
@@ -187,14 +175,14 @@ const NAVIGATION_CONFIG = [
     id: 'finance',
     translationKey: 'navFinance',
     fallbackLabel: 'Finance',
-    roles: [ROLE_MANAGER, ROLE_STAFF],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/invoice-preview',
         translationKey: 'invoicePreview',
         fallbackLabel: 'Invoices',
         icon: Receipt,
-        roles: [ROLE_MANAGER, ROLE_STAFF],
+        roles: [ROLE_MANAGER],
       },
     ],
   },
@@ -217,20 +205,179 @@ const NAVIGATION_CONFIG = [
     id: 'support',
     translationKey: 'navSupport',
     fallbackLabel: 'Support',
-    roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+    roles: [ROLE_MANAGER],
     items: [
       {
         path: '/bookings',
         translationKey: 'bookings',
         fallbackLabel: 'Booking Help',
         icon: CalendarDays,
-        roles: [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+        roles: [ROLE_MANAGER],
       },
     ],
   },
 ];
 
+const STAFF_NAVIGATION_CONFIG = [
+  {
+    id: 'front-desk',
+    translationKey: 'navFrontDesk',
+    fallbackLabel: 'Front Desk',
+    roles: [ROLE_STAFF],
+    items: [
+      {
+        path: '/search',
+        translationKey: 'navFrontDesk',
+        fallbackLabel: 'Front Desk',
+        icon: Search,
+        roles: [ROLE_STAFF],
+      },
+    ],
+  },
+  {
+    id: 'reservations',
+    translationKey: 'navReservations',
+    fallbackLabel: 'Reservations',
+    roles: [ROLE_STAFF],
+    items: [
+      {
+        path: '/reservations',
+        translationKey: 'navReservations',
+        fallbackLabel: 'Reservations',
+        icon: CalendarDays,
+        roles: [ROLE_STAFF],
+      },
+    ],
+  },
+  {
+    id: 'arrivals',
+    translationKey: 'navArrivals',
+    fallbackLabel: 'Arrivals',
+    roles: [ROLE_STAFF],
+    items: [
+      {
+        path: '/check-in',
+        translationKey: 'navArrivals',
+        fallbackLabel: 'Arrivals',
+        icon: ClipboardCheck,
+        roles: [ROLE_STAFF],
+      },
+    ],
+  },
+  {
+    id: 'departures',
+    translationKey: 'navDepartures',
+    fallbackLabel: 'Departures',
+    roles: [ROLE_STAFF],
+    items: [
+      {
+        path: '/checkout',
+        translationKey: 'navDepartures',
+        fallbackLabel: 'Departures',
+        icon: DoorClosedLocked,
+        roles: [ROLE_STAFF],
+      },
+    ],
+  },
+  {
+    id: 'billing',
+    translationKey: 'navBilling',
+    fallbackLabel: 'Billing',
+    roles: [ROLE_STAFF],
+    items: [
+      {
+        path: '/invoice-preview',
+        translationKey: 'navBilling',
+        fallbackLabel: 'Billing',
+        icon: Receipt,
+        roles: [ROLE_STAFF],
+      },
+    ],
+  },
+];
+
+const GUEST_NAVIGATION_CONFIG = [
+  {
+    id: 'my-stay',
+    translationKey: 'navMyStay',
+    fallbackLabel: 'My Stay',
+    roles: [ROLE_GUEST],
+    items: [
+      {
+        path: '/guest/dashboard',
+        translationKey: 'navMyStay',
+        fallbackLabel: 'My Stay',
+        icon: LayoutDashboard,
+        roles: [ROLE_GUEST],
+      },
+    ],
+  },
+  {
+    id: 'browse-rooms',
+    translationKey: 'navBrowseRooms',
+    fallbackLabel: 'Browse Rooms',
+    roles: [ROLE_GUEST],
+    items: [
+      {
+        path: '/search',
+        translationKey: 'navBrowseRooms',
+        fallbackLabel: 'Browse Rooms',
+        icon: Search,
+        roles: [ROLE_GUEST],
+      },
+    ],
+  },
+  {
+    id: 'get-help',
+    translationKey: 'navGetHelp',
+    fallbackLabel: 'Get Help',
+    roles: [ROLE_GUEST],
+    items: [
+      {
+        path: '/bookings',
+        translationKey: 'navGetHelp',
+        fallbackLabel: 'Get Help',
+        icon: LifeBuoy,
+        roles: [ROLE_GUEST],
+      },
+    ],
+  },
+  {
+    id: 'billing-status',
+    translationKey: 'navBillingStatus',
+    fallbackLabel: 'Billing Status',
+    roles: [ROLE_GUEST],
+    items: [
+      {
+        path: GUEST_BILLING_STATUS_PATH,
+        translationKey: 'navBillingStatus',
+        fallbackLabel: 'Billing Status',
+        icon: Receipt,
+        roles: [ROLE_GUEST],
+      },
+    ],
+  },
+];
+
+const NAVIGATION_CONFIG_BY_ROLE = {
+  [ROLE_MANAGER]: MANAGER_NAVIGATION_CONFIG,
+  [ROLE_STAFF]: STAFF_NAVIGATION_CONFIG,
+  [ROLE_GUEST]: GUEST_NAVIGATION_CONFIG,
+};
+
 const PAGE_META = [
+  {
+    match: (pathname) => pathname === '/reservations',
+    sectionId: 'reservations',
+    translationKey: 'navReservations',
+    fallbackLabel: 'Reservations',
+  },
+  {
+    match: (pathname) => pathname === '/staff/dashboard',
+    sectionId: 'front-desk',
+    translationKey: 'navFrontDesk',
+    fallbackLabel: 'Front Desk',
+  },
   {
     match: (pathname) => /^\/reservations\/[^/]+$/.test(pathname),
     sectionId: 'reservations',
@@ -243,8 +390,11 @@ const buildSectionLabel = (section, t) => translateWithFallback(t, section.trans
 
 const buildItemLabel = (item, t) => translateWithFallback(t, item.translationKey, item.fallbackLabel);
 
+const getNavigationConfigForRoles = (roles = []) =>
+  NAVIGATION_CONFIG_BY_ROLE[getPrimaryRole(roles)] ?? [];
+
 export const getNavigationSections = (roles = [], t) =>
-  NAVIGATION_CONFIG
+  getNavigationConfigForRoles(roles)
     .filter((section) => section.roles.some((role) => roles.includes(role)))
     .map((section) => ({
       ...section,
