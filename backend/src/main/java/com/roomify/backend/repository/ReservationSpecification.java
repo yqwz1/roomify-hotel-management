@@ -5,6 +5,7 @@ import com.roomify.backend.entity.ReservationStatus;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.data.domain.Sort;
@@ -36,9 +37,12 @@ public final class ReservationSpecification {
             }
 
             if (guestName != null) {
-                predicates.add(cb.like(
-                        cb.lower(root.join("guest").get("name")),
-                        "%" + guestName.toLowerCase(Locale.ROOT) + "%"));
+                Arrays.stream(guestName.trim().split("\\s+"))
+                        .filter(token -> !token.isBlank())
+                        .map(token -> token.toLowerCase(Locale.ROOT))
+                        .forEach(token -> predicates.add(cb.like(
+                                cb.lower(root.join("guest").get("name")),
+                                "%" + token + "%")));
             }
 
             if (status != null) {

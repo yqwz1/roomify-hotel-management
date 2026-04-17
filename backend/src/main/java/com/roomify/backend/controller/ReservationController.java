@@ -60,8 +60,13 @@ public class ReservationController {
     @GetMapping("/search")
     public ResponseEntity<ReservationLookupResponse> search(
             @RequestParam(required = false) String confirmation,
+            @RequestParam(required = false, name = "confirmationNumber") String confirmationNumber,
             @RequestParam(required = false) String guestName) {
-        ReservationLookupResponse response = reservationLookupService.search(confirmation, guestName);
+        String effectiveConfirmation = confirmation;
+        if (effectiveConfirmation == null || effectiveConfirmation.isBlank()) {
+            effectiveConfirmation = confirmationNumber;
+        }
+        ReservationLookupResponse response = reservationLookupService.search(effectiveConfirmation, guestName);
         return ResponseEntity.ok(response);
     }
 

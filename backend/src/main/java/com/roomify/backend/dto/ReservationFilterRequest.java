@@ -12,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ReservationFilterRequest {
 
     private String confirmation;
+    private String confirmationNumber;
     private String guestName;
     private ReservationStatus status;
     private String queueTab;
@@ -44,6 +45,14 @@ public class ReservationFilterRequest {
 
     public void setConfirmation(String confirmation) {
         this.confirmation = confirmation;
+    }
+
+    public String getConfirmationNumber() {
+        return confirmationNumber;
+    }
+
+    public void setConfirmationNumber(String confirmationNumber) {
+        this.confirmationNumber = confirmationNumber;
     }
 
     public String getGuestName() {
@@ -86,13 +95,20 @@ public class ReservationFilterRequest {
         this.queueTab = queueTab;
     }
 
+    public boolean hasConfirmationFilter() {
+        return normalizedConfirmation() != null;
+    }
+
     public String normalizedConfirmation() {
         String normalized = normalizeBlankToNull(confirmation);
+        if (normalized == null) {
+            normalized = normalizeBlankToNull(confirmationNumber);
+        }
         return normalized == null ? null : normalized.toUpperCase(Locale.ROOT);
     }
 
     public String normalizedGuestName() {
-        return normalizeBlankToNull(guestName);
+        return normalizeWhitespace(guestName);
     }
 
     public ReservationStatus effectiveStatus() {
@@ -106,8 +122,10 @@ public class ReservationFilterRequest {
         }
 
         String canonicalTab = normalizedTab
-                .toUpperCase(Locale.ROOT)
+                .replaceAll("([a-z])([A-Z])", "$1_$2")
+                .replace(' ', '_')
                 .replace('-', '_');
+        canonicalTab = canonicalTab.toUpperCase(Locale.ROOT);
 
         return switch (canonicalTab) {
             case "ALL" -> null;
@@ -126,5 +144,10 @@ public class ReservationFilterRequest {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeWhitespace(String value) {
+        String trimmed = normalizeBlankToNull(value);
+        return trimmed == null ? null : trimmed.replaceAll("\\s+", " ");
     }
 }
