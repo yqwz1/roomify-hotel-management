@@ -40,10 +40,8 @@ public class EmailService {
                         String template,
                         Context context,
                         String confirmationNumber) {
-
-                String htmlBody = templateEngine.process(template, context);
-
                 try {
+                        String htmlBody = templateEngine.process(template, context);
 
                         MimeMessage message = mailSender.createMimeMessage();
 
@@ -63,7 +61,7 @@ public class EmailService {
                                         null,
                                         confirmationNumber);
 
-                } catch (MailException | MessagingException ex) {
+                } catch (MessagingException | RuntimeException ex) {
 
                         emailLogService.log(
                                         to,

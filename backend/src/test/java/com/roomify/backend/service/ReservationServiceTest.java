@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import com.roomify.backend.dto.ReservationActionPlaceholderResponse;
 import com.roomify.backend.dto.ReservationCancelRequest;
 import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationFilterRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
@@ -401,6 +402,60 @@ class ReservationServiceTest {
                 checkIn,
                 checkOut);
         verify(reservationRepository, never()).findAll();
+    }
+
+    @Test
+    void getAllReservationsWithQueueTabShouldMapToStatusFilter() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq("Guest"),
+                eq(ReservationStatus.CHECKED_IN),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setGuestName("Guest");
+        filters.setQueueTab("in_house");
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                null,
+                "Guest",
+                ReservationStatus.CHECKED_IN,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsShouldPrioritizeExplicitStatusOverQueueTab() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq(null),
+                eq(ReservationStatus.CONFIRMED),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setQueueTab("in_house");
+        filters.setStatus(ReservationStatus.CONFIRMED);
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                null,
+                null,
+                ReservationStatus.CONFIRMED,
+                null,
+                null);
     }
 
     private Reservation buildReservationForCancel(ReservationStatus status) {
