@@ -6,6 +6,14 @@ Endpoint: `GET /api/reservations`
 - `confirmation` (string): exact reservation confirmation number match, case-insensitive.
 - `guestName` (string): partial guest name match, case-insensitive.
 - `status` (enum): one of `PENDING`, `CONFIRMED`, `CHECKED_IN`, `CHECKED_OUT`, `CANCELLED`.
+- `queueTab` (string): optional queue alias mapped server-side to status filters:
+  - `arrivals` -> `CONFIRMED`
+  - `in_house` -> `CHECKED_IN`
+  - `departures` -> `CHECKED_IN`
+  - `pending` -> `PENDING`
+  - `checked_out` -> `CHECKED_OUT`
+  - `cancelled` -> `CANCELLED`
+  - `all` -> no status filter
 - `checkInDate` (date): exact check-in date match (`yyyy-MM-dd`).
 - `checkOutDate` (date): exact check-out date match (`yyyy-MM-dd`).
 
@@ -13,6 +21,7 @@ Endpoint: `GET /api/reservations`
 - All parameters are optional.
 - Any provided parameters are combined with logical `AND`.
 - If a parameter is omitted (or blank for string params), it is ignored.
+- If both `status` and `queueTab` are provided, `status` takes precedence.
 - If no parameters are provided, behavior is unchanged: returns the same unfiltered reservation list as before.
 
 ## Guest-Name Multi-Match Behavior
@@ -25,6 +34,7 @@ Endpoint: `GET /api/reservations`
 - `GET /api/reservations`
 - `GET /api/reservations?confirmation=RSV-ABC123DEF456`
 - `GET /api/reservations?guestName=moaz`
+- `GET /api/reservations?queueTab=arrivals`
 - `GET /api/reservations?status=CONFIRMED&checkInDate=2026-04-20`
 - `GET /api/reservations?guestName=ali&status=CHECKED_IN&checkOutDate=2026-04-22`
 

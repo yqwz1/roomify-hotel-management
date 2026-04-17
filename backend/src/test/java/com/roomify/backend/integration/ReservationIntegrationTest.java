@@ -303,6 +303,135 @@ class ReservationIntegrationTest {
         }
 
         @Test
+        void getAllReservationsAppliesQueueTabArrivalsAsConfirmedFilter() throws Exception {
+                CreatedReservation confirmed = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(7),
+                                LocalDate.now().plusDays(9),
+                                "CONFIRMED",
+                                "Queue Confirmed");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(7),
+                                LocalDate.now().plusDays(9),
+                                "PENDING",
+                                "Queue Pending");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", "arrivals"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(confirmed.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("CONFIRMED", json.get(0).get("status").asText());
+        }
+
+        @Test
+        void getAllReservationsAppliesQueueTabInHouseAsCheckedInFilter() throws Exception {
+                CreatedReservation inHouse = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Queue In House");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(1),
+                                LocalDate.now().plusDays(3),
+                                "CONFIRMED",
+                                "Queue Not In House");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", inHouse.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", "in_house"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(inHouse.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("CHECKED_IN", json.get(0).get("status").asText());
+        }
+
+        @Test
+        void getAllReservationsWithoutFiltersReturnsUnfilteredList() throws Exception {
+                CreatedReservation first = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(2),
+                                LocalDate.now().plusDays(4),
+                                "CONFIRMED",
+                                "Unfiltered One");
+                CreatedReservation second = createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(6),
+                                LocalDate.now().plusDays(8),
+                                "PENDING",
+                                "Unfiltered Two");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                List<String> confirmations = json.findValuesAsText("confirmationNumber");
+
+                assertEquals(2, json.size());
+                assertTrue(confirmations.contains(first.confirmationNumber()));
+                assertTrue(confirmations.contains(second.confirmationNumber()));
+        }
+
+        @Test
+        void getAllReservationsAppliesConfirmationFilterCaseInsensitively() throws Exception {
+                CreatedReservation target = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(11),
+                                LocalDate.now().plusDays(13),
+                                "CONFIRMED",
+                                "Confirmation Target");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(11),
+                                LocalDate.now().plusDays(13),
+                                "CONFIRMED",
+                                "Confirmation Other");
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("confirmation", " " + target.confirmationNumber().toLowerCase() + " "))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(target.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("Confirmation Target", json.get(0).get("guestName").asText());
+        }
+
+        @Test
         void lookupThenCheckInSuccessUpdatesStatusRoomAndWritesAudit() throws Exception {
                 CreatedReservation created = createReservation(
                                 managerToken,

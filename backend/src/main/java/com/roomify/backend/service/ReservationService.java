@@ -569,7 +569,7 @@ public class ReservationService {
         java.util.List<Reservation> reservations = reservationRepository.findAllByOptionalFilters(
                 effectiveFilters.normalizedConfirmation(),
                 effectiveFilters.normalizedGuestName(),
-                effectiveFilters.getStatus(),
+                effectiveFilters.effectiveStatus(),
                 effectiveFilters.getCheckInDate(),
                 effectiveFilters.getCheckOutDate());
 
