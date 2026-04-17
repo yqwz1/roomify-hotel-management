@@ -565,13 +565,15 @@ public class ReservationService {
     public java.util.List<ReservationResponse> getAllReservations(ReservationFilterRequest filters) {
 
         ReservationFilterRequest effectiveFilters = filters != null ? filters : new ReservationFilterRequest();
+        String normalizedConfirmation = effectiveFilters.normalizedConfirmation();
+        boolean confirmationScoped = effectiveFilters.hasConfirmationFilter();
 
         java.util.List<Reservation> reservations = reservationRepository.findAllByOptionalFilters(
-                effectiveFilters.normalizedConfirmation(),
-                effectiveFilters.normalizedGuestName(),
-                effectiveFilters.effectiveStatus(),
-                effectiveFilters.getCheckInDate(),
-                effectiveFilters.getCheckOutDate());
+                normalizedConfirmation,
+                confirmationScoped ? null : effectiveFilters.normalizedGuestName(),
+                confirmationScoped ? null : effectiveFilters.effectiveStatus(),
+                confirmationScoped ? null : effectiveFilters.getCheckInDate(),
+                confirmationScoped ? null : effectiveFilters.getCheckOutDate());
 
         return reservations.stream()
                 .map(reservation -> toResponse(reservation, financialService.summarize(reservation)))
