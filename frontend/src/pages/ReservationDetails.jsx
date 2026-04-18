@@ -11,7 +11,7 @@ import {
   XCircle,
   Eye,
 } from 'lucide-react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import StatusPill from '../components/StatusPill';
@@ -65,6 +65,7 @@ function ActionButton({
 export default function ReservationDetails() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { confirmationNumber: routeConfirmation } = useParams();
   const { t, i18n } = useTranslation();
 
@@ -77,14 +78,28 @@ export default function ReservationDetails() {
   const [error, setError] = useState(null);
   const [reservation, setReservation] = useState(null);
   const [reservationsList, setReservationsList] = useState(null);
+  const listFilters = useMemo(
+    () => ({
+      confirmation: searchParams.get('confirmation') ?? '',
+      confirmationNumber: searchParams.get('confirmationNumber') ?? '',
+      guestName: searchParams.get('guestName') ?? '',
+      status: searchParams.get('status') ?? '',
+      queueTab: searchParams.get('queueTab') ?? '',
+      checkInDate: searchParams.get('checkInDate') ?? '',
+      checkOutDate: searchParams.get('checkOutDate') ?? '',
+    }),
+    [searchParams]
+  );
 
   useEffect(() => {
     const run = async () => {
       setLoading(true);
       setError(null);
+      setReservation(null);
+      setReservationsList(null);
       try {
         if (!confirmationNumber) {
-          const result = await getAllReservations();
+          const result = await getAllReservations(listFilters);
           setReservationsList(result);
         } else {
           const result = await getReservationByConfirmationNumber(confirmationNumber);
@@ -98,7 +113,7 @@ export default function ReservationDetails() {
     };
 
     run();
-  }, [confirmationNumber, t]);
+  }, [confirmationNumber, listFilters, t]);
 
   if (loading) {
     return <LoadingState message={t('reservationDetailsPage.loading')} />;
