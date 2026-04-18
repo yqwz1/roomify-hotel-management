@@ -1431,13 +1431,19 @@ class ReservationIntegrationTest {
                                 "Other Guest",
                                 "other." + UUID.randomUUID().toString().substring(0, 8) + "@example.com");
 
-                mockMvc.perform(get("/api/guest/reservations")
+                String response = mockMvc.perform(get("/api/guest/reservations")
                                 .header("Authorization", "Bearer " + guestToken))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.reservations.length()").value(1))
-                                .andExpect(jsonPath("$.reservations[0].confirmation")
-                                                .value(ownReservation.confirmationNumber()))
-                                .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"));
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                JsonNode reservations = json.path("reservations");
+
+                assertEquals(1, reservations.size());
+                assertEquals(ownReservation.confirmationNumber(), reservations.get(0).path("confirmation").asText());
+                assertEquals("CONFIRMED", reservations.get(0).path("status").asText());
         }
 
         @Test
