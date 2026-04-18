@@ -3,6 +3,7 @@ package com.roomify.backend.repository;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Join;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,12 +38,17 @@ public final class ReservationSpecification {
             }
 
             if (guestName != null) {
-                Arrays.stream(guestName.trim().split("\\s+"))
+                List<String> guestTokens = Arrays.stream(guestName.trim().split("\\s+"))
                         .filter(token -> !token.isBlank())
                         .map(token -> token.toLowerCase(Locale.ROOT))
-                        .forEach(token -> predicates.add(cb.like(
-                                cb.lower(root.join("guest").get("name")),
-                                "%" + token + "%")));
+                        .toList();
+
+                if (!guestTokens.isEmpty()) {
+                    Join<Object, Object> guest = root.join("guest");
+                    guestTokens.forEach(token -> predicates.add(cb.like(
+                            cb.lower(guest.get("name")),
+                            "%" + token + "%")));
+                }
             }
 
             if (status != null) {
