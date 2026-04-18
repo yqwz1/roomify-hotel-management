@@ -482,6 +482,87 @@ class ReservationIntegrationTest {
         }
 
         @Test
+        void staffCanApplyQueueTabGuestNameAndDateFiltersTogether() throws Exception {
+                LocalDate checkIn = LocalDate.now();
+                LocalDate checkOut = LocalDate.now().plusDays(2);
+
+                CreatedReservation matching = createReservation(
+                                managerToken,
+                                room1Id,
+                                checkIn,
+                                checkOut,
+                                "CONFIRMED",
+                                "Staff Queue Match");
+                CreatedReservation sameQueueDifferentDate = createReservation(
+                                managerToken,
+                                room2Id,
+                                checkIn,
+                                checkOut.plusDays(1),
+                                "CONFIRMED",
+                                "Staff Queue Match");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", matching.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}",
+                                sameQueueDifferentDate.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("queueTab", "in_house")
+                                .param("guestName", "match")
+                                .param("checkOutDate", checkOut.toString()))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(matching.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("CHECKED_IN", json.get(0).get("status").asText());
+        }
+
+        @Test
+        void getAllReservationsUsesExplicitStatusOverQueueTabForStaffRequests() throws Exception {
+                CreatedReservation confirmed = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(11),
+                                LocalDate.now().plusDays(13),
+                                "CONFIRMED",
+                                "Status Priority");
+                CreatedReservation checkedIn = createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Status Priority");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", checkedIn.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                String response = mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("queueTab", "in_house")
+                                .param("status", "CONFIRMED")
+                                .param("guestName", "Priority"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                JsonNode json = objectMapper.readTree(response);
+                assertEquals(1, json.size());
+                assertEquals(confirmed.confirmationNumber(), json.get(0).get("confirmationNumber").asText());
+                assertEquals("CONFIRMED", json.get(0).get("status").asText());
+        }
+
+        @Test
         void getAllReservationsIgnoresUnsupportedQueueTabAndPreservesLegacyListBehavior() throws Exception {
                 CreatedReservation first = createReservation(
                                 managerToken,
