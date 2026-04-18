@@ -33,14 +33,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                         ReservationStatus status,
                         LocalDate checkInDate,
                         LocalDate checkOutDate) {
-                return findAll(
-                                ReservationSpecification.build(
-                                                confirmation,
-                                                guestName,
-                                                status,
-                                                checkInDate,
-                                                checkOutDate),
-                                ReservationSpecification.filteredSort());
+                var specification = ReservationSpecification.build(
+                                confirmation,
+                                guestName,
+                                status,
+                                checkInDate,
+                                checkOutDate);
+
+                if (guestName != null) {
+                        return findAll(specification, ReservationSpecification.filteredSort());
+                }
+
+                return findAll(specification);
         }
 
         @Lock(LockModeType.PESSIMISTIC_WRITE)

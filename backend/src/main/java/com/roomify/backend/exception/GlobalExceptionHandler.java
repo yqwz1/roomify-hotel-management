@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,6 +31,25 @@ public class GlobalExceptionHandler {
                                 .forEach(error -> validationErrors.putIfAbsent(
                                                 resolveGlobalErrorKey(error),
                                                 error.getDefaultMessage()));
+
+                ApiError error = new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Validation Error",
+                                "Input validation failed",
+                                request.getRequestURI(),
+                                validationErrors);
+
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        @ExceptionHandler(BindException.class)
+        public ResponseEntity<ApiError> handleBindException(
+                        BindException ex,
+                        HttpServletRequest request) {
+
+                Map<String, String> validationErrors = new HashMap<>();
+                ex.getBindingResult().getFieldErrors()
+                                .forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
 
                 ApiError error = new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
@@ -169,6 +190,23 @@ public class GlobalExceptionHandler {
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Bad Request",
                                 ex.getMessage(),
+                                request.getRequestURI());
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        public ResponseEntity<ApiError> handleTypeMismatch(
+                        MethodArgumentTypeMismatchException ex,
+                        HttpServletRequest request) {
+                String message = "Invalid value for parameter: " + ex.getName();
+                if (ex.getValue() != null) {
+                        message += " (" + ex.getValue() + ")";
+                }
+
+                ApiError error = new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                message,
                                 request.getRequestURI());
                 return ResponseEntity.badRequest().body(error);
         }

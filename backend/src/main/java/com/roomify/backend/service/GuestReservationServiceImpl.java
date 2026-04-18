@@ -7,12 +7,15 @@ import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,26 +27,48 @@ public class GuestReservationServiceImpl implements GuestReservationService {
     @Override
     public List<GuestReservationSummaryDto> getGuestReservations() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResourceNotFoundException("No authenticated user found in the security context.");
+            throw new AccessDeniedException("Guest authentication required");
         }
 
         String email = authentication.getName();
-
         if (email == null || email.isBlank()) {
-            throw new ResourceNotFoundException("Authenticated user identity could not be resolved: email is missing.");
+            throw new AccessDeniedException("Authenticated guest email is missing");
         }
 
         Guest guest = guestRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Guest profile not found for authenticated user: " + email));
 
-        List<Reservation> reservations = reservationRepository.findByGuest_Id(guest.getId());
+        LocalDate today = LocalDate.now();
 
-        return reservations.stream()
+        return reservationRepository.findByGuest_Id(guest.getId()).stream()
+                .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
+    }
+
+    private Comparator<Reservation> buildReservationSort(LocalDate today) {
+        return Comparator
+                .comparing((Reservation reservation) -> isOlderStay(reservation, today))
+                .thenComparing(
+                        reservation -> isOlderStay(reservation, today)
+                                ? null
+                                : reservation.getCheckInDate(),
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                )
+                .thenComparing(
+                        reservation -> isOlderStay(reservation, today)
+                                ? reservation.getCheckOutDate()
+                                : null,
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                )
+                .thenComparing(Reservation::getConfirmationNumber, Comparator.nullsLast(Comparator.naturalOrder()));
+    }
+
+    private boolean isOlderStay(Reservation reservation, LocalDate today) {
+        return reservation.getCheckOutDate() != null
+                && reservation.getCheckOutDate().isBefore(today);
     }
 
     private GuestReservationSummaryDto mapToDto(Reservation reservation) {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import api from './api';
-import { searchReservations } from './reservationService';
+import { getAllReservations, searchReservations } from './reservationService';
 
 vi.mock('./api', () => ({
   default: {
@@ -62,18 +62,14 @@ describe('reservationService.searchReservations', () => {
           guestName: 'Jane Smith',
           roomNumber: '102',
         },
-        {
-          id: 3,
-          confirmationNumber: 'RSV-333333',
-          guestName: 'John Doe',
-          roomNumber: '103',
-        },
       ],
     });
 
     const results = await searchReservations('Jane');
 
-    expect(api.get).toHaveBeenCalledWith('/reservations');
+    expect(api.get).toHaveBeenCalledWith('/reservations', {
+      params: { guestName: 'Jane' },
+    });
     expect(results).toEqual([
       expect.objectContaining({
         id: 1,
@@ -84,5 +80,23 @@ describe('reservationService.searchReservations', () => {
         confirmationNumber: 'RSV-222222',
       }),
     ]);
+  });
+
+  it('forwards supported reservation filters to the list endpoint', async () => {
+    api.get.mockResolvedValueOnce({ data: [] });
+
+    await getAllReservations({
+      guestName: ' Jane Doe ',
+      queueTab: 'arrivals',
+      checkInDate: '2026-04-20',
+    });
+
+    expect(api.get).toHaveBeenCalledWith('/reservations', {
+      params: {
+        guestName: 'Jane Doe',
+        queueTab: 'arrivals',
+        checkInDate: '2026-04-20',
+      },
+    });
   });
 });

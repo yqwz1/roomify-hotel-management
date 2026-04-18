@@ -7,13 +7,42 @@ export const extractReservationError = (err) => {
 
 export const isConflictError = (err) => err?.response?.status === 409;
 
+const normalizeFilterValue = (value) => {
+    if (value == null) return null;
+    const normalized = String(value).trim();
+    return normalized ? normalized : null;
+};
+
+const buildReservationParams = (filters = {}) => {
+    const params = {};
+    const confirmation = normalizeFilterValue(filters.confirmation);
+    const confirmationNumber = normalizeFilterValue(filters.confirmationNumber);
+    const guestName = normalizeFilterValue(filters.guestName);
+    const status = normalizeFilterValue(filters.status);
+    const queueTab = normalizeFilterValue(filters.queueTab);
+    const checkInDate = normalizeFilterValue(filters.checkInDate);
+    const checkOutDate = normalizeFilterValue(filters.checkOutDate);
+
+    if (confirmation) params.confirmation = confirmation;
+    if (confirmationNumber) params.confirmationNumber = confirmationNumber;
+    if (guestName) params.guestName = guestName;
+    if (status) params.status = status;
+    if (queueTab) params.queueTab = queueTab;
+    if (checkInDate) params.checkInDate = checkInDate;
+    if (checkOutDate) params.checkOutDate = checkOutDate;
+
+    return params;
+};
+
 export const createReservation = async (data) => {
     const response = await api.post('/reservations', data);
     return response.data;
 };
 
-export const getAllReservations = async () => {
-    const response = await api.get('/reservations');
+export const getAllReservations = async (filters = {}) => {
+    const params = buildReservationParams(filters);
+    const requestConfig = Object.keys(params).length > 0 ? { params } : undefined;
+    const response = await api.get('/reservations', requestConfig);
     return response.data;
 };
 
@@ -67,16 +96,7 @@ export const searchReservations = async (query) => {
         return [{ ...lookup, id }];
     }
 
-    const reservations = await getAllReservations();
-    const normalizedQuery = trimmed.toLowerCase();
-
-    return reservations.filter((reservation) => {
-        const guestName = String(
-            reservation?.guestName ?? reservation?.guest?.name ?? ''
-        ).toLowerCase();
-
-        return guestName.includes(normalizedQuery);
-    });
+    return getAllReservations({ guestName: trimmed });
 };
 
 export const checkInReservation = async (confirmationNumber) => {

@@ -360,12 +360,7 @@ class ReservationServiceTest {
                 eq(null)))
                 .thenReturn(List.of(reservation));
 
-        List<ReservationResponse> response = reservationService.getAllReservations(
-                null,
-                null,
-                null,
-                null,
-                null);
+        List<ReservationResponse> response = reservationService.getAllReservations();
 
         assertEquals(1, response.size());
         verify(reservationRepository).findAllByOptionalFilters(null, null, null, null, null);
@@ -373,30 +368,50 @@ class ReservationServiceTest {
     }
 
     @Test
-    void getAllReservationsWithFiltersShouldUseFilteredRepositoryPath() {
+    void getAllReservationsWithNullFilterRequestShouldStillUseFilteredRepositoryPath() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        List<ReservationResponse> response = reservationService.getAllReservations((ReservationFilterRequest) null);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(null, null, null, null, null);
+        verify(reservationRepository, never()).findAll();
+    }
+
+    @Test
+    void getAllReservationsWithFiltersShouldNormalizeAndUseFilteredRepositoryPath() {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
 
         LocalDate checkIn = LocalDate.of(2026, 4, 1);
         LocalDate checkOut = LocalDate.of(2026, 4, 3);
 
         when(reservationRepository.findAllByOptionalFilters(
-                eq("RSV-ABC123DEF456"),
+                eq(null),
                 eq("Guest"),
                 eq(ReservationStatus.CONFIRMED),
                 eq(checkIn),
                 eq(checkOut)))
                 .thenReturn(List.of(reservation));
 
-        List<ReservationResponse> response = reservationService.getAllReservations(
-                " rsv-abc123def456 ",
-                " Guest ",
-                ReservationStatus.CONFIRMED,
-                checkIn,
-                checkOut);
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setGuestName(" Guest ");
+        filters.setStatus(ReservationStatus.CONFIRMED);
+        filters.setCheckInDate(checkIn);
+        filters.setCheckOutDate(checkOut);
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
 
         assertEquals(1, response.size());
         verify(reservationRepository).findAllByOptionalFilters(
-                "RSV-ABC123DEF456",
+                null,
                 "Guest",
                 ReservationStatus.CONFIRMED,
                 checkIn,
@@ -456,6 +471,171 @@ class ReservationServiceTest {
                 ReservationStatus.CONFIRMED,
                 null,
                 null);
+    }
+
+    @Test
+    void getAllReservationsShouldIgnoreUnsupportedQueueTabAndPreserveUnfilteredPath() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setQueueTab("frontDeskUnknown");
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                null,
+                null,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsShouldMapCamelCaseQueueTabAliases() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_OUT);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq(null),
+                eq(ReservationStatus.CHECKED_OUT),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setQueueTab("checkedOut");
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                null,
+                null,
+                ReservationStatus.CHECKED_OUT,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsShouldAcceptConfirmationNumberAlias() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq("RSV-ABC123DEF456"),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setConfirmationNumber(" rsv-abc123def456 ");
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                "RSV-ABC123DEF456",
+                null,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsShouldPreferConfirmationOverConfirmationNumberAlias() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq("RSV-ABC123DEF456"),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setConfirmation(" rsv-abc123def456 ");
+        filters.setConfirmationNumber("rsv-other999999");
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                "RSV-ABC123DEF456",
+                null,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsShouldPrioritizeConfirmationOverOtherFilters() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq("RSV-ABC123DEF456"),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setConfirmation(" rsv-abc123def456 ");
+        filters.setGuestName("No Match");
+        filters.setStatus(ReservationStatus.PENDING);
+        filters.setQueueTab("in_house");
+        filters.setCheckInDate(LocalDate.of(2026, 5, 1));
+        filters.setCheckOutDate(LocalDate.of(2026, 5, 3));
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                "RSV-ABC123DEF456",
+                null,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void getAllReservationsLegacyOverloadShouldDelegateToFilterRequestPath() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq(null),
+                eq("Guest"),
+                eq(ReservationStatus.CONFIRMED),
+                eq(LocalDate.of(2026, 4, 1)),
+                eq(LocalDate.of(2026, 4, 3))))
+                .thenReturn(List.of(reservation));
+
+        List<ReservationResponse> response = reservationService.getAllReservations(
+                null,
+                " Guest ",
+                ReservationStatus.CONFIRMED,
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 4, 3));
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                null,
+                "Guest",
+                ReservationStatus.CONFIRMED,
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 4, 3));
+        verify(reservationRepository, never()).findAll();
     }
 
     private Reservation buildReservationForCancel(ReservationStatus status) {

@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { describe, beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ReservationDetails from './ReservationDetails';
-import { getReservationByConfirmationNumber } from '../services/reservationService';
+import {
+  getAllReservations,
+  getReservationByConfirmationNumber,
+} from '../services/reservationService';
 
 const reservation = {
   id: 17,
@@ -36,6 +39,15 @@ const renderPage = () =>
     </MemoryRouter>
   );
 
+const renderListPage = (entry = '/reservations?queueTab=arrivals&guestName=Jane') =>
+  render(
+    <MemoryRouter initialEntries={[entry]}>
+      <Routes>
+        <Route path="/reservations" element={<ReservationDetails />} />
+      </Routes>
+    </MemoryRouter>
+  );
+
 vi.mock('../components/StatusPill', () => ({
   default: ({ status }) => <span>{status}</span>,
 }));
@@ -64,6 +76,7 @@ vi.mock('../components/dashboard/DashboardPanel', () => ({
 }));
 
 vi.mock('../services/reservationService', () => ({
+  getAllReservations: vi.fn(),
   getReservationByConfirmationNumber: vi.fn(),
   extractReservationError: (err) => err?.message ?? 'Request failed',
 }));
@@ -83,5 +96,22 @@ describe('ReservationDetails', () => {
     expect(screen.getByText('$200.00')).toBeInTheDocument();
     expect(screen.getAllByText('$76.00').length).toBeGreaterThan(0);
     expect(screen.getByText(/^No$/i)).toBeInTheDocument();
+  });
+
+  it('loads reservation lists through backend filters when query params are present', async () => {
+    getAllReservations.mockResolvedValue([reservation]);
+
+    renderListPage();
+
+    expect(getAllReservations).toHaveBeenCalledWith({
+      confirmation: '',
+      confirmationNumber: '',
+      guestName: 'Jane',
+      status: '',
+      queueTab: 'arrivals',
+      checkInDate: '',
+      checkOutDate: '',
+    });
+    expect(await screen.findByText('RSV-DET-123456')).toBeInTheDocument();
   });
 });
