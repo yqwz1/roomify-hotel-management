@@ -1,6 +1,14 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Home, LifeBuoy, LogIn, Search, ShieldCheck } from 'lucide-react';
+import {
+    CalendarDays,
+    Home,
+    LifeBuoy,
+    LogIn,
+    Mail,
+    Search,
+    ShieldCheck,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
 import { useTranslation } from 'react-i18next';
 
@@ -137,21 +145,14 @@ export default function Bookings() {
                                         title={t('browseRoomsBtn')}
                                         description={t('bookingsPage.actionDescriptions.browse')}
                                         openLabel={openLabel}
-                                        onClick={() => navigate('/')}
+                                        onClick={() => navigate('/search')}
                                     />
                                     <ActionCard
-                                        icon={LifeBuoy}
-                                        title={t('helpSupport')}
-                                        description={t('bookingsPage.actionDescriptions.support')}
+                                        icon={Mail}
+                                        title={t('bookingsPage.contactFrontDeskTitle')}
+                                        description={t('bookingsPage.actionDescriptions.contactFrontDesk')}
                                         openLabel={openLabel}
                                         href={SUPPORT_LINK}
-                                    />
-                                    <ActionCard
-                                        icon={LogIn}
-                                        title={t('signIn')}
-                                        description={t('bookingsPage.actionDescriptions.signIn')}
-                                        openLabel={openLabel}
-                                        onClick={() => navigate('/login')}
                                     />
                                 </>
                             ) : (
