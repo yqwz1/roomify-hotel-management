@@ -1415,13 +1415,14 @@ class ReservationIntegrationTest {
 
         @Test
         void guestCanReadOnlyTheirOwnReservations() throws Exception {
-                Guest guest = guestRepository.save(new Guest(
+                guestRepository.saveAndFlush(new Guest(
                                 "Guest Dashboard",
                                 "guest@roomify.com",
                                 "0500000000",
                                 "ID-GUEST-DASHBOARD",
                                 "SA"));
-                Guest otherGuest = guestRepository.save(new Guest(
+                Guest guest = guestRepository.findByEmailIgnoreCase("guest@roomify.com").orElseThrow();
+                Guest otherGuest = guestRepository.saveAndFlush(new Guest(
                                 "Other Guest",
                                 "other." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
                                 "0500000001",
@@ -1447,6 +1448,8 @@ class ReservationIntegrationTest {
                                 new BigDecimal("690.00"),
                                 ReservationStatus.CONFIRMED,
                                 "RSV-OTHER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
+
+                assertEquals(1, reservationRepository.findByGuest_Id(guest.getId()).size());
 
                 String response = mockMvc.perform(get("/api/guest/reservations")
                                 .header("Authorization", "Bearer " + guestToken))
