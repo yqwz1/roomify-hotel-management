@@ -249,6 +249,22 @@ class BillingIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /{confirmationNumber}/bill/payments forbids guest role")
+    void recordPaymentForbiddenForGuestRole() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("amount", "200.00");
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/payments", confirmationNumber)
+                        .header("Authorization", "Bearer " + guestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("POST /api/payments persists failed-payment notifications and audit logs on rollback")
     void directPaymentsOverpaymentStillPersistsNotificationAndAudit() throws Exception {
         String confirmationNumber = createReservation(
@@ -285,6 +301,24 @@ class BillingIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /api/payments forbids guest role")
+    void directPaymentsForbiddenForGuestRole() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("confirmationNumber", confirmationNumber);
+        request.put("amount", "200.00");
+        request.put("paymentMethod", "CARD");
+
+        mockMvc.perform(post("/api/payments")
+                        .header("Authorization", "Bearer " + guestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("POST /{confirmationNumber}/bill/close blocks close while outstanding is positive")
     void closeBillBlockedWhenOutstandingIsPositive() throws Exception {
         String confirmationNumber = createReservation(
@@ -294,6 +328,17 @@ class BillingIntegrationTest {
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("PAYMENT_BALANCE_DUE"));
+    }
+
+    @Test
+    @DisplayName("POST /{confirmationNumber}/bill/close forbids guest role")
+    void closeBillForbiddenForGuestRole() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
+
+        mockMvc.perform(post("/api/reservations/{cn}/bill/close", confirmationNumber)
+                        .header("Authorization", "Bearer " + guestToken))
+                .andExpect(status().isForbidden());
     }
 
     @Test

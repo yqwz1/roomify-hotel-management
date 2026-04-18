@@ -1413,6 +1413,100 @@ class ReservationIntegrationTest {
         }
 
         @Test
+        void guestCanReadOnlyTheirOwnReservations() throws Exception {
+                CreatedReservation ownReservation = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(6),
+                                LocalDate.now().plusDays(8),
+                                "CONFIRMED",
+                                "Guest Dashboard",
+                                "guest@roomify.com");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(9),
+                                LocalDate.now().plusDays(11),
+                                "CONFIRMED",
+                                "Other Guest",
+                                "other." + UUID.randomUUID().toString().substring(0, 8) + "@example.com");
+
+                mockMvc.perform(get("/api/guest/reservations")
+                                .header("Authorization", "Bearer " + guestToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.reservations.length()").value(1))
+                                .andExpect(jsonPath("$.reservations[0].confirmation")
+                                                .value(ownReservation.confirmationNumber()))
+                                .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"));
+        }
+
+        @Test
+        void onlyGuestsCanAccessGuestReservationEndpoint() throws Exception {
+                mockMvc.perform(get("/api/guest/reservations")
+                                .header("Authorization", "Bearer " + staffToken))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/api/guest/reservations")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void guestCannotCreateReservation() throws Exception {
+                Map<String, Object> request = buildCreateReservationRequest(
+                                room1Id,
+                                LocalDate.now().plusDays(5).toString(),
+                                LocalDate.now().plusDays(7).toString(),
+                                "CONFIRMED",
+                                "Guest Blocked",
+                                "guest-create@example.com",
+                                "0500000000",
+                                "ID-GUEST-CREATE",
+                                "SA");
+
+                mockMvc.perform(post("/api/reservations")
+                                .header("Authorization", "Bearer " + guestToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void guestCannotCancelReservation() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(6),
+                                LocalDate.now().plusDays(8),
+                                "CONFIRMED");
+
+                mockMvc.perform(post("/api/reservations/{id}/cancel", created.id())
+                                .header("Authorization", "Bearer " + guestToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(
+                                                Map.of("cancellationReason", "Guest cannot cancel here"))))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void guestCannotCheckInOrCheckOutReservation() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                                .header("Authorization", "Bearer " + guestToken))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}", created.confirmationNumber())
+                                .header("Authorization", "Bearer " + guestToken))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
         void guestCannotModifyReservation() throws Exception {
                 CreatedReservation created = createReservation(
                                 managerToken,
@@ -1488,6 +1582,24 @@ class ReservationIntegrationTest {
                         LocalDate checkOut,
                         String status,
                         String guestName) throws Exception {
+                return createReservation(
+                                token,
+                                roomId,
+                                checkIn,
+                                checkOut,
+                                status,
+                                guestName,
+                                "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com");
+        }
+
+        private CreatedReservation createReservation(
+                        String token,
+                        Long roomId,
+                        LocalDate checkIn,
+                        LocalDate checkOut,
+                        String status,
+                        String guestName,
+                        String guestEmail) throws Exception {
 
                 Map<String, Object> request = buildCreateReservationRequest(
                                 roomId,
@@ -1495,7 +1607,7 @@ class ReservationIntegrationTest {
                                 checkOut.toString(),
                                 status,
                                 guestName,
-                                "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
+                                guestEmail,
                                 "0500000000",
                                 "ID-" + UUID.randomUUID().toString().substring(0, 8),
                                 "USA");

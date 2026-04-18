@@ -52,6 +52,7 @@ class StaffIntegrationTest {
     private UserRepository userRepository;
 
     private String managerToken;
+    private String staffToken;
 
     @BeforeEach
     void setUp() {
@@ -60,6 +61,7 @@ class StaffIntegrationTest {
                 .build();
 
         managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
+        staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
 
         staffRepository.deleteAll();
         userRepository.deleteAll();
@@ -134,6 +136,25 @@ class StaffIntegrationTest {
                 .andExpect(jsonPath("$.name").value("New Staff"))
                 .andExpect(jsonPath("$.department").value("Front Desk"))
                 .andExpect(jsonPath("$.active").value(true));
+    }
+
+    @Test
+    void staffCannotAccessManagerOnlyStaffResources() throws Exception {
+        mockMvc.perform(get("/api/staff")
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/staff")
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "blocked.staff@roomify.com",
+                                  "name": "Blocked Staff",
+                                  "department": "Front Desk"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
     }
 
     private void createStaffProfile(String email, Role role, boolean active, String name, String department) {
