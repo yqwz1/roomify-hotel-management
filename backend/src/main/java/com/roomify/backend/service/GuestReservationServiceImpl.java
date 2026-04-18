@@ -64,10 +64,12 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 roomType,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                reservation.getTotalPrice(),
+                reservation.getTotalPrice() != null ? reservation.getTotalPrice() : java.math.BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),
-                reservation.isInvoiceFinalized()
+                reservation.isInvoiceFinalized(),
+                reservation.getTotalPaid() != null ? reservation.getTotalPaid() : java.math.BigDecimal.ZERO,
+                reservation.getOutstandingBalance() != null ? reservation.getOutstandingBalance() : java.math.BigDecimal.ZERO
         );
     }
 }

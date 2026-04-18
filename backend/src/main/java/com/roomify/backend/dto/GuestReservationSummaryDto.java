@@ -15,6 +15,8 @@ public class GuestReservationSummaryDto {
     private String paymentStatus;
     private String invoiceNumber;
     private boolean invoiceFinalized;
+    private BigDecimal totalPaid;
+    private BigDecimal outstandingBalance;
 
     public GuestReservationSummaryDto() {
     }
@@ -29,7 +31,9 @@ public class GuestReservationSummaryDto {
             BigDecimal totalAmount,
             String paymentStatus,
             String invoiceNumber,
-            boolean invoiceFinalized) {
+            boolean invoiceFinalized,
+            BigDecimal totalPaid,
+            BigDecimal outstandingBalance) {
         this.confirmation = confirmation;
         this.status = status;
         this.roomNumber = roomNumber;
@@ -40,6 +44,8 @@ public class GuestReservationSummaryDto {
         this.paymentStatus = paymentStatus;
         this.invoiceNumber = invoiceNumber;
         this.invoiceFinalized = invoiceFinalized;
+        this.totalPaid = totalPaid;
+        this.outstandingBalance = outstandingBalance;
     }
 
     public String getConfirmation() {
@@ -120,5 +126,21 @@ public class GuestReservationSummaryDto {
 
     public void setInvoiceFinalized(boolean invoiceFinalized) {
         this.invoiceFinalized = invoiceFinalized;
+    }
+
+    public BigDecimal getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(BigDecimal totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public BigDecimal getOutstandingBalance() {
+        return outstandingBalance;
+    }
+
+    public void setOutstandingBalance(BigDecimal outstandingBalance) {
+        this.outstandingBalance = outstandingBalance;
     }
 }
