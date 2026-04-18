@@ -5,5 +5,5 @@ import com.roomify.backend.dto.GuestReservationSummaryDto;
 import java.util.List;
 
 public interface GuestReservationService {
-    List<GuestReservationSummaryDto> getGuestReservations(Long guestId);
+    List<GuestReservationSummaryDto> getGuestReservations();
 }

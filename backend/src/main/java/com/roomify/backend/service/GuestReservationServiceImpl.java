@@ -1,11 +1,18 @@
 package com.roomify.backend.service;
 
 import com.roomify.backend.dto.GuestReservationSummaryDto;
+import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -15,12 +22,27 @@ import java.util.List;
 public class GuestReservationServiceImpl implements GuestReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final GuestRepository guestRepository;
 
     @Override
-    public List<GuestReservationSummaryDto> getGuestReservations(Long guestId) {
+    public List<GuestReservationSummaryDto> getGuestReservations() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Guest authentication required");
+        }
+
+        String email = authentication.getName();
+        if (email == null || email.isBlank()) {
+            throw new AccessDeniedException("Authenticated guest email is missing");
+        }
+
+        Guest guest = guestRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Guest profile not found for authenticated user: " + email));
+
         LocalDate today = LocalDate.now();
 
-        return reservationRepository.findByGuest_Id(guestId).stream()
+        return reservationRepository.findByGuest_Id(guest.getId()).stream()
                 .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
@@ -40,7 +62,8 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                                 ? reservation.getCheckOutDate()
                                 : null,
                         Comparator.nullsLast(Comparator.reverseOrder())
-                );
+                )
+                .thenComparing(Reservation::getConfirmationNumber, Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
     private boolean isOlderStay(Reservation reservation, LocalDate today) {
@@ -67,7 +90,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 roomType,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                reservation.getTotalPrice(),
+                reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),
                 reservation.isInvoiceFinalized()
