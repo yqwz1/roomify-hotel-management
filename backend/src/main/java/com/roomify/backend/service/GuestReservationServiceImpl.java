@@ -90,10 +90,13 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 roomType,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
+                // field name matches entity and frontend contract
                 reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),
-                reservation.isInvoiceFinalized()
+                reservation.isInvoiceFinalized(),
+                reservation.getTotalPaid() != null ? reservation.getTotalPaid() : BigDecimal.ZERO,
+                reservation.getOutstandingBalance() != null ? reservation.getOutstandingBalance() : BigDecimal.ZERO
         );
     }
 }
