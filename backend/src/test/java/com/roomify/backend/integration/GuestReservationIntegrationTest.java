@@ -157,14 +157,14 @@ class GuestReservationIntegrationTest {
                 .getContentAsString();
 
         JsonNode json = objectMapper.readTree(response);
-        assertEquals("RSV-CURRENT-001", json.get(0).get("confirmation").asText());
-        assertEquals("RSV-UPCOMING-001", json.get(1).get("confirmation").asText());
-        assertEquals("RSV-PAST-RECENT", json.get(2).get("confirmation").asText());
-        assertEquals("RSV-PAST-OLDER", json.get(3).get("confirmation").asText());
+        assertEquals("RSV-CURRENT-001", json.get(0).get("confirmationNumber").asText());
+        assertEquals("RSV-UPCOMING-001", json.get(1).get("confirmationNumber").asText());
+        assertEquals("RSV-PAST-RECENT", json.get(2).get("confirmationNumber").asText());
+        assertEquals("RSV-PAST-OLDER", json.get(3).get("confirmationNumber").asText());
         assertEquals("101", json.get(0).get("roomNumber").asText());
-        assertEquals("Deluxe", json.get(0).get("roomType").asText());
+        assertEquals("Deluxe", json.get(0).get("roomTypeName").asText());
         assertEquals("PENDING", json.get(0).get("paymentStatus").asText());
-        assertEquals(0, new BigDecimal("200.00").compareTo(new BigDecimal(json.get(0).get("totalAmount").asText())));
+        assertEquals(0, new BigDecimal("200.00").compareTo(new BigDecimal(json.get(0).get("totalPrice").asText())));
     }
 
     @Test
