@@ -65,7 +65,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 roomType,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                // totalAmount is the API contract name; populated from entity field totalPrice
+                // field name matches entity and frontend contract
                 reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),

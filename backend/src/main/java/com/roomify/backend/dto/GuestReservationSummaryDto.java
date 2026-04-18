@@ -5,14 +5,14 @@ import java.time.LocalDate;
 
 public class GuestReservationSummaryDto {
 
-    private String confirmation;
+    private String confirmationNumber;
     private String status;
     private String roomNumber;
-    private String roomType;
+    private String roomTypeName;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    // intentionally named totalAmount for API contract; populated from entity field totalPrice
-    private BigDecimal totalAmount;
+    // field name matches entity and frontend contract
+    private BigDecimal totalPrice;
     private String paymentStatus;
     private String invoiceNumber;
     private boolean invoiceFinalized;
@@ -23,25 +23,25 @@ public class GuestReservationSummaryDto {
     }
 
     public GuestReservationSummaryDto(
-            String confirmation,
+            String confirmationNumber,
             String status,
             String roomNumber,
-            String roomType,
+            String roomTypeName,
             LocalDate checkInDate,
             LocalDate checkOutDate,
-            BigDecimal totalAmount,
+            BigDecimal totalPrice,
             String paymentStatus,
             String invoiceNumber,
             boolean invoiceFinalized,
             BigDecimal totalPaid,
             BigDecimal outstandingBalance) {
-        this.confirmation = confirmation;
+        this.confirmationNumber = confirmationNumber;
         this.status = status;
         this.roomNumber = roomNumber;
-        this.roomType = roomType;
+        this.roomTypeName = roomTypeName;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
-        this.totalAmount = totalAmount;
+        this.totalPrice = totalPrice;
         this.paymentStatus = paymentStatus;
         this.invoiceNumber = invoiceNumber;
         this.invoiceFinalized = invoiceFinalized;
@@ -49,12 +49,12 @@ public class GuestReservationSummaryDto {
         this.outstandingBalance = outstandingBalance;
     }
 
-    public String getConfirmation() {
-        return confirmation;
+    public String getConfirmationNumber() {
+        return confirmationNumber;
     }
 
-    public void setConfirmation(String confirmation) {
-        this.confirmation = confirmation;
+    public void setConfirmationNumber(String confirmationNumber) {
+        this.confirmationNumber = confirmationNumber;
     }
 
     public String getStatus() {
@@ -73,12 +73,12 @@ public class GuestReservationSummaryDto {
         this.roomNumber = roomNumber;
     }
 
-    public String getRoomType() {
-        return roomType;
+    public String getRoomTypeName() {
+        return roomTypeName;
     }
 
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
+    public void setRoomTypeName(String roomTypeName) {
+        this.roomTypeName = roomTypeName;
     }
 
     public LocalDate getCheckInDate() {
@@ -97,12 +97,12 @@ public class GuestReservationSummaryDto {
         this.checkOutDate = checkOutDate;
     }
 
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     public String getPaymentStatus() {
