@@ -20,6 +20,7 @@ import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
 import com.roomify.backend.dto.EmailDeliveryStatus;
 import com.roomify.backend.entity.AuditLog;
+import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
@@ -1414,22 +1415,38 @@ class ReservationIntegrationTest {
 
         @Test
         void guestCanReadOnlyTheirOwnReservations() throws Exception {
-                CreatedReservation ownReservation = createReservation(
-                                managerToken,
-                                room1Id,
+                Guest guest = guestRepository.save(new Guest(
+                                "Guest Dashboard",
+                                "guest@roomify.com",
+                                "0500000000",
+                                "ID-GUEST-DASHBOARD",
+                                "SA"));
+                Guest otherGuest = guestRepository.save(new Guest(
+                                "Other Guest",
+                                "other." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
+                                "0500000001",
+                                "ID-OTHER-" + UUID.randomUUID().toString().substring(0, 8),
+                                "SA"));
+
+                Room room1 = roomRepository.findById(room1Id).orElseThrow();
+                Room room2 = roomRepository.findById(room2Id).orElseThrow();
+
+                Reservation ownReservation = reservationRepository.saveAndFlush(new Reservation(
+                                guest,
+                                room1,
                                 LocalDate.now().plusDays(6),
                                 LocalDate.now().plusDays(8),
-                                "CONFIRMED",
-                                "Guest Dashboard",
-                                "guest@roomify.com");
-                createReservation(
-                                managerToken,
-                                room2Id,
+                                new BigDecimal("460.00"),
+                                ReservationStatus.CONFIRMED,
+                                "RSV-GUEST-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
+                reservationRepository.saveAndFlush(new Reservation(
+                                otherGuest,
+                                room2,
                                 LocalDate.now().plusDays(9),
                                 LocalDate.now().plusDays(11),
-                                "CONFIRMED",
-                                "Other Guest",
-                                "other." + UUID.randomUUID().toString().substring(0, 8) + "@example.com");
+                                new BigDecimal("690.00"),
+                                ReservationStatus.CONFIRMED,
+                                "RSV-OTHER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
 
                 String response = mockMvc.perform(get("/api/guest/reservations")
                                 .header("Authorization", "Bearer " + guestToken))
@@ -1442,7 +1459,7 @@ class ReservationIntegrationTest {
                 JsonNode reservations = json.path("reservations");
 
                 assertEquals(1, reservations.size());
-                assertEquals(ownReservation.confirmationNumber(), reservations.get(0).path("confirmation").asText());
+                assertEquals(ownReservation.getConfirmationNumber(), reservations.get(0).path("confirmation").asText());
                 assertEquals("CONFIRMED", reservations.get(0).path("status").asText());
         }
 
