@@ -9,11 +9,14 @@ import {
   Users,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ROLE_GUEST, getPrimaryRole } from '../components/navigation/navConfig';
 import DateRangePicker from '../components/DateRangePicker';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useAuth } from '../context/AuthProvider';
 import { useSearch } from '../hooks/useSearch';
+import { getRoomSearchCardActions } from '../utils/roomSearchActions';
 import {
   formatLocalizedCurrency,
   getRoomStatusLabel,
@@ -21,6 +24,8 @@ import {
 } from '../utils/localization';
 
 const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
+const FRONT_DESK_EMAIL = 'info@roomify.com';
+const FRONT_DESK_LINK = `mailto:${FRONT_DESK_EMAIL}?subject=Roomify%20Front%20Desk%20Support`;
 
 const STATUS_STYLES = {
   AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
@@ -44,10 +49,13 @@ function SearchSkeletonCard() {
 }
 
 export default function RoomSearch() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const pageTx = 'roomSearchPage';
+  const primaryRole = getPrimaryRole(user?.roles ?? []);
+  const isGuest = primaryRole === ROLE_GUEST;
 
   const sortOptions = useMemo(
     () => [
@@ -134,13 +142,30 @@ export default function RoomSearch() {
       state: { checkIn, checkOut, room },
     });
   };
+  const cardActions = getRoomSearchCardActions(primaryRole);
+
+  const handleCardAction = (actionId, room) => {
+    switch (actionId) {
+      case 'book':
+        handleBookNow(room);
+        break;
+      case 'help':
+        navigate('/bookings');
+        break;
+      case 'contactFrontDesk':
+        window.location.assign(FRONT_DESK_LINK);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow={t(`${pageTx}.heroEyebrow`)}
+        eyebrow={t(isGuest ? `${pageTx}.guestHeroEyebrow` : `${pageTx}.heroEyebrow`)}
         title={t('roomSearchTitle')}
-        description={t('roomSearchDesc')}
+        description={t(isGuest ? `${pageTx}.guestDescription` : 'roomSearchDesc')}
         meta={[
           t('nightsCount', { count: nights || 0 }),
           hasSearched ? t(`${pageTx}.matchedCount`, { count: totalResults }) : t('common.pending'),
@@ -231,7 +256,9 @@ export default function RoomSearch() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
               >
                 <Search className="h-4 w-4" />
-                {loading ? t(`${pageTx}.searchingRooms`) : t('searchRoomsButton')}
+                {loading
+                  ? t(`${pageTx}.searchingRooms`)
+                  : t(isGuest ? `${pageTx}.guestSearchCta` : 'searchRoomsButton')}
               </button>
             </div>
           </DashboardPanel>
@@ -387,15 +414,30 @@ export default function RoomSearch() {
                             </p>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => handleBookNow(room)}
-                            className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
-                          >
-                            {t(`${pageTx}.bookRoomCta`)}
-                            <ArrowRight className="h-4 w-4" />
-                          </button>
+                          <div className="flex flex-wrap justify-end gap-2">
+                            {cardActions.map((action) => (
+                              <button
+                                key={action.id}
+                                type="button"
+                                onClick={() => handleCardAction(action.id, room)}
+                                className={
+                                  action.tone === 'secondary'
+                                    ? 'inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-300 hover:bg-zinc-50'
+                                    : 'inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800'
+                                }
+                              >
+                                {t(action.labelKey)}
+                                <ArrowRight className="h-4 w-4" />
+                              </button>
+                            ))}
+                          </div>
                         </div>
+
+                        {isGuest && (
+                          <p className="border-t border-zinc-100 pt-4 text-sm font-medium leading-6 text-zinc-500">
+                            {t(`${pageTx}.guestCtaNote`)}
+                          </p>
+                        )}
                       </div>
                     </article>
                   );
