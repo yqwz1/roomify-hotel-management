@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -64,12 +65,13 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 roomType,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                reservation.getTotalPrice() != null ? reservation.getTotalPrice() : java.math.BigDecimal.ZERO,
+                // totalAmount is the API contract name; populated from entity field totalPrice
+                reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),
                 reservation.isInvoiceFinalized(),
-                reservation.getTotalPaid() != null ? reservation.getTotalPaid() : java.math.BigDecimal.ZERO,
-                reservation.getOutstandingBalance() != null ? reservation.getOutstandingBalance() : java.math.BigDecimal.ZERO
+                reservation.getTotalPaid() != null ? reservation.getTotalPaid() : BigDecimal.ZERO,
+                reservation.getOutstandingBalance() != null ? reservation.getOutstandingBalance() : BigDecimal.ZERO
         );
     }
 }

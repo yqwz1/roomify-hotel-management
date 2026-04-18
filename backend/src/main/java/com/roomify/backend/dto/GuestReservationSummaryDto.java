@@ -11,6 +11,7 @@ public class GuestReservationSummaryDto {
     private String roomType;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
+    // intentionally named totalAmount for API contract; populated from entity field totalPrice
     private BigDecimal totalAmount;
     private String paymentStatus;
     private String invoiceNumber;
