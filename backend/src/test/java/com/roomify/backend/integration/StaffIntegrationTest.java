@@ -1,9 +1,15 @@
 package com.roomify.backend.integration;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,12 +20,13 @@ import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.StaffRepository;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -140,6 +147,14 @@ class StaffIntegrationTest {
 
     @Test
     void staffCannotAccessManagerOnlyStaffResources() throws Exception {
+        Long aliceId = getUserIdByEmail("alice@roomify.com");
+        Long bobId = getUserIdByEmail("bob@roomify.com");
+
+        User lockedAlice = getUserByEmail("alice@roomify.com");
+        lockedAlice.setFailedAttempts(4);
+        lockedAlice.setLockUntil(Instant.now().plusSeconds(900));
+        userRepository.saveAndFlush(lockedAlice);
+
         mockMvc.perform(get("/api/staff")
                         .header("Authorization", "Bearer " + staffToken))
                 .andExpect(status().isForbidden());
@@ -155,6 +170,97 @@ class StaffIntegrationTest {
                                 }
                                 """))
                 .andExpect(status().isForbidden());
+
+        mockMvc.perform(put("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Alice Escalated",
+                                  "department": "Management"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch("/api/staff/{id}/deactivate", aliceId)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch("/api/staff/{id}/activate", bobId)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch("/api/staff/{id}/unlock", aliceId)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
+
+        Staff alice = staffRepository.findById(aliceId).orElseThrow();
+        Staff bob = staffRepository.findById(bobId).orElseThrow();
+        User aliceUser = getUserByEmail("alice@roomify.com");
+        User bobUser = getUserByEmail("bob@roomify.com");
+
+        assertEquals("Alice Johnson", alice.getName());
+        assertEquals("Front Desk", alice.getDepartment());
+        assertEquals(4, aliceUser.getFailedAttempts());
+        assertNotNull(aliceUser.getLockUntil());
+        assertFalse(bob.isActive());
+        assertFalse(bobUser.isActive());
+    }
+
+    @Test
+    void managerCanUpdateActivationAndUnlockStaffLifecycleEndpoints() throws Exception {
+        Long aliceId = getUserIdByEmail("alice@roomify.com");
+
+        mockMvc.perform(put("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Alice Updated",
+                                  "department": "Concierge"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Alice Updated"))
+                .andExpect(jsonPath("$.department").value("Concierge"));
+
+        Staff updated = staffRepository.findById(aliceId).orElseThrow();
+        assertEquals("Alice Updated", updated.getName());
+        assertEquals("Concierge", updated.getDepartment());
+
+        mockMvc.perform(patch("/api/staff/{id}/deactivate", aliceId)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false));
+
+        assertFalse(staffRepository.findById(aliceId).orElseThrow().isActive());
+        assertFalse(getUserByEmail("alice@roomify.com").isActive());
+
+        mockMvc.perform(patch("/api/staff/{id}/activate", aliceId)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(true));
+
+        User lockedAlice = getUserByEmail("alice@roomify.com");
+        lockedAlice.setFailedAttempts(5);
+        lockedAlice.setLockUntil(Instant.now().plusSeconds(900));
+        userRepository.saveAndFlush(lockedAlice);
+
+        mockMvc.perform(patch("/api/staff/{id}/unlock", aliceId)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isNoContent());
+
+        User unlockedAlice = getUserByEmail("alice@roomify.com");
+        assertEquals(0, unlockedAlice.getFailedAttempts());
+        assertNull(unlockedAlice.getLockUntil());
+    }
+
+    private Long getUserIdByEmail(String email) {
+        return getUserByEmail(email).getId();
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email).orElseThrow();
     }
 
     private void createStaffProfile(String email, Role role, boolean active, String name, String department) {
