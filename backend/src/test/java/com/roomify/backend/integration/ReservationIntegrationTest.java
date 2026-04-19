@@ -1540,11 +1540,9 @@ class ReservationIntegrationTest {
                                 .getContentAsString();
 
                 JsonNode json = objectMapper.readTree(response);
-                JsonNode reservations = json.path("reservations");
-
-                assertEquals(1, reservations.size());
-                assertEquals(ownReservation.getConfirmationNumber(), reservations.get(0).path("confirmation").asText());
-                assertEquals("CONFIRMED", reservations.get(0).path("status").asText());
+                assertEquals(1, json.size());
+                assertEquals(ownReservation.getConfirmationNumber(), json.get(0).path("confirmationNumber").asText());
+                assertEquals("CONFIRMED", json.get(0).path("status").asText());
         }
 
         @Test
@@ -1555,6 +1553,29 @@ class ReservationIntegrationTest {
 
                 mockMvc.perform(get("/api/guest/reservations")
                                 .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void guestCannotReadReservationManagementEndpoints() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(6),
+                                LocalDate.now().plusDays(8),
+                                "CONFIRMED");
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + guestToken))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + guestToken)
+                                .param("confirmation", created.confirmationNumber()))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/api/reservations/{confirmationNumber}", created.confirmationNumber())
+                                .header("Authorization", "Bearer " + guestToken))
                                 .andExpect(status().isForbidden());
         }
 
