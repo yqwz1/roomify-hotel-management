@@ -204,8 +204,23 @@ class GuestReservationIntegrationTest {
         mockMvc.perform(get("/api/guest/reservations")
                         .header("Authorization", "Bearer " + guestCToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.length()").value(4))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode json = objectMapper.readTree(response);
+        assertEquals("RSV-CURRENT-001", json.get(0).get("confirmationNumber").asText());
+        assertEquals("RSV-CURRENT-001", json.get(0).get("confirmation").asText());
+        assertEquals("RSV-UPCOMING-001", json.get(1).get("confirmationNumber").asText());
+        assertEquals("RSV-PAST-RECENT", json.get(2).get("confirmationNumber").asText());
+        assertEquals("RSV-PAST-OLDER", json.get(3).get("confirmationNumber").asText());
+        assertEquals("101", json.get(0).get("roomNumber").asText());
+        assertEquals("Deluxe", json.get(0).get("roomType").asText());
+        assertEquals("Deluxe", json.get(0).get("roomTypeName").asText());
+        assertEquals("PENDING", json.get(0).get("paymentStatus").asText());
+        assertEquals(0, new BigDecimal("200.00").compareTo(new BigDecimal(json.get(0).get("totalAmount").asText())));
+        assertEquals(0, new BigDecimal("200.00").compareTo(new BigDecimal(json.get(0).get("totalPrice").asText())));
     }
 
     @Test
@@ -232,6 +247,57 @@ class GuestReservationIntegrationTest {
         for (String guestBConfirm : guestBConfirmationNumbers) {
             assertFalse(returnedConfirmationNumbers.contains(guestBConfirm));
         }
+    }
+
+    @Test
+    void guestReservationsMergeCaseVariantGuestProfilesAndTrimAuthenticatedEmail() throws Exception {
+        String paddedGuestToken = jwtUtils.generateToken("  GUEST@roomify.com  ", "ROLE_GUEST");
+
+        Guest primaryGuest = guestRepository.save(
+                new Guest("Guest User", "guest@roomify.com", "0500000000", "ID-GUEST-PRIMARY", "SA"));
+        Guest legacyCaseVariantGuest = guestRepository.save(
+                new Guest("Guest User Legacy", "GUEST@ROOMIFY.COM", "0500000001", "ID-GUEST-LEGACY", "SA"));
+        Guest otherGuest = guestRepository.save(
+                new Guest("Other Guest", "other@roomify.com", "0500000002", "ID-GUEST-OTHER", "SA"));
+
+        RoomType roomType = roomTypeRepository.save(
+                new RoomType("Suite", new BigDecimal("300.00"), 2, "WiFi, TV", "Suite room"));
+        Room room201 = roomRepository.save(new Room("201", roomType, 2, RoomStatus.AVAILABLE));
+        Room room202 = roomRepository.save(new Room("202", roomType, 2, RoomStatus.AVAILABLE));
+        Room room203 = roomRepository.save(new Room("203", roomType, 2, RoomStatus.AVAILABLE));
+
+        reservationRepository.save(buildReservation(
+                primaryGuest,
+                room201,
+                LocalDate.now().plusDays(2),
+                LocalDate.now().plusDays(4),
+                "RSV-PRIMARY-001"));
+        reservationRepository.save(buildReservation(
+                legacyCaseVariantGuest,
+                room202,
+                LocalDate.now().plusDays(5),
+                LocalDate.now().plusDays(7),
+                "RSV-LEGACY-001"));
+        reservationRepository.save(buildReservation(
+                otherGuest,
+                room203,
+                LocalDate.now().plusDays(8),
+                LocalDate.now().plusDays(10),
+                "RSV-OTHER-001"));
+
+        String response = mockMvc.perform(get("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + paddedGuestToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode json = objectMapper.readTree(response);
+        assertEquals("RSV-PRIMARY-001", json.get(0).get("confirmationNumber").asText());
+        assertEquals("RSV-PRIMARY-001", json.get(0).get("confirmation").asText());
+        assertEquals("RSV-LEGACY-001", json.get(1).get("confirmationNumber").asText());
+        assertEquals("RSV-LEGACY-001", json.get(1).get("confirmation").asText());
     }
 
     private Reservation buildReservation(

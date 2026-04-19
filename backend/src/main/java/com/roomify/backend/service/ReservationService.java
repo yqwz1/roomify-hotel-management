@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -297,9 +298,10 @@ public class ReservationService {
     // =============================
 
     public ReservationResponse checkIn(String confirmationNumber) {
+        String normalizedConfirmationNumber = normalizeConfirmationNumber(confirmationNumber);
 
         Reservation reservation = reservationRepository
-                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .findByConfirmationNumber(normalizedConfirmationNumber)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
@@ -352,9 +354,10 @@ public class ReservationService {
     // =============================
 
     public ReservationActionPlaceholderResponse checkOut(String confirmationNumber) {
+        String normalizedConfirmationNumber = normalizeConfirmationNumber(confirmationNumber);
 
         Reservation reservation = reservationRepository
-                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .findByConfirmationNumber(normalizedConfirmationNumber)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
@@ -433,9 +436,10 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationResponse getByConfirmationNumber(String confirmationNumber) {
+        String normalizedConfirmationNumber = normalizeConfirmationNumber(confirmationNumber);
 
         Reservation reservation = reservationRepository
-                .findByConfirmationNumber(confirmationNumber.trim().toUpperCase())
+                .findByConfirmationNumber(normalizedConfirmationNumber)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
@@ -568,6 +572,13 @@ public class ReservationService {
         String normalizedConfirmation = effectiveFilters.normalizedConfirmation();
         boolean confirmationScoped = effectiveFilters.hasConfirmationFilter();
 
+        if (!confirmationScoped
+                && effectiveFilters.getCheckInDate() != null
+                && effectiveFilters.getCheckOutDate() != null
+                && effectiveFilters.getCheckOutDate().isBefore(effectiveFilters.getCheckInDate())) {
+            throw new IllegalArgumentException("checkOutDate cannot be before checkInDate");
+        }
+
         java.util.List<Reservation> reservations = reservationRepository.findAllByOptionalFilters(
                 normalizedConfirmation,
                 confirmationScoped ? null : effectiveFilters.normalizedGuestName(),
@@ -621,5 +632,12 @@ public class ReservationService {
         response.setActualCheckInDate(reservation.getActualCheckInDate());
         response.setActualCheckOutAt(reservation.getActualCheckOutAt());
         return response;
+    }
+
+    private String normalizeConfirmationNumber(String confirmationNumber) {
+        if (confirmationNumber == null || confirmationNumber.isBlank()) {
+            throw new IllegalArgumentException("Confirmation number is required");
+        }
+        return confirmationNumber.trim().toUpperCase(Locale.ROOT);
     }
 }

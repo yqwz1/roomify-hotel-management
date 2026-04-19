@@ -1,5 +1,6 @@
 package com.roomify.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -57,6 +58,14 @@ public class GuestReservationSummaryDto {
         this.confirmationNumber = confirmationNumber;
     }
 
+    /**
+     * Backward-compatible alias preserved for legacy guest dashboard consumers.
+     */
+    @JsonProperty("confirmation")
+    public String getConfirmation() {
+        return confirmationNumber;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -81,6 +90,14 @@ public class GuestReservationSummaryDto {
         this.roomTypeName = roomTypeName;
     }
 
+    /**
+     * Backward-compatible alias preserved for older clients expecting roomType.
+     */
+    @JsonProperty("roomType")
+    public String getRoomType() {
+        return roomTypeName;
+    }
+
     public LocalDate getCheckInDate() {
         return checkInDate;
     }
@@ -103,6 +120,14 @@ public class GuestReservationSummaryDto {
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    /**
+     * Backward-compatible alias preserved for older clients expecting totalAmount.
+     */
+    @JsonProperty("totalAmount")
+    public BigDecimal getTotalAmount() {
+        return totalPrice;
     }
 
     public String getPaymentStatus() {
