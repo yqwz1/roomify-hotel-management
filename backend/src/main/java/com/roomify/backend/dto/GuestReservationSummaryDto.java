@@ -8,7 +8,7 @@ public class GuestReservationSummaryDto {
     private String confirmationNumber;
     private String status;
     private String roomNumber;
-    private String roomTypeName;
+    private String roomType;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     // field name matches entity and frontend contract
@@ -26,7 +26,7 @@ public class GuestReservationSummaryDto {
             String confirmationNumber,
             String status,
             String roomNumber,
-            String roomTypeName,
+            String roomType,
             LocalDate checkInDate,
             LocalDate checkOutDate,
             BigDecimal totalPrice,
@@ -38,7 +38,7 @@ public class GuestReservationSummaryDto {
         this.confirmationNumber = confirmationNumber;
         this.status = status;
         this.roomNumber = roomNumber;
-        this.roomTypeName = roomTypeName;
+        this.roomType = roomType;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.totalPrice = totalPrice;
@@ -73,12 +73,12 @@ public class GuestReservationSummaryDto {
         this.roomNumber = roomNumber;
     }
 
-    public String getRoomTypeName() {
-        return roomTypeName;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public void setRoomTypeName(String roomTypeName) {
-        this.roomTypeName = roomTypeName;
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
     }
 
     public LocalDate getCheckInDate() {
