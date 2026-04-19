@@ -2,6 +2,7 @@ package com.roomify.backend.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.roomify.backend.config.JwtUtils;
+import com.roomify.backend.config.TestConfig;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
@@ -33,24 +36,40 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestConfig.class)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.datasource.url=jdbc:h2:mem:guestreservationdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
+                "spring.datasource.driverClassName=org.h2.Driver",
+                "spring.datasource.username=sa",
+                "spring.datasource.password=",
+                "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+                "spring.jpa.hibernate.ddl-auto=create-drop",
+                "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
+                "roomify.jwt.expiration=3600000",
+                "roomify.billing.vat-rate=0.15"
+        }
+)
 @ActiveProfiles("test")
 class GuestReservationIntegrationTest {
 
-    private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    private MockMvc mockMvc;
 
     @Autowired
     private GuestRepository guestRepository;
@@ -76,9 +95,13 @@ class GuestReservationIntegrationTest {
     private Reservation guestBCurrentReservation;
     private Reservation guestBPastReservation;
 
+    private String guestAToken;
+    private String guestBToken;
+
     @BeforeEach
     void buildTestData() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
                 .build();
 
         objectMapper = new ObjectMapper();
@@ -107,6 +130,8 @@ class GuestReservationIntegrationTest {
         guestA = guestRepository.save(
                 new Guest("Guest A", "guestA@test.com", "0500000001", "ID-A-001", "SA"));
 
+        guestAToken = jwtUtils.generateToken("guestA@test.com", "ROLE_GUEST");
+
         guestACurrentReservation = reservationRepository.save(buildReservation(
                 guestA, room101,
                 LocalDate.now(), LocalDate.now().plusDays(2),
@@ -126,6 +151,8 @@ class GuestReservationIntegrationTest {
         guestB = guestRepository.save(
                 new Guest("Guest B", "guestB@test.com", "0500000002", "ID-B-001", "SA"));
 
+        guestBToken = jwtUtils.generateToken("guestB@test.com", "ROLE_GUEST");
+
         guestBCurrentReservation = reservationRepository.save(buildReservation(
                 guestB, room201,
                 LocalDate.now(), LocalDate.now().plusDays(3),
@@ -138,9 +165,9 @@ class GuestReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "guestA@test.com", roles = "GUEST")
     void shouldReturnGuestReservationSummaries() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/guest/reservations"))
+        MvcResult result = mockMvc.perform(get("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + guestAToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -162,7 +189,6 @@ class GuestReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "guestC@test.com", roles = "GUEST")
     void shouldReturnEmptyListWhenNoReservations() throws Exception {
         userRepository.save(new User(
                 "guestC@test.com",
@@ -173,20 +199,23 @@ class GuestReservationIntegrationTest {
         guestRepository.save(
                 new Guest("Guest C", "guestC@test.com", "0500000003", "ID-C-001", "SA"));
 
-        mockMvc.perform(get("/api/guest/reservations"))
+        String guestCToken = jwtUtils.generateToken("guestC@test.com", "ROLE_GUEST");
+
+        mockMvc.perform(get("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + guestCToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
-    @WithMockUser(username = "guestA@test.com", roles = "GUEST")
     void shouldNotReturnOtherGuestsReservations() throws Exception {
         Set<String> guestBConfirmationNumbers = Set.of(
                 guestBCurrentReservation.getConfirmationNumber(),
                 guestBPastReservation.getConfirmationNumber());
 
-        MvcResult result = mockMvc.perform(get("/api/guest/reservations"))
+        MvcResult result = mockMvc.perform(get("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + guestAToken))
                 .andExpect(status().isOk())
                 .andReturn();
 
