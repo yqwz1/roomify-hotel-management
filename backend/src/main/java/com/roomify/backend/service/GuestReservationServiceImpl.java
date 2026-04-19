@@ -26,7 +26,18 @@ public class GuestReservationServiceImpl implements GuestReservationService {
 
     @Override
     public List<GuestReservationSummaryDto> getGuestReservations() {
+        Guest guest = getAuthenticatedGuest();
+        LocalDate today = LocalDate.now();
+
+        return reservationRepository.findByGuest_Id(guest.getId()).stream()
+                .sorted(buildReservationSort(today))
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    private Guest getAuthenticatedGuest() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AccessDeniedException("Guest authentication required");
         }
@@ -36,50 +47,42 @@ public class GuestReservationServiceImpl implements GuestReservationService {
             throw new AccessDeniedException("Authenticated guest email is missing");
         }
 
-        Guest guest = guestRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Guest profile not found for authenticated user: " + email));
-
-        LocalDate today = LocalDate.now();
-
-        return reservationRepository.findByGuest_Id(guest.getId()).stream()
-                .sorted(buildReservationSort(today))
-                .map(this::mapToDto)
-                .toList();
+        return guestRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Guest profile not found for authenticated user: " + email));
     }
 
     private Comparator<Reservation> buildReservationSort(LocalDate today) {
         return Comparator
-                .comparing((Reservation reservation) -> isOlderStay(reservation, today))
+                .comparing((Reservation reservation) -> isPastStay(reservation, today))
                 .thenComparing(
-                        reservation -> isOlderStay(reservation, today)
-                                ? null
-                                : reservation.getCheckInDate(),
+                        reservation -> isPastStay(reservation, today) ? null : reservation.getCheckInDate(),
                         Comparator.nullsLast(Comparator.naturalOrder())
                 )
                 .thenComparing(
-                        reservation -> isOlderStay(reservation, today)
-                                ? reservation.getCheckOutDate()
-                                : null,
+                        reservation -> isPastStay(reservation, today) ? reservation.getCheckOutDate() : null,
                         Comparator.nullsLast(Comparator.reverseOrder())
                 )
-                .thenComparing(Reservation::getConfirmationNumber, Comparator.nullsLast(Comparator.naturalOrder()));
+                .thenComparing(
+                        Reservation::getConfirmationNumber,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                );
     }
 
-    private boolean isOlderStay(Reservation reservation, LocalDate today) {
+    private boolean isPastStay(Reservation reservation, LocalDate today) {
         return reservation.getCheckOutDate() != null
                 && reservation.getCheckOutDate().isBefore(today);
     }
 
     private GuestReservationSummaryDto mapToDto(Reservation reservation) {
         String roomNumber = null;
-        String roomType = null;
+        String roomTypeName = null;
 
         if (reservation.getRoom() != null) {
             roomNumber = reservation.getRoom().getRoomNumber();
 
             if (reservation.getRoom().getRoomType() != null) {
-                roomType = reservation.getRoom().getRoomType().getName();
+                roomTypeName = reservation.getRoom().getRoomType().getName();
             }
         }
 
@@ -87,10 +90,9 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 reservation.getConfirmationNumber(),
                 reservation.getStatus() != null ? reservation.getStatus().name() : null,
                 roomNumber,
-                roomType,
+                roomTypeName,
                 reservation.getCheckInDate(),
                 reservation.getCheckOutDate(),
-                // field name matches entity and frontend contract
                 reservation.getTotalPrice() != null ? reservation.getTotalPrice() : BigDecimal.ZERO,
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),

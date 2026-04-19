@@ -21,10 +21,6 @@ public class GuestReservationController {
 
     @GetMapping
     public ResponseEntity<List<GuestReservationSummaryDto>> getGuestReservations() {
-
-        List<GuestReservationSummaryDto> reservations =
-                guestReservationService.getGuestReservations();
-
-        return ResponseEntity.ok(reservations);
+        return ResponseEntity.ok(guestReservationService.getGuestReservations());
     }
 }
