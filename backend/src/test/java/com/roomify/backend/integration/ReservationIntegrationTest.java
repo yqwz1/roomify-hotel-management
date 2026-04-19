@@ -459,7 +459,8 @@ class ReservationIntegrationTest {
                                 .param("checkInDate", arrivalDay.toString()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.length()").value(1))
-                                .andExpect(jsonPath("$[0].confirmationNumber").value(arrivingToday.confirmationNumber()))
+                                .andExpect(jsonPath("$[0].confirmationNumber")
+                                                .value(arrivingToday.confirmationNumber()))
                                 .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
         }
 
@@ -481,10 +482,12 @@ class ReservationIntegrationTest {
                                 "CONFIRMED",
                                 "Departures Other Day");
 
-                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", departingToday.confirmationNumber())
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}",
+                                departingToday.confirmationNumber())
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk());
-                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", departingLater.confirmationNumber())
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}",
+                                departingLater.confirmationNumber())
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk());
 
@@ -494,7 +497,8 @@ class ReservationIntegrationTest {
                                 .param("checkOutDate", departureDay.toString()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.length()").value(1))
-                                .andExpect(jsonPath("$[0].confirmationNumber").value(departingToday.confirmationNumber()))
+                                .andExpect(jsonPath("$[0].confirmationNumber")
+                                                .value(departingToday.confirmationNumber()))
                                 .andExpect(jsonPath("$[0].status").value("CHECKED_IN"));
         }
 
@@ -525,7 +529,8 @@ class ReservationIntegrationTest {
                 mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", matching.confirmationNumber())
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk());
-                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", sameTabDifferentGuest.confirmationNumber())
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}",
+                                sameTabDifferentGuest.confirmationNumber())
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk());
 
@@ -966,7 +971,8 @@ class ReservationIntegrationTest {
                                 .param("checkInDate", targetCheckIn.toString()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.length()").value(1))
-                                .andExpect(jsonPath("$[0].confirmationNumber").value(checkInMatch.confirmationNumber()));
+                                .andExpect(jsonPath("$[0].confirmationNumber")
+                                                .value(checkInMatch.confirmationNumber()));
 
                 mockMvc.perform(get("/api/reservations")
                                 .header("Authorization", "Bearer " + managerToken)
@@ -1049,7 +1055,8 @@ class ReservationIntegrationTest {
                                 "CONFIRMED",
                                 "Detail Guest");
 
-                mockMvc.perform(get("/api/reservations/{confirmationNumber}", " " + created.confirmationNumber().toLowerCase() + " ")
+                mockMvc.perform(get("/api/reservations/{confirmationNumber}",
+                                " " + created.confirmationNumber().toLowerCase() + " ")
                                 .header("Authorization", "Bearer " + managerToken))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.confirmationNumber").value(created.confirmationNumber()))
@@ -1830,6 +1837,29 @@ class ReservationIntegrationTest {
 
                 mockMvc.perform(get("/api/guest/reservations")
                                 .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void guestCannotReadReservationManagementEndpoints() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(6),
+                                LocalDate.now().plusDays(8),
+                                "CONFIRMED");
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + guestToken))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + guestToken)
+                                .param("confirmation", created.confirmationNumber()))
+                                .andExpect(status().isForbidden());
+
+                mockMvc.perform(get("/api/reservations/{confirmationNumber}", created.confirmationNumber())
+                                .header("Authorization", "Bearer " + guestToken))
                                 .andExpect(status().isForbidden());
         }
 
