@@ -796,7 +796,9 @@ class ReservationIntegrationTest {
                                 .param("status", "NOT_A_STATUS"))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.status").value(400))
-                                .andExpect(jsonPath("$.error").value("Validation Error"));
+                                .andExpect(jsonPath("$.error").value("Validation Error"))
+                                .andExpect(jsonPath("$.validationErrors.status")
+                                                .value("Invalid value for parameter: status (NOT_A_STATUS)"));
         }
 
         @Test
@@ -806,7 +808,172 @@ class ReservationIntegrationTest {
                                 .param("checkInDate", "2026-99-99"))
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.status").value(400))
-                                .andExpect(jsonPath("$.error").value("Validation Error"));
+                                .andExpect(jsonPath("$.error").value("Validation Error"))
+                                .andExpect(jsonPath("$.validationErrors.checkInDate")
+                                                .value("Invalid value for parameter: checkInDate (2026-99-99)"));
+        }
+
+        @Test
+        void getAllReservationsNormalizesStatusFilterCaseAndLegacyAliases() throws Exception {
+                CreatedReservation confirmed = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(31),
+                                LocalDate.now().plusDays(33),
+                                "CONFIRMED",
+                                "Normalized Confirmed");
+                CreatedReservation checkedIn = createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Normalized Checked In");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", checkedIn.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("status", " confirmed "))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(confirmed.confirmationNumber()));
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("status", " checked-in "))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(checkedIn.confirmationNumber()));
+        }
+
+        @Test
+        void getAllReservationsNormalizesQueueTabVariants() throws Exception {
+                CreatedReservation checkedIn = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Queue Variant");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", checkedIn.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", " in-house "))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(checkedIn.confirmationNumber()));
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", "IN_HOUSE"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(checkedIn.confirmationNumber()));
+        }
+
+        @Test
+        void getAllReservationsAppliesSingleDateFiltersIndependently() throws Exception {
+                LocalDate targetCheckIn = LocalDate.now().plusDays(40);
+                LocalDate targetCheckOut = LocalDate.now().plusDays(42);
+
+                CreatedReservation checkInMatch = createReservation(
+                                managerToken,
+                                room1Id,
+                                targetCheckIn,
+                                targetCheckOut,
+                                "CONFIRMED",
+                                "CheckIn Match");
+                CreatedReservation checkOutMatch = createReservation(
+                                managerToken,
+                                room2Id,
+                                targetCheckIn.plusDays(1),
+                                targetCheckOut,
+                                "CONFIRMED",
+                                "CheckOut Match");
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("checkInDate", targetCheckIn.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(checkInMatch.confirmationNumber()));
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("checkOutDate", targetCheckOut.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(2));
+        }
+
+        @Test
+        void getAllReservationsTreatsBlankDateFiltersAsMissing() throws Exception {
+                CreatedReservation target = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now().plusDays(45),
+                                LocalDate.now().plusDays(47),
+                                "CONFIRMED",
+                                "Blank Date Guest");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now().plusDays(48),
+                                LocalDate.now().plusDays(50),
+                                "CONFIRMED",
+                                "Other Guest");
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("guestName", "Blank")
+                                .param("checkInDate", "   ")
+                                .param("checkOutDate", ""))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(target.confirmationNumber()));
+        }
+
+        @Test
+        void getAllReservationsRejectsReversedDateRange() throws Exception {
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("checkInDate", "2026-05-10")
+                                .param("checkOutDate", "2026-05-09"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.status").value(400))
+                                .andExpect(jsonPath("$.error").value("Bad Request"))
+                                .andExpect(jsonPath("$.message").value("checkOutDate cannot be before checkInDate"));
+        }
+
+        @Test
+        void searchTreatsBlankParametersAsMissing() throws Exception {
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("confirmation", "   ")
+                                .param("guestName", " "))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.status").value(400))
+                                .andExpect(jsonPath("$.error").value("Bad Request"))
+                                .andExpect(jsonPath("$.message").value(
+                                                "At least one search parameter is required: 'confirmation' or 'guestName'"));
+        }
+
+        @Test
+        void searchReturnsNotFoundPayloadForUnknownConfirmation() throws Exception {
+                mockMvc.perform(get("/api/reservations/search")
+                                .header("Authorization", "Bearer " + staffToken)
+                                .param("confirmation", " rsv-missing-001 "))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.status").value(404))
+                                .andExpect(jsonPath("$.error").value("Not Found"))
+                                .andExpect(jsonPath("$.message")
+                                                .value("Reservation not found with confirmation number:  rsv-missing-001 "));
         }
 
         @Test
@@ -827,6 +994,52 @@ class ReservationIntegrationTest {
                                 .andExpect(jsonPath("$.checkInDate").exists())
                                 .andExpect(jsonPath("$.checkOutDate").exists())
                                 .andExpect(jsonPath("$.roomNumber").exists());
+        }
+
+        @Test
+        void checkInNormalizesCaseAndWhitespaceInPath() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Check In Normalize");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}",
+                                " " + created.confirmationNumber().toLowerCase() + " ")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.confirmationNumber").value(created.confirmationNumber()))
+                                .andExpect(jsonPath("$.status").value("CHECKED_IN"));
+        }
+
+        @Test
+        void checkOutNormalizesCaseAndWhitespaceInPath() throws Exception {
+                CreatedReservation created = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                LocalDate.now().plusDays(2),
+                                "CONFIRMED",
+                                "Check Out Normalize");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
+                reservation.setInvoiceFinalized(true);
+                reservation.setOutstandingBalance(BigDecimal.ZERO);
+                reservation.setTotalPaid(reservation.getTotalPrice());
+                reservationRepository.save(reservation);
+
+                mockMvc.perform(post("/api/reservations/check-out/{confirmationNumber}",
+                                " " + created.confirmationNumber().toLowerCase() + " ")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.action").value("check-out"))
+                                .andExpect(jsonPath("$.currentStatus").value("CHECKED_OUT"));
         }
 
         @Test
@@ -1540,11 +1753,10 @@ class ReservationIntegrationTest {
                                 .getContentAsString();
 
                 JsonNode json = objectMapper.readTree(response);
-                JsonNode reservations = json.path("reservations");
-
-                assertEquals(1, reservations.size());
-                assertEquals(ownReservation.getConfirmationNumber(), reservations.get(0).path("confirmation").asText());
-                assertEquals("CONFIRMED", reservations.get(0).path("status").asText());
+                assertEquals(1, json.size());
+                assertEquals(ownReservation.getConfirmationNumber(), json.get(0).path("confirmation").asText());
+                assertEquals(ownReservation.getConfirmationNumber(), json.get(0).path("confirmationNumber").asText());
+                assertEquals("CONFIRMED", json.get(0).path("status").asText());
         }
 
         @Test
