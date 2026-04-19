@@ -168,6 +168,23 @@ class BillingIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /{confirmationNumber}/bill returns validation error details for invalid numeric query params")
+    void getBillReturnsValidationErrorForInvalidQueryParamType() throws Exception {
+        String confirmationNumber = createReservation(
+                managerToken, LocalDate.now().plusDays(6), LocalDate.now().plusDays(9));
+
+        mockMvc.perform(get("/api/reservations/{cn}/bill", confirmationNumber)
+                        .param("serviceCharges", "oops")
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Input validation failed"))
+                .andExpect(jsonPath("$.validationErrors.serviceCharges")
+                        .value("Invalid value for parameter: serviceCharges (oops)"));
+    }
+
+    @Test
     @DisplayName("GET /{confirmationNumber}/bill forbids guest role")
     void getBillForbiddenForGuestRole() throws Exception {
         String confirmationNumber = createReservation(

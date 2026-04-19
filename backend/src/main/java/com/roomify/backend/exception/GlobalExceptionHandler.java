@@ -228,11 +228,14 @@ public class GlobalExceptionHandler {
                         message += " (" + ex.getValue() + ")";
                 }
 
+                Map<String, String> validationErrors = new HashMap<>();
+                validationErrors.put(ex.getName(), message);
                 ApiError error = new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "Bad Request",
-                                message,
-                                request.getRequestURI());
+                                "Validation Error",
+                                "Input validation failed",
+                                request.getRequestURI(),
+                                validationErrors);
                 return ResponseEntity.badRequest().body(error);
         }
 

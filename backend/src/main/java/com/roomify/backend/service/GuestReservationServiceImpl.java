@@ -7,9 +7,12 @@ import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -49,6 +52,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         return guests.stream()
                 .map(Guest::getId)
                 .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
+                .filter(distinctByReservationId())
                 .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
@@ -60,6 +64,11 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         }
         String normalized = email.trim();
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    private Predicate<Reservation> distinctByReservationId() {
+        Set<Long> seenIds = new HashSet<>();
+        return reservation -> reservation.getId() == null || seenIds.add(reservation.getId());
     }
 
     private Comparator<Reservation> buildReservationSort(LocalDate today) {

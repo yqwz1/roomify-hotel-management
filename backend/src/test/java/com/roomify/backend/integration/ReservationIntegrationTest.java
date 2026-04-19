@@ -436,6 +436,69 @@ class ReservationIntegrationTest {
         }
 
         @Test
+        void arrivalsQueueUsesCheckInDateToScopeArrivalDay() throws Exception {
+                LocalDate arrivalDay = LocalDate.now().plusDays(12);
+                CreatedReservation arrivingToday = createReservation(
+                                managerToken,
+                                room1Id,
+                                arrivalDay,
+                                arrivalDay.plusDays(2),
+                                "CONFIRMED",
+                                "Arrivals Day Match");
+                createReservation(
+                                managerToken,
+                                room2Id,
+                                arrivalDay.plusDays(1),
+                                arrivalDay.plusDays(3),
+                                "CONFIRMED",
+                                "Arrivals Other Day");
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", "arrivals")
+                                .param("checkInDate", arrivalDay.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(arrivingToday.confirmationNumber()))
+                                .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
+        }
+
+        @Test
+        void departuresQueueUsesCheckOutDateToScopeDepartureDay() throws Exception {
+                LocalDate departureDay = LocalDate.now().plusDays(3);
+                CreatedReservation departingToday = createReservation(
+                                managerToken,
+                                room1Id,
+                                LocalDate.now(),
+                                departureDay,
+                                "CONFIRMED",
+                                "Departures Day Match");
+                CreatedReservation departingLater = createReservation(
+                                managerToken,
+                                room2Id,
+                                LocalDate.now(),
+                                departureDay.plusDays(1),
+                                "CONFIRMED",
+                                "Departures Other Day");
+
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", departingToday.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+                mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", departingLater.confirmationNumber())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk());
+
+                mockMvc.perform(get("/api/reservations")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .param("queueTab", "departures")
+                                .param("checkOutDate", departureDay.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].confirmationNumber").value(departingToday.confirmationNumber()))
+                                .andExpect(jsonPath("$[0].status").value("CHECKED_IN"));
+        }
+
+        @Test
         void getAllReservationsAppliesQueueTabTogetherWithGuestNameFilter() throws Exception {
                 CreatedReservation matching = createReservation(
                                 managerToken,
