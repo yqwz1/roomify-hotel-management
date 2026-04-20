@@ -198,7 +198,7 @@ export default function ReservationDetails() {
 
   if (!confirmationNumber) {
     return (
-      <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
         <ErrorState
           title={t('reservationDetailsPage.emptyTitle')}
           message={t('reservationDetailsPage.emptyDescription')}
@@ -227,7 +227,7 @@ export default function ReservationDetails() {
 
   if (!reservation) {
     return (
-      <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
         <ErrorState
           title={t('reservationDetailsPage.emptyTitle')}
           message={t('reservationDetailsPage.emptyDescription')}
@@ -284,7 +284,7 @@ export default function ReservationDetails() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <Button
         variant="outline"
         className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
@@ -494,10 +494,12 @@ export default function ReservationDetails() {
                 {queueContext.map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3"
+                    className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
                     <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
-                    <dd className="text-sm font-bold text-zinc-950">{item.value}</dd>
+                    <dd className="w-full text-sm font-bold text-zinc-950 sm:w-auto sm:text-right">
+                      {item.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -539,10 +541,12 @@ export default function ReservationDetails() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3"
+                  className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
-                  <dd className="text-sm font-bold text-zinc-950">{item.value}</dd>
+                  <dd className="w-full text-sm font-bold text-zinc-950 sm:w-auto sm:text-right">
+                    {item.value}
+                  </dd>
                 </div>
               ))}
             </dl>

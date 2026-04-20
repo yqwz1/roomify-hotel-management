@@ -32,7 +32,7 @@ export default function AppTopbar({ onMenuToggle }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-[#e7ddd0] bg-[#f7f3ed]/90 backdrop-blur-xl">
-      <div className="flex min-h-20 items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="flex min-h-20 flex-wrap items-start gap-3 px-4 py-3 sm:items-center sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             type="button"
@@ -70,7 +70,7 @@ export default function AppTopbar({ onMenuToggle }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
           <LanguageSwitcher />
 
           <div className="hidden items-center gap-3 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 shadow-sm xl:flex">
@@ -88,7 +88,7 @@ export default function AppTopbar({ onMenuToggle }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-black"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-black"
             title={t('logout')}
           >
             <LogOut className="h-4 w-4" />

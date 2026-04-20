@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
@@ -155,5 +155,60 @@ describe('StaffDashboard', () => {
     expect(
       screen.getByText(/\?queueTab=arrivals&guestName=John&checkInDate=\d{4}-\d{2}-\d{2}/)
     ).toBeInTheDocument();
+  });
+
+  it('submits explicit queue filters and clears back to the active queue defaults', async () => {
+    const user = userEvent.setup();
+    searchReservations.mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={['/staff/dashboard?queueTab=all&guestName=John']}>
+        <Routes>
+          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() =>
+      expect(searchReservations).toHaveBeenNthCalledWith(1, {
+        queueTab: 'all',
+        confirmation: '',
+        guestName: 'John',
+        status: '',
+        checkInDate: '',
+        checkOutDate: '',
+      })
+    );
+
+    await user.type(screen.getByLabelText(/Confirmation Number/i), 'RSV-9');
+    await user.selectOptions(screen.getByLabelText(/^Status$/i), 'CHECKED_IN');
+    fireEvent.change(screen.getByLabelText(/Check-Out/i), {
+      target: { value: '2026-04-22' },
+    });
+    await user.click(screen.getByRole('button', { name: /Apply Filters/i }));
+
+    await waitFor(() =>
+      expect(searchReservations).toHaveBeenNthCalledWith(2, {
+        queueTab: 'all',
+        confirmation: 'RSV-9',
+        guestName: 'John',
+        status: 'CHECKED_IN',
+        checkInDate: '',
+        checkOutDate: '2026-04-22',
+      })
+    );
+
+    await user.click(screen.getByRole('button', { name: /Clear Filters/i }));
+
+    await waitFor(() =>
+      expect(searchReservations).toHaveBeenNthCalledWith(3, {
+        queueTab: 'all',
+        confirmation: '',
+        guestName: '',
+        status: '',
+        checkInDate: '',
+        checkOutDate: '',
+      })
+    );
   });
 });
