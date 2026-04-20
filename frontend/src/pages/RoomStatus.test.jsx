@@ -31,12 +31,15 @@ vi.mock('../components/dashboard/DashboardPanel', () => ({
   ),
 }));
 
-vi.mock('../services/roomService', () => ({
-  extractErrorMessage: (err) => err?.message ?? 'Room request failed',
-  getRooms: vi.fn(),
-  getValidNextStatuses: vi.fn(),
-  updateRoomStatus: vi.fn(),
-}));
+vi.mock('../services/roomService', async () => {
+  const actual = await vi.importActual('../services/roomService');
+  return {
+    ...actual,
+    getRooms: vi.fn(),
+    getValidNextStatuses: vi.fn(),
+    updateRoomStatus: vi.fn(),
+  };
+});
 
 describe('RoomStatus', () => {
   beforeEach(() => {
@@ -143,5 +146,39 @@ describe('RoomStatus', () => {
     expect(within(roomCard).getByText(/could not load valid next statuses for this room right now/i)).toBeInTheDocument();
     expect(within(roomCard).queryByText(/Managed automatically/i)).not.toBeInTheDocument();
     expect(within(roomCard).queryByRole('button', { name: /Under Maintenance/i })).not.toBeInTheDocument();
+  });
+
+  it('shows an actionable message when a room-status update times out', async () => {
+    const user = userEvent.setup();
+
+    getRooms.mockResolvedValue([
+      {
+        id: 4,
+        roomNumber: '104',
+        floor: 1,
+        status: 'AVAILABLE',
+        roomType: { name: 'Standard Room', basePrice: 100 },
+      },
+    ]);
+
+    getValidNextStatuses.mockResolvedValue(['UNDER_MAINTENANCE']);
+    updateRoomStatus.mockRejectedValue({
+      code: 'ECONNABORTED',
+      message: 'timeout of 10000ms exceeded',
+    });
+
+    renderPage();
+
+    const roomNumber = await screen.findByText('104');
+    const roomCard = roomNumber.closest('article');
+
+    expect(roomCard).not.toBeNull();
+    await user.click(within(roomCard).getByRole('button', { name: /Under Maintenance/i }));
+
+    expect(
+      await screen.findByText(
+        /The server took too long to respond. Confirm the backend is running, then try again./i
+      )
+    ).toBeInTheDocument();
   });
 });

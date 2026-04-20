@@ -57,4 +57,26 @@ describe('localization helpers', () => {
       'Outstanding balance remains on this reservation (210.50). Refresh the bill before retrying.'
     );
   });
+
+  it('maps backend timeout transport errors to an actionable message', () => {
+    const message = extractApiErrorMessage({
+      code: 'ECONNABORTED',
+      message: 'timeout of 10000ms exceeded',
+    });
+
+    expect(message).toBe(
+      'The server took too long to respond. Confirm the backend is running, then try again.'
+    );
+  });
+
+  it('maps backend network transport errors to an actionable message', () => {
+    const message = extractApiErrorMessage({
+      code: 'ERR_NETWORK',
+      message: 'Network Error',
+    });
+
+    expect(message).toBe(
+      'Cannot reach the backend service. Confirm the backend is running, then try again.'
+    );
+  });
 });

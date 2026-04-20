@@ -92,7 +92,9 @@ export const searchReservations = async (query) => {
 };
 
 export const checkInReservation = async (confirmationNumber) => {
-    const response = await api.post(`/reservations/check-in/${confirmationNumber}`);
+    const response = await api.post(`/reservations/check-in/${confirmationNumber}`, null, {
+        timeout: 20000,
+    });
     return response.data;
 };
 

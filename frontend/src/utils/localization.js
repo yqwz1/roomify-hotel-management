@@ -143,6 +143,11 @@ const SERVER_MESSAGE_KEYS = {
   'Search failed. Please try again.': 'errors.searchFailed',
   'Search failed.': 'errors.searchFailedShort',
   'Reservation request failed. Please try again.': 'errors.reservationRequestFailed',
+  'Room status request failed. Please try again.': 'errors.roomStatusRequestFailed',
+  'The server took too long to respond. Confirm the backend is running, then try again.':
+    'errors.backendTimeout',
+  'Cannot reach the backend service. Confirm the backend is running, then try again.':
+    'errors.backendUnavailable',
   'Something went wrong. Please try again.': 'errors.generic',
   'Unknown error': 'errors.unknown',
   'Failed to fetch room types': 'errors.fetchRoomTypes',

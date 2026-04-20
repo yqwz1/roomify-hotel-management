@@ -36,12 +36,31 @@ const buildPaymentValidationMessage = (data) => {
   return null;
 };
 
+const buildTransportErrorMessage = (err) => {
+  const code = String(err?.code ?? '').trim().toUpperCase();
+  const message = String(err?.message ?? '').trim();
+
+  if (code === 'ECONNABORTED' || /timeout/i.test(message)) {
+    return 'The server took too long to respond. Confirm the backend is running, then try again.';
+  }
+
+  if (code === 'ERR_NETWORK' || /network error/i.test(message)) {
+    return 'Cannot reach the backend service. Confirm the backend is running, then try again.';
+  }
+
+  return null;
+};
+
 export const extractApiErrorMessage = (
   err,
   fallbackMessage = 'Something went wrong. Please try again.'
 ) => {
   const data = err?.response?.data;
-  if (!data) return localizeKnownServerMessage(err?.message ?? fallbackMessage);
+  if (!data) {
+    return localizeKnownServerMessage(
+      buildTransportErrorMessage(err) ?? err?.message ?? fallbackMessage
+    );
+  }
 
   if (data.validationErrors && typeof data.validationErrors === 'object') {
     const messages = Object.values(data.validationErrors).filter(Boolean);

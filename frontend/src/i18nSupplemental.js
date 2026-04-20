@@ -1034,6 +1034,11 @@ const supplementalResources = {
         searchFailed: 'Search failed. Please try again.',
         searchFailedShort: 'Search failed.',
         reservationRequestFailed: 'Reservation request failed. Please try again.',
+        roomStatusRequestFailed: 'Room status request failed. Please try again.',
+        backendTimeout:
+          'The server took too long to respond. Confirm the backend is running, then try again.',
+        backendUnavailable:
+          'Cannot reach the backend service. Confirm the backend is running, then try again.',
         fetchRoomTypes: 'Failed to fetch room types.',
         createRoomType: 'Failed to create room type.',
         updateRoomType: 'Failed to update room type.',
