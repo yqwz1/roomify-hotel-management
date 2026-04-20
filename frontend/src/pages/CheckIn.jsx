@@ -167,65 +167,122 @@ export default function CheckIn() {
               description={t('checkInPage.summaryDescription')}
               action={<StatusPill status={selected.status} />}
             >
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.guest')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">{selected.guest?.name || selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
-                    {selected.guest?.email || selected.guestEmail || t('common.noGuestEmailProvided')}
-                  </p>
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
+                <div className="grid min-w-0 gap-4">
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('common.guest')}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950 [overflow-wrap:anywhere]">
+                      {selected.guest?.name || selected.guestName}
+                    </p>
+                    <LtrText
+                      as="p"
+                      className="mt-1 text-sm font-medium text-zinc-500"
+                    >
+                      {selected.guest?.email ||
+                        selected.guestEmail ||
+                        t('common.noGuestEmailProvided')}
+                    </LtrText>
+                  </div>
+
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('common.stay')}
+                    </p>
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          {t('checkInDate')}
+                        </span>
+                        <span className="text-sm font-bold text-zinc-950 sm:text-right [overflow-wrap:anywhere]">
+                          {formatLocalizedDate(
+                            selected.dates?.checkIn || selected.checkInDate,
+                            i18n.language,
+                            {
+                              weekday: 'short',
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          {t('checkOutDate')}
+                        </span>
+                        <span className="text-sm font-bold text-zinc-950 sm:text-right [overflow-wrap:anywhere]">
+                          {formatLocalizedDate(
+                            selected.dates?.checkOut || selected.checkOutDate,
+                            i18n.language,
+                            {
+                              weekday: 'short',
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.confirmation')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">
-                    <LtrText>{selected.confirmationNumber}</LtrText>
-                  </p>
-                </div>
+                <div className="grid min-w-0 gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))]">
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('checkInPage.confirmation')}
+                    </p>
+                    <LtrText
+                      as="p"
+                      className="mt-2 text-lg font-black text-zinc-950"
+                    >
+                      {selected.confirmationNumber}
+                    </LtrText>
+                  </div>
 
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.room')}</p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
-                    {t('roomNum', { number: selected.room?.roomNumber || selected.roomNumber })} |{' '}
-                    {translateKnownValue(selected.room?.roomTypeName || selected.roomTypeName, t)}
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
-                    {t('floorNum', { floor: selected.room?.floor || selected.floor || '-' })}
-                  </p>
-                </div>
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('common.room')}
+                    </p>
+                    <LtrText
+                      as="p"
+                      className="mt-2 text-lg font-black text-zinc-950"
+                    >
+                      {selected.room?.roomNumber || selected.roomNumber || t('unassigned')}
+                    </LtrText>
+                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
+                      {translateKnownValue(selected.room?.roomTypeName || selected.roomTypeName, t)}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                      {t('floorNum', { floor: selected.room?.floor || selected.floor || '-' })}
+                    </p>
+                  </div>
 
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.stay')}</p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
-                    {formatLocalizedDate(selected.dates?.checkIn || selected.checkInDate, i18n.language, {
-                      weekday: 'short',
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
-                    {formatLocalizedDate(selected.dates?.checkOut || selected.checkOutDate, i18n.language, {
-                      weekday: 'short',
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('nights')}
+                    </p>
+                    <p className="mt-2 text-lg font-black text-zinc-950">
+                      {selected.dates?.nights || selected.nights || 0}
+                    </p>
+                  </div>
 
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('nights')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">
-                    {selected.dates?.nights || selected.nights || 0}
-                  </p>
-                </div>
-
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.reservationTotal')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">
-                    {formatLocalizedCurrency(selected.pricing?.totalPrice || selected.totalPrice || 0, i18n.language)}
-                  </p>
+                  <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                      {t('checkInPage.reservationTotal')}
+                    </p>
+                    <LtrText
+                      as="p"
+                      className="mt-2 text-lg font-black text-zinc-950"
+                    >
+                      {formatLocalizedCurrency(
+                        selected.pricing?.totalPrice || selected.totalPrice || 0,
+                        i18n.language
+                      )}
+                    </LtrText>
+                  </div>
                 </div>
               </div>
 
