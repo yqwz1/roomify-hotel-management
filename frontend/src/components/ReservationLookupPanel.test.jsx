@@ -5,29 +5,17 @@ import ReservationLookupPanel from './ReservationLookupPanel';
 import { searchReservations } from '../services/reservationService';
 
 const reservation = {
+  id: 15,
   confirmationNumber: 'RSV-LOOK-123456',
   status: 'CHECKED_IN',
-  guest: {
-    name: 'Jane Doe',
-    email: 'jane@example.com',
-    phone: '+966500000000',
-    idNumber: 'A1234567',
-    nationality: 'Saudi Arabian',
-  },
-  room: {
-    roomNumber: '401',
-    roomTypeName: 'Deluxe Room',
-    maxGuests: 3,
-    amenities: 'WiFi, Air Conditioning',
-  },
-  dates: {
-    checkIn: '2026-03-10',
-    checkOut: '2026-03-12',
-    nights: 2,
-  },
-  pricing: {
-    totalPrice: 420,
-  },
+  guestName: 'Jane Doe',
+  guestEmail: 'jane@example.com',
+  roomNumber: '401',
+  roomTypeName: 'Deluxe Room',
+  checkInDate: '2026-03-10',
+  checkOutDate: '2026-03-12',
+  totalPrice: 420,
+  outstandingBalance: 80,
 };
 
 vi.mock('../components/StatusPill', () => ({
@@ -47,25 +35,59 @@ describe('ReservationLookupPanel', () => {
     vi.resetAllMocks();
   });
 
-  it('renders useful guest and room metadata from lookup results', async () => {
+  it('auto-searches explicit confirmation filters for non-RSV action-hub handoffs', async () => {
+    const onSelect = vi.fn();
+
+    searchReservations.mockResolvedValue([
+      {
+        ...reservation,
+        confirmationNumber: 'DEMO-CHECKIN-READY',
+      },
+    ]);
+
+    render(
+      <ReservationLookupPanel
+        onSelect={onSelect}
+        initialFilters={{ confirmation: 'DEMO-CHECKIN-READY' }}
+      />
+    );
+
+    expect(searchReservations).toHaveBeenCalledWith({
+      confirmation: 'DEMO-CHECKIN-READY',
+      guestName: '',
+      status: '',
+      checkInDate: '',
+      checkOutDate: '',
+    });
+    expect(await screen.findByText('DEMO-CHECKIN-READY')).toBeInTheDocument();
+  });
+
+  it('sends backend filter params and renders the filtered reservation response', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     searchReservations.mockResolvedValue([reservation]);
 
     render(<ReservationLookupPanel onSelect={onSelect} autoSearch={false} />);
 
-    await user.type(screen.getByRole('textbox'), 'RSV-LOOK-123456');
+    await user.type(screen.getByLabelText(/Confirmation Number/i), 'RSV-LOOK-123456');
+    await user.selectOptions(screen.getByLabelText(/^Status$/i), 'CHECKED_IN');
+    await user.type(screen.getByLabelText(/Check-in Date/i), '2026-03-10');
     await user.click(screen.getByRole('button', { name: /Search Reservation/i }));
 
-    expect(await screen.findByText('+966500000000')).toBeInTheDocument();
-    expect(screen.getByText('Saudi Arabian')).toBeInTheDocument();
-    expect(screen.getByText('A1234567')).toBeInTheDocument();
-    expect(screen.getByText(/up to 3/i)).toBeInTheDocument();
-    expect(screen.getByText(/WiFi/i)).toBeInTheDocument();
-    expect(screen.getByText(/Air Conditioning/i)).toBeInTheDocument();
+    expect(searchReservations).toHaveBeenCalledWith({
+      confirmation: 'RSV-LOOK-123456',
+      guestName: '',
+      status: 'CHECKED_IN',
+      checkInDate: '2026-03-10',
+      checkOutDate: '',
+    });
+    expect(await screen.findByText('jane@example.com')).toBeInTheDocument();
+    expect(screen.getByText('RSV-LOOK-123456')).toBeInTheDocument();
+    expect(screen.getByText('$420.00')).toBeInTheDocument();
+    expect(screen.getByText(/\$80.00/)).toBeInTheDocument();
   });
 
-  it('shows selectable guest-name matches instead of collapsing to the first reservation', async () => {
+  it('shows selectable guest-name matches from the filtered backend response', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
 
@@ -79,6 +101,7 @@ describe('ReservationLookupPanel', () => {
         roomNumber: '401',
         checkInDate: '2026-03-10',
         checkOutDate: '2026-03-12',
+        totalPrice: 400,
       },
       {
         id: 2,
@@ -89,15 +112,23 @@ describe('ReservationLookupPanel', () => {
         roomNumber: '402',
         checkInDate: '2026-04-10',
         checkOutDate: '2026-04-12',
+        totalPrice: 500,
       },
     ]);
 
     render(<ReservationLookupPanel onSelect={onSelect} autoSearch={false} />);
 
-    await user.type(screen.getByRole('textbox'), 'Jane');
+    await user.type(screen.getByLabelText(/Guest Name/i), 'Jane');
     await user.click(screen.getByRole('button', { name: /Search Reservation/i }));
 
-    expect(await screen.findByText(/2 reservations matched this guest search/i)).toBeInTheDocument();
+    expect(searchReservations).toHaveBeenCalledWith({
+      confirmation: '',
+      guestName: 'Jane',
+      status: '',
+      checkInDate: '',
+      checkOutDate: '',
+    });
+    expect(await screen.findByText(/2 reservations ready for selection/i)).toBeInTheDocument();
     expect(screen.getByText('RSV-LOOK-111111')).toBeInTheDocument();
     expect(screen.getByText('RSV-LOOK-222222')).toBeInTheDocument();
     expect(onSelect).not.toHaveBeenCalled();

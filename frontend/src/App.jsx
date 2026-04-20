@@ -207,7 +207,7 @@ const AppContent = () => {
           path="/reservations"
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
-              <Layout showSidebar={true}><ReservationDetails /></Layout>
+              <Layout showSidebar={true}><StaffDashboard /></Layout>
             </ProtectedRoute>
           }
         />

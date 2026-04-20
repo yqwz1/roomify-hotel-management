@@ -1,11 +1,10 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, beforeEach, expect, it, vi } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import ReservationDetails from './ReservationDetails';
-import {
-  getAllReservations,
-  getReservationByConfirmationNumber,
-} from '../services/reservationService';
+import CheckIn from './CheckIn';
+import { getReservationByConfirmationNumber } from '../services/reservationService';
 
 const reservation = {
   id: 17,
@@ -27,26 +26,42 @@ const reservation = {
   paymentStatus: 'PARTIALLY_PAID',
 };
 
-const renderPage = () =>
+const defaultEntry = '/reservations/RSV-DET-123456?queueTab=arrivals&guestName=Jane&checkInDate=2026-04-20';
+
+function ActionRouteProbe() {
+  const location = useLocation();
+
+  return (
+    <div>
+      <p>Action Route</p>
+      <p>{location.pathname}</p>
+      <p>{location.state?.initialFilters?.confirmation ?? 'missing-confirmation'}</p>
+      <p>{location.state?.initialQuery ?? 'empty-query'}</p>
+    </div>
+  );
+}
+
+const renderPage = ({
+  entry = defaultEntry,
+  extraRoutes = null,
+} = {}) =>
   render(
-    <MemoryRouter initialEntries={['/reservations/RSV-DET-123456']}>
+    <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route
           path="/reservations/:confirmationNumber"
           element={<ReservationDetails />}
         />
+        {extraRoutes}
       </Routes>
     </MemoryRouter>
   );
 
-const renderListPage = (entry = '/reservations?queueTab=arrivals&guestName=Jane') =>
-  render(
-    <MemoryRouter initialEntries={[entry]}>
-      <Routes>
-        <Route path="/reservations" element={<ReservationDetails />} />
-      </Routes>
-    </MemoryRouter>
-  );
+vi.mock('../context/AuthProvider', () => ({
+  useAuth: () => ({
+    hasRole: (role) => role === 'ROLE_STAFF',
+  }),
+}));
 
 vi.mock('../components/StatusPill', () => ({
   default: ({ status }) => <span>{status}</span>,
@@ -54,6 +69,19 @@ vi.mock('../components/StatusPill', () => ({
 
 vi.mock('../components/LtrText', () => ({
   LtrText: ({ children }) => <span>{children}</span>,
+}));
+
+vi.mock('../components/ConfirmationToast', () => ({
+  default: () => null,
+}));
+
+vi.mock('../components/ReservationLookupPanel', () => ({
+  default: ({ initialFilters, initialQuery }) => (
+    <div>
+      <p>Lookup Confirmation: {initialFilters?.confirmation || 'empty'}</p>
+      <p>Lookup Query: {initialQuery || 'empty'}</p>
+    </div>
+  ),
 }));
 
 vi.mock('../components/dashboard/DashboardHero', () => ({
@@ -76,8 +104,8 @@ vi.mock('../components/dashboard/DashboardPanel', () => ({
 }));
 
 vi.mock('../services/reservationService', () => ({
-  getAllReservations: vi.fn(),
   getReservationByConfirmationNumber: vi.fn(),
+  checkInReservation: vi.fn(),
   extractReservationError: (err) => err?.message ?? 'Request failed',
 }));
 
@@ -86,7 +114,7 @@ describe('ReservationDetails', () => {
     vi.resetAllMocks();
   });
 
-  it('surfaces reservation financial metadata when the API provides it', async () => {
+  it('surfaces financial metadata and operational actions for the reservation', async () => {
     getReservationByConfirmationNumber.mockResolvedValue(reservation);
 
     renderPage();
@@ -96,22 +124,87 @@ describe('ReservationDetails', () => {
     expect(screen.getByText('$200.00')).toBeInTheDocument();
     expect(screen.getAllByText('$76.00').length).toBeGreaterThan(0);
     expect(screen.getByText(/^No$/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Back to Queue/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Check-In/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Modify Reservation/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cancel Reservation/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Checkout/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Invoice/i })).toBeInTheDocument();
   });
 
-  it('loads reservation lists through backend filters when query params are present', async () => {
-    getAllReservations.mockResolvedValue([reservation]);
+  it('renders queue context from the workspace filters when present', async () => {
+    getReservationByConfirmationNumber.mockResolvedValue(reservation);
 
-    renderListPage();
+    renderPage();
 
-    expect(getAllReservations).toHaveBeenCalledWith({
-      confirmation: '',
-      confirmationNumber: '',
-      guestName: 'Jane',
-      status: '',
-      queueTab: 'arrivals',
-      checkInDate: '',
-      checkOutDate: '',
+    expect(await screen.findByText(/Queue Context/i)).toBeInTheDocument();
+    expect(screen.getByText(/Arrivals/i)).toBeInTheDocument();
+    expect(screen.getByText('Jane')).toBeInTheDocument();
+    expect(screen.getByText(/Apr 20, 2026/i)).toBeInTheDocument();
+  });
+
+  it('hands off a non-RSV confirmation to check-in through explicit lookup filters', async () => {
+    const user = userEvent.setup();
+
+    getReservationByConfirmationNumber.mockResolvedValue({
+      ...reservation,
+      confirmationNumber: 'DEMO-CHECKIN-READY',
+      status: 'CONFIRMED',
     });
-    expect(await screen.findByText('RSV-DET-123456')).toBeInTheDocument();
+
+    renderPage({
+      entry: '/reservations/DEMO-CHECKIN-READY',
+      extraRoutes: <Route path="/check-in" element={<CheckIn />} />,
+    });
+
+    await screen.findByText(/Reservation Details/i);
+    await user.click(screen.getByRole('button', { name: /Check-In/i }));
+
+    expect(await screen.findByText('Lookup Confirmation: DEMO-CHECKIN-READY')).toBeInTheDocument();
+    expect(screen.getByText('Lookup Query: empty')).toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      buttonName: /Modify Reservation/i,
+      path: '/reservations/modify',
+      status: 'CONFIRMED',
+    },
+    {
+      buttonName: /Cancel Reservation/i,
+      path: '/reservations/cancel',
+      status: 'CONFIRMED',
+    },
+    {
+      buttonName: /Checkout/i,
+      path: '/checkout',
+      status: 'CHECKED_IN',
+    },
+    {
+      buttonName: /Invoice/i,
+      path: '/invoice-preview',
+      status: 'CONFIRMED',
+    },
+  ])('routes $path through explicit confirmation filters', async ({ buttonName, path, status }) => {
+    const user = userEvent.setup();
+
+    getReservationByConfirmationNumber.mockResolvedValue({
+      ...reservation,
+      confirmationNumber: 'DEMO-CHECKIN-READY',
+      status,
+    });
+
+    renderPage({
+      entry: '/reservations/DEMO-CHECKIN-READY',
+      extraRoutes: <Route path={path} element={<ActionRouteProbe />} />,
+    });
+
+    await screen.findByText(/Reservation Details/i);
+    await user.click(screen.getByRole('button', { name: buttonName }));
+
+    expect(await screen.findByText('Action Route')).toBeInTheDocument();
+    expect(screen.getByText(path)).toBeInTheDocument();
+    expect(screen.getByText('DEMO-CHECKIN-READY')).toBeInTheDocument();
+    expect(screen.getByText('empty-query')).toBeInTheDocument();
   });
 });

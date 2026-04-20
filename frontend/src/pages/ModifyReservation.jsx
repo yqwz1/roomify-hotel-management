@@ -12,6 +12,7 @@ import { searchRooms } from '../services/searchService';
 import { modifyReservation, extractReservationError } from '../services/reservationService';
 import { useTranslation } from 'react-i18next';
 import { reservationStatusRules } from '../domain/reservations/statusRules';
+import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
@@ -314,15 +315,11 @@ function ModifyModal({ reservation, onClose, onSave }) {
 export default function ModifyReservation() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
 
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
-
-  const initialQuery = useMemo(
-    () => String(location.state?.initialQuery ?? '').trim(),
-    [location.state?.initialQuery]
-  );
 
   const handleSelect = (reservation) => {
     setSelected(reservation);
@@ -386,7 +383,11 @@ export default function ModifyReservation() {
       </DashboardHero>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+        <ReservationLookupPanel
+          initialFilters={initialFilters}
+          initialQuery={initialQuery}
+          onSelect={handleSelect}
+        />
 
         {!selected ? (
           <DashboardPanel

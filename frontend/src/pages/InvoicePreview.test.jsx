@@ -37,14 +37,14 @@ vi.mock('../components/ConfirmationToast', () => ({
 }));
 
 vi.mock('../components/ReservationLookupPanel', () => {
-  function MockReservationLookupPanel({ onSelect, initialQuery }) {
+  function MockReservationLookupPanel({ onSelect, initialFilters, initialQuery }) {
     useEffect(() => {
-      if (initialQuery === reservation.confirmationNumber) {
+      if (initialFilters?.confirmation === reservation.confirmationNumber || initialQuery === reservation.confirmationNumber) {
         onSelect(reservation);
       }
       // Mirror the real panel's one-time auto-search behavior for routed confirmation numbers.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialQuery]);
+    }, [initialFilters?.confirmation, initialQuery]);
 
     return (
       <button type="button" onClick={() => onSelect(reservation)}>
@@ -150,7 +150,7 @@ describe('InvoicePreview', () => {
     renderPage([
       {
         pathname: '/invoice-preview',
-        state: { confirmationNumber: reservation.confirmationNumber },
+        state: { initialFilters: { confirmation: reservation.confirmationNumber } },
       },
     ]);
 
