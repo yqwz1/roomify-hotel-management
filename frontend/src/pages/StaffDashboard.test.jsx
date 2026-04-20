@@ -185,6 +185,14 @@ describe('StaffDashboard', () => {
     fireEvent.change(screen.getByLabelText(/Check-Out/i), {
       target: { value: '2026-04-22' },
     });
+    expect(
+      screen.getAllByText((_, element) =>
+        element?.textContent?.includes(
+          'Confirmation number takes precedence. Guest name, status, and stay dates remain visible'
+        ) ?? false
+      ).length
+    ).toBeGreaterThan(0);
+    expect(screen.getByText(/Apply filters to refresh the queue/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Apply Filters/i }));
 
     await waitFor(() =>
@@ -198,7 +206,7 @@ describe('StaffDashboard', () => {
       })
     );
 
-    await user.click(screen.getByRole('button', { name: /Clear Filters/i }));
+    await user.click(screen.getAllByRole('button', { name: /Clear Filters/i })[0]);
 
     await waitFor(() =>
       expect(searchReservations).toHaveBeenNthCalledWith(3, {

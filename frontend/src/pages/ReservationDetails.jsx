@@ -265,13 +265,16 @@ export default function ReservationDetails() {
     },
     {
       label: t('checkoutPage.totalPaidLabel'),
-      value: totalPaid != null ? formatLocalizedCurrency(totalPaid, i18n.language) : null,
+      value:
+        totalPaid != null ? (
+          <LtrText>{formatLocalizedCurrency(totalPaid, i18n.language)}</LtrText>
+        ) : null,
     },
     {
       label: t('checkoutPage.outstandingBalanceLabel'),
       value:
         outstandingBalance != null
-          ? formatLocalizedCurrency(outstandingBalance, i18n.language)
+          ? <LtrText>{formatLocalizedCurrency(outstandingBalance, i18n.language)}</LtrText>
           : null,
     },
     {
@@ -287,7 +290,7 @@ export default function ReservationDetails() {
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <Button
         variant="outline"
-        className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
+        className="w-full rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100 sm:w-auto"
         onClick={() => navigate(queueReturnPath)}
       >
         <ArrowLeft className="h-4 w-4" />
@@ -317,7 +320,7 @@ export default function ReservationDetails() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="space-y-6">
           <DashboardPanel
             title={t('reservationDetailsPage.actionCenterTitle')}
@@ -390,51 +393,55 @@ export default function ReservationDetails() {
             title={t('reservationDetailsPage.overviewTitle')}
             description={t('reservationDetailsPage.overviewDescription')}
           >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+            <div className="grid gap-4 md:grid-cols-[repeat(2,minmax(0,1fr))]">
+              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                     <UserRound className="h-4 w-4" />
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
                       {t('common.guest')}
                     </p>
-                    <p className="mt-2 text-lg font-black text-zinc-950">{guestName}</p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">{guestEmail}</p>
+                    <p className="mt-2 text-lg font-black text-zinc-950 [overflow-wrap:anywhere]">
+                      {guestName}
+                    </p>
+                    <LtrText className="mt-1 text-sm font-medium text-zinc-500">
+                      {guestEmail}
+                    </LtrText>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                     <Hotel className="h-4 w-4" />
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
                       {t('common.room')}
                     </p>
-                    <p className="mt-2 text-lg font-black text-zinc-950">
-                      {t('roomNumber', { number: roomNumber })}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                    <LtrText className="mt-2 text-lg font-black text-zinc-950">
+                      {roomNumber}
+                    </LtrText>
+                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
                       {translateKnownValue(roomTypeName, t)} | {t('floorNum', { floor })}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                     <CalendarDays className="h-4 w-4" />
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
                       {t('reservationDetailsPage.stayWindow')}
                     </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950">
+                    <p className="mt-2 text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
                       {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                         weekday: 'short',
                         month: 'long',
@@ -442,7 +449,7 @@ export default function ReservationDetails() {
                         year: 'numeric',
                       })}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
                       {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
                         weekday: 'short',
                         month: 'long',
@@ -454,19 +461,19 @@ export default function ReservationDetails() {
                 </div>
               </div>
 
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                     <Receipt className="h-4 w-4" />
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
                       {t('reservationDetailsPage.financials')}
                     </p>
-                    <p className="mt-2 text-lg font-black text-zinc-950">
+                    <LtrText className="mt-2 text-lg font-black text-zinc-950">
                       {formatLocalizedCurrency(totalPrice, i18n.language)}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                    </LtrText>
+                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
                       {paymentStatus
                         ? `${t('checkoutPage.paymentStatusLabel')}: ${getPaymentStatusLabel(paymentStatus, t)}`
                         : t('nightsCount', { count: nights })}
@@ -474,7 +481,9 @@ export default function ReservationDetails() {
                     {outstandingBalance != null ? (
                       <p className="mt-1 text-sm font-medium text-zinc-500">
                         {t('checkoutPage.outstandingBalanceLabel')}: {' '}
-                        {formatLocalizedCurrency(outstandingBalance, i18n.language)}
+                        <LtrText className="text-zinc-950">
+                          {formatLocalizedCurrency(outstandingBalance, i18n.language)}
+                        </LtrText>
                       </p>
                     ) : null}
                   </div>
@@ -518,10 +527,13 @@ export default function ReservationDetails() {
                   value: <LtrText>{reservation.confirmationNumber}</LtrText>,
                 },
                 { label: t('reservationDetailsPage.guestName'), value: guestName },
-                { label: t('reservationDetailsPage.guestEmail'), value: guestEmail },
+                {
+                  label: t('reservationDetailsPage.guestEmail'),
+                  value: <LtrText>{guestEmail}</LtrText>,
+                },
                 {
                   label: t('reservationDetailsPage.roomNumber'),
-                  value: t('roomNumber', { number: roomNumber }),
+                  value: <LtrText>{roomNumber}</LtrText>,
                 },
                 {
                   label: t('reservationDetailsPage.roomType'),
@@ -529,13 +541,19 @@ export default function ReservationDetails() {
                 },
                 {
                   label: t('reservationDetailsPage.nightlyRate'),
-                  value: formatLocalizedCurrency(reservation.roomRate, i18n.language),
+                  value: <LtrText>{formatLocalizedCurrency(reservation.roomRate, i18n.language)}</LtrText>,
                 },
-                { label: t('subtotal'), value: formatLocalizedCurrency(reservation.subtotal, i18n.language) },
-                { label: t('taxes15'), value: formatLocalizedCurrency(reservation.taxes, i18n.language) },
+                {
+                  label: t('subtotal'),
+                  value: <LtrText>{formatLocalizedCurrency(reservation.subtotal, i18n.language)}</LtrText>,
+                },
+                {
+                  label: t('taxes15'),
+                  value: <LtrText>{formatLocalizedCurrency(reservation.taxes, i18n.language)}</LtrText>,
+                },
                 {
                   label: t('reservationDetailsPage.totalPrice'),
-                  value: formatLocalizedCurrency(totalPrice, i18n.language),
+                  value: <LtrText>{formatLocalizedCurrency(totalPrice, i18n.language)}</LtrText>,
                 },
                 ...financialFacts,
               ].map((item) => (

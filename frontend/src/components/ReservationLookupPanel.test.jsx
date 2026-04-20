@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ReservationLookupPanel from './ReservationLookupPanel';
@@ -82,9 +82,9 @@ describe('ReservationLookupPanel', () => {
       checkOutDate: '',
     });
     expect(await screen.findByText('jane@example.com')).toBeInTheDocument();
-    expect(screen.getByText('RSV-LOOK-123456')).toBeInTheDocument();
-    expect(screen.getByText('$420.00')).toBeInTheDocument();
-    expect(screen.getByText(/\$80.00/)).toBeInTheDocument();
+    expect(screen.getAllByText('RSV-LOOK-123456').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('$420.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\$80.00/).length).toBeGreaterThan(0);
   });
 
   it('shows selectable guest-name matches from the filtered backend response', async () => {
@@ -143,5 +143,57 @@ describe('ReservationLookupPanel', () => {
         roomNumber: '402',
       })
     );
+  });
+
+  it('makes confirmation precedence explicit and resets back to the default lookup state', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+
+    searchReservations
+      .mockResolvedValueOnce([
+        {
+          ...reservation,
+          confirmationNumber: 'DEMO-CHECKIN-READY',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...reservation,
+          confirmationNumber: 'DEMO-CHECKIN-READY',
+        },
+      ]);
+
+    render(
+      <ReservationLookupPanel
+        onSelect={onSelect}
+        initialFilters={{ confirmation: 'DEMO-CHECKIN-READY' }}
+      />
+    );
+
+    expect(await screen.findByText('DEMO-CHECKIN-READY')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/Guest Name/i), 'Jane');
+
+    expect(
+      screen.getAllByText((_, element) =>
+        element?.textContent?.includes(
+          'Confirmation number takes precedence. Guest name, status, and stay dates remain visible'
+        ) ?? false
+      ).length
+    ).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('button', { name: /Clear Filters/i }));
+
+    await waitFor(() =>
+      expect(searchReservations).toHaveBeenNthCalledWith(2, {
+        confirmation: 'DEMO-CHECKIN-READY',
+        guestName: '',
+        status: '',
+        checkInDate: '',
+        checkOutDate: '',
+      })
+    );
+    expect(screen.getAllByText('DEMO-CHECKIN-READY').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText(/Guest Name/i)).toHaveValue('');
   });
 });

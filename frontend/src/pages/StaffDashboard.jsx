@@ -28,6 +28,7 @@ import {
   formatLocalizedCurrency,
   formatLocalizedDate,
   getReservationStatusLabel,
+  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -123,6 +124,83 @@ const countActiveFilters = (filters) =>
   ['confirmation', 'guestName', 'status', 'checkInDate', 'checkOutDate'].filter(
     (key) => Boolean(normalizeValue(filters[key]))
   ).length;
+
+const areQueueFiltersEqual = (left = {}, right = {}) =>
+  ['queueTab', 'confirmation', 'guestName', 'status', 'checkInDate', 'checkOutDate'].every(
+    (key) => normalizeValue(left[key]) === normalizeValue(right[key])
+  );
+
+const getQueueTabLabel = (queueTab, t) => {
+  switch (queueTab) {
+    case 'inHouse':
+      return t('staffDashboardPage.tabs.inHouse');
+    case 'departures':
+      return t('staffDashboardPage.tabs.departures');
+    case 'all':
+      return t('staffDashboardPage.tabs.all');
+    case 'arrivals':
+    default:
+      return t('staffDashboardPage.tabs.arrivals');
+  }
+};
+
+const buildActiveFilterChips = (filters, t, language) => {
+  const chips = [
+    {
+      key: 'queueTab',
+      label: translateWithFallback(t, 'staffDashboardPage.activeQueue', 'Queue'),
+      value: getQueueTabLabel(filters.queueTab || 'arrivals', t),
+      ltr: false,
+    },
+  ];
+
+  if (normalizeValue(filters.confirmation)) {
+    chips.push({
+      key: 'confirmation',
+      label: t('confirmationNumber'),
+      value: normalizeValue(filters.confirmation),
+      ltr: true,
+    });
+  }
+
+  if (normalizeValue(filters.guestName)) {
+    chips.push({
+      key: 'guestName',
+      label: t('guestName'),
+      value: normalizeValue(filters.guestName),
+      ltr: false,
+    });
+  }
+
+  if (normalizeValue(filters.status)) {
+    chips.push({
+      key: 'status',
+      label: t('status'),
+      value: getReservationStatusLabel(normalizeValue(filters.status), t),
+      ltr: false,
+    });
+  }
+
+  if (normalizeValue(filters.checkInDate)) {
+    chips.push({
+      key: 'checkInDate',
+      label: t('checkInDate'),
+      value: formatLocalizedDate(filters.checkInDate, language, { dateStyle: 'medium' }),
+      ltr: false,
+    });
+  }
+
+  if (normalizeValue(filters.checkOutDate)) {
+    chips.push({
+      key: 'checkOutDate',
+      label: t('checkOutDate'),
+      value: formatLocalizedDate(filters.checkOutDate, language, { dateStyle: 'medium' }),
+      ltr: false,
+    });
+  }
+
+  return chips;
+};
 
 const toQueueReservation = (reservation) => ({
   id: reservation?.id ?? null,
@@ -226,6 +304,23 @@ export default function StaffDashboard() {
   );
   const activeTab =
     queueTabs.find((tab) => tab.id === activeFilters.queueTab) ?? queueTabs[0];
+  const defaultFilters = useMemo(
+    () => buildTabDefaults(activeFilters.queueTab || 'arrivals', today),
+    [activeFilters.queueTab, today]
+  );
+  const visibleFilterChips = useMemo(
+    () => buildActiveFilterChips(draftFilters, t, i18n.language),
+    [draftFilters, i18n.language, t]
+  );
+  const hasPendingFilterChanges = !areQueueFiltersEqual(activeFilters, draftFilters);
+  const hasConfirmationPrecedence =
+    Boolean(draftFilters.confirmation) &&
+    ['guestName', 'status', 'checkInDate', 'checkOutDate'].some((key) =>
+      Boolean(normalizeValue(draftFilters[key]))
+    );
+  const isAtQueueDefault =
+    areQueueFiltersEqual(activeFilters, defaultFilters) &&
+    areQueueFiltersEqual(draftFilters, defaultFilters);
 
   const queueMetrics = useMemo(() => {
     const arrivalsReady = reservations.filter(
@@ -384,7 +479,7 @@ export default function StaffDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <DashboardPanel
           title={t(`${pageTx}.queueTitle`)}
           description={t(`${pageTx}.queueDescription`)}
@@ -411,14 +506,18 @@ export default function StaffDashboard() {
               })}
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4">
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4"
+            >
+              <div className="grid gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
                     {t('confirmationNumber')}
                   </span>
                   <input
                     type="text"
+                    dir="ltr"
                     value={draftFilters.confirmation}
                     onChange={(event) =>
                       setDraftFilters((current) => ({
@@ -517,26 +616,116 @@ export default function StaffDashboard() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                  disabled={isAtQueueDefault}
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {t('common.clearFilters')}
                 </button>
+              </div>
+
+              <div className="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                    {hasPendingFilterChanges
+                      ? translateWithFallback(
+                          t,
+                          'staffDashboardPage.pendingFilters',
+                          'Draft filters'
+                        )
+                      : translateWithFallback(
+                          t,
+                          'staffDashboardPage.appliedFilters',
+                          'Applied filters'
+                        )}
+                  </p>
+                  {hasPendingFilterChanges ? (
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                      {translateWithFallback(
+                        t,
+                        'staffDashboardPage.pendingFiltersHint',
+                        'Apply filters to refresh the queue'
+                      )}
+                    </span>
+                  ) : null}
+                </div>
+
+                {visibleFilterChips.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visibleFilterChips.map((chip) => (
+                      <span
+                        key={chip.key}
+                        className="inline-flex max-w-full items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold text-zinc-700"
+                      >
+                        <span className="text-zinc-500">{chip.label}:</span>
+                        {chip.ltr ? (
+                          <LtrText className="text-zinc-950">{chip.value}</LtrText>
+                        ) : (
+                          <span className="min-w-0 break-words [overflow-wrap:anywhere] text-zinc-950">
+                            {chip.value}
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm font-medium text-zinc-500">
+                    {translateWithFallback(
+                      t,
+                      'staffDashboardPage.emptyFiltersNote',
+                      'No extra filters are applied. The queue is showing the default reservations for the active tab.'
+                    )}
+                  </p>
+                )}
+
+                <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
+                  {hasConfirmationPrecedence
+                    ? 'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the backend resolves the queue by confirmation first.'
+                    : hasPendingFilterChanges
+                      ? 'Queue filtering stays backend-driven. Apply Filters updates the URL and refreshes the queue with the draft filters shown above.'
+                      : 'Filters stay backend-driven and remain synchronized with the queue URL. Clear Filters restores the default state for the active queue tab.'}
+                </p>
               </div>
             </form>
 
             {loading ? (
               <LoadingState message={t(`${pageTx}.loading`)} />
             ) : error ? (
-              <ErrorState
-                title={t(`${pageTx}.errorTitle`)}
-                message={error}
-                onRetry={() => setReloadNonce((current) => current + 1)}
-              />
+              <div className="space-y-4">
+                <ErrorState
+                  title={t(`${pageTx}.errorTitle`)}
+                  message={error}
+                  onRetry={() => setReloadNonce((current) => current + 1)}
+                />
+                {!isAtQueueDefault ? (
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                    >
+                      {t('common.clearFilters')}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : reservations.length === 0 ? (
-              <EmptyState
-                title={t(`${pageTx}.emptyTitle`)}
-                message={t(`${pageTx}.emptyDescription`)}
-              />
+              <div className="space-y-4">
+                <EmptyState
+                  title={t(`${pageTx}.emptyTitle`)}
+                  message={t(`${pageTx}.emptyDescription`)}
+                />
+                {!isAtQueueDefault ? (
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                    >
+                      {t('common.clearFilters')}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : (
               <div className="space-y-3">
                 {reservations.map((reservation) => (
@@ -544,88 +733,96 @@ export default function StaffDashboard() {
                     key={reservation.id ?? reservation.confirmationNumber}
                     className="rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300"
                   >
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-lg font-black tracking-tight text-zinc-950">
-                              {reservation.guestName || t('common.guest')}
-                            </p>
-                            <p className="truncate text-sm font-medium text-zinc-500">
-                              {reservation.guestEmail || t('common.noGuestEmailProvided')}
-                            </p>
-                          </div>
-                          <StatusPill status={reservation.status} size="sm" />
+                    <div className="flex min-w-0 flex-col gap-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-lg font-black tracking-tight text-zinc-950 [overflow-wrap:anywhere]">
+                            {reservation.guestName || t('common.guest')}
+                          </p>
+                          <LtrText className="mt-1 text-sm font-medium text-zinc-500">
+                            {reservation.guestEmail || t('common.noGuestEmailProvided')}
+                          </LtrText>
+                        </div>
+                        <StatusPill status={reservation.status} size="sm" />
+                      </div>
+
+                      <div className="grid gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))]">
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('confirmationNumber')}
+                          </p>
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {reservation.confirmationNumber}
+                          </LtrText>
                         </div>
 
-                        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                              {t('confirmationNumber')}
-                            </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
-                              <LtrText>{reservation.confirmationNumber}</LtrText>
-                            </p>
-                          </div>
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('common.room')}
+                          </p>
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {reservation.roomNumber || t('unassigned')}
+                          </LtrText>
+                          <p className="mt-1 text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">
+                            {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
+                          </p>
+                        </div>
 
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                              {t('common.room')}
-                            </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
-                              {t('roomNum', {
-                                number: reservation.roomNumber || t('unassigned'),
-                              })}
-                            </p>
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('modifyReservationPage.stayDates')}
+                          </p>
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-start justify-between gap-3">
+                              <span className="text-xs font-medium text-zinc-500">{t('checkInDate')}</span>
+                              <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                                {formatLocalizedDate(reservation.checkInDate, i18n.language, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-start justify-between gap-3">
+                              <span className="text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
+                              <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                                {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('checkInPage.reservationTotal')}
+                          </p>
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
+                          </LtrText>
+                          {reservation.outstandingBalance != null ? (
                             <p className="mt-1 text-xs font-medium text-zinc-500">
-                              {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                              {t('modifyReservationPage.stayDates')}
-                            </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
-                              {formatLocalizedDate(reservation.checkInDate, i18n.language, {
-                                month: 'short',
-                                day: 'numeric',
-                              })}
-                            </p>
-                            <p className="mt-1 text-sm font-medium text-zinc-500">
-                              {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
-                                month: 'short',
-                                day: 'numeric',
-                              })}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                              {t('checkInPage.reservationTotal')}
-                            </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
-                              {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
-                            </p>
-                            {reservation.outstandingBalance != null ? (
-                              <p className="mt-1 text-xs font-medium text-zinc-500">
-                                {t('checkoutPage.outstandingBalanceLabel')}: {' '}
+                              {t('checkoutPage.outstandingBalanceLabel')}:{' '}
+                              <LtrText className="text-zinc-950">
                                 {formatLocalizedCurrency(
                                   reservation.outstandingBalance,
                                   i18n.language
                                 )}
-                              </p>
-                            ) : null}
-                          </div>
+                              </LtrText>
+                            </p>
+                          ) : null}
                         </div>
                       </div>
 
-                      <div className="flex min-w-[13rem] flex-col items-stretch gap-3">
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                      <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 sm:max-w-[20rem]">
                           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
                             {t(`${pageTx}.nextActionLabel`)}
                           </p>
-                          <p className="mt-2 text-sm font-bold text-zinc-950">
+                          <p className="mt-2 text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
                             {getQueueActionLabel(reservation, today, t)}
                           </p>
                         </div>
@@ -633,7 +830,7 @@ export default function StaffDashboard() {
                         <button
                           type="button"
                           onClick={() => handleOpenReservation(reservation)}
-                          className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800"
+                          className="inline-flex h-11 w-full items-center justify-center rounded-full border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-950 transition hover:border-zinc-950 hover:bg-zinc-50 sm:w-auto"
                         >
                           {t(`${pageTx}.openReservation`)}
                         </button>
