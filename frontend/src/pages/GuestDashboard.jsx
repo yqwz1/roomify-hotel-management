@@ -189,6 +189,7 @@ export default function GuestDashboard() {
     : nextReservation
       ? `${propertyName} · ${nextReservation.status ? getReservationStatusLabel(nextReservation.status, t) : t('common.pending')}`
       : t(`${pageTx}.metrics.nextStayHintEmpty`);
+  const sanitizedNextStayHint = nextStayHint.replace(/Â·/g, '·');
   const totalValue = loadingReservations
     ? t('common.pending')
     : nextReservation
@@ -212,7 +213,7 @@ export default function GuestDashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('guestDashboardTitle')}
@@ -255,7 +256,7 @@ export default function GuestDashboard() {
           icon={BedDouble}
           label={t(`${pageTx}.metrics.nextStayLabel`)}
           value={nextStayValue}
-          hint={nextStayHint}
+          hint={sanitizedNextStayHint}
         />
         <DashboardMetricCard
           icon={Receipt}

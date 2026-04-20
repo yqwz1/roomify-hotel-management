@@ -15,7 +15,7 @@ export const LanguageSwitcher = () => {
       type="button"
       onClick={toggleLanguage}
       aria-label={isArabic ? t('switchToEnglish') : t('switchToArabic')}
-      className="rounded-full border border-zinc-200 px-4 py-2 font-sans text-sm font-medium text-black transition-colors hover:bg-zinc-100"
+      className="rounded-full border border-zinc-200 px-3 py-2 font-sans text-xs font-medium text-black transition-colors hover:bg-zinc-100 sm:px-4 sm:text-sm"
     >
       {isArabic ? t('languageNameEnglish') : t('languageNameArabic')}
     </button>

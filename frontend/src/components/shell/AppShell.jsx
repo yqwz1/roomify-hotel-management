@@ -1,17 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
 import AppTopbar from './AppTopbar';
 
 export default function AppShell({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const [sidebarState, setSidebarState] = useState({
+    isOpen: false,
+    locationKey: '',
+  });
+  const sidebarOpen = sidebarState.isOpen && sidebarState.locationKey === location.key;
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sidebarOpen]);
 
   return (
     <div className="flex min-h-screen overflow-x-hidden bg-[#f2ede5] font-sans text-zinc-950 lg:h-screen lg:overflow-hidden">
-      <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AppSidebar
+        isOpen={sidebarOpen}
+        onClose={() =>
+          setSidebarState((current) => ({
+            ...current,
+            isOpen: false,
+          }))
+        }
+      />
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-visible lg:overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.82),transparent_26%),radial-gradient(circle_at_top_right,rgba(24,24,27,0.04),transparent_24%),linear-gradient(180deg,#f7f3ed_0%,#f1ece4_100%)]" />
-        <AppTopbar onMenuToggle={() => setSidebarOpen((current) => !current)} />
+        <AppTopbar
+          onMenuToggle={() =>
+            setSidebarState((current) => ({
+              isOpen: !(current.isOpen && current.locationKey === location.key),
+              locationKey: location.key,
+            }))
+          }
+        />
 
         <main className="relative flex-1 overflow-visible lg:min-h-0 lg:overflow-y-auto">
           {children}
