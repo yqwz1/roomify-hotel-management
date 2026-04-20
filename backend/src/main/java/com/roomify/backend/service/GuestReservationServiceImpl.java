@@ -28,16 +28,18 @@ public class GuestReservationServiceImpl implements GuestReservationService {
 
     @Override
     public List<GuestReservationSummaryDto> getGuestReservations() {
-        Guest guest = getAuthenticatedGuest();
         LocalDate today = LocalDate.now();
 
-        return reservationRepository.findByGuest_Id(guest.getId()).stream()
+        return getAuthenticatedGuests().stream()
+                .map(Guest::getId)
+                .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
+                .filter(distinctByReservationId())
                 .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
     }
 
-    private Guest getAuthenticatedGuest() {
+    private List<Guest> getAuthenticatedGuests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -58,15 +60,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                     "Guest profile not found for authenticated user: " + email);
         }
 
-        LocalDate today = LocalDate.now();
-
-        return guests.stream()
-                .map(Guest::getId)
-                .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
-                .filter(distinctByReservationId())
-                .sorted(buildReservationSort(today))
-                .map(this::mapToDto)
-                .toList();
+        return guests;
     }
 
     private String normalizeEmail(String email) {

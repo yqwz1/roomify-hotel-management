@@ -9,7 +9,7 @@ public class GuestReservationSummaryDto {
     private String confirmationNumber;
     private String status;
     private String roomNumber;
-    private String roomType;
+    private String roomTypeName;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private BigDecimal totalPrice;
@@ -26,7 +26,7 @@ public class GuestReservationSummaryDto {
             String confirmationNumber,
             String status,
             String roomNumber,
-            String roomType,
+            String roomTypeName,
             LocalDate checkInDate,
             LocalDate checkOutDate,
             BigDecimal totalPrice,
@@ -38,7 +38,7 @@ public class GuestReservationSummaryDto {
         this.confirmationNumber = confirmationNumber;
         this.status = status;
         this.roomNumber = roomNumber;
-        this.roomType = roomType;
+        this.roomTypeName = roomTypeName;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.totalPrice = totalPrice;
@@ -81,12 +81,12 @@ public class GuestReservationSummaryDto {
         this.roomNumber = roomNumber;
     }
 
-    public String getRoomType() {
-        return roomType;
+    public String getRoomTypeName() {
+        return roomTypeName;
     }
 
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
+    public void setRoomTypeName(String roomTypeName) {
+        this.roomTypeName = roomTypeName;
     }
 
     /**
@@ -95,6 +95,10 @@ public class GuestReservationSummaryDto {
     @JsonProperty("roomType")
     public String getRoomType() {
         return roomTypeName;
+    }
+
+    public void setRoomType(String roomType) {
+        this.roomTypeName = roomType;
     }
 
     public LocalDate getCheckInDate() {
