@@ -1,5 +1,6 @@
 import api from './api';
 import { extractApiErrorMessage } from '../utils/apiError';
+import { isLikelyConfirmationValue } from '../utils/reservationLookup';
 
 export const extractReservationError = (err) => {
     return extractApiErrorMessage(err, 'Reservation request failed. Please try again.');
@@ -13,15 +14,29 @@ const normalizeFilterValue = (value) => {
     return normalized ? normalized : null;
 };
 
+const normalizeSearchInput = (input) => {
+    if (typeof input === 'string') {
+        const trimmed = normalizeFilterValue(input);
+        if (!trimmed) return {};
+
+        return isLikelyConfirmationValue(trimmed)
+            ? { confirmation: trimmed }
+            : { guestName: trimmed };
+    }
+
+    return input && typeof input === 'object' ? input : {};
+};
+
 const buildReservationParams = (filters = {}) => {
     const params = {};
-    const confirmation = normalizeFilterValue(filters.confirmation);
-    const confirmationNumber = normalizeFilterValue(filters.confirmationNumber);
-    const guestName = normalizeFilterValue(filters.guestName);
-    const status = normalizeFilterValue(filters.status);
-    const queueTab = normalizeFilterValue(filters.queueTab);
-    const checkInDate = normalizeFilterValue(filters.checkInDate);
-    const checkOutDate = normalizeFilterValue(filters.checkOutDate);
+    const normalizedFilters = normalizeSearchInput(filters);
+    const confirmation = normalizeFilterValue(normalizedFilters.confirmation);
+    const confirmationNumber = normalizeFilterValue(normalizedFilters.confirmationNumber);
+    const guestName = normalizeFilterValue(normalizedFilters.guestName);
+    const status = normalizeFilterValue(normalizedFilters.status);
+    const queueTab = normalizeFilterValue(normalizedFilters.queueTab);
+    const checkInDate = normalizeFilterValue(normalizedFilters.checkInDate);
+    const checkOutDate = normalizeFilterValue(normalizedFilters.checkOutDate);
 
     if (confirmation) params.confirmation = confirmation;
     if (confirmationNumber) params.confirmationNumber = confirmationNumber;
@@ -61,42 +76,19 @@ const resolveReservationId = async (idOrConfirmation) => {
         throw new Error('Invalid reservation identifier');
     }
 
-    if (raw.toUpperCase().startsWith('RSV-')) {
-        const reservation = await getReservationByConfirmationNumber(raw);
-        return reservation.id;
+    if (/^\d+$/.test(raw)) {
+        return Number(raw);
     }
 
-    const parsed = Number(raw);
-    if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
-        return parsed;
-    }
-
-    throw new Error('Invalid reservation identifier');
+    const reservation = await getReservationByConfirmationNumber(raw);
+    return reservation.id;
 };
 
 export const searchReservations = async (query) => {
-    const trimmed = (query ?? '').trim();
-    if (!trimmed) return [];
+    const params = buildReservationParams(query);
+    if (Object.keys(params).length === 0) return [];
 
-    const isConfirmation = trimmed.toUpperCase().startsWith('RSV-');
-    if (isConfirmation) {
-        const lookupResponse = await api.get('/reservations/search', {
-            params: { confirmation: trimmed },
-        });
-        const lookup = lookupResponse.data;
-
-        let id = null;
-        try {
-            const full = await getReservationByConfirmationNumber(lookup.confirmationNumber);
-            id = full.id;
-        } catch {
-            // Allow UI lookup rendering even if id enrichment fails.
-        }
-
-        return [{ ...lookup, id }];
-    }
-
-    return getAllReservations({ guestName: trimmed });
+    return getAllReservations(params);
 };
 
 export const checkInReservation = async (confirmationNumber) => {

@@ -226,10 +226,10 @@ const STAFF_NAVIGATION_CONFIG = [
     roles: [ROLE_STAFF],
     items: [
       {
-        path: '/search',
+        path: '/staff/dashboard',
         translationKey: 'navFrontDesk',
         fallbackLabel: 'Front Desk',
-        icon: Search,
+        icon: LayoutDashboard,
         roles: [ROLE_STAFF],
       },
     ],

@@ -44,6 +44,7 @@ const supplementalResources = {
         searching: 'Searching...',
         searchReservation: 'Search Reservation',
         selectReservation: 'Select Reservation',
+        clearFilters: 'Clear Filters',
         noGuestEmailProvided: 'No guest email provided',
         guest: 'Guest',
         room: 'Room',
@@ -449,70 +450,71 @@ const supplementalResources = {
         newLabel: 'New',
       },
       staffDashboardPage: {
-        loading: "Loading tonight's available inventory...",
+        loading: 'Loading the reservation queue...',
         errorTitle: 'Staff dashboard unavailable',
         eyebrow: 'Front desk operations',
         description:
-          "Welcome back, {{name}}. This view is tuned for tonight's availability window so the front desk can move quickly between room search, check-in, billing, and reservation changes.",
-        arrivalWindow: '{{date}} arrival window',
-        roomsAvailable: '{{count}} rooms available',
-        floorsRepresented: '{{count}} floors represented',
-        inventoryTitle: "Tonight's Inventory",
-        startingRate: 'Starting Rate',
-        largestFit: 'Largest Fit',
+          'Welcome back, {{name}}. This workspace keeps arrivals, in-house stays, departures, and reservation follow-up in one operational queue.',
+        focusMeta: 'Focus: {{focus}}',
+        resultsMeta: '{{count}} reservations in view',
+        resultsMeta_other: '{{count}} reservations in view',
+        filtersMeta: '{{count}} active filters',
+        filtersMeta_other: '{{count}} active filters',
+        filtersMetaNone: 'No extra filters applied',
+        workspaceTitle: 'Desk Workspace',
+        currentFocus: 'Current Focus',
+        activeQueue: 'Visible Queue',
         metrics: {
-          availableLabel: 'Available Tonight',
-          availableHint:
-            "Current search window using today's arrival and tomorrow's departure.",
-          premiumLabel: 'Premium Ready',
-          premiumHint: 'Deluxe and suite inventory currently available.',
-          roomTypesLabel: 'Room Types Ready',
-          roomTypesHint: 'Distinct room categories you can offer immediately.',
-          rateLabel: 'Starting Rate',
-          rateHint: "Lowest visible base rate in tonight's live search.",
+          visibleLabel: 'Visible Queue',
+          visibleHint: 'Reservations currently returned by the active filters.',
+          arrivalsLabel: 'Arrivals Ready',
+          arrivalsHint: 'Confirmed reservations ready for the arrival workflow.',
+          departuresLabel: 'Departures Today',
+          departuresHint: 'Checked-in guests leaving on the selected departure date.',
+          balanceLabel: 'Balances Due',
+          balanceHint: 'Reservations in the current queue with money still outstanding.',
         },
+        queueTitle: 'Reservation Queue',
+        queueDescription:
+          'Filter the live queue by confirmation, guest, status, and stay dates, then open a reservation to continue the next desk action.',
+        tabs: {
+          arrivals: 'Arrivals',
+          inHouse: 'In House',
+          departures: 'Departures',
+          all: 'All Reservations',
+        },
+        confirmationPlaceholder: 'RSV-XXXXXXXXXXXX',
+        guestNamePlaceholder: 'Guest name',
+        anyStatus: 'Any status',
+        applyFilters: 'Apply Filters',
+        emptyTitle: 'No reservations match this queue',
+        emptyDescription:
+          'Adjust the active queue tab or filters to bring the next reservation into view.',
+        nextActionLabel: 'Next Action',
+        openReservation: 'Open Reservation',
         actionsTitle: 'Operational Actions',
-        actionsDescription: 'Primary workflows for the current shift.',
+        actionsDescription: 'Fast links for front-desk workflows outside the queue.',
         actions: {
-          roomSearchDescription: 'Find available rooms and start a new reservation.',
+          roomSearchDescription: 'Check live room availability before promising a move or extension.',
+          bookRoomDescription: 'Open the staff booking flow for walk-ins and assisted reservations.',
           checkInDescription: 'Complete guest arrivals and checklist verification.',
-          modifyDescription: 'Adjust dates and room assignments when plans change.',
-          cancelDescription: 'Handle cancellation requests with the current policy.',
           invoiceDescription: 'Generate billing documents and confirm delivery.',
           checkoutDescription: 'Review balances and complete guest departure.',
         },
-        shiftAlertsTitle: 'Shift Alerts',
-        shiftAlertsDescription:
-          'Conditions worth calling out before promising inventory changes.',
-        noAlertsTitle: 'Inventory looks healthy.',
-        noAlertsDescription:
-          'The current search window has sufficient availability for standard front desk changes.',
-        availabilityTitle: 'Availability by Room Type',
-        availabilityDescription:
-          'Live mix of the room categories you can currently offer tonight.',
-        availabilityItemDescription:
-          'Available immediately for the active search window.',
-        availabilityItemCount: '{{count}} room',
-        availabilityItemCount_other: '{{count}} rooms',
-        noInventory:
-          "No inventory was returned for tonight's window.",
-        playbookTitle: 'Front Desk Playbook',
-        playbookDescription:
-          'Suggested workflow for the most common hotel desk scenarios.',
-        playbookTip1:
-          'Start every walk-in or modification request from Room Search so the room promise is based on live availability.',
-        playbookTip2:
-          'Use Check-In only after confirming identity, payment readiness, and room status.',
-        playbookTip3:
-          'Generate invoices before checkout when guests request paperwork in advance.',
-        playbookTip4:
-          "Tonight's search returned {{count}} available rooms, so escalate scarce categories early if premium inventory is low.",
-        alertNoInventory:
-          "No rooms are currently available in tonight's search window.",
-        alertTightInventory:
-          'Inventory is tight tonight. Review alternatives before promising room moves.',
-        alertNoPremium:
-          'Premium room inventory is unavailable tonight. Manage upsell expectations carefully.',
+        workspaceNotesTitle: 'Workspace Notes',
+        workspaceNotesDescription:
+          'Keep the queue operational and push reservation-specific work into the reservation detail action hub.',
+        workspaceNote1:
+          'Open a reservation before modifying, cancelling, checking in, checking out, or generating an invoice.',
+        workspaceNote2:
+          'Use the arrivals and departures tabs with date filters to stay aligned with the current shift.',
+        workspaceNote3:
+          'If a guest search returns a broad list, tighten it with dates or confirmation before acting.',
+        queueActionArrivals: 'Start check-in',
+        queueActionDepartures: 'Review for checkout',
+        queueActionInHouse: 'Review in-house stay',
+        queueActionPending: 'Confirm reservation details',
+        queueActionReview: 'Review reservation',
       },
       guestDashboardPage: {
         eyebrow: 'Guest services',
@@ -918,19 +920,23 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'Reservation Lookup',
         description:
-          'Search by confirmation number or guest name. When a guest-name search returns multiple stays, select the exact reservation before continuing.',
+          'Use backend filters to find the exact reservation before continuing with a staff workflow.',
         chipConfirmation: 'Confirmation-first',
-        chipStaff: 'Staff lookup',
-        placeholder: 'RSV-XXXXXXXXXXXX or guest name',
+        chipFiltered: 'Filtered results',
+        confirmationPlaceholder: 'RSV-XXXXXXXXXXXX',
+        guestNamePlaceholder: 'Guest name',
+        anyStatus: 'Any status',
         emptyTitle: 'No reservation found',
         emptyDescription:
-          'Try a confirmation number or a more specific guest name.',
-        guestNameWarning:
-          'Guest-name search matched this reservation. Confirm the details before continuing.',
-        multipleMatchesTitle:
-          '{{count}} reservations matched this guest search',
+          'Try a confirmation number, tighter guest details, or a stay date filter.',
+        resultsTitle:
+          '{{count}} reservation ready for selection',
+        resultsTitle_other:
+          '{{count}} reservations ready for selection',
         multipleMatchesDescription:
-          'Select the exact reservation to avoid checking in or checking out the wrong stay.',
+          'Select the exact reservation to avoid acting on the wrong stay.',
+        singleMatchDescription:
+          'Review the reservation snapshot, then continue into the next desk action.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'Missing confirmation number.',
@@ -941,7 +947,7 @@ const supplementalResources = {
         heroEyebrow: 'Reservation record',
         heroTitle: 'Reservation Details',
         heroDescription:
-          'Review guest, stay, and financial context before moving into the next front-desk action.',
+          'Use this reservation as the operational action hub for arrival, departure, changes, cancellation, and billing follow-up.',
         overviewTitle: 'Reservation Overview',
         overviewDescription:
           'Primary guest and stay information for the current booking.',
@@ -949,7 +955,9 @@ const supplementalResources = {
         financials: 'Financials',
         actionCenterTitle: 'Action Center',
         actionCenterDescription:
-          'Move directly into the next workflow that matches the reservation status.',
+          'Launch the next operational workflow directly from this reservation.',
+        actionHubNote:
+          'Reservation-specific actions stay here so staff can move from queue selection to execution without bouncing between screens.',
         checkInTitle: 'Check-In',
         checkInDescription:
           'Continue the arrival workflow and complete guest handoff.',
@@ -967,6 +975,11 @@ const supplementalResources = {
         factsTitle: 'Reservation Facts',
         factsDescription:
           'Core identifiers and billing values tied to this booking.',
+        backToQueue: 'Back to Queue',
+        queueContextTitle: 'Queue Context',
+        queueContextDescription:
+          'The filters used to open this reservation from the front-desk workspace.',
+        queueContextFocus: 'Queue Focus',
         confirmationNumber: 'Confirmation Number',
         guestName: 'Guest Name',
         guestEmail: 'Guest Email',
@@ -1089,6 +1102,7 @@ const supplementalResources = {
         searching: 'جار البحث...',
         searchReservation: 'البحث عن الحجز',
         selectReservation: 'اختيار الحجز',
+        clearFilters: 'مسح الفلاتر',
         noGuestEmailProvided: 'لا يوجد بريد إلكتروني للضيف',
         guest: 'الضيف',
         room: 'الغرفة',
@@ -1541,69 +1555,71 @@ const supplementalResources = {
           'توجد {{count}} حسابات موظفين غير نشطة وقد تحتاج إلى مراجعة.',
       },
       staffDashboardPage: {
-        loading: 'جار تحميل المخزون المتاح لهذه الليلة...',
+        loading: 'جار تحميل قائمة الحجوزات...',
         errorTitle: 'تعذر تحميل لوحة الموظف',
         eyebrow: 'عمليات الاستقبال',
         description:
-          'مرحبًا بعودتك يا {{name}}. هذا العرض مضبوط على نافذة التوفر لهذه الليلة حتى يتمكن فريق الاستقبال من التنقل بسرعة بين البحث والوصول والفوترة وتعديلات الحجوزات.',
-        arrivalWindow: 'نافذة الوصول {{date}}',
-        roomsAvailable: '{{count}} غرف متاحة',
-        floorsRepresented: '{{count}} طوابق ممثلة',
-        inventoryTitle: 'مخزون الليلة',
-        startingRate: 'السعر الابتدائي',
-        largestFit: 'أكبر سعة',
+          'مرحبًا بعودتك يا {{name}}. تجمع هذه المساحة الوصولات والإقامات الحالية والمغادرات ومتابعة الحجوزات في قائمة تشغيلية واحدة.',
+        focusMeta: 'التركيز: {{focus}}',
+        resultsMeta: '{{count}} حجز ظاهر',
+        resultsMeta_other: '{{count}} حجوزات ظاهرة',
+        filtersMeta: '{{count}} فلتر نشط',
+        filtersMeta_other: '{{count}} فلاتر نشطة',
+        filtersMetaNone: 'لا توجد فلاتر إضافية',
+        workspaceTitle: 'مساحة المكتب',
+        currentFocus: 'التركيز الحالي',
+        activeQueue: 'القائمة الظاهرة',
         metrics: {
-          availableLabel: 'المتاح الليلة',
-          availableHint:
-            'نافذة البحث الحالية باستخدام وصول اليوم ومغادرة الغد.',
-          premiumLabel: 'الفئات المميزة الجاهزة',
-          premiumHint: 'المخزون المتاح حاليًا من الديلوكس والأجنحة.',
-          roomTypesLabel: 'أنواع الغرف الجاهزة',
-          roomTypesHint: 'الفئات المختلفة التي يمكنك عرضها فورًا.',
-          rateLabel: 'السعر الابتدائي',
-          rateHint: 'أدنى سعر أساسي ظاهر في البحث المباشر لهذه الليلة.',
+          visibleLabel: 'القائمة الظاهرة',
+          visibleHint: 'الحجوزات المعادة ضمن الفلاتر النشطة حاليًا.',
+          arrivalsLabel: 'وصولات جاهزة',
+          arrivalsHint: 'الحجوزات المؤكدة الجاهزة لمسار الوصول.',
+          departuresLabel: 'مغادرات اليوم',
+          departuresHint: 'الضيوف المقيمون الذين يغادرون في تاريخ المغادرة المحدد.',
+          balanceLabel: 'أرصدة مستحقة',
+          balanceHint: 'الحجوزات الظاهرة التي لا يزال عليها رصيد مستحق.',
         },
+        queueTitle: 'قائمة الحجوزات',
+        queueDescription:
+          'فلتر القائمة المباشرة برقم التأكيد أو اسم الضيف أو الحالة أو تواريخ الإقامة، ثم افتح الحجز لمتابعة الإجراء التالي.',
+        tabs: {
+          arrivals: 'الوصول',
+          inHouse: 'داخل الفندق',
+          departures: 'المغادرة',
+          all: 'كل الحجوزات',
+        },
+        confirmationPlaceholder: 'RSV-XXXXXXXXXXXX',
+        guestNamePlaceholder: 'اسم الضيف',
+        anyStatus: 'أي حالة',
+        applyFilters: 'تطبيق الفلاتر',
+        emptyTitle: 'لا توجد حجوزات مطابقة لهذه القائمة',
+        emptyDescription:
+          'عدّل تبويب القائمة أو الفلاتر لإظهار الحجز التالي المطلوب.',
+        nextActionLabel: 'الإجراء التالي',
+        openReservation: 'فتح الحجز',
         actionsTitle: 'إجراءات تشغيلية',
-        actionsDescription: 'المسارات الأساسية للوردية الحالية.',
+        actionsDescription: 'روابط سريعة لمسارات الاستقبال خارج القائمة.',
         actions: {
-          roomSearchDescription: 'اعثر على الغرف المتاحة وابدأ حجزًا جديدًا.',
+          roomSearchDescription: 'تحقق من توفر الغرف مباشرة قبل تأكيد نقل أو تمديد.',
+          bookRoomDescription: 'افتح مسار الحجز الخاص بالموظفين للحجوزات المباشرة والمساعدة.',
           checkInDescription: 'أكمل إجراءات وصول الضيوف والتحقق من قائمة المراجعة.',
-          modifyDescription: 'عدّل التواريخ وتخصيص الغرف عند تغير الخطط.',
-          cancelDescription: 'عالج طلبات الإلغاء وفق السياسة الحالية.',
           invoiceDescription: 'أنشئ مستندات الفواتير وتحقق من حالة التسليم.',
           checkoutDescription: 'راجع الأرصدة وأكمل مغادرة الضيف.',
         },
-        shiftAlertsTitle: 'تنبيهات الوردية',
-        shiftAlertsDescription:
-          'حالات جديرة بالتنبيه قبل تأكيد أي تغيير في المخزون.',
-        noAlertsTitle: 'المخزون يبدو بصحة جيدة.',
-        noAlertsDescription:
-          'تملك نافذة البحث الحالية سعة كافية للتغييرات الاعتيادية في الاستقبال.',
-        availabilityTitle: 'التوفر حسب نوع الغرفة',
-        availabilityDescription:
-          'المزيج المباشر للفئات التي يمكنك عرضها الليلة.',
-        availabilityItemDescription:
-          'متاحة فورًا ضمن نافذة البحث النشطة.',
-        availabilityItemCount: '{{count}} غرفة',
-        availabilityItemCount_other: '{{count}} غرف',
-        noInventory: 'لم يتم إرجاع أي مخزون لنافذة هذه الليلة.',
-        playbookTitle: 'دليل الاستقبال',
-        playbookDescription:
-          'سير عمل مقترح لأكثر سيناريوهات المكتب الأمامي شيوعًا.',
-        playbookTip1:
-          'ابدأ كل طلب مباشر أو تعديل من البحث عن الغرف حتى يكون الوعد مبنيًا على التوفر الفعلي.',
-        playbookTip2:
-          'استخدم تسجيل الوصول فقط بعد التأكد من الهوية والجاهزية المالية وحالة الغرفة.',
-        playbookTip3:
-          'أنشئ الفواتير قبل المغادرة عندما يطلب الضيوف المستندات مسبقًا.',
-        playbookTip4:
-          'أعاد بحث الليلة {{count}} غرفة متاحة، لذا صعّد الفئات الشحيحة مبكرًا إذا كان المخزون المميز منخفضًا.',
-        alertNoInventory:
-          'لا توجد غرف متاحة حاليًا ضمن نافذة بحث هذه الليلة.',
-        alertTightInventory:
-          'المخزون محدود هذه الليلة. راجع البدائل قبل تأكيد نقل الغرف.',
-        alertNoPremium:
-          'الغرف المميزة غير متاحة هذه الليلة. أدر توقعات الترقية بعناية.',
+        workspaceNotesTitle: 'ملاحظات مساحة العمل',
+        workspaceNotesDescription:
+          'أبقِ القائمة تشغيلية وادفع الإجراءات الخاصة بكل حجز إلى مركز الإجراءات في صفحة التفاصيل.',
+        workspaceNote1:
+          'افتح الحجز قبل التعديل أو الإلغاء أو تسجيل الوصول أو المغادرة أو إنشاء الفاتورة.',
+        workspaceNote2:
+          'استخدم تبويبي الوصول والمغادرة مع فلاتر التاريخ للبقاء متوافقًا مع الوردية الحالية.',
+        workspaceNote3:
+          'إذا أعاد البحث باسم الضيف قائمة واسعة، فقم بتضييقها بالتواريخ أو رقم التأكيد قبل التنفيذ.',
+        queueActionArrivals: 'ابدأ تسجيل الوصول',
+        queueActionDepartures: 'راجع للمغادرة',
+        queueActionInHouse: 'راجع الإقامة الحالية',
+        queueActionPending: 'أكد تفاصيل الحجز',
+        queueActionReview: 'راجع الحجز',
       },
       guestDashboardPage: {
         eyebrow: 'خدمات الضيوف',
@@ -2005,19 +2021,23 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'البحث عن الحجز',
         description:
-          'ابحث برقم التأكيد أو باسم الضيف. إذا أعاد البحث باسم الضيف عدة إقامات، فاختر الحجز الصحيح قبل المتابعة.',
+          'استخدم فلاتر الخادم للوصول إلى الحجز الصحيح قبل متابعة أي مسار خاص بالموظفين.',
         chipConfirmation: 'الأولوية لرقم التأكيد',
-        chipStaff: 'بحث الموظفين',
-        placeholder: 'RSV-XXXXXXXXXXXX أو اسم الضيف',
+        chipFiltered: 'نتائج مفلترة',
+        confirmationPlaceholder: 'RSV-XXXXXXXXXXXX',
+        guestNamePlaceholder: 'اسم الضيف',
+        anyStatus: 'أي حالة',
         emptyTitle: 'لم يتم العثور على حجز',
         emptyDescription:
-          'جرّب رقم تأكيد أو اسم ضيف أكثر تحديدًا.',
-        guestNameWarning:
-          'تمت مطابقة هذا الحجز عبر اسم الضيف. تحقق من التفاصيل قبل المتابعة.',
-        multipleMatchesTitle:
-          'تم العثور على {{count}} حجوزات مطابقة لهذا البحث',
+          'جرّب رقم تأكيد أو بيانات ضيف أدق أو فلترًا لتاريخ الإقامة.',
+        resultsTitle:
+          '{{count}} حجز جاهز للاختيار',
+        resultsTitle_other:
+          '{{count}} حجوزات جاهزة للاختيار',
         multipleMatchesDescription:
-          'اختر الحجز الصحيح لتجنب تسجيل الوصول أو المغادرة للحجز الخطأ.',
+          'اختر الحجز الصحيح لتجنب تنفيذ الإجراء على إقامة غير صحيحة.',
+        singleMatchDescription:
+          'راجع ملخص الحجز ثم انتقل إلى الإجراء التالي في المكتب الأمامي.',
       },
       reservationDetailsPage: {
         missingConfirmation: 'رقم التأكيد مفقود.',
@@ -2028,7 +2048,7 @@ const supplementalResources = {
         heroEyebrow: 'سجل الحجز',
         heroTitle: 'تفاصيل الحجز',
         heroDescription:
-          'راجع بيانات الضيف والإقامة والسياق المالي قبل الانتقال إلى الإجراء التالي في الاستقبال.',
+          'استخدم هذا الحجز كمركز إجراءات تشغيلي للوصول والمغادرة والتعديلات والإلغاء ومتابعة الفوترة.',
         overviewTitle: 'نظرة عامة على الحجز',
         overviewDescription:
           'بيانات الضيف والإقامة الأساسية للحجز الحالي.',
@@ -2036,7 +2056,9 @@ const supplementalResources = {
         financials: 'البيانات المالية',
         actionCenterTitle: 'مركز الإجراءات',
         actionCenterDescription:
-          'انتقل مباشرة إلى المسار التالي المناسب لحالة الحجز.',
+          'ابدأ مسار العمل التشغيلي التالي مباشرة من هذا الحجز.',
+        actionHubNote:
+          'تبقى الإجراءات الخاصة بكل حجز هنا حتى ينتقل الموظف من اختيار الحجز في القائمة إلى التنفيذ دون التنقل غير الضروري بين الشاشات.',
         checkInTitle: 'تسجيل الوصول',
         checkInDescription:
           'تابع مسار الوصول وأكمل تسليم الغرفة للضيف.',
@@ -2054,6 +2076,11 @@ const supplementalResources = {
         factsTitle: 'حقائق الحجز',
         factsDescription:
           'المعرفات الأساسية والقيم المالية المرتبطة بهذا الحجز.',
+        backToQueue: 'العودة إلى القائمة',
+        queueContextTitle: 'سياق القائمة',
+        queueContextDescription:
+          'الفلاتر المستخدمة لفتح هذا الحجز من مساحة عمل الاستقبال.',
+        queueContextFocus: 'تركيز القائمة',
         confirmationNumber: 'رقم التأكيد',
         guestName: 'اسم الضيف',
         guestEmail: 'بريد الضيف',

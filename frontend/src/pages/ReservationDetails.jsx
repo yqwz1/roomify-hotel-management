@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ArrowLeft,
   ArrowRightLeft,
   CalendarDays,
   CreditCard,
@@ -9,19 +10,19 @@ import {
   Receipt,
   UserRound,
   XCircle,
-  Eye,
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import StatusPill from '../components/StatusPill';
+import { Button } from '../components/ui/button';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useAuth } from '../context/AuthProvider';
 import {
   extractReservationError,
   getReservationByConfirmationNumber,
-  getAllReservations,
 } from '../services/reservationService';
 import { reservationStatusRules } from '../domain/reservations/statusRules';
 import {
@@ -32,6 +33,7 @@ import {
   getReservationStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+import { buildReservationLookupNavigationState } from '../utils/reservationLookup';
 
 function ActionButton({
   icon: Icon,
@@ -62,11 +64,78 @@ function ActionButton({
   );
 }
 
+const normalizeSearchValue = (value) => String(value ?? '').trim();
+
+const buildQueueContext = (searchParams, t, language) => {
+  const queueTab = normalizeSearchValue(searchParams.get('queueTab'));
+  const confirmation = normalizeSearchValue(searchParams.get('confirmation'));
+  const guestName = normalizeSearchValue(searchParams.get('guestName'));
+  const status = normalizeSearchValue(searchParams.get('status'));
+  const checkInDate = normalizeSearchValue(searchParams.get('checkInDate'));
+  const checkOutDate = normalizeSearchValue(searchParams.get('checkOutDate'));
+
+  const items = [];
+
+  if (queueTab) {
+    const focusLabel =
+      queueTab === 'arrivals'
+        ? t('staffDashboardPage.tabs.arrivals')
+        : queueTab === 'inHouse'
+          ? t('staffDashboardPage.tabs.inHouse')
+          : queueTab === 'departures'
+            ? t('staffDashboardPage.tabs.departures')
+            : t('staffDashboardPage.tabs.all');
+
+    items.push({
+      label: t('reservationDetailsPage.queueContextFocus'),
+      value: focusLabel,
+    });
+  }
+
+  if (confirmation) {
+    items.push({
+      label: t('confirmationNumber'),
+      value: <LtrText>{confirmation}</LtrText>,
+    });
+  }
+
+  if (guestName) {
+    items.push({
+      label: t('guestName'),
+      value: guestName,
+    });
+  }
+
+  if (status) {
+    items.push({
+      label: t('status'),
+      value: getReservationStatusLabel(status, t),
+    });
+  }
+
+  if (checkInDate) {
+    items.push({
+      label: t('checkInDate'),
+      value: formatLocalizedDate(checkInDate, language, { dateStyle: 'medium' }),
+    });
+  }
+
+  if (checkOutDate) {
+    items.push({
+      label: t('checkOutDate'),
+      value: formatLocalizedDate(checkOutDate, language, { dateStyle: 'medium' }),
+    });
+  }
+
+  return items;
+};
+
 export default function ReservationDetails() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { confirmationNumber: routeConfirmation } = useParams();
+  const { hasRole } = useAuth();
   const { t, i18n } = useTranslation();
 
   const confirmationNumber = useMemo(() => {
@@ -74,49 +143,76 @@ export default function ReservationDetails() {
     return String(fromState ?? routeConfirmation ?? '').trim();
   }, [location.state?.confirmationNumber, routeConfirmation]);
 
+  const queueSearch = searchParams.toString();
+  const queueBasePath =
+    location.state?.fromQueuePath ??
+    (hasRole('ROLE_STAFF') ? '/staff/dashboard' : '/reservations');
+  const queueReturnPath = `${queueBasePath}${queueSearch ? `?${queueSearch}` : ''}`;
+  const queueContext = useMemo(
+    () => buildQueueContext(searchParams, t, i18n.language),
+    [i18n.language, searchParams, t]
+  );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reservation, setReservation] = useState(null);
-  const [reservationsList, setReservationsList] = useState(null);
-  const listFilters = useMemo(
-    () => ({
-      confirmation: searchParams.get('confirmation') ?? '',
-      confirmationNumber: searchParams.get('confirmationNumber') ?? '',
-      guestName: searchParams.get('guestName') ?? '',
-      status: searchParams.get('status') ?? '',
-      queueTab: searchParams.get('queueTab') ?? '',
-      checkInDate: searchParams.get('checkInDate') ?? '',
-      checkOutDate: searchParams.get('checkOutDate') ?? '',
-    }),
-    [searchParams]
-  );
 
   useEffect(() => {
-    const run = async () => {
+    let ignore = false;
+
+    const loadReservation = async () => {
+      if (!confirmationNumber) {
+        setReservation(null);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
-      setReservation(null);
-      setReservationsList(null);
+
       try {
-        if (!confirmationNumber) {
-          const result = await getAllReservations(listFilters);
-          setReservationsList(result);
-        } else {
-          const result = await getReservationByConfirmationNumber(confirmationNumber);
-          setReservation(result);
-        }
+        const result = await getReservationByConfirmationNumber(confirmationNumber);
+        if (ignore) return;
+        setReservation(result);
       } catch (err) {
+        if (ignore) return;
+        setReservation(null);
         setError(extractReservationError(err));
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
-    run();
-  }, [confirmationNumber, listFilters, t]);
+    loadReservation();
+
+    return () => {
+      ignore = true;
+    };
+  }, [confirmationNumber]);
 
   if (loading) {
     return <LoadingState message={t('reservationDetailsPage.loading')} />;
+  }
+
+  if (!confirmationNumber) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+        <ErrorState
+          title={t('reservationDetailsPage.emptyTitle')}
+          message={t('reservationDetailsPage.emptyDescription')}
+        />
+        <Button
+          variant="outline"
+          className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
+          onClick={() => navigate(queueReturnPath)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('reservationDetailsPage.backToQueue')}
+        </Button>
+      </div>
+    );
   }
 
   if (error) {
@@ -129,66 +225,28 @@ export default function ReservationDetails() {
     );
   }
 
-  if (!confirmationNumber && reservationsList) {
+  if (!reservation) {
     return (
       <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-        <DashboardHero
-          eyebrow={t('bookings')}
-          title={t('bookings')}
-          description={t('reservationLookupPanel.description')}
+        <ErrorState
+          title={t('reservationDetailsPage.emptyTitle')}
+          message={t('reservationDetailsPage.emptyDescription')}
         />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {reservationsList.map((res) => (
-            <div key={res.id || res.confirmationNumber} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-black">
-              <div className="mb-4 flex items-start justify-between">
-                <div>
-                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.confirmation')}</p>
-                   <p className="mt-1 text-sm font-bold"><LtrText>{res.confirmationNumber}</LtrText></p>
-                </div>
-                <StatusPill status={res.status} size="sm" />
-              </div>
-              <div className="mb-4 space-y-2">
-                 <p className="text-sm font-medium text-zinc-600">
-                    <UserRound className="mr-2 inline h-4 w-4"/>
-                    {res.guestName || res.guest?.name || t('common.guest')}
-                 </p>
-                 <p className="text-sm font-medium text-zinc-600">
-                    <Hotel className="mr-2 inline h-4 w-4"/>
-                    {t('roomNum', { number: res.roomNumber || res.room?.roomNumber || t('unassigned') })}
-                 </p>
-                 <p className="text-sm font-medium text-zinc-600">
-                    <Receipt className="mr-2 inline h-4 w-4"/>
-                    {res.paymentStatus ? getPaymentStatusLabel(res.paymentStatus, t) : t('nightsCount', { count: res.nights })}
-                 </p>
-              </div>
-              <button 
-                 onClick={() => navigate(`/reservations/${res.confirmationNumber}`)}
-                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-100 py-2.5 text-sm font-bold transition hover:bg-zinc-200 text-zinc-900">
-                 <Eye className="h-4 w-4" /> {t('common.selectReservation')}
-              </button>
-            </div>
-          ))}
-          {reservationsList.length === 0 && (
-             <div className="col-span-full py-12 text-center text-sm font-medium text-zinc-500">
-                {t('reservationLookupPanel.emptyDescription')}
-             </div>
-          )}
-        </div>
+        <Button
+          variant="outline"
+          className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
+          onClick={() => navigate(queueReturnPath)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('reservationDetailsPage.backToQueue')}
+        </Button>
       </div>
     );
   }
 
-  if (!reservation && confirmationNumber) {
-    return (
-      <ErrorState
-        title={t('reservationDetailsPage.emptyTitle')}
-        message={t('reservationDetailsPage.emptyDescription')}
-      />
-    );
-  }
-
   const guestName = reservation.guestName || reservation.guest?.name || t('common.guest');
-  const guestEmail = reservation.guestEmail || reservation.guest?.email || t('common.noGuestEmailProvided');
+  const guestEmail =
+    reservation.guestEmail || reservation.guest?.email || t('common.noGuestEmailProvided');
   const roomNumber = reservation.roomNumber || reservation.room?.roomNumber || '-';
   const roomTypeName = reservation.roomTypeName || reservation.room?.roomTypeName || t('unassigned');
   const floor = reservation.floor || reservation.room?.floor || '-';
@@ -199,6 +257,7 @@ export default function ReservationDetails() {
   const paymentStatus = reservation.paymentStatus;
   const invoiceFinalized =
     typeof reservation.invoiceFinalized === 'boolean' ? reservation.invoiceFinalized : null;
+
   const financialFacts = [
     {
       label: t('checkoutPage.paymentStatusLabel'),
@@ -206,8 +265,7 @@ export default function ReservationDetails() {
     },
     {
       label: t('checkoutPage.totalPaidLabel'),
-      value:
-        totalPaid != null ? formatLocalizedCurrency(totalPaid, i18n.language) : null,
+      value: totalPaid != null ? formatLocalizedCurrency(totalPaid, i18n.language) : null,
     },
     {
       label: t('checkoutPage.outstandingBalanceLabel'),
@@ -218,13 +276,24 @@ export default function ReservationDetails() {
     },
     {
       label: t('common.finalized'),
-      value:
-        invoiceFinalized != null ? getBooleanLabel(invoiceFinalized, t) : null,
+      value: invoiceFinalized != null ? getBooleanLabel(invoiceFinalized, t) : null,
     },
   ].filter((item) => item.value != null);
+  const lookupNavigationState = buildReservationLookupNavigationState({
+    confirmation: reservation.confirmationNumber,
+  });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <Button
+        variant="outline"
+        className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
+        onClick={() => navigate(queueReturnPath)}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {t('reservationDetailsPage.backToQueue')}
+      </Button>
+
       <DashboardHero
         eyebrow={t('reservationDetailsPage.heroEyebrow')}
         title={t('reservationDetailsPage.heroTitle')}
@@ -250,6 +319,73 @@ export default function ReservationDetails() {
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
+          <DashboardPanel
+            title={t('reservationDetailsPage.actionCenterTitle')}
+            description={t('reservationDetailsPage.actionCenterDescription')}
+          >
+            <div className="mb-4 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium leading-6 text-zinc-600">
+              {t('reservationDetailsPage.actionHubNote')}
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <ActionButton
+                icon={CreditCard}
+                title={t('reservationDetailsPage.checkInTitle')}
+                description={t('reservationDetailsPage.checkInDescription')}
+                onClick={() =>
+                  navigate('/check-in', {
+                    state: lookupNavigationState,
+                  })
+                }
+                disabled={!reservationStatusRules.canCheckIn(reservation.status)}
+              />
+              <ActionButton
+                icon={ArrowRightLeft}
+                title={t('reservationDetailsPage.modifyTitle')}
+                description={t('reservationDetailsPage.modifyDescription')}
+                onClick={() =>
+                  navigate('/reservations/modify', {
+                    state: lookupNavigationState,
+                  })
+                }
+                disabled={!reservationStatusRules.canModify(reservation.status)}
+              />
+              <ActionButton
+                icon={XCircle}
+                title={t('reservationDetailsPage.cancelTitle')}
+                description={t('reservationDetailsPage.cancelDescription')}
+                onClick={() =>
+                  navigate('/reservations/cancel', {
+                    state: lookupNavigationState,
+                  })
+                }
+                disabled={!reservationStatusRules.canCancel(reservation.status)}
+                tone="danger"
+              />
+              <ActionButton
+                icon={Receipt}
+                title={t('checkoutTitle')}
+                description={t('reservationDetailsPage.checkoutDescription')}
+                onClick={() =>
+                  navigate('/checkout', {
+                    state: lookupNavigationState,
+                  })
+                }
+                disabled={!reservationStatusRules.canCheckOut(reservation.status)}
+              />
+              <ActionButton
+                icon={FileText}
+                title={t('reservationDetailsPage.invoiceTitle')}
+                description={t('reservationDetailsPage.invoiceDescription')}
+                onClick={() =>
+                  navigate('/invoice-preview', {
+                    state: lookupNavigationState,
+                  })
+                }
+              />
+            </div>
+          </DashboardPanel>
+
           <DashboardPanel
             title={t('reservationDetailsPage.overviewTitle')}
             description={t('reservationDetailsPage.overviewDescription')}
@@ -346,72 +482,28 @@ export default function ReservationDetails() {
               </div>
             </div>
           </DashboardPanel>
-
-          <DashboardPanel
-            title={t('reservationDetailsPage.actionCenterTitle')}
-            description={t('reservationDetailsPage.actionCenterDescription')}
-          >
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <ActionButton
-                icon={CreditCard}
-                title={t('reservationDetailsPage.checkInTitle')}
-                description={t('reservationDetailsPage.checkInDescription')}
-                onClick={() =>
-                  navigate('/check-in', {
-                    state: { initialQuery: reservation.confirmationNumber },
-                  })
-                }
-                disabled={!reservationStatusRules.canCheckIn(reservation.status)}
-              />
-              <ActionButton
-                icon={ArrowRightLeft}
-                title={t('reservationDetailsPage.modifyTitle')}
-                description={t('reservationDetailsPage.modifyDescription')}
-                onClick={() =>
-                  navigate('/reservations/modify', {
-                    state: { initialQuery: reservation.confirmationNumber },
-                  })
-                }
-                disabled={!reservationStatusRules.canModify(reservation.status)}
-              />
-              <ActionButton
-                icon={XCircle}
-                title={t('reservationDetailsPage.cancelTitle')}
-                description={t('reservationDetailsPage.cancelDescription')}
-                onClick={() =>
-                  navigate('/reservations/cancel', {
-                    state: { initialQuery: reservation.confirmationNumber },
-                  })
-                }
-                disabled={!reservationStatusRules.canCancel(reservation.status)}
-                tone="danger"
-              />
-              <ActionButton
-                icon={Receipt}
-                title={t('checkoutTitle')}
-                description={t('reservationDetailsPage.checkoutDescription')}
-                onClick={() =>
-                  navigate('/checkout', {
-                    state: { initialQuery: reservation.confirmationNumber },
-                  })
-                }
-                disabled={!reservationStatusRules.canCheckOut(reservation.status)}
-              />
-              <ActionButton
-                icon={FileText}
-                title={t('reservationDetailsPage.invoiceTitle')}
-                description={t('reservationDetailsPage.invoiceDescription')}
-                onClick={() =>
-                  navigate('/invoice-preview', {
-                    state: { confirmationNumber: reservation.confirmationNumber },
-                  })
-                }
-              />
-            </div>
-          </DashboardPanel>
         </div>
 
         <div className="space-y-6">
+          {queueContext.length > 0 ? (
+            <DashboardPanel
+              title={t('reservationDetailsPage.queueContextTitle')}
+              description={t('reservationDetailsPage.queueContextDescription')}
+            >
+              <dl className="space-y-4">
+                {queueContext.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3"
+                  >
+                    <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
+                    <dd className="text-sm font-bold text-zinc-950">{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </DashboardPanel>
+          ) : null}
+
           <DashboardPanel
             title={t('reservationDetailsPage.factsTitle')}
             description={t('reservationDetailsPage.factsDescription')}

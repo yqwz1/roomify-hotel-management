@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Download,
   FilePlus2,
@@ -28,6 +28,7 @@ import {
   getBill,
   getReservationByConfirmationNumber,
 } from '../services/reservationService';
+import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 import { useTranslation } from 'react-i18next';
 import {
   formatLocalizedCurrency,
@@ -152,6 +153,7 @@ function InvoiceLedger({ bill, t, language }) {
 export default function InvoicePreview() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
   const [selected, setSelected] = useState(null);
   const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -166,14 +168,6 @@ export default function InvoicePreview() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(null);
   const printFrameRef = useRef(null);
-
-  const initialQuery = useMemo(
-    () =>
-      String(
-        location.state?.confirmationNumber ?? location.state?.initialQuery ?? ''
-      ).trim(),
-    [location.state?.confirmationNumber, location.state?.initialQuery]
-  );
 
   const invoiceFinalized = Boolean(bill?.invoiceFinalized);
 
@@ -332,10 +326,10 @@ export default function InvoicePreview() {
   }, [emailing, invoiceFinalized, selected?.id, t]);
 
   const handleRetryData = useCallback(async () => {
-    const confirmationNumber = selected?.confirmationNumber || initialQuery;
+    const confirmationNumber = selected?.confirmationNumber || initialFilters.confirmation || initialQuery;
     if (!confirmationNumber || loading) return;
     await fetchInvoiceData(confirmationNumber);
-  }, [fetchInvoiceData, initialQuery, loading, selected?.confirmationNumber]);
+  }, [fetchInvoiceData, initialFilters.confirmation, initialQuery, loading, selected?.confirmationNumber]);
 
   const handleRetryPreview = useCallback(async () => {
     if (!selected?.id || previewLoading) return;
@@ -441,7 +435,11 @@ export default function InvoicePreview() {
       </DashboardHero>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+        <ReservationLookupPanel
+          initialFilters={initialFilters}
+          initialQuery={initialQuery}
+          onSelect={handleSelect}
+        />
 
         {!selected && !loading ? (
           <DashboardPanel

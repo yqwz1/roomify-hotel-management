@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import api from './api';
-import { getAllReservations, searchReservations } from './reservationService';
+import {
+  getAllReservations,
+  modifyReservation,
+  searchReservations,
+} from './reservationService';
 
 vi.mock('./api', () => ({
   default: {
@@ -15,30 +19,23 @@ describe('reservationService.searchReservations', () => {
     vi.resetAllMocks();
   });
 
-  it('keeps confirmation-number lookup on the exact search endpoint', async () => {
-    api.get
-      .mockResolvedValueOnce({
-        data: {
-          confirmationNumber: 'RSV-123456',
-          guestName: 'Jane Doe',
-          status: 'CHECKED_IN',
-        },
-      })
-      .mockResolvedValueOnce({
-        data: {
+  it('routes confirmation lookups through the backend filtered reservations endpoint', async () => {
+    api.get.mockResolvedValueOnce({
+      data: [
+        {
           id: 77,
           confirmationNumber: 'RSV-123456',
           guestName: 'Jane Doe',
           status: 'CHECKED_IN',
         },
-      });
+      ],
+    });
 
     const results = await searchReservations('RSV-123456');
 
-    expect(api.get).toHaveBeenNthCalledWith(1, '/reservations/search', {
+    expect(api.get).toHaveBeenCalledWith('/reservations', {
       params: { confirmation: 'RSV-123456' },
     });
-    expect(api.get).toHaveBeenNthCalledWith(2, '/reservations/RSV-123456');
     expect(results).toEqual([
       expect.objectContaining({
         id: 77,
@@ -47,39 +44,41 @@ describe('reservationService.searchReservations', () => {
     ]);
   });
 
-  it('returns all guest-name matches for explicit selection', async () => {
+  it('treats non-RSV identifiers as confirmation filters when used as direct lookups', async () => {
     api.get.mockResolvedValueOnce({
       data: [
         {
-          id: 1,
-          confirmationNumber: 'RSV-111111',
-          guestName: 'Jane Doe',
-          roomNumber: '101',
-        },
-        {
-          id: 2,
-          confirmationNumber: 'RSV-222222',
-          guestName: 'Jane Smith',
-          roomNumber: '102',
+          id: 91,
+          confirmationNumber: 'DEMO-CHECKIN-READY',
+          guestName: 'Demo Guest',
+          status: 'CONFIRMED',
         },
       ],
     });
 
-    const results = await searchReservations('Jane');
+    await searchReservations('DEMO-CHECKIN-READY');
 
     expect(api.get).toHaveBeenCalledWith('/reservations', {
-      params: { guestName: 'Jane' },
+      params: { confirmation: 'DEMO-CHECKIN-READY' },
     });
-    expect(results).toEqual([
-      expect.objectContaining({
-        id: 1,
-        confirmationNumber: 'RSV-111111',
-      }),
-      expect.objectContaining({
-        id: 2,
-        confirmationNumber: 'RSV-222222',
-      }),
-    ]);
+  });
+
+  it('forwards combined backend filters for staff queue searches', async () => {
+    api.get.mockResolvedValueOnce({ data: [] });
+
+    await searchReservations({
+      guestName: ' Jane Doe ',
+      status: 'CHECKED_IN',
+      checkOutDate: '2026-04-20',
+    });
+
+    expect(api.get).toHaveBeenCalledWith('/reservations', {
+      params: {
+        guestName: 'Jane Doe',
+        status: 'CHECKED_IN',
+        checkOutDate: '2026-04-20',
+      },
+    });
   });
 
   it('forwards supported reservation filters to the list endpoint', async () => {
@@ -98,5 +97,20 @@ describe('reservationService.searchReservations', () => {
         checkInDate: '2026-04-20',
       },
     });
+  });
+
+  it('resolves non-RSV confirmation numbers before modifying reservations', async () => {
+    api.get.mockResolvedValueOnce({
+      data: {
+        id: 88,
+        confirmationNumber: 'DEMO-CHECKIN-READY',
+      },
+    });
+    api.put.mockResolvedValueOnce({ data: { success: true } });
+
+    await modifyReservation('DEMO-CHECKIN-READY', { roomId: 305 });
+
+    expect(api.get).toHaveBeenCalledWith('/reservations/DEMO-CHECKIN-READY');
+    expect(api.put).toHaveBeenCalledWith('/reservations/88', { roomId: 305 });
   });
 });

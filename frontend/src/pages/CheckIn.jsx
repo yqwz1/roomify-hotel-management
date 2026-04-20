@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ClipboardCheck, KeyRound, ShieldCheck, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { checkInReservation, extractReservationError } from '../services/reservationService';
 import { reservationStatusRules, normalizeReservationStatusLabel } from '../domain/reservations/statusRules';
+import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
@@ -43,16 +44,12 @@ const resolveChecklistLabel = (t, id) => {
 export default function CheckIn() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
 
   const [selected, setSelected] = useState(null);
   const [checklist, setChecklist] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
-
-  const initialQuery = useMemo(
-    () => String(location.state?.initialQuery ?? '').trim(),
-    [location.state?.initialQuery]
-  );
 
   const completedCount = CHECKLIST_ITEMS.filter((item) => checklist[item.id]).length;
   const allChecked = completedCount === CHECKLIST_ITEMS.length;
@@ -141,7 +138,11 @@ export default function CheckIn() {
       </DashboardHero>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+        <ReservationLookupPanel
+          initialFilters={initialFilters}
+          initialQuery={initialQuery}
+          onSelect={handleSelect}
+        />
 
         {!selected ? (
           <DashboardPanel

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, Ban, ShieldAlert } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ import {
   getReservationStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 
 function CancelDialog({ reservation, onClose, onConfirm }) {
   const { t, i18n } = useTranslation();
@@ -169,14 +170,10 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
 export default function CancelReservation() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
   const [selected, setSelected] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [toast, setToast] = useState(null);
-
-  const initialQuery = useMemo(
-    () => String(location.state?.initialQuery ?? '').trim(),
-    [location.state?.initialQuery]
-  );
 
   const canCancel = selected ? reservationStatusRules.canCancel(selected.status) : false;
 
@@ -249,7 +246,11 @@ export default function CancelReservation() {
       </DashboardHero>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+        <ReservationLookupPanel
+          initialFilters={initialFilters}
+          initialQuery={initialQuery}
+          onSelect={handleSelect}
+        />
 
         {!selected ? (
           <DashboardPanel

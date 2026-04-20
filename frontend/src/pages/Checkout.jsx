@@ -31,6 +31,7 @@ import {
   extractReservationError,
   getBill,
 } from '../services/reservationService';
+import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
@@ -371,6 +372,7 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
 export default function Checkout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [bill, setBill] = useState(null);
@@ -384,11 +386,6 @@ export default function Checkout() {
   const [paymentError, setPaymentError] = useState(null);
   const [paymentReceipt, setPaymentReceipt] = useState(null);
   const [toast, setToast] = useState(null);
-
-  const initialQuery = useMemo(
-    () => String(location.state?.initialQuery ?? '').trim(),
-    [location.state?.initialQuery]
-  );
 
   const fetchBill = useCallback(async (confirmationNumber) => {
     if (!confirmationNumber) return;
@@ -601,7 +598,11 @@ export default function Checkout() {
       </DashboardHero>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <ReservationLookupPanel initialQuery={initialQuery} onSelect={handleSelect} />
+        <ReservationLookupPanel
+          initialFilters={initialFilters}
+          initialQuery={initialQuery}
+          onSelect={handleSelect}
+        />
 
         {!selected ? (
           <DashboardPanel title={t('checkoutPage.selectTitle')} description={t('checkoutPage.selectDescription')}>
