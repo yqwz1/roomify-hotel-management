@@ -17,6 +17,7 @@ import {
   formatLocalizedCurrency,
   formatLocalizedDate,
   getReservationStatusLabel,
+  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -24,6 +25,63 @@ const STATUS_OPTIONS = Object.values(ReservationStatus);
 
 const hasActiveFilters = (filters) =>
   hasReservationLookupFilters(filters);
+
+const areLookupFiltersEqual = (left = {}, right = {}) =>
+  ['confirmation', 'guestName', 'status', 'checkInDate', 'checkOutDate'].every(
+    (key) => normalizeReservationLookupFilters(left)[key] === normalizeReservationLookupFilters(right)[key]
+  );
+
+const buildActiveFilterChips = (filters, t, language) => {
+  const normalized = normalizeReservationLookupFilters(filters);
+  const chips = [];
+
+  if (normalized.confirmation) {
+    chips.push({
+      key: 'confirmation',
+      label: t('confirmationNumber'),
+      value: normalized.confirmation,
+      ltr: true,
+    });
+  }
+
+  if (normalized.guestName) {
+    chips.push({
+      key: 'guestName',
+      label: t('guestName'),
+      value: normalized.guestName,
+      ltr: false,
+    });
+  }
+
+  if (normalized.status) {
+    chips.push({
+      key: 'status',
+      label: t('status'),
+      value: getReservationStatusLabel(normalized.status, t),
+      ltr: false,
+    });
+  }
+
+  if (normalized.checkInDate) {
+    chips.push({
+      key: 'checkInDate',
+      label: t('checkInDate'),
+      value: formatLocalizedDate(normalized.checkInDate, language, { dateStyle: 'medium' }),
+      ltr: false,
+    });
+  }
+
+  if (normalized.checkOutDate) {
+    chips.push({
+      key: 'checkOutDate',
+      label: t('checkOutDate'),
+      value: formatLocalizedDate(normalized.checkOutDate, language, { dateStyle: 'medium' }),
+      ltr: false,
+    });
+  }
+
+  return chips;
+};
 
 const buildInitialFilters = (initialQuery = '', initialFilters = {}) => {
   const nextFilters = {
@@ -90,7 +148,11 @@ export default function ReservationLookupPanel({
   autoSearch = true,
 }) {
   const { t, i18n } = useTranslation();
-  const [filters, setFilters] = useState(() => buildInitialFilters(initialQuery, initialFilters));
+  const defaultFilters = useMemo(
+    () => buildInitialFilters(initialQuery, initialFilters),
+    [initialFilters, initialQuery]
+  );
+  const [filters, setFilters] = useState(defaultFilters);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -124,22 +186,31 @@ export default function ReservationLookupPanel({
   );
 
   useEffect(() => {
-    const nextFilters = buildInitialFilters(initialQuery, initialFilters);
-    setFilters(nextFilters);
+    setFilters(defaultFilters);
     setResults([]);
     setSearched(false);
     setError(null);
 
-    if (autoSearch && hasActiveFilters(nextFilters)) {
-      void runSearch(nextFilters);
+    if (autoSearch && hasActiveFilters(defaultFilters)) {
+      void runSearch(defaultFilters);
     }
-  }, [autoSearch, initialFilters, initialQuery, runSearch]);
+  }, [autoSearch, defaultFilters, runSearch]);
 
   const reservations = useMemo(
     () => results.map((record, index) => toUiReservation(record, index)),
     [results]
   );
   const hasMultipleMatches = reservations.length > 1;
+  const activeFilterChips = useMemo(
+    () => buildActiveFilterChips(filters, t, i18n.language),
+    [filters, i18n.language, t]
+  );
+  const hasConfirmationPrecedence =
+    Boolean(filters.confirmation) &&
+    ['guestName', 'status', 'checkInDate', 'checkOutDate'].some((key) =>
+      Boolean(normalizeReservationLookupFilters(filters)[key])
+    );
+  const isAtDefaultState = areLookupFiltersEqual(filters, defaultFilters);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -147,11 +218,14 @@ export default function ReservationLookupPanel({
   };
 
   const resetFilters = () => {
-    const nextFilters = buildInitialFilters('', {});
-    setFilters(nextFilters);
+    setFilters(defaultFilters);
     setResults([]);
     setSearched(false);
     setError(null);
+
+    if (autoSearch && hasActiveFilters(defaultFilters)) {
+      void runSearch(defaultFilters);
+    }
   };
 
   const updateFilter = (key, value) => {
@@ -198,13 +272,14 @@ export default function ReservationLookupPanel({
 
       <div className="px-5 py-5 sm:px-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
             <label className="space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
                 {t('confirmationNumber')}
               </span>
               <input
                 type="text"
+                dir="ltr"
                 value={filters.confirmation}
                 onChange={(event) => updateFilter('confirmation', event.target.value)}
                 placeholder={t('reservationLookupPanel.confirmationPlaceholder')}
@@ -280,12 +355,64 @@ export default function ReservationLookupPanel({
             <button
               type="button"
               onClick={resetFilters}
+              disabled={isAtDefaultState}
               className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
             >
               {t('common.clearFilters')}
             </button>
           </div>
+
+          <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
+            {activeFilterChips.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {activeFilterChips.map((chip) => (
+                  <span
+                    key={chip.key}
+                    className="inline-flex max-w-full items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700"
+                  >
+                    <span className="text-zinc-500">{chip.label}:</span>
+                    {chip.ltr ? (
+                      <LtrText className="text-zinc-950">{chip.value}</LtrText>
+                    ) : (
+                      <span className="min-w-0 break-words [overflow-wrap:anywhere] text-zinc-950">
+                        {chip.value}
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm font-medium text-zinc-500">
+                {translateWithFallback(
+                  t,
+                  'reservationLookupPanel.emptyFiltersNote',
+                  'Add a confirmation number, guest name, status, or stay date to search the live reservation list.'
+                )}
+              </p>
+            )}
+
+            <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
+              {hasConfirmationPrecedence
+                ? 'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the backend resolves the selection list by confirmation first.'
+                : 'Reservation lookup stays backend-driven. Search uses the current filters exactly as shown.'}
+            </p>
+          </div>
         </form>
+
+        {loading && (
+          <div className="mt-4 rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-6 py-8 text-center">
+            <p className="text-sm font-bold text-zinc-950">
+              {translateWithFallback(t, 'reservationLookupPanel.loadingTitle', 'Searching reservations')}
+            </p>
+            <p className="mt-2 text-sm font-medium text-zinc-500">
+              {translateWithFallback(
+                t,
+                'reservationLookupPanel.loadingDescription',
+                'The backend is filtering live reservations for the current lookup criteria.'
+              )}
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
@@ -294,11 +421,22 @@ export default function ReservationLookupPanel({
         )}
 
         {!loading && searched && reservations.length === 0 && (
-          <div className="mt-4 rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-10 text-center">
-            <p className="text-sm font-bold text-zinc-950">{t('reservationLookupPanel.emptyTitle')}</p>
-            <p className="mt-2 text-sm font-medium text-zinc-500">
-              {t('reservationLookupPanel.emptyDescription')}
-            </p>
+          <div className="mt-4 space-y-4">
+            <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-10 text-center">
+              <p className="text-sm font-bold text-zinc-950">{t('reservationLookupPanel.emptyTitle')}</p>
+              <p className="mt-2 text-sm font-medium text-zinc-500">
+                {t('reservationLookupPanel.emptyDescription')}
+              </p>
+            </div>
+            {!isAtDefaultState ? (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+              >
+                {t('common.clearFilters')}
+              </button>
+            ) : null}
           </div>
         )}
 
@@ -318,87 +456,113 @@ export default function ReservationLookupPanel({
             <div className="divide-y divide-zinc-200">
               {reservations.map((reservation) => (
                 <div key={reservation._rowKey} className="bg-white/80 px-4 py-4 sm:px-5">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-col gap-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
                         <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
                           <UserRound className="h-4 w-4" />
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate text-base font-black tracking-tight text-zinc-950">
+                          <p className="text-base font-black tracking-tight text-zinc-950 [overflow-wrap:anywhere]">
                             {reservation.guestName ?? t('common.guest')}
                           </p>
-                          <p className="truncate text-sm font-medium text-zinc-500">
+                          <LtrText className="mt-1 text-sm font-medium text-zinc-500">
                             {reservation.guestEmail || t('common.noGuestEmailProvided')}
-                          </p>
+                          </LtrText>
+                        </div>
+                      </div>
+                      <StatusPill status={reservation.status} size="sm" />
+                    </div>
+
+                    <div className="grid gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))]">
+                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                          {t('confirmationNumber')}
+                        </p>
+                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                          {reservation.confirmationNumber}
+                        </LtrText>
+                      </div>
+
+                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                          {t('common.room')}
+                        </p>
+                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                          {reservation.roomNumber ?? t('unassigned')}
+                        </LtrText>
+                        <p className="mt-1 text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">
+                          {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
+                        </p>
+                      </div>
+
+                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                          {t('modifyReservationPage.stayDates')}
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500">
+                              <CalendarDays className="h-4 w-4 text-zinc-400" />
+                              {t('checkInDate')}
+                            </span>
+                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                              {formatLocalizedDate(reservation.checkInDate, i18n.language, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
+                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                              {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('confirmationNumber')}
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-zinc-950">
-                            <LtrText>{reservation.confirmationNumber}</LtrText>
-                          </p>
-                        </div>
-
-                        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('common.room')}
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-zinc-950">
-                            {t('roomNum', { number: reservation.roomNumber ?? t('unassigned') })}
-                          </p>
+                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                          {t('checkInPage.reservationTotal')}
+                        </p>
+                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                          {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
+                        </LtrText>
+                        {reservation.outstandingBalance != null ? (
                           <p className="mt-1 text-xs font-medium text-zinc-500">
-                            {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
-                          </p>
-                        </div>
-
-                        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('modifyReservationPage.stayDates')}
-                          </p>
-                          <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
-                            <CalendarDays className="h-4 w-4 text-zinc-400" />
-                            {formatLocalizedDate(reservation.checkInDate, i18n.language, {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}{' '}
-                            -{' '}
-                            {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </p>
-                        </div>
-
-                        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('checkInPage.reservationTotal')}
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-zinc-950">
-                            {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
-                          </p>
-                          {reservation.outstandingBalance != null ? (
-                            <p className="mt-1 text-xs font-medium text-zinc-500">
-                              {t('checkoutPage.outstandingBalanceLabel')}: {' '}
+                            {t('checkoutPage.outstandingBalanceLabel')}:{' '}
+                            <LtrText className="text-zinc-950">
                               {formatLocalizedCurrency(reservation.outstandingBalance, i18n.language)}
-                            </p>
-                          ) : null}
-                        </div>
+                            </LtrText>
+                          </p>
+                        ) : null}
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 lg:items-end">
-                      <StatusPill status={reservation.status} size="sm" />
+                    <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm font-medium text-zinc-500">
+                        {hasMultipleMatches
+                          ? translateWithFallback(
+                              t,
+                              'reservationLookupPanel.multipleMatchesHint',
+                              'Select the exact stay before continuing with a reservation action.'
+                            )
+                          : translateWithFallback(
+                              t,
+                              'reservationLookupPanel.singleMatchHint',
+                              'This stay is ready to hand off into the reservation workflow.'
+                            )}
+                      </p>
                       <button
                         type="button"
                         onClick={() => onSelect?.(reservation)}
-                        className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800"
+                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-950 transition hover:border-zinc-950 hover:bg-zinc-50 sm:w-auto"
                       >
                         {t('common.selectReservation')}
                         <ArrowRight className="h-4 w-4" />

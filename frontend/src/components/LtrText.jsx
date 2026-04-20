@@ -1,12 +1,11 @@
-/**
- * A wrapper component that forces its content to be displayed Left-to-Right (LTR).
- * Useful for data strings like reservation numbers or phone numbers that should 
- * remain readable regardless of the app's current language direction (RTL/LTR).
- */
-export const LtrText = ({ children, className = '' }) => {
+export const LtrText = ({ children, className = '', as: Component = 'span' }) => {
   return (
-    <span dir="ltr" className={`inline-block font-sans ${className}`}>
+    <Component
+      dir="ltr"
+      className={`inline-block max-w-full break-words text-left font-sans [overflow-wrap:anywhere] ${className}`}
+      style={{ unicodeBidi: 'isolate' }}
+    >
       {children}
-    </span>
+    </Component>
   );
 };
