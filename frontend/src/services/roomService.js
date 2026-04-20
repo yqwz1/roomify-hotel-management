@@ -1,20 +1,8 @@
 import api from './api';
-import { localizeKnownServerMessage } from '../utils/localization';
+import { extractApiErrorMessage } from '../utils/apiError';
 
-export const extractErrorMessage = (err) => {
-  const data = err?.response?.data;
-  if (!data) return localizeKnownServerMessage(err?.message ?? 'Unknown error');
-
-  if (data.validationErrors) {
-    return localizeKnownServerMessage(
-      Object.values(data.validationErrors).join(' · ')
-    );
-  }
-
-  if (data.message) return localizeKnownServerMessage(data.message);
-
-  return localizeKnownServerMessage(err?.message ?? 'Unknown error');
-};
+export const extractErrorMessage = (err) =>
+  extractApiErrorMessage(err, 'Room status request failed. Please try again.');
 
 export const getRooms = async (filters = {}) => {
   const params = {};
@@ -49,6 +37,7 @@ export const updateRoom = async (id, data) => {
 export const updateRoomStatus = async (id, status) => {
   const response = await api.put(`/rooms/${id}/status`, null, {
     params: { status },
+    timeout: 20000,
   });
   return response.data;
 };

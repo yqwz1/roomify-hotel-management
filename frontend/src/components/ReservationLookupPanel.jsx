@@ -474,39 +474,18 @@ export default function ReservationLookupPanel({
                       <StatusPill status={reservation.status} size="sm" />
                     </div>
 
-                    <div className="grid gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))]">
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          {t('confirmationNumber')}
-                        </p>
-                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                          {reservation.confirmationNumber}
-                        </LtrText>
-                      </div>
-
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          {t('common.room')}
-                        </p>
-                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                          {reservation.roomNumber ?? t('unassigned')}
-                        </LtrText>
-                        <p className="mt-1 text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">
-                          {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
-                        </p>
-                      </div>
-
+                    <div className="grid gap-3 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
                       <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
                         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
                           {t('modifyReservationPage.stayDates')}
                         </p>
                         <div className="mt-2 space-y-2">
-                          <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                             <span className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500">
                               <CalendarDays className="h-4 w-4 text-zinc-400" />
                               {t('checkInDate')}
                             </span>
-                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                            <span className="min-w-0 text-sm font-bold text-zinc-950 sm:text-right [overflow-wrap:anywhere]">
                               {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                                 month: 'short',
                                 day: 'numeric',
@@ -514,9 +493,9 @@ export default function ReservationLookupPanel({
                               })}
                             </span>
                           </div>
-                          <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                             <span className="text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
-                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                            <span className="min-w-0 text-sm font-bold text-zinc-950 sm:text-right [overflow-wrap:anywhere]">
                               {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
                                 month: 'short',
                                 day: 'numeric',
@@ -527,21 +506,44 @@ export default function ReservationLookupPanel({
                         </div>
                       </div>
 
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                          {t('checkInPage.reservationTotal')}
-                        </p>
-                        <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                          {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
-                        </LtrText>
-                        {reservation.outstandingBalance != null ? (
-                          <p className="mt-1 text-xs font-medium text-zinc-500">
-                            {t('checkoutPage.outstandingBalanceLabel')}:{' '}
-                            <LtrText className="text-zinc-950">
-                              {formatLocalizedCurrency(reservation.outstandingBalance, i18n.language)}
-                            </LtrText>
+                      <div className="grid min-w-0 gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-2">
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('confirmationNumber')}
                           </p>
-                        ) : null}
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {reservation.confirmationNumber}
+                          </LtrText>
+                        </div>
+
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('common.room')}
+                          </p>
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {reservation.roomNumber ?? t('unassigned')}
+                          </LtrText>
+                          <p className="mt-1 text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">
+                            {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
+                          </p>
+                        </div>
+
+                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm sm:col-span-2 xl:col-span-2">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            {t('checkInPage.reservationTotal')}
+                          </p>
+                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                            {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
+                          </LtrText>
+                          {reservation.outstandingBalance != null ? (
+                            <p className="mt-1 text-xs font-medium text-zinc-500">
+                              {t('checkoutPage.outstandingBalanceLabel')}:{' '}
+                              <LtrText className="text-zinc-950">
+                                {formatLocalizedCurrency(reservation.outstandingBalance, i18n.language)}
+                              </LtrText>
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
 
