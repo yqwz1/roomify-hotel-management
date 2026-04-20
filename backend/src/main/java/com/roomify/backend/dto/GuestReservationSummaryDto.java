@@ -12,7 +12,6 @@ public class GuestReservationSummaryDto {
     private String roomType;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    // field name matches entity and frontend contract
     private BigDecimal totalPrice;
     private String paymentStatus;
     private String invoiceNumber;
