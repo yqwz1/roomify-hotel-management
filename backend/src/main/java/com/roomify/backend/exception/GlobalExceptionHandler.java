@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,7 +27,9 @@ public class GlobalExceptionHandler {
 
                 Map<String, String> validationErrors = new HashMap<>();
                 ex.getBindingResult().getFieldErrors()
-                                .forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
+                                .forEach(error -> validationErrors.put(
+                                                error.getField(),
+                                                resolveFieldErrorMessage(error)));
                 ex.getBindingResult().getGlobalErrors()
                                 .forEach(error -> validationErrors.putIfAbsent(
                                                 resolveGlobalErrorKey(error),
@@ -49,7 +52,9 @@ public class GlobalExceptionHandler {
 
                 Map<String, String> validationErrors = new HashMap<>();
                 ex.getBindingResult().getFieldErrors()
-                                .forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
+                                .forEach(error -> validationErrors.put(
+                                                error.getField(),
+                                                resolveFieldErrorMessage(error)));
 
                 ApiError error = new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
@@ -77,6 +82,26 @@ public class GlobalExceptionHandler {
                         }
                 }
                 return error.getObjectName();
+        }
+
+        private String resolveFieldErrorMessage(FieldError error) {
+                String defaultMessage = error.getDefaultMessage();
+                boolean conversionFailure = (error.getCode() != null && error.getCode().contains("typeMismatch"))
+                                || (defaultMessage != null
+                                                && defaultMessage.startsWith("Failed to convert property value"));
+
+                if (conversionFailure) {
+                        if (error.getRejectedValue() != null) {
+                                return "Invalid value for parameter: "
+                                                + error.getField()
+                                                + " ("
+                                                + error.getRejectedValue()
+                                                + ")";
+                        }
+                        return "Invalid value for parameter: " + error.getField();
+                }
+
+                return defaultMessage;
         }
 
         @ExceptionHandler(AccessDeniedException.class)
@@ -203,11 +228,14 @@ public class GlobalExceptionHandler {
                         message += " (" + ex.getValue() + ")";
                 }
 
+                Map<String, String> validationErrors = new HashMap<>();
+                validationErrors.put(ex.getName(), message);
                 ApiError error = new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "Bad Request",
-                                message,
-                                request.getRequestURI());
+                                "Validation Error",
+                                "Input validation failed",
+                                request.getRequestURI(),
+                                validationErrors);
                 return ResponseEntity.badRequest().body(error);
         }
 

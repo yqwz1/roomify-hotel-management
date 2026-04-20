@@ -1,5 +1,6 @@
 package com.roomify.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -8,7 +9,7 @@ public class GuestReservationSummaryDto {
     private String confirmationNumber;
     private String status;
     private String roomNumber;
-    private String roomTypeName;
+    private String roomType;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private BigDecimal totalPrice;
@@ -25,7 +26,7 @@ public class GuestReservationSummaryDto {
             String confirmationNumber,
             String status,
             String roomNumber,
-            String roomTypeName,
+            String roomType,
             LocalDate checkInDate,
             LocalDate checkOutDate,
             BigDecimal totalPrice,
@@ -37,7 +38,7 @@ public class GuestReservationSummaryDto {
         this.confirmationNumber = confirmationNumber;
         this.status = status;
         this.roomNumber = roomNumber;
-        this.roomTypeName = roomTypeName;
+        this.roomType = roomType;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.totalPrice = totalPrice;
@@ -56,6 +57,14 @@ public class GuestReservationSummaryDto {
         this.confirmationNumber = confirmationNumber;
     }
 
+    /**
+     * Backward-compatible alias preserved for legacy guest dashboard consumers.
+     */
+    @JsonProperty("confirmation")
+    public String getConfirmation() {
+        return confirmationNumber;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -72,12 +81,20 @@ public class GuestReservationSummaryDto {
         this.roomNumber = roomNumber;
     }
 
-    public String getRoomTypeName() {
-        return roomTypeName;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public void setRoomTypeName(String roomTypeName) {
-        this.roomTypeName = roomTypeName;
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
+    }
+
+    /**
+     * Backward-compatible alias preserved for older clients expecting roomType.
+     */
+    @JsonProperty("roomType")
+    public String getRoomType() {
+        return roomTypeName;
     }
 
     public LocalDate getCheckInDate() {
@@ -102,6 +119,14 @@ public class GuestReservationSummaryDto {
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    /**
+     * Backward-compatible alias preserved for older clients expecting totalAmount.
+     */
+    @JsonProperty("totalAmount")
+    public BigDecimal getTotalAmount() {
+        return totalPrice;
     }
 
     public String getPaymentStatus() {

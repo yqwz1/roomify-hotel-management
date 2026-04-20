@@ -37,10 +37,12 @@ public final class ReservationSpecification {
                 predicates.add(cb.equal(cb.upper(root.get("confirmationNumber")), confirmation));
             }
 
-            if (guestName != null) {
-                List<String> guestTokens = Arrays.stream(guestName.trim().split("\\s+"))
-                        .filter(token -> !token.isBlank())
-                        .map(token -> token.toLowerCase(Locale.ROOT))
+                if (guestName != null) {
+                    query.distinct(true);
+
+                    List<String> guestTokens = Arrays.stream(guestName.trim().split("\\s+"))
+                            .filter(token -> !token.isBlank())
+                            .map(token -> token.toLowerCase(Locale.ROOT))
                         .toList();
 
                 if (!guestTokens.isEmpty()) {

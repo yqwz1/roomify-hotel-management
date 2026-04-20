@@ -271,6 +271,20 @@ class ReservationServiceTest {
     }
 
     @Test
+    void checkInShouldNormalizeConfirmationNumber() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        reservationService.checkIn("  rsv-abc123def456  ");
+
+        verify(reservationRepository).findByConfirmationNumber("RSV-ABC123DEF456");
+    }
+
+    @Test
     void checkOutShouldThrowConflictWhenInvoiceIsNotFinalized() {
         Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
         reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
@@ -285,6 +299,25 @@ class ReservationServiceTest {
                 () -> reservationService.checkOut("RSV-ABC123DEF456"));
 
         assertEquals("Payment must be finalized before checkout", ex.getMessage());
+    }
+
+    @Test
+    void checkOutShouldNormalizeConfirmationNumber() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+        reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+        reservation.setInvoiceFinalized(true);
+        reservation.setOutstandingBalance(BigDecimal.ZERO);
+        reservation.setTotalPaid(reservation.getTotalPrice());
+        reservation.setPaymentStatus(PaymentStatus.PAID);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        reservationService.checkOut("  rsv-abc123def456  ");
+
+        verify(reservationRepository).findByConfirmationNumber("RSV-ABC123DEF456");
     }
 
     @Test
@@ -607,6 +640,61 @@ class ReservationServiceTest {
                 null,
                 null,
                 null);
+    }
+
+    @Test
+    void getAllReservationsShouldRejectReversedDateRangeWhenNotConfirmationScoped() {
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setCheckInDate(LocalDate.of(2026, 5, 3));
+        filters.setCheckOutDate(LocalDate.of(2026, 5, 1));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> reservationService.getAllReservations(filters));
+
+        assertEquals("checkOutDate cannot be before checkInDate", ex.getMessage());
+        verify(reservationRepository, never()).findAllByOptionalFilters(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void getAllReservationsShouldIgnoreReversedDateRangeWhenConfirmationScoped() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findAllByOptionalFilters(
+                eq("RSV-ABC123DEF456"),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .thenReturn(List.of(reservation));
+
+        ReservationFilterRequest filters = new ReservationFilterRequest();
+        filters.setConfirmation("  rsv-abc123def456  ");
+        filters.setCheckInDate(LocalDate.of(2026, 5, 3));
+        filters.setCheckOutDate(LocalDate.of(2026, 5, 1));
+
+        List<ReservationResponse> response = reservationService.getAllReservations(filters);
+
+        assertEquals(1, response.size());
+        verify(reservationRepository).findAllByOptionalFilters(
+                "RSV-ABC123DEF456",
+                null,
+                null,
+                null,
+                null);
+    }
+
+    @Test
+    void getByConfirmationNumberShouldNormalizeConfirmationNumber() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+
+        ReservationResponse response = reservationService.getByConfirmationNumber("  rsv-abc123def456  ");
+
+        assertEquals("RSV-ABC123DEF456", response.getConfirmationNumber());
+        verify(reservationRepository).findByConfirmationNumber("RSV-ABC123DEF456");
     }
 
     @Test

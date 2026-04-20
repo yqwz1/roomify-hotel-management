@@ -6,16 +6,18 @@ import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,14 +44,42 @@ public class GuestReservationServiceImpl implements GuestReservationService {
             throw new AccessDeniedException("Guest authentication required");
         }
 
-        String email = authentication.getName();
+        String email = normalizeEmail(authentication.getName());
         if (email == null || email.isBlank()) {
             throw new AccessDeniedException("Authenticated guest email is missing");
         }
 
-        return guestRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Guest profile not found for authenticated user: " + email));
+        // Some legacy datasets can contain case-variant guest rows for the same
+        // logical email. We merge them so the authenticated guest still sees a
+        // complete reservation history without any frontend workaround.
+        List<Guest> guests = guestRepository.findAllByEmailIgnoreCaseOrderByIdAsc(email);
+        if (guests.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Guest profile not found for authenticated user: " + email);
+        }
+
+        LocalDate today = LocalDate.now();
+
+        return guests.stream()
+                .map(Guest::getId)
+                .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
+                .filter(distinctByReservationId())
+                .sorted(buildReservationSort(today))
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+        String normalized = email.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    private Predicate<Reservation> distinctByReservationId() {
+        Set<Long> seenIds = new HashSet<>();
+        return reservation -> reservation.getId() == null || seenIds.add(reservation.getId());
     }
 
     private Comparator<Reservation> buildReservationSort(LocalDate today) {

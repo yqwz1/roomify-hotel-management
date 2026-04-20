@@ -40,7 +40,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                                 checkInDate,
                                 checkOutDate);
 
-                if (guestName != null) {
+                boolean hasActiveFilters = confirmation != null
+                                || guestName != null
+                                || status != null
+                                || checkInDate != null
+                                || checkOutDate != null;
+
+                if (hasActiveFilters) {
                         return findAll(specification, ReservationSpecification.filteredSort());
                 }
 
