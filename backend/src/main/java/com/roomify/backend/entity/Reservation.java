@@ -73,6 +73,9 @@ public class Reservation {
     @Column(name = "invoice_number", unique = true, length = 100)
     private String invoiceNumber;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     @Column(name = "actual_check_in_date")
     private LocalDate actualCheckInDate;
 
@@ -135,6 +138,9 @@ public class Reservation {
     public void applyDefaults() {
         if (status == null) {
             status = ReservationStatus.PENDING;
+        }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
         }
         if (modifiedAt == null) {
             modifiedAt = LocalDateTime.now();
@@ -241,6 +247,14 @@ public class Reservation {
 
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public LocalDate getActualCheckInDate() {

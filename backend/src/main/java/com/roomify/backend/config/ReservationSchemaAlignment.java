@@ -231,6 +231,7 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
 
     private void alignReservationColumns() {
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(100)");
+        execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS actual_check_in_date DATE");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS actual_check_out_at TIMESTAMP");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(500)");
@@ -241,9 +242,22 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS outstanding_balance NUMERIC(10, 2) DEFAULT 0.00");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'PENDING'");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS invoice_finalized BOOLEAN NOT NULL DEFAULT FALSE");
+        execute("ALTER TABLE reservations ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP");
     }
 
     private void backfillReservationFinancials() {
+        execute("""
+                UPDATE reservations
+                SET created_at = COALESCE(
+                    created_at,
+                    modified_at,
+                    cancellation_at,
+                    CAST(actual_check_in_date AS TIMESTAMP),
+                    CAST(check_in_date AS TIMESTAMP),
+                    CURRENT_TIMESTAMP
+                )
+                WHERE created_at IS NULL
+                """);
         execute("UPDATE reservations SET total_paid = 0.00 WHERE total_paid IS NULL OR total_paid < 0.00");
         execute("""
                 UPDATE reservations
@@ -260,11 +274,12 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
                     CASE
                         WHEN COALESCE(total_paid, 0.00) > 0.00
                              AND COALESCE(outstanding_balance, 0.00) <= 0.00 THEN 'PAID'
-                        WHEN COALESCE(total_paid, 0.00) > 0.00 THEN 'PARTIALLY_PAID'
+                WHEN COALESCE(total_paid, 0.00) > 0.00 THEN 'PARTIALLY_PAID'
                         ELSE 'UNPAID'
                     END
                 WHERE payment_status IS NULL OR TRIM(payment_status) = ''
                 """);
+        execute("ALTER TABLE reservations ALTER COLUMN created_at SET NOT NULL");
     }
 
     private String buildTextConversionSql(String tableName, String columnName, int length, ColumnMetadata metadata) {
