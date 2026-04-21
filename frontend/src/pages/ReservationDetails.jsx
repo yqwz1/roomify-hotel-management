@@ -70,12 +70,19 @@ export default function ReservationDetails() {
         });
         break;
       case 'invoice':
-        navigate('/invoice-preview', {
-          state: buildReservationLookupNavigationState(
-            { confirmation: reservation.confirmationNumber },
-            { initialReservation: reservation }
-          ),
-        });
+        navigate(
+          reservation.id
+            ? `/invoices/${reservation.id}`
+            : '/invoice-preview',
+          reservation.id
+            ? undefined
+            : {
+                state: buildReservationLookupNavigationState(
+                  { confirmation: reservation.confirmationNumber },
+                  { initialReservation: reservation }
+                ),
+              }
+        );
         break;
       default:
         break;

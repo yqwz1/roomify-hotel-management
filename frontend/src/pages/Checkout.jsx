@@ -768,9 +768,11 @@ export default function Checkout() {
                           <Button
                             type="button"
                             onClick={() =>
-                              navigate('/invoice-preview', {
-                                state: { confirmationNumber: selected.confirmationNumber },
-                              })
+                              selected?.id
+                                ? navigate(`/invoices/${selected.id}`)
+                                : navigate('/invoice-preview', {
+                                    state: { confirmationNumber: selected?.confirmationNumber },
+                                  })
                             }
                             className="h-12 bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
                           >

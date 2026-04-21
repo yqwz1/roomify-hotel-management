@@ -16,12 +16,16 @@ import GuestBillingStatus from './pages/GuestBillingStatus'
 import GuestProfile from './pages/GuestProfile'
 import GuestBookings from './pages/GuestBookings'
 import GuestBookingDetails from './pages/GuestBookingDetails'
+import Invoices from './pages/Invoices'
+import InvoiceDetails from './pages/InvoiceDetails'
 import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
+  GUEST_INVOICES_PATH,
   GUEST_BOOKINGS_PATH,
   GUEST_BILLING_STATUS_PATH,
   GUEST_PROFILE_PATH,
+  INVOICE_CENTER_PATH,
   ROLE_ADMIN,
   ROLE_GUEST,
   ROLE_MANAGER,
@@ -222,6 +226,22 @@ const AppContent = () => {
           }
         />
         <Route
+          path={INVOICE_CENTER_PATH}
+          element={
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+              <Layout showSidebar={true}><Invoices /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={`${INVOICE_CENTER_PATH}/:reservationId`}
+          element={
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+              <Layout showSidebar={true}><InvoiceDetails /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/invoice-preview"
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
@@ -253,6 +273,22 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
               <Layout showSidebar={true}><GuestBillingStatus /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={GUEST_INVOICES_PATH}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestBillingStatus /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={`${GUEST_INVOICES_PATH}/:confirmationNumber`}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><InvoiceDetails /></Layout>
             </ProtectedRoute>
           }
         />

@@ -1,8 +1,11 @@
 package com.roomify.backend.controller;
 
+import com.roomify.backend.dto.InvoiceDetailsDto;
+import com.roomify.backend.dto.InvoiceListItemDto;
 import com.roomify.backend.entity.InvoiceDeliveryLog;
 import com.roomify.backend.service.InvoiceService;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
+
+    @GetMapping
+    public ResponseEntity<List<InvoiceListItemDto>> getInvoiceHistory() {
+        return ResponseEntity.ok(invoiceService.getInvoiceHistory());
+    }
+
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<InvoiceDetailsDto> getInvoiceDetails(
+            @PathVariable Long reservationId) {
+        return ResponseEntity.ok(invoiceService.getInvoiceDetails(reservationId));
+    }
 
     @PostMapping("/{reservationId}")
     public ResponseEntity<String> generateInvoice(
