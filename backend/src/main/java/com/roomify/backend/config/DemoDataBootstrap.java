@@ -94,7 +94,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
         Room roomD201 = upsertRoom("D201", demoDeluxe, 2);
         Room roomD202 = upsertRoom("D202", demoDeluxe, 2);
         Room roomD301 = upsertRoom("D301", demoSuite, 3);
-        Room roomD302 = upsertRoom("D302", demoStandard, 3);
+        upsertRoom("D302", demoStandard, 3);
 
         Guest demoGuest = upsertGuest();
         LocalDate today = LocalDate.now();

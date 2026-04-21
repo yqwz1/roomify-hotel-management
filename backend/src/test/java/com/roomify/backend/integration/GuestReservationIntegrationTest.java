@@ -91,8 +91,6 @@ class GuestReservationIntegrationTest {
 
     private Guest guestA;
     private Guest guestB;
-    private Reservation guestACurrentReservation;
-    private Reservation guestAPastReservation;
     private Reservation guestBCurrentReservation;
     private Reservation guestBPastReservation;
 
@@ -133,12 +131,12 @@ class GuestReservationIntegrationTest {
 
         guestAToken = jwtUtils.generateToken("guestA@test.com", "ROLE_GUEST");
 
-        guestACurrentReservation = reservationRepository.save(buildReservation(
+        reservationRepository.save(buildReservation(
                 guestA, room101,
                 LocalDate.now(), LocalDate.now().plusDays(2),
                 ReservationStatus.CONFIRMED, "RSV-A-CURRENT"));
 
-        guestAPastReservation = reservationRepository.save(buildReservation(
+        reservationRepository.save(buildReservation(
                 guestA, room102,
                 LocalDate.now().minusDays(30), LocalDate.now().minusDays(28),
                 ReservationStatus.CHECKED_OUT, "RSV-A-PAST"));

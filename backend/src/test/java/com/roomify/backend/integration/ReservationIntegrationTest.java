@@ -953,7 +953,7 @@ class ReservationIntegrationTest {
                 targetCheckOut,
                 "CONFIRMED",
                 "CheckIn Match");
-        CreatedReservation checkOutMatch = createReservation(
+        createReservation(
                 managerToken,
                 room2Id,
                 targetCheckIn.plusDays(1),

@@ -50,8 +50,6 @@ public class ReservationService {
     private final AuditService auditService;
     private final HousekeepingNotificationService housekeepingNotificationService;
     private final ReservationFinancialService financialService;
-    private final InvoiceEmailService invoiceEmailService;
-    private final InvoiceDeliveryLogService invoiceDeliveryLogService;
     private final HotelSettingsService hotelSettingsService;
 
     public ReservationService(
@@ -59,8 +57,6 @@ public class ReservationService {
             GuestRepository guestRepository,
             RoomRepository roomRepository,
             EmailService emailService,
-            InvoiceEmailService invoiceEmailService,
-            InvoiceDeliveryLogService invoiceDeliveryLogService,
             AuditService auditService,
             HousekeepingNotificationService housekeepingNotificationService,
             ReservationFinancialService financialService,
@@ -70,8 +66,6 @@ public class ReservationService {
         this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
         this.emailService = emailService;
-        this.invoiceEmailService = invoiceEmailService;
-        this.invoiceDeliveryLogService = invoiceDeliveryLogService;
         this.auditService = auditService;
         this.housekeepingNotificationService = housekeepingNotificationService;
         this.financialService = financialService;
@@ -333,21 +327,6 @@ public class ReservationService {
                 "ROOM_STATUS_CHANGE",
                 "Room",
                 "Room " + room.getRoomNumber() + " status changed to OCCUPIED during check-in");
-
-        long nights = ChronoUnit.DAYS.between(
-                reservation.getCheckInDate(),
-                reservation.getCheckOutDate());
-
-        BigDecimal rate = room.getRoomType()
-                .getBasePrice()
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxRate = hotelSettingsService.getTaxRate();
-
-        BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-
-        BigDecimal taxes = subtotal.multiply(taxRate)
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
         return toResponse(reservation, financialService.summarize(reservation));
     }

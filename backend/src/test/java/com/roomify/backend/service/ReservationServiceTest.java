@@ -50,8 +50,6 @@ class ReservationServiceTest {
     private RoomRepository roomRepository;
 
     private EmailService emailService;
-    private InvoiceEmailService invoiceEmailService;
-    private InvoiceDeliveryLogService invoiceDeliveryLogService;
     private AuditService auditService;
     private HousekeepingNotificationService housekeepingNotificationService;
     private ReservationFinancialService financialService;
@@ -67,8 +65,6 @@ class ReservationServiceTest {
         roomRepository = mock(RoomRepository.class);
 
         emailService = mock(EmailService.class);
-        invoiceEmailService = mock(InvoiceEmailService.class);
-        invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
         auditService = mock(AuditService.class);
         housekeepingNotificationService = mock(HousekeepingNotificationService.class);
         hotelSettingsService = mock(HotelSettingsService.class);
@@ -80,8 +76,6 @@ class ReservationServiceTest {
                 guestRepository,
                 roomRepository,
                 emailService,
-                invoiceEmailService,
-                invoiceDeliveryLogService,
                 auditService,
                 housekeepingNotificationService,
                 financialService,
