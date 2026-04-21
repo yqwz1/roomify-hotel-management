@@ -27,15 +27,13 @@ class GuestReservationServiceImplTest {
 
     private ReservationRepository reservationRepository;
     private GuestRepository guestRepository;
-    private ReservationService reservationService;
     private GuestReservationServiceImpl service;
 
     @BeforeEach
     void setUp() {
         reservationRepository = mock(ReservationRepository.class);
         guestRepository = mock(GuestRepository.class);
-        reservationService = mock(ReservationService.class);
-        service = new GuestReservationServiceImpl(reservationRepository, guestRepository, reservationService);
+        service = new GuestReservationServiceImpl(reservationRepository, guestRepository);
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("  guest@example.com  ", "pw", List.of()));

@@ -245,19 +245,12 @@ export default function ReservationsWorkspace() {
         });
         break;
       case 'invoice':
-        navigate(
-          reservation.id
-            ? `/invoices/${reservation.id}`
-            : '/invoice-preview',
-          reservation.id
-            ? undefined
-            : {
-                state: buildReservationLookupNavigationState(
-                  { confirmation: reservation.confirmationNumber },
-                  { initialReservation: reservation }
-                ),
-              }
-        );
+        navigate('/invoice-preview', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation }
+          ),
+        });
         break;
       default:
         break;

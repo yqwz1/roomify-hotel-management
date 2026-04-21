@@ -540,16 +540,6 @@ export default function GuestBookingDetails() {
                 value={getBooleanLabel(Boolean(reservation.invoiceFinalized), t)}
               />
             </dl>
-
-            <div className="mt-4 flex justify-end border-t border-zinc-200 pt-4">
-              <Link
-                to={`/guest/invoices/${reservation.confirmationNumber}`}
-                className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
-              >
-                <Receipt className="h-4 w-4" />
-                {translateWithFallback(t, 'guestBookingDetailsPage.invoiceCta', 'Open invoice')}
-              </Link>
-            </div>
           </DashboardPanel>
 
           <DashboardPanel

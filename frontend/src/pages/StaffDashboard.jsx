@@ -85,7 +85,7 @@ export default function StaffDashboard() {
         icon: Receipt,
         title: t('invoicePreview'),
         description: t(`${pageTx}.actions.invoiceDescription`),
-        onClick: () => navigate('/invoices'),
+        onClick: () => navigate('/invoice-preview'),
       },
     ],
     [navigate, t]

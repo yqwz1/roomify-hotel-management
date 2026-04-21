@@ -1118,7 +1118,7 @@ export default function ManagerDashboard() {
         icon: Receipt,
         title: t(`${pageTx}.quickActionItems.invoicesTitle`),
         description: t(`${pageTx}.quickActionItems.invoicesDescription`),
-        onClick: () => navigate('/invoices'),
+        onClick: () => navigate('/invoice-preview'),
       },
       {
         icon: TrendingUp,

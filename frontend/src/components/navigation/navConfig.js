@@ -22,8 +22,6 @@ export const ROLE_STAFF = 'ROLE_STAFF';
 export const ROLE_GUEST = 'ROLE_GUEST';
 export const GUEST_PROFILE_PATH = '/guest/profile';
 export const GUEST_BOOKINGS_PATH = '/guest/bookings';
-export const INVOICE_CENTER_PATH = '/invoices';
-export const GUEST_INVOICES_PATH = '/guest/invoices';
 export const GUEST_BILLING_STATUS_PATH = '/guest/billing-status';
 
 const ROLE_PRIORITY = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
@@ -249,7 +247,7 @@ const MANAGER_NAVIGATION_CONFIG = [
     roles: [ROLE_MANAGER],
     items: [
       {
-        path: INVOICE_CENTER_PATH,
+        path: '/invoice-preview',
         translationKey: 'invoicePreview',
         fallbackLabel: 'Invoices',
         icon: Receipt,
@@ -342,7 +340,7 @@ const STAFF_NAVIGATION_CONFIG = [
     roles: [ROLE_STAFF],
     items: [
       {
-        path: INVOICE_CENTER_PATH,
+        path: '/invoice-preview',
         translationKey: 'navBilling',
         fallbackLabel: 'Billing',
         icon: Receipt,
@@ -419,7 +417,7 @@ const GUEST_NAVIGATION_CONFIG = [
     roles: [ROLE_GUEST],
     items: [
       {
-        path: GUEST_INVOICES_PATH,
+        path: GUEST_BILLING_STATUS_PATH,
         translationKey: 'navBillingStatus',
         fallbackLabel: 'Billing Status',
         icon: Receipt,
@@ -460,30 +458,6 @@ const PAGE_META = [
     sectionId: 'my-stay',
     translationKey: 'guestBookingDetailsPage.title',
     fallbackLabel: 'Booking Details',
-  },
-  {
-    match: (pathname) => pathname === INVOICE_CENTER_PATH,
-    sectionId: 'finance',
-    translationKey: 'invoicePreview',
-    fallbackLabel: 'Invoices',
-  },
-  {
-    match: (pathname) => /^\/invoices\/[^/]+$/.test(pathname),
-    sectionId: 'finance',
-    translationKey: 'invoicePreview',
-    fallbackLabel: 'Invoice Details',
-  },
-  {
-    match: (pathname) => pathname === GUEST_INVOICES_PATH || pathname === GUEST_BILLING_STATUS_PATH,
-    sectionId: 'billing-status',
-    translationKey: 'navBillingStatus',
-    fallbackLabel: 'Billing Status',
-  },
-  {
-    match: (pathname) => /^\/guest\/invoices\/[^/]+$/.test(pathname),
-    sectionId: 'billing-status',
-    translationKey: 'invoicePreview',
-    fallbackLabel: 'Invoice Details',
   },
 ];
 

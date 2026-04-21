@@ -34,7 +34,6 @@ class BillingServiceTest {
         private PaymentRepository paymentRepository;
         private AuditService auditService;
         private NotificationService notificationService;
-        private HotelSettingsService hotelSettingsService;
         private ReservationFinancialService financialService;
         private BillingService billingService;
 
@@ -44,9 +43,7 @@ class BillingServiceTest {
                 paymentRepository = mock(PaymentRepository.class);
                 auditService = mock(AuditService.class);
                 notificationService = mock(NotificationService.class);
-                hotelSettingsService = mock(HotelSettingsService.class);
-                when(hotelSettingsService.getTaxRate()).thenReturn(new BigDecimal("0.15"));
-                financialService = new ReservationFinancialService(hotelSettingsService);
+                financialService = new ReservationFinancialService(new BigDecimal("0.15"));
 
                 billingService = new BillingService(
                                 reservationRepository,
@@ -54,7 +51,7 @@ class BillingServiceTest {
                                 auditService,
                                 notificationService,
                                 financialService,
-                                hotelSettingsService);
+                                new BigDecimal("0.15"));
         }
 
         @Test

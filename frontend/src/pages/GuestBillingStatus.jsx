@@ -8,12 +8,14 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
-import { getGuestInvoiceHistory } from '../services/invoiceService';
+import {
+  extractGuestReservationError,
+  getGuestReservations,
+} from '../services/guestReservationService';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
   getBooleanLabel,
-  getInvoiceDeliveryStatusLabel,
   getPaymentStatusLabel,
   translateWithFallback,
 } from '../utils/localization';
@@ -35,13 +37,13 @@ export default function GuestBillingStatus() {
       setError('');
 
       try {
-        const data = await getGuestInvoiceHistory();
+        const data = await getGuestReservations();
         if (ignore) return;
         setReservations(Array.isArray(data) ? data : []);
       } catch (err) {
         if (ignore) return;
         setReservations([]);
-        setError(err?.response?.data?.message || err?.message || 'Unable to load invoices');
+        setError(extractGuestReservationError(err));
       } finally {
         if (!ignore) {
           setLoading(false);
@@ -92,13 +94,13 @@ export default function GuestBillingStatus() {
         description={translateWithFallback(
           t,
           `${pageTx}.description`,
-          'Review invoice history, payment state, and printable hotel billing records across your stays.'
+          'Review invoice state, amounts paid, and any remaining balances across your active stays.'
         )}
         meta={[
           translateWithFallback(
             t,
             `${pageTx}.metaReservations`,
-            '{{count}} invoice records',
+            '{{count}} stays tracked',
             { count: reservations.length }
           ),
           translateWithFallback(
@@ -124,7 +126,11 @@ export default function GuestBillingStatus() {
           icon={Receipt}
           label={translateWithFallback(t, `${pageTx}.metrics.trackedLabel`, 'Tracked Stays')}
           value={String(reservations.length)}
-          hint={translateWithFallback(t, `${pageTx}.metrics.trackedHint`, 'Invoice records linked to your account')}
+          hint={translateWithFallback(
+            t,
+            `${pageTx}.metrics.trackedHint`,
+            'Reservations returned by the guest reservations endpoint.'
+          )}
         />
         <DashboardMetricCard
           icon={WalletCards}
@@ -165,7 +171,7 @@ export default function GuestBillingStatus() {
           description={translateWithFallback(
             t,
             `${pageTx}.billingDescription`,
-            'Open any invoice record to review its billing lines, delivery state, and document preview.'
+            'Review invoice references, payment state, and balances for each stay.'
           )}
         >
           {loading ? (
@@ -223,9 +229,6 @@ export default function GuestBillingStatus() {
                           ? getPaymentStatusLabel(reservation.paymentStatus, t)
                           : t('common.pending')}
                       </span>
-                      <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700">
-                        {getInvoiceDeliveryStatusLabel(reservation.deliveryStatus, t)}
-                      </span>
                     </div>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -269,10 +272,10 @@ export default function GuestBillingStatus() {
                     <div className="mt-4 flex justify-end border-t border-zinc-200 pt-4">
                       <button
                         type="button"
-                        onClick={() => navigate(`/guest/invoices/${confirmation}`)}
+                        onClick={() => navigate(`/guest/bookings/${confirmation}`)}
                         className="inline-flex items-center rounded-full bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
                       >
-                        {translateWithFallback(t, `${pageTx}.viewReservationCta`, 'Open invoice')}
+                        {translateWithFallback(t, `${pageTx}.viewReservationCta`, 'Open reservation')}
                       </button>
                     </div>
                   </article>
