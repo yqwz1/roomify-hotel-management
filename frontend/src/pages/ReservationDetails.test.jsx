@@ -37,6 +37,7 @@ function ActionRouteProbe() {
       <p>{location.pathname}</p>
       <p>{location.state?.initialFilters?.confirmation ?? 'missing-confirmation'}</p>
       <p>{location.state?.initialQuery ?? 'empty-query'}</p>
+      <p>{location.state?.workflowIntent ?? 'missing-intent'}</p>
     </div>
   );
 }
@@ -126,9 +127,18 @@ describe('ReservationDetails', () => {
     expect(screen.getByText(/^No$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Back to Queue/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Check-In/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: /^Payment Open billing now and collect payment/i,
+      })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Modify Reservation/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Cancel Reservation/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Checkout/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: /^Checkout Review the bill and complete the final departure workflow/i,
+      })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Invoice/i })).toBeInTheDocument();
   });
 
@@ -166,45 +176,59 @@ describe('ReservationDetails', () => {
 
   it.each([
     {
+      buttonName: /^Payment Open billing now and collect payment/i,
+      path: '/checkout',
+      status: 'CONFIRMED',
+      workflowIntent: 'payment',
+    },
+    {
       buttonName: /Modify Reservation/i,
       path: '/reservations/modify',
       status: 'CONFIRMED',
+      workflowIntent: 'missing-intent',
     },
     {
       buttonName: /Cancel Reservation/i,
       path: '/reservations/cancel',
       status: 'CONFIRMED',
+      workflowIntent: 'missing-intent',
     },
     {
-      buttonName: /Checkout/i,
+      buttonName: /^Checkout Review the bill and complete the final departure workflow/i,
       path: '/checkout',
       status: 'CHECKED_IN',
+      workflowIntent: 'checkout',
     },
     {
       buttonName: /Invoice/i,
       path: '/invoice-preview',
       status: 'CONFIRMED',
+      workflowIntent: 'missing-intent',
     },
-  ])('routes $path through explicit confirmation filters', async ({ buttonName, path, status }) => {
-    const user = userEvent.setup();
+  ])(
+    'routes $path through explicit confirmation filters',
+    async ({ buttonName, path, status, workflowIntent }) => {
+      const user = userEvent.setup();
 
-    getReservationByConfirmationNumber.mockResolvedValue({
-      ...reservation,
-      confirmationNumber: 'DEMO-CHECKIN-READY',
-      status,
-    });
+      getReservationByConfirmationNumber.mockResolvedValue({
+        ...reservation,
+        confirmationNumber: 'DEMO-CHECKIN-READY',
+        status,
+      });
 
-    renderPage({
-      entry: '/reservations/DEMO-CHECKIN-READY',
-      extraRoutes: <Route path={path} element={<ActionRouteProbe />} />,
-    });
+      renderPage({
+        entry: '/reservations/DEMO-CHECKIN-READY',
+        extraRoutes: <Route path={path} element={<ActionRouteProbe />} />,
+      });
 
-    await screen.findByText(/Reservation Details/i);
-    await user.click(screen.getByRole('button', { name: buttonName }));
+      await screen.findByText(/Reservation Details/i);
+      await user.click(screen.getByRole('button', { name: buttonName }));
 
-    expect(await screen.findByText('Action Route')).toBeInTheDocument();
-    expect(screen.getByText(path)).toBeInTheDocument();
-    expect(screen.getByText('DEMO-CHECKIN-READY')).toBeInTheDocument();
-    expect(screen.getByText('empty-query')).toBeInTheDocument();
-  });
+      expect(await screen.findByText('Action Route')).toBeInTheDocument();
+      expect(screen.getByText(path)).toBeInTheDocument();
+      expect(screen.getByText('DEMO-CHECKIN-READY')).toBeInTheDocument();
+      expect(screen.getByText('empty-query')).toBeInTheDocument();
+      expect(screen.getByText(workflowIntent)).toBeInTheDocument();
+    }
+  );
 });

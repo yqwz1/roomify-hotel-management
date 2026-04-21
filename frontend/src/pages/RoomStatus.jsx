@@ -24,24 +24,21 @@ import {
   getRoomStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 const STATUSES = ['ALL', 'AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
 const STATUS_META = {
   AVAILABLE: {
-    color: 'border-emerald-200 bg-emerald-50 text-emerald-900',
     icon: CheckCircle2,
   },
   OCCUPIED: {
-    color: 'border-zinc-300 bg-zinc-100 text-zinc-700',
     icon: AlertCircle,
   },
   NEEDS_CLEANING: {
-    color: 'border-amber-200 bg-amber-50 text-amber-900',
     icon: Sparkles,
   },
   UNDER_MAINTENANCE: {
-    color: 'border-rose-200 bg-rose-50 text-rose-900',
     icon: Wrench,
   },
 };
@@ -305,6 +302,7 @@ export default function RoomStatus() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {filteredRooms.map((room) => {
               const meta = STATUS_META[room.status] || STATUS_META.AVAILABLE;
+              const statusClasses = getStatusBadgeClasses(room.status);
               const Icon = meta.icon;
               const actions = room.validNextStatuses ?? [];
               const actionsUnavailable = room.validNextStatusesStatus === ACTION_STATUS_UNAVAILABLE;
@@ -329,14 +327,14 @@ export default function RoomStatus() {
                     </div>
 
                     <span
-                      className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${meta.color}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${statusClasses}`}
                     >
                       <Icon className="h-5 w-5" />
                     </span>
                   </div>
 
                   <div
-                    className={`mt-5 inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] ${meta.color}`}
+                    className={`mt-5 inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] ${statusClasses}`}
                   >
                     {getRoomStatusLabel(room.status, t)}
                   </div>

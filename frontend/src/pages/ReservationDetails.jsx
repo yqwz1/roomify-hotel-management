@@ -28,25 +28,54 @@ export default function ReservationDetails() {
   );
 
   const handleAction = (action, reservation) => {
-    const navigationState = buildReservationLookupNavigationState({
-      confirmation: reservation.confirmationNumber,
-    });
-
     switch (action) {
       case 'checkIn':
-        navigate('/check-in', { state: navigationState });
+        navigate('/check-in', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation }
+          ),
+        });
+        break;
+      case 'payment':
+        navigate('/checkout', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation, workflowIntent: 'payment' }
+          ),
+        });
         break;
       case 'modify':
-        navigate('/reservations/modify', { state: navigationState });
+        navigate('/reservations/modify', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation }
+          ),
+        });
         break;
       case 'cancel':
-        navigate('/reservations/cancel', { state: navigationState });
+        navigate('/reservations/cancel', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation }
+          ),
+        });
         break;
       case 'checkout':
-        navigate('/checkout', { state: navigationState });
+        navigate('/checkout', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation, workflowIntent: 'checkout' }
+          ),
+        });
         break;
       case 'invoice':
-        navigate('/invoice-preview', { state: navigationState });
+        navigate('/invoice-preview', {
+          state: buildReservationLookupNavigationState(
+            { confirmation: reservation.confirmationNumber },
+            { initialReservation: reservation }
+          ),
+        });
         break;
       default:
         break;

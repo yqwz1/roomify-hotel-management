@@ -22,17 +22,11 @@ import {
   getRoomStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
 const FRONT_DESK_EMAIL = 'info@roomify.com';
 const FRONT_DESK_LINK = `mailto:${FRONT_DESK_EMAIL}?subject=Roomify%20Front%20Desk%20Support`;
-
-const STATUS_STYLES = {
-  AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  OCCUPIED: 'border-zinc-300 bg-zinc-100 text-zinc-700',
-  NEEDS_CLEANING: 'border-amber-200 bg-amber-50 text-amber-900',
-  UNDER_MAINTENANCE: 'border-rose-200 bg-rose-50 text-rose-900',
-};
 
 function SearchSkeletonCard() {
   return (
@@ -354,8 +348,7 @@ export default function RoomSearch() {
                           </div>
                           <span
                             className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
-                              STATUS_STYLES[room.status] ||
-                              'border-zinc-200 bg-zinc-50 text-zinc-500'
+                              getStatusBadgeClasses(room.status)
                             }`}
                           >
                             {getRoomStatusLabel(room.status, t)}

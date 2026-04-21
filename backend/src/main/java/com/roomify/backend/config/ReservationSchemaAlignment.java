@@ -1,5 +1,6 @@
 package com.roomify.backend.config;
 
+import com.roomify.backend.user.Role;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
@@ -7,9 +8,11 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -173,8 +176,41 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
         alignTextColumn("users", "email", 255);
         alignTextColumn("users", "password_hash", 255);
         alignTextColumn("users", "role", 20);
+        normalizeUserRoles();
+        alignUserRoleConstraint();
         alignTextColumn("staff", "name", 100);
         alignTextColumn("staff", "department", 50);
+    }
+
+    private void normalizeUserRoles() {
+        if (!columnExists("users", "role")) {
+            return;
+        }
+
+        for (Role role : Role.values()) {
+            String canonicalRole = role.name();
+            execute("UPDATE users SET role = '" + canonicalRole + "' WHERE UPPER(TRIM(role)) = '" + canonicalRole + "'");
+            execute("UPDATE users SET role = '" + canonicalRole
+                    + "' WHERE UPPER(TRIM(role)) = 'ROLE_" + canonicalRole + "'");
+        }
+    }
+
+    private void alignUserRoleConstraint() {
+        if (!columnExists("users", "role")) {
+            return;
+        }
+
+        String allowedRoles = Arrays.stream(Role.values())
+                .map(Role::name)
+                .map(role -> "'" + role + "'")
+                .collect(Collectors.joining(", "));
+
+        execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+        execute("""
+                ALTER TABLE users
+                ADD CONSTRAINT users_role_check
+                CHECK (role IN (%s))
+                """.formatted(allowedRoles));
     }
 
     private void alignTextColumn(String tableName, String columnName, int length) {

@@ -305,8 +305,9 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Reservation not found with confirmation number: " + confirmationNumber));
 
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new ResourceConflictException("Only CONFIRMED reservations can be checked in");
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED
+                && reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new ResourceConflictException("Only PENDING or CONFIRMED reservations can be checked in");
         }
 
         if (LocalDate.now().isBefore(reservation.getCheckInDate())) {

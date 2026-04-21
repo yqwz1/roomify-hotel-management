@@ -202,6 +202,7 @@ export default function BookRoom() {
         roomId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
+        status: 'CONFIRMED',
         guest: {
           name: guest.name.trim(),
           email: guest.email.trim(),

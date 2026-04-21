@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -42,14 +42,7 @@ import {
   translateBillLineItemLabel,
   translateKnownValue,
 } from '../utils/localization';
-
-const PAYMENT_STATUS_STYLES = {
-  PAID: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  PARTIALLY_PAID: 'border-amber-200 bg-amber-50 text-amber-900',
-  PAYMENT_PENDING: 'border-amber-200 bg-amber-50 text-amber-900',
-  UNPAID: 'border-rose-200 bg-rose-50 text-rose-900',
-  FAILED: 'border-rose-200 bg-rose-50 text-rose-900',
-};
+import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 const PAYMENT_METHODS = ['CASH', 'CARD', 'ONLINE'];
 const PAYMENT_BLOCKING_STATUSES = new Set(['UNPAID', 'PARTIALLY_PAID', 'FAILED', 'PAYMENT_PENDING']);
@@ -65,7 +58,7 @@ const humanizePaymentMethod = (method) =>
 
 function PaymentStatusBadge({ status, t }) {
   const normalized = normalizePaymentStatus(status);
-  const tone = PAYMENT_STATUS_STYLES[normalized] ?? 'border-zinc-200 bg-zinc-50 text-zinc-600';
+  const tone = getStatusBadgeClasses(normalized);
 
   return (
     <span
@@ -372,9 +365,15 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
 export default function Checkout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
-  const { initialFilters, initialQuery } = readReservationLookupNavigationState(location.state);
+  const {
+    initialFilters,
+    initialQuery,
+    workflowIntent,
+    initialReservation,
+  } = readReservationLookupNavigationState(location.state);
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(null);
+  const paymentFirstMode = workflowIntent === 'payment';
+  const [selected, setSelected] = useState(initialReservation);
   const [bill, setBill] = useState(null);
   const [billLoading, setBillLoading] = useState(false);
   const [billError, setBillError] = useState(null);
@@ -415,6 +414,20 @@ export default function Checkout() {
     setPaymentReceipt(null);
     await fetchBill(reservation.confirmationNumber);
   };
+
+  useEffect(() => {
+    if (!initialReservation?.confirmationNumber) {
+      return;
+    }
+
+    setSelected(initialReservation);
+    setCheckoutSuccess(false);
+    setCheckoutError(null);
+    setPaymentModalOpen(false);
+    setPaymentError(null);
+    setPaymentReceipt(null);
+    void fetchBill(initialReservation.confirmationNumber);
+  }, [fetchBill, initialReservation]);
 
   const handleReset = () => {
     setSelected(null);
@@ -480,10 +493,48 @@ export default function Checkout() {
       bill &&
       !billLoading &&
       !billError &&
-      selected.status === 'CHECKED_IN' &&
+      reservationStatusRules.canCollectPayment(selected.status) &&
       outstandingBalance > 0 &&
       !checkoutSuccess
   );
+  const pageTitle = paymentFirstMode ? t('checkoutPage.paymentTitle') : t('checkoutTitle');
+  const pageEyebrow = paymentFirstMode
+    ? t('checkoutPage.paymentHeroEyebrow')
+    : t('checkoutPage.heroEyebrow');
+  const pageDescription = paymentFirstMode
+    ? t('checkoutPage.paymentDescription')
+    : t('checkoutPage.description');
+  const workflowMeta = checkoutSuccess
+    ? t('checkoutPage.departureCompleted')
+    : paymentFirstMode
+      ? paymentReceipt
+        ? t('checkoutPage.paymentCaptured')
+        : t('checkoutPage.paymentOpenWorkflow')
+      : t('checkoutPage.openWorkflow');
+  const gateTitle = paymentFirstMode
+    ? t('checkoutPage.paymentGateTitle')
+    : t('checkoutPage.gateTitle');
+  const selectDescription = paymentFirstMode
+    ? t('checkoutPage.paymentSelectDescription')
+    : t('checkoutPage.selectDescription');
+  const selectionTips = paymentFirstMode
+    ? t('checkoutPage.paymentTips', { returnObjects: true })
+    : t('checkoutPage.tips', { returnObjects: true });
+  const summaryTitle = paymentFirstMode
+    ? t('checkoutPage.paymentSummaryTitle')
+    : t('checkoutPage.summaryTitle');
+  const summaryDescription = paymentFirstMode
+    ? t('checkoutPage.paymentSummaryDescription')
+    : t('checkoutPage.summaryDescription');
+  const finalBillDescription = paymentFirstMode
+    ? t('checkoutPage.paymentBillDescription')
+    : t('checkoutPage.finalBillDescription');
+  const controlsTitle = paymentFirstMode
+    ? t('checkoutPage.paymentModeControlsTitle')
+    : t('checkoutPage.controlsTitle');
+  const controlsDescription = paymentFirstMode
+    ? t('checkoutPage.paymentModeControlsDescription')
+    : t('checkoutPage.controlsDescription');
 
   const handlePaymentSubmit = async ({ amount, paymentMethod }) => {
     if (!selected?.confirmationNumber || paymentLoading) {
@@ -563,18 +614,18 @@ export default function Checkout() {
       ) : null}
 
       <DashboardHero
-        eyebrow={t('checkoutPage.heroEyebrow')}
-        title={t('checkoutTitle')}
-        description={t('checkoutPage.description')}
+        eyebrow={pageEyebrow}
+        title={pageTitle}
+        description={pageDescription}
         meta={[
           t('checkoutPage.billingRequired'),
           selected ? `${t('checkInPage.reservation')}: ${selected.confirmationNumber}` : t('checkInPage.awaitingSelection'),
-          checkoutSuccess ? t('checkoutPage.departureCompleted') : t('checkoutPage.openWorkflow'),
+          workflowMeta,
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
-            {t('checkoutPage.gateTitle')}
+            {gateTitle}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -605,9 +656,9 @@ export default function Checkout() {
         />
 
         {!selected ? (
-          <DashboardPanel title={t('checkoutPage.selectTitle')} description={t('checkoutPage.selectDescription')}>
+          <DashboardPanel title={t('checkoutPage.selectTitle')} description={selectDescription}>
             <div className="grid gap-3 md:grid-cols-3">
-              {t('checkoutPage.tips', { returnObjects: true }).map((item) => (
+              {selectionTips.map((item) => (
                 <div
                   key={item}
                   className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
@@ -620,8 +671,8 @@ export default function Checkout() {
         ) : (
           <div className="space-y-6">
             <DashboardPanel
-              title={t('checkoutPage.summaryTitle')}
-              description={t('checkoutPage.summaryDescription')}
+              title={summaryTitle}
+              description={summaryDescription}
               action={<StatusPill status={selected.status} />}
             >
               <div className="grid gap-4 md:grid-cols-2">
@@ -736,7 +787,7 @@ export default function Checkout() {
 
             <DashboardPanel
               title={t('checkoutPage.finalBillTitle')}
-              description={t('checkoutPage.finalBillDescription')}
+              description={finalBillDescription}
               action={
                 bill ? (
                   <PaymentStatusBadge status={paymentStatus} t={t} />
@@ -834,8 +885,8 @@ export default function Checkout() {
             </DashboardPanel>
 
             <DashboardPanel
-              title={t('checkoutPage.controlsTitle')}
-              description={t('checkoutPage.controlsDescription')}
+              title={controlsTitle}
+              description={controlsDescription}
             >
               <div className="grid gap-3 md:grid-cols-3">
                 {[

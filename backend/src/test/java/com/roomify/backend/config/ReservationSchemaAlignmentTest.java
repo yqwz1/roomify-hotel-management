@@ -227,6 +227,7 @@ class ReservationSchemaAlignmentTest {
         user.setStaff(staff);
         userRepository.save(user);
 
+        jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN email SET DATA TYPE VARBINARY");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN password_hash SET DATA TYPE VARBINARY");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN role SET DATA TYPE VARBINARY");
@@ -254,5 +255,45 @@ class ReservationSchemaAlignmentTest {
         assertEquals("Alice Johnson", byName.getFirst().getName());
         assertEquals(1, byEmail.size());
         assertFalse(userRepository.findById(byEmail.getFirst().getId()).orElseThrow().getEmail().isBlank());
+    }
+
+    @Test
+    void repairsLegacyUsersRoleCheckConstraintToAllowAdmin() throws Exception {
+        User user = userRepository.save(new User("manager@roomify.com", "hashed-password", Role.MANAGER, true));
+
+        jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+        jdbcTemplate.execute("""
+                ALTER TABLE users
+                ADD CONSTRAINT users_role_check
+                CHECK (role IN ('MANAGER', 'STAFF', 'GUEST'))
+                """);
+
+        reservationSchemaAlignment.run(new DefaultApplicationArguments(new String[0]));
+
+        jdbcTemplate.update("UPDATE users SET role = 'ADMIN' WHERE id = ?", user.getId());
+
+        String repairedRole = jdbcTemplate.queryForObject(
+                "SELECT role FROM users WHERE id = ?",
+                String.class,
+                user.getId());
+
+        assertEquals("ADMIN", repairedRole);
+    }
+
+    @Test
+    void normalizesPrefixedUserRolesBeforeReapplyingConstraint() throws Exception {
+        User user = userRepository.save(new User("prefixed@roomify.com", "hashed-password", Role.STAFF, true));
+
+        jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+        jdbcTemplate.update("UPDATE users SET role = 'ROLE_ADMIN' WHERE id = ?", user.getId());
+
+        reservationSchemaAlignment.run(new DefaultApplicationArguments(new String[0]));
+
+        String repairedRole = jdbcTemplate.queryForObject(
+                "SELECT role FROM users WHERE id = ?",
+                String.class,
+                user.getId());
+
+        assertEquals("ADMIN", repairedRole);
     }
 }

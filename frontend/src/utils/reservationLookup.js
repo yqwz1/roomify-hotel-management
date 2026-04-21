@@ -7,6 +7,10 @@ export const EMPTY_RESERVATION_LOOKUP_FILTERS = Object.freeze({
 });
 
 const normalizeLookupValue = (value) => String(value ?? '').trim();
+const normalizeWorkflowIntent = (value) => {
+  const normalized = normalizeLookupValue(value).toLowerCase();
+  return normalized === 'payment' || normalized === 'checkout' ? normalized : '';
+};
 
 export const normalizeReservationLookupFilters = (filters = {}) => ({
   confirmation: normalizeLookupValue(filters.confirmation),
@@ -29,15 +33,30 @@ export const isLikelyConfirmationValue = (value) => {
   return /[-\d]/.test(normalized);
 };
 
-export const buildReservationLookupNavigationState = (filters = {}) => ({
-  initialFilters: normalizeReservationLookupFilters(filters),
-});
+export const buildReservationLookupNavigationState = (filters = {}, options = {}) => {
+  const workflowIntent = normalizeWorkflowIntent(options.workflowIntent);
+  const initialReservation =
+    options.initialReservation && typeof options.initialReservation === 'object'
+      ? options.initialReservation
+      : null;
+
+  return {
+    initialFilters: normalizeReservationLookupFilters(filters),
+    ...(workflowIntent ? { workflowIntent } : {}),
+    ...(initialReservation ? { initialReservation } : {}),
+  };
+};
 
 export const readReservationLookupNavigationState = (state = {}) => {
   const initialFilters = normalizeReservationLookupFilters(state?.initialFilters);
   const initialQuery = hasReservationLookupFilters(initialFilters)
     ? ''
     : normalizeLookupValue(state?.initialQuery ?? state?.confirmationNumber);
+  const workflowIntent = normalizeWorkflowIntent(state?.workflowIntent);
+  const initialReservation =
+    state?.initialReservation && typeof state.initialReservation === 'object'
+      ? state.initialReservation
+      : null;
 
-  return { initialFilters, initialQuery };
+  return { initialFilters, initialQuery, workflowIntent, initialReservation };
 };

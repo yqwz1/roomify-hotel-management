@@ -217,26 +217,43 @@ const supplementalResources = {
       checkoutTitle: 'Checkout',
       checkoutPage: {
         heroEyebrow: 'Departure workflow',
+        paymentHeroEyebrow: 'Billing workflow',
+        paymentTitle: 'Payment',
         description:
           'Load a checked-in reservation, validate the final bill, and complete the guest departure.',
+        paymentDescription:
+          'Open a reservation, review the live bill, and collect payment before the guest reaches checkout.',
         billingRequired: 'Billing required',
         departureCompleted: 'Departure completed',
         openWorkflow: 'Open workflow',
+        paymentOpenWorkflow: 'Payment workflow',
+        paymentCaptured: 'Payment captured',
         gateTitle: 'Departure Gate',
+        paymentGateTitle: 'Billing Gate',
         outstanding: 'Outstanding',
         noBill: 'No bill',
         status: 'Status',
         selectTitle: 'Select a Reservation',
         selectDescription:
           'Choose the active booking before loading the guest bill and checkout controls.',
+        paymentSelectDescription:
+          'Choose the reservation before loading the live bill and payment controls.',
         tips: [
           'Checkout is only available for reservations that are already checked in.',
           'The backend blocks checkout when any balance remains outstanding.',
           'Load the reservation from the lookup panel first, then review the final bill.',
         ],
+        paymentTips: [
+          'Payment can be collected before checkout as long as the reservation is still active.',
+          'The live bill is loaded first so the remaining balance stays accurate.',
+          'Use checkout later only after the guest is checked in and the balance is settled.',
+        ],
         summaryTitle: 'Departure Summary',
         summaryDescription:
           'Validate the reservation state and confirm the guest is ready to depart.',
+        paymentSummaryTitle: 'Billing Summary',
+        paymentSummaryDescription:
+          'Review the reservation and collect payment without waiting for the departure workflow.',
         outstandingBalance: 'Outstanding Balance',
         statusBlocked:
           'This reservation cannot be checked out because its current status is {{status}}.',
@@ -254,10 +271,15 @@ const supplementalResources = {
         finalBillTitle: 'Final Bill',
         finalBillDescription:
           'Review the reservation billing details before closing the stay.',
+        paymentBillDescription:
+          'Review the live reservation bill that payment will be applied against.',
         loadingBill: 'Loading bill...',
         controlsTitle: 'Departure Controls',
         controlsDescription:
           'Use the final action only when the balance is settled and the reservation is eligible.',
+        paymentModeControlsTitle: 'Checkout Readiness',
+        paymentModeControlsDescription:
+          'Payment can be handled now. Checkout remains here as the next step once the stay is checked in and the balance is clear.',
         billReviewTitle: 'Bill Review',
         billReviewDescription:
           'Billing is fetched from the reservation bill endpoint before departure is allowed.',
@@ -971,6 +993,9 @@ const supplementalResources = {
         checkInTitle: 'Check-In',
         checkInDescription:
           'Continue the arrival workflow and complete guest handoff.',
+        paymentTitle: 'Payment',
+        paymentDescription:
+          'Open billing now and collect payment before the guest reaches checkout.',
         modifyTitle: 'Modify Reservation',
         modifyDescription:
           'Adjust the room assignment or stay dates.',
@@ -1285,26 +1310,43 @@ const supplementalResources = {
       checkoutTitle: 'المغادرة',
       checkoutPage: {
         heroEyebrow: 'مسار المغادرة',
+        paymentHeroEyebrow: 'مسار الفوترة',
+        paymentTitle: 'الدفع',
         description:
           'حمّل حجزًا مسجل الوصول، وراجع الفاتورة النهائية، ثم أكمل مغادرة الضيف.',
+        paymentDescription:
+          'افتح الحجز، وراجع الفاتورة المباشرة، وسجّل الدفع قبل أن يصل الضيف إلى المغادرة.',
         billingRequired: 'الفوترة مطلوبة',
         departureCompleted: 'تمت المغادرة',
         openWorkflow: 'مسار مفتوح',
+        paymentOpenWorkflow: 'مسار الدفع',
+        paymentCaptured: 'تم تسجيل الدفع',
         gateTitle: 'بوابة المغادرة',
+        paymentGateTitle: 'بوابة الفوترة',
         outstanding: 'الرصيد المستحق',
         noBill: 'لا توجد فاتورة',
         status: 'الحالة',
         selectTitle: 'اختر حجزًا',
         selectDescription:
           'اختر الحجز النشط قبل تحميل فاتورة الضيف وعناصر التحكم بالمغادرة.',
+        paymentSelectDescription:
+          'اختر الحجز قبل تحميل الفاتورة المباشرة وعناصر التحكم بالدفع.',
         tips: [
           'المغادرة متاحة فقط للحجوزات التي تم تسجيل وصولها بالفعل.',
           'يمنع الخادم إتمام المغادرة إذا بقي أي رصيد مستحق.',
           'حمّل الحجز من لوحة البحث أولاً ثم راجع الفاتورة النهائية.',
         ],
+        paymentTips: [
+          'يمكن تسجيل الدفع قبل المغادرة ما دام الحجز ما زال نشطًا.',
+          'يتم تحميل الفاتورة المباشرة أولاً حتى يبقى الرصيد المتبقي دقيقًا.',
+          'استخدم المغادرة لاحقًا فقط بعد تسجيل الوصول وتسوية الرصيد بالكامل.',
+        ],
         summaryTitle: 'ملخص المغادرة',
         summaryDescription:
           'تحقق من حالة الحجز وتأكد من جاهزية الضيف للمغادرة.',
+        paymentSummaryTitle: 'ملخص الفوترة',
+        paymentSummaryDescription:
+          'راجع الحجز وسجّل الدفع دون انتظار مسار المغادرة.',
         outstandingBalance: 'الرصيد المتبقي',
         statusBlocked:
           'لا يمكن تسجيل مغادرة هذا الحجز لأن حالته الحالية هي {{status}}.',
@@ -1322,10 +1364,15 @@ const supplementalResources = {
         finalBillTitle: 'الفاتورة النهائية',
         finalBillDescription:
           'راجع تفاصيل فاتورة الحجز قبل إغلاق الإقامة.',
+        paymentBillDescription:
+          'راجع فاتورة الحجز المباشرة التي سيتم تطبيق الدفع عليها.',
         loadingBill: 'جار تحميل الفاتورة...',
         controlsTitle: 'عناصر التحكم بالمغادرة',
         controlsDescription:
           'استخدم الإجراء النهائي فقط عندما تتم تسوية الرصيد ويكون الحجز مؤهلاً.',
+        paymentModeControlsTitle: 'جاهزية المغادرة',
+        paymentModeControlsDescription:
+          'يمكن معالجة الدفع الآن. تبقى المغادرة هنا كخطوة تالية بعد تسجيل الوصول وتصفير الرصيد.',
         billReviewTitle: 'مراجعة الفاتورة',
         billReviewDescription:
           'يتم جلب الفوترة من نقطة نهاية الفاتورة قبل السماح بالمغادرة.',
@@ -2072,6 +2119,9 @@ const supplementalResources = {
         checkInTitle: 'تسجيل الوصول',
         checkInDescription:
           'تابع مسار الوصول وأكمل تسليم الغرفة للضيف.',
+        paymentTitle: 'الدفع',
+        paymentDescription:
+          'افتح الفوترة الآن وسجّل الدفع قبل أن يصل الضيف إلى المغادرة.',
         modifyTitle: 'تعديل الحجز',
         modifyDescription:
           'عدّل تخصيص الغرفة أو تواريخ الإقامة.',

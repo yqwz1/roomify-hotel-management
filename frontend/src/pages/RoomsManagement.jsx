@@ -13,16 +13,10 @@ import {
   getRoomStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
+import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
 const BACKEND_STATUSES = ['AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
-
-const STATUS_STYLES = {
-  AVAILABLE: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  OCCUPIED: 'border-zinc-300 bg-zinc-100 text-zinc-700',
-  NEEDS_CLEANING: 'border-amber-200 bg-amber-50 text-amber-900',
-  UNDER_MAINTENANCE: 'border-rose-200 bg-rose-50 text-rose-900',
-};
 
 const buildApiFilters = (filters) => {
   const params = {};
@@ -166,7 +160,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                 <div className="flex items-center justify-between gap-3">
                   <span
                     className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
-                      STATUS_STYLES[form.status]
+                      getStatusBadgeClasses(form.status)
                     }`}
                   >
                     {getRoomStatusLabel(form.status, t)}
@@ -490,7 +484,7 @@ export default function RoomsManagement() {
                       <td className="px-4 py-4">
                         <span
                           className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
-                            STATUS_STYLES[room.status]
+                            getStatusBadgeClasses(room.status)
                           }`}
                         >
                           {getRoomStatusLabel(room.status, t)}

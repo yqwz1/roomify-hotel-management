@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ArrowRightLeft,
-  CreditCard,
+  ClipboardCheck,
   FileText,
   Receipt,
+  Wallet,
   XCircle,
 } from 'lucide-react';
 import EmptyState from '../common/EmptyState';
@@ -139,11 +140,18 @@ function ReservationDetailBody({
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           <ActionButton
-            icon={CreditCard}
+            icon={ClipboardCheck}
             title={t('reservationDetailsPage.checkInTitle')}
             description={t('reservationDetailsPage.checkInDescription')}
             onClick={() => onAction?.('checkIn', reservation)}
             disabled={!reservationStatusRules.canCheckIn(reservation.status)}
+          />
+          <ActionButton
+            icon={Wallet}
+            title={t('reservationDetailsPage.paymentTitle')}
+            description={t('reservationDetailsPage.paymentDescription')}
+            onClick={() => onAction?.('payment', reservation)}
+            disabled={!reservationStatusRules.canCollectPayment(reservation.status)}
           />
           <ActionButton
             icon={ArrowRightLeft}

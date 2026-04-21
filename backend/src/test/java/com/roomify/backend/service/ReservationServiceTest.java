@@ -254,9 +254,9 @@ class ReservationServiceTest {
     }
 
     @Test
-    void checkInShouldThrowConflictWhenReservationIsNotConfirmed() {
+    void checkInShouldThrowConflictWhenReservationIsNotPendingOrConfirmed() {
 
-        Reservation reservation = buildReservationForCancel(ReservationStatus.PENDING);
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_OUT);
 
         when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
                 .thenReturn(Optional.of(reservation));
@@ -266,8 +266,24 @@ class ReservationServiceTest {
                 () -> reservationService.checkIn("RSV-ABC123DEF456"));
 
         assertEquals(
-                "Only CONFIRMED reservations can be checked in",
+                "Only PENDING or CONFIRMED reservations can be checked in",
                 ex.getMessage());
+    }
+
+    @Test
+    void checkInShouldAllowPendingReservation() {
+        Reservation reservation = buildReservationForCancel(ReservationStatus.PENDING);
+
+        when(reservationRepository.findByConfirmationNumber("RSV-ABC123DEF456"))
+                .thenReturn(Optional.of(reservation));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReservationResponse response = reservationService.checkIn("RSV-ABC123DEF456");
+
+        assertEquals(ReservationStatus.CHECKED_IN, reservation.getStatus());
+        assertEquals(RoomStatus.OCCUPIED, reservation.getRoom().getStatus());
+        assertEquals(ReservationStatus.CHECKED_IN, response.getStatus());
     }
 
     @Test

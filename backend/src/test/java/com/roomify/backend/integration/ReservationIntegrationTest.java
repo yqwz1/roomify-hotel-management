@@ -1140,7 +1140,7 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    void checkInBlockedWhenReservationIsNotConfirmed() throws Exception {
+    void checkInAllowsPendingReservation() throws Exception {
         CreatedReservation created = createReservation(
                 managerToken,
                 room1Id,
@@ -1150,17 +1150,14 @@ class ReservationIntegrationTest {
 
         mockMvc.perform(post("/api/reservations/check-in/{confirmationNumber}", created.confirmationNumber())
                         .header("Authorization", "Bearer " + managerToken))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message")
-                        .value("Only CONFIRMED reservations can be checked in"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CHECKED_IN"));
 
         Reservation reservation = reservationRepository.findById(created.id()).orElseThrow();
         Room room = roomRepository.findById(room1Id).orElseThrow();
 
-        assertEquals(ReservationStatus.PENDING, reservation.getStatus());
-        assertEquals(RoomStatus.AVAILABLE, room.getStatus());
+        assertEquals(ReservationStatus.CHECKED_IN, reservation.getStatus());
+        assertEquals(RoomStatus.OCCUPIED, room.getStatus());
     }
 
     @Test

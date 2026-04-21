@@ -28,9 +28,9 @@ function InvoicePreviewRouteProbe() {
   );
 }
 
-const renderPage = () =>
+const renderPage = (entry = '/') =>
   render(
-    <MemoryRouter initialEntries={['/']}>
+    <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route path="/" element={<Checkout />} />
         <Route path="/invoice-preview" element={<InvoicePreviewRouteProbe />} />
@@ -259,6 +259,101 @@ describe('Checkout', () => {
     await screen.findByTestId('payment-receipt');
     expect(screen.getByText(/CARD-1234/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Complete Checkout/i })).toBeEnabled();
+  });
+
+  it('allows recording payment for a confirmed reservation', async () => {
+    const user = userEvent.setup();
+
+    mockReservation.status = 'CONFIRMED';
+
+    getBill.mockResolvedValue({
+      nights: 2,
+      roomRate: 120,
+      roomCharge: 240,
+      serviceCharges: 30,
+      vatRate: 0.15,
+      vatAmount: 40.5,
+      discountAmount: 0,
+      balanceDue: 310.5,
+      totalPaid: 0,
+      outstandingBalance: 310.5,
+      invoiceFinalized: false,
+      paymentStatus: 'UNPAID',
+      lineItems: [],
+    });
+
+    createPayment.mockResolvedValue({
+      paymentId: 91,
+      confirmationNumber: mockReservation.confirmationNumber,
+      amount: 50,
+      paymentMethod: 'CASH',
+      paymentStatus: 'PARTIALLY_PAID',
+      totalPaid: 50,
+      remainingBalance: 260.5,
+      invoiceFinalized: false,
+      gatewayReference: null,
+      message: 'Payment processed successfully',
+      createdAt: '2026-04-03T10:00:00',
+    });
+
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Select Reservation' }));
+    const recordPaymentButton = await screen.findByRole('button', { name: /Record Payment/i });
+
+    expect(recordPaymentButton).toBeEnabled();
+
+    await user.click(recordPaymentButton);
+    await user.clear(screen.getByLabelText(/Payment amount/i));
+    await user.type(screen.getByLabelText(/Payment amount/i), '50');
+    await user.click(screen.getByRole('button', { name: /Submit Payment/i }));
+
+    await waitFor(() => {
+      expect(createPayment).toHaveBeenCalledWith({
+        confirmationNumber: mockReservation.confirmationNumber,
+        amount: '50.00',
+        paymentMethod: 'CASH',
+      });
+    });
+  });
+
+  it('opens directly in payment mode when launched from reservation details', async () => {
+    getBill.mockResolvedValue({
+      nights: 2,
+      roomRate: 120,
+      roomCharge: 240,
+      serviceCharges: 30,
+      vatRate: 0.15,
+      vatAmount: 40.5,
+      discountAmount: 0,
+      balanceDue: 310.5,
+      totalPaid: 0,
+      outstandingBalance: 310.5,
+      invoiceFinalized: false,
+      paymentStatus: 'UNPAID',
+      lineItems: [],
+    });
+
+    renderPage({
+      pathname: '/',
+      state: {
+        initialFilters: { confirmation: mockReservation.confirmationNumber },
+        initialReservation: {
+          ...mockReservation,
+          status: 'CONFIRMED',
+        },
+        workflowIntent: 'payment',
+      },
+    });
+
+    expect(await screen.findByRole('heading', { level: 1, name: /^Payment$/i })).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getBill).toHaveBeenCalledWith(mockReservation.confirmationNumber);
+    });
+
+    expect(screen.getByText(mockReservation.guestName)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Record Payment/i })).toBeEnabled();
   });
 
   it('validates payment amount before submit', async () => {
