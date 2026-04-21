@@ -143,6 +143,9 @@ export default function RoomSearch() {
       case 'book':
         handleBookNow(room);
         break;
+      case 'help':
+        navigate('/bookings');
+        break;
       case 'contactFrontDesk':
         window.location.assign(FRONT_DESK_LINK);
         break;
@@ -314,9 +317,8 @@ export default function RoomSearch() {
                 {results.map((room) => {
                   const basePrice = Number(room.roomType?.basePrice ?? 0);
                   const totalCost = nights > 0 ? basePrice * nights : basePrice;
-                  const amenitiesSource = room.customAmenities || room.roomType?.amenities;
-                  const amenities = amenitiesSource
-                    ? amenitiesSource
+                  const amenities = room.roomType?.amenities
+                    ? room.roomType.amenities
                         .split(',')
                         .map((item) => item.trim())
                         .filter(Boolean)
@@ -328,36 +330,21 @@ export default function RoomSearch() {
                       className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-28px_rgba(15,23,42,0.24)]"
                     >
                       <div className="flex h-40 items-center justify-center bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
-                        {room.primaryPhotoUrl ? (
-                          <img
-                            src={room.primaryPhotoUrl}
-                            alt={room.displayName || room.roomNumber}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
-                            <BedDouble className="h-7 w-7" />
-                          </span>
-                        )}
+                        <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
+                          <BedDouble className="h-7 w-7" />
+                        </span>
                       </div>
 
                       <div className="space-y-4 p-5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-xl font-black tracking-tight text-zinc-950">
-                              {room.displayName || t('roomNumber', { number: room.roomNumber })}
+                              {t('roomNumber', { number: room.roomNumber })}
                             </p>
                             <p className="mt-1 text-sm font-medium text-zinc-500">
-                              {t('roomNumber', { number: room.roomNumber })} • {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
+                              {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
                               {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                             </p>
-                            {(room.bedType || room.viewType || room.sizeSquareMeters) ? (
-                              <p className="mt-1 text-sm font-medium text-zinc-500">
-                                {[room.bedType, room.viewType, room.sizeSquareMeters ? `${room.sizeSquareMeters} sqm` : null]
-                                  .filter(Boolean)
-                                  .join(' • ')}
-                              </p>
-                            ) : null}
                           </div>
                           <span
                             className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
@@ -368,9 +355,9 @@ export default function RoomSearch() {
                           </span>
                         </div>
 
-                        {(room.featuredNote || room.roomType?.description) && (
+                        {room.roomType?.description && (
                           <p className="text-sm font-medium leading-6 text-zinc-500">
-                            {room.featuredNote || room.roomType.description}
+                            {room.roomType.description}
                           </p>
                         )}
 

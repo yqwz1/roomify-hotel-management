@@ -196,7 +196,6 @@ public class AvailabilityQueryStrategy {
          * could introduce a "projected status" concept.
          */
         jpql.append("r.status = com.roomify.backend.entity.RoomStatus.AVAILABLE ");
-        jpql.append("AND r.bookable = true ");
 
         /*
          * RESERVATION OVERLAP EXCLUSION

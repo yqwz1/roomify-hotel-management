@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 import { checkHealth } from '../services/healthService';
-import { getHotelSettings } from '../services/hotelSettingsService';
 import { useAuth } from '../context/AuthProvider';
 import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
 
@@ -22,7 +21,6 @@ export default function Home() {
   const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
   const dashboardLabel = user?.roles?.includes('ROLE_GUEST') ? t('myDashboard') : t('dashboard');
   const [health, setHealth] = useState(null);
-  const [hotelSettings, setHotelSettings] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,27 +50,6 @@ export default function Home() {
     };
 
     fetchHealth();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    const loadSettings = async () => {
-      try {
-        const settings = await getHotelSettings();
-        if (isMounted) {
-          setHotelSettings(settings);
-        }
-      } catch {
-        if (isMounted) {
-          setHotelSettings(null);
-        }
-      }
-    };
-
-    loadSettings();
     return () => {
       isMounted = false;
     };
@@ -113,7 +90,7 @@ export default function Home() {
               {t('home.eyebrow')}
             </p>
             <p className="mt-6 font-heading text-5xl font-black tracking-tighter sm:text-6xl">
-              {hotelSettings?.hotelName || brandName}
+              {brandName}
             </p>
             <h1 className="mt-6 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
               {t('home.title')}
@@ -121,12 +98,6 @@ export default function Home() {
             <p className="mt-6 max-w-xl text-base font-medium leading-7 text-zinc-400">
               {t('home.description')}
             </p>
-            {hotelSettings?.contactPhone || hotelSettings?.contactEmail ? (
-              <div className="mt-5 rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4 text-sm font-medium text-zinc-300">
-                <p>{hotelSettings?.contactPhone || 'Phone unavailable'}</p>
-                <p className="mt-1">{hotelSettings?.contactEmail || 'Email unavailable'}</p>
-              </div>
-            ) : null}
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link

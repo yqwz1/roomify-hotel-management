@@ -44,10 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (contextPath != null && !contextPath.isBlank() && path.startsWith(contextPath)) {
             path = path.substring(contextPath.length());
         }
-        return "/api/health".equals(path)
-                || path.startsWith("/api/auth/")
-                || "/api/rooms/search".equals(path)
-                || ("GET".equalsIgnoreCase(request.getMethod()) && "/api/hotel-settings".equals(path));
+        return "/api/health".equals(path) || path.startsWith("/api/auth/")
+                || "/api/rooms/search".equals(path);
     }
 
     @Override

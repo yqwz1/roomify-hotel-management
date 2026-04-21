@@ -20,8 +20,6 @@ export const ROLE_ADMIN = 'ROLE_ADMIN';
 export const ROLE_MANAGER = 'ROLE_MANAGER';
 export const ROLE_STAFF = 'ROLE_STAFF';
 export const ROLE_GUEST = 'ROLE_GUEST';
-export const GUEST_PROFILE_PATH = '/guest/profile';
-export const GUEST_BOOKINGS_PATH = '/guest/bookings';
 export const GUEST_BILLING_STATUS_PATH = '/guest/billing-status';
 
 const ROLE_PRIORITY = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
@@ -225,13 +223,6 @@ const MANAGER_NAVIGATION_CONFIG = [
         roles: [ROLE_MANAGER],
       },
       {
-        path: '/hotel-settings',
-        translationKey: 'hotelSettings',
-        fallbackLabel: 'Hotel Settings',
-        icon: BriefcaseBusiness,
-        roles: [ROLE_MANAGER],
-      },
-      {
         path: '/room-status',
         translationKey: 'roomStatus',
         fallbackLabel: 'Room Status',
@@ -364,20 +355,6 @@ const GUEST_NAVIGATION_CONFIG = [
         icon: LayoutDashboard,
         roles: [ROLE_GUEST],
       },
-      {
-        path: GUEST_BOOKINGS_PATH,
-        translationKey: 'guestBookingsPage.title',
-        fallbackLabel: 'My Bookings',
-        icon: CalendarDays,
-        roles: [ROLE_GUEST],
-      },
-      {
-        path: GUEST_PROFILE_PATH,
-        translationKey: 'guestProfilePage.title',
-        fallbackLabel: 'Guest Profile',
-        icon: Users,
-        roles: [ROLE_GUEST],
-      },
     ],
   },
   {
@@ -452,12 +429,6 @@ const PAGE_META = [
     sectionId: 'reservations',
     translationKey: 'reservationDetailsTitle',
     fallbackLabel: 'Reservation Details',
-  },
-  {
-    match: (pathname) => /^\/guest\/bookings\/[^/]+$/.test(pathname),
-    sectionId: 'my-stay',
-    translationKey: 'guestBookingDetailsPage.title',
-    fallbackLabel: 'Booking Details',
   },
 ];
 

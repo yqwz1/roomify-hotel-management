@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +51,9 @@ public class ReservationService {
     private final AuditService auditService;
     private final HousekeepingNotificationService housekeepingNotificationService;
     private final ReservationFinancialService financialService;
+    private final BigDecimal taxRate;
     private final InvoiceEmailService invoiceEmailService;
     private final InvoiceDeliveryLogService invoiceDeliveryLogService;
-    private final HotelSettingsService hotelSettingsService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
@@ -64,7 +65,7 @@ public class ReservationService {
             AuditService auditService,
             HousekeepingNotificationService housekeepingNotificationService,
             ReservationFinancialService financialService,
-            HotelSettingsService hotelSettingsService) {
+            @Value("${roomify.billing.vat-rate:0.15}") BigDecimal taxRate) {
 
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
@@ -75,7 +76,7 @@ public class ReservationService {
         this.auditService = auditService;
         this.housekeepingNotificationService = housekeepingNotificationService;
         this.financialService = financialService;
-        this.hotelSettingsService = hotelSettingsService;
+        this.taxRate = taxRate;
     }
 
     // =============================
@@ -108,7 +109,6 @@ public class ReservationService {
         BigDecimal roomRate = room.getRoomType()
                 .getBasePrice()
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxRate = hotelSettingsService.getTaxRate();
 
         BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
@@ -194,7 +194,6 @@ public class ReservationService {
         BigDecimal roomRate = targetRoom.getRoomType()
                 .getBasePrice()
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxRate = hotelSettingsService.getTaxRate();
 
         BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
@@ -341,7 +340,6 @@ public class ReservationService {
         BigDecimal rate = room.getRoomType()
                 .getBasePrice()
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
-        BigDecimal taxRate = hotelSettingsService.getTaxRate();
 
         BigDecimal subtotal = rate.multiply(BigDecimal.valueOf(nights))
                 .setScale(MONEY_SCALE, RoundingMode.HALF_UP);

@@ -31,15 +31,6 @@ const buildRoomForm = (roomTypes, initialRoom) => ({
   roomTypeId: initialRoom?.roomType?.id ?? roomTypes[0]?.id ?? '',
   floor: initialRoom?.floor ?? 1,
   status: initialRoom?.status ?? 'AVAILABLE',
-  displayName: initialRoom?.displayName ?? '',
-  primaryPhotoUrl: initialRoom?.primaryPhotoUrl ?? '',
-  galleryPhotoUrls: initialRoom?.galleryPhotoUrls ?? '',
-  bedType: initialRoom?.bedType ?? '',
-  viewType: initialRoom?.viewType ?? '',
-  sizeSquareMeters: initialRoom?.sizeSquareMeters ?? '',
-  featuredNote: initialRoom?.featuredNote ?? '',
-  customAmenities: initialRoom?.customAmenities ?? '',
-  bookable: initialRoom?.bookable ?? true,
 });
 
 function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
@@ -75,15 +66,6 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
       roomTypeId: Number(form.roomTypeId),
       floor: Number(form.floor) || null,
       status: form.status,
-      displayName: form.displayName.trim(),
-      primaryPhotoUrl: form.primaryPhotoUrl.trim(),
-      galleryPhotoUrls: form.galleryPhotoUrls.trim(),
-      bedType: form.bedType.trim(),
-      viewType: form.viewType.trim(),
-      sizeSquareMeters: form.sizeSquareMeters ? Number(form.sizeSquareMeters) : null,
-      featuredNote: form.featuredNote.trim(),
-      customAmenities: form.customAmenities.trim(),
-      bookable: Boolean(form.bookable),
     });
     setSaving(false);
 
@@ -209,111 +191,6 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
               </select>
             </div>
           )}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Display Name
-            </label>
-            <input
-              value={form.displayName}
-              onChange={(event) => setField('displayName', event.target.value)}
-              placeholder="Executive Corner Room"
-              className={inputClassName}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Primary Photo URL
-            </label>
-            <input
-              value={form.primaryPhotoUrl}
-              onChange={(event) => setField('primaryPhotoUrl', event.target.value)}
-              placeholder="https://..."
-              className={inputClassName}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Gallery Photo URLs
-            </label>
-            <textarea
-              value={form.galleryPhotoUrls}
-              onChange={(event) => setField('galleryPhotoUrls', event.target.value)}
-              placeholder="Comma-separated image URLs"
-              className="min-h-24 w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Room Visibility
-            </label>
-            <select
-              value={form.bookable ? 'true' : 'false'}
-              onChange={(event) => setField('bookable', event.target.value === 'true')}
-              className={inputClassName}
-            >
-              <option value="true">Visible and bookable</option>
-              <option value="false">Hidden from guest search</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Bed Type
-            </label>
-            <input
-              value={form.bedType}
-              onChange={(event) => setField('bedType', event.target.value)}
-              placeholder="King Bed"
-              className={inputClassName}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              View Type
-            </label>
-            <input
-              value={form.viewType}
-              onChange={(event) => setField('viewType', event.target.value)}
-              placeholder="City View"
-              className={inputClassName}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Size (sqm)
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={form.sizeSquareMeters}
-              onChange={(event) => setField('sizeSquareMeters', event.target.value)}
-              className={inputClassName}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Room Amenities Override
-            </label>
-            <input
-              value={form.customAmenities}
-              onChange={(event) => setField('customAmenities', event.target.value)}
-              placeholder="Coffee Machine, Smart TV, Work Desk"
-              className={inputClassName}
-            />
-          </div>
-          <div className="sm:col-span-2 space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-              Display Note
-            </label>
-            <textarea
-              value={form.featuredNote}
-              onChange={(event) => setField('featuredNote', event.target.value)}
-              placeholder="Quiet corner room designed for longer stays."
-              className="min-h-24 w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-            />
-          </div>
         </div>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
@@ -586,9 +463,8 @@ export default function RoomsManagement() {
               </thead>
               <tbody className="divide-y divide-zinc-200 bg-white">
                 {displayedRooms.map((room) => {
-                  const amenitySource = room.customAmenities || room.roomType?.amenities;
-                  const amenities = amenitySource
-                    ? amenitySource
+                  const amenities = room.roomType?.amenities
+                    ? room.roomType.amenities
                         .split(',')
                         .map((item) => item.trim())
                         .filter(Boolean)
@@ -596,28 +472,8 @@ export default function RoomsManagement() {
 
                   return (
                     <tr key={room.id}>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-16 w-20 overflow-hidden rounded-2xl bg-zinc-100">
-                            {room.primaryPhotoUrl ? (
-                              <img src={room.primaryPhotoUrl} alt={room.displayName || room.roomNumber} className="h-full w-full object-cover" />
-                            ) : null}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xl font-black tracking-tight text-zinc-950">
-                              {room.displayName || room.roomNumber}
-                            </p>
-                            <p className="mt-1 text-sm font-medium text-zinc-500">
-                              Room {room.roomNumber}
-                              {room.bookable ? ' • Bookable' : ' • Hidden'}
-                            </p>
-                            {room.featuredNote ? (
-                              <p className="mt-1 max-w-sm text-sm font-medium text-zinc-500">
-                                {room.featuredNote}
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
+                      <td className="px-4 py-4 text-xl font-black tracking-tight text-zinc-950">
+                        {room.roomNumber}
                       </td>
                       <td className="px-4 py-4 text-sm font-medium text-zinc-600">
                         {room.floor ?? '-'}
@@ -639,13 +495,6 @@ export default function RoomsManagement() {
                       </td>
                       <td className="px-4 py-4 text-sm font-medium text-zinc-600">
                         {room.roomType?.maxGuests ?? '-'}
-                        {(room.bedType || room.viewType || room.sizeSquareMeters) ? (
-                          <p className="mt-1 text-xs text-zinc-500">
-                            {[room.bedType, room.viewType, room.sizeSquareMeters ? `${room.sizeSquareMeters} sqm` : null]
-                              .filter(Boolean)
-                              .join(' • ')}
-                          </p>
-                        ) : null}
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex max-w-xs flex-wrap gap-2">

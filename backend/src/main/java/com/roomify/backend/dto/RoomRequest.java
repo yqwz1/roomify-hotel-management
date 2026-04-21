@@ -21,29 +21,6 @@ public class RoomRequest {
     @NotNull(message = "Room status is required")
     private RoomStatus status;
 
-    @Size(max = 120, message = "Display name cannot exceed 120 characters")
-    private String displayName;
-
-    @Size(max = 1000, message = "Primary photo URL cannot exceed 1000 characters")
-    private String primaryPhotoUrl;
-
-    private String galleryPhotoUrls;
-
-    @Size(max = 80, message = "Bed type cannot exceed 80 characters")
-    private String bedType;
-
-    @Size(max = 80, message = "View type cannot exceed 80 characters")
-    private String viewType;
-
-    @Min(value = 1, message = "Room size must be at least 1 square meter")
-    private Integer sizeSquareMeters;
-
-    private String featuredNote;
-
-    private String customAmenities;
-
-    private Boolean bookable;
-
     // Constructors
     public RoomRequest() {}
 
@@ -85,77 +62,5 @@ public class RoomRequest {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getPrimaryPhotoUrl() {
-        return primaryPhotoUrl;
-    }
-
-    public void setPrimaryPhotoUrl(String primaryPhotoUrl) {
-        this.primaryPhotoUrl = primaryPhotoUrl;
-    }
-
-    public String getGalleryPhotoUrls() {
-        return galleryPhotoUrls;
-    }
-
-    public void setGalleryPhotoUrls(String galleryPhotoUrls) {
-        this.galleryPhotoUrls = galleryPhotoUrls;
-    }
-
-    public String getBedType() {
-        return bedType;
-    }
-
-    public void setBedType(String bedType) {
-        this.bedType = bedType;
-    }
-
-    public String getViewType() {
-        return viewType;
-    }
-
-    public void setViewType(String viewType) {
-        this.viewType = viewType;
-    }
-
-    public Integer getSizeSquareMeters() {
-        return sizeSquareMeters;
-    }
-
-    public void setSizeSquareMeters(Integer sizeSquareMeters) {
-        this.sizeSquareMeters = sizeSquareMeters;
-    }
-
-    public String getFeaturedNote() {
-        return featuredNote;
-    }
-
-    public void setFeaturedNote(String featuredNote) {
-        this.featuredNote = featuredNote;
-    }
-
-    public String getCustomAmenities() {
-        return customAmenities;
-    }
-
-    public void setCustomAmenities(String customAmenities) {
-        this.customAmenities = customAmenities;
-    }
-
-    public Boolean getBookable() {
-        return bookable;
-    }
-
-    public void setBookable(Boolean bookable) {
-        this.bookable = bookable;
     }
 }

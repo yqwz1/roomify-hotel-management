@@ -52,7 +52,6 @@ public class RoomService {
                                 roomType,
                                 request.getFloor(),
                                 request.getStatus());
-                applyCustomizationFields(room, request);
 
                 return toResponse(roomRepository.save(room));
         }
@@ -143,7 +142,6 @@ public class RoomService {
                 existing.setRoomNumber(request.getRoomNumber());
                 existing.setFloor(request.getFloor());
                 existing.setStatus(request.getStatus());
-                applyCustomizationFields(existing, request);
 
                 return toResponse(roomRepository.save(existing));
         }
@@ -238,43 +236,11 @@ public class RoomService {
                                 roomType.getAmenities(),
                                 roomType.getDescription());
 
-                RoomResponse response = new RoomResponse(
+                return new RoomResponse(
                                 room.getId(),
                                 room.getRoomNumber(),
                                 roomTypeResponse,
                                 room.getFloor(),
                                 room.getStatus());
-                response.setDisplayName(room.getDisplayName());
-                response.setPrimaryPhotoUrl(room.getPrimaryPhotoUrl());
-                response.setGalleryPhotoUrls(room.getGalleryPhotoUrls());
-                response.setBedType(room.getBedType());
-                response.setViewType(room.getViewType());
-                response.setSizeSquareMeters(room.getSizeSquareMeters());
-                response.setFeaturedNote(room.getFeaturedNote());
-                response.setCustomAmenities(room.getCustomAmenities());
-                response.setBookable(room.isBookable());
-                return response;
-        }
-
-        private void applyCustomizationFields(Room room, RoomRequest request) {
-                room.setDisplayName(trimToNull(request.getDisplayName()));
-                room.setPrimaryPhotoUrl(trimToNull(request.getPrimaryPhotoUrl()));
-                room.setGalleryPhotoUrls(trimToNull(request.getGalleryPhotoUrls()));
-                room.setBedType(trimToNull(request.getBedType()));
-                room.setViewType(trimToNull(request.getViewType()));
-                room.setSizeSquareMeters(request.getSizeSquareMeters());
-                room.setFeaturedNote(trimToNull(request.getFeaturedNote()));
-                room.setCustomAmenities(trimToNull(request.getCustomAmenities()));
-                if (request.getBookable() != null) {
-                        room.setBookable(request.getBookable());
-                }
-        }
-
-        private String trimToNull(String value) {
-                if (value == null) {
-                        return null;
-                }
-                String trimmed = value.trim();
-                return trimmed.isEmpty() ? null : trimmed;
         }
 }

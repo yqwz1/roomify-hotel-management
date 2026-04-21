@@ -10,6 +10,7 @@ import com.itextpdf.layout.properties.TextAlignment;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -24,7 +25,9 @@ public class InvoicePdfService {
         private final QRCodeHelper qrCodeHelper;
         private final ZatcaQrService zatcaQrService;
         private final ReservationFinancialService financialService;
-        private final HotelSettingsService hotelSettingsService;
+
+        @Value("${roomify.billing.vat-rate}")
+        private BigDecimal vatRate;
 
         public byte[] generateInvoice(
                         Reservation reservation,
@@ -32,13 +35,6 @@ public class InvoicePdfService {
 
                 try {
                         ReservationFinancialService.ReservationFinancialSummary summary = financialService.summarize(reservation);
-                        var settings = hotelSettingsService.resolveSettings();
-                        BigDecimal vatRate = hotelSettingsService.getTaxRate();
-                        String hotelName = settings.getHotelName();
-                        String vatLabel = settings.getVatLabel() != null ? settings.getVatLabel() : "VAT";
-                        String invoiceFooter = settings.getInvoiceFooter() != null
-                                        ? settings.getInvoiceFooter()
-                                        : "Thank you for staying with us.";
 
                         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -50,7 +46,7 @@ public class InvoicePdfService {
                         // HEADER
                         // ======================
 
-                        document.add(new Paragraph(hotelName)
+                        document.add(new Paragraph("ROOMIFY HOTEL")
                                         .setBold()
                                         .setFontSize(22)
                                         .setTextAlignment(TextAlignment.CENTER));
@@ -128,7 +124,7 @@ public class InvoicePdfService {
                         totals.addCell("Subtotal");
                         totals.addCell(subtotal.toString());
 
-                        totals.addCell(vatLabel + " " + vatRate.multiply(new BigDecimal("100")) + "%");
+                        totals.addCell("VAT " + vatRate.multiply(new BigDecimal("100")) + "%");
                         totals.addCell(vat.toString());
 
                         totals.addCell("Total");
@@ -143,7 +139,7 @@ public class InvoicePdfService {
                         // ======================
 
                         String payload = zatcaQrService.generateQrPayload(
-                                        hotelName,
+                                        "Roomify Hotel",
                                         "1234567890",
                                         now,
                                         total.toString(),
@@ -165,7 +161,7 @@ public class InvoicePdfService {
                         // Footer
                         // ======================
 
-                        document.add(new Paragraph(invoiceFooter)
+                        document.add(new Paragraph("Thank you for staying with Roomify Hotel")
                                         .setTextAlignment(TextAlignment.CENTER)
                                         .setFontSize(10));
 

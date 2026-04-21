@@ -99,21 +99,11 @@ public class RoomSearchService {
                 roomType.getAmenities(),
                 roomType.getDescription());
 
-        RoomResponse response = new RoomResponse(
+        return new RoomResponse(
                 room.getId(),
                 room.getRoomNumber(),
                 roomTypeResponse,
                 room.getFloor(),
                 room.getStatus());
-        response.setDisplayName(room.getDisplayName());
-        response.setPrimaryPhotoUrl(room.getPrimaryPhotoUrl());
-        response.setGalleryPhotoUrls(room.getGalleryPhotoUrls());
-        response.setBedType(room.getBedType());
-        response.setViewType(room.getViewType());
-        response.setSizeSquareMeters(room.getSizeSquareMeters());
-        response.setFeaturedNote(room.getFeaturedNote());
-        response.setCustomAmenities(room.getCustomAmenities());
-        response.setBookable(room.isBookable());
-        return response;
     }
 }
