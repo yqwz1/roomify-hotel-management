@@ -12,6 +12,15 @@ public class RoomResponse {
     private RoomTypeResponse roomType;
     private Integer floor;
     private RoomStatus status;
+    private String displayName;
+    private String primaryPhotoUrl;
+    private String galleryPhotoUrls;
+    private String bedType;
+    private String viewType;
+    private Integer sizeSquareMeters;
+    private String featuredNote;
+    private String customAmenities;
+    private boolean bookable;
 
     // Constructors
     public RoomResponse() {}
@@ -63,5 +72,77 @@ public class RoomResponse {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getPrimaryPhotoUrl() {
+        return primaryPhotoUrl;
+    }
+
+    public void setPrimaryPhotoUrl(String primaryPhotoUrl) {
+        this.primaryPhotoUrl = primaryPhotoUrl;
+    }
+
+    public String getGalleryPhotoUrls() {
+        return galleryPhotoUrls;
+    }
+
+    public void setGalleryPhotoUrls(String galleryPhotoUrls) {
+        this.galleryPhotoUrls = galleryPhotoUrls;
+    }
+
+    public String getBedType() {
+        return bedType;
+    }
+
+    public void setBedType(String bedType) {
+        this.bedType = bedType;
+    }
+
+    public String getViewType() {
+        return viewType;
+    }
+
+    public void setViewType(String viewType) {
+        this.viewType = viewType;
+    }
+
+    public Integer getSizeSquareMeters() {
+        return sizeSquareMeters;
+    }
+
+    public void setSizeSquareMeters(Integer sizeSquareMeters) {
+        this.sizeSquareMeters = sizeSquareMeters;
+    }
+
+    public String getFeaturedNote() {
+        return featuredNote;
+    }
+
+    public void setFeaturedNote(String featuredNote) {
+        this.featuredNote = featuredNote;
+    }
+
+    public String getCustomAmenities() {
+        return customAmenities;
+    }
+
+    public void setCustomAmenities(String customAmenities) {
+        this.customAmenities = customAmenities;
+    }
+
+    public boolean isBookable() {
+        return bookable;
+    }
+
+    public void setBookable(boolean bookable) {
+        this.bookable = bookable;
     }
 }

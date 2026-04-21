@@ -28,12 +28,13 @@ import {
   formatLocalizedDate,
   getPaymentStatusLabel,
   getReservationStatusLabel,
+  translateWithFallback,
 } from '../utils/localization';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Guest%20Support`;
 
-function GuestStayCard({ reservation, propertyName, language, t }) {
+function GuestStayCard({ reservation, propertyName, language, onOpen, t }) {
   const roomLabel = reservation.roomNumber
     ? t('roomNumber', { number: reservation.roomNumber })
     : t('guestDashboardPage.roomPending');
@@ -114,6 +115,16 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
           </p>
           <p className="mt-2 text-sm font-bold text-zinc-950">{statusLabel}</p>
         </div>
+      </div>
+
+      <div className="mt-4 flex justify-end border-t border-zinc-200 pt-4">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+        >
+          {translateWithFallback(t, 'guestBookingsPage.viewDetailsCta', 'View details')}
+        </button>
       </div>
     </article>
   );
@@ -316,10 +327,10 @@ export default function GuestDashboard() {
               <div className="flex flex-wrap justify-center gap-3">
                 <button
                   type="button"
-                  onClick={() => navigate('/bookings')}
+                  onClick={() => navigate('/guest/bookings')}
                   className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
                 >
-                  {t('navGetHelp')}
+                  {translateWithFallback(t, 'guestBookingsPage.title', 'My Bookings')}
                 </button>
                 <button
                   type="button"
@@ -338,6 +349,9 @@ export default function GuestDashboard() {
                   reservation={reservation}
                   propertyName={propertyName}
                   language={i18n.language}
+                  onOpen={() =>
+                    navigate(`/guest/bookings/${reservation.confirmation || reservation.confirmationNumber}`)
+                  }
                   t={t}
                 />
               ))}
@@ -369,16 +383,30 @@ export default function GuestDashboard() {
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <DashboardQuickAction
-              icon={LifeBuoy}
-              title={t('navGetHelp')}
-              description={t(`${pageTx}.bookingsDescription`)}
-              onClick={() => navigate('/bookings')}
+              icon={UserRound}
+              title={translateWithFallback(t, 'guestProfilePage.title', 'Guest Profile')}
+              description={translateWithFallback(
+                t,
+                'guestDashboardPage.profileDescription',
+                'Review and update the guest details reused in new bookings.'
+              )}
+              onClick={() => navigate('/guest/profile')}
             />
             <DashboardQuickAction
               icon={BedDouble}
               title={t('navBrowseRooms')}
               description={t(`${pageTx}.browseDescription`)}
               onClick={() => navigate('/search')}
+            />
+            <DashboardQuickAction
+              icon={CalendarDays}
+              title={translateWithFallback(t, 'guestBookingsPage.title', 'My Bookings')}
+              description={translateWithFallback(
+                t,
+                'guestDashboardPage.bookingsPortalDescription',
+                'Open reservation details, modify eligible stays, or cancel if allowed.'
+              )}
+              onClick={() => navigate('/guest/bookings')}
             />
             <DashboardQuickAction
               icon={ReceiptText}

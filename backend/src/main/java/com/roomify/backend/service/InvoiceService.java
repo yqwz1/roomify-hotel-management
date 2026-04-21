@@ -6,7 +6,6 @@ import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.ReservationRepository;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +20,7 @@ public class InvoiceService {
     private final InvoiceDeliveryLogService deliveryLogService;
     private final AuditService auditService;
     private final ReservationFinancialService financialService;
+    private final InvoiceNumberService invoiceNumberService;
 
     @Transactional
     public void generateInvoice(Long reservationId) {
@@ -67,10 +67,7 @@ public class InvoiceService {
             return reservation.getInvoiceNumber();
         }
 
-        String invoiceNumber = "INV-" + UUID.randomUUID()
-                .toString()
-                .substring(0, 8)
-                .toUpperCase();
+        String invoiceNumber = invoiceNumberService.generate();
 
         reservation.setInvoiceNumber(invoiceNumber);
         reservationRepository.save(reservation);

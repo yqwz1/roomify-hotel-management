@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { cn } from '../../lib/utils';
+import { getHotelSettings } from '../../services/hotelSettingsService';
 import {
   getNavigationSections,
   getRoleDisplayLabel,
@@ -13,13 +15,35 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
   const location = useLocation();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
-  const brandName = t('brandName');
+  const [hotelSettings, setHotelSettings] = useState(null);
+  const brandName = hotelSettings?.hotelName || t('brandName');
   const isRtl = i18n.dir() === 'rtl';
 
   const roles = user?.roles ?? [];
   const sections = getNavigationSections(roles, t);
   const homePath = '/';
   const roleLabel = getRoleDisplayLabel(roles, t);
+
+  useEffect(() => {
+    let ignore = false;
+    const loadSettings = async () => {
+      try {
+        const settings = await getHotelSettings();
+        if (!ignore) {
+          setHotelSettings(settings);
+        }
+      } catch {
+        if (!ignore) {
+          setHotelSettings(null);
+        }
+      }
+    };
+
+    loadSettings();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleNavigation = () => {
     if (!isDesktop) {
@@ -52,12 +76,23 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           <div className="border-b border-white/10 px-5 py-5">
             <div className="flex items-center justify-between gap-3">
               <Link to={homePath} onClick={handleNavigation} className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">
-                  {brandName}
-                </p>
-                <p className="mt-1 truncate text-2xl font-black tracking-tight text-white">
-                  {t('hotelConsole')}
-                </p>
+                <div className="flex items-center gap-3">
+                  {hotelSettings?.logoUrl ? (
+                    <img
+                      src={hotelSettings.logoUrl}
+                      alt={brandName}
+                      className="h-11 w-11 rounded-2xl border border-white/10 object-cover"
+                    />
+                  ) : null}
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">
+                      {brandName}
+                    </p>
+                    <p className="mt-1 truncate text-2xl font-black tracking-tight text-white">
+                      {t('hotelConsole')}
+                    </p>
+                  </div>
+                </div>
               </Link>
 
               <button

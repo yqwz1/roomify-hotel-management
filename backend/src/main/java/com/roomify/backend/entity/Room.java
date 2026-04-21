@@ -35,6 +35,33 @@ public class Room {
     @Column(nullable = false, length = 20)
     private RoomStatus status;
 
+    @Column(name = "display_name", length = 120)
+    private String displayName;
+
+    @Column(name = "primary_photo_url", length = 1000)
+    private String primaryPhotoUrl;
+
+    @Column(name = "gallery_photo_urls", columnDefinition = "TEXT")
+    private String galleryPhotoUrls;
+
+    @Column(name = "bed_type", length = 80)
+    private String bedType;
+
+    @Column(name = "view_type", length = 80)
+    private String viewType;
+
+    @Column(name = "size_square_meters")
+    private Integer sizeSquareMeters;
+
+    @Column(name = "featured_note", columnDefinition = "TEXT")
+    private String featuredNote;
+
+    @Column(name = "custom_amenities", columnDefinition = "TEXT")
+    private String customAmenities;
+
+    @Column(name = "is_bookable", nullable = false)
+    private boolean bookable = true;
+
     // Constructors
     public Room() {}
 
@@ -84,5 +111,77 @@ public class Room {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getPrimaryPhotoUrl() {
+        return primaryPhotoUrl;
+    }
+
+    public void setPrimaryPhotoUrl(String primaryPhotoUrl) {
+        this.primaryPhotoUrl = primaryPhotoUrl;
+    }
+
+    public String getGalleryPhotoUrls() {
+        return galleryPhotoUrls;
+    }
+
+    public void setGalleryPhotoUrls(String galleryPhotoUrls) {
+        this.galleryPhotoUrls = galleryPhotoUrls;
+    }
+
+    public String getBedType() {
+        return bedType;
+    }
+
+    public void setBedType(String bedType) {
+        this.bedType = bedType;
+    }
+
+    public String getViewType() {
+        return viewType;
+    }
+
+    public void setViewType(String viewType) {
+        this.viewType = viewType;
+    }
+
+    public Integer getSizeSquareMeters() {
+        return sizeSquareMeters;
+    }
+
+    public void setSizeSquareMeters(Integer sizeSquareMeters) {
+        this.sizeSquareMeters = sizeSquareMeters;
+    }
+
+    public String getFeaturedNote() {
+        return featuredNote;
+    }
+
+    public void setFeaturedNote(String featuredNote) {
+        this.featuredNote = featuredNote;
+    }
+
+    public String getCustomAmenities() {
+        return customAmenities;
+    }
+
+    public void setCustomAmenities(String customAmenities) {
+        this.customAmenities = customAmenities;
+    }
+
+    public boolean isBookable() {
+        return bookable;
+    }
+
+    public void setBookable(boolean bookable) {
+        this.bookable = bookable;
     }
 }

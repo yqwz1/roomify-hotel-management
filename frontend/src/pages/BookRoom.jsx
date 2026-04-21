@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -12,9 +12,16 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ROLE_GUEST, getPrimaryRole } from '../components/navigation/navConfig';
 import DateRangePicker from '../components/DateRangePicker';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { useAuth } from '../context/AuthProvider';
+import {
+  createGuestReservation,
+  extractGuestReservationError,
+  getGuestProfile,
+} from '../services/guestReservationService';
 import {
   createReservation,
   extractReservationError,
@@ -23,6 +30,7 @@ import {
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
+  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -43,6 +51,7 @@ function Field({
   value,
   onChange,
   icon: Icon,
+  readOnly = false,
 }) {
   return (
     <div className="space-y-2">
@@ -60,8 +69,13 @@ function Field({
           type={type}
           placeholder={placeholder}
           value={value}
+          readOnly={readOnly}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+          className={`h-12 w-full rounded-full border ps-11 pe-4 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/5 ${
+            readOnly
+              ? 'border-zinc-200 bg-zinc-100 text-zinc-500'
+              : 'border-zinc-200 bg-zinc-50 text-zinc-950 focus:border-zinc-400 focus:bg-white'
+          }`}
         />
       </div>
     </div>
@@ -108,10 +122,13 @@ function ConflictBanner({ message, room, onSearchAlternatives }) {
 }
 
 export default function BookRoom() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const primaryRole = getPrimaryRole(user?.roles ?? []);
+  const isGuest = primaryRole === ROLE_GUEST;
 
   const room = location.state?.room ?? null;
   const roomId = room?.id ?? Number(searchParams.get('roomId'));
@@ -131,6 +148,7 @@ export default function BookRoom() {
   const [validationError, setValidationError] = useState(null);
   const [conflictError, setConflictError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(isGuest);
 
   const setField = (field, value) => {
     setGuest((prev) => ({ ...prev, [field]: value }));
@@ -145,6 +163,44 @@ export default function BookRoom() {
   const subtotal = roomRate * nights;
   const taxes = subtotal * 0.1;
   const totalPrice = subtotal + taxes;
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadGuestProfile = async () => {
+      if (!isGuest) return;
+
+      setLoadingProfile(true);
+      try {
+        const profile = await getGuestProfile();
+        if (ignore) return;
+        setGuest({
+          name: profile?.name ?? '',
+          email: profile?.email ?? user?.email ?? '',
+          phone: profile?.phone ?? '',
+          idNumber: profile?.idNumber ?? '',
+          nationality: profile?.nationality ?? '',
+        });
+      } catch (error) {
+        if (ignore) return;
+        setValidationError(extractGuestReservationError(error));
+        setGuest((current) => ({
+          ...current,
+          email: current.email || user?.email || '',
+        }));
+      } finally {
+        if (!ignore) {
+          setLoadingProfile(false);
+        }
+      }
+    };
+
+    loadGuestProfile();
+
+    return () => {
+      ignore = true;
+    };
+  }, [isGuest, user?.email]);
 
   const handleSearchAlternatives = () => {
     navigate('/search', { state: { checkIn, checkOut } });
@@ -198,7 +254,7 @@ export default function BookRoom() {
     setSubmitting(true);
 
     try {
-      const reservation = await createReservation({
+      const payload = {
         roomId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
@@ -210,7 +266,10 @@ export default function BookRoom() {
           idNumber: guest.idNumber.trim(),
           nationality: guest.nationality.trim(),
         },
-      });
+      };
+      const reservation = isGuest
+        ? await createGuestReservation(payload)
+        : await createReservation(payload);
 
       navigate('/confirmation', {
         state: {
@@ -221,7 +280,9 @@ export default function BookRoom() {
         },
       });
     } catch (error) {
-      const message = extractReservationError(error);
+      const message = isGuest
+        ? extractGuestReservationError(error)
+        : extractReservationError(error);
 
       if (isConflictError(error)) {
         setConflictError(message);
@@ -311,6 +372,12 @@ export default function BookRoom() {
             title={t('bookRoomPage.formTitle')}
             description={t('bookRoomPage.formDescription')}
           >
+            {loadingProfile ? (
+              <div className="mb-5 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+                {translateWithFallback(t, 'guestProfilePage.loading', 'Loading profile...')}
+              </div>
+            ) : null}
+
             {validationError && (
               <div className="mb-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
                 {validationError}
@@ -367,6 +434,7 @@ export default function BookRoom() {
                     value={guest.email}
                     onChange={(value) => setField('email', value)}
                     icon={Mail}
+                    readOnly={isGuest}
                   />
 
                   <Field
@@ -413,7 +481,7 @@ export default function BookRoom() {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || nights <= 0}
+                  disabled={submitting || nights <= 0 || loadingProfile}
                   className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                 >
                   {submitting
@@ -432,19 +500,39 @@ export default function BookRoom() {
           >
             <div className="space-y-5">
               <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
-                <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
-                  <BedDouble className="h-7 w-7" />
-                </span>
+                {room?.primaryPhotoUrl ? (
+                  <img
+                    src={room.primaryPhotoUrl}
+                    alt={room.displayName || room.roomNumber}
+                    className="h-full w-full rounded-[1.75rem] object-cover"
+                  />
+                ) : (
+                  <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
+                    <BedDouble className="h-7 w-7" />
+                  </span>
+                )}
               </div>
 
               <div>
                 <p className="text-2xl font-black tracking-tight text-zinc-950">
-                  {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
+                  {room?.displayName || (room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`)}
                 </p>
                 <p className="mt-1 text-sm font-medium text-zinc-500">
-                  {translateKnownValue(room?.roomType?.name, t) || t('bookRoomPage.roomTypeUnavailable')}
+                  {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`} • {translateKnownValue(room?.roomType?.name, t) || t('bookRoomPage.roomTypeUnavailable')}
                   {room?.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                 </p>
+                {(room?.bedType || room?.viewType || room?.sizeSquareMeters) ? (
+                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                    {[room?.bedType, room?.viewType, room?.sizeSquareMeters ? `${room.sizeSquareMeters} sqm` : null]
+                      .filter(Boolean)
+                      .join(' • ')}
+                  </p>
+                ) : null}
+                {room?.featuredNote ? (
+                  <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
+                    {room.featuredNote}
+                  </p>
+                ) : null}
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -510,9 +598,9 @@ export default function BookRoom() {
                 </div>
               </div>
 
-              {room?.roomType?.amenities && (
+              {(room?.customAmenities || room?.roomType?.amenities) && (
                 <div className="flex flex-wrap gap-2">
-                  {room.roomType.amenities
+                  {(room.customAmenities || room.roomType.amenities)
                     .split(',')
                     .map((item) => item.trim())
                     .filter(Boolean)

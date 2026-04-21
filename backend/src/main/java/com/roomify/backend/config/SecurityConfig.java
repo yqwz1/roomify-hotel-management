@@ -2,6 +2,7 @@ package com.roomify.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // ✅ مهم
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rooms/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hotel-settings").permitAll()
                         .requestMatchers("/api/guest/reservations").hasRole("GUEST")
 
                         // ❗ باقي endpoints تحتاج Authentication

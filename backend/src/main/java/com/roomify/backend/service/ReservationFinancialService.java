@@ -5,7 +5,6 @@ import com.roomify.backend.entity.Reservation;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,13 +13,14 @@ public class ReservationFinancialService {
     private static final int MONEY_SCALE = 2;
     private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
 
-    private final BigDecimal vatRate;
+    private final HotelSettingsService hotelSettingsService;
 
-    public ReservationFinancialService(@Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
-        this.vatRate = vatRate;
+    public ReservationFinancialService(HotelSettingsService hotelSettingsService) {
+        this.hotelSettingsService = hotelSettingsService;
     }
 
     public ReservationFinancialSummary summarize(Reservation reservation) {
+        BigDecimal vatRate = hotelSettingsService.getTaxRate();
         BigDecimal roomRate = sanitize(reservation.getRoom().getRoomType().getBasePrice());
         long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
         BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights)).setScale(MONEY_SCALE, ROUNDING);

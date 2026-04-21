@@ -8,7 +8,6 @@ import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +35,7 @@ public class BillingService {
         private final AuditService auditService;
         private final NotificationService notificationService;
         private final ReservationFinancialService financialService;
-        private final BigDecimal vatRate;
+        private final HotelSettingsService hotelSettingsService;
 
         public BillingService(
                         ReservationRepository reservationRepository,
@@ -44,13 +43,13 @@ public class BillingService {
                         AuditService auditService,
                         NotificationService notificationService,
                         ReservationFinancialService financialService,
-                        @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
+                        HotelSettingsService hotelSettingsService) {
                 this.reservationRepository = reservationRepository;
                 this.paymentRepository = paymentRepository;
                 this.auditService = auditService;
                 this.notificationService = notificationService;
                 this.financialService = financialService;
-                this.vatRate = vatRate;
+                this.hotelSettingsService = hotelSettingsService;
         }
 
         public BillResponse calculateBill(
@@ -204,6 +203,7 @@ public class BillingService {
                 BigDecimal safeDiscount = sanitise(discountAmount);
 
                 ReservationFinancialService.ReservationFinancialSummary financialSummary = financialService.summarize(reservation);
+                BigDecimal vatRate = hotelSettingsService.getTaxRate();
 
                 if (financialSummary.nights() <= 0) {
                         throw new IllegalArgumentException("Reservation date range is invalid for billing");
@@ -222,7 +222,7 @@ public class BillingService {
 
                 List<BillLineItem> lineItems = buildLineItems(
                                 financialSummary.nights(), roomRate, roomCharge, safeServiceCharges,
-                                vatAmount, safeDiscount, balanceDue);
+                                vatRate, vatAmount, safeDiscount, balanceDue);
 
                 if (auditBillCalculated) {
                         auditService.log(
@@ -260,6 +260,7 @@ public class BillingService {
                         BigDecimal roomRate,
                         BigDecimal roomCharge,
                         BigDecimal serviceCharges,
+                        BigDecimal vatRate,
                         BigDecimal vatAmount,
                         BigDecimal discount,
                         BigDecimal balanceDue) {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Receipt, WalletCards } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -22,6 +22,7 @@ import {
 
 export default function GuestBillingStatus() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const pageTx = 'guestBillingStatusPage';
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -267,6 +268,16 @@ export default function GuestBillingStatus() {
                         </p>
                       </div>
                     </div>
+
+                    <div className="mt-4 flex justify-end border-t border-zinc-200 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/guest/bookings/${confirmation}`)}
+                        className="inline-flex items-center rounded-full bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
+                      >
+                        {translateWithFallback(t, `${pageTx}.viewReservationCta`, 'Open reservation')}
+                      </button>
+                    </div>
                   </article>
                 );
               })}
@@ -307,10 +318,10 @@ export default function GuestBillingStatus() {
                 {t('navGetHelp')}
               </Link>
               <Link
-                to="/guest/dashboard"
+                to="/guest/bookings"
                 className="inline-flex items-center rounded-full border border-zinc-900 bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
               >
-                {t('navMyStay')}
+                {translateWithFallback(t, 'guestBookingsPage.title', 'My Bookings')}
               </Link>
             </div>
           </div>

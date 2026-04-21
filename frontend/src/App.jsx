@@ -13,10 +13,15 @@ import ManagerDashboard from './pages/ManagerDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
+import GuestProfile from './pages/GuestProfile'
+import GuestBookings from './pages/GuestBookings'
+import GuestBookingDetails from './pages/GuestBookingDetails'
 import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
+  GUEST_BOOKINGS_PATH,
   GUEST_BILLING_STATUS_PATH,
+  GUEST_PROFILE_PATH,
   ROLE_ADMIN,
   ROLE_GUEST,
   ROLE_MANAGER,
@@ -37,6 +42,7 @@ import Checkout from './pages/Checkout'
 import RoomStatus from './pages/RoomStatus'
 import InvoicePreview from './pages/InvoicePreview'
 import ReservationDetails from './pages/ReservationDetails'
+import HotelSettings from './pages/HotelSettings'
 import ReservationsWorkspace from './pages/ReservationsWorkspace'
 import AdminDashboard from './pages/AdminDashboard'
 import HotelServices from './pages/HotelServices'
@@ -147,7 +153,7 @@ const AppContent = () => {
         <Route
           path="/book"
           element={
-            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
               <Layout showSidebar={true}><BookRoom /></Layout>
             </ProtectedRoute>
           }
@@ -156,7 +162,7 @@ const AppContent = () => {
         <Route
           path="/confirmation"
           element={
-            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
               <Layout showSidebar={true}><ConfirmationPage /></Layout>
             </ProtectedRoute>
           }
@@ -208,6 +214,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/hotel-settings"
+          element={
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
+              <Layout showSidebar={true}><HotelSettings /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/invoice-preview"
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
@@ -239,6 +253,30 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
               <Layout showSidebar={true}><GuestBillingStatus /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={GUEST_PROFILE_PATH}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestProfile /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={GUEST_BOOKINGS_PATH}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestBookings /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={`${GUEST_BOOKINGS_PATH}/:confirmationNumber`}
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestBookingDetails /></Layout>
             </ProtectedRoute>
           }
         />

@@ -10,17 +10,22 @@ import com.roomify.backend.repository.InvoiceRepository;
 public class InvoiceNumberService {
 
     private final InvoiceRepository invoiceRepository;
+    private final HotelSettingsService hotelSettingsService;
 
-    public InvoiceNumberService(InvoiceRepository invoiceRepository) {
+    public InvoiceNumberService(
+            InvoiceRepository invoiceRepository,
+            HotelSettingsService hotelSettingsService) {
         this.invoiceRepository = invoiceRepository;
+        this.hotelSettingsService = hotelSettingsService;
     }
 
     public String generate() {
 
         for (int i = 0; i < 10; i++) {
 
+            String prefix = hotelSettingsService.getInvoicePrefix();
             String number =
-                    "INV-" +
+                    prefix + "-" +
                     UUID.randomUUID()
                             .toString()
                             .replace("-", "")
