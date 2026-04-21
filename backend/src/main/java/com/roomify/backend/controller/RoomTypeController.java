@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/room-types")
-@PreAuthorize("hasRole('MANAGER')")
 public class RoomTypeController {
 
     private final RoomTypeService roomTypeService;
@@ -27,6 +26,7 @@ public class RoomTypeController {
      * POST /api/room-types
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomTypeResponse> create(@Valid @RequestBody RoomTypeRequest request) {
         RoomTypeResponse response = roomTypeService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -37,6 +37,7 @@ public class RoomTypeController {
      * GET /api/room-types
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<RoomTypeResponse>> getAll() {
         List<RoomTypeResponse> roomTypes = roomTypeService.findAll();
         return ResponseEntity.ok(roomTypes);
@@ -47,6 +48,7 @@ public class RoomTypeController {
      * GET /api/room-types/{id}
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<RoomTypeResponse> getById(@PathVariable Long id) {
         RoomTypeResponse response = roomTypeService.findById(id);
         return ResponseEntity.ok(response);
@@ -57,6 +59,7 @@ public class RoomTypeController {
      * PUT /api/room-types/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomTypeResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody RoomTypeRequest request) {
@@ -69,6 +72,7 @@ public class RoomTypeController {
      * DELETE /api/room-types/{id}
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         roomTypeService.delete(id);
         return ResponseEntity.noContent().build();

@@ -10,8 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
-const DEFAULT_ADMIN_EMAIL = 'admin@roomify.com';
-const DEFAULT_ADMIN_PASSWORD = 'password123';
+const showDemoCredentials = import.meta.env?.MODE === 'development';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ const LoginPage = () => {
   const brandName = t('brandName');
 
   const [formData, setFormData] = useState({
-    email: DEFAULT_ADMIN_EMAIL,
+    email: '',
     password: '',
   });
   const [errors, setErrors] = useState({ email: '', password: '' });
@@ -84,6 +83,9 @@ const LoginPage = () => {
       const primaryRole = user.roles && user.roles.length > 0 ? user.roles[0] : '';
 
       switch (primaryRole) {
+        case 'ROLE_ADMIN':
+          navigate('/admin/dashboard', { replace: true });
+          break;
         case 'ROLE_MANAGER':
           navigate('/manager/dashboard', { replace: true });
           break;
@@ -189,9 +191,11 @@ const LoginPage = () => {
                 {errors.email && (
                   <p className="mt-1 ps-2 text-xs font-bold text-red-500">{errors.email}</p>
                 )}
-                <p className="ps-2 text-xs leading-5 text-zinc-400" dir="ltr">
-                  Default admin: {DEFAULT_ADMIN_EMAIL} / {DEFAULT_ADMIN_PASSWORD}
-                </p>
+                {showDemoCredentials ? (
+                  <p className="ps-2 text-xs leading-5 text-zinc-400" dir="ltr">
+                    admin@roomify.com / password123
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">

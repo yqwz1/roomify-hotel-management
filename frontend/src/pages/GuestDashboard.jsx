@@ -6,6 +6,7 @@ import {
   CalendarDays,
   LifeBuoy,
   Mail,
+  ReceiptText,
   Receipt,
   UserRound,
 } from 'lucide-react';
@@ -167,6 +168,11 @@ export default function GuestDashboard() {
   };
 
   const nextReservation = reservations[0] ?? null;
+  const outstandingBalance = reservations.reduce(
+    (sum, reservation) => sum + Number(reservation.outstandingBalance ?? 0),
+    0
+  );
+  const finalizedInvoices = reservations.filter((reservation) => reservation.invoiceFinalized).length;
   const propertyName = t(`${pageTx}.propertyName`, {
     brand: t('brandName'),
   });
@@ -210,6 +216,14 @@ export default function GuestDashboard() {
     { label: t('emailLabel'), value: user?.email || '-' },
     { label: t('roleLabel'), value: getRoleCodeLabel(user?.roles?.[0] || 'ROLE_GUEST', t) },
     { label: t(`${pageTx}.supportContact`), value: SUPPORT_EMAIL },
+    {
+      label: t('checkoutPage.outstandingBalanceLabel'),
+      value: formatLocalizedCurrency(outstandingBalance, i18n.language),
+    },
+    {
+      label: t('common.finalized'),
+      value: String(finalizedInvoices),
+    },
   ];
 
   return (
@@ -365,6 +379,12 @@ export default function GuestDashboard() {
               title={t('navBrowseRooms')}
               description={t(`${pageTx}.browseDescription`)}
               onClick={() => navigate('/search')}
+            />
+            <DashboardQuickAction
+              icon={ReceiptText}
+              title={t('navBillingStatus')}
+              description={t('guestBillingStatusPage.description')}
+              onClick={() => navigate('/guest/billing-status')}
             />
             <DashboardQuickAction
               icon={Mail}

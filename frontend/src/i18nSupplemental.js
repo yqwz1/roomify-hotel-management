@@ -487,6 +487,10 @@ const supplementalResources = {
         guestNamePlaceholder: 'Guest name',
         anyStatus: 'Any status',
         applyFilters: 'Apply Filters',
+        confirmationPrecedenceNote:
+          'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the queue resolves by confirmation first.',
+        filterSyncNote:
+          'The queue is synced with the current filters.',
         emptyTitle: 'No reservations match this queue',
         emptyDescription:
           'Adjust the active queue tab or filters to bring the next reservation into view.',
@@ -920,12 +924,18 @@ const supplementalResources = {
       reservationLookupPanel: {
         title: 'Reservation Lookup',
         description:
-          'Use backend filters to find the exact reservation before continuing with a staff workflow.',
+          'Use the current filters to find the exact reservation before continuing with a staff workflow.',
         chipConfirmation: 'Confirmation-first',
         chipFiltered: 'Filtered results',
         confirmationPlaceholder: 'RSV-XXXXXXXXXXXX',
         guestNamePlaceholder: 'Guest name',
         anyStatus: 'Any status',
+        backendDrivenDescription:
+          'Reservation lookup stays aligned with the current filters exactly as shown.',
+        confirmationPrecedenceDescription:
+          'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the results list is resolved by confirmation first.',
+        loadingDescription:
+          'Live reservations are being filtered using the current lookup criteria.',
         emptyTitle: 'No reservation found',
         emptyDescription:
           'Try a confirmation number, tighter guest details, or a stay date filter.',

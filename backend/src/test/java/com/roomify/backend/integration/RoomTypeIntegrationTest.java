@@ -59,6 +59,7 @@ class RoomTypeIntegrationTest {
         private RoomRepository roomRepository;
 
         private ObjectMapper objectMapper;
+        private String adminToken;
         private String managerToken;
         private String staffToken;
         private String guestToken;
@@ -71,6 +72,7 @@ class RoomTypeIntegrationTest {
                 objectMapper = new ObjectMapper();
 
                 // Generate tokens for different roles
+                adminToken = jwtUtils.generateToken("admin@roomify.com", "ROLE_ADMIN");
                 managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
                 staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
                 guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
@@ -92,7 +94,7 @@ class RoomTypeIntegrationTest {
                 String json = objectMapper.writeValueAsString(roomTypeData);
 
                 mockMvc.perform(post("/api/room-types")
-                                .header("Authorization", "Bearer " + managerToken)
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isCreated())
@@ -126,7 +128,7 @@ class RoomTypeIntegrationTest {
                 String json = objectMapper.writeValueAsString(duplicateData);
 
                 mockMvc.perform(post("/api/room-types")
-                                .header("Authorization", "Bearer " + managerToken)
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isConflict())
@@ -189,7 +191,7 @@ class RoomTypeIntegrationTest {
                 String json = objectMapper.writeValueAsString(updateData);
 
                 mockMvc.perform(put("/api/room-types/" + saved.getId())
-                                .header("Authorization", "Bearer " + managerToken)
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isOk())
@@ -218,7 +220,7 @@ class RoomTypeIntegrationTest {
                 String json = objectMapper.writeValueAsString(updateData);
 
                 mockMvc.perform(put("/api/room-types/" + type2.getId())
-                                .header("Authorization", "Bearer " + managerToken)
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isConflict())
@@ -231,12 +233,12 @@ class RoomTypeIntegrationTest {
                                 new RoomType("Temporary Type", new BigDecimal("100.00"), 2, "WiFi", "Will be deleted"));
 
                 mockMvc.perform(delete("/api/room-types/" + saved.getId())
-                                .header("Authorization", "Bearer " + managerToken))
+                                .header("Authorization", "Bearer " + adminToken))
                                 .andExpect(status().isNoContent());
 
                 // Verify it's deleted
                 mockMvc.perform(get("/api/room-types/" + saved.getId())
-                                .header("Authorization", "Bearer " + managerToken))
+                                .header("Authorization", "Bearer " + adminToken))
                                 .andExpect(status().isNotFound());
         }
 
@@ -254,9 +256,39 @@ class RoomTypeIntegrationTest {
                 roomRepository.save(room);
 
                 mockMvc.perform(delete("/api/room-types/" + roomType.getId())
-                                .header("Authorization", "Bearer " + managerToken))
+                                .header("Authorization", "Bearer " + adminToken))
                                 .andExpect(jsonPath("$.message")
                                                 .value("Cannot delete room type: rooms are currently assigned to this type"));
+        }
+
+        @Test
+        void managerCanReadRoomTypesButCannotMutateThem() throws Exception {
+                RoomType saved = roomTypeRepository.save(
+                                new RoomType("Manager Read", new BigDecimal("140.00"), 2, "WiFi", "Read-only"));
+
+                mockMvc.perform(get("/api/room-types")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(1)));
+
+                mockMvc.perform(get("/api/room-types/" + saved.getId())
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.name").value("Manager Read"));
+
+                mockMvc.perform(post("/api/room-types")
+                                .header("Authorization", "Bearer " + managerToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                  "name": "Blocked Write",
+                                                  "basePrice": 100.0,
+                                                  "maxGuests": 2,
+                                                  "amenities": "WiFi",
+                                                  "description": "Manager write should fail"
+                                                }
+                                                """))
+                                .andExpect(status().isForbidden());
         }
 
         @Test

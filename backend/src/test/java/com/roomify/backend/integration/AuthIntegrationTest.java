@@ -80,7 +80,7 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.email").value("admin@roomify.com"))
                 .andExpect(jsonPath("$.username").value("Admin"))
-                .andExpect(jsonPath("$.roles[0]").value("ROLE_MANAGER"));
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"));
     }
 
     @Test
@@ -148,8 +148,8 @@ class AuthIntegrationTest {
                 .get("token")
                 .asText();
 
-        // Use token to access protected endpoint
-        mockMvc.perform(get("/api/rooms")
+        // Use token to access an admin endpoint
+        mockMvc.perform(get("/api/staff")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }

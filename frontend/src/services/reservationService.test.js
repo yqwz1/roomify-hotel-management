@@ -99,6 +99,23 @@ describe('reservationService.searchReservations', () => {
     });
   });
 
+  it('does not forward workspace-only selected params to the backend', async () => {
+    api.get.mockResolvedValueOnce({ data: [] });
+
+    await getAllReservations({
+      queueTab: 'arrivals',
+      selected: 'RSV-123456',
+      confirmation: 'RSV-123456',
+    });
+
+    expect(api.get).toHaveBeenCalledWith('/reservations', {
+      params: {
+        queueTab: 'arrivals',
+        confirmation: 'RSV-123456',
+      },
+    });
+  });
+
   it('resolves non-RSV confirmation numbers before modifying reservations', async () => {
     api.get.mockResolvedValueOnce({
       data: {

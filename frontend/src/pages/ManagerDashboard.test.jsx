@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import ManagerDashboard from './ManagerDashboard';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
-import { getRecentAuditLogs } from '../services/auditLogService';
 import { exportDashboardReport } from '../services/dashboardService';
 import { getNotifications } from '../services/notificationService';
 
@@ -35,11 +34,6 @@ vi.mock('../services/dashboardService', () => ({
 vi.mock('../services/notificationService', () => ({
   getNotifications: vi.fn(),
   extractNotificationError: (err) => err?.message ?? 'Notifications failed',
-}));
-
-vi.mock('../services/auditLogService', () => ({
-  getRecentAuditLogs: vi.fn(),
-  extractAuditLogError: (err) => err?.message ?? 'Audit failed',
 }));
 
 const renderPage = () =>
@@ -78,11 +72,9 @@ describe('ManagerDashboard', () => {
     useManagerDashboard.mockReset();
     exportDashboardReport.mockReset();
     getNotifications.mockReset();
-    getRecentAuditLogs.mockReset();
     globalThis.URL.createObjectURL = vi.fn(() => 'blob:report');
     globalThis.URL.revokeObjectURL = vi.fn();
     getNotifications.mockImplementation(() => new Promise(() => {}));
-    getRecentAuditLogs.mockImplementation(() => new Promise(() => {}));
   });
 
   it('shows loading state while the live dashboard hook is loading', () => {
@@ -177,7 +169,7 @@ describe('ManagerDashboard', () => {
     expect(screen.getByRole('link', { name: /Download JSON Export/i })).toHaveAttribute('href', 'blob:report');
   });
 
-  it('shows recent notifications and audit logs for demo visibility', async () => {
+  it('shows recent notifications without exposing admin-only audit activity', async () => {
     useManagerDashboard.mockReturnValue(dashboardData);
     getNotifications.mockResolvedValue([
       {
@@ -188,23 +180,21 @@ describe('ManagerDashboard', () => {
         createdAt: '2026-04-03T10:00:00',
       },
     ]);
-    getRecentAuditLogs.mockResolvedValue([
-      {
-        id: 2,
-        actor: 'manager@roomify.com',
-        action: 'ROOM_UPDATED',
-        target: 'Room#201',
-        metadata: 'roomNumber=201 floor=2',
-        createdAt: '2026-04-03T10:05:00',
-      },
-    ]);
 
     renderPage();
 
     expect(await screen.findByTestId('manager-notifications')).toBeInTheDocument();
     expect(screen.getByText(/Reservation RSV-9 payment failed/i)).toBeInTheDocument();
-    expect(screen.getByTestId('manager-audit-logs')).toBeInTheDocument();
-    expect(screen.getByText('ROOM_UPDATED')).toBeInTheDocument();
-    expect(screen.getByText(/roomNumber=201 floor=2/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('manager-audit-logs')).not.toBeInTheDocument();
+  });
+
+  it('removes admin-only quick actions from the manager dashboard', () => {
+    useManagerDashboard.mockReturnValue(dashboardData);
+
+    renderPage();
+
+    expect(screen.queryByRole('button', { name: /Room Types/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Staff/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Reservations/i })).toBeInTheDocument();
   });
 });

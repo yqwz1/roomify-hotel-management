@@ -58,6 +58,7 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
 
         alignRoomTypeColumn();
         normalizeLegacyRoomStatuses();
+        alignRoomStatusConstraint();
         relaxLegacyRoomColumns();
     }
 
@@ -111,6 +112,19 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
                 """);
         execute("UPDATE rooms SET status = 'NEEDS_CLEANING' WHERE status = 'MAINTENANCE'");
         execute("UPDATE rooms SET status = 'UNDER_MAINTENANCE' WHERE status = 'OUT_OF_SERVICE'");
+    }
+
+    private void alignRoomStatusConstraint() {
+        if (!columnExists("rooms", "status")) {
+            return;
+        }
+
+        execute("ALTER TABLE rooms DROP CONSTRAINT IF EXISTS rooms_status_check");
+        execute("""
+                ALTER TABLE rooms
+                ADD CONSTRAINT rooms_status_check
+                CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'))
+                """);
     }
 
     private void relaxLegacyRoomColumns() {

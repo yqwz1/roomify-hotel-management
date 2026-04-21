@@ -17,6 +17,7 @@ import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
   GUEST_BILLING_STATUS_PATH,
+  ROLE_ADMIN,
   ROLE_GUEST,
   ROLE_MANAGER,
   ROLE_STAFF,
@@ -36,9 +37,13 @@ import Checkout from './pages/Checkout'
 import RoomStatus from './pages/RoomStatus'
 import InvoicePreview from './pages/InvoicePreview'
 import ReservationDetails from './pages/ReservationDetails'
+import ReservationsWorkspace from './pages/ReservationsWorkspace'
+import AdminDashboard from './pages/AdminDashboard'
+import HotelServices from './pages/HotelServices'
 
 import Layout from './components/Layout';
 
+const ADMIN_ONLY_ROLES = [ROLE_ADMIN];
 const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
 const STAFF_ONLY_ROLES = [ROLE_STAFF];
 const GUEST_ONLY_ROLES = [ROLE_GUEST];
@@ -62,7 +67,7 @@ const AppContent = () => {
         <Route
           path="/room-types"
           element={
-            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
               <Layout showSidebar={true}><RoomTypes /></Layout>
             </ProtectedRoute>
           }
@@ -71,7 +76,7 @@ const AppContent = () => {
         <Route
           path="/staff"
           element={
-            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
               <Layout showSidebar={true}><Staff /></Layout>
             </ProtectedRoute>
           }
@@ -92,6 +97,14 @@ const AppContent = () => {
           element={
             <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><ManagerDashboard /></Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <PrivateRoute allowedRoles={ADMIN_ONLY_ROLES}>
+              <Layout showSidebar={true}><AdminDashboard /></Layout>
             </PrivateRoute>
           }
         />
@@ -207,7 +220,7 @@ const AppContent = () => {
           path="/reservations"
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
-              <Layout showSidebar={true}><StaffDashboard /></Layout>
+              <Layout showSidebar={true}><ReservationsWorkspace /></Layout>
             </ProtectedRoute>
           }
         />
@@ -226,6 +239,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
               <Layout showSidebar={true}><GuestBillingStatus /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/services"
+          element={
+            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
+              <Layout showSidebar={true}><HotelServices /></Layout>
             </ProtectedRoute>
           }
         />

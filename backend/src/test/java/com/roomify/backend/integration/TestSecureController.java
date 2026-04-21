@@ -16,6 +16,12 @@ class TestSecureController {
         return ResponseEntity.ok("manager-summary");
     }
 
+    @GetMapping("/admin/summary")
+    @PreAuthorize("@roleSecurityEvaluator.hasAnyRole({'ADMIN'})")
+    ResponseEntity<String> adminSummary() {
+        return ResponseEntity.ok("admin-summary");
+    }
+
     @GetMapping("/manager/reports")
     @PreAuthorize("@roleSecurityEvaluator.hasAnyRole({'MANAGER'})")
     ResponseEntity<String> managerReports() {

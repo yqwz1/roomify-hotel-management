@@ -1,141 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowLeft,
-  ArrowRightLeft,
-  CalendarDays,
-  CreditCard,
-  FileText,
-  Hotel,
-  Receipt,
-  UserRound,
-  XCircle,
-} from 'lucide-react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import ErrorState from '../components/common/ErrorState';
-import LoadingState from '../components/common/LoadingState';
-import StatusPill from '../components/StatusPill';
-import { Button } from '../components/ui/button';
-import { LtrText } from '../components/LtrText';
-import DashboardHero from '../components/dashboard/DashboardHero';
-import DashboardPanel from '../components/dashboard/DashboardPanel';
-import { useAuth } from '../context/AuthProvider';
+import { ReservationDetailLoader } from '../components/reservations/ReservationDetailContent';
 import {
-  extractReservationError,
-  getReservationByConfirmationNumber,
-} from '../services/reservationService';
-import { reservationStatusRules } from '../domain/reservations/statusRules';
-import {
-  formatLocalizedCurrency,
-  formatLocalizedDate,
-  getBooleanLabel,
-  getPaymentStatusLabel,
-  getReservationStatusLabel,
-  translateKnownValue,
-} from '../utils/localization';
+  buildReservationWorkspaceQueueContext,
+} from '../utils/reservationWorkspace';
 import { buildReservationLookupNavigationState } from '../utils/reservationLookup';
-
-function ActionButton({
-  icon: Icon,
-  title,
-  description,
-  onClick,
-  disabled = false,
-  tone = 'default',
-}) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-rose-200 bg-rose-50 text-rose-900 hover:border-rose-300 hover:bg-rose-100'
-      : 'border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-300 hover:bg-white';
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`rounded-[1.35rem] border p-4 text-left transition disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 ${toneClass}`}
-    >
-      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <Icon className="h-4 w-4" />
-      </span>
-      <p className="mt-3 text-sm font-bold">{title}</p>
-      <p className="mt-1 text-sm font-medium leading-6 opacity-80">{description}</p>
-    </button>
-  );
-}
-
-const normalizeSearchValue = (value) => String(value ?? '').trim();
-
-const buildQueueContext = (searchParams, t, language) => {
-  const queueTab = normalizeSearchValue(searchParams.get('queueTab'));
-  const confirmation = normalizeSearchValue(searchParams.get('confirmation'));
-  const guestName = normalizeSearchValue(searchParams.get('guestName'));
-  const status = normalizeSearchValue(searchParams.get('status'));
-  const checkInDate = normalizeSearchValue(searchParams.get('checkInDate'));
-  const checkOutDate = normalizeSearchValue(searchParams.get('checkOutDate'));
-
-  const items = [];
-
-  if (queueTab) {
-    const focusLabel =
-      queueTab === 'arrivals'
-        ? t('staffDashboardPage.tabs.arrivals')
-        : queueTab === 'inHouse'
-          ? t('staffDashboardPage.tabs.inHouse')
-          : queueTab === 'departures'
-            ? t('staffDashboardPage.tabs.departures')
-            : t('staffDashboardPage.tabs.all');
-
-    items.push({
-      label: t('reservationDetailsPage.queueContextFocus'),
-      value: focusLabel,
-    });
-  }
-
-  if (confirmation) {
-    items.push({
-      label: t('confirmationNumber'),
-      value: <LtrText>{confirmation}</LtrText>,
-    });
-  }
-
-  if (guestName) {
-    items.push({
-      label: t('guestName'),
-      value: guestName,
-    });
-  }
-
-  if (status) {
-    items.push({
-      label: t('status'),
-      value: getReservationStatusLabel(status, t),
-    });
-  }
-
-  if (checkInDate) {
-    items.push({
-      label: t('checkInDate'),
-      value: formatLocalizedDate(checkInDate, language, { dateStyle: 'medium' }),
-    });
-  }
-
-  if (checkOutDate) {
-    items.push({
-      label: t('checkOutDate'),
-      value: formatLocalizedDate(checkOutDate, language, { dateStyle: 'medium' }),
-    });
-  }
-
-  return items;
-};
 
 export default function ReservationDetails() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { confirmationNumber: routeConfirmation } = useParams();
-  const { hasRole } = useAuth();
   const { t, i18n } = useTranslation();
 
   const confirmationNumber = useMemo(() => {
@@ -144,433 +20,48 @@ export default function ReservationDetails() {
   }, [location.state?.confirmationNumber, routeConfirmation]);
 
   const queueSearch = searchParams.toString();
-  const queueBasePath =
-    location.state?.fromQueuePath ??
-    (hasRole('ROLE_STAFF') ? '/staff/dashboard' : '/reservations');
+  const queueBasePath = location.state?.fromQueuePath ?? '/reservations';
   const queueReturnPath = `${queueBasePath}${queueSearch ? `?${queueSearch}` : ''}`;
   const queueContext = useMemo(
-    () => buildQueueContext(searchParams, t, i18n.language),
+    () => buildReservationWorkspaceQueueContext(searchParams, t, i18n.language),
     [i18n.language, searchParams, t]
   );
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [reservation, setReservation] = useState(null);
+  const handleAction = (action, reservation) => {
+    const navigationState = buildReservationLookupNavigationState({
+      confirmation: reservation.confirmationNumber,
+    });
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadReservation = async () => {
-      if (!confirmationNumber) {
-        setReservation(null);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const result = await getReservationByConfirmationNumber(confirmationNumber);
-        if (ignore) return;
-        setReservation(result);
-      } catch (err) {
-        if (ignore) return;
-        setReservation(null);
-        setError(extractReservationError(err));
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadReservation();
-
-    return () => {
-      ignore = true;
-    };
-  }, [confirmationNumber]);
-
-  if (loading) {
-    return <LoadingState message={t('reservationDetailsPage.loading')} />;
-  }
-
-  if (!confirmationNumber) {
-    return (
-      <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-        <ErrorState
-          title={t('reservationDetailsPage.emptyTitle')}
-          message={t('reservationDetailsPage.emptyDescription')}
-        />
-        <Button
-          variant="outline"
-          className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-          onClick={() => navigate(queueReturnPath)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('reservationDetailsPage.backToQueue')}
-        </Button>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <ErrorState
-        title={t('reservationDetailsPage.errorTitle')}
-        message={error}
-        onRetry={() => navigate(0)}
-      />
-    );
-  }
-
-  if (!reservation) {
-    return (
-      <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-        <ErrorState
-          title={t('reservationDetailsPage.emptyTitle')}
-          message={t('reservationDetailsPage.emptyDescription')}
-        />
-        <Button
-          variant="outline"
-          className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-          onClick={() => navigate(queueReturnPath)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('reservationDetailsPage.backToQueue')}
-        </Button>
-      </div>
-    );
-  }
-
-  const guestName = reservation.guestName || reservation.guest?.name || t('common.guest');
-  const guestEmail =
-    reservation.guestEmail || reservation.guest?.email || t('common.noGuestEmailProvided');
-  const roomNumber = reservation.roomNumber || reservation.room?.roomNumber || '-';
-  const roomTypeName = reservation.roomTypeName || reservation.room?.roomTypeName || t('unassigned');
-  const floor = reservation.floor || reservation.room?.floor || '-';
-  const nights = reservation.nights ?? reservation.dates?.nights ?? 0;
-  const totalPrice = reservation.totalPrice ?? reservation.pricing?.totalPrice ?? 0;
-  const totalPaid = reservation.totalPaid;
-  const outstandingBalance = reservation.outstandingBalance;
-  const paymentStatus = reservation.paymentStatus;
-  const invoiceFinalized =
-    typeof reservation.invoiceFinalized === 'boolean' ? reservation.invoiceFinalized : null;
-
-  const financialFacts = [
-    {
-      label: t('checkoutPage.paymentStatusLabel'),
-      value: paymentStatus ? getPaymentStatusLabel(paymentStatus, t) : null,
-    },
-    {
-      label: t('checkoutPage.totalPaidLabel'),
-      value:
-        totalPaid != null ? (
-          <LtrText>{formatLocalizedCurrency(totalPaid, i18n.language)}</LtrText>
-        ) : null,
-    },
-    {
-      label: t('checkoutPage.outstandingBalanceLabel'),
-      value:
-        outstandingBalance != null
-          ? <LtrText>{formatLocalizedCurrency(outstandingBalance, i18n.language)}</LtrText>
-          : null,
-    },
-    {
-      label: t('common.finalized'),
-      value: invoiceFinalized != null ? getBooleanLabel(invoiceFinalized, t) : null,
-    },
-  ].filter((item) => item.value != null);
-  const lookupNavigationState = buildReservationLookupNavigationState({
-    confirmation: reservation.confirmationNumber,
-  });
+    switch (action) {
+      case 'checkIn':
+        navigate('/check-in', { state: navigationState });
+        break;
+      case 'modify':
+        navigate('/reservations/modify', { state: navigationState });
+        break;
+      case 'cancel':
+        navigate('/reservations/cancel', { state: navigationState });
+        break;
+      case 'checkout':
+        navigate('/checkout', { state: navigationState });
+        break;
+      case 'invoice':
+        navigate('/invoice-preview', { state: navigationState });
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <Button
-        variant="outline"
-        className="w-full rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100 sm:w-auto"
-        onClick={() => navigate(queueReturnPath)}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {t('reservationDetailsPage.backToQueue')}
-      </Button>
-
-      <DashboardHero
-        eyebrow={t('reservationDetailsPage.heroEyebrow')}
-        title={t('reservationDetailsPage.heroTitle')}
-        description={t('reservationDetailsPage.heroDescription')}
-        meta={[
-          getReservationStatusLabel(reservation.status, t),
-          t('roomNumber', { number: roomNumber }),
-          t('nightsCount', { count: nights }),
-        ]}
-      >
-        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
-            {t('reservationDetailsPage.confirmationNumber')}
-          </p>
-          <p className="mt-4 text-2xl font-black">
-            <LtrText>{reservation.confirmationNumber}</LtrText>
-          </p>
-          <div className="mt-4 flex items-center gap-3">
-            <StatusPill status={reservation.status} />
-          </div>
-        </div>
-      </DashboardHero>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <div className="space-y-6">
-          <DashboardPanel
-            title={t('reservationDetailsPage.actionCenterTitle')}
-            description={t('reservationDetailsPage.actionCenterDescription')}
-          >
-            <div className="mb-4 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium leading-6 text-zinc-600">
-              {t('reservationDetailsPage.actionHubNote')}
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <ActionButton
-                icon={CreditCard}
-                title={t('reservationDetailsPage.checkInTitle')}
-                description={t('reservationDetailsPage.checkInDescription')}
-                onClick={() =>
-                  navigate('/check-in', {
-                    state: lookupNavigationState,
-                  })
-                }
-                disabled={!reservationStatusRules.canCheckIn(reservation.status)}
-              />
-              <ActionButton
-                icon={ArrowRightLeft}
-                title={t('reservationDetailsPage.modifyTitle')}
-                description={t('reservationDetailsPage.modifyDescription')}
-                onClick={() =>
-                  navigate('/reservations/modify', {
-                    state: lookupNavigationState,
-                  })
-                }
-                disabled={!reservationStatusRules.canModify(reservation.status)}
-              />
-              <ActionButton
-                icon={XCircle}
-                title={t('reservationDetailsPage.cancelTitle')}
-                description={t('reservationDetailsPage.cancelDescription')}
-                onClick={() =>
-                  navigate('/reservations/cancel', {
-                    state: lookupNavigationState,
-                  })
-                }
-                disabled={!reservationStatusRules.canCancel(reservation.status)}
-                tone="danger"
-              />
-              <ActionButton
-                icon={Receipt}
-                title={t('checkoutTitle')}
-                description={t('reservationDetailsPage.checkoutDescription')}
-                onClick={() =>
-                  navigate('/checkout', {
-                    state: lookupNavigationState,
-                  })
-                }
-                disabled={!reservationStatusRules.canCheckOut(reservation.status)}
-              />
-              <ActionButton
-                icon={FileText}
-                title={t('reservationDetailsPage.invoiceTitle')}
-                description={t('reservationDetailsPage.invoiceDescription')}
-                onClick={() =>
-                  navigate('/invoice-preview', {
-                    state: lookupNavigationState,
-                  })
-                }
-              />
-            </div>
-          </DashboardPanel>
-
-          <DashboardPanel
-            title={t('reservationDetailsPage.overviewTitle')}
-            description={t('reservationDetailsPage.overviewDescription')}
-          >
-            <div className="grid gap-4 md:grid-cols-[repeat(2,minmax(0,1fr))]">
-              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
-                    <UserRound className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                      {t('common.guest')}
-                    </p>
-                    <p className="mt-2 text-lg font-black text-zinc-950 [overflow-wrap:anywhere]">
-                      {guestName}
-                    </p>
-                    <LtrText className="mt-1 text-sm font-medium text-zinc-500">
-                      {guestEmail}
-                    </LtrText>
-                  </div>
-                </div>
-              </div>
-
-              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
-                    <Hotel className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                      {t('common.room')}
-                    </p>
-                    <LtrText className="mt-2 text-lg font-black text-zinc-950">
-                      {roomNumber}
-                    </LtrText>
-                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
-                      {translateKnownValue(roomTypeName, t)} | {t('floorNum', { floor })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
-                    <CalendarDays className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                      {t('reservationDetailsPage.stayWindow')}
-                    </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
-                      {formatLocalizedDate(reservation.checkInDate, i18n.language, {
-                        weekday: 'short',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
-                      {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
-                        weekday: 'short',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="min-w-0 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
-                    <Receipt className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
-                      {t('reservationDetailsPage.financials')}
-                    </p>
-                    <LtrText className="mt-2 text-lg font-black text-zinc-950">
-                      {formatLocalizedCurrency(totalPrice, i18n.language)}
-                    </LtrText>
-                    <p className="mt-1 text-sm font-medium text-zinc-500 [overflow-wrap:anywhere]">
-                      {paymentStatus
-                        ? `${t('checkoutPage.paymentStatusLabel')}: ${getPaymentStatusLabel(paymentStatus, t)}`
-                        : t('nightsCount', { count: nights })}
-                    </p>
-                    {outstandingBalance != null ? (
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
-                        {t('checkoutPage.outstandingBalanceLabel')}: {' '}
-                        <LtrText className="text-zinc-950">
-                          {formatLocalizedCurrency(outstandingBalance, i18n.language)}
-                        </LtrText>
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DashboardPanel>
-        </div>
-
-        <div className="space-y-6">
-          {queueContext.length > 0 ? (
-            <DashboardPanel
-              title={t('reservationDetailsPage.queueContextTitle')}
-              description={t('reservationDetailsPage.queueContextDescription')}
-            >
-              <dl className="space-y-4">
-                {queueContext.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                  >
-                    <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
-                    <dd className="w-full text-sm font-bold text-zinc-950 sm:w-auto sm:text-right">
-                      {item.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </DashboardPanel>
-          ) : null}
-
-          <DashboardPanel
-            title={t('reservationDetailsPage.factsTitle')}
-            description={t('reservationDetailsPage.factsDescription')}
-            action={<StatusPill status={reservation.status} />}
-          >
-            <dl className="space-y-4">
-              {[
-                {
-                  label: t('reservationDetailsPage.confirmationNumber'),
-                  value: <LtrText>{reservation.confirmationNumber}</LtrText>,
-                },
-                { label: t('reservationDetailsPage.guestName'), value: guestName },
-                {
-                  label: t('reservationDetailsPage.guestEmail'),
-                  value: <LtrText>{guestEmail}</LtrText>,
-                },
-                {
-                  label: t('reservationDetailsPage.roomNumber'),
-                  value: <LtrText>{roomNumber}</LtrText>,
-                },
-                {
-                  label: t('reservationDetailsPage.roomType'),
-                  value: translateKnownValue(roomTypeName, t),
-                },
-                {
-                  label: t('reservationDetailsPage.nightlyRate'),
-                  value: <LtrText>{formatLocalizedCurrency(reservation.roomRate, i18n.language)}</LtrText>,
-                },
-                {
-                  label: t('subtotal'),
-                  value: <LtrText>{formatLocalizedCurrency(reservation.subtotal, i18n.language)}</LtrText>,
-                },
-                {
-                  label: t('taxes15'),
-                  value: <LtrText>{formatLocalizedCurrency(reservation.taxes, i18n.language)}</LtrText>,
-                },
-                {
-                  label: t('reservationDetailsPage.totalPrice'),
-                  value: <LtrText>{formatLocalizedCurrency(totalPrice, i18n.language)}</LtrText>,
-                },
-                ...financialFacts,
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                >
-                  <dt className="text-sm font-medium text-zinc-500">{item.label}</dt>
-                  <dd className="w-full text-sm font-bold text-zinc-950 sm:w-auto sm:text-right">
-                    {item.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </DashboardPanel>
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+      <ReservationDetailLoader
+        confirmationNumber={confirmationNumber}
+        queueContext={queueContext}
+        onBack={() => navigate(queueReturnPath)}
+        onAction={handleAction}
+        variant="page"
+      />
     </div>
   );
 }

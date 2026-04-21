@@ -58,6 +58,7 @@ class StaffIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    private String adminToken;
     private String managerToken;
     private String staffToken;
 
@@ -67,6 +68,7 @@ class StaffIntegrationTest {
                 .apply(springSecurity())
                 .build();
 
+        adminToken = jwtUtils.generateToken("admin@roomify.com", "ROLE_ADMIN");
         managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
         staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
 
@@ -81,7 +83,7 @@ class StaffIntegrationTest {
     @Test
     void searchMatchesNameAndEmailCaseInsensitively() throws Exception {
         mockMvc.perform(get("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("search", "ALICE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -89,7 +91,7 @@ class StaffIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value("Alice Johnson"));
 
         mockMvc.perform(get("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("search", "mona@roomify.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -99,7 +101,7 @@ class StaffIntegrationTest {
     @Test
     void filtersStaffByDepartment() throws Exception {
         mockMvc.perform(get("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("department", "Housekeeping"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -110,7 +112,7 @@ class StaffIntegrationTest {
     @Test
     void filtersStaffByRoleAndActiveStatus() throws Exception {
         mockMvc.perform(get("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("role", "MANAGER")
                         .param("active", "true"))
                 .andExpect(status().isOk())
@@ -118,7 +120,7 @@ class StaffIntegrationTest {
                 .andExpect(jsonPath("$[0].email").value("mona@roomify.com"));
 
         mockMvc.perform(get("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("role", "STAFF")
                         .param("active", "false"))
                 .andExpect(status().isOk())
@@ -129,7 +131,7 @@ class StaffIntegrationTest {
     @Test
     void createsStaffProfileWhenWelcomeTemplateIsAvailable() throws Exception {
         mockMvc.perform(post("/api/staff")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -208,11 +210,31 @@ class StaffIntegrationTest {
     }
 
     @Test
-    void managerCanUpdateActivationAndUnlockStaffLifecycleEndpoints() throws Exception {
+    void managerCannotAccessAdminOnlyStaffResources() throws Exception {
         Long aliceId = getUserIdByEmail("alice@roomify.com");
+
+        mockMvc.perform(get("/api/staff")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isForbidden());
 
         mockMvc.perform(put("/api/staff/{id}", aliceId)
                         .header("Authorization", "Bearer " + managerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Alice Escalated",
+                                  "department": "Management"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminCanUpdateActivationAndUnlockStaffLifecycleEndpoints() throws Exception {
+        Long aliceId = getUserIdByEmail("alice@roomify.com");
+
+        mockMvc.perform(put("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -229,7 +251,7 @@ class StaffIntegrationTest {
         assertEquals("Concierge", updated.getDepartment());
 
         mockMvc.perform(patch("/api/staff/{id}/deactivate", aliceId)
-                        .header("Authorization", "Bearer " + managerToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
 
@@ -237,7 +259,7 @@ class StaffIntegrationTest {
         assertFalse(getUserByEmail("alice@roomify.com").isActive());
 
         mockMvc.perform(patch("/api/staff/{id}/activate", aliceId)
-                        .header("Authorization", "Bearer " + managerToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(true));
 
@@ -247,7 +269,7 @@ class StaffIntegrationTest {
         userRepository.saveAndFlush(lockedAlice);
 
         mockMvc.perform(patch("/api/staff/{id}/unlock", aliceId)
-                        .header("Authorization", "Bearer " + managerToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
 
         User unlockedAlice = getUserByEmail("alice@roomify.com");

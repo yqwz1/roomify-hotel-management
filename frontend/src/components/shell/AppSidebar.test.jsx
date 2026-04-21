@@ -107,4 +107,25 @@ describe('AppSidebar', () => {
     expect(screen.queryByText('Staff Dashboard')).not.toBeInTheDocument();
     expect(screen.queryByText('Room Search')).not.toBeInTheDocument();
   });
+
+  it('renders the admin navigation labels for the system workspace', () => {
+    currentDir = 'ltr';
+    mockUseAuth.mockReturnValue({
+      user: {
+        roles: ['ROLE_ADMIN'],
+        username: 'Admin',
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AppSidebar isOpen={true} onClose={() => {}} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getAllByText('Admin Dashboard').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Staff').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Room Types').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Services').length).toBeGreaterThan(0);
+  });
 });

@@ -1,19 +1,25 @@
 package com.roomify.backend.repository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.LockModeType;
 
 @Repository
@@ -33,12 +39,43 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                         ReservationStatus status,
                         LocalDate checkInDate,
                         LocalDate checkOutDate) {
-                var specification = ReservationSpecification.build(
-                                confirmation,
-                                guestName,
-                                status,
-                                checkInDate,
-                                checkOutDate);
+                Specification<Reservation> specification = (root, query, cb) -> {
+                        List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+                        if (confirmation != null) {
+                                predicates.add(cb.equal(cb.upper(root.get("confirmationNumber")), confirmation));
+                        }
+
+                        if (guestName != null) {
+                                query.distinct(true);
+
+                                List<String> guestTokens = Arrays.stream(guestName.trim().split("\\s+"))
+                                                .filter(token -> !token.isBlank())
+                                                .map(token -> token.toLowerCase(Locale.ROOT))
+                                                .toList();
+
+                                if (!guestTokens.isEmpty()) {
+                                        Join<Object, Object> guest = root.join("guest");
+                                        guestTokens.forEach(token -> predicates.add(cb.like(
+                                                        cb.lower(guest.get("name")),
+                                                        "%" + token + "%")));
+                                }
+                        }
+
+                        if (status != null) {
+                                predicates.add(cb.equal(root.get("status"), status));
+                        }
+
+                        if (checkInDate != null) {
+                                predicates.add(cb.equal(root.get("checkInDate"), checkInDate));
+                        }
+
+                        if (checkOutDate != null) {
+                                predicates.add(cb.equal(root.get("checkOutDate"), checkOutDate));
+                        }
+
+                        return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
 
                 boolean hasActiveFilters = confirmation != null
                                 || guestName != null
@@ -47,7 +84,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                                 || checkOutDate != null;
 
                 if (hasActiveFilters) {
-                        return findAll(specification, ReservationSpecification.filteredSort());
+                        return findAll(specification, Sort.by(
+                                        Sort.Order.desc("checkInDate"),
+                                        Sort.Order.asc("confirmationNumber")));
                 }
 
                 return findAll(specification);

@@ -150,7 +150,7 @@ export default function Staff() {
   const { user, hasRole } = useAuth();
 
   const currentUserEmail = user?.email;
-  const isManager = hasRole('ROLE_MANAGER');
+  const canUnlock = hasRole('ROLE_ADMIN') || hasRole('ROLE_MANAGER');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -514,7 +514,7 @@ export default function Staff() {
                             </button>
                           )}
 
-                          {isManager && (
+                          {canUnlock && (
                             <button
                               type="button"
                               onClick={() => handleUnlock(member)}

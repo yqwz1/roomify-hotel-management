@@ -123,6 +123,7 @@ class ReservationSchemaAlignmentTest {
         Room occupiedRoom = roomRepository.save(new Room("204", roomType, 2, RoomStatus.AVAILABLE));
 
         jdbcTemplate.execute("ALTER TABLE rooms ALTER COLUMN status SET DATA TYPE VARCHAR(30)");
+        jdbcTemplate.execute("ALTER TABLE rooms DROP CONSTRAINT IF EXISTS rooms_status_check");
         jdbcTemplate.update("UPDATE rooms SET status = 'MAINTENANCE' WHERE id = ?", cleaningRoom.getId());
         jdbcTemplate.update("UPDATE rooms SET status = 'OUT_OF_SERVICE' WHERE id = ?", maintenanceRoom.getId());
         jdbcTemplate.update("UPDATE rooms SET status = 'Available' WHERE id = ?", availableRoom.getId());
@@ -135,6 +136,33 @@ class ReservationSchemaAlignmentTest {
                 roomRepository.findById(maintenanceRoom.getId()).orElseThrow().getStatus());
         assertEquals(RoomStatus.AVAILABLE, roomRepository.findById(availableRoom.getId()).orElseThrow().getStatus());
         assertEquals(RoomStatus.OCCUPIED, roomRepository.findById(occupiedRoom.getId()).orElseThrow().getStatus());
+    }
+
+    @Test
+    void repairsLegacyRoomsStatusCheckConstraintToAllowCurrentStatuses() throws Exception {
+        RoomType roomType = roomTypeRepository.save(new RoomType(
+                "Constraint Repair",
+                new BigDecimal("120.00"),
+                2,
+                "TV",
+                "Constraint repair"));
+
+        Room room = roomRepository.save(new Room("205", roomType, 2, RoomStatus.AVAILABLE));
+
+        jdbcTemplate.execute("ALTER TABLE rooms ALTER COLUMN status SET DATA TYPE VARCHAR(30)");
+        jdbcTemplate.execute("ALTER TABLE rooms DROP CONSTRAINT IF EXISTS rooms_status_check");
+        jdbcTemplate.execute("""
+                ALTER TABLE rooms
+                ADD CONSTRAINT rooms_status_check
+                CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'MAINTENANCE', 'OUT_OF_SERVICE'))
+                """);
+
+        reservationSchemaAlignment.run(new DefaultApplicationArguments(new String[0]));
+
+        jdbcTemplate.update("UPDATE rooms SET status = 'UNDER_MAINTENANCE' WHERE id = ?", room.getId());
+        jdbcTemplate.update("UPDATE rooms SET status = 'NEEDS_CLEANING' WHERE id = ?", room.getId());
+
+        assertEquals(RoomStatus.NEEDS_CLEANING, roomRepository.findById(room.getId()).orElseThrow().getStatus());
     }
 
     @Test

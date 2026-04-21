@@ -140,6 +140,18 @@ const toUiReservation = (record, fallbackIndex) => {
   };
 };
 
+const FILTER_GRID_CLASS =
+  'grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]';
+
+const FILTER_FIELD_CLASS =
+  'flex min-w-0 flex-col gap-2 rounded-[1.35rem] border border-zinc-200 bg-white p-3 shadow-sm';
+
+const FILTER_LABEL_CLASS =
+  'text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500';
+
+const FILTER_INPUT_CLASS =
+  'h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+
 export default function ReservationLookupPanel({
   onSelect,
   className = '',
@@ -272,9 +284,9 @@ export default function ReservationLookupPanel({
 
       <div className="px-5 py-5 sm:px-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
-            <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+          <div className={FILTER_GRID_CLASS}>
+            <label className={FILTER_FIELD_CLASS}>
+              <span className={FILTER_LABEL_CLASS}>
                 {t('confirmationNumber')}
               </span>
               <input
@@ -283,12 +295,12 @@ export default function ReservationLookupPanel({
                 value={filters.confirmation}
                 onChange={(event) => updateFilter('confirmation', event.target.value)}
                 placeholder={t('reservationLookupPanel.confirmationPlaceholder')}
-                className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className={FILTER_INPUT_CLASS}
               />
             </label>
 
-            <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <label className={FILTER_FIELD_CLASS}>
+              <span className={FILTER_LABEL_CLASS}>
                 {t('guestName')}
               </span>
               <input
@@ -296,18 +308,18 @@ export default function ReservationLookupPanel({
                 value={filters.guestName}
                 onChange={(event) => updateFilter('guestName', event.target.value)}
                 placeholder={t('reservationLookupPanel.guestNamePlaceholder')}
-                className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className={FILTER_INPUT_CLASS}
               />
             </label>
 
-            <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <label className={FILTER_FIELD_CLASS}>
+              <span className={FILTER_LABEL_CLASS}>
                 {t('status')}
               </span>
               <select
                 value={filters.status}
                 onChange={(event) => updateFilter('status', event.target.value)}
-                className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className={FILTER_INPUT_CLASS}
               >
                 <option value="">{t('reservationLookupPanel.anyStatus')}</option>
                 {STATUS_OPTIONS.map((status) => (
@@ -318,32 +330,32 @@ export default function ReservationLookupPanel({
               </select>
             </label>
 
-            <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <label className={FILTER_FIELD_CLASS}>
+              <span className={FILTER_LABEL_CLASS}>
                 {t('checkInDate')}
               </span>
               <input
                 type="date"
                 value={filters.checkInDate}
                 onChange={(event) => updateFilter('checkInDate', event.target.value)}
-                className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className={FILTER_INPUT_CLASS}
               />
             </label>
 
-            <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <label className={FILTER_FIELD_CLASS}>
+              <span className={FILTER_LABEL_CLASS}>
                 {t('checkOutDate')}
               </span>
               <input
                 type="date"
                 value={filters.checkOutDate}
                 onChange={(event) => updateFilter('checkOutDate', event.target.value)}
-                className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className={FILTER_INPUT_CLASS}
               />
             </label>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 sm:justify-end">
             <button
               type="submit"
               disabled={loading || !hasActiveFilters(filters)}
@@ -393,8 +405,16 @@ export default function ReservationLookupPanel({
 
             <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
               {hasConfirmationPrecedence
-                ? 'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the backend resolves the selection list by confirmation first.'
-                : 'Reservation lookup stays backend-driven. Search uses the current filters exactly as shown.'}
+                ? translateWithFallback(
+                    t,
+                    'reservationLookupPanel.confirmationPrecedenceDescription',
+                    'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the results list is resolved by confirmation first.'
+                  )
+                : translateWithFallback(
+                    t,
+                    'reservationLookupPanel.backendDrivenDescription',
+                    'Reservation lookup stays aligned with the current filters exactly as shown.'
+                  )}
             </p>
           </div>
         </form>
@@ -408,7 +428,7 @@ export default function ReservationLookupPanel({
               {translateWithFallback(
                 t,
                 'reservationLookupPanel.loadingDescription',
-                'The backend is filtering live reservations for the current lookup criteria.'
+                'Live reservations are being filtered using the current lookup criteria.'
               )}
             </p>
           </div>

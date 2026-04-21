@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   GUEST_BILLING_STATUS_PATH,
+  ROLE_ADMIN,
   getNavigationSections,
+  getPageMeta,
   ROLE_GUEST,
   ROLE_MANAGER,
   ROLE_STAFF,
+  getDefaultRouteForRoles,
 } from './navConfig';
 
 const getPathsForRoles = (roles) =>
@@ -45,5 +48,23 @@ describe('navConfig', () => {
       'Departures',
       'Billing',
     ]);
+  });
+
+  it('routes admins to the admin dashboard by default', () => {
+    expect(getDefaultRouteForRoles([ROLE_ADMIN])).toBe('/admin/dashboard');
+  });
+
+  it('keeps staff and room type navigation off the manager sidebar', () => {
+    const paths = getPathsForRoles([ROLE_MANAGER]);
+
+    expect(paths).not.toContain('/staff');
+    expect(paths).not.toContain('/room-types');
+  });
+
+  it('prefers explicit reservation detail metadata over the reservations parent item', () => {
+    const meta = getPageMeta('/reservations/RSV-1001', [ROLE_STAFF], (key) => key);
+
+    expect(meta.title).toBe('Reservation Details');
+    expect(meta.sectionLabel).toBe('Reservations');
   });
 });

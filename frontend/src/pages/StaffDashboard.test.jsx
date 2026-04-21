@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import StaffDashboard from './StaffDashboard';
+import ReservationsWorkspace from './ReservationsWorkspace';
 import { searchReservations } from '../services/reservationService';
 
 const reservation = {
@@ -84,14 +84,40 @@ vi.mock('../components/dashboard/DashboardQuickAction', () => ({
   ),
 }));
 
+vi.mock('../components/reservations/ReservationDetailContent', () => ({
+  ReservationDetailLoader: ({ confirmationNumber }) => (
+    <div>Inline Detail: {confirmationNumber}</div>
+  ),
+}));
+
 vi.mock('../services/reservationService', () => ({
   searchReservations: vi.fn(),
   extractReservationError: (err) => err?.message ?? 'Request failed',
 }));
 
-describe('StaffDashboard', () => {
+let isDesktop = true;
+
+const installMatchMedia = () => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches: isDesktop,
+      media: '(min-width: 1280px)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+};
+
+describe('ReservationsWorkspace', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    isDesktop = true;
+    installMatchMedia();
   });
 
   it('loads the default arrivals queue and maps queue tabs to backend filters', async () => {
@@ -101,9 +127,9 @@ describe('StaffDashboard', () => {
       .mockResolvedValueOnce([]);
 
     render(
-      <MemoryRouter initialEntries={['/staff/dashboard']}>
+      <MemoryRouter initialEntries={['/reservations']}>
         <Routes>
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/reservations" element={<ReservationsWorkspace />} />
         </Routes>
       </MemoryRouter>
     );
@@ -133,14 +159,44 @@ describe('StaffDashboard', () => {
     );
   });
 
-  it('opens reservation details from the queue while preserving active filters', async () => {
+  it('updates the selected query param and renders inline details on desktop', async () => {
     const user = userEvent.setup();
     searchReservations.mockResolvedValue([reservation]);
 
     render(
-      <MemoryRouter initialEntries={['/staff/dashboard?queueTab=arrivals&guestName=John']}>
+      <MemoryRouter initialEntries={['/reservations?queueTab=arrivals&guestName=John']}>
         <Routes>
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route
+            path="/reservations"
+            element={
+              <>
+                <ReservationsWorkspace />
+                <DetailRouteProbe />
+              </>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('RSV-QUEUE-123456')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Select Reservation/i }));
+
+    expect(await screen.findByText('Inline Detail: RSV-QUEUE-123456')).toBeInTheDocument();
+    expect(screen.getByText(/\?queueTab=arrivals&guestName=John&checkInDate=\d{4}-\d{2}-\d{2}&selected=RSV-QUEUE-123456/)).toBeInTheDocument();
+  });
+
+  it('opens the standalone reservation page on mobile while preserving filters', async () => {
+    isDesktop = false;
+    installMatchMedia();
+    const user = userEvent.setup();
+    searchReservations.mockResolvedValue([reservation]);
+
+    render(
+      <MemoryRouter initialEntries={['/reservations?queueTab=arrivals&guestName=John']}>
+        <Routes>
+          <Route path="/reservations" element={<ReservationsWorkspace />} />
           <Route path="/reservations/:confirmationNumber" element={<DetailRouteProbe />} />
         </Routes>
       </MemoryRouter>
@@ -162,9 +218,9 @@ describe('StaffDashboard', () => {
     searchReservations.mockResolvedValue([]);
 
     render(
-      <MemoryRouter initialEntries={['/staff/dashboard?queueTab=all&guestName=John']}>
+      <MemoryRouter initialEntries={['/reservations?queueTab=all&guestName=John']}>
         <Routes>
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          <Route path="/reservations" element={<ReservationsWorkspace />} />
         </Routes>
       </MemoryRouter>
     );

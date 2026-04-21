@@ -9,7 +9,7 @@ import {
   isNavItemActive,
 } from '../navigation/navConfig';
 
-export default function AppSidebar({ isOpen, onClose }) {
+export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
   const location = useLocation();
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
@@ -21,9 +21,15 @@ export default function AppSidebar({ isOpen, onClose }) {
   const homePath = '/';
   const roleLabel = getRoleDisplayLabel(roles, t);
 
+  const handleNavigation = () => {
+    if (!isDesktop) {
+      onClose();
+    }
+  };
+
   return (
     <>
-      {isOpen && (
+      {!isDesktop && isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           aria-hidden="true"
@@ -33,15 +39,19 @@ export default function AppSidebar({ isOpen, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] border-e border-white/10 bg-zinc-950 text-zinc-100 shadow-2xl transition-transform duration-300 lg:static lg:z-0 lg:max-w-none lg:translate-x-0',
+          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-white/10 bg-zinc-950 text-zinc-100 shadow-2xl transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
-          isOpen ? 'translate-x-0' : isRtl ? 'translate-x-full' : '-translate-x-full'
+          isOpen ? 'translate-x-0 opacity-100' : isRtl ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0',
+          isDesktop &&
+            (isOpen
+              ? 'lg:w-[19rem] lg:translate-x-0 lg:opacity-100'
+              : 'lg:w-0 lg:min-w-0 lg:border-e-0 lg:shadow-none lg:pointer-events-none')
         )}
       >
         <div className="flex h-full flex-col">
           <div className="border-b border-white/10 px-5 py-5">
             <div className="flex items-center justify-between gap-3">
-              <Link to={homePath} onClick={onClose} className="min-w-0">
+              <Link to={homePath} onClick={handleNavigation} className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">
                   {brandName}
                 </p>
@@ -87,7 +97,7 @@ export default function AppSidebar({ isOpen, onClose }) {
                       <Link
                         key={item.path}
                         to={item.path}
-                        onClick={onClose}
+                        onClick={handleNavigation}
                         className={cn(
                           'group flex items-center gap-3 rounded-2xl px-3 py-3 transition-all duration-200',
                           isActive

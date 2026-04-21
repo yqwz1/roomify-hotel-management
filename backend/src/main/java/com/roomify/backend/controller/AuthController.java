@@ -92,11 +92,11 @@ public class AuthController {
                 if (isLegacyDemoAdminLogin(email, request.getPassword())) {
                         auditSuccess(email, ipAddress);
                         return ResponseEntity.ok(new JwtResponse(
-                                        jwtUtils.generateToken(DEMO_ADMIN_EMAIL, "ROLE_MANAGER"),
+                                        jwtUtils.generateToken(DEMO_ADMIN_EMAIL, "ROLE_ADMIN"),
                                         1L,
                                         "Admin",
                                         DEMO_ADMIN_EMAIL,
-                                        List.of("ROLE_MANAGER")));
+                                        List.of("ROLE_ADMIN")));
                 }
 
                 auditFailure(email, ipAddress, "wrong-email-or-password");

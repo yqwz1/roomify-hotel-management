@@ -72,6 +72,7 @@ describe('LoginPage', () => {
 
         // Check for submit button
         expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
+        expect(screen.queryByText(/admin@roomify\.com/i)).not.toBeInTheDocument();
     });
 
     // it('displays validation error for invalid email format', async () => {
@@ -200,6 +201,33 @@ describe('LoginPage', () => {
         // Check that navigate was called with correct path
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('/manager/dashboard', { replace: true });
+        });
+    });
+
+    it('redirects to admin dashboard on successful admin login', async () => {
+        const user = userEvent.setup();
+
+        authService.login.mockResolvedValue({
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6WyJST0xFX0FETUlOIl0sImV4cCI6MTk5OTk5OTk5OX0.signature',
+            type: 'Bearer',
+            id: 1,
+            username: 'admin',
+            email: 'admin@test.com',
+            roles: ['ROLE_ADMIN']
+        });
+
+        renderLoginPage();
+
+        const emailInput = screen.getByLabelText(/Email/i);
+        const passwordInput = screen.getByLabelText(/Password/i);
+        const submitButton = screen.getByRole('button', { name: /Sign In/i });
+
+        await user.type(emailInput, 'admin@test.com');
+        await user.type(passwordInput, 'password123');
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/admin/dashboard', { replace: true });
         });
     });
 

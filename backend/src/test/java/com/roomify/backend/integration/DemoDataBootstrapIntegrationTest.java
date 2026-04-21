@@ -15,6 +15,7 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
+import com.roomify.backend.user.Role;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.time.LocalDate;
@@ -102,10 +103,11 @@ class DemoDataBootstrapIntegrationTest {
     }
 
     @Test
-    void demoBootstrapKeepsDocumentedManagerLoginUsable() {
+    void demoBootstrapKeepsDocumentedAdminLoginUsable() {
         User adminUser = userRepository.findByEmailIgnoreCase("admin@roomify.com").orElseThrow();
 
         assertTrue(adminUser.isActive());
+        assertEquals(Role.ADMIN, adminUser.getRole());
         assertTrue(passwordEncoder.matches("password123", adminUser.getPasswordHash()));
     }
 }

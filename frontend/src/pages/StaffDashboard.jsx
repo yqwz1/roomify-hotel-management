@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   BedDouble,
   CalendarDays,
@@ -13,335 +13,41 @@ import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import { LtrText } from '../components/LtrText';
-import StatusPill from '../components/StatusPill';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
 import { useAuth } from '../context/AuthProvider';
-import { ReservationStatus } from '../domain/reservations/statusRules';
-import {
-  extractReservationError,
-  searchReservations,
-} from '../services/reservationService';
+import { useReservationQueue } from '../hooks/useReservationQueue';
 import {
   formatLocalizedCurrency,
-  formatLocalizedDate,
-  getReservationStatusLabel,
-  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
-
-const formatDateInputValue = (date = new Date()) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const normalizeValue = (value) => String(value ?? '').trim();
-
-const normalizeQueueFilters = (filters = {}) => ({
-  queueTab: normalizeValue(filters.queueTab),
-  confirmation: normalizeValue(filters.confirmation),
-  guestName: normalizeValue(filters.guestName),
-  status: normalizeValue(filters.status),
-  checkInDate: normalizeValue(filters.checkInDate),
-  checkOutDate: normalizeValue(filters.checkOutDate),
-});
-
-const buildTabDefaults = (tabId, today) => {
-  switch (tabId) {
-    case 'departures':
-      return {
-        queueTab: 'departures',
-        confirmation: '',
-        guestName: '',
-        status: '',
-        checkInDate: '',
-        checkOutDate: today,
-      };
-    case 'inHouse':
-      return {
-        queueTab: 'inHouse',
-        confirmation: '',
-        guestName: '',
-        status: '',
-        checkInDate: '',
-        checkOutDate: '',
-      };
-    case 'all':
-      return {
-        queueTab: 'all',
-        confirmation: '',
-        guestName: '',
-        status: '',
-        checkInDate: '',
-        checkOutDate: '',
-      };
-    case 'arrivals':
-    default:
-      return {
-        queueTab: 'arrivals',
-        confirmation: '',
-        guestName: '',
-        status: '',
-        checkInDate: today,
-        checkOutDate: '',
-      };
-  }
-};
-
-const createFiltersFromSearchParams = (searchParams, today) => {
-  const hasParams = Array.from(searchParams.keys()).length > 0;
-  const requestedTab = normalizeValue(searchParams.get('queueTab')) || (hasParams ? 'all' : 'arrivals');
-  const defaults = buildTabDefaults(requestedTab, today);
-
-  return {
-    ...defaults,
-    confirmation: normalizeValue(searchParams.get('confirmation')),
-    guestName: normalizeValue(searchParams.get('guestName')),
-    status: normalizeValue(searchParams.get('status')),
-    checkInDate: normalizeValue(searchParams.get('checkInDate')) || defaults.checkInDate,
-    checkOutDate: normalizeValue(searchParams.get('checkOutDate')) || defaults.checkOutDate,
-  };
-};
-
-const buildSearchParamsFromFilters = (filters) => {
-  const params = new URLSearchParams();
-  const normalized = normalizeQueueFilters(filters);
-
-  Object.entries(normalized).forEach(([key, value]) => {
-    if (value) {
-      params.set(key, value);
-    }
-  });
-
-  return params;
-};
-
-const countActiveFilters = (filters) =>
-  ['confirmation', 'guestName', 'status', 'checkInDate', 'checkOutDate'].filter(
-    (key) => Boolean(normalizeValue(filters[key]))
-  ).length;
-
-const areQueueFiltersEqual = (left = {}, right = {}) =>
-  ['queueTab', 'confirmation', 'guestName', 'status', 'checkInDate', 'checkOutDate'].every(
-    (key) => normalizeValue(left[key]) === normalizeValue(right[key])
-  );
-
-const getQueueTabLabel = (queueTab, t) => {
-  switch (queueTab) {
-    case 'inHouse':
-      return t('staffDashboardPage.tabs.inHouse');
-    case 'departures':
-      return t('staffDashboardPage.tabs.departures');
-    case 'all':
-      return t('staffDashboardPage.tabs.all');
-    case 'arrivals':
-    default:
-      return t('staffDashboardPage.tabs.arrivals');
-  }
-};
-
-const buildActiveFilterChips = (filters, t, language) => {
-  const chips = [
-    {
-      key: 'queueTab',
-      label: translateWithFallback(t, 'staffDashboardPage.activeQueue', 'Queue'),
-      value: getQueueTabLabel(filters.queueTab || 'arrivals', t),
-      ltr: false,
-    },
-  ];
-
-  if (normalizeValue(filters.confirmation)) {
-    chips.push({
-      key: 'confirmation',
-      label: t('confirmationNumber'),
-      value: normalizeValue(filters.confirmation),
-      ltr: true,
-    });
-  }
-
-  if (normalizeValue(filters.guestName)) {
-    chips.push({
-      key: 'guestName',
-      label: t('guestName'),
-      value: normalizeValue(filters.guestName),
-      ltr: false,
-    });
-  }
-
-  if (normalizeValue(filters.status)) {
-    chips.push({
-      key: 'status',
-      label: t('status'),
-      value: getReservationStatusLabel(normalizeValue(filters.status), t),
-      ltr: false,
-    });
-  }
-
-  if (normalizeValue(filters.checkInDate)) {
-    chips.push({
-      key: 'checkInDate',
-      label: t('checkInDate'),
-      value: formatLocalizedDate(filters.checkInDate, language, { dateStyle: 'medium' }),
-      ltr: false,
-    });
-  }
-
-  if (normalizeValue(filters.checkOutDate)) {
-    chips.push({
-      key: 'checkOutDate',
-      label: t('checkOutDate'),
-      value: formatLocalizedDate(filters.checkOutDate, language, { dateStyle: 'medium' }),
-      ltr: false,
-    });
-  }
-
-  return chips;
-};
-
-const toQueueReservation = (reservation) => ({
-  id: reservation?.id ?? null,
-  confirmationNumber: reservation?.confirmationNumber,
-  status: reservation?.status,
-  guestName: reservation?.guestName ?? reservation?.guest?.name,
-  guestEmail: reservation?.guestEmail ?? reservation?.guest?.email,
-  roomNumber: reservation?.roomNumber ?? reservation?.room?.roomNumber,
-  roomTypeName: reservation?.roomTypeName ?? reservation?.room?.roomTypeName,
-  checkInDate: reservation?.checkInDate ?? reservation?.dates?.checkIn,
-  checkOutDate: reservation?.checkOutDate ?? reservation?.dates?.checkOut,
-  nights: reservation?.nights ?? reservation?.dates?.nights ?? 0,
-  totalPrice: reservation?.totalPrice ?? reservation?.pricing?.totalPrice ?? 0,
-  outstandingBalance: reservation?.outstandingBalance,
-});
-
-const getQueueActionLabel = (reservation, today, t) => {
-  if (reservation.status === ReservationStatus.CONFIRMED) {
-    return t('staffDashboardPage.queueActionArrivals');
-  }
-
-  if (
-    reservation.status === ReservationStatus.CHECKED_IN &&
-    reservation.checkOutDate === today
-  ) {
-    return t('staffDashboardPage.queueActionDepartures');
-  }
-
-  if (reservation.status === ReservationStatus.CHECKED_IN) {
-    return t('staffDashboardPage.queueActionInHouse');
-  }
-
-  if (reservation.status === ReservationStatus.PENDING) {
-    return t('staffDashboardPage.queueActionPending');
-  }
-
-  return t('staffDashboardPage.queueActionReview');
-};
+import {
+  getReservationWorkspaceActionLabel,
+} from '../utils/reservationWorkspace';
 
 export default function StaffDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t, i18n } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [reservations, setReservations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [reloadNonce, setReloadNonce] = useState(0);
-
-  const today = useMemo(() => formatDateInputValue(new Date()), []);
   const pageTx = 'staffDashboardPage';
   const welcomeName = user?.username || t('roleStaff');
-  const activeFilters = useMemo(
-    () => createFiltersFromSearchParams(searchParams, today),
-    [searchParams, today]
+
+  const overviewFilters = useMemo(
+    () => ({
+      queueTab: 'all',
+      confirmation: '',
+      guestName: '',
+      status: '',
+      checkInDate: '',
+      checkOutDate: '',
+    }),
+    []
   );
-  const [draftFilters, setDraftFilters] = useState(activeFilters);
 
-  useEffect(() => {
-    setDraftFilters(activeFilters);
-  }, [activeFilters]);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const loadQueue = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await searchReservations(activeFilters);
-        if (ignore) return;
-        setReservations(Array.isArray(response) ? response.map(toQueueReservation) : []);
-      } catch (err) {
-        if (ignore) return;
-        setReservations([]);
-        setError(extractReservationError(err));
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadQueue();
-
-    return () => {
-      ignore = true;
-    };
-  }, [activeFilters, reloadNonce]);
-
-  const queueTabs = useMemo(
-    () => [
-      { id: 'arrivals', label: t(`${pageTx}.tabs.arrivals`) },
-      { id: 'inHouse', label: t(`${pageTx}.tabs.inHouse`) },
-      { id: 'departures', label: t(`${pageTx}.tabs.departures`) },
-      { id: 'all', label: t(`${pageTx}.tabs.all`) },
-    ],
-    [t]
-  );
-  const activeTab =
-    queueTabs.find((tab) => tab.id === activeFilters.queueTab) ?? queueTabs[0];
-  const defaultFilters = useMemo(
-    () => buildTabDefaults(activeFilters.queueTab || 'arrivals', today),
-    [activeFilters.queueTab, today]
-  );
-  const visibleFilterChips = useMemo(
-    () => buildActiveFilterChips(draftFilters, t, i18n.language),
-    [draftFilters, i18n.language, t]
-  );
-  const hasPendingFilterChanges = !areQueueFiltersEqual(activeFilters, draftFilters);
-  const hasConfirmationPrecedence =
-    Boolean(draftFilters.confirmation) &&
-    ['guestName', 'status', 'checkInDate', 'checkOutDate'].some((key) =>
-      Boolean(normalizeValue(draftFilters[key]))
-    );
-  const isAtQueueDefault =
-    areQueueFiltersEqual(activeFilters, defaultFilters) &&
-    areQueueFiltersEqual(draftFilters, defaultFilters);
-
-  const queueMetrics = useMemo(() => {
-    const arrivalsReady = reservations.filter(
-      (reservation) => reservation.status === ReservationStatus.CONFIRMED
-    ).length;
-    const departuresToday = reservations.filter(
-      (reservation) =>
-        reservation.status === ReservationStatus.CHECKED_IN &&
-        reservation.checkOutDate === today
-    ).length;
-    const balancesDue = reservations.filter(
-      (reservation) => Number(reservation.outstandingBalance ?? 0) > 0
-    ).length;
-
-    return {
-      visibleCount: reservations.length,
-      arrivalsReady,
-      departuresToday,
-      balancesDue,
-    };
-  }, [reservations, today]);
+  const { reservations, loading, error, metrics, today, reload } =
+    useReservationQueue(overviewFilters);
 
   const quickActions = useMemo(
     () => [
@@ -356,6 +62,12 @@ export default function StaffDashboard() {
         title: t('bookRoom'),
         description: t(`${pageTx}.actions.bookRoomDescription`),
         onClick: () => navigate('/book'),
+      },
+      {
+        icon: CalendarDays,
+        title: t('navReservations'),
+        description: t('staffDashboardPage.queueDescription'),
+        onClick: () => navigate('/reservations'),
       },
       {
         icon: ClipboardCheck,
@@ -379,42 +91,7 @@ export default function StaffDashboard() {
     [navigate, t]
   );
 
-  const applyFilters = (nextFilters) => {
-    setSearchParams(buildSearchParamsFromFilters(nextFilters));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    applyFilters({
-      ...activeFilters,
-      ...draftFilters,
-    });
-  };
-
-  const handleTabChange = (tabId) => {
-    const defaults = buildTabDefaults(tabId, today);
-    applyFilters({
-      ...defaults,
-      confirmation: activeFilters.confirmation,
-      guestName: activeFilters.guestName,
-    });
-  };
-
-  const handleReset = () => {
-    const resetFilters = buildTabDefaults(activeFilters.queueTab || 'arrivals', today);
-    setDraftFilters(resetFilters);
-    applyFilters(resetFilters);
-  };
-
-  const handleOpenReservation = (reservation) => {
-    const params = buildSearchParamsFromFilters(activeFilters).toString();
-    navigate(
-      `/reservations/${reservation.confirmationNumber}${params ? `?${params}` : ''}`,
-      {
-        state: { fromQueuePath: location.pathname },
-      }
-    );
-  };
+  const previewReservations = reservations.slice(0, 3);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -423,11 +100,9 @@ export default function StaffDashboard() {
         title={t('staffDashboardTitle')}
         description={t(`${pageTx}.description`, { name: welcomeName })}
         meta={[
-          t(`${pageTx}.focusMeta`, { focus: activeTab.label }),
-          t(`${pageTx}.resultsMeta`, { count: queueMetrics.visibleCount }),
-          countActiveFilters(activeFilters) > 0
-            ? t(`${pageTx}.filtersMeta`, { count: countActiveFilters(activeFilters) })
-            : t(`${pageTx}.filtersMetaNone`),
+          t(`${pageTx}.focusMeta`, { focus: t('navReservations') }),
+          t(`${pageTx}.resultsMeta`, { count: metrics.visibleCount }),
+          t(`${pageTx}.filtersMetaNone`),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
@@ -439,13 +114,13 @@ export default function StaffDashboard() {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t(`${pageTx}.currentFocus`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{activeTab.label}</p>
+              <p className="mt-2 text-3xl font-black">{t('navReservations')}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t(`${pageTx}.activeQueue`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{queueMetrics.visibleCount}</p>
+              <p className="mt-2 text-3xl font-black">{metrics.visibleCount}</p>
             </div>
           </div>
         </div>
@@ -455,392 +130,116 @@ export default function StaffDashboard() {
         <DashboardMetricCard
           icon={CalendarDays}
           label={t(`${pageTx}.metrics.visibleLabel`)}
-          value={String(queueMetrics.visibleCount)}
+          value={String(metrics.visibleCount)}
           hint={t(`${pageTx}.metrics.visibleHint`)}
         />
         <DashboardMetricCard
           icon={ClipboardCheck}
           label={t(`${pageTx}.metrics.arrivalsLabel`)}
-          value={String(queueMetrics.arrivalsReady)}
+          value={String(metrics.arrivalsReady)}
           hint={t(`${pageTx}.metrics.arrivalsHint`)}
         />
         <DashboardMetricCard
           icon={DoorClosedLocked}
           label={t(`${pageTx}.metrics.departuresLabel`)}
-          value={String(queueMetrics.departuresToday)}
+          value={String(metrics.departuresToday)}
           hint={t(`${pageTx}.metrics.departuresHint`)}
         />
         <DashboardMetricCard
           icon={Receipt}
           label={t(`${pageTx}.metrics.balanceLabel`)}
-          value={String(queueMetrics.balancesDue)}
+          value={String(metrics.balancesDue)}
           hint={t(`${pageTx}.metrics.balanceHint`)}
           tone="dark"
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <DashboardPanel
-          title={t(`${pageTx}.queueTitle`)}
-          description={t(`${pageTx}.queueDescription`)}
+          title={t('navReservations')}
+          description={t('staffDashboardPage.queueDescription')}
         >
-          <div className="space-y-5">
-            <div className="flex flex-wrap gap-2">
-              {queueTabs.map((tab) => {
-                const isActive = tab.id === activeTab.id;
-
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-                      isActive
-                        ? 'bg-zinc-950 text-white'
-                        : 'border border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300 hover:bg-white'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-4 rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4"
-            >
-              <div className="grid gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]">
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {t('confirmationNumber')}
-                  </span>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={draftFilters.confirmation}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        confirmation: event.target.value,
-                      }))
-                    }
-                    placeholder={t(`${pageTx}.confirmationPlaceholder`)}
-                    className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {t('guestName')}
-                  </span>
-                  <input
-                    type="text"
-                    value={draftFilters.guestName}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        guestName: event.target.value,
-                      }))
-                    }
-                    placeholder={t(`${pageTx}.guestNamePlaceholder`)}
-                    className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {t('status')}
-                  </span>
-                  <select
-                    value={draftFilters.status}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        status: event.target.value,
-                      }))
-                    }
-                    className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5"
-                  >
-                    <option value="">{t(`${pageTx}.anyStatus`)}</option>
-                    {Object.values(ReservationStatus).map((status) => (
-                      <option key={status} value={status}>
-                        {getReservationStatusLabel(status, t)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {t('checkInDate')}
-                  </span>
-                  <input
-                    type="date"
-                    value={draftFilters.checkInDate}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        checkInDate: event.target.value,
-                      }))
-                    }
-                    className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {t('checkOutDate')}
-                  </span>
-                  <input
-                    type="date"
-                    value={draftFilters.checkOutDate}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        checkOutDate: event.target.value,
-                      }))
-                    }
-                    className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5"
-                  />
-                </label>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+          {loading ? (
+            <LoadingState message={t(`${pageTx}.loading`)} />
+          ) : error ? (
+            <ErrorState
+              title={t(`${pageTx}.errorTitle`)}
+              message={error}
+              onRetry={reload}
+            />
+          ) : previewReservations.length === 0 ? (
+            <EmptyState
+              title={t(`${pageTx}.emptyTitle`)}
+              message={t(`${pageTx}.emptyDescription`)}
+            />
+          ) : (
+            <div className="space-y-3">
+              {previewReservations.map((reservation) => (
+                <div
+                  key={reservation.id ?? reservation.confirmationNumber}
+                  className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
                 >
-                  {t(`${pageTx}.applyFilters`)}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  disabled={isAtQueueDefault}
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {t('common.clearFilters')}
-                </button>
-              </div>
-
-              <div className="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    {hasPendingFilterChanges
-                      ? translateWithFallback(
-                          t,
-                          'staffDashboardPage.pendingFilters',
-                          'Draft filters'
-                        )
-                      : translateWithFallback(
-                          t,
-                          'staffDashboardPage.appliedFilters',
-                          'Applied filters'
-                        )}
-                  </p>
-                  {hasPendingFilterChanges ? (
-                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-                      {translateWithFallback(
-                        t,
-                        'staffDashboardPage.pendingFiltersHint',
-                        'Apply filters to refresh the queue'
-                      )}
-                    </span>
-                  ) : null}
-                </div>
-
-                {visibleFilterChips.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {visibleFilterChips.map((chip) => (
-                      <span
-                        key={chip.key}
-                        className="inline-flex max-w-full items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold text-zinc-700"
-                      >
-                        <span className="text-zinc-500">{chip.label}:</span>
-                        {chip.ltr ? (
-                          <LtrText className="text-zinc-950">{chip.value}</LtrText>
-                        ) : (
-                          <span className="min-w-0 break-words [overflow-wrap:anywhere] text-zinc-950">
-                            {chip.value}
-                          </span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-sm font-medium text-zinc-500">
-                    {translateWithFallback(
-                      t,
-                      'staffDashboardPage.emptyFiltersNote',
-                      'No extra filters are applied. The queue is showing the default reservations for the active tab.'
-                    )}
-                  </p>
-                )}
-
-                <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
-                  {hasConfirmationPrecedence
-                    ? 'Confirmation number takes precedence. Guest name, status, and stay dates remain visible, but the backend resolves the queue by confirmation first.'
-                    : hasPendingFilterChanges
-                      ? 'Queue filtering stays backend-driven. Apply Filters updates the URL and refreshes the queue with the draft filters shown above.'
-                      : 'Filters stay backend-driven and remain synchronized with the queue URL. Clear Filters restores the default state for the active queue tab.'}
-                </p>
-              </div>
-            </form>
-
-            {loading ? (
-              <LoadingState message={t(`${pageTx}.loading`)} />
-            ) : error ? (
-              <div className="space-y-4">
-                <ErrorState
-                  title={t(`${pageTx}.errorTitle`)}
-                  message={error}
-                  onRetry={() => setReloadNonce((current) => current + 1)}
-                />
-                {!isAtQueueDefault ? (
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-lg font-black tracking-tight text-zinc-950 [overflow-wrap:anywhere]">
+                        {reservation.guestName || t('common.guest')}
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                        {getReservationWorkspaceActionLabel(reservation, today, t)}
+                      </p>
+                    </div>
                     <button
                       type="button"
-                      onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                      onClick={() =>
+                        navigate(`/reservations?selected=${reservation.confirmationNumber}`)
+                      }
+                      className="inline-flex h-10 items-center justify-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-950 transition hover:border-zinc-950 hover:bg-zinc-50"
                     >
-                      {t('common.clearFilters')}
+                      {t('staffDashboardPage.openReservation')}
                     </button>
                   </div>
-                ) : null}
-              </div>
-            ) : reservations.length === 0 ? (
-              <div className="space-y-4">
-                <EmptyState
-                  title={t(`${pageTx}.emptyTitle`)}
-                  message={t(`${pageTx}.emptyDescription`)}
-                />
-                {!isAtQueueDefault ? (
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
-                    >
-                      {t('common.clearFilters')}
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {reservations.map((reservation) => (
-                  <div
-                    key={reservation.id ?? reservation.confirmationNumber}
-                    className="rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300"
-                  >
-                    <div className="flex min-w-0 flex-col gap-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-lg font-black tracking-tight text-zinc-950 [overflow-wrap:anywhere]">
-                            {reservation.guestName || t('common.guest')}
-                          </p>
-                          <LtrText className="mt-1 text-sm font-medium text-zinc-500">
-                            {reservation.guestEmail || t('common.noGuestEmailProvided')}
-                          </LtrText>
-                        </div>
-                        <StatusPill status={reservation.status} size="sm" />
-                      </div>
 
-                      <div className="grid gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))]">
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('confirmationNumber')}
-                          </p>
-                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                            {reservation.confirmationNumber}
-                          </LtrText>
-                        </div>
-
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('common.room')}
-                          </p>
-                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                            {reservation.roomNumber || t('unassigned')}
-                          </LtrText>
-                          <p className="mt-1 text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">
-                            {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
-                          </p>
-                        </div>
-
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('modifyReservationPage.stayDates')}
-                          </p>
-                          <div className="mt-2 space-y-2">
-                            <div className="flex items-start justify-between gap-3">
-                              <span className="text-xs font-medium text-zinc-500">{t('checkInDate')}</span>
-                              <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
-                                {formatLocalizedDate(reservation.checkInDate, i18n.language, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
-                              </span>
-                            </div>
-                            <div className="flex items-start justify-between gap-3">
-                              <span className="text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
-                              <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
-                                {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t('checkInPage.reservationTotal')}
-                          </p>
-                          <LtrText className="mt-2 text-sm font-bold text-zinc-950">
-                            {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
-                          </LtrText>
-                          {reservation.outstandingBalance != null ? (
-                            <p className="mt-1 text-xs font-medium text-zinc-500">
-                              {t('checkoutPage.outstandingBalanceLabel')}:{' '}
-                              <LtrText className="text-zinc-950">
-                                {formatLocalizedCurrency(
-                                  reservation.outstandingBalance,
-                                  i18n.language
-                                )}
-                              </LtrText>
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 sm:max-w-[20rem]">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
-                            {t(`${pageTx}.nextActionLabel`)}
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
-                            {getQueueActionLabel(reservation, today, t)}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleOpenReservation(reservation)}
-                          className="inline-flex h-11 w-full items-center justify-center rounded-full border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-950 transition hover:border-zinc-950 hover:bg-zinc-50 sm:w-auto"
-                        >
-                          {t(`${pageTx}.openReservation`)}
-                        </button>
-                      </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('confirmationNumber')}
+                      </p>
+                      <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                        {reservation.confirmationNumber}
+                      </LtrText>
+                    </div>
+                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('common.room')}
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                        {reservation.roomNumber || t('unassigned')}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-zinc-500">
+                        {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                        {t('checkInPage.reservationTotal')}
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                        {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => navigate('/reservations')}
+                className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+              >
+                {t('navReservations')}
+              </button>
+            </div>
+          )}
         </DashboardPanel>
 
         <div className="space-y-6">

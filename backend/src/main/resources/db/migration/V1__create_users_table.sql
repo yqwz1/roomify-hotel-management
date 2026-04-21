@@ -12,6 +12,6 @@ INSERT INTO users (email, password_hash, role, is_active)
 VALUES (
     'admin@roomify.com',
     '$2a$10$PLACEHOLDER_HASH_CHANGE_ME',
-    'MANAGER',
+    'ADMIN',
     TRUE
 );

@@ -1,8 +1,18 @@
 import i18n from '../i18n';
 
+const interpolateFallback = (fallback, options) => {
+  if (typeof fallback !== 'string' || !options || typeof options !== 'object') {
+    return fallback;
+  }
+
+  return fallback.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, token) =>
+    Object.prototype.hasOwnProperty.call(options, token) ? String(options[token]) : ''
+  );
+};
+
 export const translateWithFallback = (t, key, fallback, options) => {
   const value = t(key, options);
-  return value === key ? fallback : value;
+  return value === key ? interpolateFallback(fallback, options) : value;
 };
 
 export const getLocale = (language = i18n.language) =>
@@ -77,6 +87,7 @@ const RESERVATION_STATUS_KEYS = {
 };
 
 const ROLE_CODE_KEYS = {
+  ROLE_ADMIN: 'roleAdmin',
   ROLE_MANAGER: 'roleManager',
   ROLE_STAFF: 'roleStaff',
   ROLE_GUEST: 'roleGuest',
@@ -167,7 +178,14 @@ export const getReservationStatusLabel = (status, t) =>
   translateWithFallback(t, RESERVATION_STATUS_KEYS[status], humanizeStatus(status));
 
 export const getRoleCodeLabel = (role, t) =>
-  translateWithFallback(t, ROLE_CODE_KEYS[role], role ?? '-');
+  translateWithFallback(
+    t,
+    ROLE_CODE_KEYS[role],
+    String(role ?? '-')
+      .replace(/^ROLE_/, '')
+      .toLowerCase()
+      .replace(/\b\w/g, (segment) => segment.toUpperCase())
+  );
 
 export const getInvoiceDeliveryStatusLabel = (status, t) =>
   translateWithFallback(t, INVOICE_DELIVERY_STATUS_KEYS[status], humanizeStatus(status));

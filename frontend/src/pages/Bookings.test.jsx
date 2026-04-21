@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Bookings from './Bookings';
+import i18n from '../i18n';
 
 const mockNavigate = vi.hoisted(() => vi.fn());
 const mockUseAuth = vi.hoisted(() => vi.fn());
@@ -29,6 +30,7 @@ const renderPage = () =>
 describe('Bookings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    void i18n.changeLanguage('en');
   });
 
   it('keeps guest booking help focused on support-safe actions', async () => {
@@ -72,5 +74,18 @@ describe('Bookings', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith('/login');
     expect(mockNavigate).not.toHaveBeenCalledWith('/guest/dashboard');
+  });
+
+  it('keeps support tips visible in Arabic guest booking help', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      hasRole: (role) => role === 'ROLE_GUEST',
+    });
+
+    await i18n.changeLanguage('ar');
+
+    renderPage();
+
+    expect(screen.getByText(/احتفظ برقم التأكيد جاهزًا/i)).toBeInTheDocument();
   });
 });

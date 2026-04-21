@@ -11,9 +11,7 @@ import {
   Receipt,
   RefreshCw,
   Search,
-  Tag,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
@@ -26,7 +24,6 @@ import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
 import { useRoomTypes } from '../hooks/useRoomTypes';
-import { getRecentAuditLogs, extractAuditLogError } from '../services/auditLogService';
 import { exportDashboardReport, extractDashboardError } from '../services/dashboardService';
 import { getNotifications, extractNotificationError } from '../services/notificationService';
 import {
@@ -35,6 +32,7 @@ import {
   formatLocalizedDateTime,
   formatLocalizedNumber,
   getReservationStatusLabel,
+  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
 
@@ -139,9 +137,6 @@ export default function ManagerDashboard() {
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(true);
   const [notificationsError, setNotificationsError] = useState(null);
-  const [auditLogs, setAuditLogs] = useState([]);
-  const [auditLogsLoading, setAuditLogsLoading] = useState(true);
-  const [auditLogsError, setAuditLogsError] = useState(null);
 
   const {
     metrics,
@@ -160,14 +155,9 @@ export default function ManagerDashboard() {
 
   const loadActivity = useCallback(async () => {
     setNotificationsLoading(true);
-    setAuditLogsLoading(true);
     setNotificationsError(null);
-    setAuditLogsError(null);
 
-    const [notificationsResult, auditLogsResult] = await Promise.allSettled([
-      getNotifications(),
-      getRecentAuditLogs(8),
-    ]);
+    const [notificationsResult] = await Promise.allSettled([getNotifications()]);
 
     if (notificationsResult.status === 'fulfilled') {
       setNotifications(notificationsResult.value);
@@ -176,15 +166,7 @@ export default function ManagerDashboard() {
       setNotificationsError(extractNotificationError(notificationsResult.reason));
     }
 
-    if (auditLogsResult.status === 'fulfilled') {
-      setAuditLogs(auditLogsResult.value);
-    } else {
-      setAuditLogs([]);
-      setAuditLogsError(extractAuditLogError(auditLogsResult.reason));
-    }
-
     setNotificationsLoading(false);
-    setAuditLogsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -214,22 +196,30 @@ export default function ManagerDashboard() {
         onClick: () => navigate('/check-in'),
       },
       {
-        icon: Tag,
-        title: t(`${pageTx}.quickActionItems.roomTypesTitle`),
-        description: t(`${pageTx}.quickActionItems.roomTypesDescription`),
-        onClick: () => navigate('/room-types'),
-      },
-      {
-        icon: Users,
-        title: t(`${pageTx}.quickActionItems.staffTitle`),
-        description: t(`${pageTx}.quickActionItems.staffDescription`),
-        onClick: () => navigate('/staff'),
+        icon: CalendarRange,
+        title: t('navReservations'),
+        description: translateWithFallback(
+          t,
+          `${pageTx}.quickActionItems.reservationsDescription`,
+          'Open the live reservations workspace for queue-driven operations.'
+        ),
+        onClick: () => navigate('/reservations'),
       },
       {
         icon: Receipt,
         title: t(`${pageTx}.quickActionItems.invoicesTitle`),
         description: t(`${pageTx}.quickActionItems.invoicesDescription`),
         onClick: () => navigate('/invoice-preview'),
+      },
+      {
+        icon: TrendingUp,
+        title: t('roomStatus'),
+        description: translateWithFallback(
+          t,
+          `${pageTx}.quickActionItems.roomStatusDescription`,
+          'Review room readiness, cleaning, and operational status transitions.'
+        ),
+        onClick: () => navigate('/room-status'),
       },
       {
         icon: BedDouble,
@@ -811,116 +801,65 @@ export default function ManagerDashboard() {
         )}
       </DashboardPanel>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <DashboardPanel
-          title={t(`${pageTx}.notificationsTitle`)}
-          description={t(`${pageTx}.notificationsDescription`)}
-          action={
-            <Button type="button" variant="outline" onClick={loadActivity} className="border-zinc-200">
-              <RefreshCw className="h-4 w-4" />
-              {t('retry')}
-            </Button>
-          }
-        >
-          {notificationsLoading ? (
-            <LoadingState message={t(`${pageTx}.notificationsLoading`)} />
-          ) : notificationsError ? (
-            <ErrorState
-              title={t(`${pageTx}.notificationsTitle`)}
-              message={notificationsError}
-              onRetry={loadActivity}
-            />
-          ) : notifications.length === 0 ? (
-            <EmptyState
-              title={t(`${pageTx}.notificationsEmptyTitle`)}
-              message={t(`${pageTx}.notificationsEmptyDescription`)}
-              icon={Bell}
-            />
-          ) : (
-            <div className="space-y-3" data-testid="manager-notifications">
-              {notifications.slice(0, 6).map((notification) => (
-                <div
-                  key={notification.id}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black text-zinc-950">{notification.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-600">
-                        {notification.message}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
-                        notification.read
-                          ? 'border border-zinc-200 bg-white text-zinc-500'
-                          : 'border border-emerald-200 bg-emerald-50 text-emerald-900'
-                      }`}
-                    >
-                      {notification.read ? t(`${pageTx}.readLabel`) : t(`${pageTx}.newLabel`)}
-                    </span>
+      <DashboardPanel
+        title={t(`${pageTx}.notificationsTitle`)}
+        description={t(`${pageTx}.notificationsDescription`)}
+        action={
+          <Button type="button" variant="outline" onClick={loadActivity} className="border-zinc-200">
+            <RefreshCw className="h-4 w-4" />
+            {t('retry')}
+          </Button>
+        }
+      >
+        {notificationsLoading ? (
+          <LoadingState message={t(`${pageTx}.notificationsLoading`)} />
+        ) : notificationsError ? (
+          <ErrorState
+            title={t(`${pageTx}.notificationsTitle`)}
+            message={notificationsError}
+            onRetry={loadActivity}
+          />
+        ) : notifications.length === 0 ? (
+          <EmptyState
+            title={t(`${pageTx}.notificationsEmptyTitle`)}
+            message={t(`${pageTx}.notificationsEmptyDescription`)}
+            icon={Bell}
+          />
+        ) : (
+          <div className="space-y-3" data-testid="manager-notifications">
+            {notifications.slice(0, 6).map((notification) => (
+              <div
+                key={notification.id}
+                className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-zinc-950">{notification.title}</p>
+                    <p className="mt-1 text-sm font-medium leading-6 text-zinc-600">
+                      {notification.message}
+                    </p>
                   </div>
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
-                    {formatLocalizedDateTime(notification.createdAt, i18n.language, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })}
-                  </p>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                      notification.read
+                        ? 'border border-zinc-200 bg-white text-zinc-500'
+                        : 'border border-emerald-200 bg-emerald-50 text-emerald-900'
+                    }`}
+                  >
+                    {notification.read ? t(`${pageTx}.readLabel`) : t(`${pageTx}.newLabel`)}
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </DashboardPanel>
-
-        <DashboardPanel
-          title={t(`${pageTx}.auditTitle`)}
-          description={t(`${pageTx}.auditDescription`)}
-        >
-          {auditLogsLoading ? (
-            <LoadingState message={t(`${pageTx}.auditLoading`)} />
-          ) : auditLogsError ? (
-            <ErrorState
-              title={t(`${pageTx}.auditTitle`)}
-              message={auditLogsError}
-              onRetry={loadActivity}
-            />
-          ) : auditLogs.length === 0 ? (
-            <EmptyState
-              title={t(`${pageTx}.auditEmptyTitle`)}
-              message={t(`${pageTx}.auditEmptyDescription`)}
-              icon={Receipt}
-            />
-          ) : (
-            <div className="space-y-3" data-testid="manager-audit-logs">
-              {auditLogs.slice(0, 6).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black text-zinc-950">{entry.action}</p>
-                      <p className="mt-1 text-sm font-medium text-zinc-600">{entry.target}</p>
-                    </div>
-                    <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-500">
-                      {entry.actor}
-                    </span>
-                  </div>
-                  {entry.metadata ? (
-                    <p className="mt-3 text-sm font-medium leading-6 text-zinc-500">{entry.metadata}</p>
-                  ) : null}
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
-                    {formatLocalizedDateTime(entry.createdAt, i18n.language, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </DashboardPanel>
-      </div>
+                <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  {formatLocalizedDateTime(notification.createdAt, i18n.language, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </DashboardPanel>
     </div>
   );
 }

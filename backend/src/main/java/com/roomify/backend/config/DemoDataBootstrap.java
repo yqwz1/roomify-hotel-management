@@ -114,10 +114,10 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private void upsertDemoAdminUser() {
         String encodedPassword = passwordEncoder.encode(DEMO_ADMIN_PASSWORD);
         User adminUser = userRepository.findByEmailIgnoreCase(DEMO_ADMIN_EMAIL)
-                .orElseGet(() -> new User(DEMO_ADMIN_EMAIL, encodedPassword, Role.MANAGER, true));
+                .orElseGet(() -> new User(DEMO_ADMIN_EMAIL, encodedPassword, Role.ADMIN, true));
         adminUser.setEmail(DEMO_ADMIN_EMAIL);
         adminUser.setPasswordHash(encodedPassword);
-        adminUser.setRole(Role.MANAGER);
+        adminUser.setRole(Role.ADMIN);
         adminUser.setActive(true);
         adminUser.setFailedAttempts(0);
         adminUser.setLockUntil(null);

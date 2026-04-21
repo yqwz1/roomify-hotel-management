@@ -71,6 +71,7 @@ class SecurityIntegrationTest {
 
     static Stream<Arguments> allowedRoleEndpoints() {
         return Stream.of(
+                Arguments.of("ROLE_ADMIN", "/api/test/admin/summary", "admin-summary"),
                 Arguments.of("ROLE_MANAGER", "/api/test/manager/summary", "manager-summary"),
                 Arguments.of("ROLE_MANAGER", "/api/test/manager/reports", "manager-reports"),
                 Arguments.of("ROLE_STAFF", "/api/test/staff/summary", "staff-summary"),
@@ -82,7 +83,11 @@ class SecurityIntegrationTest {
 
     static Stream<Arguments> crossRoleEndpoints() {
         return Stream.of(
+                Arguments.of("ROLE_ADMIN", "/api/test/manager/summary"),
+                Arguments.of("ROLE_MANAGER", "/api/test/admin/summary"),
+                Arguments.of("ROLE_STAFF", "/api/test/admin/summary"),
                 Arguments.of("ROLE_STAFF", "/api/test/manager/summary"),
+                Arguments.of("ROLE_ADMIN", "/api/test/shared/frontdesk"),
                 Arguments.of("ROLE_GUEST", "/api/test/staff/summary"),
                 Arguments.of("ROLE_MANAGER", "/api/test/guest/summary"),
                 Arguments.of("ROLE_GUEST", "/api/test/shared/frontdesk")

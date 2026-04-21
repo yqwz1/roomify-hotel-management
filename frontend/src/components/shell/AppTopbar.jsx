@@ -8,7 +8,7 @@ import {
   getRoleDisplayLabel,
 } from '../navigation/navConfig';
 
-export default function AppTopbar({ onMenuToggle }) {
+export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -37,8 +37,9 @@ export default function AppTopbar({ onMenuToggle }) {
           <button
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-zinc-200 bg-white p-2.5 text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black lg:hidden"
-            aria-label={t('openNavigation')}
+            className="rounded-2xl border border-zinc-200 bg-white p-2.5 text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black"
+            aria-label={isSidebarOpen ? t('closeNavigation') : t('openNavigation')}
+            aria-pressed={isSidebarOpen}
           >
             <Menu className="h-5 w-5" />
           </button>

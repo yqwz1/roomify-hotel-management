@@ -1,5 +1,6 @@
 import {
   BedDouble,
+  BriefcaseBusiness,
   CalendarDays,
   ClipboardCheck,
   DoorClosedLocked,
@@ -15,12 +16,13 @@ import {
   Users,
 } from 'lucide-react';
 
+export const ROLE_ADMIN = 'ROLE_ADMIN';
 export const ROLE_MANAGER = 'ROLE_MANAGER';
 export const ROLE_STAFF = 'ROLE_STAFF';
 export const ROLE_GUEST = 'ROLE_GUEST';
 export const GUEST_BILLING_STATUS_PATH = '/guest/billing-status';
 
-const ROLE_PRIORITY = [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
+const ROLE_PRIORITY = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
 
 export const translateWithFallback = (t, translationKey, fallbackLabel, options) => {
   if (!translationKey) return fallbackLabel;
@@ -35,6 +37,8 @@ export const getDefaultRouteForRoles = (roles = []) => {
   const primaryRole = getPrimaryRole(roles);
 
   switch (primaryRole) {
+    case ROLE_ADMIN:
+      return '/admin/dashboard';
     case ROLE_MANAGER:
       return '/manager/dashboard';
     case ROLE_STAFF:
@@ -50,6 +54,8 @@ export const getRoleDisplayLabel = (roles = [], t) => {
   const primaryRole = getPrimaryRole(roles);
 
   switch (primaryRole) {
+    case ROLE_ADMIN:
+      return translateWithFallback(t, 'roleAdmin', 'Admin');
     case ROLE_MANAGER:
       return translateWithFallback(t, 'roleManager', 'Manager');
     case ROLE_STAFF:
@@ -60,6 +66,60 @@ export const getRoleDisplayLabel = (roles = [], t) => {
       return translateWithFallback(t, 'user', 'User');
   }
 };
+
+const ADMIN_NAVIGATION_CONFIG = [
+  {
+    id: 'overview',
+    translationKey: 'navOverview',
+    fallbackLabel: 'Overview',
+    roles: [ROLE_ADMIN],
+    items: [
+      {
+        path: '/',
+        translationKey: 'homeNav',
+        fallbackLabel: 'Home',
+        icon: House,
+        roles: [ROLE_ADMIN],
+      },
+      {
+        path: '/admin/dashboard',
+        translationKey: 'adminDashboardTitle',
+        fallbackLabel: 'Admin Dashboard',
+        icon: LayoutDashboard,
+        roles: [ROLE_ADMIN],
+      },
+    ],
+  },
+  {
+    id: 'staff-access',
+    translationKey: 'navStaffAccess',
+    fallbackLabel: 'Staff & Access',
+    roles: [ROLE_ADMIN],
+    items: [
+      {
+        path: '/staff',
+        translationKey: 'staffMenu',
+        fallbackLabel: 'Staff',
+        icon: Users,
+        roles: [ROLE_ADMIN],
+      },
+      {
+        path: '/room-types',
+        translationKey: 'roomTypes',
+        fallbackLabel: 'Room Types',
+        icon: Tag,
+        roles: [ROLE_ADMIN],
+      },
+      {
+        path: '/services',
+        translationKey: 'servicesTitle',
+        fallbackLabel: 'Services',
+        icon: BriefcaseBusiness,
+        roles: [ROLE_ADMIN],
+      },
+    ],
+  },
+];
 
 const MANAGER_NAVIGATION_CONFIG = [
   {
@@ -102,6 +162,13 @@ const MANAGER_NAVIGATION_CONFIG = [
         translationKey: 'bookRoom',
         fallbackLabel: 'Book Room',
         icon: BedDouble,
+        roles: [ROLE_MANAGER],
+      },
+      {
+        path: '/reservations',
+        translationKey: 'navReservations',
+        fallbackLabel: 'Reservations',
+        icon: CalendarDays,
         roles: [ROLE_MANAGER],
       },
       {
@@ -156,13 +223,6 @@ const MANAGER_NAVIGATION_CONFIG = [
         roles: [ROLE_MANAGER],
       },
       {
-        path: '/room-types',
-        translationKey: 'roomTypes',
-        fallbackLabel: 'Room Types',
-        icon: Tag,
-        roles: [ROLE_MANAGER],
-      },
-      {
         path: '/room-status',
         translationKey: 'roomStatus',
         fallbackLabel: 'Room Status',
@@ -182,21 +242,6 @@ const MANAGER_NAVIGATION_CONFIG = [
         translationKey: 'invoicePreview',
         fallbackLabel: 'Invoices',
         icon: Receipt,
-        roles: [ROLE_MANAGER],
-      },
-    ],
-  },
-  {
-    id: 'staff-access',
-    translationKey: 'navStaffAccess',
-    fallbackLabel: 'Staff & Access',
-    roles: [ROLE_MANAGER],
-    items: [
-      {
-        path: '/staff',
-        translationKey: 'staffMenu',
-        fallbackLabel: 'Staff',
-        icon: Users,
         roles: [ROLE_MANAGER],
       },
     ],
@@ -360,6 +405,7 @@ const GUEST_NAVIGATION_CONFIG = [
 ];
 
 const NAVIGATION_CONFIG_BY_ROLE = {
+  [ROLE_ADMIN]: ADMIN_NAVIGATION_CONFIG,
   [ROLE_MANAGER]: MANAGER_NAVIGATION_CONFIG,
   [ROLE_STAFF]: STAFF_NAVIGATION_CONFIG,
   [ROLE_GUEST]: GUEST_NAVIGATION_CONFIG,
@@ -417,6 +463,15 @@ export const isNavItemActive = (pathname, itemPath) =>
   pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 
 export const getPageMeta = (pathname, roles = [], t) => {
+  const matchedPageMeta = PAGE_META.find((page) => page.match(pathname));
+  if (matchedPageMeta) {
+    const section = findSectionById(matchedPageMeta.sectionId, roles, t);
+    return {
+      title: translateWithFallback(t, matchedPageMeta.translationKey, matchedPageMeta.fallbackLabel),
+      sectionLabel: section?.label ?? translateWithFallback(t, 'dashboard', 'Dashboard'),
+    };
+  }
+
   const sections = getNavigationSections(roles, t);
   const flatItems = sections.flatMap((section) =>
     section.items.map((item) => ({
@@ -431,15 +486,6 @@ export const getPageMeta = (pathname, roles = [], t) => {
     return {
       title: matchedItem.label,
       sectionLabel: matchedItem.sectionLabel,
-    };
-  }
-
-  const matchedPageMeta = PAGE_META.find((page) => page.match(pathname));
-  if (matchedPageMeta) {
-    const section = findSectionById(matchedPageMeta.sectionId, roles, t);
-    return {
-      title: translateWithFallback(t, matchedPageMeta.translationKey, matchedPageMeta.fallbackLabel),
-      sectionLabel: section?.label ?? translateWithFallback(t, 'dashboard', 'Dashboard'),
     };
   }
 

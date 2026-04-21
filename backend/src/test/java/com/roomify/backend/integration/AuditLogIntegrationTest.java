@@ -43,6 +43,7 @@ class AuditLogIntegrationTest {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
+    private String adminToken;
     private String managerToken;
     private String staffToken;
 
@@ -52,6 +53,7 @@ class AuditLogIntegrationTest {
                 .apply(springSecurity())
                 .build();
 
+        adminToken = jwtUtils.generateToken("admin@roomify.com", "ROLE_ADMIN");
         managerToken = jwtUtils.generateToken("manager@roomify.com", "ROLE_MANAGER");
         staffToken = jwtUtils.generateToken("staff@roomify.com", "ROLE_STAFF");
 
@@ -61,15 +63,22 @@ class AuditLogIntegrationTest {
     }
 
     @Test
-    void managerCanReadRecentAuditLogs() throws Exception {
+    void adminCanReadRecentAuditLogs() throws Exception {
         mockMvc.perform(get("/api/audit-logs")
-                        .header("Authorization", "Bearer " + managerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .param("limit", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].action").isNotEmpty())
                 .andExpect(jsonPath("$[0].target").isNotEmpty())
                 .andExpect(jsonPath("$[0].actor").isNotEmpty());
+    }
+
+    @Test
+    void managerCannotReadAuditLogs() throws Exception {
+        mockMvc.perform(get("/api/audit-logs")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isForbidden());
     }
 
     @Test

@@ -58,7 +58,7 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }
 export default function Bookings() {
     const navigate = useNavigate();
     const { isAuthenticated, hasRole } = useAuth();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const roleView = useMemo(() => {
         if (hasRole('ROLE_MANAGER') || hasRole('ROLE_STAFF')) return 'staff';
@@ -75,7 +75,6 @@ export default function Bookings() {
     const openLabel = t('openLabel');
     const supportTips = t('bookingsPage.supportTips', { returnObjects: true });
     const showSupportTips =
-        !i18n.language?.startsWith('ar') &&
         Array.isArray(supportTips) &&
         supportTips.length > 0;
 

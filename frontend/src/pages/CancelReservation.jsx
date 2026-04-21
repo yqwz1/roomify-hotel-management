@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ConfirmationToast from '../components/ConfirmationToast';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
+import ModalFrame from '../components/common/ModalFrame';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -45,33 +46,14 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-      <div className="w-full max-w-2xl rounded-[2rem] border border-black/5 bg-white shadow-2xl">
-        <div className="border-b border-zinc-100 px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-rose-500">
-                {t('cancelReservationPage.destructiveAction')}
-              </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
-                {t('cancelReservationTitle')}
-              </h2>
-              <p className="mt-1 text-sm font-medium text-zinc-500">
-                <LtrText>{reservation.confirmationNumber}</LtrText>
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-600 transition hover:bg-zinc-50 hover:text-black"
-            >
-              {t('closeDialog')}
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-5 px-6 py-6">
+    <ModalFrame
+      title={t('cancelReservationTitle')}
+      description={t('cancelReservationPage.destructiveAction')}
+      onClose={onClose}
+      closeLabel={t('closeDialog')}
+      widthClassName="max-w-2xl"
+    >
+      <div className="space-y-5">
           <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-4">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-200 text-rose-950">
@@ -161,9 +143,8 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
               {confirming ? t('cancelling') : t('cancelReservationPage.confirmCancellation')}
             </button>
           </div>
-        </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 }
 

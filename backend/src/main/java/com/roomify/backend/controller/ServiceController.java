@@ -12,11 +12,11 @@ import com.roomify.backend.repository.HotelServiceRepository;
 @RestController
 @RequestMapping("/api/services")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class ServiceController {
 
     private final HotelServiceRepository repository;
 
-    @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
     public HotelService create(@RequestBody HotelService service) {
         return repository.save(service);
@@ -27,7 +27,6 @@ public class ServiceController {
         return repository.findAll();
     }
 
-    @PreAuthorize("hasAuthority('MANAGER')")
     @PutMapping("/{id}")
     public HotelService update(@PathVariable Long id, @RequestBody HotelService s) {
 
@@ -42,7 +41,6 @@ public class ServiceController {
         return repository.save(existing);
     }
 
-    @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         repository.deleteById(id);

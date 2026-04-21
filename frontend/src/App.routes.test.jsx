@@ -24,6 +24,10 @@ vi.mock('./pages/ManagerDashboard', () => ({
   default: () => <div>Manager Dashboard Page</div>,
 }));
 
+vi.mock('./pages/AdminDashboard', () => ({
+  default: () => <div>Admin Dashboard Page</div>,
+}));
+
 vi.mock('./pages/Unauthorized', () => ({
   default: () => <div>Unauthorized Page</div>,
 }));
@@ -77,6 +81,18 @@ describe('App route guards', () => {
 
   it('keeps manager-only pages blocked for staff', async () => {
     renderAtRoute('/manager/dashboard', ['ROLE_STAFF']);
+
+    expect(await screen.findByText('Unauthorized Page')).toBeInTheDocument();
+  });
+
+  it('allows admins to reach /admin/dashboard', async () => {
+    renderAtRoute('/admin/dashboard', ['ROLE_ADMIN']);
+
+    expect(await screen.findByText('Admin Dashboard Page')).toBeInTheDocument();
+  });
+
+  it('keeps admin-only pages blocked for managers', async () => {
+    renderAtRoute('/admin/dashboard', ['ROLE_MANAGER']);
 
     expect(await screen.findByText('Unauthorized Page')).toBeInTheDocument();
   });
