@@ -58,5 +58,9 @@ class DashboardIntegrationTest {
         mockMvc.perform(get("/api/dashboard/room-type-distribution")
                         .header("Authorization", "Bearer " + staffToken))
                 .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/expenses")
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
     }
 }

@@ -18,6 +18,12 @@ public class DashboardMetricsResponse {
     /** Total revenue from non-cancelled reservations in the period. */
     private BigDecimal totalRevenue;
 
+    /** Total operating expenses in the requested period. */
+    private BigDecimal totalExpenses;
+
+    /** Net profit calculated as revenue minus expenses. */
+    private BigDecimal netProfit;
+
     /**
      * Overall occupancy rate expressed as a fraction (0.0 – 1.0).
      * Calculated as: occupied rooms / total rooms.
@@ -39,6 +45,8 @@ public class DashboardMetricsResponse {
             long totalReservations,
             long activeReservations,
             BigDecimal totalRevenue,
+            BigDecimal totalExpenses,
+            BigDecimal netProfit,
             double occupancyRate,
             double averageStayNights,
             LocalDate periodStart,
@@ -46,6 +54,8 @@ public class DashboardMetricsResponse {
         this.totalReservations = totalReservations;
         this.activeReservations = activeReservations;
         this.totalRevenue = totalRevenue;
+        this.totalExpenses = totalExpenses;
+        this.netProfit = netProfit;
         this.occupancyRate = occupancyRate;
         this.averageStayNights = averageStayNights;
         this.periodStart = periodStart;
@@ -60,6 +70,12 @@ public class DashboardMetricsResponse {
 
     public BigDecimal getTotalRevenue() { return totalRevenue; }
     public void setTotalRevenue(BigDecimal totalRevenue) { this.totalRevenue = totalRevenue; }
+
+    public BigDecimal getTotalExpenses() { return totalExpenses; }
+    public void setTotalExpenses(BigDecimal totalExpenses) { this.totalExpenses = totalExpenses; }
+
+    public BigDecimal getNetProfit() { return netProfit; }
+    public void setNetProfit(BigDecimal netProfit) { this.netProfit = netProfit; }
 
     public double getOccupancyRate() { return occupancyRate; }
     public void setOccupancyRate(double occupancyRate) { this.occupancyRate = occupancyRate; }

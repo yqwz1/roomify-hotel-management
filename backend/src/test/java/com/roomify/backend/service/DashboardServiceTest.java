@@ -13,6 +13,7 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.DashboardRepository;
+import com.roomify.backend.repository.ExpenseRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.when;
 class DashboardServiceTest {
 
         private DashboardRepository dashboardRepository;
+        private ExpenseRepository expenseRepository;
         private RoomRepository roomRepository;
         private RoomTypeRepository roomTypeRepository;
 
@@ -58,11 +60,13 @@ class DashboardServiceTest {
         @BeforeEach
         void setUp() {
                 dashboardRepository = mock(DashboardRepository.class);
+                expenseRepository = mock(ExpenseRepository.class);
                 roomRepository = mock(RoomRepository.class);
                 roomTypeRepository = mock(RoomTypeRepository.class);
 
                 dashboardService = new DashboardService(
                                 dashboardRepository,
+                                expenseRepository,
                                 roomRepository,
                                 roomTypeRepository);
         }
@@ -79,6 +83,8 @@ class DashboardServiceTest {
                 when(dashboardRepository.countActiveReservationsInPeriod(START, END)).thenReturn(2L);
                 when(dashboardRepository.sumRevenueInPeriod(START, END))
                                 .thenReturn(new BigDecimal("2000.00"));
+                when(expenseRepository.sumAmountInPeriod(START, END))
+                                .thenReturn(new BigDecimal("425.50"));
                 when(dashboardRepository.findStayDatesInPeriod(START, END))
                                 .thenReturn(List.of(pair1, pair2));
                 when(roomRepository.count()).thenReturn(10L);
@@ -90,6 +96,8 @@ class DashboardServiceTest {
                                 "avgNights should be (3+5)/2 = 4.0 — computed in Java, not via DATEDIFF");
                 assertEquals(0.5, response.getOccupancyRate(), 0.0001);
                 assertEquals(new BigDecimal("2000.00"), response.getTotalRevenue());
+                assertEquals(new BigDecimal("425.50"), response.getTotalExpenses());
+                assertEquals(new BigDecimal("1574.50"), response.getNetProfit());
         }
 
         @Test
@@ -97,6 +105,7 @@ class DashboardServiceTest {
                 when(dashboardRepository.countReservationsInPeriod(START, END)).thenReturn(0L);
                 when(dashboardRepository.countActiveReservationsInPeriod(START, END)).thenReturn(0L);
                 when(dashboardRepository.sumRevenueInPeriod(START, END)).thenReturn(BigDecimal.ZERO);
+                when(expenseRepository.sumAmountInPeriod(START, END)).thenReturn(BigDecimal.ZERO);
                 when(dashboardRepository.findStayDatesInPeriod(START, END))
                                 .thenReturn(Collections.emptyList());
                 when(roomRepository.count()).thenReturn(0L);

@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Search,
   TrendingUp,
+  WalletCards,
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
@@ -1084,7 +1085,6 @@ export default function ManagerDashboard() {
 
   const activePresetId =
     rangePresets.find((preset) => compareRanges(draftRange, preset.range))?.id ?? null;
-  const daysInView = getDaysInRange(appliedRange);
   const unreadNotifications = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
     [notifications]
@@ -1121,6 +1121,20 @@ export default function ManagerDashboard() {
         onClick: () => navigate('/invoice-preview'),
       },
       {
+        icon: WalletCards,
+        title: translateWithFallback(
+          t,
+          `${pageTx}.quickActionItems.expensesTitle`,
+          'Expense Tracker'
+        ),
+        description: translateWithFallback(
+          t,
+          `${pageTx}.quickActionItems.expensesDescription`,
+          'Track operating spend, compare it against revenue, and update expense records quickly.'
+        ),
+        onClick: () => navigate('/manager/expenses'),
+      },
+      {
         icon: TrendingUp,
         title: t('roomStatus'),
         description: translateWithFallback(
@@ -1145,8 +1159,6 @@ export default function ManagerDashboard() {
 
     const totalReservations = Number(metrics.totalReservations ?? 0);
     const activeReservations = Number(metrics.activeReservations ?? 0);
-    const averageStayNights = Number(metrics.averageStayNights ?? 0);
-
     return [
       {
         icon: CalendarRange,
@@ -1176,22 +1188,42 @@ export default function ManagerDashboard() {
         theme: 'revenue',
       },
       {
+        icon: WalletCards,
+        label: translateWithFallback(t, `${pageTx}.metrics.expensesLabel`, 'Expenses'),
+        value: formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }),
+        hint: translateWithFallback(
+          t,
+          `${pageTx}.metrics.expensesHint`,
+          'Operating expenses tracked in the active range.'
+        ),
+        eyebrow: translateWithFallback(t, `${pageTx}.metricExpensesEyebrow`, 'Spend'),
+        theme: 'stay',
+      },
+      {
+        icon: TrendingUp,
+        label: translateWithFallback(t, `${pageTx}.metrics.netProfitLabel`, 'Net Profit'),
+        value: formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }),
+        hint: translateWithFallback(
+          t,
+          `${pageTx}.metrics.netProfitHint`,
+          'Revenue minus operating expenses for the selected range.'
+        ),
+        eyebrow: translateWithFallback(t, `${pageTx}.metricNetProfitEyebrow`, 'Result'),
+        theme: Number(metrics.netProfit ?? 0) >= 0 ? 'active' : 'stay',
+      },
+      {
         icon: Gauge,
         label: t(`${pageTx}.metrics.occupancyLabel`),
         value: formatPercent(metrics.occupancyRate),
         hint: t(`${pageTx}.metrics.occupancyHint`),
         eyebrow: translateWithFallback(t, `${pageTx}.metricOccupancyEyebrow`, 'Capacity'),
         theme: 'occupancy',
-      },
-      {
-        icon: BedDouble,
-        label: t(`${pageTx}.metrics.averageStayLabel`),
-        value: t(`${pageTx}.averageStayValue`, {
-          count: averageStayNights.toFixed(1),
-        }),
-        hint: t(`${pageTx}.metrics.averageStayHint`),
-        eyebrow: translateWithFallback(t, `${pageTx}.metricStayEyebrow`, 'Pattern'),
-        theme: 'stay',
       },
     ];
   }, [i18n.language, metrics, pageTx, t]);
@@ -1637,6 +1669,18 @@ export default function ManagerDashboard() {
               maximumFractionDigits: 0,
             }),
           }),
+          translateWithFallback(t, `${pageTx}.metaExpenses`, 'Expenses {{value}}', {
+            value: formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }),
+          }),
+          translateWithFallback(t, `${pageTx}.metaNetProfit`, 'Net {{value}}', {
+            value: formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }),
+          }),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
@@ -1644,7 +1688,7 @@ export default function ManagerDashboard() {
             {translateWithFallback(t, `${pageTx}.heroSnapshotTitle`, 'Live Snapshot')}
           </p>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {translateWithFallback(t, `${pageTx}.heroActiveReservations`, 'Active reservations')}
@@ -1668,10 +1712,22 @@ export default function ManagerDashboard() {
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                {translateWithFallback(t, `${pageTx}.heroNetProfit`, 'Net profit')}
+              </p>
+              <p className="mt-2 text-3xl font-black">
+                {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {translateWithFallback(t, `${pageTx}.heroDaysInView`, 'Days in view')}
               </p>
               <p className="mt-2 text-3xl font-black">
-                {formatLocalizedNumber(daysInView, i18n.language)}
+                {formatLocalizedNumber(getDaysInRange(appliedRange), i18n.language)}
               </p>
             </div>
           </div>
@@ -1767,7 +1823,7 @@ export default function ManagerDashboard() {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
                 {t(`${pageTx}.controlsSummaryTitle`)}
               </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
                     {t(`${pageTx}.controlsSummaryReservations`)}
@@ -1789,10 +1845,24 @@ export default function ManagerDashboard() {
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
-                    {t(`${pageTx}.controlsSummaryOccupancy`)}
+                    {translateWithFallback(t, `${pageTx}.controlsSummaryExpenses`, 'Expenses')}
                   </p>
                   <p className="mt-2 text-2xl font-black text-zinc-950">
-                    {formatPercent(metrics.occupancyRate)}
+                    {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
+                  </p>
+                </div>
+                <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                    {translateWithFallback(t, `${pageTx}.controlsSummaryNetProfit`, 'Net Profit')}
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-zinc-950">
+                    {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                 </div>
               </div>

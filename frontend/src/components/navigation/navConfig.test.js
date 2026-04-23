@@ -22,6 +22,7 @@ describe('navConfig', () => {
 
     expect(paths).toContain('/');
     expect(paths).toContain('/bookings');
+    expect(paths).toContain('/manager/expenses');
   });
 
   it('does not duplicate the bookings entry for guests', () => {

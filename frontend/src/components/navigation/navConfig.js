@@ -244,6 +244,13 @@ const MANAGER_NAVIGATION_CONFIG = [
         icon: Receipt,
         roles: [ROLE_MANAGER],
       },
+      {
+        path: '/manager/expenses',
+        translationKey: 'expenseTrackerTitle',
+        fallbackLabel: 'Expenses',
+        icon: Receipt,
+        roles: [ROLE_MANAGER],
+      },
     ],
   },
   {

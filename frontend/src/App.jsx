@@ -40,6 +40,7 @@ import ReservationDetails from './pages/ReservationDetails'
 import ReservationsWorkspace from './pages/ReservationsWorkspace'
 import AdminDashboard from './pages/AdminDashboard'
 import HotelServices from './pages/HotelServices'
+import ExpenseTracker from './pages/ExpenseTracker'
 
 import Layout from './components/Layout';
 
@@ -248,6 +249,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
               <Layout showSidebar={true}><HotelServices /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manager/expenses"
+          element={
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
+              <Layout showSidebar={true}><ExpenseTracker /></Layout>
             </ProtectedRoute>
           }
         />

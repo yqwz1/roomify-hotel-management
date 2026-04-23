@@ -9,6 +9,7 @@ import com.roomify.backend.dto.RoomTypeDistributionItem;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.DashboardRepository;
+import com.roomify.backend.repository.ExpenseRepository;
 import com.roomify.backend.repository.DashboardSpecification;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -61,14 +62,17 @@ public class DashboardService {
     private static final int EXPORT_CHUNK_SIZE = 500;
 
     private final DashboardRepository dashboardRepository;
+    private final ExpenseRepository expenseRepository;
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
 
     public DashboardService(
             DashboardRepository dashboardRepository,
+            ExpenseRepository expenseRepository,
             RoomRepository roomRepository,
             RoomTypeRepository roomTypeRepository) {
         this.dashboardRepository = dashboardRepository;
+        this.expenseRepository = expenseRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
     }
@@ -89,7 +93,9 @@ public class DashboardService {
 
         long totalReservations = dashboardRepository.countReservationsInPeriod(start, end);
         long activeReservations = dashboardRepository.countActiveReservationsInPeriod(start, end);
-        BigDecimal totalRevenue = dashboardRepository.sumRevenueInPeriod(start, end);
+        BigDecimal totalRevenue = money(dashboardRepository.sumRevenueInPeriod(start, end));
+        BigDecimal totalExpenses = money(expenseRepository.sumAmountInPeriod(start, end));
+        BigDecimal netProfit = money(totalRevenue.subtract(totalExpenses));
 
         // FIX 1: average stay computed in Java — no DB-specific DATEDIFF needed.
         double avgNights = calculateAvgStayNights(start, end);
@@ -102,6 +108,8 @@ public class DashboardService {
                 totalReservations,
                 activeReservations,
                 totalRevenue,
+                totalExpenses,
+                netProfit,
                 occupancyRate,
                 avgNights,
                 start,
@@ -299,5 +307,9 @@ public class DashboardService {
         row.put("totalPaid",         r.getTotalPaid());
         row.put("outstandingBalance",r.getOutstandingBalance());
         return row;
+    }
+
+    private BigDecimal money(BigDecimal value) {
+        return (value == null ? BigDecimal.ZERO : value).setScale(2, java.math.RoundingMode.HALF_UP);
     }
 }

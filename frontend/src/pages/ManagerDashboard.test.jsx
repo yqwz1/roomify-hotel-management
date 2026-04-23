@@ -48,6 +48,8 @@ const dashboardData = {
     totalReservations: 18,
     activeReservations: 7,
     totalRevenue: 4200,
+    totalExpenses: 750,
+    netProfit: 3450,
     occupancyRate: 0.64,
     averageStayNights: 2.7,
   },
