@@ -108,6 +108,7 @@ class DemoDataBootstrapIntegrationTest {
 
         assertTrue(adminUser.isActive());
         assertEquals(Role.ADMIN, adminUser.getRole());
+        assertTrue(adminUser.getRoles().contains(Role.MANAGER));
         assertTrue(passwordEncoder.matches("password123", adminUser.getPasswordHash()));
     }
 }

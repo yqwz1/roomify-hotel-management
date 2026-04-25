@@ -444,7 +444,9 @@ const buildSectionLabel = (section, t) => translateWithFallback(t, section.trans
 const buildItemLabel = (item, t) => translateWithFallback(t, item.translationKey, item.fallbackLabel);
 
 const getNavigationConfigForRoles = (roles = []) =>
-  NAVIGATION_CONFIG_BY_ROLE[getPrimaryRole(roles)] ?? [];
+  ROLE_PRIORITY
+    .filter((role) => roles.includes(role))
+    .flatMap((role) => NAVIGATION_CONFIG_BY_ROLE[role] ?? []);
 
 export const getNavigationSections = (roles = [], t) =>
   getNavigationConfigForRoles(roles)

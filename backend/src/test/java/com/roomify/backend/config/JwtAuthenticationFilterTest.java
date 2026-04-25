@@ -108,6 +108,26 @@ class JwtAuthenticationFilterTest {
                 .anyMatch(a -> "ROLE_MANAGER".equals(a.getAuthority())));
     }
 
+    @Test
+    void multiRoleTokenAddsAllAuthorities() throws Exception {
+        String token = jwtUtils.generateToken("owner@example.com", java.util.List.of("ROLE_ADMIN", "ROLE_MANAGER"));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/protected");
+        request.addHeader("Authorization", "Bearer " + token);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        jakarta.servlet.FilterChain chain = Mockito.mock(jakarta.servlet.FilterChain.class);
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(any(), any());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(authentication);
+        assertEquals("owner@example.com", authentication.getPrincipal());
+        assertTrue(authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority())));
+        assertTrue(authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_MANAGER".equals(a.getAuthority())));
+    }
+
     private String createExpiredToken() {
         long now = System.currentTimeMillis();
         return Jwts.builder()

@@ -68,16 +68,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             Claims claims = jwtUtils.parseClaims(token);
             String email = claims.getSubject();
-            String role = claims.get("role", String.class);
+            List<String> roles = jwtUtils.extractRoles(claims);
 
             if (email == null || email.isBlank()) {
                 respondUnauthorized(response, "Invalid token subject", request.getRequestURI());
                 return;
             }
 
-            List<SimpleGrantedAuthority> authorities = role == null || role.isBlank()
-                    ? List.of()
-                    : List.of(new SimpleGrantedAuthority(role));
+            List<SimpleGrantedAuthority> authorities = roles.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null,
                     authorities);

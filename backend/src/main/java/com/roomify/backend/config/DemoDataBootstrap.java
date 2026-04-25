@@ -17,6 +17,7 @@ import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +119,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
         adminUser.setEmail(DEMO_ADMIN_EMAIL);
         adminUser.setPasswordHash(encodedPassword);
         adminUser.setRole(Role.ADMIN);
+        adminUser.setRoles(EnumSet.of(Role.ADMIN, Role.MANAGER));
         adminUser.setActive(true);
         adminUser.setFailedAttempts(0);
         adminUser.setLockUntil(null);

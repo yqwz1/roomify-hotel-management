@@ -91,12 +91,13 @@ public class AuthController {
 
                 if (isLegacyDemoAdminLogin(email, request.getPassword())) {
                         auditSuccess(email, ipAddress);
+                        List<String> roles = List.of("ROLE_ADMIN", "ROLE_MANAGER");
                         return ResponseEntity.ok(new JwtResponse(
-                                        jwtUtils.generateToken(DEMO_ADMIN_EMAIL, "ROLE_ADMIN"),
+                                        jwtUtils.generateToken(DEMO_ADMIN_EMAIL, roles),
                                         1L,
                                         "Admin",
                                         DEMO_ADMIN_EMAIL,
-                                        List.of("ROLE_ADMIN")));
+                                        roles));
                 }
 
                 auditFailure(email, ipAddress, "wrong-email-or-password");
@@ -111,7 +112,7 @@ public class AuthController {
                 try {
                         Claims claims = jwtUtils.parseClaims(token);
                         String email = claims.getSubject();
-                        String role = claims.get("role", String.class);
+                        List<String> roles = jwtUtils.extractRoles(claims);
 
                         if (email == null || email.isBlank()) {
                                 ApiError error = new ApiError(
@@ -123,7 +124,7 @@ public class AuthController {
                                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                         }
 
-                        if (role == null || role.isBlank()) {
+                        if (roles.isEmpty()) {
                                 ApiError error = new ApiError(
                                                 HttpStatus.UNAUTHORIZED.value(),
                                                 "Unauthorized",
@@ -133,7 +134,7 @@ public class AuthController {
                                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                         }
 
-                        String newToken = jwtUtils.generateToken(email, role);
+                        String newToken = jwtUtils.generateToken(email, roles);
                         return ResponseEntity.ok(new TokenRefreshResponse(newToken));
                 } catch (ExpiredJwtException e) {
                         ApiError error = new ApiError(
@@ -168,18 +169,20 @@ public class AuthController {
         }
 
         private JwtResponse buildJwtResponse(User user) {
-                String role = "ROLE_" + user.getRole().name();
+                List<String> roles = user.getRoles().stream()
+                                .map(role -> "ROLE_" + role.name())
+                                .toList();
                 String displayName = user.getStaff() != null && user.getStaff().getName() != null
                                 && !user.getStaff().getName().isBlank()
                                                 ? user.getStaff().getName()
                                                 : user.getEmail();
 
                 return new JwtResponse(
-                                jwtUtils.generateToken(user.getEmail(), role),
+                                jwtUtils.generateToken(user.getEmail(), roles),
                                 user.getId(),
                                 displayName,
                                 user.getEmail(),
-                                List.of(role));
+                                roles);
         }
 
         private void auditSuccess(String email, String ipAddress) {

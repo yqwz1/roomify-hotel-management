@@ -80,7 +80,8 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.email").value("admin@roomify.com"))
                 .andExpect(jsonPath("$.username").value("Admin"))
-                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"));
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"))
+                .andExpect(jsonPath("$.roles[1]").value("ROLE_MANAGER"));
     }
 
     @Test
@@ -174,6 +175,33 @@ class AuthIntegrationTest {
         // Verify new token works
         mockMvc.perform(get("/api/rooms")
                 .header("Authorization", "Bearer " + newToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void refreshTokenWithMultipleRolesPreservesAllRoles() throws Exception {
+        String validToken = jwtUtils.generateToken(
+                "owner@roomify.com",
+                java.util.List.of("ROLE_ADMIN", "ROLE_MANAGER"));
+        String refreshJson = objectMapper.writeValueAsString(Map.of("token", validToken));
+
+        MvcResult result = mockMvc.perform(post("/api/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(refreshJson))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String newToken = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("token")
+                .asText();
+
+        mockMvc.perform(get("/api/staff")
+                .header("Authorization", "Bearer " + newToken))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/dashboard/metrics")
+                .header("Authorization", "Bearer " + newToken)
+                .param("startDate", "2026-04-01")
+                .param("endDate", "2026-04-30"))
                 .andExpect(status().isOk());
     }
 
