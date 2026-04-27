@@ -22,7 +22,7 @@ BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}/api/health"
 APP_URL="http://localhost:3000"
 LOGIN_URL="${APP_URL}/login"
 MAILPIT_URL="http://127.0.0.1:${MAILPIT_HTTP_PORT}"
-DEMO_CREDENTIALS="admin@roomify.com / password123"
+DEMO_CREDENTIALS="admin@roomify.com / password123; staff@roomify.com / password123; demo.guest@roomify.dev / password123"
 
 BACKEND_PID=""
 

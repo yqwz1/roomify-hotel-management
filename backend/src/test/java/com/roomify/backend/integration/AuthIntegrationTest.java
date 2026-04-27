@@ -105,6 +105,24 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void loginWithPersistedGuestCredentialsReturnsGuestRole() throws Exception {
+        User user = new User("demo.guest@roomify.dev", passwordEncoder.encode("password123"), Role.GUEST, true);
+        userRepository.save(user);
+
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", "demo.guest@roomify.dev",
+                "password", "password123"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("demo.guest@roomify.dev"))
+                .andExpect(jsonPath("$.username").value("demo.guest@roomify.dev"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+    }
+
+    @Test
     void loginWithWrongPasswordReturnsUnauthorized() throws Exception {
         String loginJson = objectMapper.writeValueAsString(Map.of(
                 "email", "admin@roomify.com",

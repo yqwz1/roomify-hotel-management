@@ -43,6 +43,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
     private static final String DEMO_STAFF_PASSWORD = "password123";
     private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
+    private static final String DEMO_GUEST_PASSWORD = "password123";
     private static final String DEMO_GUEST_ID = "ROOMIFY-DEMO-GUEST";
 
     private final RoomTypeRepository roomTypeRepository;
@@ -74,6 +75,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         upsertDemoAdminUser();
         upsertDemoStaffUser();
+        upsertDemoGuestUser();
 
         RoomType demoStandard = upsertRoomType(new RoomTypeSpec(
                 "Demo Standard",
@@ -152,6 +154,20 @@ public class DemoDataBootstrap implements ApplicationRunner {
         staff.setActive(true);
 
         userRepository.save(staffUser);
+    }
+
+    private void upsertDemoGuestUser() {
+        String encodedPassword = passwordEncoder.encode(DEMO_GUEST_PASSWORD);
+        User guestUser = userRepository.findByEmailIgnoreCase(DEMO_GUEST_EMAIL)
+                .orElseGet(() -> new User(DEMO_GUEST_EMAIL, encodedPassword, Role.GUEST, true));
+        guestUser.setEmail(DEMO_GUEST_EMAIL);
+        guestUser.setPasswordHash(encodedPassword);
+        guestUser.setRole(Role.GUEST);
+        guestUser.setRoles(EnumSet.of(Role.GUEST));
+        guestUser.setActive(true);
+        guestUser.setFailedAttempts(0);
+        guestUser.setLockUntil(null);
+        userRepository.save(guestUser);
     }
 
     private RoomType upsertRoomType(RoomTypeSpec spec) {

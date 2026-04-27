@@ -196,6 +196,8 @@ const LoginPage = () => {
                     admin@roomify.com / password123
                     <br />
                     staff@roomify.com / password123
+                    <br />
+                    demo.guest@roomify.dev / password123
                   </p>
                 ) : null}
               </div>
