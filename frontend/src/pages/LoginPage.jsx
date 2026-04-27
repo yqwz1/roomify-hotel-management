@@ -194,6 +194,8 @@ const LoginPage = () => {
                 {showDemoCredentials ? (
                   <p className="ps-2 text-xs leading-5 text-zinc-400" dir="ltr">
                     admin@roomify.com / password123
+                    <br />
+                    staff@roomify.com / password123
                   </p>
                 ) : null}
               </div>

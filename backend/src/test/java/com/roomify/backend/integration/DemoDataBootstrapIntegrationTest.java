@@ -111,4 +111,17 @@ class DemoDataBootstrapIntegrationTest {
         assertTrue(adminUser.getRoles().contains(Role.MANAGER));
         assertTrue(passwordEncoder.matches("password123", adminUser.getPasswordHash()));
     }
+
+    @Test
+    void demoBootstrapKeepsDocumentedStaffLoginUsable() {
+        User staffUser = userRepository.findByEmailIgnoreCase("staff@roomify.com").orElseThrow();
+
+        assertTrue(staffUser.isActive());
+        assertEquals(Role.STAFF, staffUser.getRole());
+        assertTrue(staffUser.getRoles().contains(Role.STAFF));
+        assertTrue(passwordEncoder.matches("password123", staffUser.getPasswordHash()));
+        assertEquals(0, staffUser.getFailedAttempts());
+        assertEquals("Demo Staff", staffUser.getStaff().getName());
+        assertTrue(staffUser.getStaff().isActive());
+    }
 }

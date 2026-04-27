@@ -13,6 +13,7 @@ import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import com.roomify.backend.service.ReservationFinancialService;
 import com.roomify.backend.user.Role;
+import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
@@ -39,6 +40,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
     private static final String DEMO_ADMIN_PASSWORD = "password123";
+    private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
+    private static final String DEMO_STAFF_PASSWORD = "password123";
     private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
     private static final String DEMO_GUEST_ID = "ROOMIFY-DEMO-GUEST";
 
@@ -70,6 +73,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         upsertDemoAdminUser();
+        upsertDemoStaffUser();
 
         RoomType demoStandard = upsertRoomType(new RoomTypeSpec(
                 "Demo Standard",
@@ -124,6 +128,30 @@ public class DemoDataBootstrap implements ApplicationRunner {
         adminUser.setFailedAttempts(0);
         adminUser.setLockUntil(null);
         userRepository.save(adminUser);
+    }
+
+    private void upsertDemoStaffUser() {
+        String encodedPassword = passwordEncoder.encode(DEMO_STAFF_PASSWORD);
+        User staffUser = userRepository.findByEmailIgnoreCase(DEMO_STAFF_EMAIL)
+                .orElseGet(() -> new User(DEMO_STAFF_EMAIL, encodedPassword, Role.STAFF, true));
+        staffUser.setEmail(DEMO_STAFF_EMAIL);
+        staffUser.setPasswordHash(encodedPassword);
+        staffUser.setRole(Role.STAFF);
+        staffUser.setRoles(EnumSet.of(Role.STAFF));
+        staffUser.setActive(true);
+        staffUser.setFailedAttempts(0);
+        staffUser.setLockUntil(null);
+
+        Staff staff = staffUser.getStaff();
+        if (staff == null) {
+            staff = new Staff(staffUser, "Demo Staff", "Front Desk");
+            staffUser.setStaff(staff);
+        }
+        staff.setName("Demo Staff");
+        staff.setDepartment("Front Desk");
+        staff.setActive(true);
+
+        userRepository.save(staffUser);
     }
 
     private RoomType upsertRoomType(RoomTypeSpec spec) {

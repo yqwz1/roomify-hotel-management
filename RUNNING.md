@@ -76,7 +76,8 @@ npm run dev
 
 [http://localhost:3000](http://localhost:3000)
 
-Login: `admin@roomify.com` / `password123`
+Admin login: `admin@roomify.com` / `password123`
+Staff login: `staff@roomify.com` / `password123`
 
 Quick smoke:
 - Open `/search` and run the default same-day search (`today -> tomorrow`)
