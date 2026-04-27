@@ -2,7 +2,12 @@ package com.roomify.backend.controller;
 
 import com.roomify.backend.dto.RoomRequest;
 import com.roomify.backend.dto.RoomResponse;
+import com.roomify.backend.dto.RoomServiceCompletionRequest;
+import com.roomify.backend.dto.RoomServiceCompletionResponse;
+import com.roomify.backend.dto.RoomServicePreviewRequest;
+import com.roomify.backend.dto.RoomServicePreviewResponse;
 import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.service.RoomOperationalService;
 import com.roomify.backend.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,9 +27,11 @@ import java.util.List;
 public class RoomController {
 
     private final RoomService roomService;
+    private final RoomOperationalService roomOperationalService;
 
-    public RoomController(RoomService roomService) {
+    public RoomController(RoomService roomService, RoomOperationalService roomOperationalService) {
         this.roomService = roomService;
+        this.roomOperationalService = roomOperationalService;
     }
 
     /**
@@ -95,6 +102,21 @@ public class RoomController {
             @RequestParam String status) {
         RoomResponse response = roomService.updateStatus(id, status);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/service-preview")
+    public ResponseEntity<RoomServicePreviewResponse> previewRoomService(
+            @PathVariable Long id,
+            @RequestBody(required = false) RoomServicePreviewRequest request) {
+        RoomServicePreviewRequest safeRequest = request != null ? request : new RoomServicePreviewRequest();
+        return ResponseEntity.ok(roomOperationalService.previewRoomService(id, safeRequest));
+    }
+
+    @PostMapping("/{id}/complete-service")
+    public ResponseEntity<RoomServiceCompletionResponse> completeRoomService(
+            @PathVariable Long id,
+            @Valid @RequestBody RoomServiceCompletionRequest request) {
+        return ResponseEntity.ok(roomOperationalService.completeRoomService(id, request));
     }
 
     /**

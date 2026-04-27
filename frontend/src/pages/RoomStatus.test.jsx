@@ -31,6 +31,31 @@ vi.mock('../components/dashboard/DashboardPanel', () => ({
   ),
 }));
 
+vi.mock('../components/inventory/ServiceCompletionModal', () => ({
+  default: ({ room, onClose, onCompleted }) => (
+    <div>
+      <p>Service modal for room {room.roomNumber}</p>
+      <button
+        type="button"
+        onClick={() =>
+          onCompleted({
+            room: {
+              ...room,
+              status: 'AVAILABLE',
+            },
+            warnings: ['Low stock: Surface cleaner'],
+          })
+        }
+      >
+        Finish service
+      </button>
+      <button type="button" onClick={onClose}>
+        Close service modal
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('../services/roomService', () => ({
   extractErrorMessage: (err) => err?.message ?? 'Room request failed',
   getRooms: vi.fn(),
@@ -143,5 +168,39 @@ describe('RoomStatus', () => {
     expect(within(roomCard).getByText(/could not load valid next statuses for this room right now/i)).toBeInTheDocument();
     expect(within(roomCard).queryByText(/Managed automatically/i)).not.toBeInTheDocument();
     expect(within(roomCard).queryByRole('button', { name: /Under Maintenance/i })).not.toBeInTheDocument();
+  });
+
+  it('routes cleaning completion through the service modal instead of the raw status endpoint', async () => {
+    const user = userEvent.setup();
+
+    getRooms.mockResolvedValue([
+      {
+        id: 4,
+        roomNumber: '104',
+        floor: 1,
+        status: 'NEEDS_CLEANING',
+        roomType: { name: 'Standard Room', basePrice: 100 },
+      },
+    ]);
+
+    getValidNextStatuses
+      .mockResolvedValueOnce(['AVAILABLE'])
+      .mockResolvedValueOnce(['UNDER_MAINTENANCE']);
+
+    renderPage();
+
+    const roomNumber = await screen.findByText('104');
+    const roomCard = roomNumber.closest('article');
+    expect(roomCard).not.toBeNull();
+
+    await user.click(within(roomCard).getByRole('button', { name: /Available/i }));
+
+    expect(screen.getByText(/Service modal for room 104/i)).toBeInTheDocument();
+    expect(updateRoomStatus).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /Finish service/i }));
+
+    await screen.findByText(/Room 104 moved to Available/i);
+    expect(screen.getByText(/Low stock: Surface cleaner/i)).toBeInTheDocument();
   });
 });

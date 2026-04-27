@@ -20,6 +20,7 @@ import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import InventoryOperationsPanel from '../components/inventory/InventoryOperationsPanel';
 import { Button } from '../components/ui/button';
 import {
   createExpense,
@@ -1165,6 +1166,8 @@ export default function ExpenseTracker() {
           )}
         </DashboardPanel>
       </div>
+
+      <InventoryOperationsPanel filters={filters} t={t} language={i18n.language} />
 
       {(modalMode === 'create' || modalMode === 'edit') && (
         <ExpenseFormModal

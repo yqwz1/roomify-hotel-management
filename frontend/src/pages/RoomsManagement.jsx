@@ -243,10 +243,7 @@ export default function RoomsManagement() {
     });
   }, [rooms, filters.minPrice, filters.maxPrice]);
 
-  const statusOptions = useMemo(
-    () => BACKEND_STATUSES.map((status) => ({ value: status, label: getRoomStatusLabel(status, t) })),
-    [t]
-  );
+ 
 
   const roomTypeOptions = useMemo(
     () => roomTypes.map((roomType) => ({ value: roomType.name, label: translateKnownValue(roomType.name, t) })),
@@ -411,7 +408,6 @@ export default function RoomsManagement() {
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onClear={handleClearFilters}
-        statusOptions={statusOptions}
         roomTypeOptions={roomTypeOptions}
         floorOptions={floorOptions}
         showPriceRange={false}
@@ -446,7 +442,6 @@ export default function RoomsManagement() {
                     t('roomsManagementPage.tableRoom'),
                     t('roomsManagementPage.tableFloor'),
                     t('roomsManagementPage.tableType'),
-                    t('roomsManagementPage.tableStatus'),
                     t('roomsManagementPage.tableBasePrice'),
                     t('roomsManagementPage.tableCapacity'),
                     t('roomsManagementPage.tableAmenities'),
@@ -481,15 +476,7 @@ export default function RoomsManagement() {
                       <td className="px-4 py-4 text-sm font-bold text-zinc-950">
                         {translateKnownValue(room.roomType?.name, t)}
                       </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
-                            getStatusBadgeClasses(room.status)
-                          }`}
-                        >
-                          {getRoomStatusLabel(room.status, t)}
-                        </span>
-                      </td>
+                      
                       <td className="px-4 py-4 text-sm font-bold text-zinc-950">
                         {formatLocalizedCurrency(room.roomType?.basePrice, i18n.language)}
                       </td>

@@ -18,6 +18,10 @@ vi.mock('../services/expenseService', () => ({
   extractExpenseError: (err) => err?.message ?? 'Expense request failed',
 }));
 
+vi.mock('../components/inventory/InventoryOperationsPanel', () => ({
+  default: () => <section>Inventory &amp; Automation</section>,
+}));
+
 const summaryResponse = {
   totalRevenue: 4200,
   totalExpenses: 540,

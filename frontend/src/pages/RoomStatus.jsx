@@ -19,6 +19,7 @@ import {
   getValidNextStatuses,
   updateRoomStatus,
 } from '../services/roomService';
+import ServiceCompletionModal from '../components/inventory/ServiceCompletionModal';
 import {
   formatLocalizedCurrency,
   getRoomStatusLabel,
@@ -105,6 +106,7 @@ export default function RoomStatus() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const [updatingRoomId, setUpdatingRoomId] = useState(null);
+  const [serviceRoom, setServiceRoom] = useState(null);
 
   const fetchRooms = async (statusFilter = filter) => {
     setLoading(true);
@@ -129,6 +131,14 @@ export default function RoomStatus() {
 
   const handleStatusChange = async (roomId, nextStatus) => {
     if (!roomId || !nextStatus) return;
+    const room = rooms.find((candidate) => candidate.id === roomId);
+    if (
+      nextStatus === 'AVAILABLE' &&
+      (room?.status === 'NEEDS_CLEANING' || room?.status === 'UNDER_MAINTENANCE')
+    ) {
+      setServiceRoom(room);
+      return;
+    }
     setUpdatingRoomId(roomId);
     setError(null);
 
@@ -165,6 +175,45 @@ export default function RoomStatus() {
     }
   };
 
+  const handleServiceCompleted = async (response) => {
+    const updated = response?.room;
+    if (!updated) {
+      setServiceRoom(null);
+      return;
+    }
+
+    setError(null);
+    let validNextStatuses = [];
+    let validNextStatusesStatus = ACTION_STATUS_READY;
+    try {
+      validNextStatuses = await getValidNextStatuses(updated.id);
+    } catch (transitionErr) {
+      if (transitionErr?.response?.status === 403) {
+        setError(extractErrorMessage(transitionErr));
+      } else {
+        validNextStatusesStatus = ACTION_STATUS_UNAVAILABLE;
+      }
+    }
+
+    const hydratedRoom = { ...updated, validNextStatuses, validNextStatusesStatus };
+    setRooms((prev) => {
+      if (filter !== 'ALL' && hydratedRoom.status !== filter) {
+        return prev.filter((room) => room.id !== updated.id);
+      }
+      return prev.map((room) => (room.id === updated.id ? hydratedRoom : room));
+    });
+
+    const warningSuffix = response?.warnings?.length ? ` · ${response.warnings.join(' · ')}` : '';
+    setToast({
+      message: `${t('roomStatusPage.successToast', {
+        roomNumber: updated.roomNumber,
+        status: getRoomStatusLabel(updated.status, t),
+      })}${warningSuffix}`,
+      type: 'success',
+    });
+    setServiceRoom(null);
+  };
+
   const filteredRooms = useMemo(() => {
     const search = searchQuery.trim().toLowerCase();
     if (!search) return rooms;
@@ -197,6 +246,16 @@ export default function RoomStatus() {
         type={toast?.type}
         onClose={() => setToast(null)}
       />
+
+      {serviceRoom ? (
+        <ServiceCompletionModal
+          room={serviceRoom}
+          onClose={() => setServiceRoom(null)}
+          onCompleted={handleServiceCompleted}
+          t={t}
+          language={i18n.language}
+        />
+      ) : null}
 
       <DashboardHero
         eyebrow={t('roomStatusPage.heroEyebrow')}
