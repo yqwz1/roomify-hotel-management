@@ -136,6 +136,7 @@ class InventoryIntegrationTest {
         String restockPayload = objectMapper.writeValueAsString(Map.of(
                 "quantity", new BigDecimal("20.000"),
                 "unitCost", new BigDecimal("5.0000"),
+                "occurredAt", "2026-04-24T10:00:00",
                 "supplier", "Sparkle Supply",
                 "notes", "Weekly purchase",
                 "linkToExpense", true));
