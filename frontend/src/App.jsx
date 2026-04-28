@@ -10,6 +10,7 @@ import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
 import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
+import AiFinanceDashboard from './pages/AiFinanceDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
@@ -98,6 +99,14 @@ const AppContent = () => {
           element={
             <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><ManagerDashboard /></Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/manager/ai-finance"
+          element={
+            <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
+              <Layout showSidebar={true}><AiFinanceDashboard /></Layout>
             </PrivateRoute>
           }
         />
