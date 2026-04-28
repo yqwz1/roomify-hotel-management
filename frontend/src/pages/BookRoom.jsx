@@ -25,6 +25,7 @@ import {
   formatLocalizedDate,
   translateKnownValue,
 } from '../utils/localization';
+import { VAT_RATE } from '../utils/billing';
 
 const EMPTY_GUEST = {
   name: '',
@@ -143,7 +144,7 @@ export default function BookRoom() {
 
   const roomRate = Number(room?.roomType?.basePrice ?? 0);
   const subtotal = roomRate * nights;
-  const taxes = subtotal * 0.1;
+  const taxes = subtotal * VAT_RATE;
   const totalPrice = subtotal + taxes;
 
   const handleSearchAlternatives = () => {

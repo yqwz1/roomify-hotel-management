@@ -17,13 +17,13 @@ public class ServiceChargeController {
 
     private final ServiceChargeService service;
 
-    @PreAuthorize("hasAuthority('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping
     public List<ServiceCharge> getByReservation(@RequestParam Long reservationId) {
         return service.getByReservation(reservationId);
     }
 
-    @PreAuthorize("hasAuthority('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping
     public ResponseEntity<?> add(
             @RequestParam Long reservationId,
@@ -42,7 +42,7 @@ public class ServiceChargeController {
         }
     }
 
-    @PreAuthorize("hasAuthority('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable Long id,
@@ -60,7 +60,7 @@ public class ServiceChargeController {
         }
     }
 
-    @PreAuthorize("hasAuthority('STAFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(
             @PathVariable Long id,
