@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -28,9 +29,17 @@ import java.time.LocalDateTime;
  * Reservation entity representing guest bookings for rooms.
  */
 @Entity
-@Table(name = "reservations", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "confirmation_number", name = "uk_reservation_confirmation_number")
-})
+@Table(
+        name = "reservations",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "confirmation_number", name = "uk_reservation_confirmation_number")
+        },
+        indexes = {
+                @Index(name = "idx_reservations_check_in_date", columnList = "check_in_date"),
+                @Index(name = "idx_reservations_check_out_date", columnList = "check_out_date"),
+                @Index(name = "idx_reservations_status", columnList = "status"),
+                @Index(name = "idx_reservations_room_id", columnList = "room_id")
+        })
 public class Reservation {
 
     @Id

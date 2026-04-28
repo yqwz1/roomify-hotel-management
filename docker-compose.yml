@@ -29,12 +29,13 @@ services:
     container_name: roomify-backend
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: dev-demo
       SPRING_DATASOURCE_URL: jdbc:postgresql://roomify-postgres:5432/roomify
       SPRING_DATASOURCE_USERNAME: roomify_user
       SPRING_DATASOURCE_PASSWORD: roomify_pass
       SPRING_MAIL_HOST: roomify-mailpit
       SPRING_MAIL_PORT: 1025
-      ROOMIFY_DEMO_BOOTSTRAP_ENABLED: "true"
+      ROOMIFY_DEMO_BOOTSTRAP_ENABLED: "false"
       SERVER_PORT: 8080
     depends_on:
       - postgres

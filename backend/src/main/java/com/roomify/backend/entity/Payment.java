@@ -8,7 +8,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "payments")
+@Table(
+        name = "payments",
+        indexes = {
+                @Index(name = "idx_payments_created_at", columnList = "created_at")
+        })
 public class Payment {
 
     @Id
@@ -108,5 +112,9 @@ public class Payment {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -9,9 +9,14 @@ import jakarta.validation.constraints.NotNull;
  * Each room belongs to a RoomType and has a unique room number.
  */
 @Entity
-@Table(name = "rooms", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "room_number", name = "uk_room_number")
-})
+@Table(
+        name = "rooms",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "room_number", name = "uk_room_number")
+        },
+        indexes = {
+                @Index(name = "idx_rooms_room_type_id", columnList = "room_type_id")
+        })
 public class Room {
 
     @Id
