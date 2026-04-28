@@ -59,6 +59,7 @@ class ReservationSchemaAlignmentTest {
         jdbcTemplate.execute("DELETE FROM rooms");
         jdbcTemplate.execute("DELETE FROM room_types");
         jdbcTemplate.execute("DELETE FROM staff");
+        jdbcTemplate.execute("DELETE FROM user_roles");
         jdbcTemplate.execute("DELETE FROM users");
     }
 

@@ -22,7 +22,7 @@ BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}/api/health"
 APP_URL="http://localhost:3000"
 LOGIN_URL="${APP_URL}/login"
 MAILPIT_URL="http://127.0.0.1:${MAILPIT_HTTP_PORT}"
-DEMO_CREDENTIALS="admin@roomify.com / password123"
+DEMO_CREDENTIALS="admin@roomify.com / password123; staff@roomify.com / password123; demo.guest@roomify.dev / password123"
 
 BACKEND_PID=""
 
@@ -191,6 +191,7 @@ start_backend() {
     (
         cd "$BACKEND_DIR" || exit 1
         nohup env DB_PORT="$DB_PORT" ROOMIFY_DEMO_BOOTSTRAP_ENABLED="true" \
+            SPRING_JPA_HIBERNATE_DDL_AUTO="update" \
             sh ./mvnw spring-boot:run >>"$BACKEND_LOG" 2>&1 &
         echo $! >"$BACKEND_PID_FILE"
     )
@@ -278,7 +279,7 @@ main() {
 
     stop_processes_on_port "$BACKEND_PORT"
 
-    log "Starting backend with DB_PORT=${DB_PORT} and ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true..."
+    log "Starting backend with DB_PORT=${DB_PORT}, ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true, and local schema update enabled..."
     start_backend
 
     log "Waiting for backend health at ${BACKEND_HEALTH_URL}..."

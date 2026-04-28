@@ -20,8 +20,7 @@ import {
   getReservationStatusLabel,
   translateKnownValue,
 } from '../utils/localization';
-
-const VAT_RATE = 0.15;
+import { VAT_RATE } from '../utils/billing';
 
 function ModifyModal({ reservation, onClose, onSave }) {
   const { t, i18n } = useTranslation();

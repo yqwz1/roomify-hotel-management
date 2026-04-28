@@ -152,6 +152,15 @@ const FILTER_LABEL_CLASS =
 const FILTER_INPUT_CLASS =
   'h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
+const RESULT_DETAIL_GRID_CLASS =
+  'grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]';
+
+const RESULT_DETAIL_CARD_CLASS =
+  'min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm';
+
+const RESULT_DETAIL_LABEL_CLASS =
+  'text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400';
+
 export default function ReservationLookupPanel({
   onSelect,
   className = '',
@@ -494,9 +503,9 @@ export default function ReservationLookupPanel({
                       <StatusPill status={reservation.status} size="sm" />
                     </div>
 
-                    <div className="grid gap-3 xl:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:grid-cols-[repeat(4,minmax(0,1fr))]">
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className={RESULT_DETAIL_GRID_CLASS}>
+                      <div className={RESULT_DETAIL_CARD_CLASS}>
+                        <p className={RESULT_DETAIL_LABEL_CLASS}>
                           {t('confirmationNumber')}
                         </p>
                         <LtrText className="mt-2 text-sm font-bold text-zinc-950">
@@ -504,8 +513,8 @@ export default function ReservationLookupPanel({
                         </LtrText>
                       </div>
 
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                      <div className={RESULT_DETAIL_CARD_CLASS}>
+                        <p className={RESULT_DETAIL_LABEL_CLASS}>
                           {t('common.room')}
                         </p>
                         <LtrText className="mt-2 text-sm font-bold text-zinc-950">
@@ -516,17 +525,17 @@ export default function ReservationLookupPanel({
                         </p>
                       </div>
 
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                      <div className={RESULT_DETAIL_CARD_CLASS}>
+                        <p className={RESULT_DETAIL_LABEL_CLASS}>
                           {t('modifyReservationPage.stayDates')}
                         </p>
                         <div className="mt-2 space-y-2">
-                          <div className="flex items-start justify-between gap-3">
-                            <span className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <span className="inline-flex min-w-max items-center gap-2 text-xs font-medium text-zinc-500">
                               <CalendarDays className="h-4 w-4 text-zinc-400" />
                               {t('checkInDate')}
                             </span>
-                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                            <span className="min-w-max whitespace-nowrap text-sm font-bold text-zinc-950">
                               {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                                 month: 'short',
                                 day: 'numeric',
@@ -534,9 +543,9 @@ export default function ReservationLookupPanel({
                               })}
                             </span>
                           </div>
-                          <div className="flex items-start justify-between gap-3">
-                            <span className="text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
-                            <span className="min-w-0 text-right text-sm font-bold text-zinc-950 [overflow-wrap:anywhere]">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <span className="min-w-max text-xs font-medium text-zinc-500">{t('checkOutDate')}</span>
+                            <span className="min-w-max whitespace-nowrap text-sm font-bold text-zinc-950">
                               {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
                                 month: 'short',
                                 day: 'numeric',
@@ -547,8 +556,8 @@ export default function ReservationLookupPanel({
                         </div>
                       </div>
 
-                      <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                      <div className={RESULT_DETAIL_CARD_CLASS}>
+                        <p className={RESULT_DETAIL_LABEL_CLASS}>
                           {t('checkInPage.reservationTotal')}
                         </p>
                         <LtrText className="mt-2 text-sm font-bold text-zinc-950">
