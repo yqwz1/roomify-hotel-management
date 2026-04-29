@@ -1,12 +1,14 @@
 import {
   AlertTriangle,
   BarChart3,
+  BedDouble,
   Bot,
   BrainCircuit,
   CalendarDays,
+  CreditCard,
   Gauge,
   Hotel,
-  LineChart,
+  Receipt,
   Sparkles,
   TrendingUp,
   WalletCards,
@@ -16,6 +18,7 @@ import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { Card, CardContent } from '../components/ui/card';
 import { cn } from '../lib/utils';
 
 const dashboardState = {
@@ -23,34 +26,59 @@ const dashboardState = {
   error: null,
 };
 
-const summaryCards = [
+const dataSummaryState = {
+  loading: false,
+};
+
+const dataSummaryCards = [
   {
-    label: 'Historical window',
-    value: '18 months',
-    hint: 'Reservations, payments, occupancy, and expenses',
+    label: 'Reservations',
+    value: '1,420',
+    hint: 'Confirmed, checked-in, and completed stays',
     icon: CalendarDays,
     className: 'border-sky-200 bg-sky-50/85 text-sky-950',
   },
   {
-    label: 'Forecast horizon',
-    value: '30 days',
-    hint: 'Revenue and occupancy projection range',
-    icon: LineChart,
+    label: 'Payments',
+    value: '1,286',
+    hint: 'Captured and settled demo payments',
+    icon: CreditCard,
     className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
   },
   {
-    label: 'Projected revenue',
-    value: 'SAR 128K',
-    hint: 'Static placeholder until analytics APIs are connected',
+    label: 'Expenses',
+    value: 'SAR 42K',
+    hint: 'Operating expenses prepared for analytics',
+    icon: Receipt,
+    className: 'border-rose-200 bg-rose-50/85 text-rose-950',
+  },
+  {
+    label: 'Date Range',
+    value: 'Jan 2025 - Apr 2026',
+    hint: 'Static training window placeholder',
+    icon: CalendarDays,
+    className: 'border-indigo-200 bg-indigo-50/85 text-indigo-950',
+  },
+  {
+    label: 'Total Revenue',
+    value: 'SAR 512K',
+    hint: 'Demo-friendly revenue aggregate',
     icon: WalletCards,
     className: 'border-amber-200 bg-amber-50/85 text-amber-950',
   },
   {
-    label: 'Projected occupancy',
+    label: 'Average Occupancy',
     value: '74%',
-    hint: 'Mock demand signal for manager review',
+    hint: 'Mock occupancy across the date range',
     icon: Gauge,
-    className: 'border-indigo-200 bg-indigo-50/85 text-indigo-950',
+    className: 'border-cyan-200 bg-cyan-50/85 text-cyan-950',
+  },
+  {
+    label: 'Room Types',
+    value: '5',
+    hint: 'Standard, Deluxe, Suite, Family, Executive',
+    icon: BedDouble,
+    className: 'border-violet-200 bg-violet-50/85 text-violet-950',
   },
 ];
 
@@ -119,21 +147,57 @@ const insights = [
   'Model confidence and training data freshness can be added once real AI endpoints are connected.',
 ];
 
-function SummaryCard({ icon: Icon, label, value, hint, className }) {
+function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
   return (
-    <div className={cn('rounded-[1.5rem] border p-5 shadow-sm', className)}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
-            {label}
-          </p>
-          <p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
-          <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p>
+    <Card className={cn('rounded-[1.5rem] border p-0 shadow-sm', className)}>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
+              {label}
+            </p>
+            <p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
+            <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p>
+          </div>
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
+            <Icon className="h-5 w-5" />
+          </span>
         </div>
-        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
-          <Icon className="h-5 w-5" />
-        </span>
-      </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DataSummarySkeletonCard() {
+  return (
+    <Card className="rounded-[1.5rem] border border-zinc-200 bg-white p-0 shadow-sm">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 animate-pulse">
+            <div className="h-3 w-24 rounded-full bg-zinc-200" />
+            <div className="mt-4 h-8 w-28 rounded-xl bg-zinc-200" />
+            <div className="mt-4 space-y-2">
+              <div className="h-3 w-full rounded-full bg-zinc-100" />
+              <div className="h-3 w-3/4 rounded-full bg-zinc-100" />
+            </div>
+          </div>
+          <div className="h-11 w-11 flex-shrink-0 animate-pulse rounded-2xl bg-zinc-100" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DataSummaryCards() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {dataSummaryState.loading
+        ? dataSummaryCards.map((card) => (
+            <DataSummarySkeletonCard key={`${card.label}-skeleton`} />
+          ))
+        : dataSummaryCards.map((card) => (
+            <DataSummaryCard key={card.label} {...card} />
+          ))}
     </div>
   );
 }
@@ -145,7 +209,7 @@ function StatusCard({ icon: Icon, title, description, className }) {
         <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-black">{title}</p>
           <p className="mt-1 text-sm font-medium leading-6 opacity-75">{description}</p>
         </div>
@@ -177,7 +241,7 @@ function PlaceholderBarChart({ items, accentClassName, valueSuffix = '%' }) {
 
 function AiFinanceContent() {
   const hasDashboardData =
-    summaryCards.length > 0 ||
+    dataSummaryCards.length > 0 ||
     revenueBars.length > 0 ||
     occupancyBars.length > 0 ||
     recommendations.length > 0 ||
@@ -238,13 +302,9 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Data Summary Cards"
-        description="Placeholder finance and demand metrics for the first UI pass."
+        description="Static finance and demand metrics prepared for Day 4 API data."
       >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {summaryCards.map((card) => (
-            <SummaryCard key={card.label} {...card} />
-          ))}
-        </div>
+        <DataSummaryCards />
       </DashboardPanel>
 
       <DashboardPanel
