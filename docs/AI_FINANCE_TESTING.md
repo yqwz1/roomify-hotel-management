@@ -32,6 +32,41 @@
 - Training data API exports a stable ML-ready dataset
 - FastAPI service responds within configured timeout and returns model metadata
 
+## Day 2 Verification
+- Backend compile result: PASS (`mvn.cmd clean test-compile` on April 29, 2026)
+- Backend endpoint test result: PASS
+- `AiFinanceIntegrationTest`: PASS
+- `GET /api/ai-finance/data-summary`: PASS
+- `GET /api/ai-finance/summary`: PASS
+- `GET /api/ai-finance/revenue-trend?start=2025-01-01&end=2026-04-27`: PASS
+- `GET /api/ai-finance/occupancy-trend?start=2025-01-01&end=2026-04-27`: PASS
+- `GET /api/ai-finance/room-type-revenue`: PASS
+- `GET /api/ai-finance/training-data?start=2025-01-01&end=2026-04-27`: PASS
+- `GET /api/ai-finance/training-data.csv`: PASS
+- Training data row count for the Day 2 ML window: `2410`
+- Training data validation:
+  - invalid revenue rows: `0`
+  - invalid occupancy rows: `0`
+  - invalid `totalRooms <= 0` rows: `0`
+  - invalid cancelled-booking rows: `0`
+- FastAPI dependency install result: PASS (`pip install -r requirements.txt`)
+- `python train.py`: PASS
+- Training mode:
+  - API-first attempt returned `401` because Spring auth is required
+  - local CSV fallback succeeded as designed
+- Model artifacts created:
+  - `ai-service/models/revenue_model.joblib`
+  - `ai-service/models/occupancy_model.joblib`
+  - `ai-service/models/model_metadata.json`
+  - `ai-service/models/reference_data.csv`
+- `GET http://localhost:8000/health`: PASS
+- `GET http://localhost:8000/model-info`: PASS
+- `POST http://localhost:8000/forecast/full`: PASS
+- `POST http://localhost:8000/pricing/recommendations`: PASS
+- Blockers:
+  - None for Day 2 delivery
+  - Day 3 still needs authenticated Spring Boot to FastAPI integration instead of manual CSV fallback support
+
 ## Day 3 backend verification targets
 - Spring Boot -> FastAPI integration succeeds with timeout and error handling
 - Fallback response returns when AI service is unavailable
