@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -24,6 +25,23 @@ import jakarta.persistence.LockModeType;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
+
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        @Query("SELECT r FROM Reservation r")
+        List<Reservation> findAllWithDetails();
+
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        @Query("SELECT r FROM Reservation r " +
+                        "WHERE r.checkOutDate > :start AND r.checkInDate <= :end")
+        List<Reservation> findAllOverlappingPeriodWithDetails(
+                        @Param("start") LocalDate start,
+                        @Param("end") LocalDate end);
+
+        @Query("SELECT MIN(r.checkInDate) FROM Reservation r")
+        LocalDate findMinimumCheckInDate();
+
+        @Query("SELECT MAX(r.checkOutDate) FROM Reservation r")
+        LocalDate findMaximumCheckOutDate();
 
         Optional<Reservation> findByConfirmationNumber(String confirmationNumber);
 
