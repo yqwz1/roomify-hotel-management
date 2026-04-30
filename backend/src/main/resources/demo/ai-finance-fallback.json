@@ -1,0 +1,63 @@
+{
+  "source": "SAFE_DEMO_FALLBACK",
+  "warning": "AI service is unavailable. Showing a safe demo fallback forecast.",
+  "forecastStart": "2026-04-28",
+  "forecastDays": 30,
+  "predictedRevenueTotal": 87500.00,
+  "predictedAverageOccupancy": 75.0,
+  "confidence": 0.65,
+  "points": [
+    {
+      "date": "2026-04-28",
+      "predictedRevenue": 2900.00,
+      "predictedOccupancy": 72.5
+    },
+    {
+      "date": "2026-04-29",
+      "predictedRevenue": 2950.00,
+      "predictedOccupancy": 73.0
+    }
+  ],
+  "pricingRecommendations": [
+    {
+      "roomType": "Standard",
+      "currentPrice": 220.00,
+      "suggestedPrice": 235.00,
+      "adjustmentPercent": 6.8,
+      "riskLevel": "LOW",
+      "reason": "Safe fallback recommendation based on expected moderate occupancy."
+    },
+    {
+      "roomType": "Deluxe",
+      "currentPrice": 350.00,
+      "suggestedPrice": 380.00,
+      "adjustmentPercent": 8.6,
+      "riskLevel": "LOW",
+      "reason": "Safe fallback recommendation based on expected demand."
+    },
+    {
+      "roomType": "Family",
+      "currentPrice": 430.00,
+      "suggestedPrice": 455.00,
+      "adjustmentPercent": 5.8,
+      "riskLevel": "LOW",
+      "reason": "Safe fallback recommendation with bounded price increase."
+    },
+    {
+      "roomType": "Executive",
+      "currentPrice": 540.00,
+      "suggestedPrice": 565.00,
+      "adjustmentPercent": 4.6,
+      "riskLevel": "MEDIUM",
+      "reason": "Safe fallback recommendation with conservative adjustment."
+    },
+    {
+      "roomType": "Suite",
+      "currentPrice": 760.00,
+      "suggestedPrice": 790.00,
+      "adjustmentPercent": 3.9,
+      "riskLevel": "MEDIUM",
+      "reason": "Safe fallback recommendation with bounded premium-room adjustment."
+    }
+  ]
+}

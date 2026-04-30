@@ -16,10 +16,25 @@
 
 ## Data flow
 1. PostgreSQL stores reservations, payments, expenses, rooms, room types, and guests.
-2. Spring Boot validates access, aggregates analytics, and exposes manager-only endpoints.
-3. Spring Boot training-data endpoints prepare ML-ready rows from the historical dataset.
-4. FastAPI trains and serves forecast outputs.
-5. Spring Boot applies timeout and fallback rules before responding to the frontend.
+2. React calls Spring Boot only and never calls FastAPI directly.
+3. Spring Boot validates access, aggregates analytics, and exposes manager-only endpoints.
+4. Spring Boot training-data endpoints prepare ML-ready rows from the historical dataset.
+5. `AiFinanceClient` calls FastAPI for health, model info, forecast, and pricing endpoints.
+6. FastAPI loads the trained ML artifacts and serves forecast outputs.
+7. Spring Boot applies timeout and safe fallback rules before responding to the frontend.
+
+## Day 3 delivered integration layer
+- `AiFinanceClient` owns Spring Boot -> FastAPI HTTP calls
+- `AiFinanceFallbackService` loads deterministic classpath fallback JSON
+- `AiFinanceController` now exposes:
+  - `GET /api/ai-finance/health`
+  - `GET /api/ai-finance/model-info`
+  - `GET /api/ai-finance/revenue-forecast`
+  - `GET /api/ai-finance/pricing-recommendations`
+  - `POST /api/ai-finance/ask`
+- New endpoints remain protected by `@PreAuthorize("hasRole('MANAGER')")`
+- Safe fallback uses `source=SAFE_DEMO_FALLBACK`
+- If FastAPI is unavailable, Spring Boot stays up and returns controlled responses instead of crashing
 
 ## Day 2 delivered backend layer
 - `AiFinanceController` exposes:
@@ -78,7 +93,8 @@
 - Timeout comes from `roomify.ai-service.timeout-ms`
 - Fallback behavior is controlled by `roomify.ai-service.fallback-enabled`
 
-## Day 3 boundary
-- Spring Boot to FastAPI HTTP client integration is not part of Day 2.
-- Spring fallback responses for AI inference requests are not part of Day 2.
-- `ask` endpoint orchestration is not part of Day 2.
+## Final Day 3 flow
+`Frontend -> Spring Boot -> AiFinanceClient -> FastAPI -> ML model -> Spring Boot -> Frontend`
+
+Fallback branch:
+`Frontend -> Spring Boot -> AiFinanceFallbackService -> SAFE_DEMO_FALLBACK payload -> Frontend`
