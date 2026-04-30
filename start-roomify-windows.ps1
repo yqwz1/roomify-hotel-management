@@ -297,6 +297,8 @@ Clear-StaleBackendPidFile
 
 $env:DB_PORT = "$DbPort"
 $env:ROOMIFY_DEMO_BOOTSTRAP_ENABLED = 'true'
+$env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = 'true'
+$env:SPRING_FLYWAY_BASELINE_VERSION = '12'
 $backendCommand = ".\mvnw.cmd spring-boot:run >> `"$BackendLog`" 2>&1"
 $backendProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $backendCommand -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
 $backendProcess.Id | Set-Content -LiteralPath $BackendPidFile

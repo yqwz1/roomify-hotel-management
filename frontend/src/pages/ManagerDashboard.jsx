@@ -2057,6 +2057,31 @@ export default function ManagerDashboard() {
           description={t(`${pageTx}.quickActionsDescription`)}
         >
           <div className="space-y-4">
+            <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <LineChart className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-zinc-950">AI Finance Dashboard</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-zinc-500">
+                      View revenue forecasts and pricing recommendations.
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => navigate('/manager/ai-finance')}
+                  className="h-10 flex-shrink-0 bg-zinc-950 px-4 text-white hover:bg-zinc-800"
+                >
+                  <LineChart className="h-4 w-4" />
+                  Open AI Finance
+                </Button>
+              </div>
+            </div>
+
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
               {quickActions.map((action) => (
                 <DashboardQuickAction key={action.title} {...action} />
