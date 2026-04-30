@@ -1,5 +1,30 @@
 # AI Finance Demo Script
 
+## Pre-demo startup checklist
+
+1. From the repository root, run:
+
+   ```powershell
+   .\start-roomify-windows.ps1
+   ```
+
+2. Confirm backend health:
+
+   ```powershell
+   Invoke-RestMethod http://127.0.0.1:8080/api/health
+   ```
+
+3. Confirm FastAPI health:
+
+   ```powershell
+   Invoke-RestMethod http://127.0.0.1:8000/health
+   Invoke-RestMethod http://127.0.0.1:8000/model-info
+   ```
+
+4. Open `/manager/ai-finance` as a Manager.
+
+If FastAPI is intentionally skipped with `.\start-roomify-windows.ps1 -SkipAiService`, explain that Spring Boot fallback mode remains available and AI Finance responses should be labeled `SAFE_DEMO_FALLBACK`.
+
 ## Supervisor review flow
 
 1. Login as a Manager.

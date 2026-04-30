@@ -36,6 +36,33 @@ Do not call FastAPI directly from React. Frontend integration should go through 
 
 ## How To Run Locally
 
+### Normal startup, recommended
+
+From the repository root:
+
+```powershell
+.\start-roomify-windows.ps1
+```
+
+This starts Docker/PostgreSQL/Mailpit, starts the Spring Boot backend, and now starts the AI Finance FastAPI service automatically when possible.
+
+To skip the AI service and rely on Spring Boot fallback mode:
+
+```powershell
+.\start-roomify-windows.ps1 -SkipAiService
+```
+
+Expected behavior:
+- FastAPI ON -> Spring AI Finance responses use `source=FASTAPI_MODEL`.
+- FastAPI OFF or skipped -> Spring Boot fallback responses use `source=SAFE_DEMO_FALLBACK` when fallback is enabled.
+
+FastAPI direct health checks:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+Invoke-RestMethod http://127.0.0.1:8000/model-info
+```
+
 ### 1. Start Docker services
 
 Docker Compose provides PostgreSQL and Mailpit, plus an optional backend container.
@@ -99,7 +126,13 @@ npm run build
 
 ### 4. Run the AI service
 
-The `ai-service/` folder exists and documents the current FastAPI commands.
+The main Windows startup script now starts the AI service automatically:
+
+```powershell
+.\start-roomify-windows.ps1
+```
+
+Manual FastAPI startup remains available for troubleshooting:
 
 ```powershell
 cd ai-service
@@ -314,9 +347,28 @@ Remove-Item Env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED -ErrorAction SilentlyContin
 Remove-Item Env:ROOMIFY_AI_FINANCE_DEMO_SEED_RESET -ErrorAction SilentlyContinue
 ```
 
-## Start AI Service Later
+## AI Service Startup
 
-The current `ai-service/README.md` documents:
+Normal startup:
+
+```powershell
+.\start-roomify-windows.ps1
+```
+
+The script checks `http://127.0.0.1:8000/health`. If FastAPI is already running, it prints that the AI service is already running on port `8000` and does not start a duplicate process.
+
+Skip AI service startup:
+
+```powershell
+.\start-roomify-windows.ps1 -SkipAiService
+```
+
+Expected skip behavior:
+- Spring Boot still starts normally.
+- AI Finance fallback remains available through Spring Boot when configured.
+- Forecast, pricing, and Ask responses should show `source=SAFE_DEMO_FALLBACK` if FastAPI is unavailable and fallback is enabled.
+
+Manual fallback troubleshooting command:
 
 ```powershell
 cd ai-service
@@ -325,7 +377,9 @@ python train.py
 uvicorn main:app --reload --port 8000
 ```
 
-Use `GET http://localhost:8000/health` to check the FastAPI service once it is running.
+Use these URLs to check the FastAPI service once it is running:
+- `http://127.0.0.1:8000/health`
+- `http://127.0.0.1:8000/model-info`
 
 Do not wire React directly to FastAPI. Later integration should keep the frontend behind Spring Boot routes and Manager-only authorization.
 
