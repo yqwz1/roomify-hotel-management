@@ -1,20 +1,18 @@
 import {
-  AlertTriangle,
   BarChart3,
   BedDouble,
-  Bot,
-  BrainCircuit,
   CalendarDays,
   Gauge,
   Hotel,
   Receipt,
   Sparkles,
-  TrendingUp,
   WalletCards,
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
+import AiStatusBanner from '../components/ai-finance/AiStatusBanner';
 import ForecastChart from '../components/ai-finance/ForecastChart';
+import PricingRecommendationCard from '../components/ai-finance/PricingRecommendationCard';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { Card, CardContent } from '../components/ui/card';
@@ -102,31 +100,45 @@ const buildDataSummaryCards = ({ dataSummary, summary }) => [
   },
 ];
 
-const aiStatusItems = [
+const demoAiStatus = {
+  status: 'SAFE_DEMO_FALLBACK',
+  modelType: 'RandomForestRegressor',
+  trainingRows: 1968,
+  lastTrained: '2026-04-27',
+  revenueMae: 2875,
+  occupancyMae: 4.8,
+  source: 'Day 6 UI placeholder',
+  message:
+    'AI status is displayed with demo-safe values until Day 7 routes live model information through Spring Boot.',
+};
+
+const demoPricingRecommendations = [
   {
-    icon: Bot,
-    title: 'Spring Boot analytics connected',
-    description: 'Day 4 summary cards load through the authenticated backend API.',
-    className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
+    roomType: 'Standard Room',
+    currentPrice: 320,
+    suggestedPrice: 335,
+    adjustmentPercent: 4.7,
+    riskLevel: 'LOW',
+    source: 'Day 6 UI placeholder',
+    reason:
+      'Placeholder recommendation showing how a modest increase will be displayed after Spring Boot pricing integration.',
   },
   {
-    icon: BrainCircuit,
-    title: 'Model service pending',
-    description: 'Forecast and pricing AI calls remain reserved for later integration days.',
-    className: 'border-sky-200 bg-sky-50/85 text-sky-950',
-  },
-  {
-    icon: AlertTriangle,
-    title: 'Demo-safe mode',
-    description: 'No pricing recommendation is applied from this Day 4 screen.',
-    className: 'border-amber-200 bg-amber-50/85 text-amber-950',
+    roomType: 'Deluxe Suite',
+    currentPrice: 560,
+    suggestedPrice: 530,
+    adjustmentPercent: -5.4,
+    riskLevel: 'MEDIUM',
+    source: 'Day 6 UI placeholder',
+    reason:
+      'Placeholder recommendation showing the review state for a bounded discount when demand is softer.',
   },
 ];
 
 const insights = [
   'Summary cards are now populated from Spring Boot AI Finance analytics.',
   'Historical trend APIs are loaded for Day 4 readiness; forecast chart work can build on them later.',
-  'Pricing recommendations and assistant answers remain intentionally disconnected for later days.',
+  'Pricing recommendation cards are UI-ready placeholders and remain disconnected until Day 7 Spring integration.',
 ];
 
 function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
@@ -186,22 +198,6 @@ function DataSummaryCards({ cards, loading }) {
   );
 }
 
-function StatusCard({ icon: Icon, title, description, className }) {
-  return (
-    <div className={cn('rounded-[1.4rem] border p-5', className)}>
-      <div className="flex items-start gap-3">
-        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
-          <Icon className="h-5 w-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-black">{title}</p>
-          <p className="mt-1 text-sm font-medium leading-6 opacity-75">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function AiFinanceContent() {
   const {
     loading,
@@ -222,21 +218,18 @@ function AiFinanceContent() {
     <>
       <DashboardPanel
         title="AI Status"
-        description="Readiness indicators for Day 4 Spring Boot analytics and future AI service connection."
+        description="Day 6 model readiness display prepared for future Spring Boot AI service integration."
       >
+        <AiStatusBanner {...demoAiStatus} />
         {error && !hasSummaryData && !loading ? (
-          <ErrorState
-            title="AI finance data unavailable"
-            message={error}
-            onRetry={refresh}
-          />
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-3">
-            {aiStatusItems.map((item) => (
-              <StatusCard key={item.title} {...item} />
-            ))}
+          <div className="mt-4">
+            <ErrorState
+              title="AI finance data unavailable"
+              message={error}
+              onRetry={refresh}
+            />
           </div>
-        )}
+        ) : null}
       </DashboardPanel>
 
       <DashboardPanel
@@ -301,13 +294,20 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Pricing Recommendations"
-        description="Day 7 pricing recommendations are intentionally not connected in this Day 4 task."
+        description="UI-ready recommendation cards for Day 7 Spring integration. These are not live AI decisions yet."
       >
-        <EmptyState
-          title="Pricing recommendations pending"
-          message="No recommendation values are shown until the later Spring Boot pricing advisor integration is ready."
-          icon={TrendingUp}
-        />
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-900">
+          Demo placeholder recommendations only. React does not call FastAPI directly, and no pricing
+          change can be applied from this screen.
+        </div>
+        <div className="grid gap-4 xl:grid-cols-2">
+          {demoPricingRecommendations.map((recommendation) => (
+            <PricingRecommendationCard
+              key={recommendation.roomType}
+              {...recommendation}
+            />
+          ))}
+        </div>
       </DashboardPanel>
 
       <DashboardPanel
