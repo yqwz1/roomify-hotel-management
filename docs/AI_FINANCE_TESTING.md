@@ -73,3 +73,51 @@
 - Manager-only authorization is enforced on AI Finance endpoints
 - Security tests cover unauthorized and wrong-role access
 - Final fresh DB rehearsal uses the locked `dev-demo` strategy and the AI demo seeder commands from the runbook
+
+## Day 3 Verification
+- Verification date: `2026-04-30`
+- Backend compile result: PASS
+  - `cd backend`
+  - `mvn.cmd clean test-compile`
+  - `mvn.cmd test-compile`
+- Existing backend integration test: PASS
+  - `mvn.cmd "-Dtest=AiFinanceIntegrationTest" test`
+- FastAPI ON through Spring Boot: PASS
+  - `GET /api/ai-finance/health` -> `200`, `status=UP`
+  - `GET /api/ai-finance/model-info` -> `200`, `modelType=RandomForestRegressor`, `trainingRows=2410`, `revenueMae=20.1108`, `occupancyMae=6.6309`
+  - `GET /api/ai-finance/revenue-forecast` -> `200`, `source=FASTAPI_MODEL`, `forecastDays=30`, `predictedRevenueTotal=190297.87`, `predictedAverageOccupancy=20.62`, `points=30`
+  - `GET /api/ai-finance/pricing-recommendations` -> `200`, `source=FASTAPI_MODEL`, `pricingRecommendations=5`
+  - `POST /api/ai-finance/ask` `REVENUE_FORECAST` -> `200`, `source=FASTAPI_MODEL`
+  - `POST /api/ai-finance/ask` `PRICING_RECOMMENDATION` -> `200`, `source=FASTAPI_MODEL`
+  - `POST /api/ai-finance/ask` `OCCUPANCY_ANALYSIS` -> `200`, `source=FASTAPI_MODEL`
+  - `POST /api/ai-finance/ask` `ROOM_TYPE_PERFORMANCE` -> `200`, `source=SPRING_ANALYTICS`
+  - `POST /api/ai-finance/ask` `UNKNOWN` -> `400` with supported intents list
+- FastAPI OFF fallback through Spring Boot: PASS
+  - FastAPI process stopped while Spring Boot remained running
+  - `GET /api/ai-finance/health` -> `200`, `status=DOWN`, `fallbackAvailable=true`
+  - `GET /api/ai-finance/revenue-forecast` -> `200`, `source=SAFE_DEMO_FALLBACK`, warning present
+  - `GET /api/ai-finance/pricing-recommendations` -> `200`, `source=SAFE_DEMO_FALLBACK`, warning present
+  - `POST /api/ai-finance/ask` `REVENUE_FORECAST` -> `200`, `source=SAFE_DEMO_FALLBACK`
+- Ask endpoint verification: PASS
+  - `REVENUE_FORECAST` answer used forecast totals and occupancy
+  - `PRICING_RECOMMENDATION` answer summarized live room-type pricing guidance
+  - `OCCUPANCY_ANALYSIS` answer summarized forecast occupancy and confidence
+  - `ROOM_TYPE_PERFORMANCE` answer summarized Spring analytics room-type revenue
+- Security tests: PASS with current demo setup
+  - Manager token: all required endpoints returned `200`
+  - No token: all required endpoints returned `401`
+  - Staff token: NOT_AVAILABLE
+  - Guest token: NOT_AVAILABLE
+  - Reason: this Day 3 runtime used `roomify.ai-finance.demo-seed-enabled=true` but did not enable the separate `roomify.demo.bootstrap.enabled` profile flag that provisions `staff@roomify.com` and `demo.guest@roomify.dev`
+- Final rehearsal: PASS
+  - PostgreSQL reachable on `localhost:5432`
+  - Spring Boot running on `http://localhost:8080`
+  - FastAPI running on `http://localhost:8000`
+  - Manager login worked with `admin@roomify.com / password123`
+  - Day 2 endpoints still worked: `data-summary`, `training-data`
+  - Day 3 endpoints worked with FastAPI ON
+  - FastAPI stop triggered deterministic safe fallback
+  - FastAPI restart returned Spring health to `UP`
+- Known warnings
+  - `train.py` still prefers the Spring training-data endpoint first, but when Spring auth blocks anonymous access it falls back to `ai-service/data/training_data.csv`. That remains acceptable for the standalone trainer.
+  - Backend test output still shows unrelated legacy warnings from Lombok, Mockito, and older test classes. No Day 3 failures were caused by them.

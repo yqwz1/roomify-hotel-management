@@ -240,3 +240,236 @@ Actual response shape:
 Clarification:
 - The ML model predicts revenue and occupancy.
 - Pricing recommendations use a bounded business policy based on model predictions, not a pure ML pricing model.
+
+## Day 3 Spring Boot integration endpoints
+
+### GET `/api/ai-finance/health`
+Auth:
+- Manager bearer token required
+
+Success response:
+```json
+{
+  "status": "UP",
+  "service": "ai-finance-service"
+}
+```
+
+FastAPI unavailable response:
+```json
+{
+  "status": "DOWN",
+  "service": "ai-finance-service",
+  "fallbackAvailable": true
+}
+```
+
+Notes:
+- React calls this Spring endpoint only.
+- Spring Boot calls FastAPI through `AiFinanceClient`.
+
+### GET `/api/ai-finance/model-info`
+Auth:
+- Manager bearer token required
+
+Success response:
+```json
+{
+  "modelType": "RandomForestRegressor",
+  "trainedAt": "2026-04-30T08:45:05Z",
+  "trainingRows": 2410,
+  "revenueMae": 20.1108,
+  "occupancyMae": 6.6309,
+  "features": [
+    "dayOfWeek",
+    "month",
+    "weekend",
+    "roomType",
+    "roomTypeId",
+    "totalRooms",
+    "occupiedRoomNights",
+    "confirmedBookings",
+    "cancelledBookings",
+    "averageRoomPrice",
+    "dailyExpenses",
+    "occupancyRate"
+  ],
+  "targets": [
+    "dailyRevenue",
+    "occupancyRate"
+  ],
+  "trainingDateRange": {
+    "start": "2025-01-01",
+    "end": "2026-04-27"
+  },
+  "modelVersion": "ai-finance-v1",
+  "trained": true
+}
+```
+
+FastAPI unavailable response:
+```json
+{
+  "trained": false,
+  "status": "AI_SERVICE_UNAVAILABLE",
+  "message": "AI service is unavailable. Model information cannot be loaded."
+}
+```
+
+### GET `/api/ai-finance/revenue-forecast`
+Auth:
+- Manager bearer token required
+
+Request body:
+- None
+
+Success response when FastAPI is ON:
+```json
+{
+  "forecastStart": "2026-04-28",
+  "forecastDays": 30,
+  "predictedRevenueTotal": 190297.87,
+  "predictedAverageOccupancy": 20.62,
+  "confidence": 0.95,
+  "points": [
+    {
+      "date": "2026-04-28",
+      "predictedRevenue": 6390.21,
+      "predictedOccupancy": 20.83
+    }
+  ],
+  "source": "FASTAPI_MODEL"
+}
+```
+
+Fallback response when FastAPI is OFF and fallback is enabled:
+```json
+{
+  "source": "SAFE_DEMO_FALLBACK",
+  "warning": "AI service is unavailable. Showing a safe demo fallback forecast.",
+  "forecastStart": "2026-04-28",
+  "forecastDays": 30,
+  "predictedRevenueTotal": 87500.0,
+  "predictedAverageOccupancy": 75.0,
+  "confidence": 0.65,
+  "points": [
+    {
+      "date": "2026-04-28",
+      "predictedRevenue": 2900.0,
+      "predictedOccupancy": 72.5
+    }
+  ]
+}
+```
+
+Failure behavior when fallback is disabled:
+- Spring returns `503 Service Unavailable`
+- Body includes `status=AI_SERVICE_UNAVAILABLE`
+
+### GET `/api/ai-finance/pricing-recommendations`
+Auth:
+- Manager bearer token required
+
+Request body:
+- None
+
+Success response when FastAPI is ON:
+```json
+{
+  "source": "FASTAPI_MODEL",
+  "pricingRecommendations": [
+    {
+      "roomType": "Deluxe",
+      "currentPrice": 443.37,
+      "suggestedPrice": 399.03,
+      "adjustmentPercent": -10.0,
+      "riskLevel": "HIGH",
+      "reason": "Predicted occupancy is weak, so a bounded discount is recommended to protect demand."
+    }
+  ]
+}
+```
+
+Fallback response when FastAPI is OFF and fallback is enabled:
+```json
+{
+  "source": "SAFE_DEMO_FALLBACK",
+  "warning": "AI service is unavailable. Showing a safe demo fallback forecast.",
+  "pricingRecommendations": [
+    {
+      "roomType": "Standard",
+      "currentPrice": 220.0,
+      "suggestedPrice": 235.0,
+      "adjustmentPercent": 6.8,
+      "riskLevel": "LOW",
+      "reason": "Safe fallback recommendation based on expected moderate occupancy."
+    }
+  ]
+}
+```
+
+Failure behavior when fallback is disabled:
+- Spring returns `503 Service Unavailable`
+- Body includes `status=AI_SERVICE_UNAVAILABLE`
+
+### POST `/api/ai-finance/ask`
+Auth:
+- Manager bearer token required
+
+Supported request body:
+```json
+{
+  "intent": "REVENUE_FORECAST"
+}
+```
+
+Supported intents:
+- `REVENUE_FORECAST`
+- `PRICING_RECOMMENDATION`
+- `OCCUPANCY_ANALYSIS`
+- `ROOM_TYPE_PERFORMANCE`
+
+Success response example:
+```json
+{
+  "intent": "REVENUE_FORECAST",
+  "answer": "The model predicts 190297.87 in revenue over the next 30 days with average occupancy of 20.62%.",
+  "metrics": {
+    "predictedRevenueTotal": 190297.87,
+    "predictedAverageOccupancy": 20.62,
+    "forecastDays": 30
+  },
+  "source": "FASTAPI_MODEL"
+}
+```
+
+Fallback response example:
+```json
+{
+  "intent": "REVENUE_FORECAST",
+  "answer": "The safe demo fallback projects 87500.00 in revenue over the next 30 days with average occupancy of 75.00%.",
+  "metrics": {
+    "predictedRevenueTotal": 87500.0,
+    "predictedAverageOccupancy": 75.0,
+    "forecastDays": 30
+  },
+  "source": "SAFE_DEMO_FALLBACK"
+}
+```
+
+Unsupported intent response:
+```json
+{
+  "error": "Unsupported intent.",
+  "supportedIntents": [
+    "OCCUPANCY_ANALYSIS",
+    "ROOM_TYPE_PERFORMANCE",
+    "PRICING_RECOMMENDATION",
+    "REVENUE_FORECAST"
+  ]
+}
+```
+
+Notes:
+- The endpoint is demo-safe. It does not call OpenAI.
+- `ROOM_TYPE_PERFORMANCE` is answered from Spring analytics and currently returns `source=SPRING_ANALYTICS`.

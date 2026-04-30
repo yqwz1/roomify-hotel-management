@@ -333,7 +333,81 @@ Do not wire React directly to FastAPI. Later integration should keep the fronten
 
 AI Finance is intended for Manager users only.
 
-Current frontend access controls:
-- `/manager/ai-finance` is wrapped with `PrivateRoute` and `MANAGER_ONLY_ROLES` in `frontend/src/App.jsx`.
-- Manager sidebar/navigation includes AI Finance only in the Manager navigation config.
-- Staff and Guest navigation configs do not include the AI Finance dashboard shortcut.
+Observed data coverage:
+- Reservation check-in range: `2025-01-01` to `2026-04-27`
+- Expense date range: `2025-01-04` to `2026-04-27`
+- Reservation statuses in verified run: `CHECKED_OUT=1280`, `CHECKED_IN=6`, `CANCELLED=114`
+- Overlap query result: `0`
+
+## Day 3 Final Lock
+
+Final status:
+- Day 3 backend integration: COMPLETE
+- Verification date: `2026-04-30`
+
+How to start backend:
+```powershell
+$env:SPRING_PROFILES_ACTIVE='dev-demo'
+$env:DB_HOST='localhost'
+$env:DB_PORT='5432'
+$env:DB_NAME='roomify_ai_finance_clean_test'
+$env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED='true'
+$env:ROOMIFY_AI_FINANCE_DEMO_SEED_RESET='false'
+$env:ROOMIFY_AI_SERVICE_BASE_URL='http://localhost:8000'
+$env:ROOMIFY_AI_SERVICE_TIMEOUT_MS='3000'
+$env:ROOMIFY_AI_SERVICE_FALLBACK_ENABLED='true'
+cd backend
+mvn.cmd spring-boot:run
+```
+
+How to start FastAPI:
+```powershell
+cd ai-service
+python train.py
+python -m uvicorn main:app --port 8000
+```
+
+How to verify health:
+```powershell
+# Spring Boot health
+Invoke-RestMethod -Uri 'http://localhost:8080/api/health'
+
+# Manager login
+$login = Invoke-RestMethod -Uri 'http://localhost:8080/api/auth/login' `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"email":"admin@roomify.com","password":"password123"}'
+
+$headers = @{ Authorization = "Bearer $($login.token)" }
+
+# AI integration health through Spring
+Invoke-RestMethod -Uri 'http://localhost:8080/api/ai-finance/health' -Headers $headers
+```
+
+How to test fallback:
+1. Leave Spring Boot running.
+2. Stop FastAPI only.
+3. Call:
+   - `GET /api/ai-finance/health`
+   - `GET /api/ai-finance/revenue-forecast`
+   - `GET /api/ai-finance/pricing-recommendations`
+   - `POST /api/ai-finance/ask` with `{"intent":"REVENUE_FORECAST"}`
+4. Confirm the response contains `source=SAFE_DEMO_FALLBACK` for forecast, pricing, and Ask.
+5. Restart FastAPI and confirm `/api/ai-finance/health` returns `UP`.
+
+How to test Ask endpoint:
+```powershell
+Invoke-RestMethod -Uri 'http://localhost:8080/api/ai-finance/ask' `
+  -Method Post `
+  -Headers $headers `
+  -ContentType 'application/json' `
+  -Body '{"intent":"REVENUE_FORECAST"}'
+```
+
+Verified final completion status:
+- Backend compile: PASS
+- `AiFinanceIntegrationTest`: PASS
+- FastAPI ON through Spring: PASS
+- FastAPI OFF fallback: PASS
+- Manager-only security: PASS for manager and no-token checks
+- Staff/Guest runtime auth checks: NOT AVAILABLE in the final Day 3 run because general demo bootstrap users were not enabled

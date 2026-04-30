@@ -1,6 +1,6 @@
 {
   "modelType": "RandomForestRegressor",
-  "trainedAt": "2026-04-29T14:17:16Z",
+  "trainedAt": "2026-04-30T08:45:05Z",
   "trainingRows": 2410,
   "revenueMae": 20.1108,
   "occupancyMae": 6.6309,

@@ -27,6 +27,24 @@ mvn.cmd spring-boot:run
 6. Explain that the AI demo data is synthetic, realistic, and safe to reset independently.
 7. When Day 2 / Day 3 endpoints are live, continue into forecast, pricing recommendation, and Ask AI Finance flows.
 
+## Day 3 final demo flow
+1. Log in as Manager with `admin@roomify.com / password123`.
+2. Show `GET /api/dashboard/metrics` or the Manager Dashboard using the seeded dataset.
+3. Show `GET /api/ai-finance/model-info` returning `RandomForestRegressor`, `trainingRows=2410`, `revenueMae=20.1108`, and `occupancyMae=6.6309`.
+4. Show `GET /api/ai-finance/revenue-forecast` returning `forecastDays=30`, `predictedRevenueTotal=190297.87`, `predictedAverageOccupancy=20.62`, and `source=FASTAPI_MODEL`.
+5. Show `GET /api/ai-finance/pricing-recommendations` returning room-type guidance through Spring Boot with `source=FASTAPI_MODEL`.
+6. Use `POST /api/ai-finance/ask` with:
+   - `REVENUE_FORECAST`
+   - `PRICING_RECOMMENDATION`
+   - `OCCUPANCY_ANALYSIS`
+   - `ROOM_TYPE_PERFORMANCE`
+7. Stop FastAPI only and refresh:
+   - `GET /api/ai-finance/health` -> `status=DOWN`
+   - `GET /api/ai-finance/revenue-forecast` -> `source=SAFE_DEMO_FALLBACK`
+   - `GET /api/ai-finance/pricing-recommendations` -> `source=SAFE_DEMO_FALLBACK`
+   - `POST /api/ai-finance/ask` `REVENUE_FORECAST` -> `source=SAFE_DEMO_FALLBACK`
+8. Restart FastAPI and confirm `GET /api/ai-finance/health` returns `status=UP` again.
+
 ## Reset-safe closeout
 ```powershell
 Remove-Item Env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED -ErrorAction SilentlyContinue
