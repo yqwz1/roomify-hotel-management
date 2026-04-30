@@ -14,3 +14,8 @@ Thumbs.db
 # Logs
 *.log
 *.pid
+
+# Generated Artifacts
+.m2/
+__pycache__/
+*.pyc

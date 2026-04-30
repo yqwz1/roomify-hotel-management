@@ -447,6 +447,7 @@ Clear-StaleBackendPidFile
 
 $env:DB_PORT = "$DbPort"
 $env:ROOMIFY_DEMO_BOOTSTRAP_ENABLED = 'true'
+$env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED = 'true'
 $env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = 'true'
 $env:SPRING_FLYWAY_BASELINE_VERSION = '12'
 $backendCommand = ".\mvnw.cmd spring-boot:run >> `"$BackendLog`" 2>&1"

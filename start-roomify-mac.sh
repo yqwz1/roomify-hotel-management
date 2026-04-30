@@ -190,7 +190,7 @@ start_backend() {
 
     (
         cd "$BACKEND_DIR" || exit 1
-        nohup env DB_PORT="$DB_PORT" ROOMIFY_DEMO_BOOTSTRAP_ENABLED="true" \
+        nohup env DB_PORT="$DB_PORT" ROOMIFY_DEMO_BOOTSTRAP_ENABLED="true" ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED="true" \
             SPRING_JPA_HIBERNATE_DDL_AUTO="update" \
             sh ./mvnw spring-boot:run >>"$BACKEND_LOG" 2>&1 &
         echo $! >"$BACKEND_PID_FILE"
