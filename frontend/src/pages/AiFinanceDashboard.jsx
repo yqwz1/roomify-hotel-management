@@ -5,7 +5,6 @@ import {
   Bot,
   BrainCircuit,
   CalendarDays,
-  CreditCard,
   Gauge,
   Hotel,
   Receipt,
@@ -15,136 +14,145 @@ import {
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
-import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { Card, CardContent } from '../components/ui/card';
+import { useAiFinance } from '../hooks/useAiFinance';
 import { cn } from '../lib/utils';
 
-const dashboardState = {
-  loading: false,
-  error: null,
+const UNAVAILABLE = 'Unavailable';
+
+const isPresent = (value) => value !== null && value !== undefined && value !== '';
+
+const formatNumber = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? new Intl.NumberFormat('en-US').format(numeric) : UNAVAILABLE;
 };
 
-const dataSummaryState = {
-  loading: false,
+const formatCurrency = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'SAR',
+        maximumFractionDigits: 0,
+      }).format(numeric)
+    : UNAVAILABLE;
 };
 
-const dataSummaryCards = [
+const formatPercent = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(numeric)}%`
+    : UNAVAILABLE;
+};
+
+const formatDateRange = (start, end) =>
+  isPresent(start) && isPresent(end) ? `${start} to ${end}` : 'Date range unavailable';
+
+const summarizeTrend = (items, valueKey, formatter) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return {
+      latestValue: UNAVAILABLE,
+      latestLabel: 'No historical trend data returned.',
+      bars: [],
+    };
+  }
+
+  const latestPoint = [...items].reverse().find((item) => Number(item?.[valueKey]) > 0) ?? items[items.length - 1];
+  const recent = items.slice(-8);
+  const maxValue = Math.max(...recent.map((item) => Number(item?.[valueKey]) || 0), 0);
+
+  return {
+    latestValue: formatter(latestPoint?.[valueKey]),
+    latestLabel: latestPoint?.date ? `Latest loaded point: ${latestPoint.date}` : 'Latest loaded trend point.',
+    bars: recent.map((item) => {
+      const value = Number(item?.[valueKey]) || 0;
+      return {
+        label: item?.date ?? 'No date',
+        value: maxValue > 0 ? Math.max((value / maxValue) * 100, value > 0 ? 8 : 0) : 0,
+        amount: formatter(value),
+      };
+    }),
+  };
+};
+
+const buildDataSummaryCards = ({ dataSummary, summary }) => [
   {
     label: 'Reservations',
-    value: '1,420',
-    hint: 'Confirmed, checked-in, and completed stays',
+    value: formatNumber(dataSummary?.reservations),
+    hint: isPresent(dataSummary?.payments)
+      ? `${formatNumber(dataSummary.payments)} payments included in the analytics dataset.`
+      : 'Reservation count from Spring Boot analytics.',
     icon: CalendarDays,
     className: 'border-sky-200 bg-sky-50/85 text-sky-950',
   },
   {
-    label: 'Payments',
-    value: '1,286',
-    hint: 'Captured and settled demo payments',
-    icon: CreditCard,
-    className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
-  },
-  {
-    label: 'Expenses',
-    value: 'SAR 42K',
-    hint: 'Operating expenses prepared for analytics',
-    icon: Receipt,
-    className: 'border-rose-200 bg-rose-50/85 text-rose-950',
-  },
-  {
-    label: 'Date Range',
-    value: 'Jan 2025 - Apr 2026',
-    hint: 'Static training window placeholder',
-    icon: CalendarDays,
-    className: 'border-indigo-200 bg-indigo-50/85 text-indigo-950',
-  },
-  {
-    label: 'Total Revenue',
-    value: 'SAR 512K',
-    hint: 'Demo-friendly revenue aggregate',
+    label: 'Revenue',
+    value: formatCurrency(dataSummary?.totalRevenue),
+    hint: formatDateRange(dataSummary?.dateRangeStart, dataSummary?.dateRangeEnd),
     icon: WalletCards,
     className: 'border-amber-200 bg-amber-50/85 text-amber-950',
   },
   {
-    label: 'Average Occupancy',
-    value: '74%',
-    hint: 'Mock occupancy across the date range',
+    label: 'Occupancy',
+    value: formatPercent(summary?.currentOccupancy ?? dataSummary?.averageOccupancy),
+    hint: isPresent(summary?.currentOccupancy)
+      ? 'Current occupancy from the finance summary endpoint.'
+      : 'Average occupancy across the analytics dataset.',
     icon: Gauge,
     className: 'border-cyan-200 bg-cyan-50/85 text-cyan-950',
   },
   {
+    label: 'Expenses',
+    value: formatCurrency(summary?.totalExpenses),
+    hint: isPresent(summary?.netProfit)
+      ? `${formatCurrency(summary.netProfit)} net profit after expenses.`
+      : 'Expense total from the finance summary endpoint.',
+    icon: Receipt,
+    className: 'border-rose-200 bg-rose-50/85 text-rose-950',
+  },
+  {
     label: 'Room Types',
-    value: '5',
-    hint: 'Standard, Deluxe, Suite, Family, Executive',
+    value: formatNumber(dataSummary?.roomTypes),
+    hint: 'Room-type count available to AI Finance analytics.',
     icon: BedDouble,
     className: 'border-violet-200 bg-violet-50/85 text-violet-950',
+  },
+  {
+    label: 'Top Room Type',
+    value: summary?.topRoomType || UNAVAILABLE,
+    hint: 'Top-performing room type from the summary endpoint.',
+    icon: Hotel,
+    className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
   },
 ];
 
 const aiStatusItems = [
   {
     icon: Bot,
-    title: 'Frontend preview ready',
-    description: 'Static Manager UI is prepared without live AI calls.',
+    title: 'Spring Boot analytics connected',
+    description: 'Day 4 summary cards load through the authenticated backend API.',
     className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
   },
   {
     icon: BrainCircuit,
     title: 'Model service pending',
-    description: 'FastAPI integration will be connected through Spring Boot later.',
+    description: 'Forecast and pricing AI calls remain reserved for later integration days.',
     className: 'border-sky-200 bg-sky-50/85 text-sky-950',
   },
   {
     icon: AlertTriangle,
     title: 'Demo-safe mode',
-    description: 'Recommendations are mock values and should not change rates.',
+    description: 'No pricing recommendation is applied from this Day 4 screen.',
     className: 'border-amber-200 bg-amber-50/85 text-amber-950',
   },
 ];
 
-const revenueBars = [
-  { label: 'Week 1', value: 62, amount: 'SAR 26K' },
-  { label: 'Week 2', value: 78, amount: 'SAR 32K' },
-  { label: 'Week 3', value: 71, amount: 'SAR 30K' },
-  { label: 'Week 4', value: 86, amount: 'SAR 40K' },
-];
-
-const occupancyBars = [
-  { label: 'Standard', value: 68 },
-  { label: 'Deluxe', value: 76 },
-  { label: 'Suite', value: 82 },
-  { label: 'Family', value: 64 },
-];
-
-const recommendations = [
-  {
-    roomType: 'Standard',
-    currentRate: 'SAR 430',
-    suggestedRate: 'SAR 455',
-    signal: 'Moderate demand',
-    confidence: 'Medium',
-  },
-  {
-    roomType: 'Deluxe',
-    currentRate: 'SAR 690',
-    suggestedRate: 'SAR 745',
-    signal: 'Strong weekend pickup',
-    confidence: 'High',
-  },
-  {
-    roomType: 'Suite',
-    currentRate: 'SAR 980',
-    suggestedRate: 'SAR 1,050',
-    signal: 'Premium demand rising',
-    confidence: 'High',
-  },
-];
-
 const insights = [
-  'Forecast cards currently use static data while the backend analytics contract is prepared.',
-  'Pricing recommendations will stay bounded around current room-type base rates.',
-  'Model confidence and training data freshness can be added once real AI endpoints are connected.',
+  'Summary cards are now populated from Spring Boot AI Finance analytics.',
+  'Historical trend APIs are loaded for Day 4 readiness; forecast chart work can build on them later.',
+  'Pricing recommendations and assistant answers remain intentionally disconnected for later days.',
 ];
 
 function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
@@ -156,7 +164,9 @@ function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
             <p className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
               {label}
             </p>
-            <p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
+            <p className="mt-3 break-words text-2xl font-black tracking-tight sm:text-3xl">
+              {value}
+            </p>
             <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p>
           </div>
           <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
@@ -188,14 +198,14 @@ function DataSummarySkeletonCard() {
   );
 }
 
-function DataSummaryCards() {
+function DataSummaryCards({ cards, loading }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      {dataSummaryState.loading
-        ? dataSummaryCards.map((card) => (
-            <DataSummarySkeletonCard key={`${card.label}-skeleton`} />
+      {loading
+        ? Array.from({ length: 6 }).map((_, index) => (
+            <DataSummarySkeletonCard key={`summary-skeleton-${index}`} />
           ))
-        : dataSummaryCards.map((card) => (
+        : cards.map((card) => (
             <DataSummaryCard key={card.label} {...card} />
           ))}
     </div>
@@ -219,6 +229,16 @@ function StatusCard({ icon: Icon, title, description, className }) {
 }
 
 function PlaceholderBarChart({ items, accentClassName, valueSuffix = '%' }) {
+  if (!items.length) {
+    return (
+      <EmptyState
+        title="Trend data unavailable"
+        message="The historical trend endpoint returned no points for the selected range."
+        icon={BarChart3}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       {items.map((item) => (
@@ -240,96 +260,89 @@ function PlaceholderBarChart({ items, accentClassName, valueSuffix = '%' }) {
 }
 
 function AiFinanceContent() {
-  const hasDashboardData =
-    dataSummaryCards.length > 0 ||
-    revenueBars.length > 0 ||
-    occupancyBars.length > 0 ||
-    recommendations.length > 0 ||
-    insights.length > 0;
-
-  if (dashboardState.loading) {
-    return (
-      <DashboardPanel
-        title="AI Status"
-        description="The future analytics connection can reuse this loading state."
-      >
-        <LoadingState message="Loading AI finance preview..." />
-      </DashboardPanel>
-    );
-  }
-
-  if (dashboardState.error) {
-    return (
-      <DashboardPanel
-        title="AI Status"
-        description="The future analytics connection can reuse this error state."
-      >
-        <ErrorState
-          title="AI finance preview unavailable"
-          message={dashboardState.error}
-        />
-      </DashboardPanel>
-    );
-  }
-
-  if (!hasDashboardData) {
-    return (
-      <DashboardPanel
-        title="AI Status"
-        description="The future analytics connection can reuse this empty state."
-      >
-        <EmptyState
-          title="No AI finance data yet"
-          message="Forecasts and recommendations will appear here after data is connected."
-          icon={Sparkles}
-        />
-      </DashboardPanel>
-    );
-  }
+  const {
+    loading,
+    error,
+    dataSummary,
+    summary,
+    revenueTrend,
+    occupancyTrend,
+    roomTypeRevenue,
+    refresh,
+  } = useAiFinance();
+  const dataSummaryCards = buildDataSummaryCards({ dataSummary, summary });
+  const hasSummaryData = Boolean(dataSummary || summary || roomTypeRevenue.length);
+  const revenueTrendSummary = summarizeTrend(revenueTrend, 'revenue', formatCurrency);
+  const occupancyTrendSummary = summarizeTrend(occupancyTrend, 'occupancyRate', formatPercent);
 
   return (
     <>
       <DashboardPanel
         title="AI Status"
-        description="Readiness indicators for the static Day 2 preview and future AI service connection."
+        description="Readiness indicators for Day 4 Spring Boot analytics and future AI service connection."
       >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {aiStatusItems.map((item) => (
-            <StatusCard key={item.title} {...item} />
-          ))}
-        </div>
+        {error && !hasSummaryData && !loading ? (
+          <ErrorState
+            title="AI finance data unavailable"
+            message={error}
+            onRetry={refresh}
+          />
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-3">
+            {aiStatusItems.map((item) => (
+              <StatusCard key={item.title} {...item} />
+            ))}
+          </div>
+        )}
       </DashboardPanel>
 
       <DashboardPanel
         title="Data Summary Cards"
-        description="Static finance and demand metrics prepared for Day 4 API data."
+        description="Live finance and demand metrics from Spring Boot AI Finance endpoints."
       >
-        <DataSummaryCards />
+        {error && hasSummaryData ? (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Some AI Finance data could not be refreshed. Showing the backend values that loaded successfully.
+          </div>
+        ) : null}
+        {!loading && !hasSummaryData ? (
+          <EmptyState
+            title="No AI finance summary data"
+            message="The backend returned no summary records for the current analytics window."
+            icon={Sparkles}
+          />
+        ) : (
+          <DataSummaryCards cards={dataSummaryCards} loading={loading} />
+        )}
       </DashboardPanel>
 
       <DashboardPanel
         title="Revenue Forecast"
-        description="Static forecast shape for the future revenue prediction endpoint."
+        description="Historical revenue trend loaded for Day 4; forecast prediction remains a later integration."
       >
         <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
           <div className="rounded-[1.4rem] border border-zinc-200 bg-zinc-50 p-5">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
-              30-day outlook
+              Historical trend
             </p>
-            <p className="mt-3 text-4xl font-black tracking-tight text-zinc-950">+12%</p>
+            <p className="mt-3 text-4xl font-black tracking-tight text-zinc-950">
+              {revenueTrendSummary.latestValue}
+            </p>
             <p className="mt-2 text-sm font-medium leading-6 text-zinc-600">
-              Mock uplift compared with the previous 30-day period.
+              {revenueTrendSummary.latestLabel}
             </p>
             <div className="mt-5 rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                Forecast total
+                Points loaded
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">SAR 128K</p>
+              <p className="mt-2 text-2xl font-black text-zinc-950">
+                {loading ? 'Loading' : formatNumber(revenueTrend.length)}
+              </p>
             </div>
           </div>
           <div className="rounded-[1.4rem] border border-zinc-200 bg-white p-5 shadow-sm">
             <PlaceholderBarChart
-              items={revenueBars}
+              items={loading ? [] : revenueTrendSummary.bars}
               accentClassName="bg-emerald-500"
               valueSuffix=""
             />
@@ -339,11 +352,14 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Occupancy Forecast"
-        description="Static demand-by-room-type view for the future occupancy forecast."
+        description="Historical occupancy trend loaded for Day 4; forecast prediction remains a later integration."
       >
         <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="rounded-[1.4rem] border border-zinc-200 bg-white p-5 shadow-sm">
-            <PlaceholderBarChart items={occupancyBars} accentClassName="bg-sky-500" />
+            <PlaceholderBarChart
+              items={loading ? [] : occupancyTrendSummary.bars}
+              accentClassName="bg-sky-500"
+            />
           </div>
           <div className="rounded-[1.4rem] border border-sky-200 bg-sky-50/85 p-5">
             <div className="flex items-center gap-3">
@@ -352,13 +368,15 @@ function AiFinanceContent() {
               </span>
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">
-                  Peak segment
+                  Historical trend
                 </p>
-                <p className="mt-1 text-xl font-black text-sky-950">Suite rooms</p>
+                <p className="mt-1 text-xl font-black text-sky-950">
+                  {occupancyTrendSummary.latestValue}
+                </p>
               </div>
             </div>
             <p className="mt-4 text-sm font-medium leading-6 text-sky-900/80">
-              Placeholder demand signal based on static demo values.
+              {occupancyTrendSummary.latestLabel}
             </p>
           </div>
         </div>
@@ -366,43 +384,13 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Pricing Recommendations"
-        description="Mock room-type rate suggestions for the manager dashboard."
+        description="Day 7 pricing recommendations are intentionally not connected in this Day 4 task."
       >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {recommendations.map((item) => (
-            <div
-              key={item.roomType}
-              className="rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-lg font-black text-zinc-950">{item.roomType}</p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">{item.signal}</p>
-                </div>
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-[1.15rem] border border-zinc-100 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-400">
-                    Current
-                  </p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">{item.currentRate}</p>
-                </div>
-                <div className="rounded-[1.15rem] border border-emerald-100 bg-emerald-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-                    Suggested
-                  </p>
-                  <p className="mt-2 text-lg font-black text-emerald-950">
-                    {item.suggestedRate}
-                  </p>
-                </div>
-              </div>
-              <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                Confidence: {item.confidence}
-              </p>
-            </div>
-          ))}
-        </div>
+        <EmptyState
+          title="Pricing recommendations pending"
+          message="No recommendation values are shown until the later Spring Boot pricing advisor integration is ready."
+          icon={TrendingUp}
+        />
       </DashboardPanel>
 
       <DashboardPanel
@@ -437,7 +425,7 @@ export default function AiFinanceDashboard() {
         title="AI Revenue Forecasting & Pricing Advisor"
         description="Manager workspace for revenue projections, occupancy demand signals, pricing recommendations, and AI finance insights."
         className="border-cyan-400/10 bg-[linear-gradient(135deg,#111827_0%,#0f766e_52%,#164e63_100%)]"
-        meta={['Manager only', 'Static mock data', 'Backend integration pending']}
+        meta={['Manager only', 'Spring Boot analytics', 'AI model pending']}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
@@ -448,13 +436,13 @@ export default function AiFinanceDashboard() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
                 Model status
               </p>
-              <p className="mt-2 text-2xl font-black">Preview</p>
+              <p className="mt-2 text-2xl font-black">Pending</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
                 Data mode
               </p>
-              <p className="mt-2 text-2xl font-black">Static</p>
+              <p className="mt-2 text-2xl font-black">Live</p>
             </div>
           </div>
         </div>
