@@ -21,6 +21,7 @@ import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import InventoryOperationsPanel from '../components/inventory/InventoryOperationsPanel';
+import { DistributionBarChart } from '../components/charts/DistributionBarChart';
 import { Button } from '../components/ui/button';
 import {
   createExpense,
@@ -750,8 +751,6 @@ export default function ExpenseTracker() {
     await loadData(nextFilters);
   };
 
-  const breakdownTotal = Number(summary?.totalExpenses ?? 0);
-
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
@@ -957,37 +956,19 @@ export default function ExpenseTracker() {
           {!summary ? (
             <LoadingState message={translateWithFallback(t, 'expenseTrackerPage.loadingBreakdown', 'Loading breakdown...')} />
           ) : summary.categoryBreakdown?.length ? (
-            <div className="space-y-3">
-              {summary.categoryBreakdown.map((item) => {
-                const width = breakdownTotal > 0 ? (Number(item.totalAmount ?? 0) / breakdownTotal) * 100 : 0;
-
-                return (
-                  <div key={item.category} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-black text-zinc-950">{getCategoryLabel(item.category, t)}</p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
-                          {translateWithFallback(
-                            t,
-                            'expenseTrackerPage.breakdownCount',
-                            '{{count}} entries',
-                            { count: formatLocalizedNumber(item.expenseCount, i18n.language) }
-                          )}
-                        </p>
-                      </div>
-                      <p className="text-sm font-black text-zinc-950">
-                        {formatLocalizedCurrency(item.totalAmount, i18n.language)}
-                      </p>
-                    </div>
-                    <div className="mt-4 h-2.5 rounded-full bg-white">
-                      <div
-                        className="h-2.5 rounded-full bg-zinc-950"
-                        style={{ width: `${Math.max(width, 6)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="space-y-6">
+              <DistributionBarChart
+                data={summary.categoryBreakdown.map((item) => ({
+                  name: getCategoryLabel(item.category, t),
+                  value: Number(item.totalAmount ?? 0),
+                }))}
+                labelKey="name"
+                valueKey="value"
+                valueFormatter={(val) => formatLocalizedCurrency(val, i18n.language)}
+                layout="vertical"
+                height={350}
+                colors={['#0f766e', '#0369a1', '#be185d', '#a21caf', '#6d28d9', '#4338ca', '#3f3f46']}
+              />
             </div>
           ) : (
             <EmptyState

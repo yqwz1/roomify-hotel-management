@@ -27,6 +27,8 @@ import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
+import { TrendLineChart } from '../components/charts/TrendLineChart';
+import { RadialStatusChart } from '../components/charts/RadialStatusChart';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
@@ -57,10 +59,6 @@ const EXPORTABLE_STATUSES = [
   'CHECKED_OUT',
   'CANCELLED',
 ];
-
-const TREND_WIDTH = 720;
-const TREND_HEIGHT = 260;
-const TREND_PADDING = 28;
 
 const METRIC_THEMES = {
   reservations: {
@@ -202,8 +200,6 @@ const compareRanges = (left, right) =>
 
 const formatPercent = (value) => `${Math.round(Number(value ?? 0) * 100)}%`;
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
 const getDaysInRange = ({ startDate, endDate }) => {
   if (!startDate || !endDate) return 0;
 
@@ -212,50 +208,6 @@ const getDaysInRange = ({ startDate, endDate }) => {
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
 
   return Math.max(1, Math.round((end - start) / 86400000) + 1);
-};
-
-const buildChartGeometry = (values) => {
-  const maxValue = Math.max(...values, 0);
-  const baselineY = TREND_HEIGHT - TREND_PADDING;
-  const availableHeight = TREND_HEIGHT - TREND_PADDING * 2;
-  const stepX =
-    values.length > 1
-      ? (TREND_WIDTH - TREND_PADDING * 2) / (values.length - 1)
-      : 0;
-
-  const coordinates = values.map((value, index) => {
-    const normalized =
-      maxValue > 0
-        ? clamp(value / maxValue, value > 0 ? 0.08 : 0, 1)
-        : 0;
-
-    return {
-      x: TREND_PADDING + stepX * index,
-      y: baselineY - normalized * availableHeight,
-    };
-  });
-
-  if (!coordinates.length) {
-    return {
-      areaPath: '',
-      linePath: '',
-      coordinates,
-      maxValue,
-    };
-  }
-
-  const linePath = coordinates
-    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-    .join(' ');
-
-  const areaPath = `${linePath} L ${coordinates[coordinates.length - 1].x} ${baselineY} L ${coordinates[0].x} ${baselineY} Z`;
-
-  return {
-    areaPath,
-    linePath,
-    coordinates,
-    maxValue,
-  };
 };
 
 const buildNotificationTone = (notification) => {
@@ -496,14 +448,6 @@ function InteractiveTrendExplorer({
   );
 
   const activeMode = modeConfig[mode] ?? modeConfig.occupancy;
-  const values = useMemo(
-    () => points.map((point) => activeMode.getValue(point)),
-    [activeMode, points]
-  );
-  const { areaPath, linePath, coordinates } = useMemo(
-    () => buildChartGeometry(values),
-    [values]
-  );
   const selectedPoint = points[selectedIndex] ?? points[points.length - 1] ?? null;
 
   if (!points.length) {
@@ -531,6 +475,13 @@ function InteractiveTrendExplorer({
       />
     );
   }
+
+  const chartData = points.map((point, index) => ({
+    date: point.label,
+    fullDate: point.fullLabel,
+    value: activeMode.getValue(point),
+    originalIndex: index
+  }));
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]" data-testid="occupancy-trend">
@@ -577,87 +528,16 @@ function InteractiveTrendExplorer({
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
-          <svg
-            viewBox={`0 0 ${TREND_WIDTH} ${TREND_HEIGHT}`}
-            className="h-[260px] min-w-[640px] w-full"
-            role="img"
-            aria-label={activeMode.title}
-          >
-            <defs>
-              <linearGradient id="managerTrendFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={activeMode.accent} stopOpacity="0.28" />
-                <stop offset="100%" stopColor={activeMode.accent} stopOpacity="0.03" />
-              </linearGradient>
-            </defs>
-
-            {[0.25, 0.5, 0.75, 1].map((step) => {
-              const y =
-                TREND_HEIGHT - TREND_PADDING - step * (TREND_HEIGHT - TREND_PADDING * 2);
-              return (
-                <line
-                  key={step}
-                  x1={TREND_PADDING}
-                  x2={TREND_WIDTH - TREND_PADDING}
-                  y1={y}
-                  y2={y}
-                  stroke="#e4e4e7"
-                  strokeDasharray="6 8"
-                />
-              );
-            })}
-
-            <line
-              x1={TREND_PADDING}
-              x2={TREND_WIDTH - TREND_PADDING}
-              y1={TREND_HEIGHT - TREND_PADDING}
-              y2={TREND_HEIGHT - TREND_PADDING}
-              stroke="#d4d4d8"
-            />
-
-            {areaPath ? (
-              <path d={areaPath} fill="url(#managerTrendFill)" stroke="none" />
-            ) : null}
-            {linePath ? (
-              <path
-                d={linePath}
-                fill="none"
-                stroke={activeMode.accent}
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            ) : null}
-
-            {coordinates.map((point, index) => {
-              const active = index === selectedIndex;
-
-              return (
-                <g
-                  key={`${points[index].key}-${index}`}
-                  onClick={() => onSelectIndex(index)}
-                  className="cursor-pointer"
-                >
-                  {active ? (
-                    <circle
-                      cx={point.x}
-                      cy={point.y}
-                      r="14"
-                      fill={activeMode.accentSoft}
-                    />
-                  ) : null}
-                  <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r={active ? '7' : '5'}
-                    fill={active ? activeMode.accent : '#ffffff'}
-                    stroke={activeMode.accent}
-                    strokeWidth="3"
-                  />
-                </g>
-              );
-            })}
-          </svg>
+        <div className="mt-6 -mx-2">
+          <TrendLineChart
+            data={chartData}
+            xKey="date"
+            yKey="value"
+            variant="area"
+            color={activeMode.accent}
+            height={260}
+            valueFormatter={activeMode.formatValue}
+          />
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -911,26 +791,19 @@ function RoomTypeExplorer({
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <div className="mx-auto flex items-center justify-center">
-            <div
-              className="flex h-52 w-52 items-center justify-center rounded-full"
-              style={{
-                background: `conic-gradient(${selectedTheme.accent} ${occupiedPercent}%, rgba(255,255,255,0.75) ${occupiedPercent}% 100%)`,
-              }}
-            >
-              <div className="flex h-36 w-36 flex-col items-center justify-center rounded-full bg-white text-center shadow-sm">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
-                  {translateWithFallback(
-                    t,
-                    `${pageTx}.distributionOccupancyCore`,
-                    'Occupancy'
-                  )}
-                </p>
-                <p className="mt-2 text-4xl font-black tracking-tight text-zinc-950">
-                  {occupiedPercent}%
-                </p>
-              </div>
-            </div>
+          <div className="mx-auto flex w-full items-center justify-center">
+            <RadialStatusChart
+              value={occupiedPercent}
+              max={100}
+              label={translateWithFallback(
+                t,
+                `${pageTx}.distributionOccupancyCore`,
+                'Occupancy'
+              )}
+              valueFormatter={(v) => `${v}%`}
+              color={selectedTheme.accent}
+              height={208}
+            />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
