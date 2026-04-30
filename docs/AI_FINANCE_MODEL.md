@@ -90,3 +90,14 @@ Notes:
 - Revenue is based on non-cancelled `Reservation.totalPrice`, consistent with the current dashboard backend.
 - Daily expenses are allocated proportionally by room inventory share because room-type-specific expense attribution is not stored in the Roomify schema.
 - `train.py` still falls back to the local CSV when anonymous access to Spring training-data is blocked. Day 3 completed Spring-to-FastAPI inference integration, but the standalone trainer still uses the existing CSV fallback path.
+
+## Why this is real AI
+- A machine learning regression model is trained on historical hotel data.
+- The model learns relationships between calendar features, room type, inventory, bookings, prices, expenses, revenue, and occupancy.
+- The trained artifacts are saved and loaded by the FastAPI service for inference.
+- React displays the model outputs only after Spring Boot retrieves and normalizes the AI service response.
+
+## Demo clarification
+The ML model predicts revenue and occupancy. Pricing recommendations use a bounded business policy based on model predictions, not a pure ML pricing model.
+
+The pricing policy is bounded because room price changes should remain conservative, explainable, and manager-reviewed during the demo. The React dashboard presents recommendations as advisory only and does not apply price changes.

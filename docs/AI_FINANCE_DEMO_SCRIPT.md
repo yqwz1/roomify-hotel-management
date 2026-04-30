@@ -1,5 +1,27 @@
 # AI Finance Demo Script
 
+## Supervisor review flow
+
+1. Login as a Manager.
+2. Open `/manager/ai-finance`.
+3. Show the Data Summary cards and explain that they come from Spring Boot analytics endpoints.
+4. Explain the generated historical data: realistic reservations, payments, expenses, room types, revenue, and occupancy were seeded for the graduation project demo.
+5. Show the AI Status section and model metadata. Mention that React calls Spring Boot only; Spring Boot calls FastAPI.
+6. Show Revenue Forecast. Explain that the top metrics and predicted chart are future model predictions.
+7. Show Occupancy Forecast. Explain that the historical occupancy chart is context, while predicted occupancy is the AI forecast.
+8. Show Pricing Recommendations. Explain they are advisory only and no price change is applied from the page.
+9. Click the four AI Insight buttons:
+   - Forecast next 30 days revenue.
+   - Recommend prices for next week.
+   - Analyze occupancy trend.
+   - Show best performing room type.
+10. Explain fallback behavior: if FastAPI is unavailable, Spring Boot returns deterministic `SAFE_DEMO_FALLBACK` responses and the UI shows a fallback banner.
+11. Explain the architecture: React -> Spring Boot -> FastAPI -> trained ML model, with Spring Boot handling security and integration.
+
+## Short narration
+
+"This Manager-only dashboard combines Spring Boot finance analytics with a FastAPI machine learning service. The summary cards and historical charts come from Spring Boot data. The forecast, pricing recommendations, and insight buttons also go through Spring Boot, which securely integrates with FastAPI. If the AI service is unavailable, Spring returns a safe demo fallback so the supervisor demo remains clear without pretending the fallback is live model output."
+
 ## Goal
 - Show that Roomify can start from the locked demo-safe backend profile
 - Show seeded historical hotel data for analytics

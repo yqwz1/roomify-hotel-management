@@ -18,7 +18,7 @@ const STATUS_CONFIG = {
     badgeClassName: 'border-emerald-200 bg-emerald-50 text-emerald-800',
     dotClassName: 'bg-emerald-500',
     panelClassName: 'border-emerald-200 bg-emerald-50/70',
-    defaultMessage: 'AI model metadata is available. Live forecast and pricing calls are still reserved for Day 7 integration.',
+    defaultMessage: 'AI model metadata is available through Spring Boot.',
   },
   OFFLINE: {
     label: 'Offline',
@@ -26,7 +26,7 @@ const STATUS_CONFIG = {
     badgeClassName: 'border-rose-200 bg-rose-50 text-rose-800',
     dotClassName: 'bg-rose-500',
     panelClassName: 'border-rose-200 bg-rose-50/70',
-    defaultMessage: 'The AI service is offline. The dashboard is showing a safe UI state without calling FastAPI directly.',
+    defaultMessage: 'The AI service is offline. Spring Boot will return an unavailable state or safe fallback payloads.',
   },
   SAFE_DEMO_FALLBACK: {
     label: 'Safe Demo Fallback',
@@ -34,7 +34,7 @@ const STATUS_CONFIG = {
     badgeClassName: 'border-amber-200 bg-amber-50 text-amber-800',
     dotClassName: 'bg-amber-500',
     panelClassName: 'border-amber-200 bg-amber-50/70',
-    defaultMessage: 'Day 6 components are UI-ready placeholders. Forecast and pricing values are not live AI decisions yet.',
+    defaultMessage: 'Spring Boot reports fallback mode, so demo-safe AI responses may be shown.',
   },
   PENDING: {
     label: 'Pending',
@@ -42,7 +42,7 @@ const STATUS_CONFIG = {
     badgeClassName: 'border-sky-200 bg-sky-50 text-sky-800',
     dotClassName: 'bg-sky-500',
     panelClassName: 'border-sky-200 bg-sky-50/70',
-    defaultMessage: 'AI service integration is pending. Spring Boot remains the only backend path used by the React app.',
+    defaultMessage: 'Loading AI service status and model metadata through Spring Boot.',
   },
 };
 
@@ -85,42 +85,44 @@ const formatOccupancyMae = (value) => {
 };
 
 export default function AiStatusBanner({
-  status = 'SAFE_DEMO_FALLBACK',
-  modelType = 'RandomForestRegressor',
-  trainingRows = null,
-  lastTrained = null,
-  revenueMae = null,
-  occupancyMae = null,
-  source = 'UI placeholder',
+  status = 'PENDING',
+  modelType,
+  trainingRows,
+  lastTrained,
+  revenueMae,
+  occupancyMae,
+  source = 'Spring Boot',
   message,
+  loading = false,
+  error = null,
 }) {
   const statusConfig = STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
   const StatusIcon = statusConfig.icon;
-  const statusMessage = message || statusConfig.defaultMessage;
+  const statusMessage = error || message || statusConfig.defaultMessage;
   const metrics = [
     {
       label: 'Model Type',
-      value: modelType || unavailable,
+      value: loading ? 'Loading...' : modelType || unavailable,
       icon: Activity,
     },
     {
       label: 'Training Rows',
-      value: formatNumber(trainingRows),
+      value: loading ? 'Loading...' : formatNumber(trainingRows),
       icon: Database,
     },
     {
       label: 'Last Trained',
-      value: formatDate(lastTrained),
+      value: loading ? 'Loading...' : formatDate(lastTrained),
       icon: Clock3,
     },
     {
       label: 'Revenue MAE',
-      value: formatCurrency(revenueMae),
+      value: loading ? 'Loading...' : formatCurrency(revenueMae),
       icon: Activity,
     },
     {
       label: 'Occupancy MAE',
-      value: formatOccupancyMae(occupancyMae),
+      value: loading ? 'Loading...' : formatOccupancyMae(occupancyMae),
       icon: Activity,
     },
   ];
@@ -152,7 +154,7 @@ export default function AiStatusBanner({
             </div>
           </div>
           <Badge variant="outline" className="w-fit rounded-full border-zinc-200 bg-white px-3 py-1 text-zinc-600">
-            Source: {source || 'Unknown'}
+            Source: {source || 'Spring Boot'}
           </Badge>
         </div>
       </CardHeader>
@@ -174,8 +176,8 @@ export default function AiStatusBanner({
           <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium leading-6 text-zinc-700">
             <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
             <span>
-              No React component in this section calls FastAPI directly. Live AI status should be
-              supplied through the planned Spring Boot integration.
+              React uses Spring Boot as the integration boundary. It does not call FastAPI or
+              external AI APIs directly.
             </span>
           </div>
         ) : null}

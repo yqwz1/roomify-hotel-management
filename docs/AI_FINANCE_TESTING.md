@@ -121,3 +121,36 @@
 - Known warnings
   - `train.py` still prefers the Spring training-data endpoint first, but when Spring auth blocks anonymous access it falls back to `ai-service/data/training_data.csv`. That remains acceptable for the standalone trainer.
   - Backend test output still shows unrelated legacy warnings from Lombok, Mockito, and older test classes. No Day 3 failures were caused by them.
+
+## Frontend smoke test checklist
+
+Use this checklist after starting Spring Boot, the React app, and FastAPI when available.
+
+- Login as a Manager.
+- Open `/manager/ai-finance`.
+- Confirm the AI Status section is visible and shows model/service state.
+- Confirm Data Summary cards are visible: Reservations, Revenue, Occupancy, Expenses, Room Types, Top Room Type.
+- Confirm historical revenue chart is visible and labeled as historical context.
+- Confirm historical occupancy chart is visible and labeled as historical context.
+- Confirm Revenue Forecast section is visible and shows future prediction metrics when `/api/ai-finance/revenue-forecast` returns data.
+- Confirm Occupancy Forecast section is visible and shows future prediction metrics when forecast points are available.
+- Confirm Pricing Recommendations section shows advisory room-type cards when `/api/ai-finance/pricing-recommendations` returns data.
+- Confirm AI Insights panel is visible.
+- Click the four predefined AI insight buttons:
+  - Forecast next 30 days revenue.
+  - Recommend prices for next week.
+  - Analyze occupancy trend.
+  - Show best performing room type.
+- Confirm fallback banner appears when Spring returns `source=SAFE_DEMO_FALLBACK` or a `warning`.
+- Confirm no fatal console errors appear during the demo path.
+- Confirm the dashboard remains readable on laptop and mobile-width viewports.
+- Confirm Staff and Guest users do not see Manager AI Finance navigation.
+- Confirm unauthenticated users cannot access `/manager/ai-finance`.
+
+## Frontend verification status
+
+- Code inspection verified React calls Spring Boot AI Finance endpoints only.
+- Code inspection verified no direct FastAPI URL is used in React.
+- Code inspection verified `/manager/ai-finance` remains wrapped in Manager-only route protection.
+- Runtime browser smoke test remains pending in this Codex environment because local app/browser execution was not completed here.
+- Final security matrix remains pending for Staff, Guest, and unauthenticated browser sessions unless the local demo users are provisioned.

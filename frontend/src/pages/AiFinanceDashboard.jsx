@@ -4,12 +4,17 @@ import {
   CalendarDays,
   Gauge,
   Hotel,
+  LineChart,
+  Percent,
   Receipt,
   Sparkles,
+  TrendingUp,
   WalletCards,
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
+import AiFallbackBanner from '../components/ai-finance/AiFallbackBanner';
+import AiInsightPanel from '../components/ai-finance/AiInsightPanel';
 import AiStatusBanner from '../components/ai-finance/AiStatusBanner';
 import ForecastChart from '../components/ai-finance/ForecastChart';
 import PricingRecommendationCard from '../components/ai-finance/PricingRecommendationCard';
@@ -44,6 +49,14 @@ const formatPercent = (value) => {
   return Number.isFinite(numeric)
     ? `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(numeric)}%`
     : UNAVAILABLE;
+};
+
+const formatConfidence = (value) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return UNAVAILABLE;
+
+  const percent = numeric <= 1 ? numeric * 100 : numeric;
+  return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(percent)}%`;
 };
 
 const formatDateRange = (start, end) =>
@@ -100,46 +113,20 @@ const buildDataSummaryCards = ({ dataSummary, summary }) => [
   },
 ];
 
-const demoAiStatus = {
-  status: 'SAFE_DEMO_FALLBACK',
-  modelType: 'RandomForestRegressor',
-  trainingRows: 1968,
-  lastTrained: '2026-04-27',
-  revenueMae: 2875,
-  occupancyMae: 4.8,
-  source: 'Day 6 UI placeholder',
-  message:
-    'AI status is displayed with demo-safe values until Day 7 routes live model information through Spring Boot.',
+const getAiStatus = ({ aiHealth, modelInfo, loading }) => {
+  if (loading && !aiHealth && !modelInfo) return 'PENDING';
+  if (aiHealth?.status === 'UP') return 'ONLINE';
+  if (aiHealth?.status === 'DOWN' && aiHealth?.fallbackAvailable) return 'SAFE_DEMO_FALLBACK';
+  if (aiHealth?.status === 'DOWN') return 'OFFLINE';
+  if (modelInfo?.status === 'AI_SERVICE_UNAVAILABLE') return 'OFFLINE';
+  return 'PENDING';
 };
 
-const demoPricingRecommendations = [
-  {
-    roomType: 'Standard Room',
-    currentPrice: 320,
-    suggestedPrice: 335,
-    adjustmentPercent: 4.7,
-    riskLevel: 'LOW',
-    source: 'Day 6 UI placeholder',
-    reason:
-      'Placeholder recommendation showing how a modest increase will be displayed after Spring Boot pricing integration.',
-  },
-  {
-    roomType: 'Deluxe Suite',
-    currentPrice: 560,
-    suggestedPrice: 530,
-    adjustmentPercent: -5.4,
-    riskLevel: 'MEDIUM',
-    source: 'Day 6 UI placeholder',
-    reason:
-      'Placeholder recommendation showing the review state for a bounded discount when demand is softer.',
-  },
-];
+const hasFallbackPayload = (payload) =>
+  payload?.source === 'SAFE_DEMO_FALLBACK' || Boolean(payload?.warning);
 
-const insights = [
-  'Summary cards are now populated from Spring Boot AI Finance analytics.',
-  'Historical trend APIs are loaded for Day 4 readiness; forecast chart work can build on them later.',
-  'Pricing recommendation cards are UI-ready placeholders and remain disconnected until Day 7 Spring integration.',
-];
+const getFallbackMessage = (payload) =>
+  payload?.warning || 'AI service is currently unavailable. Showing a safe demo fallback forecast.';
 
 function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
   return (
@@ -198,29 +185,102 @@ function DataSummaryCards({ cards, loading }) {
   );
 }
 
+function ForecastMetricCard({ icon: Icon, label, value, hint, className }) {
+  return (
+    <Card className={cn('rounded-[1.35rem] border p-0 shadow-sm', className)}>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.16em] opacity-70">
+              {label}
+            </p>
+            <p className="mt-3 break-words text-2xl font-black tracking-tight">{value}</p>
+            {hint ? <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p> : null}
+          </div>
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
+            <Icon className="h-5 w-5" />
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ForecastMetricSkeletons() {
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <Card key={`forecast-skeleton-${index}`} className="rounded-[1.35rem] border border-zinc-200 bg-white p-0 shadow-sm">
+          <CardContent className="p-5">
+            <div className="animate-pulse">
+              <div className="h-3 w-28 rounded-full bg-zinc-200" />
+              <div className="mt-4 h-8 w-32 rounded-xl bg-zinc-200" />
+              <div className="mt-4 h-3 w-3/4 rounded-full bg-zinc-100" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 function AiFinanceContent() {
   const {
     loading,
     error,
+    finalAiLoading,
+    finalAiErrors,
     dataSummary,
     summary,
     revenueTrend,
     occupancyTrend,
     roomTypeRevenue,
+    aiHealth,
+    modelInfo,
+    revenueForecast,
+    pricingRecommendations,
+    pricingRecommendationsResponse,
+    askResponse,
+    askLoading,
+    askError,
     refresh,
+    refreshFinalAiData,
+    askAiFinance,
   } = useAiFinance();
   const dataSummaryCards = buildDataSummaryCards({ dataSummary, summary });
   const hasSummaryData = Boolean(dataSummary || summary || roomTypeRevenue.length);
   const revenueTrendError = !loading && error && revenueTrend.length === 0 ? error : null;
   const occupancyTrendError = !loading && error && occupancyTrend.length === 0 ? error : null;
+  const forecastPoints = Array.isArray(revenueForecast?.points) ? revenueForecast.points : [];
+  const hasPricingRecommendations = pricingRecommendations.length > 0;
+  const aiStatus = getAiStatus({ aiHealth, modelInfo, loading: finalAiLoading });
+  const aiStatusMessage = modelInfo?.message || (
+    aiHealth?.status === 'DOWN'
+      ? 'Spring Boot reports the AI service is down. Safe fallback responses may be available.'
+      : undefined
+  );
+  const aiStatusSource = aiHealth?.status === 'UP'
+    ? 'Spring Boot -> FastAPI'
+    : 'Spring Boot';
 
   return (
     <>
       <DashboardPanel
         title="AI Status"
-        description="Day 6 model readiness display prepared for future Spring Boot AI service integration."
+        description="Model readiness and fallback status loaded through the Manager-only Spring Boot API."
       >
-        <AiStatusBanner {...demoAiStatus} />
+        <AiStatusBanner
+          status={aiStatus}
+          modelType={modelInfo?.modelType}
+          trainingRows={modelInfo?.trainingRows}
+          lastTrained={modelInfo?.trainedAt}
+          revenueMae={modelInfo?.revenueMae}
+          occupancyMae={modelInfo?.occupancyMae}
+          source={aiStatusSource}
+          message={aiStatusMessage}
+          loading={finalAiLoading}
+          error={finalAiErrors['AI health'] || finalAiErrors['model info']}
+        />
         {error && !hasSummaryData && !loading ? (
           <div className="mt-4">
             <ErrorState
@@ -229,6 +289,9 @@ function AiFinanceContent() {
               onRetry={refresh}
             />
           </div>
+        ) : null}
+        {aiHealth?.status === 'DOWN' || aiHealth?.fallbackAvailable ? (
+          <AiFallbackBanner className="mt-4" />
         ) : null}
       </DashboardPanel>
 
@@ -254,81 +317,225 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Revenue Forecast"
-        description="Historical revenue trend loaded from Spring Boot analytics. AI forecast prediction comes in a later integration."
+        description="Future revenue prediction from the Spring Boot AI Finance forecast endpoint, with historical context below."
       >
-        <ForecastChart
-          title="Historical revenue trend"
-          description="Daily revenue returned by Spring Boot analytics for the verified training window."
-          data={revenueTrend}
-          dateKey="date"
-          valueKey="revenue"
-          valueFormatter={formatCurrency}
-          emptyMessage="No historical revenue points were returned for the selected analytics window."
-          loading={loading}
-          error={revenueTrendError}
-          accentClassName="text-emerald-700"
-          strokeColor="#059669"
-          fillColor="rgba(5, 150, 105, 0.14)"
-        />
+        <div className="space-y-5">
+          {hasFallbackPayload(revenueForecast) ? (
+            <AiFallbackBanner
+              message={getFallbackMessage(revenueForecast)}
+              source={revenueForecast?.source}
+            />
+          ) : null}
+          {finalAiLoading ? (
+            <ForecastMetricSkeletons />
+          ) : finalAiErrors['revenue forecast'] && !revenueForecast ? (
+            <ErrorState
+              title="Revenue forecast unavailable"
+              message={finalAiErrors['revenue forecast']}
+              onRetry={refreshFinalAiData}
+            />
+          ) : revenueForecast ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-3">
+                <ForecastMetricCard
+                  icon={WalletCards}
+                  label={`Predicted Revenue Next ${revenueForecast.forecastDays || 30} Days`}
+                  value={formatCurrency(revenueForecast.predictedRevenueTotal)}
+                  hint={revenueForecast.source || 'Spring Boot AI Finance forecast'}
+                  className="border-emerald-200 bg-emerald-50/85 text-emerald-950"
+                />
+                <ForecastMetricCard
+                  icon={Percent}
+                  label="Predicted Average Occupancy"
+                  value={formatPercent(revenueForecast.predictedAverageOccupancy)}
+                  hint="Future average occupancy from the forecast payload."
+                  className="border-cyan-200 bg-cyan-50/85 text-cyan-950"
+                />
+                <ForecastMetricCard
+                  icon={Gauge}
+                  label="Confidence"
+                  value={formatConfidence(revenueForecast.confidence)}
+                  hint="Model confidence reported by the Spring endpoint."
+                  className="border-violet-200 bg-violet-50/85 text-violet-950"
+                />
+              </div>
+              <ForecastChart
+                title="Predicted revenue next 30 days"
+                description="Future forecast points returned by Spring Boot. This is the AI prediction, not historical data."
+                data={forecastPoints}
+                dateKey="date"
+                valueKey="predictedRevenue"
+                valueFormatter={formatCurrency}
+                emptyMessage="No forecast revenue points were returned by the AI Finance endpoint."
+                loading={false}
+                error={null}
+                accentClassName="text-emerald-700"
+                strokeColor="#059669"
+                fillColor="rgba(5, 150, 105, 0.14)"
+              />
+            </>
+          ) : (
+            <EmptyState
+              title="Revenue forecast unavailable"
+              message="The Spring Boot forecast endpoint did not return prediction data."
+              icon={TrendingUp}
+            />
+          )}
+
+          <ForecastChart
+            title="Historical revenue trend"
+            description="Historical daily revenue from Spring Boot analytics for comparison with the future forecast."
+            data={revenueTrend}
+            dateKey="date"
+            valueKey="revenue"
+            valueFormatter={formatCurrency}
+            emptyMessage="No historical revenue points were returned for the selected analytics window."
+            loading={loading}
+            error={revenueTrendError}
+            accentClassName="text-zinc-700"
+            strokeColor="#52525b"
+            fillColor="rgba(82, 82, 91, 0.12)"
+          />
+        </div>
       </DashboardPanel>
 
       <DashboardPanel
         title="Occupancy Forecast"
-        description="Historical occupancy trend loaded from Spring Boot analytics. AI forecast prediction comes in a later integration."
+        description="Future occupancy prediction from the Spring Boot AI Finance forecast endpoint, with historical context below."
       >
-        <ForecastChart
-          title="Historical occupancy trend"
-          description="Daily occupancy rate returned by Spring Boot analytics for the verified training window."
-          data={occupancyTrend}
-          dateKey="date"
-          valueKey="occupancyRate"
-          valueFormatter={formatPercent}
-          emptyMessage="No historical occupancy points were returned for the selected analytics window."
-          loading={loading}
-          error={occupancyTrendError}
-          accentClassName="text-sky-700"
-          strokeColor="#0284c7"
-          fillColor="rgba(2, 132, 199, 0.14)"
-        />
+        <div className="space-y-5">
+          {hasFallbackPayload(revenueForecast) ? (
+            <AiFallbackBanner
+              message={getFallbackMessage(revenueForecast)}
+              source={revenueForecast?.source}
+            />
+          ) : null}
+          {finalAiLoading ? (
+            <ForecastMetricSkeletons />
+          ) : finalAiErrors['revenue forecast'] && !revenueForecast ? (
+            <ErrorState
+              title="Occupancy forecast unavailable"
+              message={finalAiErrors['revenue forecast']}
+              onRetry={refreshFinalAiData}
+            />
+          ) : revenueForecast ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-3">
+                <ForecastMetricCard
+                  icon={Percent}
+                  label="Predicted Average Occupancy"
+                  value={formatPercent(revenueForecast.predictedAverageOccupancy)}
+                  hint={`Next ${revenueForecast.forecastDays || 30} days`}
+                  className="border-sky-200 bg-sky-50/85 text-sky-950"
+                />
+                <ForecastMetricCard
+                  icon={Gauge}
+                  label="Confidence"
+                  value={formatConfidence(revenueForecast.confidence)}
+                  hint={revenueForecast.source || 'Spring Boot AI Finance forecast'}
+                  className="border-violet-200 bg-violet-50/85 text-violet-950"
+                />
+                <ForecastMetricCard
+                  icon={LineChart}
+                  label="Forecast Points"
+                  value={formatNumber(forecastPoints.length)}
+                  hint="Daily future occupancy points loaded."
+                  className="border-cyan-200 bg-cyan-50/85 text-cyan-950"
+                />
+              </div>
+              <ForecastChart
+                title="Predicted occupancy next 30 days"
+                description="Future occupancy forecast points returned by Spring Boot. This is not the historical trend."
+                data={forecastPoints}
+                dateKey="date"
+                valueKey="predictedOccupancy"
+                valueFormatter={formatPercent}
+                emptyMessage="No forecast occupancy points were returned by the AI Finance endpoint."
+                loading={false}
+                error={null}
+                accentClassName="text-sky-700"
+                strokeColor="#0284c7"
+                fillColor="rgba(2, 132, 199, 0.14)"
+              />
+            </>
+          ) : (
+            <EmptyState
+              title="Occupancy forecast unavailable"
+              message="The Spring Boot forecast endpoint did not return occupancy prediction points."
+              icon={Gauge}
+            />
+          )}
+
+          <ForecastChart
+            title="Historical occupancy trend"
+            description="Historical occupancy rate from Spring Boot analytics for comparison with the future forecast."
+            data={occupancyTrend}
+            dateKey="date"
+            valueKey="occupancyRate"
+            valueFormatter={formatPercent}
+            emptyMessage="No historical occupancy points were returned for the selected analytics window."
+            loading={loading}
+            error={occupancyTrendError}
+            accentClassName="text-zinc-700"
+            strokeColor="#52525b"
+            fillColor="rgba(82, 82, 91, 0.12)"
+          />
+        </div>
       </DashboardPanel>
 
       <DashboardPanel
         title="Pricing Recommendations"
-        description="UI-ready recommendation cards for Day 7 Spring integration. These are not live AI decisions yet."
+        description="Advisory room-type pricing recommendations loaded through Spring Boot. No price changes are applied here."
       >
-        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-900">
-          Demo placeholder recommendations only. React does not call FastAPI directly, and no pricing
-          change can be applied from this screen.
-        </div>
-        <div className="grid gap-4 xl:grid-cols-2">
-          {demoPricingRecommendations.map((recommendation) => (
-            <PricingRecommendationCard
-              key={recommendation.roomType}
-              {...recommendation}
+        <div className="space-y-4">
+          {hasFallbackPayload(pricingRecommendationsResponse) ? (
+            <AiFallbackBanner
+              message={getFallbackMessage(pricingRecommendationsResponse)}
+              source={pricingRecommendationsResponse?.source}
             />
-          ))}
+          ) : null}
+          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium leading-6 text-zinc-700">
+            Recommendations are advisory only. Managers review them manually; this screen does not
+            apply price changes.
+          </div>
+          {finalAiLoading ? (
+            <ForecastMetricSkeletons />
+          ) : finalAiErrors['pricing recommendations'] && !hasPricingRecommendations ? (
+            <ErrorState
+              title="Pricing recommendations unavailable"
+              message={finalAiErrors['pricing recommendations']}
+              onRetry={refreshFinalAiData}
+            />
+          ) : hasPricingRecommendations ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {pricingRecommendations.map((recommendation) => (
+                <PricingRecommendationCard
+                  key={recommendation.roomType}
+                  {...recommendation}
+                  source={pricingRecommendationsResponse?.source}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No pricing recommendations"
+              message="The Spring Boot pricing endpoint returned no room-type recommendations."
+              icon={BarChart3}
+            />
+          )}
         </div>
       </DashboardPanel>
 
       <DashboardPanel
         title="AI Insights"
-        description="Placeholder narrative cards for the future AI finance assistant."
+        description="Demo-safe insight buttons call Spring Boot predefined intents. Free-text chat is not required."
       >
-        <div className="grid gap-4 lg:grid-cols-3">
-          {insights.map((insight) => (
-            <div
-              key={insight}
-              className="rounded-[1.4rem] border border-cyan-200 bg-cyan-50/85 p-5"
-            >
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-cyan-900 shadow-sm">
-                  <BarChart3 className="h-5 w-5" />
-                </span>
-                <p className="text-sm font-medium leading-6 text-cyan-950">{insight}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <AiInsightPanel
+          response={askResponse}
+          loading={askLoading}
+          error={askError}
+          onAskIntent={askAiFinance}
+        />
       </DashboardPanel>
     </>
   );
@@ -342,7 +549,7 @@ export default function AiFinanceDashboard() {
         title="AI Revenue Forecasting & Pricing Advisor"
         description="Manager workspace for revenue projections, occupancy demand signals, pricing recommendations, and AI finance insights."
         className="border-cyan-400/10 bg-[linear-gradient(135deg,#111827_0%,#0f766e_52%,#164e63_100%)]"
-        meta={['Manager only', 'Spring Boot analytics', 'AI model pending']}
+        meta={['Manager only', 'Spring Boot AI bridge', 'Fallback ready']}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
@@ -353,13 +560,13 @@ export default function AiFinanceDashboard() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
                 Model status
               </p>
-              <p className="mt-2 text-2xl font-black">Pending</p>
+              <p className="mt-2 text-2xl font-black">Spring routed</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
                 Data mode
               </p>
-              <p className="mt-2 text-2xl font-black">Live</p>
+              <p className="mt-2 text-2xl font-black">Live + fallback</p>
             </div>
           </div>
         </div>

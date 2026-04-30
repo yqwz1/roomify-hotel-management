@@ -42,20 +42,49 @@ export const getRoomTypeRevenue = async () => {
   return Array.isArray(response.data) ? response.data : [];
 };
 
-export const getTrainingData = async () => [];
+export const getTrainingData = async (
+  start = DEFAULT_AI_FINANCE_START_DATE,
+  end = DEFAULT_AI_FINANCE_END_DATE
+) => {
+  const response = await api.get('/ai-finance/training-data', {
+    params: { start, end },
+  });
+  return Array.isArray(response.data) ? response.data : [];
+};
 
-export const getModelInfo = async () => ({
-  modelName: '',
-  modelVersion: '',
-  trainedAt: null,
-  metrics: {},
-});
+export const getAiHealth = async () => {
+  const response = await api.get('/ai-finance/health');
+  return response.data;
+};
 
-export const getRevenueForecast = async () => [];
+export const getModelInfo = async () => {
+  const response = await api.get('/ai-finance/model-info');
+  return response.data;
+};
 
-export const getPricingRecommendations = async () => [];
+export const getRevenueForecast = async () => {
+  const response = await api.get('/ai-finance/revenue-forecast');
+  return response.data;
+};
 
-export const askAiFinance = async () => ({
-  answer: '',
-  sources: [],
-});
+export const getPricingRecommendations = async () => {
+  const response = await api.get('/ai-finance/pricing-recommendations');
+  if (Array.isArray(response.data)) {
+    return {
+      source: null,
+      pricingRecommendations: response.data,
+    };
+  }
+  const payload = response.data && typeof response.data === 'object' ? response.data : {};
+  return {
+    ...payload,
+    pricingRecommendations: Array.isArray(payload.pricingRecommendations)
+      ? payload.pricingRecommendations
+      : [],
+  };
+};
+
+export const askAiFinance = async (intent) => {
+  const response = await api.post('/ai-finance/ask', { intent });
+  return response.data;
+};

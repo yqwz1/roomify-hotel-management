@@ -66,3 +66,15 @@ Since this is a graduation project and the system is not connected to a real hot
 - The dataset is synthetic and optimized for demo realism, not real-world financial auditing
 - Room numbers use an `AI-` prefix so the seeder can reset only AI data safely
 - Existing Roomify pricing logic is simpler than the seeded historical pricing curve, so seeded totals intentionally represent historical market variation rather than only base-rate calculations
+
+## Training data access
+- JSON endpoint: `GET /api/ai-finance/training-data?start=2025-01-01&end=2026-04-27`
+- CSV export: `GET /api/ai-finance/training-data.csv`
+- The training dataset is daily, room-type-level aggregate data.
+- The verified model training run used `2410` rows.
+- React does not need the raw training data for the dashboard demo; it consumes summary, trend, forecast, pricing, and Ask endpoints through Spring Boot.
+
+## Data limitations for supervisor explanation
+- The data is realistic synthetic hotel data, not production hotel data.
+- The dataset is suitable for demonstrating forecasting, fallback behavior, and UI integration.
+- The data should not be presented as audited financial history.

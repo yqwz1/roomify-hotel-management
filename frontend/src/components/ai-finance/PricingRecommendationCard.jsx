@@ -69,13 +69,13 @@ const getAdjustmentStyle = (value) => {
 };
 
 export default function PricingRecommendationCard({
-  roomType = 'Deluxe Room',
-  currentPrice = 480,
-  suggestedPrice = 510,
-  adjustmentPercent,
-  reason = 'UI-ready placeholder for Day 7 Spring integration. This is not a live AI pricing decision.',
+  roomType = 'Unavailable',
+  currentPrice = null,
+  suggestedPrice = null,
+  adjustmentPercent = null,
+  reason = 'No pricing recommendation has been loaded.',
   riskLevel = 'UNKNOWN',
-  source = 'UI placeholder',
+  source,
 }) {
   const normalizedRisk = String(riskLevel || 'UNKNOWN').toUpperCase();
   const adjustmentValue = getAdjustmentValue({
@@ -105,9 +105,11 @@ export default function PricingRecommendationCard({
             >
               Risk: {normalizedRisk}
             </Badge>
-            <Badge variant="outline" className="rounded-full border-zinc-200 bg-zinc-50 px-3 py-1 text-zinc-600">
-              {source || 'Unknown source'}
-            </Badge>
+            {source ? (
+              <Badge variant="outline" className="rounded-full border-zinc-200 bg-zinc-50 px-3 py-1 text-zinc-600">
+                {source}
+              </Badge>
+            ) : null}
           </div>
         </div>
       </CardHeader>

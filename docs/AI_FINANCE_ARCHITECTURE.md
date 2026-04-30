@@ -1,5 +1,28 @@
 # AI Finance Architecture
 
+## Final frontend integration path
+
+The AI Finance frontend uses this path for all live AI feature data:
+
+React `/manager/ai-finance` -> Spring Boot `/api/ai-finance/*` -> FastAPI AI service -> trained ML artifacts.
+
+React does not call FastAPI directly. Spring Boot is the only API boundary used by the browser because it already owns authentication, Manager-only authorization, Roomify business data, timeout handling, and fallback behavior.
+
+## Layer responsibilities
+
+- React: renders the Manager-only dashboard, summary cards, historical charts, forecast display, pricing recommendation cards, fallback banner, and predefined AI insight buttons.
+- Spring Boot: enforces Manager access, serves finance analytics from Roomify data, calls FastAPI through `AiFinanceClient`, normalizes payloads, and returns safe fallback responses when configured.
+- FastAPI: loads trained model artifacts, serves model health/model metadata, forecasts revenue and occupancy, and generates pricing recommendation payloads.
+- ML model: predicts revenue and occupancy from realistic historical hotel data.
+
+## Safe fallback behavior
+
+Fallback exists to keep the graduation demo understandable when FastAPI is stopped or unreachable. It is deterministic demo data returned by Spring Boot with `source=SAFE_DEMO_FALLBACK` and a warning. It is not a cached last successful forecast.
+
+## Access control
+
+`/manager/ai-finance` remains a Manager-only route in React, and the Spring Boot controller is protected with Manager role authorization. Staff, Guest, and unauthenticated users should not access the AI Finance page or endpoints.
+
 ## Components
 - PostgreSQL stores hotel operational and financial history
 - Spring Boot owns data aggregation, security, contracts, and fallback behavior
