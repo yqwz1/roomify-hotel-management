@@ -22,6 +22,10 @@ vi.mock('../components/inventory/InventoryOperationsPanel', () => ({
   default: () => <section>Inventory &amp; Automation</section>,
 }));
 
+vi.mock('../components/charts/DistributionBarChart', () => ({
+  DistributionBarChart: () => <div data-testid="mock-distribution-bar-chart" />
+}));
+
 const summaryResponse = {
   totalRevenue: 4200,
   totalExpenses: 540,

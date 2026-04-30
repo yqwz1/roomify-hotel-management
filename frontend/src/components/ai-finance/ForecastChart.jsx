@@ -1,16 +1,10 @@
-import { AlertTriangle, LineChart } from 'lucide-react';
+import { LineChart } from 'lucide-react';
 import EmptyState from '../common/EmptyState';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
-
-const chartWidth = 640;
-const chartHeight = 240;
-const chartPadding = {
-  top: 24,
-  right: 24,
-  bottom: 44,
-  left: 56,
-};
+import { TrendLineChart } from '../charts/TrendLineChart';
+import { ChartSkeleton } from '../charts/ChartSkeleton';
+import { ChartEmptyState } from '../charts/ChartEmptyState';
 
 const defaultFormatter = (value) =>
   new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value);
@@ -29,84 +23,6 @@ const formatDateLabel = (value) => {
   }).format(date);
 };
 
-const buildCoordinates = (items) => {
-  const values = items.map((item) => item.value);
-  const minValue = Math.min(...values);
-  const maxValue = Math.max(...values);
-  const range = maxValue - minValue;
-  const innerWidth = chartWidth - chartPadding.left - chartPadding.right;
-  const innerHeight = chartHeight - chartPadding.top - chartPadding.bottom;
-  const baselineY = chartHeight - chartPadding.bottom;
-
-  const coordinates = items.map((item, index) => {
-    const x =
-      items.length === 1
-        ? chartPadding.left + innerWidth / 2
-        : chartPadding.left + (index / (items.length - 1)) * innerWidth;
-    const y =
-      range === 0
-        ? chartPadding.top + innerHeight / 2
-        : chartPadding.top + innerHeight - ((item.value - minValue) / range) * innerHeight;
-
-    return {
-      ...item,
-      x,
-      y,
-    };
-  });
-
-  const linePath = coordinates
-    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-    .join(' ');
-
-  const areaPath = coordinates.length
-    ? `${linePath} L ${coordinates[coordinates.length - 1].x.toFixed(2)} ${baselineY} L ${coordinates[0].x.toFixed(2)} ${baselineY} Z`
-    : '';
-
-  return {
-    coordinates,
-    linePath,
-    areaPath,
-    minValue,
-    maxValue,
-    baselineY,
-  };
-};
-
-function ChartSkeleton() {
-  return (
-    <Card className="rounded-[1.4rem] border border-zinc-200 bg-white p-0 shadow-sm">
-      <CardContent className="p-5">
-        <div className="animate-pulse">
-          <div className="h-4 w-44 rounded-full bg-zinc-200" />
-          <div className="mt-3 h-8 w-32 rounded-xl bg-zinc-200" />
-          <div className="mt-6 h-56 rounded-[1.2rem] bg-zinc-100" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ChartError({ message }) {
-  return (
-    <Card className="rounded-[1.4rem] border border-rose-200 bg-rose-50 p-0 shadow-sm">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-rose-700 shadow-sm">
-            <AlertTriangle className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-sm font-black text-rose-950">Trend data unavailable</p>
-            <p className="mt-1 text-sm font-medium leading-6 text-rose-900/80">
-              {message}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function ForecastChart({
   title,
   description,
@@ -119,14 +35,14 @@ export default function ForecastChart({
   error = null,
   accentClassName = 'text-emerald-700',
   strokeColor = '#059669',
-  fillColor = 'rgba(5, 150, 105, 0.14)',
+  fillColor,
 }) {
   if (loading) {
-    return <ChartSkeleton />;
+    return <ChartSkeleton height="h-72" className="rounded-[1.4rem]" />;
   }
 
   if (error) {
-    return <ChartError message={error} />;
+    return <ChartEmptyState variant="error" title="Trend data unavailable" message={error} className="rounded-[1.4rem]" />;
   }
 
   const points = Array.isArray(data)
@@ -148,13 +64,9 @@ export default function ForecastChart({
     );
   }
 
-  const { coordinates, linePath, areaPath, minValue, maxValue, baselineY } = buildCoordinates(points);
   const latestPoint = [...points].reverse().find((point) => point.value > 0) ?? points[points.length - 1];
-  const firstPoint = points[0];
-  const middlePoint = points[Math.floor(points.length / 2)];
-  const lastPoint = points[points.length - 1];
-  const labelPoints = [firstPoint, middlePoint, lastPoint].filter(Boolean);
-  const chartId = `${valueKey}-historical-chart`;
+  const maxValue = Math.max(...points.map(p => p.value));
+  const minValue = Math.min(...points.map(p => p.value));
 
   return (
     <Card className="rounded-[1.4rem] border border-zinc-200 bg-white p-0 shadow-sm">
@@ -182,85 +94,17 @@ export default function ForecastChart({
         </div>
 
         <div className="mt-5 overflow-hidden rounded-[1.2rem] border border-zinc-100 bg-zinc-50 p-3">
-          <svg
-            className="h-72 w-full"
-            viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-            role="img"
-            aria-labelledby={`${chartId}-title ${chartId}-description`}
-            preserveAspectRatio="none"
-          >
-            <title id={`${chartId}-title`}>{title}</title>
-            <desc id={`${chartId}-description`}>{description}</desc>
-            {[0, 1, 2, 3].map((index) => {
-              const y =
-                chartPadding.top +
-                (index / 3) * (chartHeight - chartPadding.top - chartPadding.bottom);
-              return (
-                <line
-                  key={`grid-${index}`}
-                  x1={chartPadding.left}
-                  x2={chartWidth - chartPadding.right}
-                  y1={y}
-                  y2={y}
-                  stroke="#e4e4e7"
-                  strokeDasharray="4 6"
-                  strokeWidth="1"
-                />
-              );
-            })}
-            <text x="0" y={chartPadding.top + 4} className="fill-zinc-500 text-[11px] font-bold">
-              {valueFormatter(maxValue)}
-            </text>
-            <text x="0" y={baselineY} className="fill-zinc-500 text-[11px] font-bold">
-              {valueFormatter(minValue)}
-            </text>
-            {areaPath ? <path d={areaPath} fill={fillColor} stroke="none" /> : null}
-            <path
-              d={linePath}
-              fill="none"
-              stroke={strokeColor}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="4"
-            />
-            {coordinates.map((point, index) => {
-              const showPoint =
-                index === 0 ||
-                index === coordinates.length - 1 ||
-                point.date === latestPoint.date;
-
-              return showPoint ? (
-                <circle
-                  key={`${point.date}-${index}`}
-                  cx={point.x}
-                  cy={point.y}
-                  r="5"
-                  fill="#ffffff"
-                  stroke={strokeColor}
-                  strokeWidth="3"
-                />
-              ) : null;
-            })}
-            {labelPoints.map((point, index) => {
-              const x =
-                labelPoints.length === 1
-                  ? chartPadding.left
-                  : chartPadding.left +
-                    (index / (labelPoints.length - 1)) *
-                      (chartWidth - chartPadding.left - chartPadding.right);
-              return (
-                <text
-                  key={`${point.date}-label-${index}`}
-                  x={x}
-                  y={chartHeight - 12}
-                  textAnchor={index === 0 ? 'start' : index === labelPoints.length - 1 ? 'end' : 'middle'}
-                  className="fill-zinc-500 text-[11px] font-bold"
-                >
-                  {formatDateLabel(point.date)}
-                </text>
-              );
-            })}
-          </svg>
+          <TrendLineChart
+            data={points}
+            xKey="date"
+            yKey="value"
+            variant="area"
+            color={strokeColor}
+            fillColor={fillColor}
+            height={288}
+            valueFormatter={valueFormatter}
+            labelFormatter={formatDateLabel}
+          />
         </div>
 
         <div className="mt-4 grid gap-3 text-sm font-bold text-zinc-600 sm:grid-cols-3">

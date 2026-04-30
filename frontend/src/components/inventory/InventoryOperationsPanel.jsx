@@ -6,6 +6,7 @@ import ErrorState from '../common/ErrorState';
 import LoadingState from '../common/LoadingState';
 import DashboardMetricCard from '../dashboard/DashboardMetricCard';
 import DashboardPanel from '../dashboard/DashboardPanel';
+import { DistributionBarChart } from '../charts/DistributionBarChart';
 import { Button } from '../ui/button';
 import {
   adjustInventoryItem,
@@ -22,7 +23,6 @@ import {
 } from '../../services/inventoryService';
 import {
   formatLocalizedCurrency,
-  formatLocalizedDate,
   formatLocalizedDateTime,
   formatLocalizedNumber,
   translateWithFallback,
@@ -1358,18 +1358,30 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   'Track consumption by category, room type, and service type without rolling it into cash expense totals twice.'
                 )}
               >
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
                     <p className="text-sm font-black text-zinc-950">
                       {translateWithFallback(t, 'inventoryPage.categoryUsageTitle', 'Usage by category')}
                     </p>
-                    <div className="mt-3 space-y-2">
-                      {summary?.usageByCategory?.slice(0, 5).map((item) => (
-                        <div key={item.key} className="flex items-center justify-between gap-3 text-sm font-medium text-zinc-700">
-                          <span>{humanizeEnum(item.label)}</span>
-                          <span>{formatLocalizedCurrency(item.totalValue, language)}</span>
+                    <div className="mt-4">
+                      {summary?.usageByCategory?.length ? (
+                        <DistributionBarChart
+                          data={summary.usageByCategory.slice(0, 5).map((item) => ({
+                            name: humanizeEnum(item.label),
+                            value: Number(item.totalValue ?? 0),
+                          }))}
+                          labelKey="name"
+                          valueKey="value"
+                          valueFormatter={(val) => formatLocalizedCurrency(val, language)}
+                          layout="vertical"
+                          height={220}
+                          colors={['#0f766e', '#0369a1', '#be123c', '#4338ca', '#b45309']}
+                        />
+                      ) : (
+                        <div className="py-8 text-center text-sm font-medium text-zinc-500">
+                          {translateWithFallback(t, 'inventoryPage.noCategoryData', 'No category data available.')}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
@@ -1377,13 +1389,25 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                     <p className="text-sm font-black text-zinc-950">
                       {translateWithFallback(t, 'inventoryPage.serviceUsageTitle', 'Usage by service type')}
                     </p>
-                    <div className="mt-3 space-y-2">
-                      {summary?.usageByServiceType?.slice(0, 5).map((item) => (
-                        <div key={item.key} className="flex items-center justify-between gap-3 text-sm font-medium text-zinc-700">
-                          <span>{humanizeEnum(item.label)}</span>
-                          <span>{formatLocalizedCurrency(item.averageCost, language)}</span>
+                    <div className="mt-4">
+                      {summary?.usageByServiceType?.length ? (
+                        <DistributionBarChart
+                          data={summary.usageByServiceType.slice(0, 5).map((item) => ({
+                            name: humanizeEnum(item.label),
+                            value: Number(item.averageCost ?? 0),
+                          }))}
+                          labelKey="name"
+                          valueKey="value"
+                          valueFormatter={(val) => formatLocalizedCurrency(val, language)}
+                          layout="horizontal"
+                          height={220}
+                          colors={['#0369a1', '#0f766e', '#b45309', '#4338ca', '#be123c']}
+                        />
+                      ) : (
+                        <div className="py-8 text-center text-sm font-medium text-zinc-500">
+                          {translateWithFallback(t, 'inventoryPage.noServiceData', 'No service data available.')}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
