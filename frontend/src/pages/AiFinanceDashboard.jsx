@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
+import ForecastChart from '../components/ai-finance/ForecastChart';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { Card, CardContent } from '../components/ui/card';
@@ -49,33 +50,6 @@ const formatPercent = (value) => {
 
 const formatDateRange = (start, end) =>
   isPresent(start) && isPresent(end) ? `${start} to ${end}` : 'Date range unavailable';
-
-const summarizeTrend = (items, valueKey, formatter) => {
-  if (!Array.isArray(items) || items.length === 0) {
-    return {
-      latestValue: UNAVAILABLE,
-      latestLabel: 'No historical trend data returned.',
-      bars: [],
-    };
-  }
-
-  const latestPoint = [...items].reverse().find((item) => Number(item?.[valueKey]) > 0) ?? items[items.length - 1];
-  const recent = items.slice(-8);
-  const maxValue = Math.max(...recent.map((item) => Number(item?.[valueKey]) || 0), 0);
-
-  return {
-    latestValue: formatter(latestPoint?.[valueKey]),
-    latestLabel: latestPoint?.date ? `Latest loaded point: ${latestPoint.date}` : 'Latest loaded trend point.',
-    bars: recent.map((item) => {
-      const value = Number(item?.[valueKey]) || 0;
-      return {
-        label: item?.date ?? 'No date',
-        value: maxValue > 0 ? Math.max((value / maxValue) * 100, value > 0 ? 8 : 0) : 0,
-        amount: formatter(value),
-      };
-    }),
-  };
-};
 
 const buildDataSummaryCards = ({ dataSummary, summary }) => [
   {
@@ -228,37 +202,6 @@ function StatusCard({ icon: Icon, title, description, className }) {
   );
 }
 
-function PlaceholderBarChart({ items, accentClassName, valueSuffix = '%' }) {
-  if (!items.length) {
-    return (
-      <EmptyState
-        title="Trend data unavailable"
-        message="The historical trend endpoint returned no points for the selected range."
-        icon={BarChart3}
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.label}>
-          <div className="flex items-center justify-between gap-3 text-sm font-bold text-zinc-700">
-            <span>{item.label}</span>
-            <span>{item.amount ?? `${item.value}${valueSuffix}`}</span>
-          </div>
-          <div className="mt-2 h-3 rounded-full bg-zinc-100">
-            <div
-              className={cn('h-3 rounded-full', accentClassName)}
-              style={{ width: `${item.value}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function AiFinanceContent() {
   const {
     loading,
@@ -272,8 +215,8 @@ function AiFinanceContent() {
   } = useAiFinance();
   const dataSummaryCards = buildDataSummaryCards({ dataSummary, summary });
   const hasSummaryData = Boolean(dataSummary || summary || roomTypeRevenue.length);
-  const revenueTrendSummary = summarizeTrend(revenueTrend, 'revenue', formatCurrency);
-  const occupancyTrendSummary = summarizeTrend(occupancyTrend, 'occupancyRate', formatPercent);
+  const revenueTrendError = !loading && error && revenueTrend.length === 0 ? error : null;
+  const occupancyTrendError = !loading && error && occupancyTrend.length === 0 ? error : null;
 
   return (
     <>
@@ -318,68 +261,42 @@ function AiFinanceContent() {
 
       <DashboardPanel
         title="Revenue Forecast"
-        description="Historical revenue trend loaded for Day 4; forecast prediction remains a later integration."
+        description="Historical revenue trend loaded from Spring Boot analytics. AI forecast prediction comes in a later integration."
       >
-        <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
-          <div className="rounded-[1.4rem] border border-zinc-200 bg-zinc-50 p-5">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
-              Historical trend
-            </p>
-            <p className="mt-3 text-4xl font-black tracking-tight text-zinc-950">
-              {revenueTrendSummary.latestValue}
-            </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-zinc-600">
-              {revenueTrendSummary.latestLabel}
-            </p>
-            <div className="mt-5 rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
-                Points loaded
-              </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
-                {loading ? 'Loading' : formatNumber(revenueTrend.length)}
-              </p>
-            </div>
-          </div>
-          <div className="rounded-[1.4rem] border border-zinc-200 bg-white p-5 shadow-sm">
-            <PlaceholderBarChart
-              items={loading ? [] : revenueTrendSummary.bars}
-              accentClassName="bg-emerald-500"
-              valueSuffix=""
-            />
-          </div>
-        </div>
+        <ForecastChart
+          title="Historical revenue trend"
+          description="Daily revenue returned by Spring Boot analytics for the verified training window."
+          data={revenueTrend}
+          dateKey="date"
+          valueKey="revenue"
+          valueFormatter={formatCurrency}
+          emptyMessage="No historical revenue points were returned for the selected analytics window."
+          loading={loading}
+          error={revenueTrendError}
+          accentClassName="text-emerald-700"
+          strokeColor="#059669"
+          fillColor="rgba(5, 150, 105, 0.14)"
+        />
       </DashboardPanel>
 
       <DashboardPanel
         title="Occupancy Forecast"
-        description="Historical occupancy trend loaded for Day 4; forecast prediction remains a later integration."
+        description="Historical occupancy trend loaded from Spring Boot analytics. AI forecast prediction comes in a later integration."
       >
-        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-[1.4rem] border border-zinc-200 bg-white p-5 shadow-sm">
-            <PlaceholderBarChart
-              items={loading ? [] : occupancyTrendSummary.bars}
-              accentClassName="bg-sky-500"
-            />
-          </div>
-          <div className="rounded-[1.4rem] border border-sky-200 bg-sky-50/85 p-5">
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sky-900 shadow-sm">
-                <Hotel className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">
-                  Historical trend
-                </p>
-                <p className="mt-1 text-xl font-black text-sky-950">
-                  {occupancyTrendSummary.latestValue}
-                </p>
-              </div>
-            </div>
-            <p className="mt-4 text-sm font-medium leading-6 text-sky-900/80">
-              {occupancyTrendSummary.latestLabel}
-            </p>
-          </div>
-        </div>
+        <ForecastChart
+          title="Historical occupancy trend"
+          description="Daily occupancy rate returned by Spring Boot analytics for the verified training window."
+          data={occupancyTrend}
+          dateKey="date"
+          valueKey="occupancyRate"
+          valueFormatter={formatPercent}
+          emptyMessage="No historical occupancy points were returned for the selected analytics window."
+          loading={loading}
+          error={occupancyTrendError}
+          accentClassName="text-sky-700"
+          strokeColor="#0284c7"
+          fillColor="rgba(2, 132, 199, 0.14)"
+        />
       </DashboardPanel>
 
       <DashboardPanel
