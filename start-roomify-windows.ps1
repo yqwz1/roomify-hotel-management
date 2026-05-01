@@ -1,4 +1,6 @@
-param()
+param(
+    [switch]$SkipAiService
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -10,19 +12,23 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = $PSScriptRoot
 $BackendDir = Join-Path $RepoRoot 'backend'
 $FrontendDir = Join-Path $RepoRoot 'frontend'
+$AiServiceDir = Join-Path $RepoRoot 'ai-service'
 $ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
 $BackendLog = Join-Path $BackendDir 'demo-backend.log'
 $BackendPidFile = Join-Path $BackendDir 'demo-backend.pid'
 
 $DbPort = 5433
 $BackendPort = 8080
+$AiServicePort = 8000
 $MailpitSmtpPort = 1025
 $MailpitHttpPort = 8025
 $BackendHealthUrl = "http://127.0.0.1:$BackendPort/api/health"
+$AiServiceHealthUrl = "http://127.0.0.1:$AiServicePort/health"
 $AppUrl = 'http://localhost:3000'
 $LoginUrl = "$AppUrl/login"
 $MailpitUrl = "http://127.0.0.1:$MailpitHttpPort"
 $DemoCredentials = 'admin@roomify.com / password123'
+$AiServiceStatus = 'not started'
 
 function Write-Info {
     param([string]$Message)
@@ -32,6 +38,11 @@ function Write-Info {
 function Write-Ok {
     param([string]$Message)
     Write-Host $Message -ForegroundColor Green
+}
+
+function Write-Warn {
+    param([string]$Message)
+    Write-Host "WARNING: $Message" -ForegroundColor Yellow
 }
 
 function Stop-Script {
@@ -192,16 +203,155 @@ function Wait-ForBackend {
     Stop-Script "Backend did not become ready at $BackendHealthUrl within ${TimeoutSeconds}s."
 }
 
+function Test-AiServiceHealth {
+    try {
+        $response = Invoke-WebRequest -Uri $AiServiceHealthUrl -TimeoutSec 2 -UseBasicParsing
+        return ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Test-AiServicePythonImports {
+    param([string]$PythonPath)
+
+    try {
+        & $PythonPath -c "import fastapi, uvicorn, pandas, sklearn, joblib, pydantic, requests, numpy" *> $null
+        return ($LASTEXITCODE -eq 0)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Start-AiFinanceService {
+    if ($SkipAiService) {
+        Write-Info 'Skipping AI Finance FastAPI startup. Spring Boot fallback mode will be available if needed.'
+        $script:AiServiceStatus = 'skipped'
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $AiServiceDir -PathType Container)) {
+        Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. ai-service folder was not found.'
+        $script:AiServiceStatus = 'missing ai-service folder'
+        return
+    }
+
+    if (Test-AiServiceHealth) {
+        Write-Ok "AI service already running on port $AiServicePort"
+        $script:AiServiceStatus = 'already running'
+        return
+    }
+
+    if (Test-TcpPort -TargetHost '127.0.0.1' -Port $AiServicePort) {
+        Write-Warn "AI service startup failed; Spring Boot safe fallback will still work. Port $AiServicePort is already in use, but $AiServiceHealthUrl did not respond."
+        $script:AiServiceStatus = "port $AiServicePort in use"
+        return
+    }
+
+    Write-Info 'Starting AI Finance FastAPI service...'
+
+    $venvDir = Join-Path $AiServiceDir '.venv'
+    $pythonPath = Join-Path $venvDir 'Scripts\python.exe'
+    $requirementsPath = Join-Path $AiServiceDir 'requirements.txt'
+
+    if (-not (Test-Path -LiteralPath $pythonPath -PathType Leaf)) {
+        if (-not (Get-Command 'py' -ErrorAction SilentlyContinue)) {
+            Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. Python launcher "py" was not found in PATH.'
+            $script:AiServiceStatus = 'python missing'
+            return
+        }
+
+        try {
+            Push-Location $AiServiceDir
+            & py -m venv .venv
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. Could not create ai-service\.venv.'
+                $script:AiServiceStatus = 'venv creation failed'
+                return
+            }
+        }
+        catch {
+            Write-Warn "AI service startup failed; Spring Boot safe fallback will still work. Could not create ai-service\.venv. $($_.Exception.Message)"
+            $script:AiServiceStatus = 'venv creation failed'
+            return
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    if (-not (Test-Path -LiteralPath $pythonPath -PathType Leaf)) {
+        Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. ai-service\.venv\Scripts\python.exe was not found.'
+        $script:AiServiceStatus = 'venv python missing'
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $requirementsPath -PathType Leaf)) {
+        Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. ai-service\requirements.txt was not found.'
+        $script:AiServiceStatus = 'requirements missing'
+        return
+    }
+
+    if (-not (Test-AiServicePythonImports -PythonPath $pythonPath)) {
+        Write-Info 'Installing AI service Python requirements...'
+        Push-Location $AiServiceDir
+        try {
+            & $pythonPath -m pip install -r requirements.txt
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. Python requirements install failed.'
+                $script:AiServiceStatus = 'requirements install failed'
+                return
+            }
+        }
+        catch {
+            Write-Warn "AI service startup failed; Spring Boot safe fallback will still work. Python requirements install failed. $($_.Exception.Message)"
+            $script:AiServiceStatus = 'requirements install failed'
+            return
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    $escapedAiServiceDir = $AiServiceDir.Replace("'", "''")
+    $escapedPythonPath = $pythonPath.Replace("'", "''")
+    $aiCommand = "Set-Location -LiteralPath '$escapedAiServiceDir'; & '$escapedPythonPath' -m uvicorn main:app --reload --port $AiServicePort"
+
+    try {
+        Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', $aiCommand) -WorkingDirectory $AiServiceDir | Out-Null
+        $script:AiServiceStatus = 'starting'
+    }
+    catch {
+        Write-Warn "AI service startup failed; Spring Boot safe fallback will still work. $($_.Exception.Message)"
+        $script:AiServiceStatus = 'startup failed'
+        return
+    }
+
+    Start-Sleep -Seconds 3
+    if (Test-AiServiceHealth) {
+        Write-Ok "AI Finance FastAPI service is responding at $AiServiceHealthUrl."
+        $script:AiServiceStatus = 'ready'
+    }
+    else {
+        Write-Warn 'AI service startup failed; Spring Boot safe fallback will still work. FastAPI did not answer /health yet; check the AI service PowerShell window for details.'
+        $script:AiServiceStatus = 'health not ready'
+    }
+}
+
 function Write-ReadySummary {
     Write-Host ''
     Write-Host 'Ready checklist' -ForegroundColor White
     Write-Host '- Postgres: ready'
     Write-Host '- Mailpit: ready'
     Write-Host '- Backend: ready'
+    Write-Host "- AI Finance FastAPI: $AiServiceStatus"
     Write-Host "- Frontend: run manually with ``Set-Location `"$FrontendDir`"; npm run dev``"
     Write-Host "- App: $AppUrl"
     Write-Host "- Login: $LoginUrl"
     Write-Host "- Mail inbox: $MailpitUrl"
+    Write-Host "- AI service health: $AiServiceHealthUrl"
     Write-Host "- Demo credentials: $DemoCredentials"
     Write-Host "- Backend log: $BackendLog"
     Write-Host "- Backend PID file: $BackendPidFile"
@@ -297,6 +447,9 @@ Clear-StaleBackendPidFile
 
 $env:DB_PORT = "$DbPort"
 $env:ROOMIFY_DEMO_BOOTSTRAP_ENABLED = 'true'
+$env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED = 'true'
+$env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = 'true'
+$env:SPRING_FLYWAY_BASELINE_VERSION = '12'
 $backendCommand = ".\mvnw.cmd spring-boot:run >> `"$BackendLog`" 2>&1"
 $backendProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $backendCommand -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
 $backendProcess.Id | Set-Content -LiteralPath $BackendPidFile
@@ -308,6 +461,8 @@ if ($backendProcess.HasExited) {
     Stop-BackendProcess -Process $backendProcess
     Stop-Script "Backend failed to start. See $BackendLog."
 }
+
+Start-AiFinanceService
 
 Write-Info "Waiting for backend health at $BackendHealthUrl..."
 Wait-ForBackend -Process $backendProcess -TimeoutSeconds 120

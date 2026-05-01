@@ -36,6 +36,14 @@ vi.mock('../services/notificationService', () => ({
   extractNotificationError: (err) => err?.message ?? 'Notifications failed',
 }));
 
+vi.mock('../components/charts/TrendLineChart', () => ({
+  TrendLineChart: () => <div data-testid="mock-trend-line-chart" />
+}));
+
+vi.mock('../components/charts/RadialStatusChart', () => ({
+  RadialStatusChart: () => <div data-testid="mock-radial-status-chart" />
+}));
+
 const renderPage = () =>
   render(
     <MemoryRouter>

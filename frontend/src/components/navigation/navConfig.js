@@ -251,6 +251,13 @@ const MANAGER_NAVIGATION_CONFIG = [
         icon: Receipt,
         roles: [ROLE_MANAGER],
       },
+      {
+        path: '/manager/ai-finance',
+        translationKey: 'aiFinanceTitle',
+        fallbackLabel: 'AI Finance',
+        icon: Sparkles,
+        roles: [ROLE_MANAGER],
+      },
     ],
   },
   {

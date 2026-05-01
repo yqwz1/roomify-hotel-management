@@ -1,0 +1,30 @@
+{
+  "modelType": "RandomForestRegressor",
+  "trainedAt": "2026-04-30T08:45:05Z",
+  "trainingRows": 2410,
+  "revenueMae": 20.1108,
+  "occupancyMae": 6.6309,
+  "features": [
+    "dayOfWeek",
+    "month",
+    "weekend",
+    "roomType",
+    "roomTypeId",
+    "totalRooms",
+    "occupiedRoomNights",
+    "confirmedBookings",
+    "cancelledBookings",
+    "averageRoomPrice",
+    "dailyExpenses",
+    "occupancyRate"
+  ],
+  "targets": [
+    "dailyRevenue",
+    "occupancyRate"
+  ],
+  "trainingDateRange": {
+    "start": "2025-01-01",
+    "end": "2026-04-27"
+  },
+  "modelVersion": "ai-finance-v1"
+}

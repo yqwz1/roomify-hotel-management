@@ -18,4 +18,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     BigDecimal sumAmountInPeriod(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT MIN(e.expenseDate) FROM Expense e")
+    LocalDate findMinimumExpenseDate();
+
+    @Query("SELECT MAX(e.expenseDate) FROM Expense e")
+    LocalDate findMaximumExpenseDate();
 }

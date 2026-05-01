@@ -1,0 +1,220 @@
+import { useCallback, useEffect, useState } from 'react';
+import {
+  DEFAULT_AI_FINANCE_END_DATE,
+  DEFAULT_AI_FINANCE_START_DATE,
+  askAiFinance as requestAiFinanceInsight,
+  extractAiFinanceError,
+  getAiHealth,
+  getDataSummary,
+  getModelInfo,
+  getOccupancyTrend,
+  getPricingRecommendations,
+  getRevenueForecast,
+  getRevenueTrend,
+  getRoomTypeRevenue,
+  getSummary,
+} from '../services/aiFinanceService';
+
+const emptyState = {
+  dataSummary: null,
+  summary: null,
+  revenueTrend: [],
+  occupancyTrend: [],
+  roomTypeRevenue: [],
+  aiHealth: null,
+  modelInfo: null,
+  revenueForecast: null,
+  pricingRecommendationsResponse: null,
+  pricingRecommendations: [],
+};
+
+const settleValue = (result, fallback) =>
+  result.status === 'fulfilled' ? result.value : fallback;
+
+export const useAiFinance = ({
+  start = DEFAULT_AI_FINANCE_START_DATE,
+  end = DEFAULT_AI_FINANCE_END_DATE,
+} = {}) => {
+  const [dataSummary, setDataSummary] = useState(emptyState.dataSummary);
+  const [summary, setSummary] = useState(emptyState.summary);
+  const [revenueTrend, setRevenueTrend] = useState(emptyState.revenueTrend);
+  const [occupancyTrend, setOccupancyTrend] = useState(emptyState.occupancyTrend);
+  const [roomTypeRevenue, setRoomTypeRevenue] = useState(emptyState.roomTypeRevenue);
+  const [aiHealth, setAiHealth] = useState(emptyState.aiHealth);
+  const [modelInfo, setModelInfo] = useState(emptyState.modelInfo);
+  const [revenueForecast, setRevenueForecast] = useState(emptyState.revenueForecast);
+  const [pricingRecommendationsResponse, setPricingRecommendationsResponse] = useState(
+    emptyState.pricingRecommendationsResponse
+  );
+  const [pricingRecommendations, setPricingRecommendations] = useState(
+    emptyState.pricingRecommendations
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [finalAiLoading, setFinalAiLoading] = useState(true);
+  const [finalAiError, setFinalAiError] = useState(null);
+  const [finalAiErrors, setFinalAiErrors] = useState({});
+  const [askResponse, setAskResponse] = useState(null);
+  const [askLoading, setAskLoading] = useState(false);
+  const [askError, setAskError] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [finalAiRefreshToken, setFinalAiRefreshToken] = useState(0);
+
+  const refresh = useCallback(() => {
+    setRefreshToken((value) => value + 1);
+    setFinalAiRefreshToken((value) => value + 1);
+  }, []);
+
+  const refreshFinalAiData = useCallback(() => {
+    setFinalAiRefreshToken((value) => value + 1);
+  }, []);
+
+  const askAiFinance = useCallback(async (intent) => {
+    setAskLoading(true);
+    setAskError(null);
+
+    try {
+      const response = await requestAiFinanceInsight(intent);
+      setAskResponse(response);
+      return response;
+    } catch (err) {
+      const message = extractAiFinanceError(err);
+      setAskError(message);
+      setAskResponse(null);
+      return null;
+    } finally {
+      setAskLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadAiFinance = async () => {
+      setLoading(true);
+      setError(null);
+
+      const results = await Promise.allSettled([
+        getDataSummary(),
+        getSummary(),
+        getRevenueTrend(start, end),
+        getOccupancyTrend(start, end),
+        getRoomTypeRevenue(),
+      ]);
+
+      if (ignore) return;
+
+      setDataSummary(settleValue(results[0], null));
+      setSummary(settleValue(results[1], null));
+      setRevenueTrend(settleValue(results[2], []));
+      setOccupancyTrend(settleValue(results[3], []));
+      setRoomTypeRevenue(settleValue(results[4], []));
+
+      const failures = results.filter((result) => result.status === 'rejected');
+      if (failures.length > 0) {
+        setError(
+          failures
+            .map((failure) => extractAiFinanceError(failure.reason))
+            .filter(Boolean)
+            .join(' ')
+        );
+      }
+
+      setLoading(false);
+    };
+
+    loadAiFinance();
+
+    return () => {
+      ignore = true;
+    };
+  }, [end, refreshToken, start]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadFinalAiData = async () => {
+      setFinalAiLoading(true);
+      setFinalAiError(null);
+      setFinalAiErrors({});
+
+      const results = await Promise.allSettled([
+        getAiHealth(),
+        getModelInfo(),
+        getRevenueForecast(),
+        getPricingRecommendations(),
+      ]);
+
+      if (ignore) return;
+
+      const nextAiHealth = settleValue(results[0], null);
+      const nextModelInfo = settleValue(results[1], null);
+      const nextRevenueForecast = settleValue(results[2], null);
+      const nextPricingResponse = settleValue(results[3], null);
+
+      setAiHealth(nextAiHealth);
+      setModelInfo(nextModelInfo);
+      setRevenueForecast(nextRevenueForecast);
+      setPricingRecommendationsResponse(nextPricingResponse);
+      setPricingRecommendations(
+        Array.isArray(nextPricingResponse?.pricingRecommendations)
+          ? nextPricingResponse.pricingRecommendations
+          : []
+      );
+
+      const errorMap = {};
+      const labels = ['AI health', 'model info', 'revenue forecast', 'pricing recommendations'];
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          errorMap[labels[index]] = extractAiFinanceError(result.reason);
+        }
+      });
+
+      if (Object.keys(errorMap).length > 0) {
+        setFinalAiErrors(errorMap);
+        setFinalAiError(Object.values(errorMap).filter(Boolean).join(' '));
+      }
+
+      setFinalAiLoading(false);
+    };
+
+    loadFinalAiData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [finalAiRefreshToken]);
+
+  const isAiFallback = Boolean(
+    aiHealth?.status === 'DOWN' ||
+      revenueForecast?.source === 'SAFE_DEMO_FALLBACK' ||
+      pricingRecommendationsResponse?.source === 'SAFE_DEMO_FALLBACK' ||
+      revenueForecast?.warning ||
+      pricingRecommendationsResponse?.warning
+  );
+
+  return {
+    loading,
+    error,
+    finalAiLoading,
+    finalAiError,
+    finalAiErrors,
+    dataSummary,
+    summary,
+    revenueTrend,
+    occupancyTrend,
+    roomTypeRevenue,
+    aiHealth,
+    modelInfo,
+    revenueForecast,
+    pricingRecommendations,
+    pricingRecommendationsResponse,
+    askResponse,
+    askLoading,
+    askError,
+    isAiFallback,
+    refresh,
+    refreshFinalAiData,
+    askAiFinance,
+  };
+};

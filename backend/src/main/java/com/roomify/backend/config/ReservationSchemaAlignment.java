@@ -1,5 +1,8 @@
 package com.roomify.backend.config;
 
+import com.roomify.backend.entity.ExpenseCategory;
+import com.roomify.backend.entity.PaymentMethod;
+import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.user.Role;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,6 +54,7 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
         alignRoomSchema();
         alignStaffAndUserColumns();
         alignReservationColumns();
+        alignPaymentAndExpenseConstraints();
         backfillReservationFinancials();
     }
 
@@ -243,6 +247,40 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'PENDING'");
         execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS invoice_finalized BOOLEAN NOT NULL DEFAULT FALSE");
         execute("ALTER TABLE reservations ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP");
+    }
+
+    private void alignPaymentAndExpenseConstraints() {
+        alignEnumConstraint("payments", "payment_method", "payments_payment_method_check",
+                Arrays.stream(PaymentMethod.values()).map(Enum::name).toList());
+        alignEnumConstraint("payments", "payment_status", "payments_payment_status_check",
+                Arrays.stream(PaymentStatus.values()).map(Enum::name).toList());
+        alignEnumConstraint("reservations", "payment_status", "reservations_payment_status_check",
+                Arrays.stream(PaymentStatus.values()).map(Enum::name).toList());
+        alignEnumConstraint("expenses", "category", "expenses_category_check",
+                Arrays.stream(ExpenseCategory.values()).map(Enum::name).toList());
+        alignEnumConstraint("expenses", "payment_method", "expenses_payment_method_check",
+                Arrays.stream(PaymentMethod.values()).map(Enum::name).toList());
+    }
+
+    private void alignEnumConstraint(
+            String tableName,
+            String columnName,
+            String constraintName,
+            List<String> allowedValues) {
+        if (!tableExists(tableName) || !columnExists(tableName, columnName)) {
+            return;
+        }
+
+        String allowed = allowedValues.stream()
+                .map(value -> "'" + value + "'")
+                .collect(Collectors.joining(", "));
+
+        execute("ALTER TABLE " + tableName + " DROP CONSTRAINT IF EXISTS " + constraintName);
+        execute("""
+                ALTER TABLE %s
+                ADD CONSTRAINT %s
+                CHECK (%s IN (%s))
+                """.formatted(tableName, constraintName, columnName, allowed));
     }
 
     private void backfillReservationFinancials() {

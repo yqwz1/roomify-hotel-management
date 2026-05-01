@@ -5,6 +5,8 @@ public enum ExpenseCategory {
     CONSUMABLES,
     MAINTENANCE,
     UTILITIES,
+    SALARIES,
+    MARKETING,
     OFFICE_ADMIN,
     EQUIPMENT,
     MISCELLANEOUS
