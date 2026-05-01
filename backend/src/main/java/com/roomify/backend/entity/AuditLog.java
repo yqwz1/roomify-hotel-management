@@ -23,7 +23,7 @@ public class AuditLog {
     @Column(length = 1000)
     private String metadata;
 
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public AuditLog() {
