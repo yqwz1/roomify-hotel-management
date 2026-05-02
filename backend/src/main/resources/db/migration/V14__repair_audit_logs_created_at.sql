@@ -1,0 +1,12 @@
+ALTER TABLE audit_logs
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;
+
+UPDATE audit_logs
+SET created_at = CURRENT_TIMESTAMP
+WHERE created_at IS NULL;
+
+ALTER TABLE audit_logs
+    ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE audit_logs
+    ALTER COLUMN created_at SET NOT NULL;
