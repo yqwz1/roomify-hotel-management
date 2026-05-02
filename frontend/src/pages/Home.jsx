@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, BedDouble, CalendarClock, Receipt, Users } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Footer from '../components/Footer';
 import { checkHealth } from '../services/healthService';
@@ -15,7 +15,7 @@ const FEATURE_ICONS = {
 };
 
 export default function Home() {
-  const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { t } = useTranslation();
   const brandName = t('brandName');
   const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
@@ -80,10 +80,6 @@ export default function Home() {
     ],
     [t]
   );
-
-  if (!authLoading && isAuthenticated) {
-    return <Navigate to={dashboardPath} replace />;
-  }
 
   return (
     <div className="flex min-h-full flex-col bg-zinc-50">
