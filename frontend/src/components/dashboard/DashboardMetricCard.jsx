@@ -8,6 +8,10 @@ export default function DashboardMetricCard({
   tone = 'light',
   valueDirection = 'auto',
   valueWrap = 'break',
+  valueClassName = '',
+  hintClassName = '',
+  labelClassName = '',
+  cardClassName = '',
 }) {
   const toneStyles = tone === 'dark'
     ? {
@@ -26,17 +30,18 @@ export default function DashboardMetricCard({
       };
 
   return (
-    <div className={cn('relative overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card)}>
+    <div className={cn('relative overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label)}>
+          <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label, labelClassName)}>
             {label}
           </p>
           <p
             className={cn(
               'mt-3 text-2xl font-black tracking-tight sm:text-[2rem]',
-              valueWrap === 'nowrap' ? 'whitespace-nowrap' : 'break-words',
-              toneStyles.value
+              valueWrap === 'nowrap' ? 'whitespace-nowrap' : 'break-words [overflow-wrap:anywhere]',
+              toneStyles.value,
+              valueClassName
             )}
           >
             <span dir={valueDirection} className="inline-block [unicode-bidi:isolate]">
@@ -44,7 +49,7 @@ export default function DashboardMetricCard({
             </span>
           </p>
           {hint && (
-            <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint)}>
+            <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint, hintClassName)}>
               {hint}
             </p>
           )}
