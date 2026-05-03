@@ -174,7 +174,7 @@ export default function RoomTypes() {
     };
 
     return (
-        <div className="h-full bg-zinc-50 p-6 lg:p-8 space-y-8">
+        <div className="h-full bg-[#f7f3ed] p-6 lg:p-8 space-y-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between max-w-7xl mx-auto">
                 <div>
                     <h1 className="text-4xl font-extrabold tracking-tight text-black">{t('roomTypesTitle')}</h1>
@@ -201,21 +201,28 @@ export default function RoomTypes() {
                 </Alert>
             )}
 
-            <Card className="border border-zinc-200 rounded-3xl shadow-sm overflow-hidden max-w-7xl mx-auto bg-white">
-                <CardHeader className="pb-4 pt-8 px-8 border-b border-zinc-100">
+            <Card className="border border-[#e7ddd0] rounded-3xl shadow-sm overflow-hidden max-w-7xl mx-auto bg-white">
+                <CardHeader className="pb-4 pt-8 px-8 border-b border-[#e7ddd0]">
                     <CardTitle className="text-xl font-bold text-black">{t('allRoomTypes')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full caption-bottom text-sm text-start">
+                            <table className="w-full table-fixed caption-bottom text-sm text-start">
+                                <colgroup>
+                                    <col className="w-[30%]" />
+                                    <col className="w-[42%]" />
+                                    <col className="w-[12%]" />
+                                    <col className="w-[8%]" />
+                                    <col className="w-[8%]" />
+                                </colgroup>
                                 <thead className="[&_tr]:border-b">
                                     <tr className="border-b border-zinc-100">
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[260px]">{t('colDetails')}</th>
                                         <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities')}</th>
                                         <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice')}</th>
                                         <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests')}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions')}</th>
+                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[140px]">{t('colActions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -238,14 +245,21 @@ export default function RoomTypes() {
                         </div>
                     ) : (
                         <div className="relative w-full overflow-x-auto">
-                            <table className="w-full caption-bottom text-sm text-start">
+                            <table className="w-full table-fixed caption-bottom text-sm text-start">
+                                <colgroup>
+                                    <col className="w-[30%]" />
+                                    <col className="w-[42%]" />
+                                    <col className="w-[12%]" />
+                                    <col className="w-[8%]" />
+                                    <col className="w-[8%]" />
+                                </colgroup>
                                 <thead className="[&_tr]:border-b [&_tr]:border-zinc-100">
                                     <tr className="transition-colors hover:bg-zinc-50/50 data-[state=selected]:bg-zinc-50">
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[100px]">{t('colDetails')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 w-[260px]">{t('colDetails')}</th>
                                         <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400">{t('colAmenities')}</th>
                                         <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colPrice')}</th>
                                         <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end">{t('colMaxGuests')}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[100px]">{t('colActions')}</th>
+                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-zinc-400 text-end w-[140px]">{t('colActions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="[&_tr:last-child]:border-0">
@@ -253,7 +267,7 @@ export default function RoomTypes() {
                                         <tr key={rt.id} className="border-b border-zinc-100 transition-colors hover:bg-zinc-50 data-[state=selected]:bg-zinc-50">
                                             <td className="p-6 align-middle font-medium">
                                                 <div className="font-extrabold text-black text-base">{rt.name}</div>
-                                                <div className="text-xs font-medium text-zinc-500 truncate max-w-[200px] mt-1">{rt.description}</div>
+                                                <div className="mt-1 line-clamp-2 text-xs font-medium text-zinc-500">{rt.description}</div>
                                             </td>
                                             <td className="p-6 align-middle">
                                                 <div className="flex flex-wrap gap-2">
@@ -270,23 +284,25 @@ export default function RoomTypes() {
                                             <td className="p-6 align-middle text-end font-bold text-black">
                                                 {rt.maxGuests}
                                             </td>
-                                            <td className="p-6 align-middle text-end">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleEdit(rt)}
-                                                    className="h-10 w-10 rounded-full text-black border border-zinc-200 hover:text-black hover:bg-zinc-100 me-2"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleDelete(rt.id)}
-                                                    className="h-10 w-10 rounded-full text-red-600 border border-zinc-200 hover:text-white hover:bg-red-600 hover:border-red-600"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                            <td className="p-6 align-middle">
+                                                <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleEdit(rt)}
+                                                        className="h-10 w-10 rounded-full text-black border border-zinc-200 hover:text-black hover:bg-zinc-100"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(rt.id)}
+                                                        className="h-10 w-10 rounded-full text-red-600 border border-zinc-200 hover:text-white hover:bg-red-600 hover:border-red-600"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

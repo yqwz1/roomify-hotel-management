@@ -160,7 +160,7 @@ export default function GuestBillingStatus() {
             `${pageTx}.metrics.finalizedHint`,
             'Invoices marked finalized by the backend.'
           )}
-          tone="dark"
+          tone="light"
         />
       </div>
 

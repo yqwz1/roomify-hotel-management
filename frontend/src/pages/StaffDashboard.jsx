@@ -110,47 +110,60 @@ export default function StaffDashboard() {
             {t(`${pageTx}.workspaceTitle`)}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <div className="flex min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
                 {t(`${pageTx}.currentFocus`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{t('navReservations')}</p>
+              <p className="mt-auto whitespace-nowrap text-[clamp(1.2rem,1.4vw,1.5rem)] font-black leading-none tracking-tight">
+                {t('navReservations')}
+              </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <div className="flex min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
                 {t(`${pageTx}.activeQueue`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{metrics.visibleCount}</p>
+              <p className="mt-auto whitespace-nowrap text-[clamp(1.2rem,1.4vw,1.5rem)] font-black leading-none tracking-tight">
+                {metrics.visibleCount}
+              </p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardMetricCard
           icon={CalendarDays}
           label={t(`${pageTx}.metrics.visibleLabel`)}
           value={String(metrics.visibleCount)}
           hint={t(`${pageTx}.metrics.visibleHint`)}
+          labelClassName="whitespace-nowrap overflow-hidden text-ellipsis tracking-[0.14em]"
+          hintClassName="whitespace-nowrap overflow-hidden text-ellipsis"
         />
         <DashboardMetricCard
           icon={ClipboardCheck}
           label={t(`${pageTx}.metrics.arrivalsLabel`)}
           value={String(metrics.arrivalsReady)}
           hint={t(`${pageTx}.metrics.arrivalsHint`)}
+          labelClassName="whitespace-nowrap overflow-hidden text-ellipsis tracking-[0.14em]"
+          hintClassName="whitespace-nowrap overflow-hidden text-ellipsis"
         />
         <DashboardMetricCard
           icon={DoorClosedLocked}
           label={t(`${pageTx}.metrics.departuresLabel`)}
           value={String(metrics.departuresToday)}
           hint={t(`${pageTx}.metrics.departuresHint`)}
+          labelClassName="whitespace-nowrap overflow-hidden text-ellipsis tracking-[0.14em]"
+          hintClassName="whitespace-nowrap overflow-hidden text-ellipsis"
         />
         <DashboardMetricCard
           icon={Receipt}
           label={t(`${pageTx}.metrics.balanceLabel`)}
           value={String(metrics.balancesDue)}
           hint={t(`${pageTx}.metrics.balanceHint`)}
-          tone="dark"
+          tone="light"
+          cardClassName="!bg-white !text-zinc-950 !border-zinc-200 !shadow-sm"
+          labelClassName="whitespace-nowrap overflow-hidden text-ellipsis tracking-[0.14em]"
+          hintClassName="whitespace-nowrap overflow-hidden text-ellipsis"
         />
       </div>
 

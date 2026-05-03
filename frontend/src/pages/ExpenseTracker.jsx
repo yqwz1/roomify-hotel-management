@@ -590,7 +590,7 @@ export default function ExpenseTracker() {
           'expenseTrackerPage.metrics.netProfitHint',
           'Revenue minus expenses for the current range.'
         ),
-        tone: 'dark',
+        tone: 'light',
       },
       {
         icon: CalendarRange,
@@ -787,7 +787,7 @@ export default function ExpenseTracker() {
             t,
             'expenseTrackerPage.metaNet',
             'Net {{value}}',
-            { value: formatLocalizedCurrency(summary?.netProfit ?? 0, i18n.language) }
+            { value: `\u200E${formatLocalizedCurrency(summary?.netProfit ?? 0, i18n.language)}\u200E` }
           ),
         ]}
       >
@@ -814,23 +814,27 @@ export default function ExpenseTracker() {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {translateWithFallback(t, 'expenseTrackerPage.heroExpensesLabel', 'Expenses')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedCurrency(summary?.totalExpenses ?? 0, i18n.language)}
+              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedCurrency(summary?.totalExpenses ?? 0, i18n.language)}
+                </span>
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {translateWithFallback(t, 'expenseTrackerPage.heroRevenueLabel', 'Revenue')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedCurrency(summary?.totalRevenue ?? 0, i18n.language)}
+              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedCurrency(summary?.totalRevenue ?? 0, i18n.language)}
+                </span>
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {translateWithFallback(t, 'expenseTrackerPage.heroRecurringLabel', 'Recurring items')}
               </p>
-              <p className="mt-2 text-3xl font-black">
+              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl">
                 {formatLocalizedNumber(recurringCount, i18n.language)}
               </p>
             </div>

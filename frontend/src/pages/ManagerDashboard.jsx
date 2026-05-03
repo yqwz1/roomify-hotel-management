@@ -806,51 +806,59 @@ function RoomTypeExplorer({
             />
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
                 {translateWithFallback(
                   t,
                   `${pageTx}.distributionTotalRooms`,
                   'Total rooms'
                 )}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
-                {formatLocalizedNumber(selectedItem.totalRooms, language)}
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedNumber(selectedItem.totalRooms, language)}
+                </span>
               </p>
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
                 {translateWithFallback(
                   t,
                   `${pageTx}.distributionOccupiedRooms`,
                   'Occupied rooms'
                 )}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
-                {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
+                </span>
               </p>
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
                 {translateWithFallback(t, `${pageTx}.distributionVacantRooms`, 'Vacant rooms')}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
-                {formatLocalizedNumber(vacantRooms, language)}
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedNumber(vacantRooms, language)}
+                </span>
               </p>
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
                 {translateWithFallback(t, `${pageTx}.distributionRateLabel`, 'Base rate')}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
-                {formatLocalizedCurrency(selectedItem.basePrice, language, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedCurrency(selectedItem.basePrice, language, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
               </p>
             </div>
           </div>
@@ -1523,6 +1531,7 @@ export default function ManagerDashboard() {
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('managerDashboardTitle')}
         description={t(`${pageTx}.description`, { name: welcomeName })}
+        desktopAlign="start"
         className="border-emerald-400/10 bg-[linear-gradient(135deg,#0f172a_0%,#0f766e_52%,#072f2a_100%)]"
         meta={[
           t(`${pageTx}.metaRange`, {
@@ -1556,51 +1565,59 @@ export default function ManagerDashboard() {
           }),
         ]}
       >
-        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+        <div className="w-full max-w-[620px] rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur xl:ms-auto">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
             {translateWithFallback(t, `${pageTx}.heroSnapshotTitle`, 'Live Snapshot')}
           </p>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
                 {translateWithFallback(t, `${pageTx}.heroActiveReservations`, 'Active reservations')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedNumber(metrics.activeReservations, i18n.language)}
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedNumber(metrics.activeReservations, i18n.language)}
+                </span>
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
                 {translateWithFallback(t, `${pageTx}.heroRevenuePerReservation`, 'Revenue per reservation')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedCurrency(revenuePerReservation, i18n.language, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedCurrency(revenuePerReservation, i18n.language, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
                 {translateWithFallback(t, `${pageTx}.heroNetProfit`, 'Net profit')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
                 {translateWithFallback(t, `${pageTx}.heroDaysInView`, 'Days in view')}
               </p>
-              <p className="mt-2 text-3xl font-black">
-                {formatLocalizedNumber(getDaysInRange(appliedRange), i18n.language)}
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+                  {formatLocalizedNumber(getDaysInRange(appliedRange), i18n.language)}
+                </span>
               </p>
             </div>
           </div>

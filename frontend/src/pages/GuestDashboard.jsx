@@ -283,13 +283,15 @@ export default function GuestDashboard() {
           label={t(`${pageTx}.metrics.supportEmailLabel`)}
           value={SUPPORT_EMAIL}
           hint={SUPPORT_EMAIL}
+          valueClassName="text-xl sm:text-2xl"
+          hintClassName="text-xs sm:text-sm text-zinc-400"
         />
         <DashboardMetricCard
           icon={LifeBuoy}
           label={t(`${pageTx}.metrics.helpDeskLabel`)}
           value={t(`${pageTx}.metrics.helpDeskValue`)}
           hint={t(`${pageTx}.metrics.helpDeskHint`)}
-          tone="dark"
+          tone="light"
         />
       </div>
 

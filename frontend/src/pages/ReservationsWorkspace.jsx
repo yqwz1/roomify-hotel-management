@@ -323,7 +323,8 @@ export default function ReservationsWorkspace() {
           label={t(`${pageTx}.metrics.balanceLabel`)}
           value={String(metrics.balancesDue)}
           hint={t(`${pageTx}.metrics.balanceHint`)}
-          tone="dark"
+          tone="light"
+          cardClassName="!bg-white !text-zinc-950 !border-zinc-200 !shadow-sm"
         />
       </div>
 
