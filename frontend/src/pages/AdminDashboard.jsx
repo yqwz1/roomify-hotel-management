@@ -299,7 +299,9 @@ export default function AdminDashboard() {
             'adminDashboardPage.metrics.averageRateHint',
             'Average starting rate across the configured room catalog.'
           )}
-          tone="dark"
+          valueDirection="ltr"
+          valueWrap="nowrap"
+          tone="light"
         />
       </div>
 

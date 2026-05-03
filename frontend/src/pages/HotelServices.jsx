@@ -389,7 +389,7 @@ export default function HotelServices() {
             'hotelServicesPage.metrics.averagePriceHint',
             'Average service price across the active catalog.'
           )}
-          tone="dark"
+          tone="light"
         />
       </div>
 

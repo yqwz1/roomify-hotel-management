@@ -18,7 +18,6 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   const homePath = '/';
   const pageMeta = getPageMeta(location.pathname, roles, t);
   const roleLabel = getRoleDisplayLabel(roles, t);
-  const brandName = t('brandName');
   const currentDate = new Intl.DateTimeFormat(i18n.language?.startsWith('ar') ? 'ar-SA' : 'en-US', {
     weekday: 'short',
     month: 'long',
@@ -60,19 +59,18 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
                   {currentDate}
                 </p>
               </div>
-
-              <Link
-                to={homePath}
-                className="hidden rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-black lg:inline-flex"
-              >
-                {brandName}
-              </Link>
             </div>
           </div>
         </div>
 
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
           <LanguageSwitcher />
+          <Link
+            to={homePath}
+            className="inline-flex shrink-0 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-bold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-black"
+          >
+            {t('homeNav')}
+          </Link>
 
           <div className="hidden items-center gap-3 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 shadow-sm xl:flex">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-zinc-950 text-xs font-black uppercase text-white">

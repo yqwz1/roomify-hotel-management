@@ -6,14 +6,16 @@ export default function DashboardMetricCard({
   value,
   hint,
   tone = 'light',
+  valueDirection = 'auto',
+  valueWrap = 'break',
 }) {
   const toneStyles = tone === 'dark'
     ? {
         card: 'border-white/10 bg-zinc-950 text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
         icon: 'bg-white/10 text-white',
-        label: 'text-zinc-400',
-        hint: 'text-zinc-500',
-        value: 'text-white',
+        label: '!text-white',
+        hint: '!text-white',
+        value: '!text-white',
       }
     : {
         card: 'border-black/5 bg-white text-zinc-950 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
@@ -30,8 +32,16 @@ export default function DashboardMetricCard({
           <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label)}>
             {label}
           </p>
-          <p className={cn('mt-3 break-words text-2xl font-black tracking-tight sm:text-[2rem]', toneStyles.value)}>
-            {value}
+          <p
+            className={cn(
+              'mt-3 text-2xl font-black tracking-tight sm:text-[2rem]',
+              valueWrap === 'nowrap' ? 'whitespace-nowrap' : 'break-words',
+              toneStyles.value
+            )}
+          >
+            <span dir={valueDirection} className="inline-block [unicode-bidi:isolate]">
+              {value}
+            </span>
           </p>
           {hint && (
             <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint)}>

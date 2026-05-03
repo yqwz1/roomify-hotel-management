@@ -7,7 +7,10 @@ export default function DashboardHero({
   meta = [],
   children,
   className,
+  desktopAlign = 'end',
 }) {
+  const desktopAlignClass = desktopAlign === 'start' ? 'xl:items-start' : 'xl:items-end';
+
   return (
     <section
       className={cn(
@@ -17,7 +20,7 @@ export default function DashboardHero({
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.14),transparent_28%)]" />
 
-      <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <div className={cn('relative flex flex-col gap-6 xl:flex-row xl:justify-between', desktopAlignClass)}>
         <div className="max-w-3xl">
           {eyebrow && (
             <p className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
@@ -28,7 +31,7 @@ export default function DashboardHero({
           <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-zinc-300 sm:text-base">
+          <p className="mt-3 max-w-2xl text-base font-medium leading-7 text-zinc-300 sm:text-[1.15rem]">
             {description}
           </p>
 

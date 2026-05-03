@@ -36,9 +36,20 @@ export default function DashboardQuickAction({
           <Icon className="h-5 w-5" />
         </span>
 
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold">{title}</p>
-          <p className={cn('mt-1 text-xs font-medium', toneStyles.description)}>
+        <div className="min-w-0 space-y-1">
+          <p
+            dir="auto"
+            className="text-sm font-bold leading-tight [unicode-bidi:plaintext]"
+          >
+            {title}
+          </p>
+          <p
+            dir="auto"
+            className={cn(
+              'text-xs font-medium leading-relaxed [overflow-wrap:anywhere] [unicode-bidi:plaintext]',
+              toneStyles.description
+            )}
+          >
             {description}
           </p>
         </div>

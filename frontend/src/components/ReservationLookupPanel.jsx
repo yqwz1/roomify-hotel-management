@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CalendarDays, Search, UserRound } from 'lucide-react';
+import { ArrowRight, CalendarDays, RotateCcw, Search, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ReservationStatus } from '../domain/reservations/statusRules';
 import { searchReservations } from '../services/reservationService';
@@ -364,12 +364,13 @@ export default function ReservationLookupPanel({
             </label>
           </div>
 
-          <div className="flex flex-wrap gap-3 sm:justify-end">
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
             <button
               type="submit"
               disabled={loading || !hasActiveFilters(filters)}
-              className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+              className="inline-flex h-12 min-w-[170px] items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-6 text-sm font-extrabold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-zinc-800 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none"
             >
+              <SlidersHorizontal className="h-4 w-4" />
               {loading ? t('common.searching') : t('common.searchReservation')}
             </button>
 
@@ -377,8 +378,9 @@ export default function ReservationLookupPanel({
               type="button"
               onClick={resetFilters}
               disabled={isAtDefaultState}
-              className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+              className="inline-flex h-12 min-w-[170px] items-center justify-center gap-2 rounded-2xl border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-zinc-400 hover:bg-zinc-50 hover:shadow disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:shadow-none"
             >
+              <RotateCcw className="h-4 w-4" />
               {t('common.clearFilters')}
             </button>
           </div>
