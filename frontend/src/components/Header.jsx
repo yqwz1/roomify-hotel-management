@@ -4,7 +4,7 @@ import { Menu, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { getDefaultRouteForRoles } from './navigation/navConfig';
-
+import { Button } from '@/components/ui/button';
 
 export default function Header({ onMenuToggle }) {
   const { isAuthenticated, user, logout, hasRole } = useAuth();
@@ -35,14 +35,16 @@ export default function Header({ onMenuToggle }) {
         <div className="flex items-center gap-3">
           {/* Hamburger – only visible on mobile when authenticated */}
           {isAuthenticated && onMenuToggle && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               type="button"
               onClick={onMenuToggle}
               className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition"
               aria-label={t('openNavigation')}
             >
               <Menu className="h-5 w-5" />
-            </button>
+            </Button>
           )}
 
           <Link to="/" className="text-black">
@@ -78,12 +80,11 @@ export default function Header({ onMenuToggle }) {
 
           {!isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <Link
-                to="/login"
-                className="px-6 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-bold"
-              >
-                {t('signIn')}
-              </Link>
+              <Button asChild className="px-6 py-2 text-sm bg-black text-white rounded-full hover:bg-zinc-800 transition font-bold">
+                <Link to="/login">
+                  {t('signIn')}
+                </Link>
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
@@ -102,14 +103,15 @@ export default function Header({ onMenuToggle }) {
                 )}
               </div>
 
-              <button
+              <Button
+                variant="ghost"
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-black rounded-full transition font-medium border border-transparent hover:border-zinc-200"
                 title={t('logout')}
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:block">{t('logout')}</span>
-              </button>
+              </Button>
             </div>
           )}
         </div>

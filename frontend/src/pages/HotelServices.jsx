@@ -136,11 +136,10 @@ function ServiceModal({
         </label>
 
         <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={formData.active}
-            onChange={(event) =>
-              setFormData((current) => ({ ...current, active: event.target.checked }))
+            onCheckedChange={(checked) =>
+              setFormData((current) => ({ ...current, active: checked === true }))
             }
             className="h-4 w-4 rounded border-zinc-300"
           />

@@ -29,7 +29,9 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
 import { TrendLineChart } from '../components/charts/TrendLineChart';
 import { RadialStatusChart } from '../components/charts/RadialStatusChart';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
 import { useRoomTypes } from '../hooks/useRoomTypes';
@@ -542,19 +544,20 @@ function InteractiveTrendExplorer({
 
         <div className="mt-5 flex flex-wrap gap-2">
           {points.map((point, index) => (
-            <button
+            <Button
               key={point.key}
+              variant="outline"
               type="button"
               onClick={() => onSelectIndex(index)}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] transition',
+                'rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] transition h-auto',
                 index === selectedIndex
                   ? activeMode.accentSurface
-                  : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
+                  : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700'
               )}
             >
               {point.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -2037,26 +2040,28 @@ export default function ManagerDashboard() {
         ) : (
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <button
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() => setNotificationScope('all')}
                 className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-bold transition',
+                  'rounded-full border px-4 py-2 text-sm font-bold transition h-auto',
                   notificationScope === 'all'
-                    ? 'border-zinc-950 bg-zinc-950 text-white'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                    ? 'border-zinc-950 bg-zinc-950 text-white hover:bg-zinc-800 hover:text-white'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
                 )}
               >
                 {translateWithFallback(t, `${pageTx}.notificationsAll`, 'All alerts')}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() => setNotificationScope('unread')}
                 className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-bold transition',
+                  'rounded-full border px-4 py-2 text-sm font-bold transition h-auto',
                   notificationScope === 'unread'
-                    ? 'border-rose-300 bg-rose-500 text-white'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                    ? 'border-rose-300 bg-rose-500 text-white hover:bg-rose-600 hover:text-white'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
                 )}
               >
                 {translateWithFallback(
@@ -2064,7 +2069,7 @@ export default function ManagerDashboard() {
                   `${pageTx}.notificationsUnread`,
                   'Unread alerts'
                 )}
-              </button>
+              </Button>
             </div>
 
             {visibleNotifications.length === 0 ? (

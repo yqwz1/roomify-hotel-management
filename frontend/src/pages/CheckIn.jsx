@@ -257,11 +257,10 @@ export default function CheckIn() {
                             : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-white'
                         }`}
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={checked}
-                          onChange={() => toggleCheck(item.id)}
-                          className="mt-0.5 h-5 w-5 rounded border-zinc-300 text-black focus:ring-black/10"
+                          onCheckedChange={(c) => toggleCheck(item.id)}
+                          className="mt-0.5 h-5 w-5 rounded border-zinc-300 focus-visible:ring-black/10 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                         />
                         <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl ${
                           checked ? 'bg-emerald-200 text-emerald-900' : 'bg-white text-zinc-500 shadow-sm'
@@ -297,18 +296,18 @@ export default function CheckIn() {
             )}
 
             {reservationStatusRules.canCheckIn(selected.status) && (
-              <button
+              <Button
                 type="button"
                 onClick={handleCheckIn}
                 disabled={!canCheckIn || submitting}
-                className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 h-auto"
               >
                 {submitting
                   ? t('processing')
                   : !allChecked
                     ? `${t('completeChecklistToCheckIn')} (${completedCount}/${CHECKLIST_ITEMS.length})`
                     : t('confirmCheckIn')}
-              </button>
+              </Button>
             )}
           </div>
         )}

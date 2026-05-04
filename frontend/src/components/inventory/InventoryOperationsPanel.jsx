@@ -267,15 +267,15 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </span>
         </label>
 
-        <label className="space-y-2">
+        <label className="space-y-2 flex flex-col">
           <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
-          <textarea
+          <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950"
+            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -365,15 +365,15 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
           </span>
         </label>
 
-        <label className="space-y-2">
+        <label className="space-y-2 flex flex-col">
           <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
-          <textarea
+          <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950"
+            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -454,15 +454,15 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
           </span>
         </label>
 
-        <label className="space-y-2">
+        <label className="space-y-2 flex flex-col">
           <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
-          <textarea
+          <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950"
+            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -621,15 +621,15 @@ function TemplateModal({
           </label>
         </div>
 
-        <label className="space-y-2">
+        <label className="space-y-2 flex flex-col">
           <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
-          <textarea
+          <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950"
+            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 

@@ -404,23 +404,24 @@ export default function BookRoom() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   {t('back')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={submitting || nights <= 0}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 h-auto"
                 >
                   {submitting
                     ? t('bookRoomPage.creatingReservation')
                     : t('confirmBookingPrice', { price: Number(totalPrice ?? 0).toFixed(2) })}
-                </button>
+                </Button>
               </div>
             </form>
           </DashboardPanel>

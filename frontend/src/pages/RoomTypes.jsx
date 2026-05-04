@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRoomTypes } from '../hooks/useRoomTypes';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import DashboardHero from '../components/dashboard/DashboardHero';
 import { useTranslation } from 'react-i18next';
-import { formatLocalizedCurrency, translateKnownValue } from '../utils/localization';
+import { formatLocalizedCurrency, translateKnownValue, translateWithFallback } from '../utils/localization';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
 
@@ -68,6 +70,26 @@ export default function RoomTypes() {
     useEffect(() => {
         fetchRoomTypes();
     }, [fetchRoomTypes]);
+
+    const summary = useMemo(() => {
+        const total = roomTypes.length;
+        const amenityCount = new Set(
+            roomTypes.flatMap((roomType) =>
+                roomType.amenities
+                    ? roomType.amenities.split(',').map((amenity) => amenity.trim()).filter(Boolean)
+                    : []
+            )
+        ).size;
+        const averageRate = total
+            ? roomTypes.reduce((sum, roomType) => sum + Number(roomType.basePrice || 0), 0) / total
+            : 0;
+
+        return {
+            total,
+            amenityCount,
+            averageRate,
+        };
+    }, [roomTypes]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -174,14 +196,55 @@ export default function RoomTypes() {
     };
 
     return (
-        <div className="h-full bg-[#f7f3ed] p-6 lg:p-8 space-y-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between max-w-7xl mx-auto">
-                <div>
-                    <h1 className="text-4xl font-extrabold tracking-tight text-black">{t('roomTypesTitle')}</h1>
-                    <p className="text-zinc-500 mt-2 font-medium text-sm">{t('roomTypesDesc')}</p>
+        <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+            <DashboardHero
+                eyebrow={translateWithFallback(t, 'roomTypesPage.heroEyebrow', 'Catalog control')}
+                title={t('roomTypesTitle')}
+                description={t('roomTypesDesc')}
+                meta={[
+                    translateWithFallback(t, 'roomTypesPage.totalMeta', '{{count}} room types', {
+                        count: summary.total,
+                    }),
+                    translateWithFallback(t, 'roomTypesPage.amenitiesMeta', '{{count}} amenities', {
+                        count: summary.amenityCount,
+                    }),
+                    translateWithFallback(t, 'roomTypesPage.rateMeta', 'Avg {{value}}', {
+                        value: formatLocalizedCurrency(summary.averageRate, i18n.language, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                        }),
+                    }),
+                ]}
+            >
+                <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+                        {translateWithFallback(t, 'roomTypesPage.catalogSnapshot', 'Catalog Snapshot')}
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                                {translateWithFallback(t, 'roomTypesPage.typesLabel', 'Types')}
+                            </p>
+                            <p className="mt-2 text-lg font-black">{summary.total}</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                                {translateWithFallback(t, 'roomTypesPage.avgRateLabel', 'Avg Rate')}
+                            </p>
+                            <p className="mt-2 whitespace-nowrap text-lg font-black">
+                                {formatLocalizedCurrency(summary.averageRate, i18n.language, {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
+                                })}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 self-start sm:self-auto rounded-full bg-black hover:bg-zinc-800 text-white font-bold px-6 py-6 transition-all shadow-md hover:shadow-lg">
-                    <Plus className="h-5 w-5" /> {t('createNewBtn')}
+            </DashboardHero>
+
+            <div className="flex justify-end">
+                <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800">
+                    <Plus className="h-4 w-4" /> {t('createNewBtn')}
                 </Button>
             </div>
 
@@ -201,8 +264,8 @@ export default function RoomTypes() {
                 </Alert>
             )}
 
-            <Card className="border border-[#e7ddd0] rounded-3xl shadow-sm overflow-hidden max-w-7xl mx-auto bg-white">
-                <CardHeader className="pb-4 pt-8 px-8 border-b border-[#e7ddd0]">
+            <Card className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-sm">
+                <CardHeader className="border-b border-zinc-100 px-8 pb-4 pt-8">
                     <CardTitle className="text-xl font-bold text-black">{t('allRoomTypes')}</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -384,11 +447,10 @@ export default function RoomTypes() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {COMMON_AMENITIES.map((amenity) => (
                                     <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-black cursor-pointer p-3 border border-zinc-200 rounded-2xl hover:bg-zinc-50 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            className="h-5 w-5 rounded-full border-zinc-300 text-black focus:ring-black"
+                                        <Checkbox
+                                            className="h-5 w-5 rounded-full border-zinc-300 focus-visible:ring-black data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                             checked={formData.amenities.includes(amenity)}
-                                            onChange={() => handleAmenityToggle(amenity)}
+                                            onCheckedChange={() => handleAmenityToggle(amenity)}
                                         />
                                         <span>{translateKnownValue(amenity, t)}</span>
                                     </label>

@@ -109,20 +109,20 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-2 flex flex-col">
             <label
               htmlFor="cancel-reason"
               className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400"
             >
               {t('reasonForCancellation')}
             </label>
-            <textarea
+            <Textarea
               id="cancel-reason"
               value={reason}
               onChange={(event) => setReason(event.target.value)}
               placeholder={t('cancelReasonPlaceholder')}
               rows={4}
-              className="w-full resize-none rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="w-full resize-none rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
             />
           </div>
 

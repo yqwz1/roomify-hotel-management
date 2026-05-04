@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
 import { X, LayoutDashboard, Tag, Users, Settings, Search, CalendarDays, Key, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 
 const ICON_MAP = {
   '/manager/dashboard': LayoutDashboard,
@@ -87,13 +88,15 @@ export default function Sidebar({ isOpen, onClose }) {
             <span className="text-2xl font-black text-white tracking-tighter">{brandName}</span>
           </div>
           {/* Close button – mobile only */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             className="md:hidden p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
             aria-label={t('closeMenu')}
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Navigation links */}

@@ -82,8 +82,8 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           </div>
 
           <nav className="flex-1 overflow-y-auto px-4 py-5">
-            {sections.map((section) => (
-              <div key={`${section.id}-${section.items[0]?.path ?? section.label}`} className="mb-6 last:mb-0">
+            {sections.map((section, index) => (
+              <div key={`${section.id}-${index}`} className="mb-6 last:mb-0">
                 <p className="px-3 text-[11px] font-bold uppercase tracking-[0.24em] text-zinc-500">
                   {section.label}
                 </p>
