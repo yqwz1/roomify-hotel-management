@@ -41,10 +41,10 @@ const PANEL_FEATURES = [
 ];
 
 const DEMO_ACCOUNTS = [
-  { role: 'Admin', email: 'admin@roomify.com', color: 'bg-violet-100 text-violet-700' },
-  { role: 'Manager', email: 'manager@roomify.com', color: 'bg-blue-100 text-blue-700' },
-  { role: 'Staff', email: 'staff@roomify.com', color: 'bg-emerald-100 text-emerald-700' },
-  { role: 'Guest', email: 'demo.guest@roomify.dev', color: 'bg-amber-100 text-amber-700' },
+  { role: 'Admin', email: 'admin@roomify.com', color: 'bg-zinc-100 text-zinc-800' },
+  { role: 'Manager', email: 'manager@roomify.com', color: 'bg-zinc-100 text-zinc-800' },
+  { role: 'Staff', email: 'staff@roomify.com', color: 'bg-emerald-50 text-emerald-800' },
+  { role: 'Guest', email: 'demo.guest@roomify.dev', color: 'bg-amber-50 text-amber-800' },
 ];
 
 const LoginPage = () => {
@@ -157,10 +157,9 @@ const LoginPage = () => {
           LEFT PANEL — PMS Visual Showcase (desktop)
          ══════════════════════════════════════════════ */}
       <div className="relative hidden overflow-hidden lg:flex lg:min-h-[calc(100vh-4rem)] lg:w-[46%] lg:flex-col lg:justify-between xl:w-[48%]">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_70%)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-blue-900/30 to-transparent" />
+        {/* Gradient background — using zinc/dark from dashboard hero */}
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.14),transparent_28%)]" />
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-12">
@@ -168,7 +167,7 @@ const LoginPage = () => {
           <div>
             <div className="flex items-center gap-2.5">
               <span className="text-2xl font-black tracking-tight text-white">{brandName}</span>
-              <span className="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-100">
+              <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300 backdrop-blur">
                 PMS
               </span>
             </div>
@@ -176,15 +175,15 @@ const LoginPage = () => {
 
           {/* Center — Value prop */}
           <div>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-200">
+            <p className="mb-3 text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
               {t('hotelManagementSystem')}
             </p>
-            <h1 className="mb-4 text-[2.1rem] font-extrabold leading-[1.15] tracking-tight text-white xl:text-[2.4rem]">
+            <h1 className="mb-4 text-[2.1rem] font-black leading-[1.15] tracking-tight text-white xl:text-[2.4rem]">
               {t('manageYourProperty')}
               <br />
-              <span className="text-blue-200">{t('withConfidence')}</span>
+              <span className="text-zinc-400">{t('withConfidence')}</span>
             </h1>
-            <p className="max-w-sm text-sm leading-relaxed text-blue-100/80">
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-zinc-400">
               {t('loginDescription')}
             </p>
 
@@ -195,12 +194,12 @@ const LoginPage = () => {
                 return (
                   <div
                     key={s.label}
-                    className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/10 px-3.5 py-2 backdrop-blur-sm"
+                    className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-3.5 py-2 backdrop-blur-sm"
                   >
-                    <Icon className="h-4 w-4 text-blue-200" />
+                    <Icon className="h-4 w-4 text-zinc-400" />
                     <div>
-                      <p className="text-sm font-bold text-white">{s.value}</p>
-                      <p className="text-[10px] text-blue-200">{s.label}</p>
+                      <p className="text-sm font-black text-white">{s.value}</p>
+                      <p className="text-[10px] font-medium text-zinc-500">{s.label}</p>
                     </div>
                   </div>
                 );
@@ -213,14 +212,14 @@ const LoginPage = () => {
             <div className="space-y-3">
               {PANEL_FEATURES.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-white/10">
-                    <Icon className="h-3.5 w-3.5 text-blue-200" />
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                    <Icon className="h-3.5 w-3.5 text-zinc-400" />
                   </div>
-                  <span className="text-[13px] font-medium text-blue-100/90">{text}</span>
+                  <span className="text-[13px] font-medium text-zinc-300">{text}</span>
                 </div>
               ))}
             </div>
-            <p className="mt-6 text-[11px] font-medium text-blue-300/50">
+            <p className="mt-6 text-[11px] font-bold text-zinc-600">
               {t('copyright', { year: new Date().getFullYear() })}
             </p>
           </div>
@@ -230,12 +229,12 @@ const LoginPage = () => {
       {/* ══════════════════════════════════════════════
           RIGHT PANEL — Login Form
          ══════════════════════════════════════════════ */}
-      <div className="flex min-h-[calc(100vh-4rem)] flex-1 items-center justify-center bg-slate-50 px-5 py-8 sm:px-8 lg:px-10">
+      <div className="flex min-h-[calc(100vh-4rem)] flex-1 items-center justify-center bg-[#f7f3ed] px-5 py-8 sm:px-8 lg:px-10">
         <div className="w-full max-w-[400px]">
           {/* Mobile brand */}
           <div className="mb-6 flex items-center justify-center gap-2 lg:hidden">
-            <span className="text-2xl font-black tracking-tight text-slate-900">{brandName}</span>
-            <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700">
+            <span className="text-2xl font-black tracking-tight text-zinc-950">{brandName}</span>
+            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
               PMS
             </span>
           </div>
@@ -243,17 +242,17 @@ const LoginPage = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
             <div className="mb-6">
-              <h2 className="mb-1 text-xl font-extrabold tracking-tight text-slate-900" role="heading" aria-level="1">
+              <h2 className="mb-1 text-xl font-black tracking-tight text-zinc-950" role="heading" aria-level="1">
                 {t('signInToAccount')}
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm font-medium text-zinc-500">
                 {t('enterCredentials')}
               </p>
             </div>
 
             {/* Error alert */}
             {loginError && (
-              <Alert variant="destructive" className="mb-4 rounded-xl">
+              <Alert variant="destructive" className="mb-4 rounded-2xl">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>{t('authFailed')}</AlertTitle>
                 <AlertDescription>{loginError}</AlertDescription>
@@ -263,7 +262,7 @@ const LoginPage = () => {
             {/* ── Form ── */}
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="email" className="text-sm font-bold text-zinc-700">
                   {t('emailAddress')}
                 </Label>
                 <Input
@@ -274,21 +273,21 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className={`h-11 rounded-lg border bg-white px-3.5 text-sm transition ${errors.email ? 'border-red-400 focus-visible:ring-red-200' : 'border-slate-200 focus-visible:ring-blue-200 focus-visible:border-blue-400'}`}
+                  className={`h-11 rounded-xl border bg-white px-3.5 text-sm transition ${errors.email ? 'border-red-400 focus-visible:ring-red-200' : 'border-zinc-200 focus-visible:ring-zinc-300 focus-visible:border-zinc-400'}`}
                 />
                 {errors.email && (
-                  <p className="ps-1 text-xs font-medium text-red-500">{errors.email}</p>
+                  <p className="ps-1 text-xs font-semibold text-red-500">{errors.email}</p>
                 )}
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-semibold text-slate-700">
+                  <Label htmlFor="password" className="text-sm font-bold text-zinc-700">
                     {t('password')}
                   </Label>
                   <a
                     href={SUPPORT_LINK}
-                    className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-800"
+                    className="text-xs font-semibold text-zinc-500 transition-colors hover:text-zinc-950"
                   >
                     {t('contactSupport')}
                   </a>
@@ -300,16 +299,16 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className={`h-11 rounded-lg border bg-white px-3.5 text-sm transition ${errors.password ? 'border-red-400 focus-visible:ring-red-200' : 'border-slate-200 focus-visible:ring-blue-200 focus-visible:border-blue-400'}`}
+                  className={`h-11 rounded-xl border bg-white px-3.5 text-sm transition ${errors.password ? 'border-red-400 focus-visible:ring-red-200' : 'border-zinc-200 focus-visible:ring-zinc-300 focus-visible:border-zinc-400'}`}
                 />
                 {errors.password && (
-                  <p className="ps-1 text-xs font-medium text-red-500">{errors.password}</p>
+                  <p className="ps-1 text-xs font-semibold text-red-500">{errors.password}</p>
                 )}
               </div>
 
               <Button
                 type="submit"
-                className="mt-2 h-11 w-full rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-md hover:shadow-blue-600/25"
+                className="mt-2 h-11 w-full rounded-full bg-zinc-950 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -328,12 +327,12 @@ const LoginPage = () => {
 
             {/* ── Demo Credentials (dev only) ── */}
             {showDemoCredentials && (
-              <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4">
+              <div className="mt-5 rounded-[1.35rem] border border-zinc-200 bg-white p-4">
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100">
-                    <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-zinc-100">
+                    <Building2 className="h-3.5 w-3.5 text-zinc-500" />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Demo Accounts</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Demo Accounts</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {DEMO_ACCOUNTS.map((acc) => (
@@ -341,36 +340,36 @@ const LoginPage = () => {
                       key={acc.email}
                       type="button"
                       onClick={() => fillDemoCredentials(acc.email)}
-                      className="group flex flex-col items-start rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-left transition hover:border-blue-200 hover:bg-blue-50/50"
+                      className="group flex flex-col items-start rounded-xl border border-zinc-100 bg-zinc-50/50 px-3 py-2 text-left transition hover:border-zinc-300 hover:bg-white hover:shadow-sm"
                     >
-                      <span className={`mb-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${acc.color}`}>
+                      <span className={`mb-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-black ${acc.color}`}>
                         {acc.role}
                       </span>
-                      <span className="text-[11px] font-medium text-slate-500 group-hover:text-blue-600 transition" dir="ltr">
+                      <span className="text-[11px] font-semibold text-zinc-500 group-hover:text-zinc-950 transition" dir="ltr">
                         {acc.email}
                       </span>
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-center text-[10px] text-slate-400" dir="ltr">
-                  Password for all: <span className="font-mono font-semibold text-slate-500">password123</span>
+                <p className="mt-2 text-center text-[10px] text-zinc-400" dir="ltr">
+                  Password for all: <span className="font-mono font-bold text-zinc-600">password123</span>
                 </p>
               </div>
             )}
 
             {/* ── Support Card ── */}
-            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="mt-4 rounded-[1.35rem] border border-zinc-200 bg-white p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                  <Mail className="h-4 w-4 text-blue-600" />
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-600">
+                  <Mail className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800">{t('loginSupportTitle')}</p>
-                  <p className="text-[11px] text-slate-500">{t('loginSupportDescription')}</p>
+                  <p className="text-sm font-bold text-zinc-900">{t('loginSupportTitle')}</p>
+                  <p className="text-[11px] font-medium text-zinc-500">{t('loginSupportDescription')}</p>
                 </div>
                 <a
                   href={SUPPORT_LINK}
-                  className="flex-shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                  className="flex-shrink-0 inline-flex items-center gap-1 rounded-full border border-zinc-200 px-3 py-1.5 text-xs font-bold text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950"
                 >
                   Contact
                   <ArrowRight className="h-3 w-3" />
