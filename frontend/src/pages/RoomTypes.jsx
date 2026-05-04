@@ -12,7 +12,7 @@ import DashboardHero from '../components/dashboard/DashboardHero';
 import { useTranslation } from 'react-i18next';
 import { formatLocalizedCurrency, translateKnownValue, translateWithFallback } from '../utils/localization';
 
-const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Mini Bar", "Safe", "Balcony", "Breakfast", "Ocean View"];
+const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Safe", "Balcony", "Breakfast"];
 
 function SkeletonRow() {
     return (
@@ -90,6 +90,19 @@ export default function RoomTypes() {
             averageRate,
         };
     }, [roomTypes]);
+
+    const amenityOptions = useMemo(() => {
+        const options = [...COMMON_AMENITIES];
+        formData.amenities
+            .map((amenity) => amenity?.trim())
+            .filter(Boolean)
+            .forEach((amenity) => {
+                if (!options.includes(amenity)) {
+                    options.push(amenity);
+                }
+            });
+        return options;
+    }, [formData.amenities]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -348,22 +361,24 @@ export default function RoomTypes() {
                                                 {rt.maxGuests}
                                             </td>
                                             <td className="p-6 align-middle">
-                                                <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                                                <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleEdit(rt)}
-                                                        className="h-10 w-10 rounded-full text-black border border-zinc-200 hover:text-black hover:bg-zinc-100"
+                                                        className="h-8 w-8 rounded-lg border border-zinc-200 bg-white text-zinc-800 shadow-sm transition-colors hover:bg-zinc-100 hover:text-black"
+                                                        aria-label={translateWithFallback(t, 'common.edit', 'Edit')}
                                                     >
-                                                        <Pencil className="h-4 w-4" />
+                                                        <Pencil className="h-3.5 w-3.5" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleDelete(rt.id)}
-                                                        className="h-10 w-10 rounded-full text-red-600 border border-zinc-200 hover:text-white hover:bg-red-600 hover:border-red-600"
+                                                        className="h-8 w-8 rounded-lg border border-black bg-black text-white shadow-sm transition-colors hover:bg-zinc-800"
+                                                        aria-label={translateWithFallback(t, 'common.delete', 'Delete')}
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-3.5 w-3.5" />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -445,7 +460,7 @@ export default function RoomTypes() {
                         <div className="space-y-4">
                             <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('amenitiesLabel')}</Label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {COMMON_AMENITIES.map((amenity) => (
+                                {amenityOptions.map((amenity) => (
                                     <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-black cursor-pointer p-3 border border-zinc-200 rounded-2xl hover:bg-zinc-50 transition-colors">
                                         <Checkbox
                                             className="h-5 w-5 rounded-full border-zinc-300 focus-visible:ring-black data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
