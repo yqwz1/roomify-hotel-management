@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CalendarRange, FileText, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
@@ -485,14 +488,14 @@ export default function ModifyReservation() {
                 })}
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowModal(true)}
                 disabled={!reservationStatusRules.canModify(selected.status)}
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 h-auto"
               >
                 {t('modifyReservationPage.saveChangesCta')}
-              </button>
+              </Button>
             </DashboardPanel>
           </div>
         )}

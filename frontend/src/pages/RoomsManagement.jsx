@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2, Waves } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import ModalFrame from '../components/common/ModalFrame';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -370,14 +375,14 @@ export default function RoomsManagement() {
       </DashboardHero>
 
       <div className="flex justify-end">
-        <button
+        <Button
           type="button"
           onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 h-auto"
         >
           <Plus className="h-4 w-4" />
           {t('roomsManagementPage.addRoomCta')}
-        </button>
+        </Button>
       </div>
 
       {(bannerError || error) && (
@@ -435,9 +440,9 @@ export default function RoomsManagement() {
           </div>
         ) : (
           <div className="overflow-x-auto rounded-[1.5rem] border border-zinc-200">
-            <table className="min-w-full border-collapse">
-              <thead className="bg-zinc-50">
-                <tr>
+            <Table className="min-w-full">
+              <TableHeader className="bg-zinc-50">
+                <TableRow>
                   {[
                     t('roomsManagementPage.tableRoom'),
                     t('roomsManagementPage.tableFloor'),
@@ -447,16 +452,16 @@ export default function RoomsManagement() {
                     t('roomsManagementPage.tableAmenities'),
                     t('roomsManagementPage.tableActions'),
                   ].map((heading) => (
-                    <th
+                    <TableHead
                       key={heading}
-                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500"
+                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto"
                     >
                       {heading}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 bg-white">
+                </TableRow>
+              </TableHeader>
+              <TableBody className="bg-white">
                 {displayedRooms.map((room) => {
                   const amenities = room.roomType?.amenities
                     ? room.roomType.amenities
@@ -466,24 +471,24 @@ export default function RoomsManagement() {
                     : [];
 
                   return (
-                    <tr key={room.id}>
-                      <td className="px-4 py-4 text-xl font-black tracking-tight text-zinc-950">
+                    <TableRow key={room.id}>
+                      <TableCell className="px-4 py-4 text-xl font-black tracking-tight text-zinc-950">
                         {room.roomNumber}
-                      </td>
-                      <td className="px-4 py-4 text-sm font-medium text-zinc-600">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-sm font-medium text-zinc-600">
                         {room.floor ?? '-'}
-                      </td>
-                      <td className="px-4 py-4 text-sm font-bold text-zinc-950">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-sm font-bold text-zinc-950">
                         {translateKnownValue(room.roomType?.name, t)}
-                      </td>
+                      </TableCell>
                       
-                      <td className="px-4 py-4 text-sm font-bold text-zinc-950">
+                      <TableCell className="px-4 py-4 text-sm font-bold text-zinc-950">
                         {formatLocalizedCurrency(room.roomType?.basePrice, i18n.language)}
-                      </td>
-                      <td className="px-4 py-4 text-sm font-medium text-zinc-600">
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-sm font-medium text-zinc-600">
                         {room.roomType?.maxGuests ?? '-'}
-                      </td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
                         <div className="flex max-w-xs flex-wrap gap-2">
                           {amenities.slice(0, 3).map((amenity) => (
                             <span
@@ -499,18 +504,20 @@ export default function RoomsManagement() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
                         <div className="flex items-center gap-2">
-                          <button
+                          <Button
+                            variant="outline"
                             type="button"
                             onClick={() => handleOpenEdit(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
                           >
                             <Pencil className="h-4 w-4" />
                             {t('roomsManagementPage.editButton')}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="outline"
                             type="button"
                             onClick={() =>
                               navigate('/room-status', {
@@ -520,25 +527,26 @@ export default function RoomsManagement() {
                                 },
                               })
                             }
-                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
                           >
                             {t('roomsManagementPage.openStatusBoard')}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="outline"
                             type="button"
                             onClick={() => handleDelete(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-50"
+                            className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-50 h-auto"
                           >
                             <Trash2 className="h-4 w-4" />
                             {t('roomsManagementPage.deleteButton')}
-                          </button>
+                          </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </DashboardPanel>

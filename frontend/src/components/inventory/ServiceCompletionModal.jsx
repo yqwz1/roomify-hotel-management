@@ -397,15 +397,15 @@ export default function ServiceCompletionModal({
             </div>
           </div>
 
-          <label className="space-y-2">
+          <label className="space-y-2 flex flex-col">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
               {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
             </span>
-            <textarea
+            <Textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950"
+              className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'inventoryPage.serviceNotesPlaceholder',

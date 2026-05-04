@@ -1,5 +1,15 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { format, parseISO } from 'date-fns';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 /**
  * DateRangePicker
@@ -14,10 +24,33 @@ import { useTranslation } from 'react-i18next';
  */
 export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, onCheckOutChange }) {
     const { t } = useTranslation();
-    // Minimum selectable date is today
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const isInvalid = checkIn && checkOut && checkOut < checkIn;
+
+    const parsedCheckIn = checkIn ? parseISO(checkIn) : undefined;
+    const parsedCheckOut = checkOut ? parseISO(checkOut) : undefined;
+
+    const handleCheckInSelect = (date) => {
+        if (date) {
+            // Adjust for local timezone before converting to string
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            onCheckInChange(localDate.toISOString().split('T')[0]);
+        } else {
+             onCheckInChange('');
+        }
+    };
+
+    const handleCheckOutSelect = (date) => {
+        if (date) {
+             const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+             onCheckOutChange(localDate.toISOString().split('T')[0]);
+        } else {
+             onCheckOutChange('');
+        }
+    };
+
 
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
@@ -26,14 +59,30 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                 <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
                     {t('checkInLabel')}
                 </label>
-                <input
-                    id="check-in-date"
-                    type="date"
-                    value={checkIn}
-                    min={today}
-                    onChange={(e) => onCheckInChange(e.target.value)}
-                    className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-black transition-all focus:bg-white focus:border-black focus:outline-none focus:ring-2 focus:ring-black/5"
-                />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            id="check-in-date"
+                            variant={"outline"}
+                            className={cn(
+                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-black hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                !checkIn && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {parsedCheckIn ? format(parsedCheckIn, "PPP") : <span>{t('checkInLabel')}</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={parsedCheckIn}
+                            onSelect={handleCheckInSelect}
+                            disabled={(date) => date < today}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
             </div>
 
             {/* Arrow separator */}
@@ -44,17 +93,31 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                 <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
                     {t('checkOutLabel')}
                 </label>
-                <input
-                    id="check-out-date"
-                    type="date"
-                    value={checkOut}
-                    min={checkIn || today}
-                    onChange={(e) => onCheckOutChange(e.target.value)}
-                    className={`rounded-full border bg-zinc-50 px-4 py-3 text-sm font-medium text-black transition-all focus:bg-white focus:outline-none focus:ring-2 ${isInvalid
-                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
-                            : 'border-zinc-200 focus:border-black focus:ring-black/5'
-                        }`}
-                />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            id="check-out-date"
+                            variant={"outline"}
+                            className={cn(
+                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-black hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                isInvalid && "border-red-400 focus:border-red-400 focus:ring-red-200",
+                                !checkOut && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {parsedCheckOut ? format(parsedCheckOut, "PPP") : <span>{t('checkOutLabel')}</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={parsedCheckOut}
+                            onSelect={handleCheckOutSelect}
+                            disabled={(date) => date < (parsedCheckIn || today)}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
             </div>
 
             {/* Validation message */}

@@ -10,7 +10,15 @@ import {
 import { useLocation } from 'react-router-dom';
 import ConfirmationToast from '../components/ConfirmationToast';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
-import { Button } from '../components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
@@ -109,43 +117,43 @@ function InvoiceLedger({ bill, t, language }) {
 
   return (
     <div className="overflow-hidden rounded-[1.5rem] border border-zinc-200">
-      <table className="w-full border-collapse">
-        <thead className="bg-zinc-50">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+      <Table className="w-full">
+        <TableHeader className="bg-zinc-50">
+          <TableRow>
+            <TableHead className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto">
               {t('invoicePreviewPage.descriptionLabel')}
-            </th>
-            <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+            </TableHead>
+            <TableHead className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto">
               {t('invoicePreviewPage.amountLabel')}
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-200 bg-white">
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-zinc-200 bg-white">
           {(bill.lineItems ?? []).map((item, index) => {
             const amount = Number(item?.amount ?? 0);
             const credit = Boolean(item?.credit);
 
             return (
-              <tr key={`${item?.label ?? 'line'}-${index}`}>
-                <td className="px-4 py-3 text-sm font-medium text-zinc-700">
+              <TableRow key={`${item?.label ?? 'line'}-${index}`}>
+                <TableCell className="px-4 py-3 text-sm font-medium text-zinc-700">
                   {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
-                </td>
-                <td className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
+                </TableCell>
+                <TableCell className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
                   {credit
                     ? `-${formatLocalizedCurrency(amount, language)}`
                     : formatLocalizedCurrency(amount, language)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-          <tr className="bg-zinc-50">
-            <td className="px-4 py-3 text-sm font-bold text-zinc-950">{t('common.total')}</td>
-            <td className="px-4 py-3 text-right text-lg font-black text-zinc-950">
+          <TableRow className="bg-zinc-50">
+            <TableCell className="px-4 py-3 text-sm font-bold text-zinc-950">{t('common.total')}</TableCell>
+            <TableCell className="px-4 py-3 text-right text-lg font-black text-zinc-950">
               {formatLocalizedCurrency(bill.balanceDue, language)}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   );
 }

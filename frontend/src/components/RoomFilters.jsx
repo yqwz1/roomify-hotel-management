@@ -2,6 +2,15 @@ import PropTypes from 'prop-types';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { translateKnownValue } from '../utils/localization';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const toOption = (option) => {
   if (typeof option === 'object' && option !== null) {
@@ -16,7 +25,7 @@ const toOption = (option) => {
 
 function FilterField({ id, label, children }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex flex-col">
       <label
         htmlFor={id}
         className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
@@ -50,7 +59,8 @@ export default function RoomFilters({
   const { t } = useTranslation();
 
   const handle = (field, value) => {
-    onFiltersChange({ ...filters, [field]: value });
+    // If Select component passes "all", we treat it as an empty string to clear the filter.
+    onFiltersChange({ ...filters, [field]: value === 'all' ? '' : value });
   };
 
   const normalizedStatusOptions = statusOptions.map(toOption);
@@ -66,7 +76,7 @@ export default function RoomFilters({
   });
 
   const inputClassName =
-    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5';
 
   return (
     <section className="rounded-[1.75rem] border border-black/5 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]">
@@ -85,55 +95,62 @@ export default function RoomFilters({
           </div>
         </div>
 
-        <button
+        <Button
+          variant="outline"
           type="button"
           onClick={onClear}
           disabled={!hasActiveFilters}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 h-auto"
         >
           <X className="h-4 w-4" />
           {t('clearFilters')}
-        </button>
+        </Button>
       </div>
 
       <div className="px-5 py-5 sm:px-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {showStatus && (
             <FilterField id="filter-status" label={t('status')}>
-              <select
-                id="filter-status"
-                value={filters.status ?? ''}
-                onChange={(event) => handle('status', event.target.value)}
-                className={inputClassName}
+              <Select
+                value={filters.status || 'all'}
+                onValueChange={(value) => handle('status', value)}
               >
-                <option value="">{t('allStatuses')}</option>
-                {normalizedStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="filter-status" className={inputClassName}>
+                  <SelectValue placeholder={t('allStatuses')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('allStatuses')}</SelectItem>
+                  {normalizedStatusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FilterField>
           )}
 
           {showType && (
             <FilterField id="filter-type" label={t('roomType')}>
               {normalizedRoomTypeOptions.length > 0 ? (
-                <select
-                  id="filter-type"
-                  value={filters.type ?? ''}
-                  onChange={(event) => handle('type', event.target.value)}
-                  className={inputClassName}
+                <Select
+                  value={filters.type || 'all'}
+                  onValueChange={(value) => handle('type', value)}
                 >
-                  <option value="">{t('allTypes')}</option>
-                  {normalizedRoomTypeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="filter-type" className={inputClassName}>
+                    <SelectValue placeholder={t('allTypes')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allTypes')}</SelectItem>
+                    {normalizedRoomTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
-                <input
+                <Input
                   id="filter-type"
                   type="text"
                   placeholder={t('roomType')}
@@ -148,21 +165,24 @@ export default function RoomFilters({
           {showFloor && (
             <FilterField id="filter-floor" label={t('floor')}>
               {normalizedFloorOptions.length > 0 ? (
-                <select
-                  id="filter-floor"
-                  value={filters.floor ?? ''}
-                  onChange={(event) => handle('floor', event.target.value)}
-                  className={inputClassName}
+                <Select
+                  value={filters.floor || 'all'}
+                  onValueChange={(value) => handle('floor', value)}
                 >
-                  <option value="">{t('allFloors')}</option>
-                  {normalizedFloorOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="filter-floor" className={inputClassName}>
+                    <SelectValue placeholder={t('allFloors')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allFloors')}</SelectItem>
+                    {normalizedFloorOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
-                <input
+                <Input
                   id="filter-floor"
                   type="number"
                   min="1"
@@ -180,7 +200,7 @@ export default function RoomFilters({
               id="filter-guests"
               label={t('maxGuestsLabel')}
             >
-              <input
+              <Input
                 id="filter-guests"
                 type="number"
                 min="1"
@@ -194,7 +214,7 @@ export default function RoomFilters({
 
           {showPriceRange && (
             <FilterField id="filter-min-price" label={`${t('minPrice')} ($)`}>
-              <input
+              <Input
                 id="filter-min-price"
                 type="number"
                 min="0"
@@ -208,7 +228,7 @@ export default function RoomFilters({
 
           {showPriceRange && (
             <FilterField id="filter-max-price" label={`${t('maxPrice')} ($)`}>
-              <input
+              <Input
                 id="filter-max-price"
                 type="number"
                 min="0"

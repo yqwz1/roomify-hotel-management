@@ -22,7 +22,11 @@ import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import InventoryOperationsPanel from '../components/inventory/InventoryOperationsPanel';
 import { DistributionBarChart } from '../components/charts/DistributionBarChart';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   createExpense,
   deleteExpense,
@@ -279,13 +283,13 @@ function ExpenseFormModal({
           <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
             {translateWithFallback(t, 'expenseTrackerPage.notesLabel', 'Notes')}
           </span>
-          <textarea
+          <Textarea
             value={formData.description}
             onChange={(event) =>
               setFormData((current) => ({ ...current, description: event.target.value }))
             }
             rows={4}
-            className="w-full rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+            className="w-full rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
             placeholder={translateWithFallback(
               t,
               'expenseTrackerPage.notesPlaceholder',
@@ -321,12 +325,12 @@ function ExpenseFormModal({
                 'Receipt URL or reference'
               )}
             </span>
-            <input
+            <Input
               value={formData.receiptFileUrl}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, receiptFileUrl: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
               placeholder="https://files.example/receipt-apr-24.pdf"
             />
           </label>
