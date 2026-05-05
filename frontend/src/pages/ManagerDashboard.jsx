@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownRight,
   ArrowUpRight,
   BedDouble,
-  Bell,
   CalendarRange,
-  CheckCircle2,
-  CircleAlert,
   ClipboardCheck,
   Download,
   Gauge,
@@ -30,8 +27,6 @@ import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
 import { TrendLineChart } from '../components/charts/TrendLineChart';
 import { RadialStatusChart } from '../components/charts/RadialStatusChart';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
 import { useRoomTypes } from '../hooks/useRoomTypes';
@@ -40,10 +35,6 @@ import {
   exportDashboardReport,
   extractDashboardError,
 } from '../services/dashboardService';
-import {
-  getNotifications,
-  extractNotificationError,
-} from '../services/notificationService';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
@@ -211,35 +202,6 @@ const getDaysInRange = ({ startDate, endDate }) => {
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
 
   return Math.max(1, Math.round((end - start) / 86400000) + 1);
-};
-
-const buildNotificationTone = (notification) => {
-  const text = `${notification?.title ?? ''} ${notification?.message ?? ''}`.toLowerCase();
-
-  if (text.includes('fail') || text.includes('error') || text.includes('overdue')) {
-    return {
-      card: 'border-rose-200 bg-rose-50/80',
-      badge: 'border-rose-200 bg-white text-rose-900',
-      body: 'text-rose-900/80',
-      eyebrow: 'text-rose-700',
-    };
-  }
-
-  if (text.includes('payment') || text.includes('balance') || text.includes('invoice')) {
-    return {
-      card: 'border-amber-200 bg-amber-50/85',
-      badge: 'border-amber-200 bg-white text-amber-900',
-      body: 'text-amber-900/80',
-      eyebrow: 'text-amber-700',
-    };
-  }
-
-  return {
-    card: 'border-sky-200 bg-sky-50/85',
-    badge: 'border-sky-200 bg-white text-sky-900',
-    body: 'text-sky-900/80',
-    eyebrow: 'text-sky-700',
-  };
 };
 
 function PerformanceMetricCard({
@@ -886,7 +848,6 @@ export default function ManagerDashboard() {
   const [selectedTrendIndex, setSelectedTrendIndex] = useState(0);
   const [distributionSort, setDistributionSort] = useState('occupancy');
   const [selectedRoomTypeName, setSelectedRoomTypeName] = useState('');
-  const [notificationScope, setNotificationScope] = useState('all');
   const [exportFilters, setExportFilters] = useState({
     roomTypeId: '',
     status: '',
@@ -895,9 +856,6 @@ export default function ManagerDashboard() {
   const [exportError, setExportError] = useState(null);
   const [exportResult, setExportResult] = useState(null);
   const [exportUrl, setExportUrl] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [notificationsLoading, setNotificationsLoading] = useState(true);
-  const [notificationsError, setNotificationsError] = useState(null);
 
   const {
     metrics,
@@ -913,26 +871,6 @@ export default function ManagerDashboard() {
   useEffect(() => {
     fetchRoomTypes();
   }, [fetchRoomTypes]);
-
-  const loadActivity = useCallback(async () => {
-    setNotificationsLoading(true);
-    setNotificationsError(null);
-
-    const [notificationsResult] = await Promise.allSettled([getNotifications()]);
-
-    if (notificationsResult.status === 'fulfilled') {
-      setNotifications(notificationsResult.value);
-    } else {
-      setNotifications([]);
-      setNotificationsError(extractNotificationError(notificationsResult.reason));
-    }
-
-    setNotificationsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadActivity();
-  }, [loadActivity]);
 
   useEffect(() => {
     if (!exportUrl) return undefined;
@@ -970,11 +908,6 @@ export default function ManagerDashboard() {
 
   const activePresetId =
     rangePresets.find((preset) => compareRanges(draftRange, preset.range))?.id ?? null;
-  const unreadNotifications = useMemo(
-    () => notifications.filter((notification) => !notification.read).length,
-    [notifications]
-  );
-
   const quickActions = useMemo(
     () => [
       {
@@ -1357,77 +1290,8 @@ export default function ManagerDashboard() {
           tone: 'amber',
         };
 
-    const attentionSignal = notificationsLoading
-      ? {
-          icon: Bell,
-          eyebrow: translateWithFallback(
-            t,
-            `${pageTx}.signalAttentionEyebrow`,
-            'Attention'
-          ),
-          title: translateWithFallback(
-            t,
-            `${pageTx}.signalAttentionLoadingTitle`,
-            'Loading manager alerts'
-          ),
-          description: translateWithFallback(
-            t,
-            `${pageTx}.signalAttentionLoadingDescription`,
-            'Recent notifications are still loading into the dashboard.'
-          ),
-          tone: 'sky',
-        }
-      : unreadNotifications > 0
-        ? {
-            icon: CircleAlert,
-            eyebrow: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionEyebrow`,
-              'Attention'
-            ),
-            title: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionUnreadTitle`,
-              '{{count}} unread alert',
-              { count: unreadNotifications }
-            ),
-            description: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionUnreadDescription`,
-              'Manager-facing alerts still need review. Use the activity feed to triage them quickly.'
-            ),
-            tone: 'rose',
-          }
-        : {
-            icon: CheckCircle2,
-            eyebrow: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionEyebrow`,
-              'Attention'
-            ),
-            title: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionClearTitle`,
-              'No unread alerts'
-            ),
-            description: translateWithFallback(
-              t,
-              `${pageTx}.signalAttentionClearDescription`,
-              'There are no unread manager alerts right now, so you can focus on performance and planning.'
-            ),
-            tone: 'emerald',
-          };
-
-    return [occupancySignal, revenueSignal, attentionSignal];
-  }, [metrics, notificationsLoading, pageTx, revenueDelta, t, unreadNotifications]);
-
-  const visibleNotifications = useMemo(() => {
-    if (notificationScope === 'unread') {
-      return notifications.filter((notification) => !notification.read);
-    }
-
-    return notifications;
-  }, [notificationScope, notifications]);
+    return [occupancySignal, revenueSignal];
+  }, [metrics, pageTx, revenueDelta, t]);
 
   const handleRangeChange = (field, value) => {
     setDraftRange((current) => ({ ...current, [field]: value }));
@@ -2007,131 +1871,6 @@ export default function ManagerDashboard() {
         </DashboardPanel>
       </div>
 
-      <DashboardPanel
-        title={t(`${pageTx}.notificationsTitle`)}
-        description={t(`${pageTx}.notificationsDescription`)}
-        action={
-          <Button
-            type="button"
-            variant="outline"
-            onClick={loadActivity}
-            className="border-zinc-200"
-          >
-            <RefreshCw className="h-4 w-4" />
-            {t('retry')}
-          </Button>
-        }
-      >
-        {notificationsLoading ? (
-          <LoadingState message={t(`${pageTx}.notificationsLoading`)} />
-        ) : notificationsError ? (
-          <ErrorState
-            title={t(`${pageTx}.notificationsTitle`)}
-            message={notificationsError}
-            onRetry={loadActivity}
-          />
-        ) : notifications.length === 0 ? (
-          <EmptyState
-            title={t(`${pageTx}.notificationsEmptyTitle`)}
-            message={t(`${pageTx}.notificationsEmptyDescription`)}
-            icon={Bell}
-          />
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setNotificationScope('all')}
-                className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-bold transition h-auto',
-                  notificationScope === 'all'
-                    ? 'border-zinc-950 bg-zinc-950 text-white hover:bg-zinc-800 hover:text-white'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
-                )}
-              >
-                {translateWithFallback(t, `${pageTx}.notificationsAll`, 'All alerts')}
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setNotificationScope('unread')}
-                className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-bold transition h-auto',
-                  notificationScope === 'unread'
-                    ? 'border-rose-300 bg-rose-500 text-white hover:bg-rose-600 hover:text-white'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900'
-                )}
-              >
-                {translateWithFallback(
-                  t,
-                  `${pageTx}.notificationsUnread`,
-                  'Unread alerts'
-                )}
-              </Button>
-            </div>
-
-            {visibleNotifications.length === 0 ? (
-              <EmptyState
-                title={translateWithFallback(
-                  t,
-                  `${pageTx}.notificationsFilteredEmptyTitle`,
-                  'No alerts in this filter'
-                )}
-                message={translateWithFallback(
-                  t,
-                  `${pageTx}.notificationsFilteredEmptyDescription`,
-                  'All manager alerts are already marked as read.'
-                )}
-                icon={Bell}
-              />
-            ) : (
-              <div className="grid gap-3 xl:grid-cols-2" data-testid="manager-notifications">
-                {visibleNotifications.slice(0, 6).map((notification) => {
-                  const tone = buildNotificationTone(notification);
-
-                  return (
-                    <div
-                      key={notification.id}
-                      className={cn('rounded-[1.45rem] border p-4', tone.card)}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className={cn('text-xs font-black uppercase tracking-[0.2em]', tone.eyebrow)}>
-                            {formatLocalizedDateTime(notification.createdAt, i18n.language, {
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            })}
-                          </p>
-                          <p className="mt-2 text-lg font-black text-zinc-950">
-                            {notification.title}
-                          </p>
-                          <p className={cn('mt-2 text-sm font-medium leading-6', tone.body)}>
-                            {notification.message}
-                          </p>
-                        </div>
-
-                        <span
-                          className={cn(
-                            'rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em]',
-                            notification.read
-                              ? 'border-zinc-200 bg-white text-zinc-500'
-                              : tone.badge
-                          )}
-                        >
-                          {notification.read
-                            ? t(`${pageTx}.readLabel`)
-                            : t(`${pageTx}.newLabel`)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </DashboardPanel>
     </div>
   );
 }
