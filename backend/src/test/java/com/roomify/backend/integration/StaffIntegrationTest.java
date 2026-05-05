@@ -270,7 +270,10 @@ class StaffIntegrationTest {
 
         mockMvc.perform(patch("/api/staff/{id}/unlock", aliceId)
                         .header("Authorization", "Bearer " + adminToken))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("alice@roomify.com"))
+                .andExpect(jsonPath("$.locked").value(false))
+                .andExpect(jsonPath("$.failedAttempts").value(0));
 
         User unlockedAlice = getUserByEmail("alice@roomify.com");
         assertEquals(0, unlockedAlice.getFailedAttempts());

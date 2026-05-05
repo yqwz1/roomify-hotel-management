@@ -256,7 +256,7 @@ export default function Home() {
                     <div className="grid grid-cols-4 gap-2">
                       {[
                         { label: 'Occupancy', val: '72%', sub: '+4% vs last week', accent: 'text-zinc-950' },
-                        { label: 'Rev Today', val: '$4,280', sub: '18 transactions', accent: 'text-emerald-700' },
+                        { label: 'Rev Today', val: 'SAR 4,280', sub: '18 transactions', accent: 'text-emerald-700' },
                         { label: 'Arrivals', val: '8', sub: '3 pending', accent: 'text-amber-700' },
                         { label: 'Departures', val: '5', sub: '2 late checkout', accent: 'text-zinc-700' },
                       ].map((s) => (

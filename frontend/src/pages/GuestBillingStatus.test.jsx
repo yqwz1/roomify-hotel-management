@@ -42,8 +42,8 @@ describe('GuestBillingStatus', () => {
 
     expect(await screen.findByText('RSV-2001')).toBeInTheDocument();
     expect(screen.getByText('INV-2001')).toBeInTheDocument();
-    expect(screen.getAllByText('$120.00').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('$45.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*120\.00/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*45\.00/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Partially paid/i)).toBeInTheDocument();
   });
 

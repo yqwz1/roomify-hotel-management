@@ -54,7 +54,7 @@ export const formatLocalizedCurrency = (
 ) =>
   new Intl.NumberFormat(getLocale(language), {
     style: 'currency',
-    currency: 'USD',
+    currency: 'SAR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     ...options,

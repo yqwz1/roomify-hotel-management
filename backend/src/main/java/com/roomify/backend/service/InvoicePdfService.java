@@ -100,12 +100,12 @@ public class InvoicePdfService {
                         table.addHeaderCell(headerCell("Room"));
                         table.addHeaderCell(headerCell("Check In"));
                         table.addHeaderCell(headerCell("Check Out"));
-                        table.addHeaderCell(headerCell("Price"));
+                        table.addHeaderCell(headerCell("Price (SAR)"));
 
                         table.addCell(reservation.getRoom().getRoomNumber());
                         table.addCell(reservation.getCheckInDate().toString());
                         table.addCell(reservation.getCheckOutDate().toString());
-                        table.addCell(summary.totalPrice().toString());
+                        table.addCell(formatMoney(summary.totalPrice()));
 
                         document.add(table);
 
@@ -122,13 +122,13 @@ public class InvoicePdfService {
                         Table totals = new Table(2);
 
                         totals.addCell("Subtotal");
-                        totals.addCell(subtotal.toString());
+                        totals.addCell(formatMoney(subtotal));
 
                         totals.addCell("VAT " + vatRate.multiply(new BigDecimal("100")) + "%");
-                        totals.addCell(vat.toString());
+                        totals.addCell(formatMoney(vat));
 
                         totals.addCell("Total");
-                        totals.addCell(total.toString());
+                        totals.addCell(formatMoney(total));
 
                         document.add(totals);
 
@@ -179,5 +179,9 @@ public class InvoicePdfService {
                                 .add(new Paragraph(text))
                                 .setBold()
                                 .setBackgroundColor(ColorConstants.LIGHT_GRAY);
+        }
+
+        private String formatMoney(BigDecimal value) {
+                return "SAR " + value;
         }
 }

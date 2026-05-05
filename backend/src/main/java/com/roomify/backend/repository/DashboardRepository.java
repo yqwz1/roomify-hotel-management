@@ -103,4 +103,20 @@ public interface DashboardRepository
            "WHERE r.status = com.roomify.backend.entity.ReservationStatus.CHECKED_IN " +
            "AND r.room.roomType.id = :roomTypeId")
     long countOccupiedRoomsByType(@Param("roomTypeId") Long roomTypeId);
+
+    /**
+     * Count distinct rooms of a type committed during a date range.
+     * Uses active reservations overlapping [start, end].
+     */
+    @Query("SELECT COUNT(DISTINCT r.room.id) FROM Reservation r " +
+           "WHERE r.status IN " +
+           "(com.roomify.backend.entity.ReservationStatus.CONFIRMED, " +
+           " com.roomify.backend.entity.ReservationStatus.CHECKED_IN) " +
+           "AND r.room.roomType.id = :roomTypeId " +
+           "AND r.checkInDate <= :end " +
+           "AND r.checkOutDate > :start")
+    long countOccupiedRoomsByTypeInPeriod(
+            @Param("roomTypeId") Long roomTypeId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
 }

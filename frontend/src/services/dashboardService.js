@@ -25,8 +25,10 @@ export const getRevenueTrend = async ({ startDate, endDate }) => {
   return response.data;
 };
 
-export const getRoomTypeDistribution = async () => {
-  const response = await api.get('/dashboard/room-type-distribution');
+export const getRoomTypeDistribution = async ({ startDate, endDate } = {}) => {
+  const response = await api.get('/dashboard/room-type-distribution', {
+    params: { startDate, endDate },
+  });
   return response.data;
 };
 

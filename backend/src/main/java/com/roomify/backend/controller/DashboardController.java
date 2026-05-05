@@ -119,8 +119,14 @@ public class DashboardController {
      * @return 200 OK with list of {@link RoomTypeDistributionItem}
      */
     @GetMapping("/room-type-distribution")
-    public ResponseEntity<List<RoomTypeDistributionItem>> getRoomTypeDistribution() {
-        List<RoomTypeDistributionItem> distribution = dashboardService.getRoomTypeDistribution();
+    public ResponseEntity<List<RoomTypeDistributionItem>> getRoomTypeDistribution(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+
+        LocalDate resolvedStart = startDate != null ? startDate : LocalDate.now();
+        LocalDate resolvedEnd = endDate != null ? endDate : resolvedStart;
+        List<RoomTypeDistributionItem> distribution =
+                dashboardService.getRoomTypeDistribution(resolvedStart, resolvedEnd);
         return ResponseEntity.ok(distribution);
     }
 

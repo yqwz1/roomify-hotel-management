@@ -30,6 +30,7 @@ export const searchRooms = async (params) => {
     checkOut: params.checkOut,
   };
 
+  if (params.roomName) query.roomName = params.roomName;
   if (params.roomType) query.roomType = params.roomType;
   if (params.minPrice) query.minPrice = params.minPrice;
   if (params.maxPrice) query.maxPrice = params.maxPrice;

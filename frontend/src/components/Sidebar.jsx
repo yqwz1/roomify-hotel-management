@@ -12,7 +12,6 @@ const ICON_MAP = {
   '/search': Search,
   '/bookings': CalendarDays,
   '/staff/dashboard': LayoutDashboard,
-  '/book': CalendarDays,
   '/check-in': Key,
   '/guest/dashboard': LayoutDashboard,
   '/checkout': CalendarDays,
@@ -46,7 +45,6 @@ export default function Sidebar({ isOpen, onClose }) {
     menuItems.push(
       { path: '/staff/dashboard', label: t('dashboard') },
       { path: '/search', label: t('roomSearch') },
-      { path: '/book', label: t('bookRoom') },
       { path: '/check-in', label: t('checkInOut') },
       { path: '/reservations/modify', label: t('modifyReservationTitle') },
       { path: '/reservations/cancel', label: t('cancelReservationTitle') },

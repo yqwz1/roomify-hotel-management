@@ -66,7 +66,7 @@ describe('GuestDashboard', () => {
     expect(screen.getByText('Deluxe Room')).toBeInTheDocument();
     expect(screen.getAllByText('Room 204').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Confirmed').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('$540.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*540\.00/).length).toBeGreaterThan(0);
   });
 
   it('routes guest dashboard actions to support-safe help and search destinations', async () => {

@@ -122,8 +122,8 @@ describe('ReservationDetails', () => {
 
     await screen.findByText(/Reservation Details/i);
     expect(screen.getAllByText(/Partially paid/i).length).toBeGreaterThan(0);
-    expect(screen.getByText('$200.00')).toBeInTheDocument();
-    expect(screen.getAllByText('$76.00').length).toBeGreaterThan(0);
+    expect(screen.getByText(/SAR\s*200\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/SAR\s*76\.00/).length).toBeGreaterThan(0);
     expect(screen.getByText(/^No$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Back to Queue/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Check-In/i })).toBeInTheDocument();

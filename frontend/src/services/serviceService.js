@@ -19,6 +19,14 @@ export const updateService = async (id, payload) => {
   return response.data;
 };
 
+export const setServiceActive = async (service, active) =>
+  updateService(service.id, {
+    name: service.name,
+    category: service.category,
+    price: service.price,
+    active,
+  });
+
 export const deleteService = async (id) => {
   await api.delete(`/services/${id}`);
 };

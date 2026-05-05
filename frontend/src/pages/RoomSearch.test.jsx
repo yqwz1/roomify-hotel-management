@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import RoomSearch from './RoomSearch';
@@ -19,7 +20,18 @@ vi.mock('../components/DateRangePicker', () => ({
 }));
 
 vi.mock('../components/RoomFilters', () => ({
-  default: () => <div>Room Filters</div>,
+  default: ({ filters, onFiltersChange }) => (
+    <label>
+      Room name or number
+      <input
+        aria-label="Room name or number"
+        value={filters.roomName ?? ''}
+        onChange={(event) =>
+          onFiltersChange({ ...filters, roomName: event.target.value })
+        }
+      />
+    </label>
+  ),
 }));
 
 const roomSearchState = {
@@ -85,5 +97,21 @@ describe('RoomSearch CTA behavior', () => {
     expect(screen.getByRole('button', { name: 'Book Room' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Get Help' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Contact Front Desk' })).not.toBeInTheDocument();
+  });
+
+  it('submits the room name or number search filter', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      user: { roles: ['ROLE_STAFF'], email: 'staff@roomify.com' },
+    });
+
+    renderPage();
+
+    await user.type(screen.getByLabelText('Room name or number'), '305');
+    await user.click(screen.getByRole('button', { name: /Search Rooms/i }));
+
+    expect(roomSearchState.search).toHaveBeenCalledWith(
+      expect.objectContaining({ roomName: '305' })
+    );
   });
 });

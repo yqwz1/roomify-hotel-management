@@ -1,5 +1,4 @@
 import {
-  BedDouble,
   BriefcaseBusiness,
   CalendarDays,
   ClipboardCheck,
@@ -155,13 +154,6 @@ const MANAGER_NAVIGATION_CONFIG = [
         translationKey: 'roomSearch',
         fallbackLabel: 'Room Search',
         icon: Search,
-        roles: [ROLE_MANAGER],
-      },
-      {
-        path: '/book',
-        translationKey: 'bookRoom',
-        fallbackLabel: 'Book Room',
-        icon: BedDouble,
         roles: [ROLE_MANAGER],
       },
       {

@@ -148,13 +148,32 @@ describe('ManagerDashboard', () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  it('exports the current filtered report as JSON', async () => {
+  it('exports the current filtered report as Excel', async () => {
     useManagerDashboard.mockReturnValue(dashboardData);
     exportDashboardReport.mockResolvedValue({
       generatedAt: '2026-04-03T10:00:00',
       totalRecords: 4,
-      format: 'JSON',
-      data: [{ confirmationNumber: 'RSV-1' }],
+      format: 'EXCEL',
+      filters: {
+        startDate: '2026-04-01',
+        endDate: '2026-04-03',
+        roomTypeId: 1,
+        status: 'CHECKED_IN',
+      },
+      data: [
+        {
+          confirmationNumber: 'RSV-1',
+          guestName: 'Jane Guest',
+          roomNumber: '204',
+          roomType: 'Deluxe Room',
+          checkInDate: '2026-04-01',
+          checkOutDate: '2026-04-03',
+          status: 'CHECKED_IN',
+          totalPrice: 420,
+          totalPaid: 300,
+          outstandingBalance: 120,
+        },
+      ],
     });
 
     renderPage();
@@ -170,13 +189,15 @@ describe('ManagerDashboard', () => {
       expect(exportDashboardReport).toHaveBeenCalledWith({
         startDate: startInput.value,
         endDate: endInput.value,
-        exportFormat: 'JSON',
+        exportFormat: 'EXCEL',
         roomTypeId: 1,
         status: 'CHECKED_IN',
       });
     });
 
-    expect(screen.getByRole('link', { name: /Download JSON Export/i })).toHaveAttribute('href', 'blob:report');
+    const downloadLink = screen.getByRole('link', { name: /Download Excel Export/i });
+    expect(downloadLink).toHaveAttribute('href', 'blob:report');
+    expect(downloadLink).toHaveAttribute('download', expect.stringMatching(/\.xls$/));
   });
 
   it('shows recent notifications without exposing admin-only audit activity', async () => {

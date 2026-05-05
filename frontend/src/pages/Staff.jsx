@@ -14,7 +14,7 @@ import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { useAuth } from '../context/AuthProvider';
 import { useStaff } from '../hooks/useStaff';
-import { translateKnownValue } from '../utils/localization';
+import { translateKnownValue, translateWithFallback } from '../utils/localization';
 
 function StaffFormModal({
   editingId,
@@ -150,7 +150,7 @@ export default function Staff() {
   const { user, hasRole } = useAuth();
 
   const currentUserEmail = user?.email;
-  const canUnlock = hasRole('ROLE_ADMIN') || hasRole('ROLE_MANAGER');
+  const canUnlock = hasRole('ROLE_ADMIN');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -473,9 +473,16 @@ export default function Staff() {
                       </td>
                       <td className="px-4 py-4">
                         {member.active ? (
-                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
-                            {t(`${pageTx}.active`)}
-                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
+                              {t(`${pageTx}.active`)}
+                            </span>
+                            {member.locked && (
+                              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-amber-900">
+                                {translateWithFallback(t, `${pageTx}.locked`, 'Locked')}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="rounded-full border border-zinc-300 bg-zinc-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-zinc-600">
                             {t(`${pageTx}.inactive`)}
@@ -518,7 +525,8 @@ export default function Staff() {
                             <button
                               type="button"
                               onClick={() => handleUnlock(member)}
-                              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                              disabled={!member.locked}
+                              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
                             >
                               <LockOpen className="h-4 w-4" />
                               {t(`${pageTx}.unlock`)}

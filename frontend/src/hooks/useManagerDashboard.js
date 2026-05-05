@@ -34,7 +34,7 @@ export const useManagerDashboard = ({ startDate, endDate }) => {
           getDashboardMetrics({ startDate, endDate }),
           getOccupancyTrend({ startDate, endDate }),
           getRevenueTrend({ startDate, endDate }),
-          getRoomTypeDistribution(),
+          getRoomTypeDistribution({ startDate, endDate }),
         ]);
 
         if (ignore) return;

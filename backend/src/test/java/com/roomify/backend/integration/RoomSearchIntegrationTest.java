@@ -231,6 +231,20 @@ class RoomSearchIntegrationTest {
         }
 
         @Test
+        void searchFiltersByRoomNameOrNumber() throws Exception {
+                LocalDate checkIn = LocalDate.now().plusDays(1);
+                LocalDate checkOut = LocalDate.now().plusDays(3);
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", checkIn.toString())
+                                .param("checkOut", checkOut.toString())
+                                .param("roomName", "30"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(1))
+                                .andExpect(jsonPath("$.rooms[0].roomNumber").value("301"));
+        }
+
+        @Test
         void searchFiltersByMinPrice() throws Exception {
                 LocalDate checkIn = LocalDate.now().plusDays(1);
                 LocalDate checkOut = LocalDate.now().plusDays(3);

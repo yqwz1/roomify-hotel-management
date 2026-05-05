@@ -72,6 +72,11 @@ describe('navConfig', () => {
     expect(paths).not.toContain('/room-types');
   });
 
+  it('keeps direct book-room entry off role sidebars', () => {
+    expect(getPathsForRoles([ROLE_MANAGER])).not.toContain('/book');
+    expect(getPathsForRoles([ROLE_STAFF])).not.toContain('/book');
+  });
+
   it('prefers explicit reservation detail metadata over the reservations parent item', () => {
     const meta = getPageMeta('/reservations/RSV-1001', [ROLE_STAFF], (key) => key);
 

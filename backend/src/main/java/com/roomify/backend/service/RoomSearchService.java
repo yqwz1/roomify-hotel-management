@@ -63,6 +63,9 @@ public class RoomSearchService {
         query.setParameter("checkOut", request.getCheckOut());
 
         // 5. Bind optional parameters (only when the filter is set)
+        if (request.getRoomName() != null && !request.getRoomName().isBlank()) {
+            query.setParameter("roomName", "%" + request.getRoomName().trim().toLowerCase() + "%");
+        }
         if (request.getRoomType() != null && !request.getRoomType().isBlank()) {
             query.setParameter("roomTypeName", request.getRoomType());
         }

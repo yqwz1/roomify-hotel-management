@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { translateKnownValue } from '../utils/localization';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,7 @@ export default function RoomFilters({
   floorOptions = [],
   showStatus = true,
   showType = true,
+  showRoomSearch = false,
   showFloor = true,
   showGuestCapacity = false,
   showPriceRange = true,
@@ -109,6 +110,22 @@ export default function RoomFilters({
 
       <div className="px-5 py-5 sm:px-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+          {showRoomSearch && (
+            <FilterField id="filter-room-name" label={t('roomNameSearchLabel')}>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Input
+                  id="filter-room-name"
+                  type="search"
+                  placeholder={t('roomNameSearchPlaceholder')}
+                  value={filters.roomName ?? ''}
+                  onChange={(event) => handle('roomName', event.target.value)}
+                  className={`${inputClassName} pl-10`}
+                />
+              </div>
+            </FilterField>
+          )}
+
           {showStatus && (
             <FilterField id="filter-status" label={t('status')}>
               <Select
@@ -213,7 +230,7 @@ export default function RoomFilters({
           )}
 
           {showPriceRange && (
-            <FilterField id="filter-min-price" label={`${t('minPrice')} ($)`}>
+            <FilterField id="filter-min-price" label={`${t('minPrice')} (SAR)`}>
               <Input
                 id="filter-min-price"
                 type="number"
@@ -227,7 +244,7 @@ export default function RoomFilters({
           )}
 
           {showPriceRange && (
-            <FilterField id="filter-max-price" label={`${t('maxPrice')} ($)`}>
+            <FilterField id="filter-max-price" label={`${t('maxPrice')} (SAR)`}>
               <Input
                 id="filter-max-price"
                 type="number"
@@ -248,6 +265,7 @@ export default function RoomFilters({
 RoomFilters.propTypes = {
   filters: PropTypes.shape({
     status: PropTypes.string,
+    roomName: PropTypes.string,
     type: PropTypes.string,
     floor: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     guestCapacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -286,6 +304,7 @@ RoomFilters.propTypes = {
   ),
   showStatus: PropTypes.bool,
   showType: PropTypes.bool,
+  showRoomSearch: PropTypes.bool,
   showFloor: PropTypes.bool,
   showGuestCapacity: PropTypes.bool,
   showPriceRange: PropTypes.bool,

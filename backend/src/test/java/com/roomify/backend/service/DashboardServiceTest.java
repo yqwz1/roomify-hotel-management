@@ -186,10 +186,10 @@ class DashboardServiceTest {
                 when(roomTypeRepository.findAll()).thenReturn(List.of(deluxe, suite));
                 when(roomRepository.countByRoomType(deluxe)).thenReturn(8L);
                 when(roomRepository.countByRoomType(suite)).thenReturn(4L);
-                when(dashboardRepository.countOccupiedRoomsByType(1L)).thenReturn(4L);
-                when(dashboardRepository.countOccupiedRoomsByType(2L)).thenReturn(1L);
+                when(dashboardRepository.countOccupiedRoomsByTypeInPeriod(1L, START, END)).thenReturn(4L);
+                when(dashboardRepository.countOccupiedRoomsByTypeInPeriod(2L, START, END)).thenReturn(1L);
 
-                List<RoomTypeDistributionItem> distribution = dashboardService.getRoomTypeDistribution();
+                List<RoomTypeDistributionItem> distribution = dashboardService.getRoomTypeDistribution(START, END);
 
                 assertEquals(2, distribution.size());
                 assertEquals(0.5, distribution.get(0).getOccupancyRate(), 0.0001);

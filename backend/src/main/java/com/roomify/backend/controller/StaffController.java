@@ -19,11 +19,7 @@ import com.roomify.backend.dto.StaffCreateRequest;
 import com.roomify.backend.dto.StaffResponse;
 import com.roomify.backend.dto.StaffUpdateRequest;
 import com.roomify.backend.service.StaffService;
-import com.roomify.backend.service.UserService;
 import com.roomify.backend.user.Role;
-import com.roomify.backend.user.User;
-import com.roomify.backend.user.UserRepository;
-import com.roomify.backend.exception.ResourceNotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -33,17 +29,9 @@ import jakarta.validation.Valid;
 public class StaffController {
 
     private final StaffService staffService;
-    private final UserRepository userRepository; // NEW
-    private final UserService userService; // NEW
 
-    public StaffController(
-            StaffService staffService,
-            UserRepository userRepository, // NEW
-            UserService userService // NEW
-    ) {
+    public StaffController(StaffService staffService) {
         this.staffService = staffService;
-        this.userRepository = userRepository;
-        this.userService = userService;
     }
 
     @PostMapping
@@ -80,14 +68,8 @@ public class StaffController {
         return staffService.setActive(id, false);
     }
 
-    // NEW - Manual Unlock Endpoint
     @PatchMapping("/{id}/unlock")
-    public ResponseEntity<Void> unlock(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        userService.manualUnlock(user);
-
-        return ResponseEntity.noContent().build();
+    public StaffResponse unlock(@PathVariable Long id) {
+        return staffService.unlockStaff(id);
     }
 }

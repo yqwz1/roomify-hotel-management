@@ -24,7 +24,7 @@ import {
 } from '../utils/localization';
 import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
-const EMPTY_FILTERS = { type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
+const EMPTY_FILTERS = { roomName: '', type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
 const FRONT_DESK_EMAIL = 'info@roomify.com';
 const FRONT_DESK_LINK = `mailto:${FRONT_DESK_EMAIL}?subject=Roomify%20Front%20Desk%20Support`;
 
@@ -122,6 +122,7 @@ export default function RoomSearch() {
     search({
       checkIn,
       checkOut,
+      roomName: filters.roomName?.trim() || undefined,
       roomType: filters.type || undefined,
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
@@ -265,6 +266,7 @@ export default function RoomSearch() {
             showStatus={false}
             showFloor={false}
             showGuestCapacity={true}
+            showRoomSearch={true}
           />
         </div>
 
@@ -313,7 +315,7 @@ export default function RoomSearch() {
             )}
 
             {!loading && results.length > 0 && (
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="space-y-4">
                 {results.map((room) => {
                   const basePrice = Number(room.roomType?.basePrice ?? 0);
                   const totalCost = nights > 0 ? basePrice * nights : basePrice;
@@ -327,27 +329,26 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-28px_rgba(15,23,42,0.24)]"
+                      className="rounded-[1.35rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-zinc-300"
                     >
-                      <div className="flex h-40 items-center justify-center bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
-                        <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
-                          <BedDouble className="h-7 w-7" />
-                        </span>
-                      </div>
-
-                      <div className="space-y-4 p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xl font-black tracking-tight text-zinc-950">
-                              {t('roomNumber', { number: room.roomNumber })}
-                            </p>
-                            <p className="mt-1 text-sm font-medium text-zinc-500">
-                              {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
-                              {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
-                            </p>
+                      <div className="space-y-4">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 text-white">
+                              <BedDouble className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xl font-black tracking-tight text-zinc-950">
+                                {t('roomNumber', { number: room.roomNumber })}
+                              </p>
+                              <p className="mt-1 text-sm font-medium text-zinc-500">
+                                {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
+                                {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
+                              </p>
+                            </div>
                           </div>
                           <span
-                            className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                            className={`w-fit rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
                               getStatusBadgeClasses(room.status)
                             }`}
                           >
@@ -377,7 +378,7 @@ export default function RoomSearch() {
                           )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-3 sm:grid-cols-3">
                           <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
                               {t(`${pageTx}.rateLabel`)}
@@ -395,35 +396,32 @@ export default function RoomSearch() {
                               {t('upToGuests', { count: room.roomType?.maxGuests ?? '-' })}
                             </p>
                           </div>
-                        </div>
-
-                        <div className="flex items-center justify-between border-t border-zinc-100 pt-4">
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
                               {t('common.stayTotal')}
                             </p>
-                            <p className="mt-1 text-lg font-black text-zinc-950">
+                            <p className="mt-2 text-sm font-bold text-zinc-950">
                               {formatLocalizedCurrency(totalCost, i18n.language)}
                             </p>
                           </div>
+                        </div>
 
-                          <div className="flex flex-wrap justify-end gap-2">
-                            {cardActions.map((action) => (
-                              <button
-                                key={action.id}
-                                type="button"
-                                onClick={() => handleCardAction(action.id, room)}
-                                className={
-                                  action.tone === 'secondary'
-                                    ? 'inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-300 hover:bg-zinc-50'
-                                    : 'inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800'
-                                }
-                              >
-                                {t(action.labelKey)}
-                                <ArrowRight className="h-4 w-4" />
-                              </button>
-                            ))}
-                          </div>
+                        <div className="flex flex-col gap-3 border-t border-zinc-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
+                          {cardActions.map((action) => (
+                            <button
+                              key={action.id}
+                              type="button"
+                              onClick={() => handleCardAction(action.id, room)}
+                              className={
+                                action.tone === 'secondary'
+                                  ? 'inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-300 hover:bg-zinc-50'
+                                  : 'inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800'
+                              }
+                            >
+                              {t(action.labelKey)}
+                              <ArrowRight className="h-4 w-4" />
+                            </button>
+                          ))}
                         </div>
 
                         {isGuest && (

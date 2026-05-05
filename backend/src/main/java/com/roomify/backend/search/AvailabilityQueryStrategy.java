@@ -226,6 +226,14 @@ public class AvailabilityQueryStrategy {
         // ------------------------------------------------------------------
 
         /*
+         * ROOM NAME / NUMBER FILTER
+         * Match either the room number or the room-type name, case-insensitively.
+         */
+        if (request.getRoomName() != null && !request.getRoomName().isBlank()) {
+            jpql.append("AND (LOWER(r.roomNumber) LIKE :roomName OR LOWER(rt.name) LIKE :roomName) ");
+        }
+
+        /*
          * ROOM TYPE NAME FILTER
          * Filter by exact room-type name (case-sensitive).
          * Example: "Deluxe", "Suite", "Standard".

@@ -113,6 +113,6 @@ describe('ModifyReservation', () => {
 
     expect(await screen.findByText(/VAT \(15%\)/i)).toBeInTheDocument();
     expect(screen.queryByText(/Taxes \(10%\)/i)).not.toBeInTheDocument();
-    expect(screen.getAllByText('$460.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*460\.00/).length).toBeGreaterThan(0);
   });
 });

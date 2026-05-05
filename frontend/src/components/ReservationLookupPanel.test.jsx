@@ -83,8 +83,8 @@ describe('ReservationLookupPanel', () => {
     });
     expect(await screen.findByText('jane@example.com')).toBeInTheDocument();
     expect(screen.getAllByText('RSV-LOOK-123456').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('$420.00').length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/\$80.00/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*420\.00/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SAR\s*80\.00/).length).toBeGreaterThan(0);
   });
 
   it('shows selectable guest-name matches from the filtered backend response', async () => {

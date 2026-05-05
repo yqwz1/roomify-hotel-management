@@ -81,7 +81,7 @@ public class StaffService {
                 .filter(staff -> matchesSearch(staff, normalizedSearch))
                 .filter(staff -> role == null || (staff.getUser() != null && staff.getUser().getRole() == role))
                 .filter(staff -> normalizedDepartment == null || normalizedDepartment.equals(staff.getDepartment()))
-                .filter(staff -> active == null || staff.isActive() == active)
+                .filter(staff -> active == null || isAccountActive(staff) == active)
                 .map(StaffResponse::from)
                 .toList();
     }
@@ -132,6 +132,10 @@ public class StaffService {
         staff.setActive(active);
         if (staff.getUser() != null) {
             staff.getUser().setActive(active);
+            if (active) {
+                staff.getUser().setFailedAttempts(0);
+                staff.getUser().setLockUntil(null);
+            }
         }
 
         // Audit log for activate/deactivate
@@ -141,6 +145,19 @@ public class StaffService {
                 "Staff:" + id,
                 "{ \"active\": " + active + " }");
 
+        return StaffResponse.from(staff);
+    }
+
+    public StaffResponse unlockStaff(Long id) {
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+        User user = staff.getUser();
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        userService.manualUnlock(user);
         return StaffResponse.from(staff);
     }
 
@@ -161,6 +178,11 @@ public class StaffService {
         String currentEmail = authentication.getName();
         User user = staff.getUser();
         return user != null && user.getEmail() != null && user.getEmail().equalsIgnoreCase(currentEmail);
+    }
+
+    private boolean isAccountActive(Staff staff) {
+        User user = staff.getUser();
+        return staff.isActive() && (user == null || user.isActive());
     }
 
     private String getCurrentActor() {

@@ -53,6 +53,7 @@ import {
   translateKnownValue,
   translateWithFallback,
 } from '../utils/localization';
+import { buildDashboardReportExcelBlob } from '../utils/reportExport';
 
 const EXPORTABLE_STATUSES = [
   'PENDING',
@@ -1468,7 +1469,7 @@ export default function ManagerDashboard() {
       const payload = {
         startDate: appliedRange.startDate,
         endDate: appliedRange.endDate,
-        exportFormat: 'JSON',
+        exportFormat: 'EXCEL',
       };
 
       if (exportFilters.roomTypeId) {
@@ -1480,9 +1481,7 @@ export default function ManagerDashboard() {
       }
 
       const result = await exportDashboardReport(payload);
-      const nextBlob = new Blob([JSON.stringify(result, null, 2)], {
-        type: 'application/json',
-      });
+      const nextBlob = buildDashboardReportExcelBlob(result);
       const nextUrl = URL.createObjectURL(nextBlob);
 
       setExportUrl((current) => {
@@ -1859,7 +1858,7 @@ export default function ManagerDashboard() {
                     >
                       <a
                         href={exportUrl}
-                        download={`roomify-report-${appliedRange.startDate}-${appliedRange.endDate}.json`}
+                        download={`roomify-report-${appliedRange.startDate}-${appliedRange.endDate}.xls`}
                       >
                         <Download className="h-4 w-4" />
                         {t(`${pageTx}.downloadExport`)}

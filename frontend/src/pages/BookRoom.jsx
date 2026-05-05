@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import DateRangePicker from '../components/DateRangePicker';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { Button } from '../components/ui/button';
 import {
   createReservation,
   extractReservationError,
@@ -420,7 +421,9 @@ export default function BookRoom() {
                 >
                   {submitting
                     ? t('bookRoomPage.creatingReservation')
-                    : t('confirmBookingPrice', { price: Number(totalPrice ?? 0).toFixed(2) })}
+                    : t('confirmBookingPrice', {
+                        price: formatLocalizedCurrency(totalPrice, i18n.language),
+                      })}
                 </Button>
               </div>
             </form>

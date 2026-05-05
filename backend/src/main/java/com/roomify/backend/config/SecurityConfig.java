@@ -56,13 +56,20 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(java.util.List.of(
                 "http://localhost:5173",
+                "http://127.0.0.1:5173",
                 "http://localhost:3000",
+                "http://127.0.0.1:3000",
                 "http://localhost:3001",
+                "http://127.0.0.1:3001",
                 "http://localhost:3002",
-                "http://localhost:3003"));
+                "http://127.0.0.1:3002",
+                "http://localhost:3003",
+                "http://127.0.0.1:3003",
+                "http://localhost:4173",
+                "http://127.0.0.1:4173"));
 
         configuration.setAllowedMethods(java.util.List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         configuration.setAllowedHeaders(java.util.List.of("*"));
         configuration.setAllowCredentials(true);

@@ -94,6 +94,19 @@ public class ServiceChargeServiceTest {
     }
 
     @Test
+    void testAddChargeWithInactiveService_ThrowsException() {
+        hotelService.setActive(false);
+        when(reservationRepo.findById(1L)).thenReturn(Optional.of(reservation));
+        when(serviceRepo.findById(10L)).thenReturn(Optional.of(hotelService));
+
+        Exception exception = assertThrows(RuntimeException.class, () -> serviceChargeService.addCharge(1L, 10L, 1));
+
+        assertEquals("Service is inactive", exception.getMessage());
+        verify(chargeRepo, never()).save(any(ServiceCharge.class));
+        verify(notificationService, never()).notifyServiceRequestCreated(any(), any(), anyInt(), any());
+    }
+
+    @Test
     void testModifyChargeWhenPaid_ThrowsException() {
         reservation.setPaymentStatus(PaymentStatus.PAID);
         when(chargeRepo.findById(100L)).thenReturn(Optional.of(serviceCharge));

@@ -72,10 +72,11 @@ export const deactivateStaff = async (id) => {
 /**
  * Manually unlock a locked staff account
  * Clears failedAttempts and lockUntil fields
- * Manager-only endpoint
+ * Admin-only endpoint
  * @param {number} id - Staff ID
- * @returns {Promise<void>}
+ * @returns {Promise<Object>} Updated staff member
  */
 export const unlockStaff = async (id) => {
-    await api.patch(`/staff/${id}/unlock`);
+    const response = await api.patch(`/staff/${id}/unlock`);
+    return response.data;
 };

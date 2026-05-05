@@ -174,15 +174,15 @@ public class DashboardService {
      *
      * @return list of {@link RoomTypeDistributionItem}, one per room type
      */
-    public List<RoomTypeDistributionItem> getRoomTypeDistribution() {
-        log.info("Room-type distribution requested");
+    public List<RoomTypeDistributionItem> getRoomTypeDistribution(LocalDate start, LocalDate end) {
+        log.info("Room-type distribution requested: {} – {}", start, end);
 
         List<RoomType> types = roomTypeRepository.findAll();
         List<RoomTypeDistributionItem> result = new ArrayList<>(types.size());
 
         for (RoomType type : types) {
             long total = roomRepository.countByRoomType(type);
-            long occupied = dashboardRepository.countOccupiedRoomsByType(type.getId());
+            long occupied = dashboardRepository.countOccupiedRoomsByTypeInPeriod(type.getId(), start, end);
             double rate = total > 0 ? (double) occupied / total : 0.0;
 
             result.add(new RoomTypeDistributionItem(

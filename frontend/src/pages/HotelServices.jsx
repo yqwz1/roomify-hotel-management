@@ -4,8 +4,10 @@ import {
   BriefcaseBusiness,
   Pencil,
   Plus,
-  Trash2,
+  Power,
+  PowerOff,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import ModalFrame from '../components/common/ModalFrame';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
@@ -15,9 +17,9 @@ import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import {
   createService,
-  deleteService,
   extractServiceError,
   getServices,
+  setServiceActive,
   updateService,
 } from '../services/serviceService';
 import {
@@ -50,7 +52,7 @@ function ServiceModal({
       title={
         editing
           ? translateWithFallback(t, 'hotelServicesPage.editTitle', 'Edit Service')
-          : translateWithFallback(t, 'hotelServicesPage.createTitle', 'Create Service')
+          : translateWithFallback(t, 'hotelServicesPage.createTitle', 'Add Service')
       }
       description={translateWithFallback(
         t,
@@ -147,7 +149,7 @@ function ServiceModal({
             {translateWithFallback(
               t,
               'hotelServicesPage.activeToggle',
-              'Service is available for booking'
+              'Service is available for billing'
             )}
           </span>
         </label>
@@ -168,8 +170,8 @@ function ServiceModal({
             {saving
               ? translateWithFallback(t, 'saving', 'Saving...')
               : editing
-                ? translateWithFallback(t, 'hotelServicesPage.updateAction', 'Update Service')
-                : translateWithFallback(t, 'hotelServicesPage.createAction', 'Create Service')}
+                ? translateWithFallback(t, 'hotelServicesPage.updateAction', 'Save Service')
+                : translateWithFallback(t, 'hotelServicesPage.createAction', 'Add Service')}
           </button>
         </div>
       </form>
@@ -187,6 +189,7 @@ export default function HotelServices() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState(createEmptyForm());
+  const [serviceActionId, setServiceActionId] = useState(null);
 
   const loadServices = async () => {
     setLoading(true);
@@ -231,6 +234,15 @@ export default function HotelServices() {
     [services]
   );
   const inactiveCount = services.length - activeCount;
+  const sortedServices = useMemo(
+    () =>
+      [...services].sort((left, right) =>
+        String(left.name ?? '').localeCompare(String(right.name ?? ''), i18n.language, {
+          sensitivity: 'base',
+        })
+      ),
+    [i18n.language, services]
+  );
   const averagePrice = useMemo(() => {
     if (services.length === 0) {
       return 0;
@@ -270,25 +282,32 @@ export default function HotelServices() {
     }
   };
 
-  const handleDelete = async (service) => {
-    if (
-      !window.confirm(
-        translateWithFallback(
-          t,
-          'hotelServicesPage.deleteConfirm',
-          'Delete {{name}} from the hotel services catalog?',
-          { name: service.name }
-        )
+  const handleToggleActive = async (service) => {
+    const nextActive = !service.active;
+
+    if (!nextActive && !window.confirm(
+      translateWithFallback(
+        t,
+        'hotelServicesPage.deactivateConfirm',
+        'Deactivate {{name}}? It will stay in the catalog but will not be available for new service charges.',
+        { name: service.name }
       )
-    ) {
+    )) {
       return;
     }
 
+    setServiceActionId(service.id);
+    setError(null);
+
     try {
-      await deleteService(service.id);
-      setServices((current) => current.filter((item) => item.id !== service.id));
+      const updated = await setServiceActive(service, nextActive);
+      setServices((current) =>
+        current.map((item) => (item.id === service.id ? updated : item))
+      );
     } catch (err) {
       setError(extractServiceError(err));
+    } finally {
+      setServiceActionId(null);
     }
   };
 
@@ -370,7 +389,7 @@ export default function HotelServices() {
           )}
         />
         <DashboardMetricCard
-          icon={Trash2}
+          icon={PowerOff}
           label={translateWithFallback(t, 'hotelServicesPage.metrics.inactiveLabel', 'Inactive Services')}
           value={formatLocalizedNumber(inactiveCount, i18n.language)}
           hint={translateWithFallback(
@@ -406,7 +425,7 @@ export default function HotelServices() {
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800"
           >
             <Plus className="h-4 w-4" />
-            {translateWithFallback(t, 'hotelServicesPage.createAction', 'Create Service')}
+            {translateWithFallback(t, 'hotelServicesPage.createAction', 'Add Service')}
           </button>
         }
       >
@@ -440,7 +459,7 @@ export default function HotelServices() {
           />
         ) : (
           <div className="space-y-3">
-            {services.map((service) => (
+            {sortedServices.map((service) => (
               <div
                 key={service.id}
                 className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
@@ -483,15 +502,22 @@ export default function HotelServices() {
                     className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
                   >
                     <Pencil className="h-4 w-4" />
-                    {translateWithFallback(t, 'editStaff', 'Edit')}
+                    {translateWithFallback(t, 'hotelServicesPage.editAction', 'Edit Service')}
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(service)}
-                    className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-900 transition hover:border-rose-300 hover:bg-rose-100"
+                    onClick={() => handleToggleActive(service)}
+                    disabled={serviceActionId === service.id}
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      service.active
+                        ? 'border-amber-200 bg-amber-50 text-amber-900 hover:border-amber-300 hover:bg-amber-100'
+                        : 'border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 hover:bg-emerald-100'
+                    }`}
                   >
-                    <Trash2 className="h-4 w-4" />
-                    {translateWithFallback(t, 'deleteRoomTitle', 'Delete')}
+                    {service.active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                    {service.active
+                      ? translateWithFallback(t, 'hotelServicesPage.deactivateAction', 'Deactivate')
+                      : translateWithFallback(t, 'hotelServicesPage.activateAction', 'Activate')}
                   </button>
                 </div>
               </div>

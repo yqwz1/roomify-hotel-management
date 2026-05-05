@@ -397,7 +397,7 @@ public class AiFinanceController {
     }
 
     private String formatMoney(BigDecimal value) {
-        return value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+        return "SAR " + value.setScale(2, RoundingMode.HALF_UP).toPlainString();
     }
 
     private String formatPercent(double value) {

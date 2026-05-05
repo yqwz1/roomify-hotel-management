@@ -39,6 +39,9 @@ public class ServiceChargeService {
 
         HotelService service = serviceRepo.findById(serviceId)
                 .orElseThrow(() -> new RuntimeException("Service not found"));
+        if (!service.isActive()) {
+            throw new RuntimeException("Service is inactive");
+        }
 
         ServiceCharge charge = new ServiceCharge();
         charge.setReservation(reservation);

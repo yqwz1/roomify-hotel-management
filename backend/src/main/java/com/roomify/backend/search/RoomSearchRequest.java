@@ -14,8 +14,9 @@ import java.time.LocalDate;
  * <h2>Endpoint Contract (future: {@code GET /api/rooms/search})</h2>
  * <p>
  * Clients send this DTO (as query-parameters or a JSON body) to search for
- * available rooms within a date range, optionally filtering by room type, price
- * band, and guest capacity. Results can be sorted by price or room-type name.
+ * available rooms within a date range, optionally filtering by room name/number,
+ * room type, price band, and guest capacity. Results can be sorted by price or
+ * room-type name.
  * </p>
  *
  * <h3>Required fields</h3>
@@ -27,6 +28,7 @@ import java.time.LocalDate;
  *
  * <h3>Optional filters</h3>
  * <ul>
+ * <li>{@code roomName} — partial room number or room-type name match</li>
  * <li>{@code roomType} — exact room-type name (e.g. "Deluxe", "Suite")</li>
  * <li>{@code minPrice} / {@code maxPrice} — base-price range filter</li>
  * <li>{@code guests} — minimum guest capacity the room type must support</li>
@@ -84,6 +86,13 @@ public class RoomSearchRequest {
     // -----------------------------------------------------------------------
     // Optional filter fields
     // -----------------------------------------------------------------------
+
+    /**
+     * Optional room search term.
+     * Matches room numbers and room-type names using a partial, case-insensitive
+     * comparison.
+     */
+    private String roomName;
 
     /**
      * Optional room-type name filter (e.g. "Deluxe", "Suite").
@@ -235,6 +244,28 @@ public class RoomSearchRequest {
 
     public void setRoomType(String roomType) {
         this.roomType = roomType;
+    }
+
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    /**
+     * Alias for query parameter compatibility when callers use "roomNumber".
+     */
+    public String getRoomNumber() {
+        return roomName;
+    }
+
+    /**
+     * Alias for query parameter compatibility when callers use "roomNumber".
+     */
+    public void setRoomNumber(String roomNumber) {
+        this.roomName = roomNumber;
     }
 
     public BigDecimal getMinPrice() {
