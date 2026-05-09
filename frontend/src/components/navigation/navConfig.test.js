@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   GUEST_BILLING_STATUS_PATH,
   ROLE_ADMIN,
+  getDocumentTitle,
   getNavigationSections,
   getPageMeta,
   ROLE_GUEST,
@@ -82,5 +83,25 @@ describe('navConfig', () => {
 
     expect(meta.title).toBe('Reservation Details');
     expect(meta.sectionLabel).toBe('Reservations');
+  });
+
+  it('builds manager dashboard browser titles with brand prefix', () => {
+    const title = getDocumentTitle('/manager/dashboard', [ROLE_MANAGER], (key) => key);
+    const titleWithoutRole = getDocumentTitle('/manager/dashboard', [], (key) => key);
+
+    expect(title).toBe('Roomify - Manager Dashboard');
+    expect(titleWithoutRole).toBe('Roomify - Manager Dashboard');
+  });
+
+  it('uses explicit dashboard labels when navigation uses section labels', () => {
+    const title = getDocumentTitle('/staff/dashboard', [ROLE_STAFF], (key) => key);
+
+    expect(title).toBe('Roomify - Staff Dashboard');
+  });
+
+  it('falls back to not found title for unknown routes', () => {
+    const title = getDocumentTitle('/definitely-missing-page', [], (key) => key);
+
+    expect(title).toBe('Roomify - Page not found');
   });
 });

@@ -438,6 +438,38 @@ const PAGE_META = [
   },
 ];
 
+// Role-independent overrides for the browser tab title. Keep titles stable
+// even when user roles haven't loaded yet, and when an in-app nav label
+// (e.g. "Front Desk") wouldn't make sense as a standalone browser title.
+const DOCUMENT_TITLE_OVERRIDES = {
+  '/': ['homeNav', 'Home'],
+  '/login': ['signIn', 'Sign In'],
+  '/unauthorized': ['unauthorizedPage.title', 'Access Denied'],
+  '/bookings': ['bookings', 'Bookings'],
+  '/admin/dashboard': ['adminDashboardTitle', 'Admin Dashboard'],
+  '/manager/dashboard': ['managerDashboardTitle', 'Manager Dashboard'],
+  '/staff/dashboard': ['staffDashboardTitle', 'Staff Dashboard'],
+  '/guest/dashboard': ['guestDashboardTitle', 'Guest Dashboard'],
+  '/manager/ai-finance': ['aiFinanceTitle', 'AI Finance'],
+  '/manager/expenses': ['expenseTrackerTitle', 'Expense Tracker'],
+  '/room-types': ['roomTypes', 'Room Types'],
+  '/staff': ['staffMenu', 'Staff'],
+  '/services': ['servicesTitle', 'Services'],
+  '/rooms': ['rooms', 'Rooms'],
+  '/rooms-management': ['roomsManagement', 'Rooms Management'],
+  '/search': ['roomSearch', 'Room Search'],
+  '/book': ['bookRoom', 'Book Room'],
+  '/confirmation': ['bookingConfirmed', 'Booking Confirmation'],
+  '/check-in': ['checkInTitle', 'Check-In'],
+  '/checkout': ['checkoutTitle', 'Checkout'],
+  '/reservations': ['navReservations', 'Reservations'],
+  '/reservations/modify': ['modifyReservationTitle', 'Modify Reservation'],
+  '/reservations/cancel': ['cancelReservationTitle', 'Cancel Reservation'],
+  '/invoice-preview': ['invoicePreview', 'Invoice Preview'],
+  '/room-status': ['roomStatus', 'Room Status'],
+  [GUEST_BILLING_STATUS_PATH]: ['navBillingStatus', 'Billing Status'],
+};
+
 const buildSectionLabel = (section, t) => translateWithFallback(t, section.translationKey, section.fallbackLabel);
 
 const buildItemLabel = (item, t) => translateWithFallback(t, item.translationKey, item.fallbackLabel);
@@ -470,7 +502,7 @@ const findSectionById = (sectionId, roles, t) => {
 export const isNavItemActive = (pathname, itemPath) =>
   pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 
-export const getPageMeta = (pathname, roles = [], t) => {
+const resolveMatchedPageMeta = (pathname, roles = [], t) => {
   const matchedPageMeta = PAGE_META.find((page) => page.match(pathname));
   if (matchedPageMeta) {
     const section = findSectionById(matchedPageMeta.sectionId, roles, t);
@@ -497,8 +529,28 @@ export const getPageMeta = (pathname, roles = [], t) => {
     };
   }
 
+  return null;
+};
+
+export const getPageMeta = (pathname, roles = [], t) => {
+  const matchedMeta = resolveMatchedPageMeta(pathname, roles, t);
+  if (matchedMeta) {
+    return matchedMeta;
+  }
+
   return {
     title: translateWithFallback(t, 'dashboard', 'Dashboard'),
     sectionLabel: translateWithFallback(t, 'dashboard', 'Dashboard'),
   };
+};
+
+export const getDocumentTitle = (pathname, roles = [], t) => {
+  const override = DOCUMENT_TITLE_OVERRIDES[pathname];
+  const pageTitle = override
+    ? translateWithFallback(t, override[0], override[1])
+    : (resolveMatchedPageMeta(pathname, roles, t)?.title
+      ?? translateWithFallback(t, 'notFoundPage.title', 'Page not found'));
+
+  const brandName = translateWithFallback(t, 'brandName', 'Roomify');
+  return `${brandName} - ${pageTitle}`;
 };

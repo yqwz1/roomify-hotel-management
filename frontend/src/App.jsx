@@ -1,6 +1,8 @@
 import './i18n'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './context/AuthProvider'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { AuthProvider, useAuth } from './context/AuthProvider'
 import Home from './pages/Home'
 import Rooms from './pages/Rooms'
 import RoomTypes from './pages/RoomTypes'
@@ -18,6 +20,7 @@ import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
   GUEST_BILLING_STATUS_PATH,
+  getDocumentTitle,
   ROLE_ADMIN,
   ROLE_GUEST,
   ROLE_MANAGER,
@@ -56,6 +59,15 @@ const AUTHENTICATED_ROLES = [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
  * AppContent component - handles routing logic
  */
 const AppContent = () => {
+  const { t, i18n } = useTranslation();
+  const { user } = useAuth();
+  const location = useLocation();
+  const roles = user?.roles;
+
+  useEffect(() => {
+    document.title = getDocumentTitle(location.pathname, roles ?? [], t);
+  }, [location.pathname, roles, t, i18n.resolvedLanguage]);
+
   return (
     <div className="h-full bg-gray-50">
       <Routes>
