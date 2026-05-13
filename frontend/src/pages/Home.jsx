@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   BedDouble,
@@ -20,7 +20,9 @@ import {
 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion, useReducedMotion } from 'framer-motion';
 import Footer from '../components/Footer';
+import Reveal, { EASE } from '../components/motion/Reveal';
 import { checkHealth } from '../services/healthService';
 import { useAuth } from '../context/AuthProvider';
 import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
@@ -126,6 +128,7 @@ export default function Home() {
   const [health, setHealth] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let isMounted = true;
@@ -152,6 +155,8 @@ export default function Home() {
     return <Navigate to={dashboardPath} replace />;
   }
 
+  const hoverLift = reduceMotion ? {} : { y: -4 };
+
   return (
     <div className="min-h-full bg-[#f7f3ed]">
 
@@ -159,67 +164,130 @@ export default function Home() {
           HERO
          ────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          <div className="absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-zinc-200/40 to-transparent blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-zinc-100/50 to-transparent blur-2xl" />
-        </div>
+        <motion.div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: EASE }}
+        >
+          <motion.div
+            className="absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-zinc-200/40 to-transparent blur-3xl"
+            animate={reduceMotion ? {} : { y: [0, 18, 0], x: [0, -12, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-zinc-100/50 to-transparent blur-2xl"
+            animate={reduceMotion ? {} : { y: [0, -14, 0], x: [0, 10, 0] }}
+            transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
 
         <div className="relative mx-auto max-w-7xl px-5 pb-6 pt-10 sm:px-8 lg:px-10 lg:pb-10 lg:pt-14">
           <div className="grid items-start gap-8 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
 
             {/* LEFT — Copy */}
             <div className="flex flex-col justify-center lg:pt-4">
-              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+                className="inline-flex w-fit items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
+              >
                 Property Management System
-              </div>
+              </motion.div>
 
-              <h1 className="mt-4 text-[1.75rem] font-black leading-[1.2] tracking-tight text-zinc-950 sm:text-[2rem] lg:text-[2.35rem]">
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
+                className="mt-4 text-[1.75rem] font-black leading-[1.2] tracking-tight text-zinc-950 sm:text-[2rem] lg:text-[2.35rem]"
+              >
                 The operating system for your&nbsp;hotel
-              </h1>
+              </motion.h1>
 
-              <p className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-zinc-500">
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
+                className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-zinc-500"
+              >
                 Manage reservations, rooms, guests, billing, and staff operations — all from one platform built for hotel teams.
-              </p>
+              </motion.p>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                <Link
-                  to="/login"
-                  id="hero-login-cta"
-                  className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Login to Dashboard
-                </Link>
-                <Link
-                  to="/bookings"
-                  id="hero-booking-cta"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950"
-                >
-                  Booking Support
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.65, ease: EASE }}
+                className="mt-6 flex flex-wrap gap-2.5"
+              >
+                <motion.div whileHover={reduceMotion ? {} : { scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link
+                    to="/login"
+                    id="hero-login-cta"
+                    className="group inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
+                  >
+                    <LogIn className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                    Login to Dashboard
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={reduceMotion ? {} : { scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link
+                    to="/bookings"
+                    id="hero-booking-cta"
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950"
+                  >
+                    Booking Support
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </motion.div>
+              </motion.div>
 
               {/* Quick stat chips */}
-              <div className="mt-7 flex flex-wrap gap-4 border-t border-zinc-200 pt-5">
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.85 } },
+                }}
+                className="mt-7 flex flex-wrap gap-4 border-t border-zinc-200 pt-5"
+              >
                 {LIVE_STATS.map((s) => {
                   const Icon = s.icon;
                   return (
-                    <div key={s.label} className="flex items-center gap-2">
+                    <motion.div
+                      key={s.label}
+                      variants={{
+                        hidden: { opacity: 0, y: 8 },
+                        visible: { opacity: 1, y: 0 },
+                      }}
+                      transition={{ duration: 0.5, ease: EASE }}
+                      className="flex items-center gap-2"
+                    >
                       <Icon className={`h-4 w-4 ${s.color}`} />
                       <div className="flex items-baseline gap-1">
                         <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
                         <span className="text-xs font-medium text-zinc-400">{s.label}</span>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             </div>
 
             {/* RIGHT — App Mockup */}
-            <div className="relative">
-              <div className="rounded-[1.75rem] border border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 ring-1 ring-zinc-900/[0.03]">
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.35, ease: EASE }}
+              className="relative"
+            >
+              <motion.div
+                whileHover={reduceMotion ? {} : { y: -6 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                className="rounded-[1.75rem] border border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 ring-1 ring-zinc-900/[0.03]"
+              >
                 {/* Window chrome */}
                 <div className="flex items-center gap-2 rounded-t-[1.75rem] border-b border-zinc-100 bg-zinc-50/70 px-4 py-2.5">
                   <div className="flex gap-1.5">
@@ -240,14 +308,17 @@ export default function Home() {
                       <span className="text-[11px] font-black text-white">Roomify</span>
                     </div>
                     {['Dashboard', 'Reservations', 'Rooms', 'Guests', 'Billing', 'Reports'].map((item, i) => (
-                      <div
+                      <motion.div
                         key={item}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.7 + i * 0.05, ease: EASE }}
                         className={`mb-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold ${
                           i === 0 ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         {item}
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
 
@@ -259,12 +330,18 @@ export default function Home() {
                         { label: 'Rev Today', val: 'SAR 4,280', sub: '18 transactions', accent: 'text-emerald-700' },
                         { label: 'Arrivals', val: '8', sub: '3 pending', accent: 'text-amber-700' },
                         { label: 'Departures', val: '5', sub: '2 late checkout', accent: 'text-zinc-700' },
-                      ].map((s) => (
-                        <div key={s.label} className="rounded-xl border border-zinc-100 bg-zinc-50/50 px-2.5 py-2">
+                      ].map((s, i) => (
+                        <motion.div
+                          key={s.label}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.45, delay: 0.8 + i * 0.07, ease: EASE }}
+                          className="rounded-xl border border-zinc-100 bg-zinc-50/50 px-2.5 py-2"
+                        >
                           <p className="text-[9px] font-black uppercase tracking-wider text-zinc-400">{s.label}</p>
                           <p className={`text-base font-black leading-tight ${s.accent}`}>{s.val}</p>
                           <p className="mt-0.5 text-[9px] text-zinc-400 hidden sm:block">{s.sub}</p>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
 
@@ -281,39 +358,73 @@ export default function Home() {
                             ))}
                           </div>
                         </div>
-                        <div className="grid grid-cols-8 gap-1">
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={{
+                            hidden: {},
+                            visible: { transition: { staggerChildren: 0.02, delayChildren: 1.0 } },
+                          }}
+                          className="grid grid-cols-8 gap-1"
+                        >
                           {ROOM_GRID.map((r) => (
-                            <div
+                            <motion.div
                               key={r.num}
-                              className={`flex h-8 items-center justify-center rounded-lg text-[9px] font-bold text-white ${ROOM_STATUS_MAP[r.status].bg} transition-transform hover:scale-110`}
+                              variants={{
+                                hidden: { opacity: 0, scale: 0.6 },
+                                visible: { opacity: 1, scale: 1 },
+                              }}
+                              transition={{ duration: 0.35, ease: EASE }}
+                              whileHover={reduceMotion ? {} : { scale: 1.15, y: -2 }}
+                              className={`flex h-8 cursor-pointer items-center justify-center rounded-lg text-[9px] font-bold text-white ${ROOM_STATUS_MAP[r.status].bg}`}
                               title={`${r.num} — ${ROOM_STATUS_MAP[r.status].label}`}
                             >
                               {r.num}
-                            </div>
+                            </motion.div>
                           ))}
-                        </div>
+                        </motion.div>
                       </div>
 
                       <div>
                         <span className="mb-2 block text-[10px] font-black uppercase tracking-wider text-zinc-500">Live Activity</span>
-                        <div className="space-y-1">
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={{
+                            hidden: {},
+                            visible: { transition: { staggerChildren: 0.1, delayChildren: 1.1 } },
+                          }}
+                          className="space-y-1"
+                        >
                           {TODAY_ACTIVITY.map((a, i) => (
-                            <div key={i} className="flex items-start gap-2 rounded-xl border border-zinc-100 bg-zinc-50/40 px-2 py-1.5">
-                              <span className={`mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full ${ACTIVITY_COLORS[a.type]}`} />
+                            <motion.div
+                              key={i}
+                              variants={{
+                                hidden: { opacity: 0, x: 12 },
+                                visible: { opacity: 1, x: 0 },
+                              }}
+                              transition={{ duration: 0.45, ease: EASE }}
+                              className="group flex items-start gap-2 rounded-xl border border-zinc-100 bg-zinc-50/40 px-2 py-1.5 transition-colors hover:bg-white"
+                            >
+                              <motion.span
+                                animate={reduceMotion ? {} : { scale: [1, 1.4, 1] }}
+                                transition={{ duration: 2, repeat: Infinity, delay: i * 0.3, ease: 'easeInOut' }}
+                                className={`mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full ${ACTIVITY_COLORS[a.type]}`}
+                              />
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-[10px] font-semibold text-zinc-700">{a.event}</p>
                                 <p className="text-[9px] text-zinc-400">{a.time} AM</p>
                               </div>
-                            </div>
+                            </motion.div>
                           ))}
-                        </div>
+                        </motion.div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
               <div className="absolute -bottom-3 left-4 right-4 -z-10 h-6 rounded-xl bg-zinc-300/30 blur-xl" />
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -323,29 +434,54 @@ export default function Home() {
          ────────────────────────────────────────────── */}
       <section className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-          <p className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">Core Modules</p>
-          <h2 className="mx-auto mt-1.5 max-w-lg text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
+            Core Modules
+          </Reveal>
+          <Reveal
+            as="h2"
+            delay={0.08}
+            className="mx-auto mt-1.5 max-w-lg text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
+          >
             Everything a hotel needs to operate
-          </h2>
+          </Reveal>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+            }}
+            className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
             {MODULES.map((m) => {
               const Icon = m.icon;
               return (
-                <article
+                <motion.article
                   key={m.title}
+                  variants={{
+                    hidden: { opacity: 0, y: 24 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.6, ease: EASE }}
+                  whileHover={hoverLift}
                   className="group relative overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/60"
                 >
-                  <div className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ${m.color} text-white shadow-sm`}>
+                  <motion.div
+                    whileHover={reduceMotion ? {} : { rotate: [0, -6, 6, 0] }}
+                    transition={{ duration: 0.6 }}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ${m.color} text-white shadow-sm`}
+                  >
                     <Icon className="h-[18px] w-[18px]" />
-                  </div>
+                  </motion.div>
                   <h3 className="mt-3 text-sm font-black text-zinc-950">{m.title}</h3>
                   <p className="mt-1 text-[13px] font-medium leading-[1.5] text-zinc-500">{m.desc}</p>
-                  <div className={`absolute bottom-0 left-0 h-[2px] w-full ${m.color} opacity-0 transition-opacity group-hover:opacity-100`} />
-                </article>
+                  <div className={`absolute bottom-0 left-0 h-[2px] w-0 ${m.color} transition-all duration-500 group-hover:w-full`} />
+                </motion.article>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -354,30 +490,65 @@ export default function Home() {
          ────────────────────────────────────────────── */}
       <section className="border-t border-zinc-200 bg-[#f7f3ed]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-          <p className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">Guest Journey</p>
-          <h2 className="mx-auto mt-1.5 max-w-md text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
+            Guest Journey
+          </Reveal>
+          <Reveal
+            as="h2"
+            delay={0.08}
+            className="mx-auto mt-1.5 max-w-md text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
+          >
             Reservation lifecycle, start to finish
-          </h2>
+          </Reveal>
 
           <div className="relative mt-10">
-            <div className="absolute left-0 right-0 top-[30px] hidden h-[2px] bg-gradient-to-r from-transparent via-zinc-300 to-transparent lg:block" aria-hidden="true" />
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+              style={{ originX: 0 }}
+              className="absolute left-0 right-0 top-[30px] hidden h-[2px] bg-gradient-to-r from-transparent via-zinc-300 to-transparent lg:block"
+              aria-hidden="true"
+            />
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
+              }}
+              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+            >
               {WORKFLOW.map((step, i) => {
                 const Icon = step.icon;
                 return (
-                  <div key={step.label} className="group flex flex-col items-center text-center">
-                    <div className="relative z-10 flex h-[60px] w-[60px] items-center justify-center rounded-2xl border-2 border-zinc-200 bg-white text-zinc-700 shadow-sm transition-all group-hover:border-zinc-400 group-hover:shadow-md">
+                  <motion.div
+                    key={step.label}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ duration: 0.55, ease: EASE }}
+                    className="group flex flex-col items-center text-center"
+                  >
+                    <motion.div
+                      whileHover={reduceMotion ? {} : { scale: 1.08, rotate: -3 }}
+                      transition={{ duration: 0.3, ease: EASE }}
+                      className="relative z-10 flex h-[60px] w-[60px] items-center justify-center rounded-2xl border-2 border-zinc-200 bg-white text-zinc-700 shadow-sm transition-all group-hover:border-zinc-400 group-hover:shadow-md"
+                    >
                       <Icon className="h-6 w-6" />
                       <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-950 text-[10px] font-bold text-white shadow-sm">
                         {i + 1}
                       </span>
-                    </div>
+                    </motion.div>
                     <p className="mt-2.5 text-sm font-black text-zinc-900">{step.label}</p>
                     <p className="text-[11px] font-medium text-zinc-400">{step.sub}</p>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -388,7 +559,7 @@ export default function Home() {
       <section className="border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <div className="lg:flex lg:items-center lg:gap-14">
-            <div className="lg:w-[340px] lg:flex-shrink-0">
+            <Reveal className="lg:w-[340px] lg:flex-shrink-0">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">Platform</p>
               <h2 className="mt-1.5 text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
                 Built for hotel operations teams
@@ -398,18 +569,36 @@ export default function Home() {
               </p>
               <Link
                 to="/login"
-                className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-zinc-950 transition hover:text-zinc-700"
+                className="group mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-zinc-950 transition hover:text-zinc-700"
               >
                 Get started
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
-            </div>
+            </Reveal>
 
-            <div className="mt-8 grid flex-1 gap-3 sm:grid-cols-2 lg:mt-0">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-60px' }}
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+              }}
+              className="mt-8 grid flex-1 gap-3 sm:grid-cols-2 lg:mt-0"
+            >
               {CAPABILITIES.map((cap) => {
                 const Icon = cap.icon;
                 return (
-                  <div key={cap.label} className="flex gap-3 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 transition hover:border-zinc-300 hover:bg-white hover:shadow-sm">
+                  <motion.div
+                    key={cap.label}
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ duration: 0.55, ease: EASE }}
+                    whileHover={hoverLift}
+                    className="flex gap-3 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
+                  >
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
                       <Icon className="h-[18px] w-[18px]" />
                     </div>
@@ -417,10 +606,10 @@ export default function Home() {
                       <p className="text-sm font-black text-zinc-900">{cap.label}</p>
                       <p className="mt-0.5 text-[12px] font-medium leading-snug text-zinc-500">{cap.desc}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -430,28 +619,35 @@ export default function Home() {
          ────────────────────────────────────────────── */}
       <section className="border-t border-zinc-200">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
-          <div className="flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left">
+          <Reveal
+            variant="scale"
+            className="flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
+          >
             <div>
               <h3 className="text-lg font-black text-white">Ready to streamline hotel operations?</h3>
               <p className="mt-1 text-sm font-medium text-zinc-400">Login to your dashboard or contact us for a demo.</p>
             </div>
             <div className="flex gap-3">
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-zinc-100"
-              >
-                <LogIn className="h-4 w-4" />
-                Login
-              </Link>
-              <Link
-                to="/bookings"
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                Learn more
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              <motion.div whileHover={reduceMotion ? {} : { scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-zinc-100"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Link>
+              </motion.div>
+              <motion.div whileHover={reduceMotion ? {} : { scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <Link
+                  to="/bookings"
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-white/20 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  Learn more
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
