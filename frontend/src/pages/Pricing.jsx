@@ -143,7 +143,7 @@ export default function Pricing() {
           <div className="mt-6">
             <RoadmapBanner
               title="Prices shown are illustrative — Roomify is not currently billing customers."
-              note="These plans represent how Roomify will be priced when it ships. As a student-built PMS, we don't take payment yet. Reach out and we'll be straight about what's available today vs. on the roadmap."
+              note="These plans represent how Roomify will be priced when it ships. As a student-built PMS, we don't take payment yet."
               inline
             />
           </div>
