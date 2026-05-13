@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { formatLocalizedDateTime } from '../utils/localization';
+import { EASE } from './motion/Reveal';
 
 export default function Footer({ connectionState = 'disconnected', timestamp = null, loading = false }) {
   const { t, i18n } = useTranslation();
@@ -20,16 +22,32 @@ export default function Footer({ connectionState = 'disconnected', timestamp = n
 
   return (
     <footer className="border-t border-white/10 bg-black text-white">
-      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 lg:flex-row lg:items-end lg:justify-between lg:px-8">
-        <div className="max-w-sm">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.12 } },
+        }}
+        className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 lg:flex-row lg:items-end lg:justify-between lg:px-8"
+      >
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.65, ease: EASE }}
+          className="max-w-sm"
+        >
           <p className="font-heading text-3xl font-black tracking-tighter">{brandName}</p>
           <p className="mt-3 text-sm font-medium leading-6 text-zinc-400">
             {t('footer.tagline')}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid gap-8 sm:grid-cols-3">
-          <div>
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.65, ease: EASE }}
+          >
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
               {t('footer.quickLinks')}
             </p>
@@ -44,9 +62,12 @@ export default function Footer({ connectionState = 'disconnected', timestamp = n
                 {t('signIn')}
               </Link>
             </div>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.65, ease: EASE }}
+          >
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
               {t('footer.platform')}
             </p>
@@ -55,9 +76,12 @@ export default function Footer({ connectionState = 'disconnected', timestamp = n
               <p>{t('home.features.reservationsTitle')}</p>
               <p>{t('home.features.billingTitle')}</p>
             </div>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.65, ease: EASE }}
+          >
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-zinc-500">
               {t('footer.contact')}
             </p>
@@ -66,9 +90,9 @@ export default function Footer({ connectionState = 'disconnected', timestamp = n
               <p>{t('footer.contactPhoneLabel')}: +1 (555) 123-4567</p>
               <p>{t('footer.contactAddressLabel')}: {t('footer.contactAddressValue')}</p>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-4 text-sm text-zinc-400 lg:flex-row lg:items-center lg:justify-between lg:px-8">
