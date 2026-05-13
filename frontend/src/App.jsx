@@ -20,7 +20,6 @@ import AiFinanceDashboard from './pages/AiFinanceDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
-import PrivateRoute from './components/PrivateRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
   GUEST_BILLING_STATUS_PATH,
@@ -117,41 +116,41 @@ const AppContent = () => {
         <Route
           path="/manager/dashboard"
           element={
-            <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><ManagerDashboard /></Layout>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/manager/ai-finance"
           element={
-            <PrivateRoute allowedRoles={MANAGER_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><AiFinanceDashboard /></Layout>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/dashboard"
           element={
-            <PrivateRoute allowedRoles={ADMIN_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
               <Layout showSidebar={true}><AdminDashboard /></Layout>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/staff/dashboard"
           element={
-            <PrivateRoute allowedRoles={STAFF_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={STAFF_ONLY_ROLES}>
               <Layout showSidebar={true}><StaffDashboard /></Layout>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/guest/dashboard"
           element={
-            <PrivateRoute allowedRoles={GUEST_ONLY_ROLES}>
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
               <Layout showSidebar={true}><GuestDashboard /></Layout>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
 
