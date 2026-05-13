@@ -4,6 +4,10 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider, useAuth } from './context/AuthProvider'
 import Home from './pages/Home'
+import Pricing from './pages/Pricing'
+import Compliance from './pages/Compliance'
+import Integrations from './pages/Integrations'
+import Demo from './pages/Demo'
 import Rooms from './pages/Rooms'
 import RoomTypes from './pages/RoomTypes'
 import Staff from './pages/Staff'
@@ -73,6 +77,10 @@ const AppContent = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />
+        <Route path="/pricing" element={<Layout showSidebar={false}><Pricing /></Layout>} />
+        <Route path="/compliance" element={<Layout showSidebar={false}><Compliance /></Layout>} />
+        <Route path="/integrations" element={<Layout showSidebar={false}><Integrations /></Layout>} />
+        <Route path="/demo" element={<Layout showSidebar={false}><Demo /></Layout>} />
         <Route path="/bookings" element={<Layout showSidebar={false}><Bookings /></Layout>} />
         <Route path="/login" element={<Layout showSidebar={false}><LoginPage /></Layout>} />
         <Route path="/unauthorized" element={<Layout showSidebar={false}><Unauthorized /></Layout>} />

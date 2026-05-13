@@ -432,7 +432,7 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           OPERATIONS MODULES
          ────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section id="features" className="scroll-mt-20 border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
             Core Modules
@@ -488,7 +488,7 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           RESERVATION LIFECYCLE
          ────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 bg-[#f7f3ed]">
+      <section id="workflow" className="scroll-mt-20 border-t border-zinc-200 bg-[#f7f3ed]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
             Guest Journey
@@ -556,7 +556,7 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           PLATFORM CAPABILITIES
          ────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section id="platform" className="scroll-mt-20 border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <div className="lg:flex lg:items-center lg:gap-14">
             <Reveal className="lg:w-[340px] lg:flex-shrink-0">
@@ -617,7 +617,7 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           CTA BANNER
          ────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200">
+      <section id="contact" className="scroll-mt-20 border-t border-zinc-200">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
           <Reveal
             variant="scale"
