@@ -845,6 +845,10 @@ i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'ar'],
     load: 'languageOnly',
+    /* Keys are stored flat with literal dots — disable path traversal so
+       dotted keys (e.g. "adminDashboardPage.eyebrow") resolve as flat lookups. */
+    keySeparator: false,
+    nsSeparator: false,
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       lookupLocalStorage: STORAGE_KEY,

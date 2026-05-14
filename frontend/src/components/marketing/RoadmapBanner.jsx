@@ -1,16 +1,23 @@
 import { Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Reveal from '../motion/Reveal';
 
 /**
- * Roadmap preview disclosure — used on marketing pages where the displayed
- * content reflects intent / a student-built proof of concept, not a live
- * commercial offering. Pass a page-specific `note` to tailor the second line.
+ * Roadmap preview disclosure. Pass a translation `tone` ("default" | "pricing" |
+ * "compliance" | "integrations") to localise the title + note, or pass raw
+ * `title` / `note` props to override.
  */
 export default function RoadmapBanner({
-  title = 'Details on this page reflect our roadmap, not a live commercial offering.',
-  note = "Roomify is a student-built PMS. What you see here illustrates the direction the platform is heading — talk to us and we'll be transparent about what's wired up today vs. what's planned.",
+  tone = 'default',
+  title,
+  note,
   inline = false,
 }) {
+  const { t } = useTranslation();
+
+  const resolvedTitle = title ?? t(`roadmap.${tone}.title`, { defaultValue: t('roadmap.titleDefault') });
+  const resolvedNote = note ?? t(`roadmap.${tone}.note`, { defaultValue: t('roadmap.noteDefault') });
+
   const card = (
     <Reveal>
       <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50 via-amber-50/60 to-transparent px-5 py-4 sm:px-6 sm:py-5">
@@ -21,16 +28,16 @@ export default function RoadmapBanner({
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
-                Roadmap preview
+                {t('roadmap.badge')}
               </span>
-              <p className="text-sm font-black tracking-tight text-zinc-950">{title}</p>
+              <p className="text-sm font-black tracking-tight text-zinc-950">{resolvedTitle}</p>
             </div>
-            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-zinc-600">{note}</p>
+            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-zinc-600">{resolvedNote}</p>
           </div>
         </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-200/40 blur-2xl"
+          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-200/40 blur-2xl rtl:right-auto rtl:-left-10"
         />
       </div>
     </Reveal>

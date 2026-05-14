@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2,
@@ -17,16 +18,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-const HIGHLIGHTS = [
-  { label: '30-min walkthrough', desc: 'Live, with one of our hotel specialists.' },
-  { label: 'Your data, your scenarios', desc: 'We tailor the demo to your property type and size.' },
-  { label: 'Q&A on compliance', desc: 'ZATCA, VAT, PDPL — bring every question.' },
-  { label: 'No obligation', desc: 'Get the deck, the pricing, and walk away if it doesn’t fit.' },
-];
+const HIGHLIGHT_IDS = ['walkthrough', 'data', 'qa', 'noObligation'];
 
 const ROOM_RANGES = ['Under 30', '30 – 80', '80 – 150', '150 – 300', '300+'];
 
 export default function Demo() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     hotelName: '',
     name: '',
@@ -49,11 +46,10 @@ export default function Demo() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.hotelName || !form.name || !form.email) {
-      setError('Hotel name, your name, and email are required.');
+      setError(t('m.demo.error.required'));
       return;
     }
     setSubmitting(true);
-    // No backend wired yet — simulate a short delay, then thank-you state.
     await new Promise((r) => setTimeout(r, 700));
     setSubmitting(false);
     setSubmitted(true);
@@ -81,15 +77,15 @@ export default function Demo() {
                 className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
               >
                 <Calendar className="h-3 w-3" />
-                Request a demo
+                {t('m.demo.eyebrow')}
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                className="mt-4 text-[2rem] font-black leading-[1.15] tracking-tight text-zinc-950 sm:text-[2.3rem]"
+                className="mt-4 font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.5rem]"
               >
-                See Roomify run your front desk in 30 minutes
+                {t('m.demo.headline')}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 8 }}
@@ -97,7 +93,7 @@ export default function Demo() {
                 transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
                 className="mt-3 max-w-md text-[0.95rem] font-medium leading-relaxed text-zinc-500"
               >
-                Tell us about your property and pick a time. We&apos;ll walk through reservations, billing, and compliance using a property that matches yours.
+                {t('m.demo.bio')}
               </motion.p>
 
               <motion.ul
@@ -109,17 +105,17 @@ export default function Demo() {
                 }}
                 className="mt-8 space-y-3"
               >
-                {HIGHLIGHTS.map((h) => (
+                {HIGHLIGHT_IDS.map((id) => (
                   <motion.li
-                    key={h.label}
+                    key={id}
                     variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
                     transition={{ duration: 0.55, ease: EASE }}
                     className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3"
                   >
                     <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
                     <div>
-                      <p className="text-sm font-black text-zinc-950">{h.label}</p>
-                      <p className="text-[12px] font-medium leading-snug text-zinc-500">{h.desc}</p>
+                      <p className="text-sm font-black text-zinc-950">{t(`m.demo.hi.${id}.label`)}</p>
+                      <p className="text-[12px] font-medium leading-snug text-zinc-500">{t(`m.demo.hi.${id}.desc`)}</p>
                     </div>
                   </motion.li>
                 ))}
@@ -131,8 +127,8 @@ export default function Demo() {
               <div className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-xl shadow-zinc-200/50 sm:p-8">
                 {!submitted ? (
                   <>
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">Step 1 of 1</p>
-                    <h2 className="mt-1 text-lg font-black tracking-tight text-zinc-950">Tell us about your property</h2>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.demo.formStep')}</p>
+                    <h2 className="mt-1 text-lg font-black tracking-tight text-zinc-950">{t('m.demo.formTitle')}</h2>
 
                     {error && (
                       <motion.p
@@ -148,46 +144,46 @@ export default function Demo() {
                       <FieldRow
                         icon={Building2}
                         id="hotelName"
-                        label="Hotel name"
+                        label={t('m.demo.field.hotelName')}
                         value={form.hotelName}
                         onChange={handleChange}
-                        placeholder="e.g. Roomify Riyadh"
+                        placeholder={t('m.demo.field.hotelNamePh')}
                       />
                       <div className="grid gap-4 sm:grid-cols-2">
                         <FieldRow
                           icon={User}
                           id="name"
-                          label="Your name"
+                          label={t('m.demo.field.name')}
                           value={form.name}
                           onChange={handleChange}
-                          placeholder="Full name"
+                          placeholder={t('m.demo.field.namePh')}
                         />
                         <FieldRow
                           id="role"
-                          label="Your role"
+                          label={t('m.demo.field.role')}
                           value={form.role}
                           onChange={handleChange}
-                          placeholder="GM, Owner, Operations…"
+                          placeholder={t('m.demo.field.rolePh')}
                         />
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <FieldRow
                           icon={Mail}
                           id="email"
-                          label="Work email"
+                          label={t('m.demo.field.email')}
                           type="email"
                           value={form.email}
                           onChange={handleChange}
-                          placeholder="you@hotel.com"
+                          placeholder={t('m.demo.field.emailPh')}
                           dir="ltr"
                         />
                         <FieldRow
                           icon={Phone}
                           id="phone"
-                          label="Phone"
+                          label={t('m.demo.field.phone')}
                           value={form.phone}
                           onChange={handleChange}
-                          placeholder="+966 5…"
+                          placeholder={t('m.demo.field.phonePh')}
                           dir="ltr"
                         />
                       </div>
@@ -196,7 +192,7 @@ export default function Demo() {
                       <div>
                         <Label className="text-sm font-bold text-zinc-700">
                           <BedDouble className="me-1.5 inline h-3.5 w-3.5" />
-                          Number of rooms
+                          {t('m.demo.field.rooms')}
                         </Label>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {ROOM_RANGES.map((r) => (
@@ -218,7 +214,7 @@ export default function Demo() {
 
                       <div>
                         <Label htmlFor="notes" className="text-sm font-bold text-zinc-700">
-                          Anything specific you&apos;d like to see? <span className="font-medium text-zinc-400">(optional)</span>
+                          {t('m.demo.field.notes')} <span className="font-medium text-zinc-400">{t('m.demo.field.optional')}</span>
                         </Label>
                         <textarea
                           id="notes"
@@ -227,7 +223,7 @@ export default function Demo() {
                           onChange={handleChange}
                           rows={3}
                           className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 transition focus-visible:border-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-200"
-                          placeholder="ZATCA setup, multi-property, OTA sync…"
+                          placeholder={t('m.demo.field.notesPh')}
                         />
                       </div>
 
@@ -240,11 +236,11 @@ export default function Demo() {
                           {submitting ? (
                             <>
                               <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                              Submitting…
+                              {t('m.demo.submitting')}
                             </>
                           ) : (
                             <>
-                              Request my demo
+                              {t('m.demo.submit')}
                               <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
                             </>
                           )}
@@ -252,7 +248,7 @@ export default function Demo() {
                       </motion.div>
 
                       <p className="text-center text-[11px] font-medium text-zinc-400">
-                        We&apos;ll never share your details. One follow-up email max.
+                        {t('m.demo.privacy')}
                       </p>
                     </form>
                   </>
@@ -267,10 +263,10 @@ export default function Demo() {
                       <CheckCircle2 className="h-7 w-7 text-emerald-700" />
                     </div>
                     <h2 className="mt-5 text-lg font-black tracking-tight text-zinc-950">
-                      Thanks, {form.name.split(' ')[0] || 'there'} — we got it.
+                      {t('m.demo.success.titlePrefix')}, {form.name.split(' ')[0] || t('m.demo.success.fallbackName')} ✓
                     </h2>
                     <p className="mt-2 max-w-sm mx-auto text-sm font-medium leading-relaxed text-zinc-500">
-                      A Roomify specialist will reach out within one business day to confirm a time that works for {form.hotelName || 'your property'}.
+                      {t('m.demo.success.bodyA')} {form.hotelName || t('m.demo.success.fallbackHotel')}.
                     </p>
                     <Button
                       onClick={() => {
@@ -280,7 +276,7 @@ export default function Demo() {
                       variant="ghost"
                       className="mt-6 h-10 rounded-full border border-zinc-200 px-5 text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
                     >
-                      Submit another
+                      {t('m.demo.success.another')}
                     </Button>
                   </motion.div>
                 )}

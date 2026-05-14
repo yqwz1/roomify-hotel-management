@@ -10,8 +10,14 @@ export default {
   theme: {
   	extend: {
       fontFamily: {
-        sans: ['Cairo', 'Inter', 'sans-serif'],
-        heading: ['"Khat Alharf Alyadawi"', 'serif'],
+        // Thmanyah Sans — body, UI, dashboards, forms (Latin + Arabic in one file)
+        sans: ['"Thmanyah Sans"', 'sans-serif'],
+        // Thmanyah Serif Display — hero headlines, editorial display moments
+        serif: ['"Thmanyah Serif Display"', 'serif'],
+        // Thmanyah Serif Text — long-form body in editorial sections
+        'serif-text': ['"Thmanyah Serif Text"', 'serif'],
+        // Alias for legacy .font-heading usage (Footer brand, status titles)
+        heading: ['"Thmanyah Serif Display"', 'serif'],
       },
   		borderRadius: {
   			lg: 'var(--radius)',

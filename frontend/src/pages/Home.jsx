@@ -32,10 +32,10 @@ import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
    ════════════════════════════════════════════════════════════ */
 
 const LIVE_STATS = [
-  { label: 'Total Rooms', value: '120', icon: BedDouble, color: 'text-zinc-700' },
-  { label: 'Occupied', value: '87', icon: CheckCircle2, color: 'text-zinc-950' },
-  { label: 'Available', value: '24', icon: Clock, color: 'text-emerald-700' },
-  { label: 'Maintenance', value: '9', icon: Clock, color: 'text-amber-700' },
+  { id: 'totalRooms', value: '120', icon: BedDouble, color: 'text-zinc-700' },
+  { id: 'occupied', value: '87', icon: CheckCircle2, color: 'text-zinc-950' },
+  { id: 'available', value: '24', icon: Clock, color: 'text-emerald-700' },
+  { id: 'maintenance', value: '9', icon: Clock, color: 'text-amber-700' },
 ];
 
 const ROOM_GRID = [
@@ -73,46 +73,26 @@ const ACTIVITY_COLORS = {
 };
 
 const MODULES = [
-  {
-    icon: CalendarClock,
-    title: 'Reservations',
-    desc: 'Full booking lifecycle — create, modify, confirm, and cancel reservations with real-time availability.',
-    color: 'bg-zinc-950',
-  },
-  {
-    icon: BedDouble,
-    title: 'Room Operations',
-    desc: 'Live room board, housekeeping status, maintenance tracking, and floor-level visibility.',
-    color: 'bg-emerald-700',
-  },
-  {
-    icon: Receipt,
-    title: 'Billing & Invoicing',
-    desc: 'Guest folios, charge posting, invoice generation, payment tracking, and checkout settlement.',
-    color: 'bg-amber-700',
-  },
-  {
-    icon: BarChart3,
-    title: 'Manager Insights',
-    desc: 'Occupancy trends, revenue reports, expense tracking, and AI-powered financial analysis.',
-    color: 'bg-zinc-700',
-  },
+  { id: 'reservations', icon: CalendarClock, color: 'bg-zinc-950' },
+  { id: 'rooms', icon: BedDouble, color: 'bg-emerald-700' },
+  { id: 'billing', icon: Receipt, color: 'bg-amber-700' },
+  { id: 'insights', icon: BarChart3, color: 'bg-zinc-700' },
 ];
 
 const WORKFLOW = [
-  { icon: Search, label: 'Search', sub: 'Find rooms' },
-  { icon: CalendarClock, label: 'Reserve', sub: 'Book room' },
-  { icon: ClipboardCheck, label: 'Check-in', sub: 'Arrive guest' },
-  { icon: CreditCard, label: 'Charges', sub: 'Post items' },
-  { icon: FileText, label: 'Invoice', sub: 'Generate bill' },
-  { icon: DoorOpen, label: 'Checkout', sub: 'Settle & depart' },
+  { id: 'search', icon: Search },
+  { id: 'reserve', icon: CalendarClock },
+  { id: 'checkin', icon: ClipboardCheck },
+  { id: 'charges', icon: CreditCard },
+  { id: 'invoice', icon: FileText },
+  { id: 'checkout', icon: DoorOpen },
 ];
 
 const CAPABILITIES = [
-  { icon: Shield, label: 'Role-based access', desc: 'Admin, Manager, Staff, and Guest dashboards' },
-  { icon: Users, label: 'Multi-staff operations', desc: 'Concurrent front-desk and back-office workflows' },
-  { icon: TrendingUp, label: 'Real-time visibility', desc: 'Live occupancy, revenue, and room status' },
-  { icon: Sparkles, label: 'AI-powered insights', desc: 'Financial analysis and performance forecasting' },
+  { id: 'roles', icon: Shield },
+  { id: 'multi', icon: Users },
+  { id: 'realtime', icon: TrendingUp },
+  { id: 'ai', icon: Sparkles },
 ];
 
 /* ════════════════════════════════════════════════════════════
@@ -194,16 +174,16 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
                 className="inline-flex w-fit items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
               >
-                Property Management System
+                {t('m.home.eyebrow')}
               </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
-                className="mt-4 text-[1.75rem] font-black leading-[1.2] tracking-tight text-zinc-950 sm:text-[2rem] lg:text-[2.35rem]"
+                className="mt-4 font-serif text-[1.85rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.4rem] lg:text-[2.8rem]"
               >
-                The operating system for your&nbsp;hotel
+                {t('m.home.headline')}
               </motion.h1>
 
               <motion.p
@@ -212,7 +192,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
                 className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-zinc-500"
               >
-                Manage reservations, rooms, guests, billing, and staff operations — all from one platform built for hotel teams.
+                {t('m.home.bio')}
               </motion.p>
 
               <motion.div
@@ -228,7 +208,7 @@ export default function Home() {
                     className="group inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
                   >
                     <LogIn className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-                    Login to Dashboard
+                    {t('m.home.ctaLogin')}
                   </Link>
                 </motion.div>
                 <motion.div whileHover={reduceMotion ? {} : { scale: 1.03 }} whileTap={{ scale: 0.97 }}>
@@ -237,8 +217,8 @@ export default function Home() {
                     id="hero-booking-cta"
                     className="group inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950"
                   >
-                    Booking Support
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    {t('m.home.ctaSupport')}
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
                   </Link>
                 </motion.div>
               </motion.div>
@@ -257,7 +237,7 @@ export default function Home() {
                   const Icon = s.icon;
                   return (
                     <motion.div
-                      key={s.label}
+                      key={s.id}
                       variants={{
                         hidden: { opacity: 0, y: 8 },
                         visible: { opacity: 1, y: 0 },
@@ -268,7 +248,7 @@ export default function Home() {
                       <Icon className={`h-4 w-4 ${s.color}`} />
                       <div className="flex items-baseline gap-1">
                         <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
-                        <span className="text-xs font-medium text-zinc-400">{s.label}</span>
+                        <span className="text-xs font-medium text-zinc-400">{t(`m.home.stat.${s.id}`)}</span>
                       </div>
                     </motion.div>
                   );
@@ -435,14 +415,14 @@ export default function Home() {
       <section id="features" className="scroll-mt-20 border-t border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
-            Core Modules
+            {t('m.home.modulesEyebrow')}
           </Reveal>
           <Reveal
             as="h2"
             delay={0.08}
             className="mx-auto mt-1.5 max-w-lg text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
           >
-            Everything a hotel needs to operate
+            {t('m.home.modulesTitle')}
           </Reveal>
 
           <motion.div
@@ -459,7 +439,7 @@ export default function Home() {
               const Icon = m.icon;
               return (
                 <motion.article
-                  key={m.title}
+                  key={m.id}
                   variants={{
                     hidden: { opacity: 0, y: 24 },
                     visible: { opacity: 1, y: 0 },
@@ -475,8 +455,8 @@ export default function Home() {
                   >
                     <Icon className="h-[18px] w-[18px]" />
                   </motion.div>
-                  <h3 className="mt-3 text-sm font-black text-zinc-950">{m.title}</h3>
-                  <p className="mt-1 text-[13px] font-medium leading-[1.5] text-zinc-500">{m.desc}</p>
+                  <h3 className="mt-3 text-sm font-black text-zinc-950">{t(`m.home.modules.${m.id}.title`)}</h3>
+                  <p className="mt-1 text-[13px] font-medium leading-[1.5] text-zinc-500">{t(`m.home.modules.${m.id}.desc`)}</p>
                   <div className={`absolute bottom-0 left-0 h-[2px] w-0 ${m.color} transition-all duration-500 group-hover:w-full`} />
                 </motion.article>
               );
@@ -491,14 +471,14 @@ export default function Home() {
       <section id="workflow" className="scroll-mt-20 border-t border-zinc-200 bg-[#f7f3ed]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
-            Guest Journey
+            {t('m.home.workflowEyebrow')}
           </Reveal>
           <Reveal
             as="h2"
             delay={0.08}
             className="mx-auto mt-1.5 max-w-md text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
           >
-            Reservation lifecycle, start to finish
+            {t('m.home.workflowTitle')}
           </Reveal>
 
           <div className="relative mt-10">
@@ -525,7 +505,7 @@ export default function Home() {
                 const Icon = step.icon;
                 return (
                   <motion.div
-                    key={step.label}
+                    key={step.id}
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       visible: { opacity: 1, y: 0 },
@@ -543,8 +523,8 @@ export default function Home() {
                         {i + 1}
                       </span>
                     </motion.div>
-                    <p className="mt-2.5 text-sm font-black text-zinc-900">{step.label}</p>
-                    <p className="text-[11px] font-medium text-zinc-400">{step.sub}</p>
+                    <p className="mt-2.5 text-sm font-black text-zinc-900">{t(`m.home.wf.${step.id}.label`)}</p>
+                    <p className="text-[11px] font-medium text-zinc-400">{t(`m.home.wf.${step.id}.sub`)}</p>
                   </motion.div>
                 );
               })}
@@ -560,19 +540,19 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <div className="lg:flex lg:items-center lg:gap-14">
             <Reveal className="lg:w-[340px] lg:flex-shrink-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">Platform</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.home.capsEyebrow')}</p>
               <h2 className="mt-1.5 text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
-                Built for hotel operations teams
+                {t('m.home.capsTitle')}
               </h2>
               <p className="mt-2 text-[0.85rem] font-medium leading-relaxed text-zinc-500">
-                Roomify is designed for how hotels actually work — from front desk to back office.
+                {t('m.home.capsBio')}
               </p>
               <Link
                 to="/login"
                 className="group mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-zinc-950 transition hover:text-zinc-700"
               >
-                Get started
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                {t('m.home.capsCta')}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180" />
               </Link>
             </Reveal>
 
@@ -590,7 +570,7 @@ export default function Home() {
                 const Icon = cap.icon;
                 return (
                   <motion.div
-                    key={cap.label}
+                    key={cap.id}
                     variants={{
                       hidden: { opacity: 0, y: 16 },
                       visible: { opacity: 1, y: 0 },
@@ -603,8 +583,8 @@ export default function Home() {
                       <Icon className="h-[18px] w-[18px]" />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{cap.label}</p>
-                      <p className="mt-0.5 text-[12px] font-medium leading-snug text-zinc-500">{cap.desc}</p>
+                      <p className="text-sm font-black text-zinc-900">{t(`m.home.cap.${cap.id}.label`)}</p>
+                      <p className="mt-0.5 text-[12px] font-medium leading-snug text-zinc-500">{t(`m.home.cap.${cap.id}.desc`)}</p>
                     </div>
                   </motion.div>
                 );
@@ -624,8 +604,8 @@ export default function Home() {
             className="flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
           >
             <div>
-              <h3 className="text-lg font-black text-white">Ready to streamline hotel operations?</h3>
-              <p className="mt-1 text-sm font-medium text-zinc-400">Login to your dashboard or contact us for a demo.</p>
+              <h3 className="text-lg font-black text-white">{t('m.home.banner.title')}</h3>
+              <p className="mt-1 text-sm font-medium text-zinc-400">{t('m.home.banner.sub')}</p>
             </div>
             <div className="flex gap-3">
               <motion.div whileHover={reduceMotion ? {} : { scale: 1.04 }} whileTap={{ scale: 0.96 }}>
@@ -634,7 +614,7 @@ export default function Home() {
                   className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-zinc-100"
                 >
                   <LogIn className="h-4 w-4" />
-                  Login
+                  {t('m.home.banner.login')}
                 </Link>
               </motion.div>
               <motion.div whileHover={reduceMotion ? {} : { scale: 1.04 }} whileTap={{ scale: 0.96 }}>
@@ -642,8 +622,8 @@ export default function Home() {
                   to="/bookings"
                   className="group inline-flex items-center gap-1.5 rounded-full border border-white/20 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
                 >
-                  Learn more
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  {t('m.home.banner.learn')}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
                 </Link>
               </motion.div>
             </div>

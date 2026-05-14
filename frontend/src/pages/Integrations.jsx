@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   CreditCard,
@@ -14,83 +15,63 @@ import Footer from '../components/Footer';
 import Reveal, { EASE } from '../components/motion/Reveal';
 import RoadmapBanner from '../components/marketing/RoadmapBanner';
 
-/* Each "logo" is a wordmark tile — no external image dependencies */
-
+/* Brand names render as-is in both locales. Only the tag is localised. */
 const CATEGORIES = [
   {
     id: 'payments',
     icon: CreditCard,
-    title: 'Payments',
-    desc: 'Local and international gateways with PCI-DSS-grade tokenisation.',
     integrations: [
-      { name: 'Mada', tag: 'Local SA' },
-      { name: 'STC Pay', tag: 'Wallet' },
-      { name: 'HyperPay', tag: 'Gateway' },
-      { name: 'PayTabs', tag: 'Gateway' },
-      { name: 'Stripe', tag: 'International' },
-      { name: 'Apple Pay', tag: 'Wallet' },
+      { name: 'Mada', tagKey: 'localSA' },
+      { name: 'STC Pay', tagKey: 'wallet' },
+      { name: 'HyperPay', tagKey: 'gateway' },
+      { name: 'PayTabs', tagKey: 'gateway' },
+      { name: 'Stripe', tagKey: 'international' },
+      { name: 'Apple Pay', tagKey: 'wallet' },
     ],
   },
   {
     id: 'ota',
     icon: Globe2,
-    title: 'Channel managers & OTAs',
-    desc: 'Two-way sync for inventory, rates, and reservations.',
     integrations: [
-      { name: 'Booking.com', tag: 'OTA' },
-      { name: 'Expedia', tag: 'OTA' },
-      { name: 'Airbnb', tag: 'OTA' },
-      { name: 'Almosafer', tag: 'Local OTA' },
-      { name: 'Agoda', tag: 'OTA' },
-      { name: 'SiteMinder', tag: 'Channel mgr' },
+      { name: 'Booking.com', tagKey: 'ota' },
+      { name: 'Expedia', tagKey: 'ota' },
+      { name: 'Airbnb', tagKey: 'ota' },
+      { name: 'Almosafer', tagKey: 'localOta' },
+      { name: 'Agoda', tagKey: 'ota' },
+      { name: 'SiteMinder', tagKey: 'channelMgr' },
     ],
   },
   {
     id: 'finance',
     icon: Receipt,
-    title: 'Accounting & tax',
-    desc: 'GL exports, VAT filing, and ZATCA clearance — out of the box.',
     integrations: [
-      { name: 'ZATCA Fatoora', tag: 'e-Invoicing' },
-      { name: 'QuickBooks', tag: 'Accounting' },
-      { name: 'Zoho Books', tag: 'Accounting' },
-      { name: 'Xero', tag: 'Accounting' },
-      { name: 'SAP Business One', tag: 'ERP' },
+      { name: 'ZATCA Fatoora', tagKey: 'einvoicing' },
+      { name: 'QuickBooks', tagKey: 'accounting' },
+      { name: 'Zoho Books', tagKey: 'accounting' },
+      { name: 'Xero', tagKey: 'accounting' },
+      { name: 'SAP Business One', tagKey: 'erp' },
     ],
   },
   {
     id: 'comms',
     icon: MessageCircle,
-    title: 'Guest communication',
-    desc: 'Pre-arrival, in-stay, and post-checkout messaging in Arabic & English.',
     integrations: [
-      { name: 'WhatsApp Business', tag: 'Messaging' },
-      { name: 'Unifonic', tag: 'SMS' },
-      { name: 'Twilio', tag: 'SMS · Voice' },
-      { name: 'SendGrid', tag: 'Email' },
+      { name: 'WhatsApp Business', tagKey: 'messaging' },
+      { name: 'Unifonic', tagKey: 'sms' },
+      { name: 'Twilio', tagKey: 'smsVoice' },
+      { name: 'SendGrid', tagKey: 'email' },
     ],
   },
 ];
 
 const STORY = [
-  {
-    icon: Plug,
-    title: 'Plug-and-play',
-    desc: 'Add an integration from the admin console — no engineering ticket.',
-  },
-  {
-    icon: Workflow,
-    title: 'Two-way sync',
-    desc: 'Inventory, rates, and reservations stay in lockstep across every channel.',
-  },
-  {
-    icon: Shield,
-    title: 'Token-only',
-    desc: 'Credentials are encrypted at rest. Each integration runs in its own sandbox.',
-  },
+  { id: 'plug', icon: Plug },
+  { id: 'sync', icon: Workflow },
+  { id: 'token', icon: Shield },
 ];
 
 export default function Integrations() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-full bg-[#f7f3ed]">
       {/* HERO */}
@@ -109,15 +90,15 @@ export default function Integrations() {
             className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
           >
             <Plug className="h-3 w-3" />
-            Integrations
+            {t('m.integrations.eyebrow')}
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="mt-4 max-w-3xl text-[2rem] font-black leading-[1.15] tracking-tight text-zinc-950 sm:text-[2.4rem]"
+            className="mt-4 max-w-3xl font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.6rem]"
           >
-            Connects with everything your hotel already uses
+            {t('m.integrations.headline')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 8 }}
@@ -125,15 +106,11 @@ export default function Integrations() {
             transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
             className="mt-3 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-zinc-500"
           >
-            Payment gateways, OTAs, accounting systems, and guest messaging — wired in from day one. Local-first, with international providers when you need them.
+            {t('m.integrations.bio')}
           </motion.p>
 
           <div className="mt-6">
-            <RoadmapBanner
-              title="Integrations shown reflect our planned ecosystem, not live partnerships."
-              note="Roomify is a student-built PMS. The providers listed below illustrate the direction the platform is heading — they aren't commercial commitments. Talk to us about what you actually run, and we'll be transparent about what's wired up today vs. on the roadmap."
-              inline
-            />
+            <RoadmapBanner tone="integrations" inline />
           </div>
 
           {/* Story strip */}
@@ -146,9 +123,9 @@ export default function Integrations() {
             }}
             className="mt-9 grid gap-3 sm:grid-cols-3"
           >
-            {STORY.map(({ icon: Icon, title, desc }) => (
+            {STORY.map(({ id, icon: Icon }) => (
               <motion.div
-                key={title}
+                key={id}
                 variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.55, ease: EASE }}
                 whileHover={{ y: -3 }}
@@ -157,8 +134,8 @@ export default function Integrations() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
                   <Icon className="h-[18px] w-[18px]" />
                 </div>
-                <p className="mt-3 text-sm font-black text-zinc-950">{title}</p>
-                <p className="mt-1 text-[12px] font-medium leading-snug text-zinc-500">{desc}</p>
+                <p className="mt-3 text-sm font-black text-zinc-950">{t(`m.integrations.story.${id}.title`)}</p>
+                <p className="mt-1 text-[12px] font-medium leading-snug text-zinc-500">{t(`m.integrations.story.${id}.desc`)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -178,8 +155,8 @@ export default function Integrations() {
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-black tracking-tight text-zinc-950">{cat.title}</h2>
-                      <p className="text-[13px] font-medium text-zinc-500">{cat.desc}</p>
+                      <h2 className="text-lg font-black tracking-tight text-zinc-950">{t(`m.integrations.cats.${cat.id}.title`)}</h2>
+                      <p className="text-[13px] font-medium text-zinc-500">{t(`m.integrations.cats.${cat.id}.desc`)}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -206,7 +183,7 @@ export default function Integrations() {
                       className="group relative flex flex-col items-center justify-center gap-1 rounded-2xl border border-zinc-200 bg-[#fafafa] px-3 py-5 text-center transition-all hover:border-zinc-300 hover:bg-white hover:shadow-md"
                     >
                       <p className="text-[13px] font-black tracking-tight text-zinc-950">{it.name}</p>
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">{it.tag}</p>
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">{t(`m.integrations.tag.${it.tagKey}`)}</p>
                       <span className="pointer-events-none absolute inset-x-3 -bottom-px h-[2px] w-0 bg-zinc-950 transition-all duration-500 group-hover:w-[calc(100%-1.5rem)]" />
                     </motion.div>
                   ))}
@@ -225,16 +202,16 @@ export default function Integrations() {
             className="flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
           >
             <div>
-              <h3 className="text-lg font-black text-white">Missing something?</h3>
+              <h3 className="text-lg font-black text-white">{t('m.integrations.cta.title')}</h3>
               <p className="mt-1 text-sm font-medium text-zinc-400">
-                Tell us what you run. We&apos;ll build the integration with you.
+                {t('m.integrations.cta.sub')}
               </p>
             </div>
             <Link
               to="/demo"
               className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-zinc-100"
             >
-              Request an integration
+              {t('m.integrations.cta.button')}
               <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </Reveal>
