@@ -13,12 +13,87 @@ import {
   getGuestReservations,
 } from '../services/guestReservationService';
 import {
+  extractGuestBillingError,
+  recordGuestReservationPayment,
+} from '../services/guestBillingService';
+import {
   formatLocalizedCurrency,
   formatLocalizedDate,
   getBooleanLabel,
   getPaymentStatusLabel,
   translateWithFallback,
 } from '../utils/localization';
+
+function GuestPaymentForm({
+  reservation,
+  language,
+  submitting,
+  paymentState,
+  onAmountChange,
+  onSubmit,
+  t,
+}) {
+  const confirmation =
+    reservation.confirmationNumber || reservation.confirmation || '-';
+  const outstandingBalance = Number(reservation.outstandingBalance ?? 0);
+
+  return (
+    <div className="mt-4 rounded-[1.35rem] border border-zinc-200 bg-white p-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            {translateWithFallback(t, 'guestBillingStatusPage.payNowLabel', 'Pay now')}
+          </p>
+          <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+            <label className="space-y-2">
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                {t('checkoutPage.paymentAmountLabel')}
+              </span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={paymentState.amount}
+                onChange={(event) => onAmountChange(confirmation, event.target.value)}
+                className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              />
+            </label>
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={() => onSubmit(reservation)}
+              className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+            >
+              {submitting
+                ? translateWithFallback(
+                    t,
+                    'guestBillingStatusPage.processingPayment',
+                    'Processing payment...'
+                  )
+                : translateWithFallback(t, 'guestBillingStatusPage.payNowAction', 'Pay balance')}
+            </button>
+          </div>
+          {paymentState.error ? (
+            <p className="mt-3 text-sm font-medium text-rose-700">{paymentState.error}</p>
+          ) : null}
+          {paymentState.successMessage ? (
+            <p className="mt-3 text-sm font-semibold text-emerald-700">
+              {paymentState.successMessage}
+            </p>
+          ) : null}
+        </div>
+        <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+            {t('checkoutPage.outstandingBalanceLabel')}
+          </p>
+          <p className="mt-2 text-sm font-bold text-zinc-950">
+            {formatLocalizedCurrency(outstandingBalance, language)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function GuestBillingStatus() {
   const { t, i18n } = useTranslation();
@@ -27,6 +102,8 @@ export default function GuestBillingStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const [paymentFormByReservation, setPaymentFormByReservation] = useState({});
+  const [submittingConfirmation, setSubmittingConfirmation] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -83,6 +160,112 @@ export default function GuestBillingStatus() {
 
   const handleRetry = () => {
     setReloadToken((current) => current + 1);
+  };
+
+  const getPaymentState = (confirmation, outstandingBalance) => {
+    const existing = paymentFormByReservation[confirmation];
+    if (existing) return existing;
+
+    return {
+      amount: Number(outstandingBalance ?? 0) > 0 ? Number(outstandingBalance).toFixed(2) : '',
+      error: '',
+      successMessage: '',
+    };
+  };
+
+  const updatePaymentState = (confirmation, updater) => {
+    setPaymentFormByReservation((current) => {
+      const previous = current[confirmation] ?? {
+        amount: '',
+        error: '',
+        successMessage: '',
+      };
+      const next =
+        typeof updater === 'function' ? updater(previous) : { ...previous, ...updater };
+
+      return {
+        ...current,
+        [confirmation]: next,
+      };
+    });
+  };
+
+  const handlePaymentAmountChange = (confirmation, amount) => {
+    updatePaymentState(confirmation, (previous) => ({
+      ...previous,
+      amount,
+      error: '',
+      successMessage: '',
+    }));
+  };
+
+  const handlePaymentSubmit = async (reservation) => {
+    const confirmation = reservation.confirmationNumber || reservation.confirmation || '';
+    const outstandingBalance = Number(reservation.outstandingBalance ?? 0);
+    const paymentState = getPaymentState(confirmation, outstandingBalance);
+    const amountText = String(paymentState.amount ?? '').trim();
+    const numericAmount = Number(amountText);
+
+    if (!amountText || Number.isNaN(numericAmount)) {
+      updatePaymentState(confirmation, {
+        error: t('checkoutPage.paymentAmountRequired'),
+        successMessage: '',
+      });
+      return;
+    }
+
+    if (numericAmount <= 0) {
+      updatePaymentState(confirmation, {
+        error: t('checkoutPage.paymentAmountPositive'),
+        successMessage: '',
+      });
+      return;
+    }
+
+    if (numericAmount > outstandingBalance) {
+      updatePaymentState(confirmation, {
+        error: t('checkoutPage.paymentAmountExceeded', {
+          amount: formatLocalizedCurrency(outstandingBalance, i18n.language),
+        }),
+        successMessage: '',
+      });
+      return;
+    }
+
+    setSubmittingConfirmation(confirmation);
+    updatePaymentState(confirmation, {
+      error: '',
+      successMessage: '',
+    });
+
+    try {
+      const bill = await recordGuestReservationPayment(
+        confirmation,
+        numericAmount.toFixed(2)
+      );
+
+      const nextOutstanding = Number(bill.outstandingBalance ?? 0);
+      updatePaymentState(confirmation, {
+        amount: nextOutstanding > 0 ? nextOutstanding.toFixed(2) : '',
+        error: '',
+        successMessage: translateWithFallback(
+          t,
+          'guestBillingStatusPage.paymentSuccess',
+          'Payment recorded successfully. Remaining balance: {{amount}}',
+          {
+            amount: formatLocalizedCurrency(nextOutstanding, i18n.language),
+          }
+        ),
+      });
+      setReloadToken((current) => current + 1);
+    } catch (err) {
+      updatePaymentState(confirmation, {
+        error: extractGuestBillingError(err),
+        successMessage: '',
+      });
+    } finally {
+      setSubmittingConfirmation(null);
+    }
   };
 
   return (
@@ -267,6 +450,21 @@ export default function GuestBillingStatus() {
                         </p>
                       </div>
                     </div>
+
+                    {Number(reservation.outstandingBalance ?? 0) > 0 ? (
+                      <GuestPaymentForm
+                        reservation={reservation}
+                        language={i18n.language}
+                        submitting={submittingConfirmation === confirmation}
+                        paymentState={getPaymentState(
+                          confirmation,
+                          reservation.outstandingBalance
+                        )}
+                        onAmountChange={handlePaymentAmountChange}
+                        onSubmit={handlePaymentSubmit}
+                        t={t}
+                      />
+                    ) : null}
                   </article>
                 );
               })}

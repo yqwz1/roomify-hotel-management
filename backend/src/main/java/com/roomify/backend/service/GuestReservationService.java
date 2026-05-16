@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface GuestReservationService {
     List<GuestReservationSummaryDto> getGuestReservations();
+    void assertGuestOwnsReservation(String confirmationNumber);
 }

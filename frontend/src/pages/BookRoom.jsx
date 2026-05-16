@@ -18,9 +18,11 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { Button } from '../components/ui/button';
 import {
   createReservation,
+  createGuestReservation,
   extractReservationError,
   isConflictError,
 } from '../services/reservationService';
+import { useAuth } from '../context/AuthProvider';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
@@ -113,6 +115,7 @@ export default function BookRoom() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const { hasRole } = useAuth();
   const { t, i18n } = useTranslation();
 
   const room = location.state?.room ?? null;
@@ -133,6 +136,7 @@ export default function BookRoom() {
   const [validationError, setValidationError] = useState(null);
   const [conflictError, setConflictError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const isGuest = hasRole('ROLE_GUEST');
 
   const setField = (field, value) => {
     setGuest((prev) => ({ ...prev, [field]: value }));
@@ -200,7 +204,7 @@ export default function BookRoom() {
     setSubmitting(true);
 
     try {
-      const reservation = await createReservation({
+      const reservationPayload = {
         roomId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
@@ -212,7 +216,10 @@ export default function BookRoom() {
           idNumber: guest.idNumber.trim(),
           nationality: guest.nationality.trim(),
         },
-      });
+      };
+      const reservation = isGuest
+        ? await createGuestReservation(reservationPayload)
+        : await createReservation(reservationPayload);
 
       navigate('/confirmation', {
         state: {

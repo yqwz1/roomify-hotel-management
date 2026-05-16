@@ -39,6 +39,21 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 .toList();
     }
 
+    @Override
+    public void assertGuestOwnsReservation(String confirmationNumber) {
+        String normalizedConfirmation = normalizeConfirmationNumber(confirmationNumber);
+
+        boolean ownsReservation = getAuthenticatedGuests().stream()
+                .map(Guest::getId)
+                .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
+                .anyMatch(reservation -> normalizedConfirmation.equals(
+                        normalizeConfirmationNumber(reservation.getConfirmationNumber())));
+
+        if (!ownsReservation) {
+            throw new AccessDeniedException("Reservation access denied for authenticated guest");
+        }
+    }
+
     private List<Guest> getAuthenticatedGuests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -68,6 +83,14 @@ public class GuestReservationServiceImpl implements GuestReservationService {
             return null;
         }
         String normalized = email.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    private String normalizeConfirmationNumber(String confirmationNumber) {
+        if (confirmationNumber == null) {
+            return null;
+        }
+        String normalized = confirmationNumber.trim().toUpperCase();
         return normalized.isEmpty() ? null : normalized;
     }
 
