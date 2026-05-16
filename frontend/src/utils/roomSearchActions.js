@@ -10,14 +10,14 @@ export const ROOM_SEARCH_CARD_ACTIONS = {
   ],
   guest: [
     {
-      id: 'help',
-      labelKey: 'navGetHelp',
-      tone: 'secondary',
+      id: 'book',
+      labelKey: 'roomSearchPage.bookRoomCta',
+      tone: 'primary',
     },
     {
       id: 'contactFrontDesk',
       labelKey: 'roomSearchPage.contactFrontDeskCta',
-      tone: 'primary',
+      tone: 'secondary',
     },
   ],
 };

@@ -54,6 +54,11 @@ export const createReservation = async (data) => {
     return response.data;
 };
 
+export const createGuestReservation = async (data) => {
+    const response = await api.post('/guest/reservations', data);
+    return response.data;
+};
+
 export const getAllReservations = async (filters = {}) => {
     const params = buildReservationParams(filters);
     const requestConfig = Object.keys(params).length > 0 ? { params } : undefined;

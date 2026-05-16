@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   BedDouble,
+  BriefcaseBusiness,
   CalendarDays,
   LifeBuoy,
   Mail,
@@ -28,6 +29,7 @@ import {
   formatLocalizedDate,
   getPaymentStatusLabel,
   getReservationStatusLabel,
+  translateWithFallback,
 } from '../utils/localization';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
@@ -378,9 +380,23 @@ export default function GuestDashboard() {
             />
             <DashboardQuickAction
               icon={BedDouble}
-              title={t('navBrowseRooms')}
-              description={t(`${pageTx}.browseDescription`)}
+              title={translateWithFallback(t, 'navBookRoom', 'Book room')}
+              description={translateWithFallback(
+                t,
+                `${pageTx}.bookRoomDescription`,
+                'Open the existing room search flow to browse available rooms.'
+              )}
               onClick={() => navigate('/search')}
+            />
+            <DashboardQuickAction
+              icon={BriefcaseBusiness}
+              title={translateWithFallback(t, 'guestServiceRequests.title', 'Service requests')}
+              description={translateWithFallback(
+                t,
+                'guestServiceRequests.dashboardDescription',
+                'Browse active hotel services and send a request from one place.'
+              )}
+              onClick={() => navigate('/guest/service-requests')}
             />
             <DashboardQuickAction
               icon={ReceiptText}

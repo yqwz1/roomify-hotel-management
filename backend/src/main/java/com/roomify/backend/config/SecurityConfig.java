@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rooms/search").permitAll()
-                        .requestMatchers("/api/guest/reservations").hasRole("GUEST")
+                        .requestMatchers("/api/guest/reservations/**").hasRole("GUEST")
 
                         // ❗ باقي endpoints تحتاج Authentication
                         .anyRequest().authenticated())

@@ -20,6 +20,7 @@ import AiFinanceDashboard from './pages/AiFinanceDashboard'
 import StaffDashboard from './pages/StaffDashboard'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
+import GuestServiceRequests from './pages/GuestServiceRequests'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
   GUEST_BILLING_STATUS_PATH,
@@ -153,6 +154,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/guest/service-requests"
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><GuestServiceRequests /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* ── Day 1 Sprint: New Rooms / Booking Routes ── */}
         <Route
@@ -176,7 +185,7 @@ const AppContent = () => {
         <Route
           path="/book"
           element={
-            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
               <Layout showSidebar={true}><BookRoom /></Layout>
             </ProtectedRoute>
           }
@@ -185,7 +194,7 @@ const AppContent = () => {
         <Route
           path="/confirmation"
           element={
-            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
               <Layout showSidebar={true}><ConfirmationPage /></Layout>
             </ProtectedRoute>
           }
