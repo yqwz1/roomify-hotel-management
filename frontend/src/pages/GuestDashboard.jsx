@@ -390,11 +390,11 @@ export default function GuestDashboard() {
             />
             <DashboardQuickAction
               icon={BriefcaseBusiness}
-              title={translateWithFallback(t, 'guestServiceRequests.title', 'Service requests')}
+              title={translateWithFallback(t, 'navRequestService', 'Request Service')}
               description={translateWithFallback(
                 t,
                 'guestServiceRequests.dashboardDescription',
-                'Browse active hotel services and send a request from one place.'
+                'Submit a service request and track its status from one place.'
               )}
               onClick={() => navigate('/guest/service-requests')}
             />

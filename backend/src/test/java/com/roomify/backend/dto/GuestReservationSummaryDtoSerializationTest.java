@@ -25,6 +25,7 @@ class GuestReservationSummaryDtoSerializationTest {
         GuestReservationSummaryDto dto = new GuestReservationSummaryDto(
                 "RSV-123456",
                 "CONFIRMED",
+                12L,
                 "301",
                 "Deluxe",
                 LocalDate.of(2026, 4, 20),
@@ -51,6 +52,7 @@ class GuestReservationSummaryDtoSerializationTest {
         GuestReservationSummaryDto dto = new GuestReservationSummaryDto(
                 null,
                 "PENDING",
+                null,
                 null,
                 null,
                 null,

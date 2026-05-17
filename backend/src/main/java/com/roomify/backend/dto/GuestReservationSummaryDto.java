@@ -8,6 +8,7 @@ public class GuestReservationSummaryDto {
 
     private String confirmationNumber;
     private String status;
+    private Long roomId;
     private String roomNumber;
     private String roomTypeName;
     private LocalDate checkInDate;
@@ -25,6 +26,7 @@ public class GuestReservationSummaryDto {
     public GuestReservationSummaryDto(
             String confirmationNumber,
             String status,
+            Long roomId,
             String roomNumber,
             String roomTypeName,
             LocalDate checkInDate,
@@ -37,6 +39,7 @@ public class GuestReservationSummaryDto {
             BigDecimal outstandingBalance) {
         this.confirmationNumber = confirmationNumber;
         this.status = status;
+        this.roomId = roomId;
         this.roomNumber = roomNumber;
         this.roomTypeName = roomTypeName;
         this.checkInDate = checkInDate;
@@ -71,6 +74,14 @@ public class GuestReservationSummaryDto {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 
     public String getRoomNumber() {

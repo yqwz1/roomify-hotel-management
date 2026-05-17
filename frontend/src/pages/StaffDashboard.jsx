@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   BedDouble,
+  BriefcaseBusiness,
   CalendarDays,
   ClipboardCheck,
   DoorClosedLocked,
@@ -21,6 +22,7 @@ import { useAuth } from '../context/AuthProvider';
 import { useReservationQueue } from '../hooks/useReservationQueue';
 import {
   formatLocalizedCurrency,
+  translateWithFallback,
   translateKnownValue,
 } from '../utils/localization';
 import {
@@ -80,6 +82,16 @@ export default function StaffDashboard() {
         title: t('checkoutTitle'),
         description: t(`${pageTx}.actions.checkoutDescription`),
         onClick: () => navigate('/checkout'),
+      },
+      {
+        icon: BriefcaseBusiness,
+        title: translateWithFallback(t, 'navServiceRequests', 'Service Requests'),
+        description: translateWithFallback(
+          t,
+          'staffServiceRequests.quickActionDescription',
+          'Review guest service requests and update their progress.'
+        ),
+        onClick: () => navigate('/staff/service-requests'),
       },
       {
         icon: Receipt,
