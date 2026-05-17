@@ -21,10 +21,10 @@ const fadeUp = {
 function FooterColumn({ title, children }) {
   return (
     <motion.div variants={fadeUp} transition={{ duration: 0.65, ease: EASE }}>
-      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">
+      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/55">
         {title}
       </p>
-      <div className="mt-4 space-y-2.5 text-sm font-medium text-zinc-300">
+      <div className="mt-4 space-y-2.5 text-sm font-medium text-white/75">
         {children}
       </div>
     </motion.div>
@@ -73,17 +73,17 @@ export default function Footer({
       : 'footer.connectionDisconnected';
 
   const statusDot = loading
-    ? 'bg-zinc-400'
+    ? 'bg-white/45'
     : connectionState === 'connected'
-      ? 'bg-emerald-400'
-      : 'bg-rose-400';
+      ? 'bg-brand-success'
+      : 'bg-brand-danger';
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent_45%),linear-gradient(180deg,#0a0a0a_0%,#000_100%)] text-white">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(220,231,238,0.08),transparent_45%),linear-gradient(180deg,#264B6B_0%,#1A2B3A_100%)] text-white">
       {/* Decorative accent line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-px left-1/2 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-zinc-700 to-transparent"
+        className="pointer-events-none absolute -top-px left-1/2 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
       />
 
       {/* ── Top: brand + columns ── */}
@@ -101,23 +101,23 @@ export default function Footer({
 
           {/* Brand block */}
           <motion.div variants={fadeUp} transition={{ duration: 0.7, ease: EASE }}>
-            <Link to="/" className="inline-flex items-center gap-2.5">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-sm font-black text-zinc-950 shadow-sm">
-                R
-              </span>
-              <span className="font-heading text-3xl font-black tracking-tighter text-white">
-                {brandName}
-              </span>
+            <Link to="/" className="inline-flex items-center" aria-label={brandName}>
+              <img
+                src="/roomify-mark-light.png"
+                alt={brandName}
+                className="h-14 w-auto select-none"
+                draggable={false}
+              />
             </Link>
 
-            <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-zinc-400">
+            <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-white/65">
               {t('footer.tagline')}
             </p>
 
             {/* Compliance badges */}
             <div className="mt-6 flex flex-wrap gap-2">
               <span
-                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.08] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300"
+                className="inline-flex items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-success"
                 title={t('footer.zatcaTooltip', {
                   defaultValue: 'ZATCA Phase 2 (e-invoicing) compliant',
                 })}
@@ -126,7 +126,7 @@ export default function Footer({
                 {t('footer.zatcaBadge', { defaultValue: 'ZATCA Compliant' })}
               </span>
               <span
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-300"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white/80"
                 title={t('footer.vatTooltip', {
                   defaultValue: 'Saudi VAT (15%) invoicing supported',
                 })}
@@ -134,7 +134,7 @@ export default function Footer({
                 <FileCheck2 className="h-3 w-3" />
                 {t('footer.vatBadge', { defaultValue: 'Saudi VAT 15%' })}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/[0.08] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-accent-gold/30 bg-brand-accent-gold/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-accent-gold">
                 <Sparkles className="h-3 w-3" />
                 {t('footer.aiBadge', { defaultValue: 'AI-Powered' })}
               </span>
@@ -160,42 +160,20 @@ export default function Footer({
             </FooterColumn>
 
             <FooterColumn title={t('footer.platform')}>
-              <p className="text-zinc-400">{t('home.features.reservationsTitle')}</p>
-              <p className="text-zinc-400">{t('home.features.roomOpsTitle')}</p>
-              <p className="text-zinc-400">{t('home.features.billingTitle')}</p>
-              <p className="text-zinc-400">{t('footer.aiInsights', { defaultValue: 'AI Insights' })}</p>
+              <p className="text-white/65">{t('home.features.reservationsTitle')}</p>
+              <p className="text-white/65">{t('home.features.roomOpsTitle')}</p>
+              <p className="text-white/65">{t('home.features.billingTitle')}</p>
+              <p className="text-white/65">{t('footer.aiInsights', { defaultValue: 'AI Insights' })}</p>
             </FooterColumn>
 
-            <FooterColumn title={t('footer.contact')}>
-              <a
-                href="mailto:info@roomify.com"
-                className="group flex items-start gap-2 text-zinc-300 transition-colors hover:text-white"
-                dir="ltr"
-              >
-                <Mail className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-zinc-500 group-hover:text-zinc-300" />
-                <span>info@roomify.com</span>
-              </a>
-              <a
-                href="tel:+15551234567"
-                className="group flex items-start gap-2 text-zinc-300 transition-colors hover:text-white"
-                dir="ltr"
-              >
-                <Phone className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-zinc-500 group-hover:text-zinc-300" />
-                <span>+1 (555) 123-4567</span>
-              </a>
-              <div className="flex items-start gap-2 text-zinc-400">
-                <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-zinc-500" />
-                <span>{t('footer.contactAddressValue')}</span>
-              </div>
-            </FooterColumn>
           </div>
         </div>
       </motion.div>
 
       {/* ── Bottom bar: copyright + status ── */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-5 text-sm text-zinc-400 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p className="text-xs font-medium text-zinc-500">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-5 text-sm text-white/65 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <p className="text-xs font-medium text-white/55">
             © {new Date().getFullYear()} {t('footer.copyright')}
           </p>
 
@@ -209,13 +187,13 @@ export default function Footer({
                 />
                 <span className={`relative inline-flex h-2 w-2 rounded-full ${statusDot}`} />
               </span>
-              <span className="text-xs font-bold text-zinc-300">{t(statusKey)}</span>
-              <span className="text-xs font-medium text-zinc-500">
+              <span className="text-xs font-bold text-white/85">{t(statusKey)}</span>
+              <span className="text-xs font-medium text-white/55">
                 · {t('footer.connectionLabel')}
               </span>
             </div>
 
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-white/55">
               {timestamp
                 ? t('footer.connectionVerifiedAt', {
                     time: formatLocalizedDateTime(timestamp, i18n.language),

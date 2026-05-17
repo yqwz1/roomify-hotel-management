@@ -32,10 +32,10 @@ import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
    ════════════════════════════════════════════════════════════ */
 
 const LIVE_STATS = [
-  { id: 'totalRooms', value: '120', icon: BedDouble, color: 'text-zinc-700' },
-  { id: 'occupied', value: '87', icon: CheckCircle2, color: 'text-zinc-950' },
-  { id: 'available', value: '24', icon: Clock, color: 'text-emerald-700' },
-  { id: 'maintenance', value: '9', icon: Clock, color: 'text-amber-700' },
+  { id: 'totalRooms', value: '120', icon: BedDouble, color: 'text-brand-ink' },
+  { id: 'occupied', value: '87', icon: CheckCircle2, color: 'text-brand-ink' },
+  { id: 'available', value: '24', icon: Clock, color: 'text-brand-success' },
+  { id: 'maintenance', value: '9', icon: Clock, color: 'text-brand-warning' },
 ];
 
 const ROOM_GRID = [
@@ -50,10 +50,10 @@ const ROOM_GRID = [
 ];
 
 const ROOM_STATUS_MAP = {
-  occupied: { bg: 'bg-zinc-800', label: 'Occupied' },
-  available: { bg: 'bg-emerald-600', label: 'Available' },
-  checkout: { bg: 'bg-amber-500', label: 'Due Out' },
-  maintenance: { bg: 'bg-zinc-400', label: 'Maint.' },
+  occupied: { bg: 'bg-brand-primary-deep', label: 'Occupied' },
+  available: { bg: 'bg-brand-success', label: 'Available' },
+  checkout: { bg: 'bg-brand-warning', label: 'Due Out' },
+  maintenance: { bg: 'bg-brand-ink-hint', label: 'Maint.' },
 };
 
 const TODAY_ACTIVITY = [
@@ -65,18 +65,18 @@ const TODAY_ACTIVITY = [
 ];
 
 const ACTIVITY_COLORS = {
-  checkout: 'bg-amber-400',
-  checkin: 'bg-emerald-500',
-  reservation: 'bg-zinc-600',
-  maintenance: 'bg-zinc-400',
-  invoice: 'bg-zinc-800',
+  checkout: 'bg-brand-warning',
+  checkin: 'bg-brand-success',
+  reservation: 'bg-brand-ink-muted',
+  maintenance: 'bg-brand-ink-hint',
+  invoice: 'bg-brand-primary-deep',
 };
 
 const MODULES = [
-  { id: 'reservations', icon: CalendarClock, color: 'bg-zinc-950' },
-  { id: 'rooms', icon: BedDouble, color: 'bg-emerald-700' },
-  { id: 'billing', icon: Receipt, color: 'bg-amber-700' },
-  { id: 'insights', icon: BarChart3, color: 'bg-zinc-700' },
+  { id: 'reservations', icon: CalendarClock, color: 'bg-brand-primary' },
+  { id: 'rooms', icon: BedDouble, color: 'bg-brand-success' },
+  { id: 'billing', icon: Receipt, color: 'bg-brand-warning' },
+  { id: 'insights', icon: BarChart3, color: 'bg-brand-primary' },
 ];
 
 const WORKFLOW = [
@@ -138,7 +138,7 @@ export default function Home() {
   const hoverLift = reduceMotion ? {} : { y: -4 };
 
   return (
-    <div className="min-h-full bg-[#f7f3ed]">
+    <div className="min-h-full bg-brand-surface">
 
       {/* ──────────────────────────────────────────────
           HERO
@@ -152,12 +152,12 @@ export default function Home() {
           transition={{ duration: 1.2, ease: EASE }}
         >
           <motion.div
-            className="absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-zinc-200/40 to-transparent blur-3xl"
+            className="absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-brand-primary-tint/50 to-transparent blur-3xl"
             animate={reduceMotion ? {} : { y: [0, 18, 0], x: [0, -12, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-zinc-100/50 to-transparent blur-2xl"
+            className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-brand-accent-gold/15 to-transparent blur-2xl"
             animate={reduceMotion ? {} : { y: [0, -14, 0], x: [0, 10, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
           />
@@ -172,7 +172,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
-                className="inline-flex w-fit items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
+                className="inline-flex w-fit items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
               >
                 {t('m.home.eyebrow')}
               </motion.div>
@@ -181,7 +181,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
-                className="mt-4 font-serif text-[1.85rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.4rem] lg:text-[2.8rem]"
+                className="mt-4 font-serif text-[1.85rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.4rem] lg:text-[2.8rem]"
               >
                 {t('m.home.headline')}
               </motion.h1>
@@ -190,7 +190,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
-                className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-zinc-500"
+                className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-brand-ink-muted"
               >
                 {t('m.home.bio')}
               </motion.p>
@@ -205,7 +205,7 @@ export default function Home() {
                   <Link
                     to="/login"
                     id="hero-login-cta"
-                    className="group inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
+                    className="group inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-primary/30 transition-all hover:bg-brand-primary-deep hover:shadow-xl hover:shadow-brand-primary-deep/35"
                   >
                     <LogIn className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                     {t('m.home.ctaLogin')}
@@ -215,7 +215,7 @@ export default function Home() {
                   <Link
                     to="/bookings"
                     id="hero-booking-cta"
-                    className="group inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950"
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition-all hover:border-brand-primary/30 hover:bg-brand-surface-light hover:text-brand-ink"
                   >
                     {t('m.home.ctaSupport')}
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
@@ -231,7 +231,7 @@ export default function Home() {
                   hidden: {},
                   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.85 } },
                 }}
-                className="mt-7 flex flex-wrap gap-4 border-t border-zinc-200 pt-5"
+                className="mt-7 flex flex-wrap gap-4 border-t border-brand-surface-border pt-5"
               >
                 {LIVE_STATS.map((s) => {
                   const Icon = s.icon;
@@ -248,7 +248,7 @@ export default function Home() {
                       <Icon className={`h-4 w-4 ${s.color}`} />
                       <div className="flex items-baseline gap-1">
                         <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
-                        <span className="text-xs font-medium text-zinc-400">{t(`m.home.stat.${s.id}`)}</span>
+                        <span className="text-xs font-medium text-brand-ink-hint">{t(`m.home.stat.${s.id}`)}</span>
                       </div>
                     </motion.div>
                   );
@@ -266,16 +266,16 @@ export default function Home() {
               <motion.div
                 whileHover={reduceMotion ? {} : { y: -6 }}
                 transition={{ duration: 0.4, ease: EASE }}
-                className="rounded-[1.75rem] border border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 ring-1 ring-zinc-900/[0.03]"
+                className="rounded-[1.75rem] border border-brand-surface-border bg-white shadow-xl shadow-brand-primary-deep/10 ring-1 ring-brand-ink/5"
               >
                 {/* Window chrome */}
-                <div className="flex items-center gap-2 rounded-t-[1.75rem] border-b border-zinc-100 bg-zinc-50/70 px-4 py-2.5">
+                <div className="flex items-center gap-2 rounded-t-[1.75rem] border-b border-brand-surface-border bg-brand-surface-light/70 px-4 py-2.5">
                   <div className="flex gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-danger/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-warning/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-success/80" />
                   </div>
-                  <div className="ml-2 flex-1 rounded-full bg-white/80 border border-zinc-200/60 px-3 py-1 text-[10px] text-zinc-400 font-mono">
+                  <div className="ml-2 flex-1 rounded-full bg-white/80 border border-brand-surface-border/60 px-3 py-1 text-[10px] text-brand-ink-hint font-mono">
                     app.roomify.io/dashboard
                   </div>
                 </div>
@@ -283,9 +283,9 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-zinc-100 bg-zinc-950 p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-r border-brand-surface-border bg-brand-surface-light p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex items-center gap-1.5">
-                      <span className="text-[11px] font-black text-white">Roomify</span>
+                      <span className="text-[11px] font-black text-brand-ink">Roomify</span>
                     </div>
                     {['Dashboard', 'Reservations', 'Rooms', 'Guests', 'Billing', 'Reports'].map((item, i) => (
                       <motion.div
@@ -294,7 +294,7 @@ export default function Home() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: 0.7 + i * 0.05, ease: EASE }}
                         className={`mb-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold ${
-                          i === 0 ? 'bg-white text-zinc-950' : 'text-zinc-400 hover:bg-white/10 hover:text-white'
+                          i === 0 ? 'bg-brand-primary text-white shadow-[0_6px_14px_-6px_rgba(53,101,141,0.45)]' : 'text-brand-ink-muted hover:bg-brand-card hover:text-brand-ink'
                         }`}
                       >
                         {item}
@@ -306,21 +306,21 @@ export default function Home() {
                   <div className="flex-1 p-4 sm:p-5">
                     <div className="grid grid-cols-4 gap-2">
                       {[
-                        { label: 'Occupancy', val: '72%', sub: '+4% vs last week', accent: 'text-zinc-950' },
-                        { label: 'Rev Today', val: 'SAR 4,280', sub: '18 transactions', accent: 'text-emerald-700' },
-                        { label: 'Arrivals', val: '8', sub: '3 pending', accent: 'text-amber-700' },
-                        { label: 'Departures', val: '5', sub: '2 late checkout', accent: 'text-zinc-700' },
+                        { label: 'Occupancy', val: '72%', sub: '+4% vs last week', accent: 'text-brand-ink' },
+                        { label: 'Rev Today', val: 'SAR 4,280', sub: '18 transactions', accent: 'text-brand-success' },
+                        { label: 'Arrivals', val: '8', sub: '3 pending', accent: 'text-brand-warning' },
+                        { label: 'Departures', val: '5', sub: '2 late checkout', accent: 'text-brand-ink' },
                       ].map((s, i) => (
                         <motion.div
                           key={s.label}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, delay: 0.8 + i * 0.07, ease: EASE }}
-                          className="rounded-xl border border-zinc-100 bg-zinc-50/50 px-2.5 py-2"
+                          className="rounded-xl border border-brand-surface-border bg-brand-surface-light/50 px-2.5 py-2"
                         >
-                          <p className="text-[9px] font-black uppercase tracking-wider text-zinc-400">{s.label}</p>
+                          <p className="text-[9px] font-black uppercase tracking-wider text-brand-ink-hint">{s.label}</p>
                           <p className={`text-base font-black leading-tight ${s.accent}`}>{s.val}</p>
-                          <p className="mt-0.5 text-[9px] text-zinc-400 hidden sm:block">{s.sub}</p>
+                          <p className="mt-0.5 text-[9px] text-brand-ink-hint hidden sm:block">{s.sub}</p>
                         </motion.div>
                       ))}
                     </div>
@@ -328,12 +328,12 @@ export default function Home() {
                     <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_0.85fr]">
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Room Board</span>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-brand-ink-muted">Room Board</span>
                           <div className="flex gap-2">
                             {Object.entries(ROOM_STATUS_MAP).map(([key, val]) => (
                               <div key={key} className="flex items-center gap-1">
                                 <span className={`h-1.5 w-1.5 rounded-full ${val.bg}`} />
-                                <span className="text-[8px] text-zinc-400">{val.label}</span>
+                                <span className="text-[8px] text-brand-ink-hint">{val.label}</span>
                               </div>
                             ))}
                           </div>
@@ -366,7 +366,7 @@ export default function Home() {
                       </div>
 
                       <div>
-                        <span className="mb-2 block text-[10px] font-black uppercase tracking-wider text-zinc-500">Live Activity</span>
+                        <span className="mb-2 block text-[10px] font-black uppercase tracking-wider text-brand-ink-muted">Live Activity</span>
                         <motion.div
                           initial="hidden"
                           animate="visible"
@@ -384,7 +384,7 @@ export default function Home() {
                                 visible: { opacity: 1, x: 0 },
                               }}
                               transition={{ duration: 0.45, ease: EASE }}
-                              className="group flex items-start gap-2 rounded-xl border border-zinc-100 bg-zinc-50/40 px-2 py-1.5 transition-colors hover:bg-white"
+                              className="group flex items-start gap-2 rounded-xl border border-brand-surface-border bg-brand-surface-light/40 px-2 py-1.5 transition-colors hover:bg-white"
                             >
                               <motion.span
                                 animate={reduceMotion ? {} : { scale: [1, 1.4, 1] }}
@@ -392,8 +392,8 @@ export default function Home() {
                                 className={`mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full ${ACTIVITY_COLORS[a.type]}`}
                               />
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-[10px] font-semibold text-zinc-700">{a.event}</p>
-                                <p className="text-[9px] text-zinc-400">{a.time} AM</p>
+                                <p className="truncate text-[10px] font-semibold text-brand-ink">{a.event}</p>
+                                <p className="text-[9px] text-brand-ink-hint">{a.time} AM</p>
                               </div>
                             </motion.div>
                           ))}
@@ -403,7 +403,7 @@ export default function Home() {
                   </div>
                 </div>
               </motion.div>
-              <div className="absolute -bottom-3 left-4 right-4 -z-10 h-6 rounded-xl bg-zinc-300/30 blur-xl" />
+              <div className="absolute -bottom-3 left-4 right-4 -z-10 h-6 rounded-xl bg-brand-primary-deep/15 blur-xl" />
             </motion.div>
           </div>
         </div>
@@ -412,15 +412,15 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           OPERATIONS MODULES
          ────────────────────────────────────────────── */}
-      <section id="features" className="scroll-mt-20 border-t border-zinc-200 bg-white">
+      <section id="features" className="scroll-mt-20 border-t border-brand-surface-border bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
+          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('m.home.modulesEyebrow')}
           </Reveal>
           <Reveal
             as="h2"
             delay={0.08}
-            className="mx-auto mt-1.5 max-w-lg text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
+            className="mx-auto mt-1.5 max-w-lg text-center text-xl font-black tracking-tight text-brand-ink sm:text-2xl"
           >
             {t('m.home.modulesTitle')}
           </Reveal>
@@ -446,7 +446,7 @@ export default function Home() {
                   }}
                   transition={{ duration: 0.6, ease: EASE }}
                   whileHover={hoverLift}
-                  className="group relative overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/60"
+                  className="group relative overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white p-5 transition-all hover:border-brand-primary/30 hover:shadow-lg hover:shadow-brand-primary-deep/10"
                 >
                   <motion.div
                     whileHover={reduceMotion ? {} : { rotate: [0, -6, 6, 0] }}
@@ -455,8 +455,8 @@ export default function Home() {
                   >
                     <Icon className="h-[18px] w-[18px]" />
                   </motion.div>
-                  <h3 className="mt-3 text-sm font-black text-zinc-950">{t(`m.home.modules.${m.id}.title`)}</h3>
-                  <p className="mt-1 text-[13px] font-medium leading-[1.5] text-zinc-500">{t(`m.home.modules.${m.id}.desc`)}</p>
+                  <h3 className="mt-3 text-sm font-black text-brand-ink">{t(`m.home.modules.${m.id}.title`)}</h3>
+                  <p className="mt-1 text-[13px] font-medium leading-[1.5] text-brand-ink-muted">{t(`m.home.modules.${m.id}.desc`)}</p>
                   <div className={`absolute bottom-0 left-0 h-[2px] w-0 ${m.color} transition-all duration-500 group-hover:w-full`} />
                 </motion.article>
               );
@@ -468,15 +468,15 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           RESERVATION LIFECYCLE
          ────────────────────────────────────────────── */}
-      <section id="workflow" className="scroll-mt-20 border-t border-zinc-200 bg-[#f7f3ed]">
+      <section id="workflow" className="scroll-mt-20 border-t border-brand-surface-border bg-brand-surface">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">
+          <Reveal as="p" className="text-center text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('m.home.workflowEyebrow')}
           </Reveal>
           <Reveal
             as="h2"
             delay={0.08}
-            className="mx-auto mt-1.5 max-w-md text-center text-xl font-black tracking-tight text-zinc-950 sm:text-2xl"
+            className="mx-auto mt-1.5 max-w-md text-center text-xl font-black tracking-tight text-brand-ink sm:text-2xl"
           >
             {t('m.home.workflowTitle')}
           </Reveal>
@@ -488,7 +488,7 @@ export default function Home() {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
               style={{ originX: 0 }}
-              className="absolute left-0 right-0 top-[30px] hidden h-[2px] bg-gradient-to-r from-transparent via-zinc-300 to-transparent lg:block"
+              className="absolute left-0 right-0 top-[30px] hidden h-[2px] bg-gradient-to-r from-transparent via-brand-primary/40 to-transparent lg:block"
               aria-hidden="true"
             />
             <motion.div
@@ -516,15 +516,15 @@ export default function Home() {
                     <motion.div
                       whileHover={reduceMotion ? {} : { scale: 1.08, rotate: -3 }}
                       transition={{ duration: 0.3, ease: EASE }}
-                      className="relative z-10 flex h-[60px] w-[60px] items-center justify-center rounded-2xl border-2 border-zinc-200 bg-white text-zinc-700 shadow-sm transition-all group-hover:border-zinc-400 group-hover:shadow-md"
+                      className="relative z-10 flex h-[60px] w-[60px] items-center justify-center rounded-2xl border-2 border-brand-surface-border bg-white text-brand-ink shadow-sm transition-all group-hover:border-brand-primary/40 group-hover:shadow-md"
                     >
                       <Icon className="h-6 w-6" />
-                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-950 text-[10px] font-bold text-white shadow-sm">
+                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-white shadow-sm">
                         {i + 1}
                       </span>
                     </motion.div>
-                    <p className="mt-2.5 text-sm font-black text-zinc-900">{t(`m.home.wf.${step.id}.label`)}</p>
-                    <p className="text-[11px] font-medium text-zinc-400">{t(`m.home.wf.${step.id}.sub`)}</p>
+                    <p className="mt-2.5 text-sm font-black text-brand-ink">{t(`m.home.wf.${step.id}.label`)}</p>
+                    <p className="text-[11px] font-medium text-brand-ink-hint">{t(`m.home.wf.${step.id}.sub`)}</p>
                   </motion.div>
                 );
               })}
@@ -536,20 +536,20 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           PLATFORM CAPABILITIES
          ────────────────────────────────────────────── */}
-      <section id="platform" className="scroll-mt-20 border-t border-zinc-200 bg-white">
+      <section id="platform" className="scroll-mt-20 border-t border-brand-surface-border bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <div className="lg:flex lg:items-center lg:gap-14">
             <Reveal className="lg:w-[340px] lg:flex-shrink-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.home.capsEyebrow')}</p>
-              <h2 className="mt-1.5 text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.home.capsEyebrow')}</p>
+              <h2 className="mt-1.5 text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
                 {t('m.home.capsTitle')}
               </h2>
-              <p className="mt-2 text-[0.85rem] font-medium leading-relaxed text-zinc-500">
+              <p className="mt-2 text-[0.85rem] font-medium leading-relaxed text-brand-ink-muted">
                 {t('m.home.capsBio')}
               </p>
               <Link
                 to="/login"
-                className="group mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-zinc-950 transition hover:text-zinc-700"
+                className="group mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-brand-ink transition hover:text-brand-ink"
               >
                 {t('m.home.capsCta')}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180" />
@@ -577,14 +577,14 @@ export default function Home() {
                     }}
                     transition={{ duration: 0.55, ease: EASE }}
                     whileHover={hoverLift}
-                    className="flex gap-3 rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-sm"
+                    className="flex gap-3 rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 transition-all hover:border-brand-primary/30 hover:bg-white hover:shadow-sm"
                   >
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary-tint text-brand-ink">
                       <Icon className="h-[18px] w-[18px]" />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{t(`m.home.cap.${cap.id}.label`)}</p>
-                      <p className="mt-0.5 text-[12px] font-medium leading-snug text-zinc-500">{t(`m.home.cap.${cap.id}.desc`)}</p>
+                      <p className="text-sm font-black text-brand-ink">{t(`m.home.cap.${cap.id}.label`)}</p>
+                      <p className="mt-0.5 text-[12px] font-medium leading-snug text-brand-ink-muted">{t(`m.home.cap.${cap.id}.desc`)}</p>
                     </div>
                   </motion.div>
                 );
@@ -597,7 +597,7 @@ export default function Home() {
       {/* ──────────────────────────────────────────────
           CTA BANNER
          ────────────────────────────────────────────── */}
-      <section id="contact" className="scroll-mt-20 border-t border-zinc-200">
+      <section id="contact" className="scroll-mt-20 border-t border-brand-surface-border">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
           <Reveal
             variant="scale"
@@ -605,13 +605,13 @@ export default function Home() {
           >
             <div>
               <h3 className="text-lg font-black text-white">{t('m.home.banner.title')}</h3>
-              <p className="mt-1 text-sm font-medium text-zinc-400">{t('m.home.banner.sub')}</p>
+              <p className="mt-1 text-sm font-medium text-brand-ink-hint">{t('m.home.banner.sub')}</p>
             </div>
             <div className="flex gap-3">
               <motion.div whileHover={reduceMotion ? {} : { scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-zinc-950 shadow-sm transition hover:bg-zinc-100"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition hover:bg-brand-primary-tint"
                 >
                   <LogIn className="h-4 w-4" />
                   {t('m.home.banner.login')}

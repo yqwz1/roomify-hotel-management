@@ -28,15 +28,13 @@ function DesktopLink({ to, route, hash, label, currentPath, currentHash }) {
   return (
     <Link
       to={to}
-      className={`group relative text-sm font-semibold transition-colors ${
-        isActive ? 'text-zinc-950' : 'text-zinc-500 hover:text-zinc-950'
-      }`}
+      className={`group relative text-sm font-semibold transition-colors ${isActive ? 'text-brand-ink' : 'text-brand-ink-muted hover:text-brand-ink'
+        }`}
     >
       {label}
       <span
-        className={`absolute -bottom-1.5 left-0 h-[2px] bg-zinc-950 transition-all duration-300 ${
-          isActive ? 'w-full' : 'w-0 group-hover:w-full'
-        }`}
+        className={`absolute -bottom-1.5 left-0 h-[2px] bg-brand-primary transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
+          }`}
         aria-hidden="true"
       />
     </Link>
@@ -96,11 +94,10 @@ export default function Header({ onMenuToggle }) {
 
   return (
     <header
-      className={`sticky top-0 z-30 flex-shrink-0 border-b transition-all duration-300 ${
-        scrolled
-          ? 'border-zinc-200 bg-white/85 shadow-[0_2px_20px_-12px_rgba(0,0,0,0.18)] backdrop-blur-md'
-          : 'border-transparent bg-white/70 backdrop-blur'
-      }`}
+      className={`sticky top-0 z-30 flex-shrink-0 border-b transition-all duration-300 ${scrolled
+          ? 'border-brand-surface-border bg-brand-card/90 shadow-[0_2px_20px_-12px_rgba(38,75,107,0.18)] backdrop-blur-md'
+          : 'border-transparent bg-brand-card/70 backdrop-blur'
+        }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
 
@@ -113,7 +110,7 @@ export default function Header({ onMenuToggle }) {
               size="icon"
               type="button"
               onClick={onMenuToggle}
-              className="lg:hidden p-2 rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition"
+              className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
               aria-label={t('openNavigation')}
             >
               <Menu className="h-5 w-5" />
@@ -128,18 +125,18 @@ export default function Header({ onMenuToggle }) {
                   variant="ghost"
                   size="icon"
                   type="button"
-                  className="lg:hidden p-2 rounded-lg text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 transition"
+                  className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
                   aria-label={t('openNavigation')}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[88%] max-w-sm flex-col bg-[#f7f3ed] p-0">
-                <SheetHeader className="border-b border-zinc-200 px-6 py-5">
-                  <SheetTitle className="text-left rtl:text-right text-xl font-black tracking-tighter text-zinc-950">
+              <SheetContent side="left" className="flex w-[88%] max-w-sm flex-col bg-brand-surface p-0">
+                <SheetHeader className="border-b border-brand-surface-border px-6 py-5">
+                  <SheetTitle className="text-left rtl:text-right text-xl font-black tracking-tighter text-brand-ink">
                     {brandName}
                   </SheetTitle>
-                  <SheetDescription className="text-left rtl:text-right text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                  <SheetDescription className="text-left rtl:text-right text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted">
                     {t('hotelManagementSystem')}
                   </SheetDescription>
                 </SheetHeader>
@@ -148,7 +145,7 @@ export default function Header({ onMenuToggle }) {
                   className="flex flex-1 flex-col gap-1 px-3 py-5 overflow-y-auto"
                   aria-label={t('openNavigation')}
                 >
-                  <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                  <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('navExploreSection', { defaultValue: 'Explore' })}
                   </p>
                   {allLinks.map(({ to, route, hash: linkHash, label }) => {
@@ -160,10 +157,9 @@ export default function Header({ onMenuToggle }) {
                           end={route === '/' && !linkHash}
                           onClick={closeMobile}
                           className={() =>
-                            `flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
-                              active
-                                ? 'bg-zinc-950 text-white'
-                                : 'text-zinc-700 hover:bg-white hover:text-zinc-950'
+                            `flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors ${active
+                              ? 'bg-brand-primary text-white'
+                              : 'text-brand-ink-muted hover:bg-brand-card hover:text-brand-ink'
                             }`
                           }
                         >
@@ -175,9 +171,9 @@ export default function Header({ onMenuToggle }) {
                   })}
                 </nav>
 
-                <div className="border-t border-zinc-200 bg-white/60 px-5 py-4">
+                <div className="border-t border-brand-surface-border bg-brand-card/60 px-5 py-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-muted">
                       {t('language', { defaultValue: 'Language' })}
                     </span>
                     <LanguageSwitcher />
@@ -187,23 +183,23 @@ export default function Header({ onMenuToggle }) {
                     <SheetClose asChild>
                       <Button
                         asChild
-                        className="h-11 w-full rounded-full bg-zinc-950 text-sm font-bold text-white shadow-sm hover:bg-zinc-800"
+                        className="h-11 w-full rounded-full bg-brand-primary text-sm font-bold text-white shadow-sm hover:bg-brand-primary-deep"
                       >
                         <Link to="/login" onClick={closeMobile}>{t('signIn')}</Link>
                       </Button>
                     </SheetClose>
                   ) : (
                     <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-3 py-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-950 text-[11px] font-bold uppercase text-white">
+                      <div className="flex items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card px-3 py-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-[11px] font-bold uppercase text-white">
                           {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-bold text-zinc-950">
+                          <p className="truncate text-sm font-bold text-brand-ink">
                             {user?.username || t('user')}
                           </p>
                           {roleLabel && (
-                            <p className="text-[11px] font-medium text-zinc-500">{roleLabel}</p>
+                            <p className="text-[11px] font-medium text-brand-ink-muted">{roleLabel}</p>
                           )}
                         </div>
                       </div>
@@ -213,7 +209,7 @@ export default function Header({ onMenuToggle }) {
                           closeMobile();
                           handleLogout();
                         }}
-                        className="h-10 w-full justify-center gap-2 rounded-full border border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+                        className="h-10 w-full justify-center gap-2 rounded-full border border-brand-surface-border text-sm font-bold text-brand-ink-muted hover:bg-brand-surface-light hover:text-brand-ink"
                       >
                         <LogOut className="h-4 w-4" />
                         {t('logout')}
@@ -225,11 +221,17 @@ export default function Header({ onMenuToggle }) {
             </Sheet>
           )}
 
-          <Link to="/" className="group flex items-center gap-2 text-zinc-950">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-950 text-[11px] font-black text-white shadow-sm transition-transform group-hover:-rotate-3">
-              R
-            </span>
-            <span className="text-xl font-black tracking-tighter">{brandName}</span>
+          <Link
+            to="/"
+            className="group flex items-center text-brand-ink"
+            aria-label={brandName}
+          >
+            <img
+              src="/roomify-mark.png"
+              alt={brandName}
+              className="h-10 w-auto select-none transition-transform group-hover:scale-[1.04]"
+              draggable={false}
+            />
           </Link>
         </div>
 
@@ -257,24 +259,24 @@ export default function Header({ onMenuToggle }) {
           {!isAuthenticated ? (
             <Button
               asChild
-              className="h-9 rounded-full bg-zinc-950 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:shadow-md"
+              className="h-9 rounded-full bg-brand-primary px-5 text-sm font-bold text-white shadow-[0_8px_22px_-10px_rgba(53,101,141,0.5)] transition hover:bg-brand-primary-deep hover:shadow-[0_12px_28px_-12px_rgba(38,75,107,0.55)]"
             >
               <Link to="/login">{t('signIn')}</Link>
             </Button>
           ) : (
             <div className="flex items-center gap-2">
               {/* User chip – desktop */}
-              <div className="hidden xl:flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950">
+              <div className="hidden xl:flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-card px-3 py-1">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary">
                   <span className="text-[10px] font-bold uppercase text-white">
                     {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
                   </span>
                 </div>
-                <span className="max-w-[120px] truncate text-sm font-semibold text-zinc-950">
+                <span className="max-w-[120px] truncate text-sm font-semibold text-brand-ink">
                   {user?.username || t('user')}
                 </span>
                 {roleLabel && (
-                  <span className="border-s border-zinc-200 ps-2 text-[11px] font-medium text-zinc-500">
+                  <span className="border-s border-brand-surface-border ps-2 text-[11px] font-medium text-brand-ink-muted">
                     {roleLabel}
                   </span>
                 )}
@@ -283,7 +285,7 @@ export default function Header({ onMenuToggle }) {
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-zinc-600 transition hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
+                className="flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-brand-ink-muted transition hover:border-brand-surface-border hover:bg-brand-surface-light hover:text-brand-ink"
                 title={t('logout')}
               >
                 <LogOut className="h-4 w-4" />

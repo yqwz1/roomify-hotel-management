@@ -64,7 +64,40 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			// ── Roomify brand tokens ──────────────────────────────────
+  			// Source of truth for product UI colors. Prefer these over inline hex.
+  			brand: {
+  				// Core
+  				primary: '#35658D',
+  				'primary-deep': '#264B6B',
+  				'primary-hover': '#4A7BA6',
+  				'primary-tint': '#D9E3EE',
+  				'primary-fg': '#FFFFFF',
+  				// Surfaces
+  				surface: '#F5F2EA',
+  				'surface-light': '#FBF9F4',
+  				card: '#FFFFFF',
+  				'surface-border': '#E8E3D6',
+  				// Text
+  				ink: '#1A2B3A',
+  				'ink-muted': '#5C6B7A',
+  				'ink-hint': '#8A95A1',
+  				// Status
+  				success: '#1D9E75',
+  				warning: '#BA7517',
+  				danger: '#A32D2D',
+  				// Accents — use sparingly
+  				'accent-gold': '#D4A24C',
+  				'accent-terracotta': '#C97757',
   			}
+  		},
+  		ringColor: {
+  			'brand-focus': 'rgba(53,101,141,0.25)',
+  		},
+  		boxShadow: {
+  			'brand-cta': '0 14px 32px -10px rgba(53,101,141,0.55)',
+  			'brand-cta-hover': '0 18px 40px -12px rgba(38,75,107,0.65)',
   		}
   	}
   },
