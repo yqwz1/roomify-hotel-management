@@ -24,6 +24,10 @@ vi.mock('./pages/ManagerDashboard', () => ({
   default: () => <div>Manager Dashboard Page</div>,
 }));
 
+vi.mock('./pages/StaffServiceRequests', () => ({
+  default: () => <div>Staff Service Requests Page</div>,
+}));
+
 vi.mock('./pages/ExpenseTracker', () => ({
   default: () => <div>Expense Tracker Page</div>,
 }));
@@ -93,6 +97,12 @@ describe('App route guards', () => {
     renderAtRoute('/manager/expenses', ['ROLE_MANAGER']);
 
     expect(await screen.findByText('Expense Tracker Page')).toBeInTheDocument();
+  });
+
+  it('allows staff to reach /staff/service-requests', async () => {
+    renderAtRoute('/staff/service-requests', ['ROLE_STAFF']);
+
+    expect(await screen.findByText('Staff Service Requests Page')).toBeInTheDocument();
   });
 
   it('allows admins to reach /admin/dashboard', async () => {

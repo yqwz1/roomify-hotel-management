@@ -3,6 +3,7 @@ package com.roomify.backend.service;
 import com.roomify.backend.dto.GuestReservationSummaryDto;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
@@ -30,7 +31,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
     public List<GuestReservationSummaryDto> getGuestReservations() {
         LocalDate today = LocalDate.now();
 
-        return getAuthenticatedGuests().stream()
+        return resolveAuthenticatedGuests().stream()
                 .map(Guest::getId)
                 .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
                 .filter(distinctByReservationId())
@@ -43,7 +44,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
     public void assertGuestOwnsReservation(String confirmationNumber) {
         String normalizedConfirmation = normalizeConfirmationNumber(confirmationNumber);
 
-        boolean ownsReservation = getAuthenticatedGuests().stream()
+        boolean ownsReservation = resolveAuthenticatedGuests().stream()
                 .map(Guest::getId)
                 .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
                 .anyMatch(reservation -> normalizedConfirmation.equals(
@@ -54,7 +55,30 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         }
     }
 
-    private List<Guest> getAuthenticatedGuests() {
+    @Override
+    public List<Long> getAuthenticatedGuestIds() {
+        return resolveAuthenticatedGuests().stream()
+                .map(Guest::getId)
+                .toList();
+    }
+
+    @Override
+    public Reservation requireActiveGuestReservationForRoom(Long roomId) {
+        LocalDate today = LocalDate.now();
+
+        return resolveAuthenticatedGuests().stream()
+                .map(Guest::getId)
+                .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
+                .filter(this::hasAssignedRoom)
+                .filter(reservation -> roomId.equals(reservation.getRoomId()))
+                .filter(reservation -> isActiveReservation(reservation, today))
+                .sorted(buildReservationSort(today))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Selected room is not part of an active reservation."));
+    }
+
+    private List<Guest> resolveAuthenticatedGuests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -121,11 +145,30 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 && reservation.getCheckOutDate().isBefore(today);
     }
 
+    private boolean isActiveReservation(Reservation reservation, LocalDate today) {
+        if (!hasAssignedRoom(reservation) || reservation.getCheckOutDate() == null) {
+            return false;
+        }
+
+        ReservationStatus status = reservation.getStatus();
+        if (status != ReservationStatus.CONFIRMED && status != ReservationStatus.CHECKED_IN) {
+            return false;
+        }
+
+        return !reservation.getCheckOutDate().isBefore(today);
+    }
+
+    private boolean hasAssignedRoom(Reservation reservation) {
+        return reservation.getRoom() != null && reservation.getRoom().getId() != null;
+    }
+
     private GuestReservationSummaryDto mapToDto(Reservation reservation) {
+        Long roomId = null;
         String roomNumber = null;
         String roomTypeName = null;
 
         if (reservation.getRoom() != null) {
+            roomId = reservation.getRoom().getId();
             roomNumber = reservation.getRoom().getRoomNumber();
 
             if (reservation.getRoom().getRoomType() != null) {
@@ -136,6 +179,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         return new GuestReservationSummaryDto(
                 reservation.getConfirmationNumber(),
                 reservation.getStatus() != null ? reservation.getStatus().name() : null,
+                roomId,
                 roomNumber,
                 roomTypeName,
                 reservation.getCheckInDate(),

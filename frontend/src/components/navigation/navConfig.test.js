@@ -49,6 +49,7 @@ describe('navConfig', () => {
       'Arrivals',
       'Departures',
       'Billing',
+      'Service Requests',
     ]);
   });
 

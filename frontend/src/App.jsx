@@ -18,6 +18,7 @@ import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
 import AiFinanceDashboard from './pages/AiFinanceDashboard'
 import StaffDashboard from './pages/StaffDashboard'
+import StaffServiceRequests from './pages/StaffServiceRequests'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
 import GuestServiceRequests from './pages/GuestServiceRequests'
@@ -143,6 +144,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={STAFF_ONLY_ROLES}>
               <Layout showSidebar={true}><StaffDashboard /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/staff/service-requests"
+          element={
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+              <Layout showSidebar={true}><StaffServiceRequests /></Layout>
             </ProtectedRoute>
           }
         />

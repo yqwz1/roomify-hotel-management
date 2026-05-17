@@ -343,6 +343,13 @@ const STAFF_NAVIGATION_CONFIG = [
         icon: Receipt,
         roles: [ROLE_STAFF],
       },
+      {
+        path: '/staff/service-requests',
+        translationKey: 'navServiceRequests',
+        fallbackLabel: 'Service Requests',
+        icon: BriefcaseBusiness,
+        roles: [ROLE_STAFF],
+      },
     ],
   },
 ];
@@ -384,6 +391,13 @@ const GUEST_NAVIGATION_CONFIG = [
     fallbackLabel: 'Get Help',
     roles: [ROLE_GUEST],
     items: [
+      {
+        path: '/guest/service-requests',
+        translationKey: 'navRequestService',
+        fallbackLabel: 'Request Service',
+        icon: BriefcaseBusiness,
+        roles: [ROLE_GUEST],
+      },
       {
         path: '/bookings',
         translationKey: 'navGetHelp',
@@ -449,7 +463,9 @@ const DOCUMENT_TITLE_OVERRIDES = {
   '/admin/dashboard': ['adminDashboardTitle', 'Admin Dashboard'],
   '/manager/dashboard': ['managerDashboardTitle', 'Manager Dashboard'],
   '/staff/dashboard': ['staffDashboardTitle', 'Staff Dashboard'],
+  '/staff/service-requests': ['navServiceRequests', 'Service Requests'],
   '/guest/dashboard': ['guestDashboardTitle', 'Guest Dashboard'],
+  '/guest/service-requests': ['navRequestService', 'Request Service'],
   '/manager/ai-finance': ['aiFinanceTitle', 'AI Finance'],
   '/manager/expenses': ['expenseTrackerTitle', 'Expense Tracker'],
   '/room-types': ['roomTypes', 'Room Types'],
