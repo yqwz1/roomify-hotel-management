@@ -490,10 +490,14 @@ const buildSectionLabel = (section, t) => translateWithFallback(t, section.trans
 
 const buildItemLabel = (item, t) => translateWithFallback(t, item.translationKey, item.fallbackLabel);
 
-const getNavigationConfigForRoles = (roles = []) =>
-  ROLE_PRIORITY
-    .filter((role) => roles.includes(role))
-    .flatMap((role) => NAVIGATION_CONFIG_BY_ROLE[role] ?? []);
+// Show only the highest-priority role's navigation. A user with both
+// ROLE_ADMIN and ROLE_MANAGER sees the admin nav only (not both flat-mapped
+// together, which previously caused duplicate "Overview" sections and
+// bled manager surfaces into the admin experience).
+const getNavigationConfigForRoles = (roles = []) => {
+  const primaryRole = getPrimaryRole(roles);
+  return primaryRole ? (NAVIGATION_CONFIG_BY_ROLE[primaryRole] ?? []) : [];
+};
 
 export const getNavigationSections = (roles = [], t) =>
   getNavigationConfigForRoles(roles)

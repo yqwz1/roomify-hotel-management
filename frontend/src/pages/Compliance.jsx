@@ -17,10 +17,10 @@ import Reveal, { EASE } from '../components/motion/Reveal';
 import RoadmapBanner from '../components/marketing/RoadmapBanner';
 
 const PILLARS = [
-  { id: 'zatca', icon: ShieldCheck, accent: 'border-emerald-200 bg-emerald-50', iconBg: 'bg-emerald-600' },
-  { id: 'vat', icon: FileCheck2, accent: 'border-amber-200 bg-amber-50', iconBg: 'bg-amber-600' },
-  { id: 'payment', icon: Lock, accent: 'border-zinc-200 bg-zinc-50', iconBg: 'bg-zinc-900' },
-  { id: 'rbac', icon: KeyRound, accent: 'border-zinc-200 bg-zinc-50', iconBg: 'bg-zinc-900' },
+  { id: 'zatca', icon: ShieldCheck, accent: 'border-brand-success/25 bg-brand-success/[0.06]', iconBg: 'bg-brand-success' },
+  { id: 'vat', icon: FileCheck2, accent: 'border-brand-warning/25 bg-brand-warning/[0.06]', iconBg: 'bg-brand-warning' },
+  { id: 'payment', icon: Lock, accent: 'border-brand-surface-border bg-brand-surface-light', iconBg: 'bg-brand-ink' },
+  { id: 'rbac', icon: KeyRound, accent: 'border-brand-surface-border bg-brand-surface-light', iconBg: 'bg-brand-ink' },
 ];
 
 const STANDARD_IDS = ['zatca', 'vat', 'pci', 'gdpr', 'iso', 'residency'];
@@ -30,12 +30,12 @@ const RESIDENCY_POINTS = ['p1', 'p2', 'p3', 'p4'];
 export default function Compliance() {
   const { t } = useTranslation();
   return (
-    <div className="min-h-full bg-[#f7f3ed]">
+    <div className="min-h-full bg-brand-surface">
       {/* HERO */}
       <section className="relative overflow-hidden">
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-32 -left-20 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-emerald-200/30 to-transparent blur-3xl"
+          className="pointer-events-none absolute -top-32 -left-20 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-brand-success/20 to-transparent blur-3xl"
           animate={{ y: [0, 18, 0], x: [0, 12, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
@@ -44,7 +44,7 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-800 shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/[0.06] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-success shadow-sm"
           >
             <ShieldCheck className="h-3 w-3" />
             {t('m.compliance.eyebrow')}
@@ -53,7 +53,7 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="mt-4 max-w-3xl font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.6rem]"
+            className="mt-4 max-w-3xl font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.6rem]"
           >
             {t('m.compliance.headline')}
           </motion.h1>
@@ -61,7 +61,7 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-            className="mt-3 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-zinc-500"
+            className="mt-3 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-brand-ink-muted"
           >
             {t('m.compliance.bio')}
           </motion.p>
@@ -77,39 +77,39 @@ export default function Compliance() {
             transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
             className="mt-10 grid gap-5 sm:grid-cols-[1.3fr_1fr]"
           >
-            <div className="rounded-[1.75rem] border border-zinc-200 bg-white p-6 shadow-sm">
+            <div className="rounded-[1.75rem] border border-brand-surface-border bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400">{t('m.compliance.invoice.label')}</p>
-                  <p className="mt-1 text-sm font-black text-zinc-950">{t('m.compliance.invoice.hotel')}</p>
-                  <p className="text-[11px] font-medium text-zinc-500" dir="ltr">{t('m.compliance.invoice.trn')}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('m.compliance.invoice.label')}</p>
+                  <p className="mt-1 text-sm font-black text-brand-ink">{t('m.compliance.invoice.hotel')}</p>
+                  <p className="text-[11px] font-medium text-brand-ink-muted" dir="ltr">{t('m.compliance.invoice.trn')}</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-950 p-2.5">
+                <div className="rounded-2xl border border-brand-surface-border bg-brand-primary p-2.5">
                   <QrCode className="h-12 w-12 text-white" />
                 </div>
               </div>
               <div className="mt-5 space-y-1.5 text-[13px]">
-                <div className="flex justify-between text-zinc-600"><span>{t('m.compliance.invoice.lineRoom')}</span><span className="font-mono" dir="ltr">1,200.00</span></div>
-                <div className="flex justify-between text-zinc-600"><span>{t('m.compliance.invoice.lineFB')}</span><span className="font-mono" dir="ltr">185.00</span></div>
-                <div className="flex justify-between text-zinc-400 text-xs"><span>{t('m.compliance.invoice.subtotal')}</span><span className="font-mono" dir="ltr">1,385.00</span></div>
-                <div className="flex justify-between text-zinc-400 text-xs"><span>{t('m.compliance.invoice.vat')}</span><span className="font-mono" dir="ltr">207.75</span></div>
-                <div className="mt-2 flex justify-between border-t border-zinc-100 pt-2 text-sm font-black text-zinc-950">
+                <div className="flex justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineRoom')}</span><span className="font-mono" dir="ltr">1,200.00</span></div>
+                <div className="flex justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineFB')}</span><span className="font-mono" dir="ltr">185.00</span></div>
+                <div className="flex justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.subtotal')}</span><span className="font-mono" dir="ltr">1,385.00</span></div>
+                <div className="flex justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.vat')}</span><span className="font-mono" dir="ltr">207.75</span></div>
+                <div className="mt-2 flex justify-between border-t border-brand-surface-border pt-2 text-sm font-black text-brand-ink">
                   <span>{t('m.compliance.invoice.total')}</span><span className="font-mono" dir="ltr">1,592.75</span>
                 </div>
               </div>
-              <p className="mt-4 text-[10px] font-medium text-zinc-400">{t('m.compliance.invoice.signed')}</p>
+              <p className="mt-4 text-[10px] font-medium text-brand-ink-hint">{t('m.compliance.invoice.signed')}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
-              <Reveal className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <ShieldCheck className="h-5 w-5 text-emerald-700" />
-                <p className="mt-3 text-sm font-black text-emerald-950">{t('m.compliance.cleared.title')}</p>
-                <p className="mt-1 text-[12px] font-medium text-emerald-800">{t('m.compliance.cleared.sub')}</p>
+              <Reveal className="rounded-2xl border border-brand-success/25 bg-brand-success/[0.06] p-4">
+                <ShieldCheck className="h-5 w-5 text-brand-success" />
+                <p className="mt-3 text-sm font-black text-brand-ink">{t('m.compliance.cleared.title')}</p>
+                <p className="mt-1 text-[12px] font-medium text-brand-success">{t('m.compliance.cleared.sub')}</p>
               </Reveal>
-              <Reveal delay={0.1} className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <FileCheck2 className="h-5 w-5 text-amber-700" />
-                <p className="mt-3 text-sm font-black text-amber-950">{t('m.compliance.vatcard.title')}</p>
-                <p className="mt-1 text-[12px] font-medium text-amber-800">{t('m.compliance.vatcard.sub')}</p>
+              <Reveal delay={0.1} className="rounded-2xl border border-brand-warning/25 bg-brand-warning/[0.06] p-4">
+                <FileCheck2 className="h-5 w-5 text-brand-warning" />
+                <p className="mt-3 text-sm font-black text-brand-ink">{t('m.compliance.vatcard.title')}</p>
+                <p className="mt-1 text-[12px] font-medium text-brand-warning">{t('m.compliance.vatcard.sub')}</p>
               </Reveal>
             </div>
           </motion.div>
@@ -117,10 +117,10 @@ export default function Compliance() {
       </section>
 
       {/* PILLARS */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section className="border-t border-brand-surface-border bg-white">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-16">
-          <Reveal as="p" className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.compliance.pillarsEyebrow')}</Reveal>
-          <Reveal as="h2" delay={0.08} className="mt-1.5 max-w-xl text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+          <Reveal as="p" className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.compliance.pillarsEyebrow')}</Reveal>
+          <Reveal as="h2" delay={0.08} className="mt-1.5 max-w-xl text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
             {t('m.compliance.pillarsTitle')}
           </Reveal>
 
@@ -150,12 +150,12 @@ export default function Compliance() {
                   <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${p.iconBg} text-white shadow-sm`}>
                     <Icon className="h-[18px] w-[18px]" />
                   </div>
-                  <h3 className="mt-4 text-base font-black tracking-tight text-zinc-950">{t(`m.compliance.pillar.${p.id}.title`)}</h3>
-                  <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-zinc-600">{t(`m.compliance.pillar.${p.id}.desc`)}</p>
+                  <h3 className="mt-4 text-base font-black tracking-tight text-brand-ink">{t(`m.compliance.pillar.${p.id}.title`)}</h3>
+                  <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-brand-ink-muted">{t(`m.compliance.pillar.${p.id}.desc`)}</p>
                   <ul className="mt-4 grid grid-cols-2 gap-1.5">
                     {[1, 2, 3, 4].map((n) => (
-                      <li key={n} className="flex items-start gap-1.5 text-[12px] font-semibold text-zinc-700">
-                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-zinc-500" />
+                      <li key={n} className="flex items-start gap-1.5 text-[12px] font-semibold text-brand-ink">
+                        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand-ink-muted" />
                         {t(`m.compliance.pillar.${p.id}.b${n}`)}
                       </li>
                     ))}
@@ -168,10 +168,10 @@ export default function Compliance() {
       </section>
 
       {/* STANDARDS GRID */}
-      <section className="border-t border-zinc-200 bg-[#f7f3ed]">
+      <section className="border-t border-brand-surface-border bg-brand-surface">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
-          <Reveal as="p" className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.compliance.standardsEyebrow')}</Reveal>
-          <Reveal as="h2" delay={0.08} className="mt-1.5 text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+          <Reveal as="p" className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.compliance.standardsEyebrow')}</Reveal>
+          <Reveal as="h2" delay={0.08} className="mt-1.5 text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
             {t('m.compliance.standardsTitle')}
           </Reveal>
           <motion.div
@@ -193,11 +193,11 @@ export default function Compliance() {
                 }}
                 transition={{ duration: 0.5, ease: EASE }}
                 whileHover={{ y: -3 }}
-                className="flex flex-col items-start gap-1 rounded-2xl border border-zinc-200 bg-white px-4 py-3 transition-shadow hover:shadow-sm"
+                className="flex flex-col items-start gap-1 rounded-2xl border border-brand-surface-border bg-white px-4 py-3 transition-shadow hover:shadow-sm"
               >
-                <ScrollText className="h-4 w-4 text-zinc-400" />
-                <p className="text-sm font-black text-zinc-950">{t(`m.compliance.standard.${id}.label`)}</p>
-                <p className="text-[10px] font-medium text-zinc-500">{t(`m.compliance.standard.${id}.sub`)}</p>
+                <ScrollText className="h-4 w-4 text-brand-ink-hint" />
+                <p className="text-sm font-black text-brand-ink">{t(`m.compliance.standard.${id}.label`)}</p>
+                <p className="text-[10px] font-medium text-brand-ink-muted">{t(`m.compliance.standard.${id}.sub`)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -205,40 +205,40 @@ export default function Compliance() {
       </section>
 
       {/* DATA RESIDENCY */}
-      <section className="border-t border-zinc-200 bg-white">
+      <section className="border-t border-brand-surface-border bg-white">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
             <Reveal>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.compliance.residencyEyebrow')}</p>
-              <h2 className="mt-1.5 max-w-md text-xl font-black tracking-tight text-zinc-950 sm:text-2xl">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.compliance.residencyEyebrow')}</p>
+              <h2 className="mt-1.5 max-w-md text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
                 {t('m.compliance.residencyTitle')}
               </h2>
-              <p className="mt-3 max-w-md text-[14px] font-medium leading-relaxed text-zinc-500">
+              <p className="mt-3 max-w-md text-[14px] font-medium leading-relaxed text-brand-ink-muted">
                 {t('m.compliance.residencyBio')}
               </p>
               <Link
                 to="/demo"
-                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800"
+                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-primary-deep"
               >
                 {t('m.compliance.residencyCta')}
                 <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Link>
             </Reveal>
             <Reveal delay={0.1} variant="scale">
-              <div className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-6">
+              <div className="rounded-[1.75rem] border border-brand-surface-border bg-brand-surface-light p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950 text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white">
                     <Database className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-zinc-950">{t('m.compliance.residency.region')}</p>
-                    <p className="text-[12px] font-medium text-zinc-500">{t('m.compliance.residency.regionSub')}</p>
+                    <p className="text-sm font-black text-brand-ink">{t('m.compliance.residency.region')}</p>
+                    <p className="text-[12px] font-medium text-brand-ink-muted">{t('m.compliance.residency.regionSub')}</p>
                   </div>
                 </div>
-                <div className="mt-5 space-y-2 text-[13px] text-zinc-700">
+                <div className="mt-5 space-y-2 text-[13px] text-brand-ink">
                   {RESIDENCY_POINTS.map((p) => (
                     <div key={p} className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-success" />
                       <span>{t(`m.compliance.residency.${p}`)}</span>
                     </div>
                   ))}

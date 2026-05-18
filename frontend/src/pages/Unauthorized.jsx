@@ -9,30 +9,30 @@ const Unauthorized = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="h-full flex items-center justify-center bg-zinc-50 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md overflow-hidden rounded-3xl border-zinc-200 bg-white shadow-sm">
+    <div className="h-full flex items-center justify-center bg-brand-surface px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md overflow-hidden rounded-3xl border-brand-surface-border bg-brand-card shadow-sm">
         <CardHeader className="pt-10 text-center">
           <div className="mb-6 flex justify-center">
-            <div className="rounded-full border border-zinc-200 bg-zinc-100 p-4">
-              <ShieldAlert className="h-10 w-10 text-black" />
+            <div className="rounded-full border border-brand-surface-border bg-brand-primary-tint p-4">
+              <ShieldAlert className="h-10 w-10 text-brand-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-extrabold tracking-tight text-black">
+          <CardTitle className="text-3xl font-extrabold tracking-tight text-brand-ink">
             {t('unauthorizedPage.title')}
           </CardTitle>
-          <CardDescription className="mt-2 text-sm font-bold uppercase tracking-widest text-zinc-400">
+          <CardDescription className="mt-2 text-sm font-bold uppercase tracking-widest text-brand-ink-muted">
             {t('unauthorizedPage.code')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="pb-2 text-center font-medium text-zinc-600">
+          <p className="pb-2 text-center font-medium text-brand-ink-muted">
             {t('unauthorizedPage.description')}
           </p>
         </CardContent>
         <CardFooter className="flex justify-center pb-10">
           <Button
             onClick={() => navigate('/')}
-            className="h-auto w-full rounded-full bg-black px-8 py-6 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-zinc-800 sm:w-auto"
+            className="h-auto w-full rounded-full bg-brand-primary px-8 py-6 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-brand-primary-deep sm:w-auto"
           >
             {t('unauthorizedPage.action')}
           </Button>

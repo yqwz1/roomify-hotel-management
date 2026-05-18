@@ -40,6 +40,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
     private static final String DEMO_ADMIN_PASSWORD = "password123";
+    private static final String DEMO_MANAGER_EMAIL = "manager@roomify.com";
+    private static final String DEMO_MANAGER_PASSWORD = "password123";
     private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
     private static final String DEMO_STAFF_PASSWORD = "password123";
     private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
@@ -74,6 +76,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         upsertDemoAdminUser();
+        upsertDemoManagerUser();
         upsertDemoStaffUser();
         upsertDemoGuestUser();
 
@@ -125,11 +128,27 @@ public class DemoDataBootstrap implements ApplicationRunner {
         adminUser.setEmail(DEMO_ADMIN_EMAIL);
         adminUser.setPasswordHash(encodedPassword);
         adminUser.setRole(Role.ADMIN);
-        adminUser.setRoles(EnumSet.of(Role.ADMIN, Role.MANAGER));
+        // Admin gets ADMIN only — manager is a separate seeded account so the two
+        // dashboards stay cleanly isolated (no shared sidebar, no dual redirects).
+        adminUser.setRoles(EnumSet.of(Role.ADMIN));
         adminUser.setActive(true);
         adminUser.setFailedAttempts(0);
         adminUser.setLockUntil(null);
         userRepository.save(adminUser);
+    }
+
+    private void upsertDemoManagerUser() {
+        String encodedPassword = passwordEncoder.encode(DEMO_MANAGER_PASSWORD);
+        User managerUser = userRepository.findByEmailIgnoreCase(DEMO_MANAGER_EMAIL)
+                .orElseGet(() -> new User(DEMO_MANAGER_EMAIL, encodedPassword, Role.MANAGER, true));
+        managerUser.setEmail(DEMO_MANAGER_EMAIL);
+        managerUser.setPasswordHash(encodedPassword);
+        managerUser.setRole(Role.MANAGER);
+        managerUser.setRoles(EnumSet.of(Role.MANAGER));
+        managerUser.setActive(true);
+        managerUser.setFailedAttempts(0);
+        managerUser.setLockUntil(null);
+        userRepository.save(managerUser);
     }
 
     private void upsertDemoStaffUser() {

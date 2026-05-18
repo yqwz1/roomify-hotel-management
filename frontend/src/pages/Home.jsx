@@ -283,7 +283,7 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-brand-surface-border bg-brand-surface-light p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-r border-brand-surface-border bg-brand-primary-tint p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex items-center gap-1.5">
                       <span className="text-[11px] font-black text-brand-ink">Roomify</span>
                     </div>
@@ -294,7 +294,7 @@ export default function Home() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: 0.7 + i * 0.05, ease: EASE }}
                         className={`mb-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold ${
-                          i === 0 ? 'bg-brand-primary text-white shadow-[0_6px_14px_-6px_rgba(53,101,141,0.45)]' : 'text-brand-ink-muted hover:bg-brand-card hover:text-brand-ink'
+                          i === 0 ? 'bg-brand-primary text-white shadow-sm' : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
                         }`}
                       >
                         {item}

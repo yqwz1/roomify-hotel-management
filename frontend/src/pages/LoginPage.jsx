@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
+import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -86,23 +87,10 @@ const LoginPage = () => {
         navigate(from, { replace: true });
         return;
       }
-      const primaryRole = user.roles && user.roles.length > 0 ? user.roles[0] : '';
-      switch (primaryRole) {
-        case 'ROLE_ADMIN':
-          navigate('/admin/dashboard', { replace: true });
-          break;
-        case 'ROLE_MANAGER':
-          navigate('/manager/dashboard', { replace: true });
-          break;
-        case 'ROLE_STAFF':
-          navigate('/staff/dashboard', { replace: true });
-          break;
-        case 'ROLE_GUEST':
-          navigate('/guest/dashboard', { replace: true });
-          break;
-        default:
-          navigate('/', { replace: true });
-      }
+      // Route by the user's HIGHEST-priority role (admin > manager > staff > guest)
+      // so a multi-role admin lands on /admin/dashboard, not /manager/dashboard,
+      // regardless of the order the backend returns roles in.
+      navigate(getDefaultRouteForRoles(user.roles ?? []), { replace: true });
     } catch (error) {
       setLoginError(
         isAr ? t('loginFailedDefault') : (error.message || t('loginFailedDefault'))

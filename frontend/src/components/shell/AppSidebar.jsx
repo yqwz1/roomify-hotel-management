@@ -39,7 +39,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-brand-surface-border bg-brand-card text-brand-ink shadow-[0_0_40px_-12px_rgba(38,75,107,0.12)] transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
+          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-brand-surface-border bg-brand-primary-tint text-brand-ink transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
           isOpen ? 'translate-x-0 opacity-100' : isRtl ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0',
           isDesktop &&
@@ -52,7 +52,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           <div className="border-b border-brand-surface-border px-5 py-5">
             <div className="flex items-center justify-between gap-3">
               <Link to={homePath} onClick={handleNavigation} className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-brand-ink-hint">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-brand-ink-muted">
                   {brandName}
                 </p>
                 <p className="mt-1 truncate text-2xl font-black tracking-tight text-brand-ink">
@@ -63,19 +63,19 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-2 text-brand-ink-hint transition hover:bg-brand-surface-light hover:text-brand-ink lg:hidden"
+                className="rounded-full p-2 text-brand-ink-muted transition hover:bg-white hover:text-brand-ink lg:hidden"
                 aria-label={t('closeNavigation')}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-5 rounded-3xl border border-brand-surface-border bg-brand-surface-light p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-ink-hint">
+            <div className="mt-5 rounded-3xl border border-brand-surface-border bg-white p-4">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-ink-muted">
                 {t('propertyOperations')}
               </p>
               <p className="mt-2 text-sm font-semibold text-brand-ink">{roleLabel}</p>
-              <p className="mt-1 truncate text-sm text-brand-ink-hint">
+              <p className="mt-1 truncate text-sm text-brand-ink-muted">
                 {user?.email || user?.username || t('user')}
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           <nav className="flex-1 overflow-y-auto px-4 py-5">
             {sections.map((section, index) => (
               <div key={`${section.id}-${index}`} className="mb-6 last:mb-0">
-                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.24em] text-brand-ink-hint">
+                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.24em] text-brand-ink-muted">
                   {section.label}
                 </p>
 
@@ -101,16 +101,16 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                         className={cn(
                           'group flex items-center gap-3 rounded-2xl px-3 py-3 transition-all duration-200',
                           isActive
-                            ? 'bg-brand-primary text-white shadow-[0_10px_24px_-10px_rgba(53,101,141,0.45)]'
-                            : 'text-brand-ink-muted hover:bg-brand-surface-light hover:text-brand-ink'
+                            ? 'bg-brand-primary text-white shadow-sm'
+                            : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
                         )}
                       >
                         <span
                           className={cn(
-                            'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border transition-colors',
+                            'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl transition-colors',
                             isActive
-                              ? 'border-white/25 bg-white/15 text-white'
-                              : 'border-brand-surface-border bg-brand-surface-light text-brand-ink-muted group-hover:border-brand-primary/25 group-hover:text-brand-ink'
+                              ? 'border border-white/25 bg-white/15 text-white'
+                              : 'text-brand-ink-muted group-hover:text-brand-primary'
                           )}
                         >
                           <Icon className="h-4 w-4" />
@@ -136,7 +136,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           </nav>
 
           <div className="border-t border-brand-surface-border px-5 py-4">
-            <div className="flex items-center gap-3 rounded-3xl bg-brand-surface-light px-3 py-3">
+            <div className="flex items-center gap-3 rounded-3xl border border-brand-surface-border bg-white px-3 py-3">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-sm font-black uppercase text-white">
                 {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </div>

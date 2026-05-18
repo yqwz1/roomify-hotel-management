@@ -16,21 +16,21 @@ const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Booking%20Support`;
 
 const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }) => {
-    const className = 'group flex h-full w-full items-center justify-between rounded-3xl border border-zinc-200 bg-white p-5 text-start transition-all hover:border-black hover:shadow-md';
+    const className = 'group flex h-full w-full items-center justify-between rounded-3xl border border-brand-surface-border bg-white p-5 text-start transition-all hover:border-brand-primary/40 hover:shadow-md';
 
     if (href) {
         return (
             <a href={href} className={className}>
                 <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 transition-colors group-hover:bg-black">
-                        <Icon className="h-5 w-5 text-zinc-700 group-hover:text-white" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
+                        <Icon className="h-5 w-5 text-brand-ink group-hover:text-white" />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-black">{title}</p>
-                        <p className="mt-1 text-xs text-zinc-500">{description}</p>
+                        <p className="text-sm font-bold text-brand-ink">{title}</p>
+                        <p className="mt-1 text-xs text-brand-ink-muted">{description}</p>
                     </div>
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink">
                     {openLabel}
                 </span>
             </a>
@@ -40,15 +40,15 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }
     return (
         <button type="button" onClick={onClick} className={className}>
             <div className="flex items-center gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-100 transition-colors group-hover:bg-black">
-                    <Icon className="h-5 w-5 text-zinc-700 group-hover:text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
+                    <Icon className="h-5 w-5 text-brand-ink group-hover:text-white" />
                 </div>
                 <div>
-                    <p className="text-sm font-bold text-black">{title}</p>
-                    <p className="mt-1 text-xs text-zinc-500">{description}</p>
+                    <p className="text-sm font-bold text-brand-ink">{title}</p>
+                    <p className="mt-1 text-xs text-brand-ink-muted">{description}</p>
                 </div>
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 transition group-hover:text-black">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink">
                 {openLabel}
             </span>
         </button>
@@ -79,23 +79,23 @@ export default function Bookings() {
         supportTips.length > 0;
 
     return (
-        <div className="h-full bg-zinc-50 p-6 lg:p-8">
+        <div className="h-full bg-brand-surface p-6 lg:p-8">
             <div className="mx-auto max-w-6xl space-y-6">
-                <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-muted">
                         {t('bookings')}
                     </p>
-                    <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black">
+                    <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-brand-ink">
                         {t('bookings')}
                     </h1>
-                    <p className="mt-3 max-w-3xl text-sm font-medium text-zinc-500">{intro}</p>
+                    <p className="mt-3 max-w-3xl text-sm font-medium text-brand-ink-muted">{intro}</p>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-                    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
                         <div className="flex items-center gap-3">
-                            <CalendarDays className="h-5 w-5 text-zinc-700" />
-                            <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.actionsTitle')}</h2>
+                            <CalendarDays className="h-5 w-5 text-brand-ink" />
+                            <h2 className="text-lg font-extrabold text-brand-ink">{t('bookingsPage.actionsTitle')}</h2>
                         </div>
 
                         <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -190,14 +190,14 @@ export default function Bookings() {
                     </div>
 
                     {showSupportTips ? (
-                        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <ShieldCheck className="h-5 w-5 text-zinc-700" />
-                                <h2 className="text-lg font-extrabold text-black">{t('bookingsPage.supportTitle')}</h2>
+                                <ShieldCheck className="h-5 w-5 text-brand-ink" />
+                                <h2 className="text-lg font-extrabold text-brand-ink">{t('bookingsPage.supportTitle')}</h2>
                             </div>
                             <div className="mt-5 space-y-3">
                                 {supportTips.map((item) => (
-                                    <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+                                    <div key={item} className="rounded-2xl border border-brand-surface-border bg-brand-surface px-4 py-3 text-sm font-medium text-brand-ink-muted">
                                         {item}
                                     </div>
                                 ))}

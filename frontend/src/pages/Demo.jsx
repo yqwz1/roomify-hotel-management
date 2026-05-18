@@ -56,11 +56,11 @@ export default function Demo() {
   };
 
   return (
-    <div className="min-h-full bg-[#f7f3ed]">
+    <div className="min-h-full bg-brand-surface">
       <section className="relative overflow-hidden">
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-32 -right-20 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-amber-200/30 to-transparent blur-3xl"
+          className="pointer-events-none absolute -top-32 -right-20 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-brand-accent-gold/20 to-transparent blur-3xl"
           animate={{ y: [0, 18, 0], x: [0, -10, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         />
@@ -74,7 +74,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, ease: EASE }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 shadow-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
               >
                 <Calendar className="h-3 w-3" />
                 {t('m.demo.eyebrow')}
@@ -83,7 +83,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                className="mt-4 font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-zinc-950 sm:text-[2.5rem]"
+                className="mt-4 font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.5rem]"
               >
                 {t('m.demo.headline')}
               </motion.h1>
@@ -91,7 +91,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-                className="mt-3 max-w-md text-[0.95rem] font-medium leading-relaxed text-zinc-500"
+                className="mt-3 max-w-md text-[0.95rem] font-medium leading-relaxed text-brand-ink-muted"
               >
                 {t('m.demo.bio')}
               </motion.p>
@@ -110,12 +110,12 @@ export default function Demo() {
                     key={id}
                     variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
                     transition={{ duration: 0.55, ease: EASE }}
-                    className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3"
+                    className="flex items-start gap-3 rounded-2xl border border-brand-surface-border bg-white px-4 py-3"
                   >
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-success" />
                     <div>
-                      <p className="text-sm font-black text-zinc-950">{t(`m.demo.hi.${id}.label`)}</p>
-                      <p className="text-[12px] font-medium leading-snug text-zinc-500">{t(`m.demo.hi.${id}.desc`)}</p>
+                      <p className="text-sm font-black text-brand-ink">{t(`m.demo.hi.${id}.label`)}</p>
+                      <p className="text-[12px] font-medium leading-snug text-brand-ink-muted">{t(`m.demo.hi.${id}.desc`)}</p>
                     </div>
                   </motion.li>
                 ))}
@@ -124,17 +124,17 @@ export default function Demo() {
 
             {/* RIGHT — Form / Success */}
             <Reveal delay={0.15} variant="scale" className="relative">
-              <div className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-xl shadow-zinc-200/50 sm:p-8">
+              <div className="rounded-[2rem] border border-brand-surface-border bg-white p-6 shadow-xl shadow-brand-primary-deep/10 sm:p-8">
                 {!submitted ? (
                   <>
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400">{t('m.demo.formStep')}</p>
-                    <h2 className="mt-1 text-lg font-black tracking-tight text-zinc-950">{t('m.demo.formTitle')}</h2>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.demo.formStep')}</p>
+                    <h2 className="mt-1 text-lg font-black tracking-tight text-brand-ink">{t('m.demo.formTitle')}</h2>
 
                     {error && (
                       <motion.p
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700"
+                        className="mt-3 rounded-xl border border-brand-danger/30 bg-brand-danger/5 px-3 py-2 text-xs font-semibold text-brand-danger"
                       >
                         {error}
                       </motion.p>
@@ -190,7 +190,7 @@ export default function Demo() {
 
                       {/* Room range chips */}
                       <div>
-                        <Label className="text-sm font-bold text-zinc-700">
+                        <Label className="text-sm font-bold text-brand-ink">
                           <BedDouble className="me-1.5 inline h-3.5 w-3.5" />
                           {t('m.demo.field.rooms')}
                         </Label>
@@ -202,8 +202,8 @@ export default function Demo() {
                               onClick={() => setForm((p) => ({ ...p, rooms: r }))}
                               className={`rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all ${
                                 form.rooms === r
-                                  ? 'border-zinc-950 bg-zinc-950 text-white'
-                                  : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                                  ? 'border-brand-primary bg-brand-primary text-white'
+                                  : 'border-brand-surface-border bg-white text-brand-ink-muted hover:border-brand-primary/30 hover:bg-brand-surface-light'
                               }`}
                             >
                               {r}
@@ -213,8 +213,8 @@ export default function Demo() {
                       </div>
 
                       <div>
-                        <Label htmlFor="notes" className="text-sm font-bold text-zinc-700">
-                          {t('m.demo.field.notes')} <span className="font-medium text-zinc-400">{t('m.demo.field.optional')}</span>
+                        <Label htmlFor="notes" className="text-sm font-bold text-brand-ink">
+                          {t('m.demo.field.notes')} <span className="font-medium text-brand-ink-hint">{t('m.demo.field.optional')}</span>
                         </Label>
                         <textarea
                           id="notes"
@@ -222,7 +222,7 @@ export default function Demo() {
                           value={form.notes}
                           onChange={handleChange}
                           rows={3}
-                          className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 transition focus-visible:border-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-200"
+                          className="mt-1.5 w-full rounded-xl border border-brand-surface-border bg-white px-3.5 py-2.5 text-sm text-brand-ink transition focus-visible:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-tint"
                           placeholder={t('m.demo.field.notesPh')}
                         />
                       </div>
@@ -231,7 +231,7 @@ export default function Demo() {
                         <Button
                           type="submit"
                           disabled={submitting}
-                          className="mt-1 h-11 w-full rounded-full bg-zinc-950 text-sm font-bold text-white shadow-lg shadow-zinc-950/20 transition-all hover:bg-zinc-800 hover:shadow-xl hover:shadow-zinc-950/25"
+                          className="mt-1 h-11 w-full rounded-full bg-brand-primary text-sm font-bold text-white shadow-lg shadow-brand-primary/30 transition-all hover:bg-brand-primary-deep hover:shadow-xl hover:shadow-brand-primary-deep/35"
                         >
                           {submitting ? (
                             <>
@@ -247,7 +247,7 @@ export default function Demo() {
                         </Button>
                       </motion.div>
 
-                      <p className="text-center text-[11px] font-medium text-zinc-400">
+                      <p className="text-center text-[11px] font-medium text-brand-ink-hint">
                         {t('m.demo.privacy')}
                       </p>
                     </form>
@@ -259,13 +259,13 @@ export default function Demo() {
                     transition={{ duration: 0.5, ease: EASE }}
                     className="py-6 text-center"
                   >
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                      <CheckCircle2 className="h-7 w-7 text-emerald-700" />
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-success/15">
+                      <CheckCircle2 className="h-7 w-7 text-brand-success" />
                     </div>
-                    <h2 className="mt-5 text-lg font-black tracking-tight text-zinc-950">
+                    <h2 className="mt-5 text-lg font-black tracking-tight text-brand-ink">
                       {t('m.demo.success.titlePrefix')}, {form.name.split(' ')[0] || t('m.demo.success.fallbackName')} ✓
                     </h2>
-                    <p className="mt-2 max-w-sm mx-auto text-sm font-medium leading-relaxed text-zinc-500">
+                    <p className="mt-2 max-w-sm mx-auto text-sm font-medium leading-relaxed text-brand-ink-muted">
                       {t('m.demo.success.bodyA')} {form.hotelName || t('m.demo.success.fallbackHotel')}.
                     </p>
                     <Button
@@ -274,7 +274,7 @@ export default function Demo() {
                         setForm({ hotelName: '', name: '', email: '', phone: '', rooms: '', role: '', notes: '' });
                       }}
                       variant="ghost"
-                      className="mt-6 h-10 rounded-full border border-zinc-200 px-5 text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+                      className="mt-6 h-10 rounded-full border border-brand-surface-border px-5 text-sm font-bold text-brand-ink hover:bg-brand-surface-light hover:text-brand-ink"
                     >
                       {t('m.demo.success.another')}
                     </Button>
@@ -294,7 +294,7 @@ export default function Demo() {
 function FieldRow({ icon: Icon, id, label, value, onChange, placeholder, type = 'text', dir }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-sm font-bold text-zinc-700">
+      <Label htmlFor={id} className="text-sm font-bold text-brand-ink">
         {Icon && <Icon className="me-1.5 inline h-3.5 w-3.5" />}
         {label}
       </Label>
@@ -306,7 +306,7 @@ function FieldRow({ icon: Icon, id, label, value, onChange, placeholder, type = 
         onChange={onChange}
         placeholder={placeholder}
         dir={dir}
-        className="h-11 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm transition-all duration-200 focus-visible:border-zinc-400 focus-visible:ring-zinc-300"
+        className="h-11 rounded-xl border border-brand-surface-border bg-white px-3.5 text-sm transition-all duration-200 focus-visible:border-brand-primary focus-visible:ring-brand-primary-tint"
       />
     </div>
   );
