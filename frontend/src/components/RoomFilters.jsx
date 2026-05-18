@@ -25,10 +25,10 @@ const toOption = (option) => {
 
 function FilterField({ id, label, children }) {
   return (
-    <div className="space-y-2 flex flex-col">
+    <div className="flex min-w-0 flex-col gap-2 rounded-[1.35rem] border border-brand-surface-border bg-white p-3 shadow-sm">
       <label
         htmlFor={id}
-        className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint"
+        className="text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted"
       >
         {label}
       </label>
@@ -77,7 +77,7 @@ export default function RoomFilters({
   });
 
   const inputClassName =
-    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5';
+    'h-11 w-full rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5';
 
   return (
     <section className="rounded-[1.75rem] border border-black/5 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]">
@@ -108,8 +108,8 @@ export default function RoomFilters({
         </Button>
       </div>
 
-      <div className="px-5 py-5 sm:px-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div className="px-5 py-5 sm:px-6 bg-brand-surface-light/30 rounded-b-[1.75rem]">
+        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))]">
           {showRoomSearch && (
             <FilterField id="filter-room-name" label={t('roomNameSearchLabel')}>
               <div className="relative">
