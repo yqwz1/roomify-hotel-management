@@ -84,7 +84,7 @@ const AppContent = () => {
         <Route path="/demo" element={<Layout showSidebar={false}><Demo /></Layout>} />
         <Route path="/bookings" element={<Layout showSidebar={false}><Bookings /></Layout>} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/unauthorized" element={<Layout showSidebar={false}><Unauthorized /></Layout>} />
+        <Route path="/unauthorized" element={<Layout showSidebar={Boolean(user)}><Unauthorized /></Layout>} />
 
         {/* Protected Routes */}
         <Route

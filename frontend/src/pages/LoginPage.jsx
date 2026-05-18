@@ -12,7 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
-import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
+import { canAccessPathForRoles, getDefaultRouteForRoles } from '../components/navigation/navConfig';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -83,14 +83,21 @@ const LoginPage = () => {
       setIsLoading(true);
       const user = await login(formData.email, formData.password);
       const from = location.state?.from?.pathname;
-      if (from) {
+      const userRoles = user.roles ?? [];
+      const canReturnToFrom =
+        Boolean(from) &&
+        from !== '/login' &&
+        from !== '/unauthorized' &&
+        canAccessPathForRoles(from, userRoles);
+
+      if (canReturnToFrom) {
         navigate(from, { replace: true });
         return;
       }
       // Route by the user's HIGHEST-priority role (admin > manager > staff > guest)
       // so a multi-role admin lands on /admin/dashboard, not /manager/dashboard,
       // regardless of the order the backend returns roles in.
-      navigate(getDefaultRouteForRoles(user.roles ?? []), { replace: true });
+      navigate(getDefaultRouteForRoles(userRoles), { replace: true });
     } catch (error) {
       setLoginError(
         isAr ? t('loginFailedDefault') : (error.message || t('loginFailedDefault'))

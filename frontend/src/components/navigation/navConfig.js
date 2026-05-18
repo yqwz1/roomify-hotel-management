@@ -49,6 +49,69 @@ export const getDefaultRouteForRoles = (roles = []) => {
   }
 };
 
+const PROTECTED_ROUTE_ROLE_MAP = {
+  '/room-types': [ROLE_ADMIN],
+  '/staff': [ROLE_ADMIN],
+  '/rooms': [ROLE_MANAGER],
+  '/manager/dashboard': [ROLE_MANAGER],
+  '/manager/ai-finance': [ROLE_MANAGER],
+  '/admin/dashboard': [ROLE_ADMIN],
+  '/staff/dashboard': [ROLE_STAFF],
+  '/staff/service-requests': [ROLE_MANAGER, ROLE_STAFF],
+  '/guest/dashboard': [ROLE_GUEST],
+  '/guest/service-requests': [ROLE_GUEST],
+  '/rooms-management': [ROLE_MANAGER],
+  '/search': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+  '/book': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+  '/confirmation': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+  '/check-in': [ROLE_MANAGER, ROLE_STAFF],
+  '/reservations/modify': [ROLE_MANAGER, ROLE_STAFF],
+  '/reservations/cancel': [ROLE_MANAGER, ROLE_STAFF],
+  '/checkout': [ROLE_MANAGER, ROLE_STAFF],
+  '/room-status': [ROLE_MANAGER],
+  '/invoice-preview': [ROLE_MANAGER, ROLE_STAFF],
+  '/reservations': [ROLE_MANAGER, ROLE_STAFF],
+  [GUEST_BILLING_STATUS_PATH]: [ROLE_GUEST],
+  '/services': [ROLE_ADMIN],
+  '/manager/expenses': [ROLE_MANAGER],
+};
+
+const PROTECTED_ROUTE_ROLE_PATTERNS = [
+  { matcher: (pathname) => /^\/reservations\/[^/]+$/.test(pathname), roles: [ROLE_MANAGER, ROLE_STAFF] },
+];
+
+const normalizePathname = (pathname = '') => {
+  if (typeof pathname !== 'string' || pathname.length === 0) {
+    return '';
+  }
+
+  return pathname.split('#')[0].split('?')[0] || '/';
+};
+
+const getAllowedRolesForPath = (pathname) => {
+  if (Object.prototype.hasOwnProperty.call(PROTECTED_ROUTE_ROLE_MAP, pathname)) {
+    return PROTECTED_ROUTE_ROLE_MAP[pathname];
+  }
+
+  const matchedPattern = PROTECTED_ROUTE_ROLE_PATTERNS.find((rule) => rule.matcher(pathname));
+  return matchedPattern?.roles ?? null;
+};
+
+export const canAccessPathForRoles = (pathname, roles = []) => {
+  const normalizedPath = normalizePathname(pathname);
+  if (!normalizedPath) {
+    return false;
+  }
+
+  const allowedRoles = getAllowedRolesForPath(normalizedPath);
+  if (!allowedRoles) {
+    return true;
+  }
+
+  const roleList = Array.isArray(roles) ? roles : [roles];
+  return roleList.some((role) => allowedRoles.includes(role));
+};
+
 export const getRoleDisplayLabel = (roles = [], t) => {
   const primaryRole = getPrimaryRole(roles);
 
