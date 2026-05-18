@@ -114,27 +114,27 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.itemNameLabel', 'Item name')}
             </span>
             <input
               value={formData.name}
               onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               placeholder="Surface cleaner"
               required
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.categoryLabel', 'Category')}
             </span>
             <select
@@ -142,7 +142,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, category: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {INVENTORY_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -155,7 +155,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
 
         <div className="grid gap-4 md:grid-cols-3">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.unitLabel', 'Unit')}
             </span>
             <select
@@ -163,7 +163,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, unitOfMeasure: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {INVENTORY_UNITS.map((unit) => (
                 <option key={unit} value={unit}>
@@ -174,7 +174,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.minimumThresholdLabel', 'Minimum stock')}
             </span>
             <input
@@ -188,13 +188,13 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
                   minimumStockThreshold: event.target.value,
                 }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.defaultUnitCostLabel', 'Default unit cost')}
             </span>
             <input
@@ -205,7 +205,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, defaultUnitCost: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
@@ -213,7 +213,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
 
         {!editing ? (
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.initialStockLabel', 'Initial stock')}
             </span>
             <input
@@ -224,14 +224,14 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, initialStockQuantity: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
             </span>
             <input
@@ -239,51 +239,51 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, supplier: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.skuLabel', 'SKU')}
             </span>
             <input
               value={formData.sku}
               onChange={(event) => setFormData((current) => ({ ...current, sku: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         </div>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.active}
             onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
-            className="h-4 w-4 rounded border-zinc-300"
+            className="h-4 w-4 rounded border-brand-surface-border"
           />
-          <span className="text-sm font-medium text-zinc-700">
+          <span className="text-sm font-medium text-brand-ink">
             {translateWithFallback(t, 'inventoryPage.activeLabel', 'Active item')}
           </span>
         </label>
 
         <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700">
+          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500">
+          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'save', 'Save')}
           </button>
         </div>
@@ -306,14 +306,14 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
             <input
@@ -322,12 +322,12 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
               step="0.001"
               value={formData.quantity}
               onChange={(event) => setFormData((current) => ({ ...current, quantity: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.unitCostLabel', 'Unit cost')}
             </span>
             <input
@@ -336,52 +336,52 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
               step="0.0001"
               value={formData.unitCost}
               onChange={(event) => setFormData((current) => ({ ...current, unitCost: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
         </div>
 
         <label className="space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
           </span>
           <input
             value={formData.supplier}
             onChange={(event) => setFormData((current) => ({ ...current, supplier: event.target.value }))}
-            className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+            className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
           />
         </label>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.linkToExpense}
             onChange={(event) => setFormData((current) => ({ ...current, linkToExpense: event.target.checked }))}
-            className="h-4 w-4 rounded border-zinc-300"
+            className="h-4 w-4 rounded border-brand-surface-border"
           />
-          <span className="text-sm font-medium text-zinc-700">
+          <span className="text-sm font-medium text-brand-ink">
             {translateWithFallback(t, 'inventoryPage.linkExpenseLabel', 'Also record this as cash spend')}
           </span>
         </label>
 
         <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700">
+          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500">
+          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'inventoryPage.restockAction', 'Restock')}
           </button>
         </div>
@@ -404,20 +404,20 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.transactionTypeLabel', 'Adjustment type')}
             </span>
             <select
               value={formData.transactionType}
               onChange={(event) => setFormData((current) => ({ ...current, transactionType: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {STOCK_ADJUSTMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -427,7 +427,7 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
             </select>
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
             <input
@@ -436,41 +436,41 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
               step="0.001"
               value={formData.quantityChange}
               onChange={(event) => setFormData((current) => ({ ...current, quantityChange: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         </div>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.increaseStock}
             onChange={(event) => setFormData((current) => ({ ...current, increaseStock: event.target.checked }))}
-            className="h-4 w-4 rounded border-zinc-300"
+            className="h-4 w-4 rounded border-brand-surface-border"
             disabled={formData.transactionType !== 'MANUAL_ADJUSTMENT'}
           />
-          <span className="text-sm font-medium text-zinc-700">
+          <span className="text-sm font-medium text-brand-ink">
             {translateWithFallback(t, 'inventoryPage.increaseStockLabel', 'Increase stock instead of reducing it')}
           </span>
         </label>
 
         <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700">
+          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500">
+          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'inventoryPage.saveAdjustmentAction', 'Save Adjustment')}
           </button>
         </div>
@@ -551,32 +551,32 @@ function TemplateModal({
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-3">
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.templateNameLabel', 'Template name')}
             </span>
             <input
               value={formData.name}
               onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               placeholder="Standard room cleaning"
               required
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.serviceTypeLabel', 'Service type')}
             </span>
             <select
               value={formData.serviceType}
               onChange={(event) => setFormData((current) => ({ ...current, serviceType: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {SERVICE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -589,13 +589,13 @@ function TemplateModal({
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'inventoryPage.roomTypeLabel', 'Room type')}
             </span>
             <select
               value={formData.roomTypeId}
               onChange={(event) => setFormData((current) => ({ ...current, roomTypeId: event.target.value }))}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               <option value="">
                 {translateWithFallback(t, 'inventoryPage.allRoomTypesLabel', 'All room types')}
@@ -608,38 +608,38 @@ function TemplateModal({
             </select>
           </label>
 
-          <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4 md:mt-7">
+          <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
             <input
               type="checkbox"
               checked={formData.active}
               onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
-              className="h-4 w-4 rounded border-zinc-300"
+              className="h-4 w-4 rounded border-brand-surface-border"
             />
-            <span className="text-sm font-medium text-zinc-700">
+            <span className="text-sm font-medium text-brand-ink">
               {translateWithFallback(t, 'inventoryPage.activeTemplateLabel', 'Template is active')}
             </span>
           </label>
         </div>
 
         <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
-        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+        <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-black text-zinc-950">
+              <p className="text-sm font-black text-brand-ink">
                 {translateWithFallback(t, 'inventoryPage.templateItemsTitle', 'Standard items')}
               </p>
-              <p className="text-sm font-medium text-zinc-500">
+              <p className="text-sm font-medium text-brand-ink-muted">
                 {translateWithFallback(
                   t,
                   'inventoryPage.templateItemsDescription',
@@ -647,16 +647,16 @@ function TemplateModal({
                 )}
               </p>
             </div>
-            <Button type="button" variant="outline" onClick={handleAddTemplateItem} className="border-zinc-200">
+            <Button type="button" variant="outline" onClick={handleAddTemplateItem} className="border-brand-surface-border">
               {translateWithFallback(t, 'inventoryPage.addItemAction', 'Add item')}
             </Button>
           </div>
 
           <div className="mt-4 space-y-3">
             {formData.items.map((item, index) => (
-              <div key={`${item.inventoryItemId}-${index}`} className="grid gap-3 rounded-[1.25rem] border border-zinc-200 bg-white p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
+              <div key={`${item.inventoryItemId}-${index}`} className="grid gap-3 rounded-[1.25rem] border border-brand-surface-border bg-white p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
                 <label className="space-y-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, 'inventoryPage.itemNameLabel', 'Item')}
                   </span>
                   <select
@@ -664,7 +664,7 @@ function TemplateModal({
                     onChange={(event) =>
                       handleTemplateItemChange(index, 'inventoryItemId', Number(event.target.value))
                     }
-                    className="h-11 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+                    className="h-11 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
                   >
                     {[...inventoryItems]
                       .sort((left, right) => left.name.localeCompare(right.name))
@@ -676,7 +676,7 @@ function TemplateModal({
                   </select>
                 </label>
                 <label className="space-y-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, 'inventoryPage.standardQuantityLabel', 'Standard quantity')}
                   </span>
                   <input
@@ -687,14 +687,14 @@ function TemplateModal({
                     onChange={(event) =>
                       handleTemplateItemChange(index, 'standardQuantity', event.target.value)
                     }
-                    className="h-11 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950"
+                    className="h-11 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
                   />
                 </label>
                 <div className="flex items-end">
                   <button
                     type="button"
                     onClick={() => handleRemoveTemplateItem(index)}
-                    className="h-11 rounded-full border border-rose-200 bg-rose-50 px-4 text-sm font-bold text-rose-900"
+                    className="h-11 rounded-full border border-brand-danger/30 bg-brand-danger/10 px-4 text-sm font-bold text-brand-danger"
                   >
                     {translateWithFallback(t, 'inventoryPage.removeItemAction', 'Remove')}
                   </button>
@@ -703,7 +703,7 @@ function TemplateModal({
             ))}
 
             {formData.items.length === 0 ? (
-              <div className="rounded-[1.25rem] border border-dashed border-zinc-200 bg-white px-4 py-5 text-sm font-medium text-zinc-500">
+              <div className="rounded-[1.25rem] border border-dashed border-brand-surface-border bg-white px-4 py-5 text-sm font-medium text-brand-ink-muted">
                 {translateWithFallback(
                   t,
                   'inventoryPage.noTemplateItemsDescription',
@@ -715,10 +715,10 @@ function TemplateModal({
         </div>
 
         <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700">
+          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500">
+          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'save', 'Save')}
           </button>
         </div>
@@ -973,10 +973,10 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
         )}
         action={
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={loadData} className="border-zinc-200">
+            <Button type="button" variant="outline" onClick={loadData} className="border-brand-surface-border">
               {translateWithFallback(t, 'retry', 'Refresh')}
             </Button>
-            <Button type="button" onClick={openCreateItemModal} className="bg-zinc-950 text-white hover:bg-zinc-800">
+            <Button type="button" onClick={openCreateItemModal} className="bg-brand-primary text-white hover:bg-brand-primary-deep">
               {translateWithFallback(t, 'inventoryPage.addItemAction', 'Add item')}
             </Button>
           </div>
@@ -1022,20 +1022,20 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                     {inventoryItems.map((item) => (
                       <div
                         key={item.id}
-                        className="rounded-[1.35rem] border border-zinc-200 bg-white p-4 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.22)]"
+                        className="rounded-[1.35rem] border border-brand-surface-border bg-white p-4 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.22)]"
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <p className="text-lg font-black tracking-tight text-zinc-950">{item.name}</p>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-500">
-                              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1">
+                            <p className="text-lg font-black tracking-tight text-brand-ink">{item.name}</p>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
                                 {humanizeEnum(item.category)}
                               </span>
-                              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1">
+                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
                                 {humanizeEnum(item.unitOfMeasure)}
                               </span>
                               {item.lowStock ? (
-                                <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-900">
+                                <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1 text-brand-danger">
                                   {translateWithFallback(t, 'inventoryPage.lowStockBadge', 'Low stock')}
                                 </span>
                               ) : null}
@@ -1043,13 +1043,13 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           </div>
 
                           <div className="text-right">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                               {translateWithFallback(t, 'inventoryPage.stockOnHandLabel', 'On hand')}
                             </p>
-                            <p className="mt-2 text-2xl font-black text-zinc-950">
+                            <p className="mt-2 text-2xl font-black text-brand-ink">
                               {formatLocalizedNumber(item.currentStockQuantity, language)}
                             </p>
-                            <p className="text-sm font-medium text-zinc-500">
+                            <p className="text-sm font-medium text-brand-ink-muted">
                               {translateWithFallback(
                                 t,
                                 'inventoryPage.avgUnitCostLabel',
@@ -1060,7 +1060,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           </div>
                         </div>
 
-                        <div className="mt-4 grid gap-3 text-sm font-medium text-zinc-600 md:grid-cols-3">
+                        <div className="mt-4 grid gap-3 text-sm font-medium text-brand-ink-muted md:grid-cols-3">
                           <p>
                             {translateWithFallback(
                               t,
@@ -1091,21 +1091,21 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           <button
                             type="button"
                             onClick={() => openRestockModal(item)}
-                            className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900"
+                            className="rounded-full border border-brand-success/30 bg-brand-success/10 px-4 py-2 text-sm font-bold text-brand-success"
                           >
                             {translateWithFallback(t, 'inventoryPage.restockAction', 'Restock')}
                           </button>
                           <button
                             type="button"
                             onClick={() => openAdjustmentModal(item)}
-                            className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-bold text-zinc-700"
+                            className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'inventoryPage.adjustStockAction', 'Adjust stock')}
                           </button>
                           <button
                             type="button"
                             onClick={() => openEditItemModal(item)}
-                            className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-bold text-zinc-700"
+                            className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'editStaff', 'Edit')}
                           </button>
@@ -1128,9 +1128,9 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   {summary?.lowStockItems?.length ? (
                     <div className="space-y-3">
                       {summary.lowStockItems.map((item) => (
-                        <div key={item.id} className="rounded-[1.25rem] border border-rose-200 bg-rose-50 p-4">
-                          <p className="text-sm font-black text-rose-950">{item.name}</p>
-                          <p className="mt-1 text-sm font-medium text-rose-900/80">
+                        <div key={item.id} className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 p-4">
+                          <p className="text-sm font-black text-brand-ink">{item.name}</p>
+                          <p className="mt-1 text-sm font-medium text-brand-danger/80">
                             {translateWithFallback(
                               t,
                               'inventoryPage.lowStockCopy',
@@ -1168,14 +1168,14 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   {summary?.topConsumedItems?.length ? (
                     <div className="space-y-3">
                       {summary.topConsumedItems.slice(0, 6).map((item) => (
-                        <div key={item.key} className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
+                        <div key={item.key} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-black text-zinc-950">{item.label}</p>
-                            <p className="text-sm font-black text-zinc-950">
+                            <p className="text-sm font-black text-brand-ink">{item.label}</p>
+                            <p className="text-sm font-black text-brand-ink">
                               {formatLocalizedCurrency(item.totalValue, language)}
                             </p>
                           </div>
-                          <p className="mt-2 text-sm font-medium text-zinc-500">
+                          <p className="mt-2 text-sm font-medium text-brand-ink-muted">
                             {translateWithFallback(
                               t,
                               'inventoryPage.topConsumedCopy',
@@ -1213,7 +1213,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   'Templates power one-click service completion by preloading standard operational items.'
                 )}
                 action={
-                  <Button type="button" variant="outline" onClick={openCreateTemplateModal} className="border-zinc-200">
+                  <Button type="button" variant="outline" onClick={openCreateTemplateModal} className="border-brand-surface-border">
                     {translateWithFallback(t, 'inventoryPage.addTemplateAction', 'Add template')}
                   </Button>
                 }
@@ -1231,11 +1231,11 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                 ) : (
                   <div className="space-y-3">
                     {templates.map((template) => (
-                      <div key={template.id} className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <div key={template.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-zinc-950">{template.name}</p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                            <p className="text-sm font-black text-brand-ink">{template.name}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                               {humanizeEnum(template.serviceType)}
                               {template.roomTypeName ? ` · ${template.roomTypeName}` : ''}
                             </p>
@@ -1243,12 +1243,12 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           <button
                             type="button"
                             onClick={() => openEditTemplateModal(template)}
-                            className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700"
+                            className="rounded-full border border-brand-surface-border bg-white px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'editStaff', 'Edit')}
                           </button>
                         </div>
-                        <p className="mt-3 text-sm font-medium text-zinc-600">
+                        <p className="mt-3 text-sm font-medium text-brand-ink-muted">
                           {translateWithFallback(
                             t,
                             'inventoryPage.templateItemCountCopy',
@@ -1273,21 +1273,21 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                 {summary?.recentUsageRecords?.length ? (
                   <div className="space-y-3">
                     {summary.recentUsageRecords.slice(0, 6).map((record) => (
-                      <div key={record.id} className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <div key={record.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-zinc-950">
+                            <p className="text-sm font-black text-brand-ink">
                               {record.roomNumber ? `Room ${record.roomNumber}` : translateWithFallback(t, 'inventoryPage.generalUsageLabel', 'General service')}
                             </p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                               {humanizeEnum(record.serviceType)}
                             </p>
                           </div>
-                          <p className="text-sm font-black text-zinc-950">
+                          <p className="text-sm font-black text-brand-ink">
                             {formatLocalizedCurrency(record.totalCost, language)}
                           </p>
                         </div>
-                        <p className="mt-3 text-sm font-medium text-zinc-600">
+                        <p className="mt-3 text-sm font-medium text-brand-ink-muted">
                           {formatLocalizedDateTime(record.performedAt, language)}
                         </p>
                       </div>
@@ -1319,19 +1319,19 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                 {summary?.recentTransactions?.length ? (
                   <div className="space-y-3">
                     {summary.recentTransactions.slice(0, 8).map((transaction) => (
-                      <div key={transaction.id} className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <div key={transaction.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-zinc-950">{transaction.itemName}</p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                            <p className="text-sm font-black text-brand-ink">{transaction.itemName}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                               {humanizeEnum(transaction.transactionType)}
                             </p>
                           </div>
-                          <p className="text-sm font-black text-zinc-950">
+                          <p className="text-sm font-black text-brand-ink">
                             {formatLocalizedNumber(transaction.quantityChange, language)}
                           </p>
                         </div>
-                        <p className="mt-2 text-sm font-medium text-zinc-600">
+                        <p className="mt-2 text-sm font-medium text-brand-ink-muted">
                           {formatLocalizedDateTime(transaction.occurredAt, language)}
                         </p>
                       </div>
@@ -1359,8 +1359,8 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                 )}
               >
                 <div className="space-y-6">
-                  <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
-                    <p className="text-sm font-black text-zinc-950">
+                  <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                    <p className="text-sm font-black text-brand-ink">
                       {translateWithFallback(t, 'inventoryPage.categoryUsageTitle', 'Usage by category')}
                     </p>
                     <div className="mt-4">
@@ -1375,18 +1375,18 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           valueFormatter={(val) => formatLocalizedCurrency(val, language)}
                           layout="vertical"
                           height={220}
-                          colors={['#0f766e', '#0369a1', '#be123c', '#4338ca', '#b45309']}
+                          colors={['#264B6B', '#264B6B', '#A32D2D', '#264B6B', '#BA7517']}
                         />
                       ) : (
-                        <div className="py-8 text-center text-sm font-medium text-zinc-500">
+                        <div className="py-8 text-center text-sm font-medium text-brand-ink-muted">
                           {translateWithFallback(t, 'inventoryPage.noCategoryData', 'No category data available.')}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
-                    <p className="text-sm font-black text-zinc-950">
+                  <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                    <p className="text-sm font-black text-brand-ink">
                       {translateWithFallback(t, 'inventoryPage.serviceUsageTitle', 'Usage by service type')}
                     </p>
                     <div className="mt-4">
@@ -1401,10 +1401,10 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           valueFormatter={(val) => formatLocalizedCurrency(val, language)}
                           layout="horizontal"
                           height={220}
-                          colors={['#0369a1', '#0f766e', '#b45309', '#4338ca', '#be123c']}
+                          colors={['#264B6B', '#264B6B', '#BA7517', '#264B6B', '#A32D2D']}
                         />
                       ) : (
-                        <div className="py-8 text-center text-sm font-medium text-zinc-500">
+                        <div className="py-8 text-center text-sm font-medium text-brand-ink-muted">
                           {translateWithFallback(t, 'inventoryPage.noServiceData', 'No service data available.')}
                         </div>
                       )}

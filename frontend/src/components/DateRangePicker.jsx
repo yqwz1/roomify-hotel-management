@@ -56,7 +56,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
             {/* Check-In */}
             <div className="flex flex-col gap-1">
-                <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+                <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-brand-ink-muted">
                     {t('checkInLabel')}
                 </label>
                 <Popover>
@@ -65,7 +65,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                             id="check-in-date"
                             variant={"outline"}
                             className={cn(
-                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-black hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
                                 !checkIn && "text-muted-foreground"
                             )}
                         >
@@ -86,11 +86,11 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             </div>
 
             {/* Arrow separator */}
-            <span className="hidden self-center text-zinc-300 sm:block mb-3" aria-hidden="true">→</span>
+            <span className="hidden self-center text-brand-ink-hint sm:block mb-3" aria-hidden="true">→</span>
 
             {/* Check-Out */}
             <div className="flex flex-col gap-1">
-                <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+                <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-brand-ink-muted">
                     {t('checkOutLabel')}
                 </label>
                 <Popover>
@@ -99,8 +99,8 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                             id="check-out-date"
                             variant={"outline"}
                             className={cn(
-                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-black hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
-                                isInvalid && "border-red-400 focus:border-red-400 focus:ring-red-200",
+                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                isInvalid && "border-brand-danger focus:border-brand-danger focus:ring-brand-danger/20",
                                 !checkOut && "text-muted-foreground"
                             )}
                         >
@@ -122,7 +122,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
 
             {/* Validation message */}
             {isInvalid && (
-                <p className="text-xs font-medium text-red-600 sm:self-end sm:pb-2" role="alert">
+                <p className="text-xs font-medium text-brand-danger sm:self-end sm:pb-2" role="alert">
                     {t('checkoutAfterCheckin')}
                 </p>
             )}

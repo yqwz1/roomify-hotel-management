@@ -17,7 +17,7 @@ export default function ErrorBanner({ message, onClose }) {
     return (
         <div
             role="alert"
-            className="flex items-center gap-3 rounded-full border border-red-200 bg-white px-5 py-3 text-black shadow-sm"
+            className="flex items-center gap-3 rounded-full border border-brand-danger/30 bg-white px-5 py-3 text-brand-ink shadow-sm"
         >
             {/* Icon */}
             <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">⚠️</span>
@@ -30,7 +30,7 @@ export default function ErrorBanner({ message, onClose }) {
                 <button
                     onClick={onClose}
                     aria-label={t('dismissError')}
-                    className="shrink-0 rounded-full p-1 text-red-500 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+                    className="shrink-0 rounded-full p-1 text-brand-danger transition hover:bg-brand-danger/10 hover:text-brand-danger focus:outline-none focus:ring-2 focus:ring-brand-danger/40"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path

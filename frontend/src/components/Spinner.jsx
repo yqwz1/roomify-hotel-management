@@ -19,7 +19,7 @@ const Spinner = ({ size = 'md', className = '' }) => {
     return (
         <div className={`flex justify-center items-center ${className}`}>
             <div
-                className={`${spinnerSize} border-blue-600 border-t-transparent rounded-full animate-spin`}
+                className={`${spinnerSize} border-brand-primary border-t-transparent rounded-full animate-spin`}
                 role="status"
                 aria-label={t('loadingLabel')}
             >

@@ -30,13 +30,13 @@ const FRONT_DESK_LINK = `mailto:${FRONT_DESK_EMAIL}?subject=Roomify%20Front%20De
 
 function SearchSkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
-      <div className="h-40 bg-zinc-100" />
+    <div className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
+      <div className="h-40 bg-brand-primary-tint" />
       <div className="space-y-4 p-5">
-        <div className="h-5 w-1/2 rounded-full bg-zinc-200" />
-        <div className="h-4 w-2/3 rounded-full bg-zinc-100" />
-        <div className="h-4 w-1/3 rounded-full bg-zinc-100" />
-        <div className="h-12 rounded-full bg-zinc-200" />
+        <div className="h-5 w-1/2 rounded-full bg-brand-surface-border" />
+        <div className="h-4 w-2/3 rounded-full bg-brand-primary-tint" />
+        <div className="h-4 w-1/3 rounded-full bg-brand-primary-tint" />
+        <div className="h-12 rounded-full bg-brand-surface-border" />
       </div>
     </div>
   );
@@ -168,7 +168,7 @@ export default function RoomSearch() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.snapshotTitle`)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -202,13 +202,13 @@ export default function RoomSearch() {
           >
             <div className="space-y-5">
               {error && (
-                <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                   <div className="flex items-start justify-between gap-3">
                     <span>{error}</span>
                     <button
                       type="button"
                       onClick={clearError}
-                      className="text-xs font-bold uppercase tracking-[0.18em] text-rose-800"
+                      className="text-xs font-bold uppercase tracking-[0.18em] text-brand-danger"
                     >
                       {t('dismissError')}
                     </button>
@@ -226,7 +226,7 @@ export default function RoomSearch() {
               <div className="space-y-2">
                 <label
                   htmlFor="room-search-sort"
-                  className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
+                  className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint"
                 >
                   {t(`${pageTx}.sortResults`)}
                 </label>
@@ -234,7 +234,7 @@ export default function RoomSearch() {
                   id="room-search-sort"
                   value={sortOptionIndex}
                   onChange={(event) => setSortOptionIndex(Number(event.target.value))}
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
                   {sortOptions.map((option, index) => (
                     <option key={`${option.sortBy}-${option.sortDirection}`} value={index}>
@@ -248,7 +248,7 @@ export default function RoomSearch() {
                 type="button"
                 onClick={handleSearch}
                 disabled={loading || !checkIn || !checkOut || checkOut <= checkIn}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
               >
                 <Search className="h-4 w-4" />
                 {loading
@@ -280,17 +280,17 @@ export default function RoomSearch() {
             }
             action={
               hasSearched && results.length > 0 ? (
-                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
                   {t(`${pageTx}.stayBadge`, { count: nights })}
                 </span>
               ) : null
             }
           >
             {!hasSearched && !loading && (
-              <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-                <CalendarRange className="mx-auto h-10 w-10 text-zinc-400" />
-                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.readyTitle`)}</p>
-                <p className="mt-2 text-sm font-medium text-zinc-500">
+              <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+                <CalendarRange className="mx-auto h-10 w-10 text-brand-ink-hint" />
+                <p className="mt-4 text-lg font-black text-brand-ink">{t(`${pageTx}.readyTitle`)}</p>
+                <p className="mt-2 text-sm font-medium text-brand-ink-muted">
                   {t(`${pageTx}.readyDescription`)}
                 </p>
               </div>
@@ -305,10 +305,10 @@ export default function RoomSearch() {
             )}
 
             {!loading && hasSearched && results.length === 0 && !error && (
-              <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-                <SlidersHorizontal className="mx-auto h-10 w-10 text-zinc-400" />
-                <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.unavailableTitle`)}</p>
-                <p className="mt-2 text-sm font-medium text-zinc-500">
+              <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+                <SlidersHorizontal className="mx-auto h-10 w-10 text-brand-ink-hint" />
+                <p className="mt-4 text-lg font-black text-brand-ink">{t(`${pageTx}.unavailableTitle`)}</p>
+                <p className="mt-2 text-sm font-medium text-brand-ink-muted">
                   {t(`${pageTx}.unavailableDescription`)}
                 </p>
               </div>
@@ -329,19 +329,19 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="rounded-[1.35rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-zinc-300"
+                      className="rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
                     >
                       <div className="space-y-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex min-w-0 items-start gap-3">
-                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 text-white">
+                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white">
                               <BedDouble className="h-5 w-5" />
                             </span>
                             <div className="min-w-0">
-                              <p className="text-xl font-black tracking-tight text-zinc-950">
+                              <p className="text-xl font-black tracking-tight text-brand-ink">
                                 {t('roomNumber', { number: room.roomNumber })}
                               </p>
-                              <p className="mt-1 text-sm font-medium text-zinc-500">
+                              <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                                 {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
                                 {room.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                               </p>
@@ -357,7 +357,7 @@ export default function RoomSearch() {
                         </div>
 
                         {room.roomType?.description && (
-                          <p className="text-sm font-medium leading-6 text-zinc-500">
+                          <p className="text-sm font-medium leading-6 text-brand-ink-muted">
                             {room.roomType.description}
                           </p>
                         )}
@@ -366,47 +366,47 @@ export default function RoomSearch() {
                           {amenities.slice(0, 3).map((amenity) => (
                             <span
                               key={amenity}
-                              className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
+                              className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
                             >
                               {translateKnownValue(amenity, t)}
                             </span>
                           ))}
                           {amenities.length > 3 && (
-                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600">
+                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted">
                               {t(`${pageTx}.moreAmenities`, { count: amenities.length - 3 })}
                             </span>
                           )}
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-3">
-                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                               {t(`${pageTx}.rateLabel`)}
                             </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
+                            <p className="mt-2 text-sm font-bold text-brand-ink">
                               {formatLocalizedCurrency(basePrice, i18n.language)} / {t('perNight')}
                             </p>
                           </div>
-                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                               {t(`${pageTx}.capacityLabel`)}
                             </p>
-                            <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
-                              <Users className="h-4 w-4 text-zinc-400" />
+                            <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
+                              <Users className="h-4 w-4 text-brand-ink-hint" />
                               {t('upToGuests', { count: room.roomType?.maxGuests ?? '-' })}
                             </p>
                           </div>
-                          <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                               {t('common.stayTotal')}
                             </p>
-                            <p className="mt-2 text-sm font-bold text-zinc-950">
+                            <p className="mt-2 text-sm font-bold text-brand-ink">
                               {formatLocalizedCurrency(totalCost, i18n.language)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 border-t border-zinc-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
+                        <div className="flex flex-col gap-3 border-t border-brand-surface-border pt-4 sm:flex-row sm:items-center sm:justify-end">
                           {cardActions.map((action) => (
                             <button
                               key={action.id}
@@ -414,8 +414,8 @@ export default function RoomSearch() {
                               onClick={() => handleCardAction(action.id, room)}
                               className={
                                 action.tone === 'secondary'
-                                  ? 'inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-300 hover:bg-zinc-50'
-                                  : 'inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800'
+                                  ? 'inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light'
+                                  : 'inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep'
                               }
                             >
                               {t(action.labelKey)}
@@ -425,7 +425,7 @@ export default function RoomSearch() {
                         </div>
 
                         {isGuest && (
-                          <p className="border-t border-zinc-100 pt-4 text-sm font-medium leading-6 text-zinc-500">
+                          <p className="border-t border-brand-surface-border pt-4 text-sm font-medium leading-6 text-brand-ink-muted">
                             {t(`${pageTx}.guestCtaNote`)}
                           </p>
                         )}

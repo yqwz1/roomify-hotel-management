@@ -70,14 +70,14 @@ const buildDataSummaryCards = ({ dataSummary, summary }) => [
       ? `${formatNumber(dataSummary.payments)} payments included in the analytics dataset.`
       : 'Reservation count from Spring Boot analytics.',
     icon: CalendarDays,
-    className: 'border-sky-200 bg-sky-50/85 text-sky-950',
+    className: 'border-brand-primary/40 bg-brand-primary/20 text-brand-ink',
   },
   {
     label: 'Revenue',
     value: formatCurrency(dataSummary?.totalRevenue),
     hint: formatDateRange(dataSummary?.dateRangeStart, dataSummary?.dateRangeEnd),
     icon: WalletCards,
-    className: 'border-amber-200 bg-amber-50/85 text-amber-950',
+    className: 'border-brand-accent-gold/45 bg-brand-accent-gold/20 text-brand-ink',
   },
   {
     label: 'Occupancy',
@@ -86,7 +86,7 @@ const buildDataSummaryCards = ({ dataSummary, summary }) => [
       ? 'Current occupancy from the finance summary endpoint.'
       : 'Average occupancy across the analytics dataset.',
     icon: Gauge,
-    className: 'border-cyan-200 bg-cyan-50/85 text-cyan-950',
+    className: 'border-brand-primary-deep/40 bg-brand-primary-deep/20 text-brand-ink',
   },
   {
     label: 'Expenses',
@@ -95,21 +95,21 @@ const buildDataSummaryCards = ({ dataSummary, summary }) => [
       ? `${formatCurrency(summary.netProfit)} net profit after expenses.`
       : 'Expense total from the finance summary endpoint.',
     icon: Receipt,
-    className: 'border-rose-200 bg-rose-50/85 text-rose-950',
+    className: 'border-brand-accent-terracotta/40 bg-brand-accent-terracotta/20 text-brand-ink',
   },
   {
     label: 'Room Types',
     value: formatNumber(dataSummary?.roomTypes),
     hint: 'Room-type count available to AI Finance analytics.',
     icon: BedDouble,
-    className: 'border-violet-200 bg-violet-50/85 text-violet-950',
+    className: 'border-brand-primary/40 bg-brand-primary/20 text-brand-ink',
   },
   {
     label: 'Top Room Type',
     value: summary?.topRoomType || UNAVAILABLE,
     hint: 'Top-performing room type from the summary endpoint.',
     icon: Hotel,
-    className: 'border-emerald-200 bg-emerald-50/85 text-emerald-950',
+    className: 'border-brand-success/40 bg-brand-success/20 text-brand-ink',
   },
 ];
 
@@ -153,18 +153,18 @@ function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
 
 function DataSummarySkeletonCard() {
   return (
-    <Card className="rounded-[1.5rem] border border-zinc-200 bg-white p-0 shadow-sm">
+    <Card className="rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1 animate-pulse">
-            <div className="h-3 w-24 rounded-full bg-zinc-200" />
-            <div className="mt-4 h-8 w-28 rounded-xl bg-zinc-200" />
+            <div className="h-3 w-24 rounded-full bg-brand-surface-border" />
+            <div className="mt-4 h-8 w-28 rounded-xl bg-brand-surface-border" />
             <div className="mt-4 space-y-2">
-              <div className="h-3 w-full rounded-full bg-zinc-100" />
-              <div className="h-3 w-3/4 rounded-full bg-zinc-100" />
+              <div className="h-3 w-full rounded-full bg-brand-primary-tint" />
+              <div className="h-3 w-3/4 rounded-full bg-brand-primary-tint" />
             </div>
           </div>
-          <div className="h-11 w-11 flex-shrink-0 animate-pulse rounded-2xl bg-zinc-100" />
+          <div className="h-11 w-11 flex-shrink-0 animate-pulse rounded-2xl bg-brand-primary-tint" />
         </div>
       </CardContent>
     </Card>
@@ -210,12 +210,12 @@ function ForecastMetricSkeletons() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <Card key={`forecast-skeleton-${index}`} className="rounded-[1.35rem] border border-zinc-200 bg-white p-0 shadow-sm">
+        <Card key={`forecast-skeleton-${index}`} className="rounded-[1.35rem] border border-brand-surface-border bg-white p-0 shadow-sm">
           <CardContent className="p-5">
             <div className="animate-pulse">
-              <div className="h-3 w-28 rounded-full bg-zinc-200" />
-              <div className="mt-4 h-8 w-32 rounded-xl bg-zinc-200" />
-              <div className="mt-4 h-3 w-3/4 rounded-full bg-zinc-100" />
+              <div className="h-3 w-28 rounded-full bg-brand-surface-border" />
+              <div className="mt-4 h-8 w-32 rounded-xl bg-brand-surface-border" />
+              <div className="mt-4 h-3 w-3/4 rounded-full bg-brand-primary-tint" />
             </div>
           </CardContent>
         </Card>
@@ -300,7 +300,7 @@ function AiFinanceContent() {
         description="Live finance and demand metrics from Spring Boot AI Finance endpoints."
       >
         {error && hasSummaryData ? (
-          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+          <div className="mb-4 rounded-2xl border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm font-medium text-brand-warning">
             Some AI Finance data could not be refreshed. Showing the backend values that loaded successfully.
           </div>
         ) : null}
@@ -342,21 +342,21 @@ function AiFinanceContent() {
                   label={`Predicted Revenue Next ${revenueForecast.forecastDays || 30} Days`}
                   value={formatCurrency(revenueForecast.predictedRevenueTotal)}
                   hint={revenueForecast.source || 'Spring Boot AI Finance forecast'}
-                  className="border-emerald-200 bg-emerald-50/85 text-emerald-950"
+                  className="border-brand-success/30 bg-brand-success/10 text-brand-ink"
                 />
                 <ForecastMetricCard
                   icon={Percent}
                   label="Predicted Average Occupancy"
                   value={formatPercent(revenueForecast.predictedAverageOccupancy)}
                   hint="Future average occupancy from the forecast payload."
-                  className="border-cyan-200 bg-cyan-50/85 text-cyan-950"
+                  className="border-brand-primary/40 bg-brand-primary/20 text-brand-ink"
                 />
                 <ForecastMetricCard
                   icon={Gauge}
                   label="Confidence"
                   value={formatConfidence(revenueForecast.confidence)}
                   hint="Model confidence reported by the Spring endpoint."
-                  className="border-violet-200 bg-violet-50/85 text-violet-950"
+                  className="border-brand-primary-deep/40 bg-brand-primary-deep/20 text-brand-ink"
                 />
               </div>
               <ForecastChart
@@ -369,8 +369,8 @@ function AiFinanceContent() {
                 emptyMessage="No forecast revenue points were returned by the AI Finance endpoint."
                 loading={false}
                 error={null}
-                accentClassName="text-emerald-700"
-                strokeColor="#059669"
+                accentClassName="text-brand-success"
+                strokeColor="#1D9E75"
                 fillColor="rgba(5, 150, 105, 0.14)"
               />
             </>
@@ -392,8 +392,8 @@ function AiFinanceContent() {
             emptyMessage="No historical revenue points were returned for the selected analytics window."
             loading={loading}
             error={revenueTrendError}
-            accentClassName="text-zinc-700"
-            strokeColor="#52525b"
+            accentClassName="text-brand-ink"
+            strokeColor="#5C6B7A"
             fillColor="rgba(82, 82, 91, 0.12)"
           />
         </div>
@@ -426,21 +426,21 @@ function AiFinanceContent() {
                   label="Predicted Average Occupancy"
                   value={formatPercent(revenueForecast.predictedAverageOccupancy)}
                   hint={`Next ${revenueForecast.forecastDays || 30} days`}
-                  className="border-sky-200 bg-sky-50/85 text-sky-950"
+                  className="border-brand-primary/40 bg-brand-primary/20 text-brand-ink"
                 />
                 <ForecastMetricCard
                   icon={Gauge}
                   label="Confidence"
                   value={formatConfidence(revenueForecast.confidence)}
                   hint={revenueForecast.source || 'Spring Boot AI Finance forecast'}
-                  className="border-violet-200 bg-violet-50/85 text-violet-950"
+                  className="border-brand-primary-deep/40 bg-brand-primary-deep/20 text-brand-ink"
                 />
                 <ForecastMetricCard
                   icon={LineChart}
                   label="Forecast Points"
                   value={formatNumber(forecastPoints.length)}
                   hint="Daily future occupancy points loaded."
-                  className="border-cyan-200 bg-cyan-50/85 text-cyan-950"
+                  className="border-brand-primary/40 bg-brand-primary/20 text-brand-ink"
                 />
               </div>
               <ForecastChart
@@ -453,8 +453,8 @@ function AiFinanceContent() {
                 emptyMessage="No forecast occupancy points were returned by the AI Finance endpoint."
                 loading={false}
                 error={null}
-                accentClassName="text-sky-700"
-                strokeColor="#0284c7"
+                accentClassName="text-brand-primary"
+                strokeColor="#35658D"
                 fillColor="rgba(2, 132, 199, 0.14)"
               />
             </>
@@ -476,8 +476,8 @@ function AiFinanceContent() {
             emptyMessage="No historical occupancy points were returned for the selected analytics window."
             loading={loading}
             error={occupancyTrendError}
-            accentClassName="text-zinc-700"
-            strokeColor="#52525b"
+            accentClassName="text-brand-ink"
+            strokeColor="#5C6B7A"
             fillColor="rgba(82, 82, 91, 0.12)"
           />
         </div>
@@ -494,7 +494,7 @@ function AiFinanceContent() {
               source={pricingRecommendationsResponse?.source}
             />
           ) : null}
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium leading-6 text-zinc-700">
+          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium leading-6 text-brand-ink">
             Recommendations are advisory only. Managers review them manually; this screen does not
             apply price changes.
           </div>
@@ -548,11 +548,11 @@ export default function AiFinanceDashboard() {
         eyebrow="Header"
         title="AI Revenue Forecasting & Pricing Advisor"
         description="Manager workspace for revenue projections, occupancy demand signals, pricing recommendations, and AI finance insights."
-        className="border-cyan-400/10 bg-[linear-gradient(135deg,#111827_0%,#0f766e_52%,#164e63_100%)]"
+        className="border-brand-primary/10 bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_52%,#264B6B_100%)]"
         meta={['Manager only', 'Spring Boot AI bridge', 'Fallback ready']}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             Advisor Snapshot
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

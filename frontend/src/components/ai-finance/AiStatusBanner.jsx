@@ -15,33 +15,33 @@ const STATUS_CONFIG = {
   ONLINE: {
     label: 'Online',
     icon: CheckCircle2,
-    badgeClassName: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    dotClassName: 'bg-emerald-500',
-    panelClassName: 'border-emerald-200 bg-emerald-50/70',
+    badgeClassName: 'border-brand-success/30 bg-brand-success/10 text-brand-success',
+    dotClassName: 'bg-brand-success',
+    panelClassName: 'border-brand-success/30 bg-brand-success/10',
     defaultMessage: 'AI model metadata is available through Spring Boot.',
   },
   OFFLINE: {
     label: 'Offline',
     icon: WifiOff,
-    badgeClassName: 'border-rose-200 bg-rose-50 text-rose-800',
-    dotClassName: 'bg-rose-500',
-    panelClassName: 'border-rose-200 bg-rose-50/70',
+    badgeClassName: 'border-brand-danger/30 bg-brand-danger/10 text-brand-danger',
+    dotClassName: 'bg-brand-danger',
+    panelClassName: 'border-brand-danger/30 bg-brand-danger/10',
     defaultMessage: 'The AI service is offline. Spring Boot will return an unavailable state or safe fallback payloads.',
   },
   SAFE_DEMO_FALLBACK: {
     label: 'Safe Demo Fallback',
     icon: ShieldCheck,
-    badgeClassName: 'border-amber-200 bg-amber-50 text-amber-800',
-    dotClassName: 'bg-amber-500',
-    panelClassName: 'border-amber-200 bg-amber-50/70',
+    badgeClassName: 'border-brand-warning/30 bg-brand-warning/10 text-brand-warning',
+    dotClassName: 'bg-brand-warning',
+    panelClassName: 'border-brand-warning/30 bg-brand-warning/10',
     defaultMessage: 'Spring Boot reports fallback mode, so demo-safe AI responses may be shown.',
   },
   PENDING: {
     label: 'Pending',
     icon: Clock3,
-    badgeClassName: 'border-sky-200 bg-sky-50 text-sky-800',
-    dotClassName: 'bg-sky-500',
-    panelClassName: 'border-sky-200 bg-sky-50/70',
+    badgeClassName: 'border-brand-primary bg-brand-primary text-brand-primary',
+    dotClassName: 'bg-brand-primary',
+    panelClassName: 'border-brand-primary bg-brand-primary/70',
     defaultMessage: 'Loading AI service status and model metadata through Spring Boot.',
   },
 };
@@ -132,12 +132,12 @@ export default function AiStatusBanner({
       <CardHeader className="gap-4 p-5 pb-0">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 items-start gap-4">
-            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
               <StatusIcon className="h-5 w-5" />
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-lg font-black tracking-tight text-zinc-950">
+                <CardTitle className="text-lg font-black tracking-tight text-brand-ink">
                   AI Service Status
                 </CardTitle>
                 <Badge
@@ -148,12 +148,12 @@ export default function AiStatusBanner({
                   {statusConfig.label}
                 </Badge>
               </div>
-              <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-zinc-700">
+              <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-brand-ink">
                 {statusMessage}
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="w-fit rounded-full border-zinc-200 bg-white px-3 py-1 text-zinc-600">
+          <Badge variant="outline" className="w-fit rounded-full border-brand-surface-border bg-white px-3 py-1 text-brand-ink-muted">
             Source: {source || 'Spring Boot'}
           </Badge>
         </div>
@@ -163,18 +163,18 @@ export default function AiStatusBanner({
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {metrics.map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-zinc-500">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
                 <Icon className="h-4 w-4" />
                 {label}
               </div>
-              <p className="mt-2 break-words text-lg font-black text-zinc-950">{value}</p>
+              <p className="mt-2 break-words text-lg font-black text-brand-ink">{value}</p>
             </div>
           ))}
         </div>
 
         {status !== 'ONLINE' ? (
-          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium leading-6 text-zinc-700">
-            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium leading-6 text-brand-ink">
+            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-warning" />
             <span>
               React uses Spring Boot as the integration boundary. It does not call FastAPI or
               external AI APIs directly.

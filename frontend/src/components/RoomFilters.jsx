@@ -28,7 +28,7 @@ function FilterField({ id, label, children }) {
     <div className="space-y-2 flex flex-col">
       <label
         htmlFor={id}
-        className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
+        className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint"
       >
         {label}
       </label>
@@ -77,20 +77,20 @@ export default function RoomFilters({
   });
 
   const inputClassName =
-    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5';
+    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5';
 
   return (
     <section className="rounded-[1.75rem] border border-black/5 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]">
-      <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-col gap-3 border-b border-brand-surface-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 text-white">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary text-white">
             <SlidersHorizontal className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="text-lg font-black tracking-tight text-zinc-950">
+            <h3 className="text-lg font-black tracking-tight text-brand-ink">
               {t('filters')}
             </h3>
-            <p className="mt-1 text-sm font-medium text-zinc-500">
+            <p className="mt-1 text-sm font-medium text-brand-ink-muted">
               {t('filtersDescription')}
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function RoomFilters({
           type="button"
           onClick={onClear}
           disabled={!hasActiveFilters}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 h-auto"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint h-auto"
         >
           <X className="h-4 w-4" />
           {t('clearFilters')}
@@ -113,7 +113,7 @@ export default function RoomFilters({
           {showRoomSearch && (
             <FilterField id="filter-room-name" label={t('roomNameSearchLabel')}>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
                 <Input
                   id="filter-room-name"
                   type="search"

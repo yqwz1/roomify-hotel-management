@@ -14,7 +14,7 @@ export default function DashboardHero({
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-6 py-7 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:px-8 sm:py-8',
+        'relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_52%,#1A2B3A_100%)] px-6 py-7 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:px-8 sm:py-8',
         className
       )}
     >
@@ -23,7 +23,7 @@ export default function DashboardHero({
       <div className={cn('relative flex flex-col gap-6 xl:flex-row xl:justify-between', desktopAlignClass)}>
         <div className="max-w-3xl">
           {eyebrow && (
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-white/65">
               {eyebrow}
             </p>
           )}
@@ -31,7 +31,7 @@ export default function DashboardHero({
           <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 max-w-2xl text-base font-medium leading-7 text-zinc-300 sm:text-[1.15rem]">
+          <p className="mt-3 max-w-2xl text-base font-medium leading-7 text-white/80 sm:text-[1.15rem]">
             {description}
           </p>
 
@@ -40,7 +40,7 @@ export default function DashboardHero({
               {meta.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-100 backdrop-blur"
+                  className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur"
                 >
                   {item}
                 </span>

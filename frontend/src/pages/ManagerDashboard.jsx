@@ -54,110 +54,116 @@ const EXPORTABLE_STATUSES = [
   'CANCELLED',
 ];
 
+// Unified card design across all tinted cards on the dashboard:
+//   - Background tint at /20 — visible color identity, not pale, not solid
+//   - Border at /40 — defined edge
+//   - ALL text uses brand-ink (label/value/hint) — guaranteed readable on every tint
+//   - Icon container: white circle with the accent color — picks up the tint hue
+// The differentiation between metrics comes from the HUE only, not from text colour.
 const METRIC_THEMES = {
   reservations: {
-    card: 'border-sky-200 bg-sky-50/80',
-    icon: 'bg-white text-sky-900 shadow-sm',
-    badge: 'border-sky-200 bg-white/80 text-sky-900',
-    value: 'text-sky-950',
-    hint: 'text-sky-900/75',
+    card: 'border-brand-primary/40 bg-brand-primary/20',
+    icon: 'bg-white text-brand-primary shadow-sm',
+    badge: 'border-brand-primary/40 bg-white/85 text-brand-primary',
+    value: 'text-brand-ink',
+    hint: 'text-brand-ink-muted',
   },
   active: {
-    card: 'border-brand-success/30 bg-brand-success/10',
+    card: 'border-brand-success/40 bg-brand-success/20',
     icon: 'bg-white text-brand-success shadow-sm',
-    badge: 'border-brand-success/30 bg-white/80 text-brand-success',
+    badge: 'border-brand-success/40 bg-white/85 text-brand-success',
     value: 'text-brand-ink',
-    hint: 'text-brand-success/75',
+    hint: 'text-brand-ink-muted',
   },
   revenue: {
-    card: 'border-brand-warning/30 bg-brand-warning/10',
+    card: 'border-brand-accent-gold/45 bg-brand-accent-gold/20',
     icon: 'bg-white text-brand-warning shadow-sm',
-    badge: 'border-brand-warning/30 bg-white/80 text-brand-warning',
+    badge: 'border-brand-accent-gold/45 bg-white/85 text-brand-warning',
     value: 'text-brand-ink',
-    hint: 'text-brand-warning/75',
+    hint: 'text-brand-ink-muted',
   },
   occupancy: {
-    card: 'border-indigo-200 bg-indigo-50/85',
-    icon: 'bg-white text-indigo-900 shadow-sm',
-    badge: 'border-indigo-200 bg-white/80 text-indigo-900',
-    value: 'text-indigo-950',
-    hint: 'text-indigo-900/75',
+    card: 'border-brand-primary-deep/40 bg-brand-primary-deep/20',
+    icon: 'bg-white text-brand-primary-deep shadow-sm',
+    badge: 'border-brand-primary-deep/40 bg-white/85 text-brand-primary-deep',
+    value: 'text-brand-ink',
+    hint: 'text-brand-ink-muted',
   },
   stay: {
-    card: 'border-brand-danger/30 bg-brand-danger/10',
-    icon: 'bg-white text-brand-danger shadow-sm',
-    badge: 'border-brand-danger/30 bg-white/80 text-brand-danger',
+    card: 'border-brand-accent-terracotta/40 bg-brand-accent-terracotta/20',
+    icon: 'bg-white text-brand-accent-terracotta shadow-sm',
+    badge: 'border-brand-accent-terracotta/40 bg-white/85 text-brand-accent-terracotta',
     value: 'text-brand-ink',
-    hint: 'text-brand-danger/75',
+    hint: 'text-brand-ink-muted',
   },
 };
 
 const SIGNAL_THEMES = {
   emerald: {
-    card: 'border-brand-success/30 bg-brand-success/10',
-    icon: 'bg-brand-success/15 text-brand-success',
+    card: 'border-brand-success/40 bg-brand-success/20',
+    icon: 'bg-white text-brand-success shadow-sm',
     eyebrow: 'text-brand-success',
     title: 'text-brand-ink',
-    body: 'text-brand-success/80',
+    body: 'text-brand-ink-muted',
   },
   amber: {
-    card: 'border-brand-warning/30 bg-brand-warning/10',
-    icon: 'bg-brand-warning/15 text-brand-warning',
+    card: 'border-brand-accent-gold/45 bg-brand-accent-gold/20',
+    icon: 'bg-white text-brand-warning shadow-sm',
     eyebrow: 'text-brand-warning',
     title: 'text-brand-ink',
-    body: 'text-brand-warning/80',
+    body: 'text-brand-ink-muted',
   },
   sky: {
-    card: 'border-sky-200 bg-sky-50/85',
-    icon: 'bg-sky-100 text-sky-900',
-    eyebrow: 'text-sky-700',
-    title: 'text-sky-950',
-    body: 'text-sky-900/80',
+    card: 'border-brand-primary/40 bg-brand-primary/20',
+    icon: 'bg-white text-brand-primary shadow-sm',
+    eyebrow: 'text-brand-primary',
+    title: 'text-brand-ink',
+    body: 'text-brand-ink-muted',
   },
   rose: {
-    card: 'border-brand-danger/30 bg-brand-danger/10',
-    icon: 'bg-brand-danger/15 text-brand-danger',
-    eyebrow: 'text-brand-danger',
+    card: 'border-brand-accent-terracotta/40 bg-brand-accent-terracotta/20',
+    icon: 'bg-white text-brand-accent-terracotta shadow-sm',
+    eyebrow: 'text-brand-accent-terracotta',
     title: 'text-brand-ink',
-    body: 'text-brand-danger/80',
+    body: 'text-brand-ink-muted',
   },
 };
 
 const ROOM_TYPE_THEMES = [
   {
-    accent: '#0f766e',
-    card: 'border-brand-success/30 bg-brand-success/10',
-    badge: 'border-brand-success/30 bg-white/85 text-brand-success',
-    progress: 'bg-brand-success/100',
+    accent: '#1D9E75',
+    card: 'border-brand-success/40 bg-brand-success/20',
+    badge: 'border-brand-success/40 bg-white/85 text-brand-success',
+    progress: 'bg-brand-success',
     text: 'text-brand-success',
   },
   {
-    accent: '#0369a1',
-    card: 'border-sky-200 bg-sky-50/85',
-    badge: 'border-sky-200 bg-white/85 text-sky-900',
-    progress: 'bg-sky-500',
-    text: 'text-sky-900',
+    accent: '#35658D',
+    card: 'border-brand-primary/40 bg-brand-primary/20',
+    badge: 'border-brand-primary/40 bg-white/85 text-brand-primary',
+    progress: 'bg-brand-primary',
+    text: 'text-brand-primary',
   },
   {
-    accent: '#b45309',
-    card: 'border-brand-warning/30 bg-brand-warning/10',
-    badge: 'border-brand-warning/30 bg-white/85 text-brand-warning',
-    progress: 'bg-brand-warning/100',
+    accent: '#BA7517',
+    card: 'border-brand-accent-gold/45 bg-brand-accent-gold/20',
+    badge: 'border-brand-accent-gold/45 bg-white/85 text-brand-warning',
+    progress: 'bg-brand-warning',
     text: 'text-brand-warning',
   },
   {
-    accent: '#4338ca',
-    card: 'border-indigo-200 bg-indigo-50/85',
-    badge: 'border-indigo-200 bg-white/85 text-indigo-900',
-    progress: 'bg-indigo-500',
-    text: 'text-indigo-900',
+    accent: '#264B6B',
+    card: 'border-brand-primary-deep/40 bg-brand-primary-deep/20',
+    badge: 'border-brand-primary-deep/40 bg-white/85 text-brand-primary-deep',
+    progress: 'bg-brand-primary-deep',
+    text: 'text-brand-primary-deep',
   },
   {
-    accent: '#be123c',
-    card: 'border-brand-danger/30 bg-brand-danger/10',
-    badge: 'border-brand-danger/30 bg-white/85 text-brand-danger',
-    progress: 'bg-brand-danger/100',
-    text: 'text-brand-danger',
+    accent: '#C97757',
+    card: 'border-brand-accent-terracotta/40 bg-brand-accent-terracotta/20',
+    badge: 'border-brand-accent-terracotta/40 bg-white/85 text-brand-accent-terracotta',
+    progress: 'bg-brand-accent-terracotta',
+    text: 'text-brand-accent-terracotta',
   },
 ];
 
@@ -250,8 +256,6 @@ function PerformanceMetricCard({
         {value}
       </p>
       <p className={cn('mt-2 text-sm font-medium leading-6', styles.hint)}>{hint}</p>
-
-      <div className="pointer-events-none absolute -bottom-10 -end-8 h-28 w-28 rounded-full border-[14px] border-white/50 opacity-60" />
     </div>
   );
 }
@@ -301,7 +305,7 @@ function RangePresetButton({ active, onClick, children }) {
       className={cn(
         'rounded-full border px-4 py-2 text-sm font-bold transition',
         active
-          ? 'border-brand-success/40 bg-brand-success/100 text-white shadow-sm'
+          ? 'border-brand-success/40 bg-brand-success text-white shadow-sm'
           : 'border-brand-surface-border bg-white text-brand-ink hover:border-brand-surface-border hover:bg-brand-surface-light'
       )}
     >
@@ -333,9 +337,9 @@ function InteractiveTrendExplorer({
           `${pageTx}.occupancyTrendDescription`,
           'Day-by-day occupancy returned by the live occupancy trend endpoint.'
         ),
-        accent: '#0f766e',
+        accent: '#264B6B',
         accentSoft: 'rgba(15,118,110,0.14)',
-        accentSurface: 'border-brand-success/30 bg-brand-success/10/70',
+        accentSurface: 'border-brand-success/30 bg-brand-success/10',
         getValue: (point) => Number(point.occupancyRate ?? 0),
         formatValue: (value) => formatPercent(value),
         detailCards: (point) => [
@@ -377,9 +381,9 @@ function InteractiveTrendExplorer({
           `${pageTx}.revenueTrendDescription`,
           'Daily revenue and reservation count returned by the revenue trend endpoint.'
         ),
-        accent: '#b45309',
+        accent: '#BA7517',
         accentSoft: 'rgba(180,83,9,0.16)',
-        accentSurface: 'border-brand-warning/30 bg-brand-warning/10/80',
+        accentSurface: 'border-brand-warning/30 bg-brand-warning/10',
         getValue: (point) => Number(point.revenue ?? 0),
         formatValue: (value) =>
           formatLocalizedCurrency(value, language, {
@@ -450,7 +454,7 @@ function InteractiveTrendExplorer({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]" data-testid="occupancy-trend">
-      <div className="rounded-[1.6rem] border border-brand-surface-border bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+      <div className="rounded-[1.6rem] border border-brand-surface-border bg-[linear-gradient(180deg,#ffffff_0%,#FBF9F4_100%)] p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-lg font-black tracking-tight text-brand-ink">
@@ -472,8 +476,8 @@ function InteractiveTrendExplorer({
                   'rounded-full border px-4 py-2 text-sm font-bold transition',
                   mode === nextMode
                     ? nextMode === 'occupancy'
-                      ? 'border-brand-success/40 bg-brand-success/100 text-white'
-                      : 'border-brand-warning/40 bg-brand-warning/100 text-white'
+                      ? 'border-brand-success/40 bg-brand-success text-white'
+                      : 'border-brand-warning/40 bg-brand-warning text-white'
                     : 'border-brand-surface-border bg-white text-brand-ink hover:border-brand-surface-border hover:bg-brand-surface-light'
                 )}
               >
@@ -644,7 +648,8 @@ function RoomTypeExplorer({
           ))}
         </div>
 
-        <div className="space-y-3">
+        {/* Compact + scrollable list — keeps the panel a fixed height even with many room types */}
+        <div className="max-h-[460px] space-y-2 overflow-y-auto pr-1 [scrollbar-width:thin]">
           {items.map((item, index) => {
             const active = item.roomTypeName === selectedItem.roomTypeName;
             const theme = ROOM_TYPE_THEMES[index % ROOM_TYPE_THEMES.length];
@@ -655,18 +660,18 @@ function RoomTypeExplorer({
                 type="button"
                 onClick={() => onSelectRoomType(item.roomTypeName)}
                 className={cn(
-                  'w-full rounded-[1.45rem] border p-4 text-left transition',
+                  'w-full rounded-2xl border p-3 text-left transition',
                   active
                     ? theme.card
                     : 'border-brand-surface-border bg-brand-surface-light hover:border-brand-surface-border hover:bg-white'
                 )}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-black text-brand-ink">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-brand-ink">
                       {translateKnownValue(item.roomTypeName, t)}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                    <p className="mt-0.5 truncate text-xs font-medium text-brand-ink-muted">
                       {translateWithFallback(
                         t,
                         `${pageTx}.distributionRate`,
@@ -678,12 +683,16 @@ function RoomTypeExplorer({
                           }),
                         }
                       )}
+                      {' · '}
+                      {formatLocalizedNumber(item.occupiedRooms, language)}
+                      {'/'}
+                      {formatLocalizedNumber(item.totalRooms, language)}
                     </p>
                   </div>
 
                   <span
                     className={cn(
-                      'rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em]',
+                      'flex-shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.16em]',
                       active ? theme.badge : 'border-brand-surface-border bg-white text-brand-ink'
                     )}
                   >
@@ -691,32 +700,13 @@ function RoomTypeExplorer({
                   </span>
                 </div>
 
-                <div className="mt-4 h-2 rounded-full bg-white/80">
+                <div className="mt-2.5 h-1.5 rounded-full bg-white/80">
                   <div
-                    className={cn('h-2 rounded-full', theme.progress)}
+                    className={cn('h-1.5 rounded-full', theme.progress)}
                     style={{
                       width: `${Math.max(Number(item.occupancyRate ?? 0) * 100, item.occupiedRooms ? 8 : 0)}%`,
                     }}
                   />
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-sm font-medium text-brand-ink-muted">
-                  <span>
-                    {translateWithFallback(
-                      t,
-                      `${pageTx}.distributionOccupiedRooms`,
-                      'Occupied rooms'
-                    )}
-                    : {formatLocalizedNumber(item.occupiedRooms, language)}
-                  </span>
-                  <span>
-                    {translateWithFallback(
-                      t,
-                      `${pageTx}.distributionTotalRooms`,
-                      'Total rooms'
-                    )}
-                    : {formatLocalizedNumber(item.totalRooms, language)}
-                  </span>
                 </div>
               </button>
             );
@@ -756,77 +746,77 @@ function RoomTypeExplorer({
           </span>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <div className="mx-auto flex w-full items-center justify-center">
-            <RadialStatusChart
-              value={occupiedPercent}
-              max={100}
-              label={translateWithFallback(
+        {/* Radial chart — centered, doesn't squeeze the 4 stat cards below */}
+        <div className="mt-6 flex justify-center">
+          <RadialStatusChart
+            value={occupiedPercent}
+            max={100}
+            label={translateWithFallback(
+              t,
+              `${pageTx}.distributionOccupancyCore`,
+              'Occupancy'
+            )}
+            valueFormatter={(v) => `${v}%`}
+            color={selectedTheme.accent}
+            height={208}
+          />
+        </div>
+
+        {/* 4 stat cards: always 2 cols to avoid label wrapping in narrow xl widths */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+              {translateWithFallback(
                 t,
-                `${pageTx}.distributionOccupancyCore`,
-                'Occupancy'
+                `${pageTx}.distributionTotalRooms`,
+                'Total rooms'
               )}
-              valueFormatter={(v) => `${v}%`}
-              color={selectedTheme.accent}
-              height={208}
-            />
+            </p>
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+              <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
+                {formatLocalizedNumber(selectedItem.totalRooms, language)}
+              </span>
+            </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
-                {translateWithFallback(
-                  t,
-                  `${pageTx}.distributionTotalRooms`,
-                  'Total rooms'
-                )}
-              </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
-                  {formatLocalizedNumber(selectedItem.totalRooms, language)}
-                </span>
-              </p>
-            </div>
+          <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+              {translateWithFallback(
+                t,
+                `${pageTx}.distributionOccupiedRooms`,
+                'Occupied rooms'
+              )}
+            </p>
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+              <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
+                {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
+              </span>
+            </p>
+          </div>
 
-            <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
-                {translateWithFallback(
-                  t,
-                  `${pageTx}.distributionOccupiedRooms`,
-                  'Occupied rooms'
-                )}
-              </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
-                  {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
-                </span>
-              </p>
-            </div>
+          <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+              {translateWithFallback(t, `${pageTx}.distributionVacantRooms`, 'Vacant rooms')}
+            </p>
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+              <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
+                {formatLocalizedNumber(vacantRooms, language)}
+              </span>
+            </p>
+          </div>
 
-            <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
-                {translateWithFallback(t, `${pageTx}.distributionVacantRooms`, 'Vacant rooms')}
-              </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
-                  {formatLocalizedNumber(vacantRooms, language)}
-                </span>
-              </p>
-            </div>
-
-            <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
-                {translateWithFallback(t, `${pageTx}.distributionRateLabel`, 'Base rate')}
-              </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
-                  {formatLocalizedCurrency(selectedItem.basePrice, language, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-              </p>
-            </div>
+          <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+              {translateWithFallback(t, `${pageTx}.distributionRateLabel`, 'Base rate')}
+            </p>
+            <p className="mt-2 text-lg font-black leading-tight tracking-tight text-brand-ink sm:text-xl">
+              <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
+                {formatLocalizedCurrency(selectedItem.basePrice, language, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -1398,7 +1388,6 @@ export default function ManagerDashboard() {
         title={t('managerDashboardTitle')}
         description={t(`${pageTx}.description`, { name: welcomeName })}
         desktopAlign="start"
-        className="border-brand-success/40/10 bg-[linear-gradient(135deg,#0f172a_0%,#0f766e_52%,#072f2a_100%)]"
         meta={[
           t(`${pageTx}.metaRange`, {
             start: formatLocalizedDate(appliedRange.startDate, i18n.language, {
@@ -1746,7 +1735,7 @@ export default function ManagerDashboard() {
         </DashboardPanel>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {metricCards.map((card) => (
           <PerformanceMetricCard key={card.label} {...card} />
         ))}
@@ -1838,7 +1827,8 @@ export default function ManagerDashboard() {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+            {/* 2-col grid; the orphan (when count is odd) stretches to full width */}
+            <div className="grid gap-3 sm:grid-cols-2 [&>*:last-child:nth-child(odd)]:sm:col-span-2">
               {quickActions.map((action) => (
                 <DashboardQuickAction key={action.title} {...action} />
               ))}

@@ -27,9 +27,9 @@ export default function ConfirmationToast({ message, type = 'success', duration 
   if (!message) return null;
 
   const styles = {
-    success: { bar: 'bg-green-500', bg: 'bg-white border-zinc-200', text: 'text-black', icon: 'OK' },
-    error: { bar: 'bg-red-500', bg: 'bg-white border-zinc-200', text: 'text-black', icon: '!' },
-    info: { bar: 'bg-black', bg: 'bg-white border-zinc-200', text: 'text-black', icon: 'i' },
+    success: { bar: 'bg-brand-success', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: 'OK' },
+    error: { bar: 'bg-brand-danger/50', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: '!' },
+    info: { bar: 'bg-black', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: 'i' },
   };
 
   const tone = styles[type] ?? styles.success;
@@ -55,7 +55,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
           type="button"
           onClick={() => onClose?.()}
           aria-label={t('dismissToast')}
-          className="shrink-0 rounded-full p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-zinc-300"
+          className="shrink-0 rounded-full p-1 text-brand-ink-hint transition hover:bg-brand-primary-tint hover:text-black focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
         >
           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path

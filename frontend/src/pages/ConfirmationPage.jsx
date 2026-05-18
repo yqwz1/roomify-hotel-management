@@ -29,16 +29,16 @@ export default function ConfirmationPage() {
 
   if (!reservation) {
     return (
-      <div className="h-full bg-zinc-50 flex flex-col items-center justify-center p-8 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-200">
-          <BedDouble className="h-9 w-9 text-zinc-500" />
+      <div className="h-full bg-brand-surface-light flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm border border-brand-surface-border">
+          <BedDouble className="h-9 w-9 text-brand-ink-muted" />
         </div>
-        <h1 className="mt-6 text-3xl font-extrabold text-black mb-2">{t('noBookingData')}</h1>
-        <p className="text-sm font-medium text-zinc-500 mb-8">{t('completeBookingMsg')}</p>
+        <h1 className="mt-6 text-3xl font-extrabold text-brand-ink mb-2">{t('noBookingData')}</h1>
+        <p className="text-sm font-medium text-brand-ink-muted mb-8">{t('completeBookingMsg')}</p>
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="rounded-full bg-black px-8 py-3 text-sm font-bold text-white transition-all shadow-md hover:shadow-lg hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+          className="rounded-full bg-brand-primary px-8 py-3 text-sm font-bold text-white transition-all shadow-md hover:shadow-lg hover:bg-brand-primary-deep focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
         >
           {t('goToRoomSearch')}
         </button>
@@ -64,11 +64,11 @@ export default function ConfirmationPage() {
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-emerald-600">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-success">
               <CheckCircle2 className="h-6 w-6" />
             </span>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-300">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                 {t('bookingConfirmed')}
               </p>
               <p className="mt-2 text-2xl font-black">
@@ -88,24 +88,24 @@ export default function ConfirmationPage() {
         description={t('bookingRecordedMsg')}
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+          <div className="rounded-2xl bg-brand-surface-light border border-brand-surface-border p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint mb-2">
               {t('guestBadge')}
             </p>
-            <p className="text-lg font-extrabold text-black">{reservation.guestName}</p>
-            <p className="text-sm font-medium text-zinc-500 mt-1">
+            <p className="text-lg font-extrabold text-brand-ink">{reservation.guestName}</p>
+            <p className="text-sm font-medium text-brand-ink-muted mt-1">
               {reservation.guestEmail || t('common.noGuestEmailProvided')}
             </p>
           </div>
 
-          <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+          <div className="rounded-2xl bg-brand-surface-light border border-brand-surface-border p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint mb-2">
               {t('common.room')}
             </p>
-            <p className="text-lg font-extrabold text-black">
+            <p className="text-lg font-extrabold text-brand-ink">
               {t('roomNumber', { number: reservation.roomNumber })}
             </p>
-            <p className="text-sm font-medium text-zinc-500 mt-1">
+            <p className="text-sm font-medium text-brand-ink-muted mt-1">
               {translateKnownValue(room?.roomType?.name ?? reservation.roomTypeName, t)}
             </p>
             {amenities.length > 0 && (
@@ -113,7 +113,7 @@ export default function ConfirmationPage() {
                 {amenities.slice(0, 3).map((amenity) => (
                   <span
                     key={amenity}
-                    className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold text-black shadow-sm"
+                    className="rounded-full border border-brand-surface-border bg-white px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold text-brand-ink shadow-sm"
                   >
                     {translateKnownValue(amenity, t)}
                   </span>
@@ -122,16 +122,16 @@ export default function ConfirmationPage() {
             )}
           </div>
 
-          <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-4">
+          <div className="rounded-2xl bg-brand-surface-light border border-brand-surface-border p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint mb-4">
               {t('stayBadge')}
             </p>
-            <div className="flex flex-col gap-2 text-sm font-medium text-zinc-600">
+            <div className="flex flex-col gap-2 text-sm font-medium text-brand-ink-muted">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">
+                <span className="text-brand-ink-muted uppercase text-[10px] font-bold tracking-widest">
                   {t('checkInLabelBase')}
                 </span>
-                <span className="font-extrabold text-black">
+                <span className="font-extrabold text-brand-ink">
                   {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                     weekday: 'short',
                     year: 'numeric',
@@ -141,10 +141,10 @@ export default function ConfirmationPage() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">
+                <span className="text-brand-ink-muted uppercase text-[10px] font-bold tracking-widest">
                   {t('checkOutLabelBase')}
                 </span>
-                <span className="font-extrabold text-black">
+                <span className="font-extrabold text-brand-ink">
                   {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
                     weekday: 'short',
                     year: 'numeric',
@@ -153,47 +153,47 @@ export default function ConfirmationPage() {
                   })}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-zinc-200 pt-3 mt-1 items-center">
-                <span className="text-black uppercase text-[10px] font-extrabold tracking-widest">
+              <div className="flex justify-between border-t border-brand-surface-border pt-3 mt-1 items-center">
+                <span className="text-brand-ink uppercase text-[10px] font-extrabold tracking-widest">
                   {t('durationStr')}
                 </span>
-                <span className="font-extrabold text-black rounded-full border border-black px-3 py-1 text-xs">
+                <span className="font-extrabold text-brand-ink rounded-full border border-black px-3 py-1 text-xs">
                   {t('nightsCount', { count: reservation.nights })}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-4">
+          <div className="rounded-2xl bg-brand-surface-light border border-brand-surface-border p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint mb-4">
               {t('pricingBadge')}
             </p>
             <div className="flex flex-col gap-2 text-sm font-medium">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">{t('ratePerNight')}</span>
-                <span className="font-bold text-black">
+                <span className="text-brand-ink-muted">{t('ratePerNight')}</span>
+                <span className="font-bold text-brand-ink">
                   {formatLocalizedCurrency(reservation.roomRate, i18n.language)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">{t('nightsLabel')}</span>
-                <span className="font-bold text-black">{reservation.nights}</span>
+                <span className="text-brand-ink-muted">{t('nightsLabel')}</span>
+                <span className="font-bold text-brand-ink">{reservation.nights}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">{t('subtotal')}</span>
-                <span className="font-bold text-black">
+                <span className="text-brand-ink-muted">{t('subtotal')}</span>
+                <span className="font-bold text-brand-ink">
                   {formatLocalizedCurrency(reservation.subtotal, i18n.language)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500">{t('taxes15')}</span>
-                <span className="font-bold text-black">
+                <span className="text-brand-ink-muted">{t('taxes15')}</span>
+                <span className="font-bold text-brand-ink">
                   {formatLocalizedCurrency(reservation.taxes, i18n.language)}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-t border-zinc-200 pt-3 mt-1">
-                <span className="font-bold text-black text-lg">{t('total')}</span>
-                <span className="text-xl font-extrabold text-black">
+              <div className="flex justify-between items-center border-t border-brand-surface-border pt-3 mt-1">
+                <span className="font-bold text-brand-ink text-lg">{t('total')}</span>
+                <span className="text-xl font-extrabold text-brand-ink">
                   {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                 </span>
               </div>
@@ -206,7 +206,7 @@ export default function ConfirmationPage() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 py-4 text-sm font-bold text-black bg-white transition-all shadow-sm hover:shadow-md hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border py-4 text-sm font-bold text-brand-ink bg-white transition-all shadow-sm hover:shadow-md hover:bg-brand-surface-light focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
         >
           <Printer className="h-4 w-4" />
           {t('printConfirmation')}
@@ -214,7 +214,7 @@ export default function ConfirmationPage() {
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 py-4 text-sm font-bold text-black bg-white transition-all shadow-sm hover:shadow-md hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border py-4 text-sm font-bold text-brand-ink bg-white transition-all shadow-sm hover:shadow-md hover:bg-brand-surface-light focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
         >
           <Search className="h-4 w-4" />
           {t('newSearch')}
@@ -222,7 +222,7 @@ export default function ConfirmationPage() {
         <button
           type="button"
           onClick={() => navigate(dashboardPath)}
-          className="flex-1 rounded-full bg-black py-4 text-sm font-extrabold text-white shadow-md transition-all hover:bg-zinc-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-zinc-400"
+          className="flex-1 rounded-full bg-brand-primary py-4 text-sm font-extrabold text-white shadow-md transition-all hover:bg-brand-primary-deep hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
         >
           {t('goToDashboard')}
         </button>

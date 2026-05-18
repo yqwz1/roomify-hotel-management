@@ -33,8 +33,8 @@ export default function ForecastChart({
   emptyMessage = 'No trend data is available for this date range.',
   loading = false,
   error = null,
-  accentClassName = 'text-emerald-700',
-  strokeColor = '#059669',
+  accentClassName = 'text-brand-success',
+  strokeColor = '#1D9E75',
   fillColor,
 }) {
   if (loading) {
@@ -69,31 +69,31 @@ export default function ForecastChart({
   const minValue = Math.min(...points.map(p => p.value));
 
   return (
-    <Card className="rounded-[1.4rem] border border-zinc-200 bg-white p-0 shadow-sm">
+    <Card className="rounded-[1.4rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardContent className="p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <p className={cn('text-xs font-black uppercase tracking-[0.18em]', accentClassName)}>
               {title}
             </p>
-            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-zinc-600">
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-brand-ink-muted">
               {description}
             </p>
           </div>
-          <div className="rounded-[1.1rem] border border-zinc-100 bg-zinc-50 px-4 py-3 text-right">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-400">
+          <div className="rounded-[1.1rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-right">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-hint">
               Latest
             </p>
-            <p className="mt-1 text-2xl font-black text-zinc-950">
+            <p className="mt-1 text-2xl font-black text-brand-ink">
               {valueFormatter(latestPoint.value)}
             </p>
-            <p className="mt-1 text-xs font-bold text-zinc-500">
+            <p className="mt-1 text-xs font-bold text-brand-ink-muted">
               {formatDateLabel(latestPoint.date)}
             </p>
           </div>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-[1.2rem] border border-zinc-100 bg-zinc-50 p-3">
+        <div className="mt-5 overflow-hidden rounded-[1.2rem] border border-brand-surface-border bg-brand-surface-light p-3">
           <TrendLineChart
             data={points}
             xKey="date"
@@ -107,14 +107,14 @@ export default function ForecastChart({
           />
         </div>
 
-        <div className="mt-4 grid gap-3 text-sm font-bold text-zinc-600 sm:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-3">
+        <div className="mt-4 grid gap-3 text-sm font-bold text-brand-ink-muted sm:grid-cols-3">
+          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-3">
             {points.length} points loaded
           </div>
-          <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-3">
+          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-3">
             High {valueFormatter(maxValue)}
           </div>
-          <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-3">
+          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-3">
             Low {valueFormatter(minValue)}
           </div>
         </div>

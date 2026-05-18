@@ -12,12 +12,12 @@ export function ChartCard({
   ...props
 }) {
   return (
-    <Card className={cn("rounded-[1.4rem] border border-zinc-200 bg-white p-0 shadow-sm", className)} {...props}>
+    <Card className={cn("rounded-[1.4rem] border border-brand-surface-border bg-white p-0 shadow-sm", className)} {...props}>
       {(title || description || action) && (
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 p-5 pb-4">
           <div className="min-w-0">
-            {title && <CardTitle className="text-sm font-black uppercase tracking-[0.16em] text-zinc-950">{title}</CardTitle>}
-            {description && <CardDescription className="mt-2 text-sm font-medium leading-6 text-zinc-500">{description}</CardDescription>}
+            {title && <CardTitle className="text-sm font-black uppercase tracking-[0.16em] text-brand-ink">{title}</CardTitle>}
+            {description && <CardDescription className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">{description}</CardDescription>}
           </div>
           {action && <div className="ml-4 shrink-0">{action}</div>}
         </CardHeader>

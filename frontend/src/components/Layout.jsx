@@ -25,7 +25,7 @@ export default function Layout({ children, showSidebar = false }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#f7f3ed] font-sans">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#F5F2EA] font-sans">
       <SmoothScroll />
       <HashScroller />
       <Header />

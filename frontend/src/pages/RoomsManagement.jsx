@@ -83,7 +83,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
   };
 
   const inputClassName =
-    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
   return (
     <ModalFrame
@@ -102,13 +102,13 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {formError && (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {formError}
           </div>
         )}
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('roomNumLabel')}
           </label>
           <input
@@ -122,7 +122,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('roomType')}
           </label>
           <select
@@ -142,7 +142,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('floor')}
             </label>
             <input
@@ -158,10 +158,10 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
 
           {isEditing ? (
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                 {t('roomsManagementPage.currentStatus')}
               </label>
-              <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
                   <span
                     className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
@@ -170,7 +170,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                   >
                     {getRoomStatusLabel(form.status, t)}
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t('roomsManagementPage.statusManagedOnBoard')}
                   </span>
                 </div>
@@ -178,7 +178,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
             </div>
           ) : (
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                 {t('initialStatusLabel')}
               </label>
               <select
@@ -202,14 +202,14 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+            className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {t('cancel')}
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+            className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
           >
             {saving ? t('roomsManagementPage.savingRoom') : t('roomsManagementPage.saveRoom')}
           </button>
@@ -354,7 +354,7 @@ export default function RoomsManagement() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('roomsManagementPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -378,7 +378,7 @@ export default function RoomsManagement() {
         <Button
           type="button"
           onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 h-auto"
+          className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep h-auto"
         >
           <Plus className="h-4 w-4" />
           {t('roomsManagementPage.addRoomCta')}
@@ -386,7 +386,7 @@ export default function RoomsManagement() {
       </div>
 
       {(bannerError || error) && (
-        <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+        <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
           <div className="flex items-start justify-between gap-3">
             <span>{bannerError || error}</span>
             <button
@@ -395,7 +395,7 @@ export default function RoomsManagement() {
                 setBannerError(null);
                 clearError();
               }}
-              className="text-xs font-bold uppercase tracking-[0.18em] text-rose-800"
+              className="text-xs font-bold uppercase tracking-[0.18em] text-brand-danger"
             >
               {t('dismissError')}
             </button>
@@ -404,7 +404,7 @@ export default function RoomsManagement() {
       )}
 
       {successMessage && (
-        <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+        <div className="rounded-[1.25rem] border border-brand-success/30 bg-brand-success/10 px-4 py-3 text-sm font-medium text-brand-success">
           {successMessage}
         </div>
       )}
@@ -427,21 +427,21 @@ export default function RoomsManagement() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, index) => (
-              <div key={index} className="h-14 animate-pulse rounded-2xl bg-zinc-100" />
+              <div key={index} className="h-14 animate-pulse rounded-2xl bg-brand-primary-tint" />
             ))}
           </div>
         ) : displayedRooms.length === 0 ? (
-          <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-            <Waves className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">{t('roomsManagementPage.noRoomsTitle')}</p>
-            <p className="mt-2 text-sm font-medium text-zinc-500">
+          <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+            <Waves className="mx-auto h-10 w-10 text-brand-ink-hint" />
+            <p className="mt-4 text-lg font-black text-brand-ink">{t('roomsManagementPage.noRoomsTitle')}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
               {t('roomsManagementPage.noRoomsDescription')}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[1.5rem] border border-zinc-200">
+          <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
             <Table className="min-w-full">
-              <TableHeader className="bg-zinc-50">
+              <TableHeader className="bg-brand-surface-light">
                 <TableRow>
                   {[
                     t('roomsManagementPage.tableRoom'),
@@ -454,7 +454,7 @@ export default function RoomsManagement() {
                   ].map((heading) => (
                     <TableHead
                       key={heading}
-                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto"
+                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto"
                     >
                       {heading}
                     </TableHead>
@@ -472,20 +472,20 @@ export default function RoomsManagement() {
 
                   return (
                     <TableRow key={room.id}>
-                      <TableCell className="px-4 py-4 text-xl font-black tracking-tight text-zinc-950">
+                      <TableCell className="px-4 py-4 text-xl font-black tracking-tight text-brand-ink">
                         {room.roomNumber}
                       </TableCell>
-                      <TableCell className="px-4 py-4 text-sm font-medium text-zinc-600">
+                      <TableCell className="px-4 py-4 text-sm font-medium text-brand-ink-muted">
                         {room.floor ?? '-'}
                       </TableCell>
-                      <TableCell className="px-4 py-4 text-sm font-bold text-zinc-950">
+                      <TableCell className="px-4 py-4 text-sm font-bold text-brand-ink">
                         {translateKnownValue(room.roomType?.name, t)}
                       </TableCell>
                       
-                      <TableCell className="px-4 py-4 text-sm font-bold text-zinc-950">
+                      <TableCell className="px-4 py-4 text-sm font-bold text-brand-ink">
                         {formatLocalizedCurrency(room.roomType?.basePrice, i18n.language)}
                       </TableCell>
-                      <TableCell className="px-4 py-4 text-sm font-medium text-zinc-600">
+                      <TableCell className="px-4 py-4 text-sm font-medium text-brand-ink-muted">
                         {room.roomType?.maxGuests ?? '-'}
                       </TableCell>
                       <TableCell className="px-4 py-4">
@@ -493,13 +493,13 @@ export default function RoomsManagement() {
                           {amenities.slice(0, 3).map((amenity) => (
                             <span
                               key={amenity}
-                              className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
+                              className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
                             >
                               {translateKnownValue(amenity, t)}
                             </span>
                           ))}
                           {amenities.length > 3 && (
-                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600">
+                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted">
                               +{amenities.length - 3}
                             </span>
                           )}
@@ -511,7 +511,7 @@ export default function RoomsManagement() {
                             variant="outline"
                             type="button"
                             onClick={() => handleOpenEdit(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
+                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                           >
                             <Pencil className="h-4 w-4" />
                             {t('roomsManagementPage.editButton')}
@@ -527,7 +527,7 @@ export default function RoomsManagement() {
                                 },
                               })
                             }
-                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
+                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                           >
                             {t('roomsManagementPage.openStatusBoard')}
                           </Button>
@@ -535,7 +535,7 @@ export default function RoomsManagement() {
                             variant="outline"
                             type="button"
                             onClick={() => handleDelete(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-50 h-auto"
+                            className="inline-flex items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10 h-auto"
                           >
                             <Trash2 className="h-4 w-4" />
                             {t('roomsManagementPage.deleteButton')}

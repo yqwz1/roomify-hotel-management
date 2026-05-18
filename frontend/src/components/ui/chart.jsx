@@ -24,13 +24,13 @@ const ChartTooltipContent = React.forwardRef(
       <div
         ref={ref}
         className={cn(
-          "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm",
+          "rounded-lg border border-brand-surface-border bg-white px-3 py-2 text-sm shadow-sm",
           className
         )}
         {...props}
       >
         {!hideLabel && displayLabel !== undefined && displayLabel !== null && displayLabel !== "" && (
-          <div className="mb-2 font-medium text-zinc-500">{displayLabel}</div>
+          <div className="mb-2 font-medium text-brand-ink-muted">{displayLabel}</div>
         )}
         <div className="flex flex-col gap-1.5">
           {payload.map((item, index) => {
@@ -41,7 +41,7 @@ const ChartTooltipContent = React.forwardRef(
                   className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: item.color || item.payload?.fill || "#000" }}
                 />
-                <span className="font-medium text-zinc-950">
+                <span className="font-medium text-brand-ink">
                   {item.name !== "value" && item.name ? `${item.name}: ` : ""}{val}
                 </span>
               </div>

@@ -29,7 +29,7 @@ function StaffFormModal({
   const { t } = useTranslation();
   const pageTx = 'staffPage';
   const inputClassName =
-    'h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
   return (
     <ModalFrame
@@ -42,13 +42,13 @@ function StaffFormModal({
     >
       <form onSubmit={onSubmit} className="space-y-5">
         {formError && (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {formError}
           </div>
         )}
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('emailLabel')}
           </label>
           <input
@@ -61,15 +61,15 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.email && (
-            <p className="text-sm font-medium text-rose-900">{validationErrors.email}</p>
+            <p className="text-sm font-medium text-brand-danger">{validationErrors.email}</p>
           )}
-          <p className="text-sm font-medium text-zinc-500">
+          <p className="text-sm font-medium text-brand-ink-muted">
             {editingId ? t(`${pageTx}.emailNoteEdit`) : t(`${pageTx}.emailNoteCreate`)}
           </p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('fullNameLabel')}
           </label>
           <input
@@ -80,12 +80,12 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.name && (
-            <p className="text-sm font-medium text-rose-900">{validationErrors.name}</p>
+            <p className="text-sm font-medium text-brand-danger">{validationErrors.name}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('departmentLabel')}
           </label>
           <input
@@ -96,12 +96,12 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.department && (
-            <p className="text-sm font-medium text-rose-900">{validationErrors.department}</p>
+            <p className="text-sm font-medium text-brand-danger">{validationErrors.department}</p>
           )}
         </div>
 
         {!editingId && (
-          <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+          <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink-muted">
             {t(`${pageTx}.passwordNote`)}
           </div>
         )}
@@ -110,14 +110,14 @@ function StaffFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+            className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {t('cancel')}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+            className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
           >
             {isSubmitting
               ? editingId
@@ -320,7 +320,7 @@ export default function Staff() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.teamSnapshot`)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -344,7 +344,7 @@ export default function Staff() {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
         >
           <UserPlus className="h-4 w-4" />
           {t(`${pageTx}.addStaff`)}
@@ -352,13 +352,13 @@ export default function Staff() {
       </div>
 
       {successMessage && (
-        <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+        <div className="rounded-[1.25rem] border border-brand-success/30 bg-brand-success/10 px-4 py-3 text-sm font-medium text-brand-success">
           {successMessage}
         </div>
       )}
 
       {(error || pageError) && (
-        <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+        <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
           {pageError || error}
         </div>
       )}
@@ -369,7 +369,7 @@ export default function Staff() {
       >
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('searchLabel')}
             </label>
             <input
@@ -378,11 +378,11 @@ export default function Staff() {
                 setFilters((prev) => ({ ...prev, search: event.target.value }))
               }
               placeholder={t('staffPage.searchPlaceholder')}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('departmentLabel')}
             </label>
             <input
@@ -391,11 +391,11 @@ export default function Staff() {
                 setFilters((prev) => ({ ...prev, department: event.target.value }))
               }
               placeholder={t('deptPlaceholder')}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t(`${pageTx}.accountState`)}
             </label>
             <select
@@ -403,7 +403,7 @@ export default function Staff() {
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, active: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             >
               <option value="all">{t('allStaff')}</option>
               <option value="true">{t('activeOnly')}</option>
@@ -420,33 +420,33 @@ export default function Staff() {
         {loading && !staff.length ? (
           <div className="space-y-3">
             {[...Array(4)].map((_, index) => (
-              <div key={index} className="h-16 animate-pulse rounded-2xl bg-zinc-100" />
+              <div key={index} className="h-16 animate-pulse rounded-2xl bg-brand-primary-tint" />
             ))}
           </div>
         ) : filteredStaff.length === 0 ? (
-          <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-            <Users className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">{t(`${pageTx}.noStaffTitle`)}</p>
-            <p className="mt-2 text-sm font-medium text-zinc-500">
+          <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+            <Users className="mx-auto h-10 w-10 text-brand-ink-hint" />
+            <p className="mt-4 text-lg font-black text-brand-ink">{t(`${pageTx}.noStaffTitle`)}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
               {t(`${pageTx}.noStaffDescription`)}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[1.5rem] border border-zinc-200">
+          <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
             <table className="min-w-full border-collapse">
-              <thead className="bg-zinc-50">
+              <thead className="bg-brand-surface-light">
                 <tr>
                   {[t(`${pageTx}.tableDetails`), t(`${pageTx}.tableDepartment`), t(`${pageTx}.tableStatus`), t(`${pageTx}.tableActions`)].map((heading) => (
                     <th
                       key={heading}
-                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500"
+                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted"
                     >
                       {heading}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 bg-white">
+              <tbody className="divide-y divide-brand-surface-border bg-white">
                 {filteredStaff.map((member) => {
                   const isCurrentUser = member.email === currentUserEmail;
 
@@ -455,36 +455,36 @@ export default function Staff() {
                       <td className="px-4 py-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-black text-zinc-950">{member.name}</p>
+                            <p className="text-sm font-black text-brand-ink">{member.name}</p>
                             {isCurrentUser && (
-                              <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted">
                                 {t(`${pageTx}.you`)}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm font-medium text-zinc-500">{member.email}</p>
+                          <p className="text-sm font-medium text-brand-ink-muted">{member.email}</p>
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm font-medium text-zinc-700">
-                          <Briefcase className="h-4 w-4 text-zinc-400" />
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-sm font-medium text-brand-ink">
+                          <Briefcase className="h-4 w-4 text-brand-ink-hint" />
                           {translateKnownValue(member.department || '-', t)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         {member.active ? (
                           <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
+                            <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
                               {t(`${pageTx}.active`)}
                             </span>
                             {member.locked && (
-                              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-amber-900">
+                              <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning">
                                 {translateWithFallback(t, `${pageTx}.locked`, 'Locked')}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="rounded-full border border-zinc-300 bg-zinc-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-zinc-600">
+                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
                             {t(`${pageTx}.inactive`)}
                           </span>
                         )}
@@ -494,7 +494,7 @@ export default function Staff() {
                           <button
                             type="button"
                             onClick={() => handleEdit(member)}
-                            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                           >
                             <Pencil className="h-4 w-4" />
                             {t(`${pageTx}.edit`)}
@@ -505,7 +505,7 @@ export default function Staff() {
                               type="button"
                               onClick={() => handleDeactivate(member)}
                               disabled={isCurrentUser}
-                              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                              className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                             >
                               <PowerOff className="h-4 w-4" />
                               {t(`${pageTx}.deactivate`)}
@@ -514,7 +514,7 @@ export default function Staff() {
                             <button
                               type="button"
                               onClick={() => handleActivate(member)}
-                              className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-zinc-800"
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                             >
                               <Power className="h-4 w-4" />
                               {t(`${pageTx}.activate`)}
@@ -526,7 +526,7 @@ export default function Staff() {
                               type="button"
                               onClick={() => handleUnlock(member)}
                               disabled={!member.locked}
-                              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                              className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                             >
                               <LockOpen className="h-4 w-4" />
                               {t(`${pageTx}.unlock`)}

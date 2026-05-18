@@ -81,7 +81,7 @@ export default function Sidebar({ isOpen, onClose }) {
         `}
       >
         {/* Brand header */}
-        <div className="flex items-center justify-between px-6 py-6 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-6 py-6 border-b border-brand-surface-border">
           <div className="flex items-center">
             <span className="text-2xl font-black text-white tracking-tighter">{brandName}</span>
           </div>
@@ -90,7 +90,7 @@ export default function Sidebar({ isOpen, onClose }) {
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="md:hidden p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="md:hidden p-2 rounded-full text-brand-ink-hint hover:text-white hover:bg-brand-primary-deep transition"
             aria-label={t('closeMenu')}
           >
             <X className="h-5 w-5" />
@@ -110,12 +110,12 @@ export default function Sidebar({ isOpen, onClose }) {
                 className={`
                   flex items-center gap-3 px-4 py-3 rounded-full text-sm font-bold transition-all duration-200
                   ${isActive
-                    ? 'bg-white text-rose-900 shadow-sm'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                    ? 'bg-white text-brand-danger shadow-sm'
+                    : 'text-brand-ink-hint hover:bg-brand-ink hover:text-white'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-rose-900' : 'text-zinc-500'}`} />
+                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-brand-danger' : 'text-brand-ink-muted'}`} />
                 <span>{item.label}</span>
               </Link>
             )
@@ -123,16 +123,16 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Footer – user info */}
-        <div className="px-6 py-5 border-t border-zinc-800">
+        <div className="px-6 py-5 border-t border-brand-surface-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-brand-primary-deep border border-brand-surface-border flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-white uppercase">
                 {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </span>
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-white truncate">{user?.username || user?.email || t('user')}</p>
-              <p className="text-xs font-medium text-zinc-500">{roleLabel}</p>
+              <p className="text-xs font-medium text-brand-ink-muted">{roleLabel}</p>
             </div>
           </div>
         </div>

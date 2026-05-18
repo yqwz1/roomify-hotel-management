@@ -20,24 +20,24 @@ export default function RoadmapBanner({
 
   const card = (
     <Reveal>
-      <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50 via-amber-50/60 to-transparent px-5 py-4 sm:px-6 sm:py-5">
+      <div className="relative overflow-hidden rounded-2xl border border-brand-warning/30 bg-gradient-to-r from-brand-warning/10 via-brand-warning/[0.04] to-transparent px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex items-start gap-3 sm:items-center">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 ring-1 ring-amber-200">
-            <Info className="h-4 w-4 text-amber-700" />
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-warning/15 ring-1 ring-brand-warning/30">
+            <Info className="h-4 w-4 text-brand-warning" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-800">
+              <span className="inline-flex items-center rounded-full bg-brand-warning/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-warning">
                 {t('roadmap.badge')}
               </span>
-              <p className="text-sm font-black tracking-tight text-zinc-950">{resolvedTitle}</p>
+              <p className="text-sm font-black tracking-tight text-brand-ink">{resolvedTitle}</p>
             </div>
-            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-zinc-600">{resolvedNote}</p>
+            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-brand-ink-muted">{resolvedNote}</p>
           </div>
         </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-200/40 blur-2xl rtl:right-auto rtl:-left-10"
+          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-warning/30 blur-2xl rtl:right-auto rtl:-left-10"
         />
       </div>
     </Reveal>

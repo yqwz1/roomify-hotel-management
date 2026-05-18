@@ -17,7 +17,7 @@ export function DistributionBarChart({
   labelKey = "name",
   valueKey = "value",
   valueFormatter,
-  color = "#0369a1",
+  color = "#264B6B",
   colors = [],
   height = 300,
   loading = false,
@@ -47,13 +47,13 @@ export function DistributionBarChart({
           layout={layout}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="4 6" horizontal={layout === "horizontal"} vertical={layout === "vertical"} stroke="#e4e4e7" />
+          <CartesianGrid strokeDasharray="4 6" horizontal={layout === "horizontal"} vertical={layout === "vertical"} stroke="#E8E3D6" />
           <XAxis
             type={layout === "horizontal" ? "category" : "number"}
             dataKey={layout === "horizontal" ? labelKey : undefined}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+            tick={{ fill: "#5C6B7A", fontSize: 11, fontWeight: "bold" }}
             tickFormatter={layout === "horizontal" ? undefined : valueFormatter}
             tickMargin={12}
             hide={layout === "vertical"}
@@ -63,7 +63,7 @@ export function DistributionBarChart({
             dataKey={layout === "horizontal" ? undefined : labelKey}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+            tick={{ fill: "#5C6B7A", fontSize: 11, fontWeight: "bold" }}
             tickFormatter={layout === "horizontal" ? valueFormatter : undefined}
             width={layout === "horizontal" ? 60 : 100}
             hide={layout === "horizontal"}

@@ -15,18 +15,18 @@ export default function DashboardMetricCard({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        card: 'border-white/10 bg-zinc-950 text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
+        card: 'border-white/10 bg-brand-primary text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
         icon: 'bg-white/10 text-white',
         label: '!text-white',
         hint: '!text-white',
         value: '!text-white',
       }
     : {
-        card: 'border-black/5 bg-white text-zinc-950 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
-        icon: 'bg-zinc-100 text-zinc-950',
-        label: 'text-zinc-500',
-        hint: 'text-zinc-400',
-        value: 'text-zinc-950',
+        card: 'border-black/5 bg-white text-brand-ink shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
+        icon: 'bg-brand-primary-tint text-brand-ink',
+        label: 'text-brand-ink-muted',
+        hint: 'text-brand-ink-hint',
+        value: 'text-brand-ink',
       };
 
   return (
@@ -59,8 +59,6 @@ export default function DashboardMetricCard({
           <Icon className="h-5 w-5" />
         </span>
       </div>
-
-      <div className="pointer-events-none absolute -bottom-9 -end-8 h-24 w-24 rounded-full border-[14px] border-black/5 opacity-40" />
     </div>
   );
 }

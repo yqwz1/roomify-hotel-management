@@ -6,18 +6,18 @@ const ErrorState = ({ title, message, onRetry }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border border-zinc-200 bg-zinc-50 p-8 text-center">
-      <AlertCircle className="mb-4 h-12 w-12 text-zinc-900" />
-      <h3 className="mb-2 font-heading text-lg font-bold text-zinc-900">
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-brand-surface-border bg-brand-surface-light p-8 text-center">
+      <AlertCircle className="mb-4 h-12 w-12 text-brand-ink" />
+      <h3 className="mb-2 font-heading text-lg font-bold text-brand-ink">
         {title || t('errorStateTitle')}
       </h3>
-      <p className="mb-6 max-w-md text-sm text-zinc-600">
+      <p className="mb-6 max-w-md text-sm text-brand-ink-muted">
         {message || t('errorStateMessage')}
       </p>
       {onRetry && (
         <Button
           variant="outline"
-          className="rounded-full border-zinc-300 text-zinc-900 hover:bg-zinc-100"
+          className="rounded-full border-brand-surface-border text-brand-ink hover:bg-brand-primary-tint"
           onClick={onRetry}
         >
           {t('retry')}

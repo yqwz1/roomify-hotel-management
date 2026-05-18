@@ -12,14 +12,14 @@ export default function DashboardQuickAction({
     ? {
         wrapper: 'border-white/10 bg-white/5 text-white hover:bg-white/10',
         iconWrap: 'bg-white/10 text-white',
-        description: 'text-zinc-300',
-        arrow: 'text-zinc-500 group-hover:text-white',
+        description: 'text-brand-ink-hint',
+        arrow: 'text-brand-ink-muted group-hover:text-white',
       }
     : {
-        wrapper: 'border-zinc-200 bg-zinc-50 text-zinc-950 hover:border-zinc-300 hover:bg-white',
-        iconWrap: 'bg-white text-zinc-950 shadow-sm',
-        description: 'text-zinc-500',
-        arrow: 'text-zinc-300 group-hover:text-zinc-950',
+        wrapper: 'border-brand-surface-border bg-brand-surface-light text-brand-ink hover:border-brand-surface-border hover:bg-white',
+        iconWrap: 'bg-white text-brand-ink shadow-sm',
+        description: 'text-brand-ink-muted',
+        arrow: 'text-brand-ink-hint group-hover:text-brand-ink',
       };
 
   return (

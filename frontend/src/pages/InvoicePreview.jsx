@@ -50,7 +50,7 @@ import {
 function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
   if (!invoiceFinalized) {
     return (
-        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-amber-900">
+        <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-warning">
         {t('invoicePreviewPage.notFinalized')}
       </span>
     );
@@ -58,7 +58,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'LOADING') {
     return (
-        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
         {t('invoicePreviewPage.loadingDelivery')}
       </span>
     );
@@ -66,7 +66,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'SENT') {
     return (
-        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-900">
+        <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-success">
         {t('invoicePreviewPage.delivered')}
       </span>
     );
@@ -74,7 +74,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'ATTEMPT') {
     return (
-      <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-sky-900">
+      <span className="rounded-full border border-brand-primary bg-brand-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-primary">
         {getInvoiceDeliveryStatusLabel(deliveryStatus, t)}
       </span>
     );
@@ -82,7 +82,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'FAILED') {
     return (
-        <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger">
         {t('invoicePreviewPage.deliveryFailed')}
         {deliveryMeta?.errorMessage ? `: ${deliveryMeta.errorMessage}` : ''}
       </span>
@@ -91,14 +91,14 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'ERROR') {
     return (
-        <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-rose-900">
+        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger">
         {t('invoicePreviewPage.deliveryUnavailable')}
       </span>
     );
   }
 
   return (
-    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+    <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
       {t('invoicePreviewPage.deliveryPending')}
     </span>
   );
@@ -116,29 +116,29 @@ function InvoiceLedger({ bill, t, language }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-zinc-200">
+    <div className="overflow-hidden rounded-[1.5rem] border border-brand-surface-border">
       <Table className="w-full">
-        <TableHeader className="bg-zinc-50">
+        <TableHeader className="bg-brand-surface-light">
           <TableRow>
-            <TableHead className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto">
+            <TableHead className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
               {t('invoicePreviewPage.descriptionLabel')}
             </TableHead>
-            <TableHead className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-zinc-500 h-auto">
+            <TableHead className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
               {t('invoicePreviewPage.amountLabel')}
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="divide-y divide-zinc-200 bg-white">
+        <TableBody className="divide-y divide-brand-surface-border bg-white">
           {(bill.lineItems ?? []).map((item, index) => {
             const amount = Number(item?.amount ?? 0);
             const credit = Boolean(item?.credit);
 
             return (
               <TableRow key={`${item?.label ?? 'line'}-${index}`}>
-                <TableCell className="px-4 py-3 text-sm font-medium text-zinc-700">
+                <TableCell className="px-4 py-3 text-sm font-medium text-brand-ink">
                   {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                 </TableCell>
-                <TableCell className="px-4 py-3 text-right text-sm font-bold text-zinc-950">
+                <TableCell className="px-4 py-3 text-right text-sm font-bold text-brand-ink">
                   {credit
                     ? `-${formatLocalizedCurrency(amount, language)}`
                     : formatLocalizedCurrency(amount, language)}
@@ -146,9 +146,9 @@ function InvoiceLedger({ bill, t, language }) {
               </TableRow>
             );
           })}
-          <TableRow className="bg-zinc-50">
-            <TableCell className="px-4 py-3 text-sm font-bold text-zinc-950">{t('common.total')}</TableCell>
-            <TableCell className="px-4 py-3 text-right text-lg font-black text-zinc-950">
+          <TableRow className="bg-brand-surface-light">
+            <TableCell className="px-4 py-3 text-sm font-bold text-brand-ink">{t('common.total')}</TableCell>
+            <TableCell className="px-4 py-3 text-right text-lg font-black text-brand-ink">
               {formatLocalizedCurrency(bill.balanceDue, language)}
             </TableCell>
           </TableRow>
@@ -420,7 +420,7 @@ export default function InvoicePreview() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('invoicePreviewPage.stateTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -458,7 +458,7 @@ export default function InvoicePreview() {
               {t('invoicePreviewPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 text-sm font-medium leading-6 text-brand-ink-muted"
                 >
                   {item}
                 </div>
@@ -492,25 +492,25 @@ export default function InvoicePreview() {
               ) : (
                 <>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('common.guest')}
                       </p>
-                      <p className="mt-2 text-lg font-black text-zinc-950">
+                      <p className="mt-2 text-lg font-black text-brand-ink">
                         {selected?.guestName || '-'}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {selected?.guestEmail || t('common.noGuestEmailProvided')}
                       </p>
                     </div>
-                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('reservationDetails')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
                         <LtrText>{selected?.confirmationNumber}</LtrText>
                       </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {t('roomNumber', { number: selected?.roomNumber })} |{' '}
                         {formatLocalizedDate(selected?.checkInDate, i18n.language, {
                           month: 'short',
@@ -533,7 +533,7 @@ export default function InvoicePreview() {
                         type="button"
                         onClick={handleGenerate}
                         disabled={!selected?.id || generating}
-                        className="h-14 w-full bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                        className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                       >
                         <FilePlus2 className="h-4 w-4" />
                         {generating ? t('invoicePreviewPage.generating') : t('invoicePreviewPage.generate')}
@@ -545,7 +545,7 @@ export default function InvoicePreview() {
                           variant="outline"
                           onClick={handleSendEmail}
                           disabled={emailing}
-                          className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                          className="h-14 w-full border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                         >
                           <Mail className="h-4 w-4" />
                           {emailing
@@ -558,7 +558,7 @@ export default function InvoicePreview() {
                           type="button"
                           variant="outline"
                           onClick={handlePrint}
-                          className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                          className="h-14 w-full border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                         >
                           <Printer className="h-4 w-4" />
                           {t('invoicePreviewPage.print')}
@@ -567,7 +567,7 @@ export default function InvoicePreview() {
                           type="button"
                           onClick={handleDownload}
                           disabled={downloading}
-                          className="h-14 w-full bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                          className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                         >
                           <Download className="h-4 w-4" />
                           {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
@@ -598,7 +598,7 @@ export default function InvoicePreview() {
                 />
               ) : previewUrl ? (
                 <div className="space-y-4">
-                  <div className="overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-zinc-50">
+                  <div className="overflow-hidden rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light">
                     <iframe
                       title={t('invoicePreviewPage.previewFrameTitle')}
                       src={previewUrl}
@@ -610,7 +610,7 @@ export default function InvoicePreview() {
                       type="button"
                       variant="outline"
                       onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}
-                      className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                      className="h-12 border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                     >
                       {t('invoicePreviewPage.openDocument')}
                     </Button>
@@ -618,7 +618,7 @@ export default function InvoicePreview() {
                       type="button"
                       variant="outline"
                       onClick={handlePrint}
-                      className="h-12 border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                      className="h-12 border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                     >
                       <Printer className="h-4 w-4" />
                       {t('invoicePreviewPage.print')}
@@ -627,7 +627,7 @@ export default function InvoicePreview() {
                       type="button"
                       onClick={handleDownload}
                       disabled={downloading}
-                      className="h-12 bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                      className="h-12 bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                     >
                       <Download className="h-4 w-4" />
                       {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
@@ -686,13 +686,13 @@ export default function InvoicePreview() {
                   return (
                     <div
                       key={item.title}
-                      className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                      className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
                         <Icon className="h-4 w-4" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-zinc-950">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
                         {item.description}
                       </p>
                     </div>

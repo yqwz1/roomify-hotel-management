@@ -56,13 +56,13 @@ const EXPENSE_CATEGORIES = [
 const PAYMENT_METHODS = ['CARD', 'CASH', 'ONLINE'];
 
 const CATEGORY_STYLES = {
-  CLEANING_SUPPLIES: 'border-cyan-200 bg-cyan-50 text-cyan-900',
-  CONSUMABLES: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  MAINTENANCE: 'border-amber-200 bg-amber-50 text-amber-900',
-  UTILITIES: 'border-indigo-200 bg-indigo-50 text-indigo-900',
-  OFFICE_ADMIN: 'border-sky-200 bg-sky-50 text-sky-900',
-  EQUIPMENT: 'border-rose-200 bg-rose-50 text-rose-900',
-  MISCELLANEOUS: 'border-zinc-200 bg-zinc-100 text-zinc-800',
+  CLEANING_SUPPLIES: 'border-brand-primary bg-brand-primary text-brand-primary',
+  CONSUMABLES: 'border-brand-success/30 bg-brand-success/10 text-brand-success',
+  MAINTENANCE: 'border-brand-warning/30 bg-brand-warning/10 text-brand-warning',
+  UTILITIES: 'border-brand-primary-deep bg-brand-primary-deep text-brand-primary-deep',
+  OFFICE_ADMIN: 'border-brand-primary bg-brand-primary text-brand-primary',
+  EQUIPMENT: 'border-brand-danger/30 bg-brand-danger/10 text-brand-danger',
+  MISCELLANEOUS: 'border-brand-surface-border bg-brand-primary-tint text-brand-ink',
 };
 
 const toIsoDate = (value) => value.toISOString().split('T')[0];
@@ -142,14 +142,14 @@ function ExpenseFormModal({
     >
       <form onSubmit={onSubmit} className="space-y-5">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.titleLabel', 'Expense title')}
             </span>
             <input
@@ -157,7 +157,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, title: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'expenseTrackerPage.titlePlaceholder',
@@ -168,7 +168,7 @@ function ExpenseFormModal({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.amountLabel', 'Amount')}
             </span>
             <input
@@ -179,7 +179,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, amount: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder="0.00"
               required
             />
@@ -188,7 +188,7 @@ function ExpenseFormModal({
 
         <div className="grid gap-4 md:grid-cols-3">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.categoryLabel', 'Category')}
             </span>
             <select
@@ -196,7 +196,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, category: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             >
               {EXPENSE_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -207,7 +207,7 @@ function ExpenseFormModal({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.dateLabel', 'Date')}
             </span>
             <input
@@ -216,13 +216,13 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, expenseDate: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               required
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'expenseTrackerPage.paymentMethodLabel',
@@ -234,7 +234,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, paymentMethod: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             >
               {PAYMENT_METHODS.map((method) => (
                 <option key={method} value={method}>
@@ -247,7 +247,7 @@ function ExpenseFormModal({
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.vendorLabel', 'Vendor or supplier')}
             </span>
             <input
@@ -255,7 +255,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, vendor: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'expenseTrackerPage.vendorPlaceholder',
@@ -264,23 +264,23 @@ function ExpenseFormModal({
             />
           </label>
 
-          <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4 md:mt-7">
+          <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
             <input
               type="checkbox"
               checked={formData.recurring}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, recurring: event.target.checked }))
               }
-              className="h-4 w-4 rounded border-zinc-300"
+              className="h-4 w-4 rounded border-brand-surface-border"
             />
-            <span className="text-sm font-medium text-zinc-700">
+            <span className="text-sm font-medium text-brand-ink">
               {translateWithFallback(t, 'expenseTrackerPage.recurringLabel', 'Recurring expense')}
             </span>
           </label>
         </div>
 
         <label className="space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'expenseTrackerPage.notesLabel', 'Notes')}
           </span>
           <Textarea
@@ -289,7 +289,7 @@ function ExpenseFormModal({
               setFormData((current) => ({ ...current, description: event.target.value }))
             }
             rows={4}
-            className="w-full rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
             placeholder={translateWithFallback(
               t,
               'expenseTrackerPage.notesPlaceholder',
@@ -300,7 +300,7 @@ function ExpenseFormModal({
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'expenseTrackerPage.receiptNameLabel',
@@ -312,13 +312,13 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, receiptFileName: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder="receipt-apr-24.pdf"
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'expenseTrackerPage.receiptUrlLabel',
@@ -330,7 +330,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, receiptFileUrl: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
               placeholder="https://files.example/receipt-apr-24.pdf"
             />
           </label>
@@ -340,14 +340,14 @@ function ExpenseFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+            className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+            className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
           >
             {saving
               ? translateWithFallback(t, 'saving', 'Saving...')
@@ -381,8 +381,8 @@ function ExpenseDetailsModal({ expense, onClose, t, language }) {
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-2xl font-black tracking-tight text-zinc-950">{expense.title}</p>
-            <p className="mt-1 text-sm font-medium text-zinc-500">
+            <p className="text-2xl font-black tracking-tight text-brand-ink">{expense.title}</p>
+            <p className="mt-1 text-sm font-medium text-brand-ink-muted">
               {formatLocalizedDate(expense.expenseDate, language, {
                 month: 'long',
                 day: 'numeric',
@@ -390,50 +390,50 @@ function ExpenseDetailsModal({ expense, onClose, t, language }) {
               })}
             </p>
           </div>
-          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-black text-zinc-900">
+          <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-black text-brand-ink">
             {formatLocalizedCurrency(expense.amount, language)}
           </span>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.categoryLabel', 'Category')}
             </p>
-            <p className="mt-2 text-base font-bold text-zinc-950">
+            <p className="mt-2 text-base font-bold text-brand-ink">
               {getCategoryLabel(expense.category, t)}
             </p>
           </div>
 
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'expenseTrackerPage.paymentMethodLabel',
                 'Payment method'
               )}
             </p>
-            <p className="mt-2 text-base font-bold text-zinc-950">
+            <p className="mt-2 text-base font-bold text-brand-ink">
               {expense.paymentMethod
                 ? getPaymentMethodLabel(expense.paymentMethod, t)
                 : translateWithFallback(t, 'expenseTrackerPage.notProvided', 'Not provided')}
             </p>
           </div>
 
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.vendorLabel', 'Vendor or supplier')}
             </p>
-            <p className="mt-2 text-base font-bold text-zinc-950">
+            <p className="mt-2 text-base font-bold text-brand-ink">
               {expense.vendor || translateWithFallback(t, 'expenseTrackerPage.notProvided', 'Not provided')}
             </p>
           </div>
 
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.recurringLabel', 'Recurring expense')}
             </p>
-            <p className="mt-2 text-base font-bold text-zinc-950">
+            <p className="mt-2 text-base font-bold text-brand-ink">
               {expense.recurring
                 ? translateWithFallback(t, 'expenseTrackerPage.recurringYes', 'Yes')
                 : translateWithFallback(t, 'expenseTrackerPage.recurringNo', 'No')}
@@ -441,34 +441,34 @@ function ExpenseDetailsModal({ expense, onClose, t, language }) {
           </div>
         </div>
 
-        <div className="rounded-[1.35rem] border border-zinc-200 bg-white p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.35rem] border border-brand-surface-border bg-white p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'expenseTrackerPage.notesLabel', 'Notes')}
           </p>
-          <p className="mt-2 text-sm font-medium leading-6 text-zinc-700">
+          <p className="mt-2 text-sm font-medium leading-6 text-brand-ink">
             {expense.description || translateWithFallback(t, 'expenseTrackerPage.noNotes', 'No notes were added.')}
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'expenseTrackerPage.receiptReferenceTitle',
                 'Receipt reference'
               )}
             </p>
-            <p className="mt-2 text-sm font-bold text-zinc-950">
+            <p className="mt-2 text-sm font-bold text-brand-ink">
               {expense.receiptFileName || expense.receiptFileUrl || translateWithFallback(t, 'expenseTrackerPage.notProvided', 'Not provided')}
             </p>
           </div>
 
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'expenseTrackerPage.lastUpdatedTitle', 'Last updated')}
             </p>
-            <p className="mt-2 text-sm font-bold text-zinc-950">
+            <p className="mt-2 text-sm font-bold text-brand-ink">
               {formatLocalizedDateTime(expense.updatedAt, language, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
@@ -798,7 +798,7 @@ export default function ExpenseTracker() {
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
                 {translateWithFallback(t, 'expenseTrackerPage.snapshotTitle', 'Operating snapshot')}
               </p>
               <p className="mt-3 text-sm font-medium leading-6 text-white/85">{financeSignal}</p>
@@ -806,7 +806,7 @@ export default function ExpenseTracker() {
             <Button
               type="button"
               onClick={openCreateModal}
-              className="h-12 bg-white text-zinc-950 hover:bg-zinc-100"
+              className="h-12 bg-white text-brand-ink hover:bg-brand-primary-tint"
             >
               <Plus className="h-4 w-4" />
               {translateWithFallback(t, 'expenseTrackerPage.quickAddAction', 'Quick Add Expense')}
@@ -861,7 +861,7 @@ export default function ExpenseTracker() {
             'Filter spend by date range, category, or vendor before comparing it against revenue.'
           )}
           action={
-            <Button type="button" variant="outline" onClick={() => loadData(filters)} className="border-zinc-200">
+            <Button type="button" variant="outline" onClick={() => loadData(filters)} className="border-brand-surface-border">
               <RefreshCw className="h-4 w-4" />
               {translateWithFallback(t, 'retry', 'Retry')}
             </Button>
@@ -870,7 +870,7 @@ export default function ExpenseTracker() {
           <div className="space-y-5">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'expenseTrackerPage.startDateLabel', 'Start date')}
                 </span>
                 <input
@@ -879,12 +879,12 @@ export default function ExpenseTracker() {
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, startDate: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'expenseTrackerPage.endDateLabel', 'End date')}
                 </span>
                 <input
@@ -893,12 +893,12 @@ export default function ExpenseTracker() {
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, endDate: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'expenseTrackerPage.categoryFilterLabel', 'Category')}
                 </span>
                 <select
@@ -906,7 +906,7 @@ export default function ExpenseTracker() {
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, category: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
                   <option value="">{translateWithFallback(t, 'expenseTrackerPage.allCategories', 'All categories')}</option>
                   {EXPENSE_CATEGORIES.map((category) => (
@@ -918,7 +918,7 @@ export default function ExpenseTracker() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'expenseTrackerPage.vendorFilterLabel', 'Vendor')}
                 </span>
                 <input
@@ -926,7 +926,7 @@ export default function ExpenseTracker() {
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, vendor: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                   placeholder={translateWithFallback(
                     t,
                     'expenseTrackerPage.vendorFilterPlaceholder',
@@ -937,16 +937,16 @@ export default function ExpenseTracker() {
             </div>
 
             {error ? (
-              <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+              <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                 {error}
               </div>
             ) : null}
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="button" onClick={handleApplyFilters} className="h-12 bg-zinc-950 text-white hover:bg-zinc-800">
+              <Button type="button" onClick={handleApplyFilters} className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep">
                 {translateWithFallback(t, 'expenseTrackerPage.applyFilters', 'Apply Filters')}
               </Button>
-              <Button type="button" variant="outline" onClick={handleResetFilters} className="h-12 border-zinc-200">
+              <Button type="button" variant="outline" onClick={handleResetFilters} className="h-12 border-brand-surface-border">
                 {translateWithFallback(t, 'expenseTrackerPage.resetFilters', 'Reset Filters')}
               </Button>
             </div>
@@ -975,7 +975,7 @@ export default function ExpenseTracker() {
                 valueFormatter={(val) => formatLocalizedCurrency(val, i18n.language)}
                 layout="vertical"
                 height={350}
-                colors={['#0f766e', '#0369a1', '#be185d', '#a21caf', '#6d28d9', '#4338ca', '#3f3f46']}
+                colors={['#264B6B', '#264B6B', '#C97757', '#C97757', '#264B6B', '#264B6B', '#5C6B7A']}
               />
             </div>
           ) : (
@@ -1004,7 +1004,7 @@ export default function ExpenseTracker() {
             <button
               type="button"
               onClick={openCreateModal}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
             >
               <Plus className="h-4 w-4" />
               {translateWithFallback(t, 'expenseTrackerPage.quickAddAction', 'Quick Add Expense')}
@@ -1034,11 +1034,11 @@ export default function ExpenseTracker() {
               {expenses.map((expense) => (
                 <div
                   key={expense.id}
-                  className="rounded-[1.4rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.22)]"
+                  className="rounded-[1.4rem] border border-brand-surface-border bg-white p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.22)]"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-lg font-black tracking-tight text-zinc-950">{expense.title}</p>
+                      <p className="text-lg font-black tracking-tight text-brand-ink">{expense.title}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span
                           className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
@@ -1047,7 +1047,7 @@ export default function ExpenseTracker() {
                         >
                           {getCategoryLabel(expense.category, t)}
                         </span>
-                        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700">
+                        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink">
                           {formatLocalizedDate(expense.expenseDate, i18n.language, {
                             month: 'short',
                             day: 'numeric',
@@ -1055,24 +1055,24 @@ export default function ExpenseTracker() {
                           })}
                         </span>
                         {expense.vendor ? (
-                          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700">
+                          <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink">
                             {expense.vendor}
                           </span>
                         ) : null}
                       </div>
                       {expense.description ? (
-                        <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
+                        <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
                           {expense.description}
                         </p>
                       ) : null}
                     </div>
 
                     <div className="flex flex-col items-end gap-3">
-                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-black text-zinc-950">
+                      <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-black text-brand-ink">
                         {formatLocalizedCurrency(expense.amount, i18n.language)}
                       </span>
                       {expense.recurring ? (
-                        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-amber-900">
+                        <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-warning">
                           {translateWithFallback(t, 'expenseTrackerPage.recurringLabel', 'Recurring expense')}
                         </span>
                       ) : null}
@@ -1083,7 +1083,7 @@ export default function ExpenseTracker() {
                     <button
                       type="button"
                       onClick={() => openViewModal(expense)}
-                      className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-white"
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-white"
                     >
                       <FileSearch className="h-4 w-4" />
                       {translateWithFallback(t, 'expenseTrackerPage.viewAction', 'View')}
@@ -1091,7 +1091,7 @@ export default function ExpenseTracker() {
                     <button
                       type="button"
                       onClick={() => openEditModal(expense)}
-                      className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-white"
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-white"
                     >
                       <Pencil className="h-4 w-4" />
                       {translateWithFallback(t, 'editStaff', 'Edit')}
@@ -1099,7 +1099,7 @@ export default function ExpenseTracker() {
                     <button
                       type="button"
                       onClick={() => handleDelete(expense)}
-                      className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-900 transition hover:border-rose-300 hover:bg-rose-100"
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-danger/30 bg-brand-danger/10 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/40 hover:bg-brand-danger/15"
                     >
                       <Trash2 className="h-4 w-4" />
                       {translateWithFallback(t, 'deleteRoomTitle', 'Delete')}
@@ -1124,19 +1124,19 @@ export default function ExpenseTracker() {
           ) : summary.recentExpenses?.length ? (
             <div className="space-y-3" data-testid="recent-expenses">
               {summary.recentExpenses.map((expense) => (
-                <div key={expense.id} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                <div key={expense.id} className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-black text-zinc-950">{expense.title}</p>
-                      <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                      <p className="text-sm font-black text-brand-ink">{expense.title}</p>
+                      <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                         {getCategoryLabel(expense.category, t)}
                       </p>
                     </div>
-                    <p className="text-sm font-black text-zinc-950">
+                    <p className="text-sm font-black text-brand-ink">
                       {formatLocalizedCurrency(expense.amount, i18n.language)}
                     </p>
                   </div>
-                  <p className="mt-3 text-sm font-medium text-zinc-600">
+                  <p className="mt-3 text-sm font-medium text-brand-ink-muted">
                     {expense.vendor || translateWithFallback(t, 'expenseTrackerPage.noVendor', 'No vendor recorded')}
                   </p>
                 </div>

@@ -102,19 +102,19 @@ function BillBreakdown({ bill, t, language }) {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+        <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
             {t('checkoutPage.paymentStatusLabel')}
           </p>
           <div className="mt-3">
             <PaymentStatusBadge status={paymentStatus} t={t} />
           </div>
         </div>
-        <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+        <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
             {t('common.finalized')}
           </p>
-          <p className="mt-3 text-sm font-bold text-zinc-950">
+          <p className="mt-3 text-sm font-bold text-brand-ink">
             {bill.invoiceFinalized ? t('common.yes') : t('common.no')}
           </p>
         </div>
@@ -123,31 +123,31 @@ function BillBreakdown({ bill, t, language }) {
       <div className="space-y-3">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-4">
-            <span className={`text-sm font-medium ${row.muted ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <span className={`text-sm font-medium ${row.muted ? 'text-brand-ink-hint' : 'text-brand-ink-muted'}`}>
               {row.label}
             </span>
-            <span className="text-sm font-bold text-zinc-950">{row.value}</span>
+            <span className="text-sm font-bold text-brand-ink">{row.value}</span>
           </div>
         ))}
 
-        <div className="border-t border-zinc-200 pt-3">
+        <div className="border-t border-brand-surface-border pt-3">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-bold text-zinc-950">{t('checkoutPage.grossBalance')}</span>
-            <span className="text-base font-black text-zinc-950">
+            <span className="text-sm font-bold text-brand-ink">{t('checkoutPage.grossBalance')}</span>
+            <span className="text-base font-black text-brand-ink">
               {formatLocalizedCurrency(bill.balanceDue, language)}
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-4">
-            <span className="text-sm font-medium text-emerald-700">{t('checkoutPage.totalPaidLabel')}</span>
-            <span className="text-sm font-bold text-emerald-700">
+            <span className="text-sm font-medium text-brand-success">{t('checkoutPage.totalPaidLabel')}</span>
+            <span className="text-sm font-bold text-brand-success">
               -{formatLocalizedCurrency(bill.totalPaid, language)}
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between gap-4 border-t border-zinc-200 pt-3">
-            <span className="text-sm font-bold text-zinc-950">{t('checkoutPage.outstandingBalanceLabel')}</span>
+          <div className="mt-3 flex items-center justify-between gap-4 border-t border-brand-surface-border pt-3">
+            <span className="text-sm font-bold text-brand-ink">{t('checkoutPage.outstandingBalanceLabel')}</span>
             <span
               className={`text-lg font-black ${
-                Number(bill.outstandingBalance ?? bill.balanceDue ?? 0) > 0 ? 'text-rose-900' : 'text-emerald-700'
+                Number(bill.outstandingBalance ?? bill.balanceDue ?? 0) > 0 ? 'text-brand-danger' : 'text-brand-success'
               }`}
             >
               {formatLocalizedCurrency(bill.outstandingBalance ?? bill.balanceDue, language)}
@@ -156,8 +156,8 @@ function BillBreakdown({ bill, t, language }) {
         </div>
 
         {Array.isArray(bill.lineItems) && bill.lineItems.length > 0 ? (
-          <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+          <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
               {t('checkoutPage.lineItems')}
             </p>
             <div className="mt-3 space-y-2">
@@ -167,10 +167,10 @@ function BillBreakdown({ bill, t, language }) {
 
                 return (
                   <div key={`${item?.label ?? 'line'}-${index}`} className="flex items-center justify-between gap-4 text-sm">
-                    <span className="font-medium text-zinc-600">
+                    <span className="font-medium text-brand-ink-muted">
                       {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                     </span>
-                    <span className="font-bold text-zinc-950">
+                    <span className="font-bold text-brand-ink">
                       {credit ? `-${formatLocalizedCurrency(amount, language)}` : formatLocalizedCurrency(amount, language)}
                     </span>
                   </div>
@@ -186,16 +186,16 @@ function BillBreakdown({ bill, t, language }) {
 
 function PaymentReceiptCard({ payment, t, language }) {
   return (
-    <div className="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 p-5" data-testid="payment-receipt">
+    <div className="rounded-[1.4rem] border border-brand-success/30 bg-brand-success/10 p-5" data-testid="payment-receipt">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptTitle')}
           </p>
-          <p className="mt-2 text-lg font-black text-emerald-950">
+          <p className="mt-2 text-lg font-black text-brand-ink">
             {formatLocalizedCurrency(payment.amount, language)}
           </p>
-          <p className="mt-1 text-sm font-medium text-emerald-900/80">
+          <p className="mt-1 text-sm font-medium text-brand-success/80">
             {payment.message || t('checkoutPage.paymentRecorded')}
           </p>
         </div>
@@ -203,32 +203,32 @@ function PaymentReceiptCard({ payment, t, language }) {
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptMethod')}
           </p>
-          <p className="mt-2 text-sm font-bold text-emerald-950">{humanizePaymentMethod(payment.paymentMethod)}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink">{humanizePaymentMethod(payment.paymentMethod)}</p>
         </div>
         <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptRemaining')}
           </p>
-          <p className="mt-2 text-sm font-bold text-emerald-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {formatLocalizedCurrency(payment.remainingBalance, language)}
           </p>
         </div>
         <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptTotalPaid')}
           </p>
-          <p className="mt-2 text-sm font-bold text-emerald-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {formatLocalizedCurrency(payment.totalPaid, language)}
           </p>
         </div>
         <div className="rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptCapturedAt')}
           </p>
-          <p className="mt-2 text-sm font-bold text-emerald-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {formatLocalizedDateTime(payment.createdAt, language, { dateStyle: 'medium', timeStyle: 'short' })}
           </p>
         </div>
@@ -236,10 +236,10 @@ function PaymentReceiptCard({ payment, t, language }) {
 
       {payment.gatewayReference ? (
         <div className="mt-4 rounded-[1.15rem] border border-white/70 bg-white/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
             {t('checkoutPage.receiptReference')}
           </p>
-          <p className="mt-2 text-sm font-bold text-emerald-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             <LtrText>{payment.gatewayReference}</LtrText>
           </p>
         </div>
@@ -297,24 +297,24 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
       widthClassName="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('checkoutPage.outstandingBalanceLabel')}
           </p>
-          <p className="mt-2 text-2xl font-black text-zinc-950">
+          <p className="mt-2 text-2xl font-black text-brand-ink">
             {formatLocalizedCurrency(outstandingBalance, language)}
           </p>
         </div>
 
         {formError ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {formError}
           </div>
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('checkoutPage.paymentAmountLabel')}
             </span>
             <input
@@ -323,18 +323,18 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
               step="0.01"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('checkoutPage.paymentMethodLabel')}
             </span>
             <select
               value={paymentMethod}
               onChange={(event) => setPaymentMethod(event.target.value)}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             >
               {PAYMENT_METHODS.map((method) => (
                 <option key={method} value={method}>
@@ -345,15 +345,15 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
           </label>
         </div>
 
-        <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-600">
+        <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink-muted">
           {t('checkoutPage.paymentModalNote')}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button type="button" variant="outline" onClick={onClose} className="h-12 border-zinc-200">
+          <Button type="button" variant="outline" onClick={onClose} className="h-12 border-brand-surface-border">
             {t('cancel')}
           </Button>
-          <Button type="submit" disabled={submitting} className="h-12 bg-zinc-950 text-white hover:bg-zinc-800">
+          <Button type="submit" disabled={submitting} className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep">
             {submitting ? t('checkoutPage.paymentSubmitting') : t('checkoutPage.paymentSubmit')}
           </Button>
         </div>
@@ -624,7 +624,7 @@ export default function Checkout() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {gateTitle}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -661,7 +661,7 @@ export default function Checkout() {
               {selectionTips.map((item) => (
                 <div
                   key={item}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 text-sm font-medium leading-6 text-brand-ink-muted"
                 >
                   {item}
                 </div>
@@ -676,22 +676,22 @@ export default function Checkout() {
               action={<StatusPill status={selected.status} />}
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.guest')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">{selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('common.guest')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink">{selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                     {selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('checkInPage.confirmation')}</p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('checkInPage.confirmation')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink">
                     <LtrText>{selected.confirmationNumber}</LtrText>
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">{t('common.stay')}</p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('common.stay')}</p>
+                  <p className="mt-2 text-sm font-bold text-brand-ink">
                     {formatLocalizedDate(selected.checkInDate, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -704,15 +704,15 @@ export default function Checkout() {
                       year: 'numeric',
                     })}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                     {t('roomNumber', { number: selected.roomNumber })} | {translateKnownValue(selected.roomTypeName, t)}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('checkoutPage.outstandingBalanceLabel')}
                   </p>
-                  <p className={`mt-2 text-lg font-black ${outstandingBalance > 0 ? 'text-rose-900' : 'text-emerald-700'}`}>
+                  <p className={`mt-2 text-lg font-black ${outstandingBalance > 0 ? 'text-brand-danger' : 'text-brand-success'}`}>
                     {bill
                       ? formatLocalizedCurrency(outstandingBalance, i18n.language)
                       : billLoading
@@ -723,7 +723,7 @@ export default function Checkout() {
               </div>
 
               {!checkoutSuccess && blockingMessage ? (
-                <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                <div className="mt-4 rounded-[1.25rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm font-medium text-brand-warning">
                   {blockingMessage}
                 </div>
               ) : null}
@@ -736,32 +736,32 @@ export default function Checkout() {
                   />
                   {selected ? (
                     <div className="mt-4 space-y-4">
-                      <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+                      <div className="rounded-[1.35rem] border border-brand-success/30 bg-brand-success/10 p-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div>
-                            <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-success">
                               {t('checkoutPage.roomStatusTitle')}
                             </p>
-                            <p className="mt-2 text-sm font-medium text-emerald-900">
+                            <p className="mt-2 text-sm font-medium text-brand-success">
                               {t('checkoutPage.roomStatusDescription', {
                                 roomNumber: selected.roomNumber,
                                 status: getRoomStatusLabel('NEEDS_CLEANING', t),
                               })}
                             </p>
                           </div>
-                          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-emerald-900">
+                          <span className="inline-flex items-center rounded-full border border-brand-success/30 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
                             {getRoomStatusLabel('NEEDS_CLEANING', t)}
                           </span>
                         </div>
                       </div>
 
-                      <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
+                      <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div>
-                            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted">
                               {t('checkoutPage.nextStepTitle')}
                             </p>
-                            <p className="mt-2 text-sm font-medium text-zinc-700">
+                            <p className="mt-2 text-sm font-medium text-brand-ink">
                               {t('checkoutPage.nextStepDescription')}
                             </p>
                           </div>
@@ -772,7 +772,7 @@ export default function Checkout() {
                                 state: { confirmationNumber: selected.confirmationNumber },
                               })
                             }
-                            className="h-12 bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                            className="h-12 bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                           >
                             <Receipt className="h-4 w-4" />
                             {t('checkoutPage.openInvoicePreview')}
@@ -792,7 +792,7 @@ export default function Checkout() {
                 bill ? (
                   <PaymentStatusBadge status={paymentStatus} t={t} />
                 ) : billLoading ? (
-                  <span className="text-sm font-medium text-zinc-500">{t('checkoutPage.loadingBill')}</span>
+                  <span className="text-sm font-medium text-brand-ink-muted">{t('checkoutPage.loadingBill')}</span>
                 ) : null
               }
             >
@@ -824,41 +824,41 @@ export default function Checkout() {
               ) : (
                 <div className="space-y-5">
                   <div className="grid gap-4 md:grid-cols-3">
-                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('checkoutPage.paymentPanelOutstanding')}
                       </p>
-                      <p className="mt-2 text-lg font-black text-zinc-950">
+                      <p className="mt-2 text-lg font-black text-brand-ink">
                         {formatLocalizedCurrency(outstandingBalance, i18n.language)}
                       </p>
                     </div>
-                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('checkoutPage.paymentStatusLabel')}
                       </p>
                       <div className="mt-3">
                         <PaymentStatusBadge status={paymentStatus} t={t} />
                       </div>
                     </div>
-                    <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('common.finalized')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
                         {bill.invoiceFinalized ? t('common.yes') : t('common.no')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-medium text-zinc-500">
+                    <p className="text-sm font-medium text-brand-ink-muted">
                       {outstandingBalance > 0 ? t('checkoutPage.paymentPanelHint') : t('checkoutPage.paymentSettledHint')}
                     </p>
                     <Button
                       type="button"
                       onClick={() => setPaymentModalOpen(true)}
                       disabled={!canRecordPayment || paymentLoading}
-                      className="h-12 bg-zinc-950 text-white hover:bg-zinc-800"
+                      className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep"
                     >
                       <Wallet className="h-4 w-4" />
                       {t('checkoutPage.openPaymentModal')}
@@ -866,7 +866,7 @@ export default function Checkout() {
                   </div>
 
                   {paymentError ? (
-                    <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                    <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                       {paymentError}
                     </div>
                   ) : null}
@@ -908,12 +908,12 @@ export default function Checkout() {
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.title} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                    <div key={item.title} className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
                         <Icon className="h-4 w-4" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-zinc-950">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
                         {item.description}
                       </p>
                     </div>
@@ -922,7 +922,7 @@ export default function Checkout() {
               </div>
 
               {checkoutError ? (
-                <div className="mt-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+                <div className="mt-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                   {checkoutError}
                 </div>
               ) : null}
@@ -933,7 +933,7 @@ export default function Checkout() {
                   variant="outline"
                   onClick={handleReset}
                   disabled={checkoutLoading}
-                  className="h-14 w-full border-zinc-200 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+                  className="h-14 w-full border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                 >
                   {t('checkoutPage.resetWorkflow')}
                 </Button>
@@ -941,7 +941,7 @@ export default function Checkout() {
                   type="button"
                   onClick={handleCheckout}
                   disabled={!canCheckOut || checkoutLoading}
-                  className="h-14 w-full bg-zinc-950 text-sm font-bold text-white hover:bg-zinc-800"
+                  className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                 >
                   {checkoutLoading ? (
                     t('checkoutPage.processing')

@@ -8,8 +8,8 @@ export function RadialStatusChart({
   max = 100,
   label = "Status",
   valueFormatter,
-  color = "#10b981",
-  trackColor = "#f4f4f5",
+  color = "#1D9E75",
+  trackColor = "#FBF9F4",
   height = 200,
   loading = false,
   error = null,
@@ -62,10 +62,10 @@ export function RadialStatusChart({
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-hint">
           {label}
         </span>
-        <span className="mt-1 text-3xl font-black tracking-tight text-zinc-950">
+        <span className="mt-1 text-3xl font-black tracking-tight text-brand-ink">
           {displayValue}
         </span>
       </div>

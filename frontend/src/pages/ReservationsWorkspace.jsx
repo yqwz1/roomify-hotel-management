@@ -75,13 +75,13 @@ const FILTER_GRID_CLASS =
   'grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]';
 
 const FILTER_FIELD_CLASS =
-  'flex min-w-0 flex-col gap-2 rounded-[1.35rem] border border-zinc-200 bg-white p-3 shadow-sm';
+  'flex min-w-0 flex-col gap-2 rounded-[1.35rem] border border-brand-surface-border bg-white p-3 shadow-sm';
 
 const FILTER_LABEL_CLASS =
-  'text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500';
+  'text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted';
 
 const FILTER_INPUT_CLASS =
-  'h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-900 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+  'h-11 w-full rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
 export default function ReservationsWorkspace() {
   const navigate = useNavigate();
@@ -279,7 +279,7 @@ export default function ReservationsWorkspace() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.workspaceTitle`)}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -324,7 +324,7 @@ export default function ReservationsWorkspace() {
           value={String(metrics.balancesDue)}
           hint={t(`${pageTx}.metrics.balanceHint`)}
           tone="light"
-          cardClassName="!bg-white !text-zinc-950 !border-zinc-200 !shadow-sm"
+          cardClassName="!bg-white !text-brand-ink !border-brand-surface-border !shadow-sm"
         />
       </div>
 
@@ -345,8 +345,8 @@ export default function ReservationsWorkspace() {
                     onClick={() => handleTabChange(tab.id)}
                     className={`rounded-full px-4 py-2 text-sm font-bold transition ${
                       isActive
-                        ? 'bg-zinc-950 text-white'
-                        : 'border border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300 hover:bg-white'
+                        ? 'bg-brand-primary text-white'
+                        : 'border border-brand-surface-border bg-brand-surface-light text-brand-ink-muted hover:border-brand-surface-border hover:bg-white'
                     }`}
                   >
                     {tab.label}
@@ -357,7 +357,7 @@ export default function ReservationsWorkspace() {
 
             <form
               onSubmit={handleSubmit}
-              className="space-y-4 rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4"
+              className="space-y-4 rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4"
             >
               <div className={FILTER_GRID_CLASS}>
                 <label className={FILTER_FIELD_CLASS}>
@@ -458,7 +458,7 @@ export default function ReservationsWorkspace() {
               <div className="flex flex-wrap gap-3 sm:justify-end">
                 <button
                   type="submit"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                 >
                   {t(`${pageTx}.applyFilters`)}
                 </button>
@@ -466,15 +466,15 @@ export default function ReservationsWorkspace() {
                   type="button"
                   onClick={handleReset}
                   disabled={isAtQueueDefault}
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {t('common.clearFilters')}
                 </button>
               </div>
 
-              <div className="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4">
+              <div className="rounded-[1.25rem] border border-brand-surface-border bg-white px-4 py-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
                     {hasPendingFilterChanges
                       ? translateWithFallback(
                           t,
@@ -488,7 +488,7 @@ export default function ReservationsWorkspace() {
                         )}
                   </p>
                   {hasPendingFilterChanges ? (
-                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                    <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1 text-xs font-bold text-brand-warning">
                       {translateWithFallback(
                         t,
                         'staffDashboardPage.pendingFiltersHint',
@@ -503,13 +503,13 @@ export default function ReservationsWorkspace() {
                     {visibleFilterChips.map((chip) => (
                       <span
                         key={chip.key}
-                        className="inline-flex max-w-full items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold text-zinc-700"
+                        className="inline-flex max-w-full items-center gap-1 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold text-brand-ink"
                       >
-                        <span className="text-zinc-500">{chip.label}:</span>
+                        <span className="text-brand-ink-muted">{chip.label}:</span>
                         {chip.ltr ? (
-                          <LtrText className="text-zinc-950">{chip.value}</LtrText>
+                          <LtrText className="text-brand-ink">{chip.value}</LtrText>
                         ) : (
-                          <span className="min-w-0 break-words [overflow-wrap:anywhere] text-zinc-950">
+                          <span className="min-w-0 break-words [overflow-wrap:anywhere] text-brand-ink">
                             {chip.value}
                           </span>
                         )}
@@ -517,7 +517,7 @@ export default function ReservationsWorkspace() {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm font-medium text-zinc-500">
+                  <p className="mt-3 text-sm font-medium text-brand-ink-muted">
                     {translateWithFallback(
                       t,
                       'staffDashboardPage.emptyFiltersNote',
@@ -526,7 +526,7 @@ export default function ReservationsWorkspace() {
                   </p>
                 )}
 
-                <p className="mt-3 text-sm font-medium leading-6 text-zinc-600">
+                <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
                   {hasConfirmationPrecedence
                     ? translateWithFallback(
                         t,
@@ -562,7 +562,7 @@ export default function ReservationsWorkspace() {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                      className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
                     >
                       {t('common.clearFilters')}
                     </button>
@@ -580,7 +580,7 @@ export default function ReservationsWorkspace() {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                      className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
                     >
                       {t('common.clearFilters')}
                     </button>
@@ -600,8 +600,8 @@ export default function ReservationsWorkspace() {
                       onClick={() => handleOpenReservation(reservation)}
                       className={`w-full rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
                         isSelected
-                          ? 'border-zinc-950 bg-zinc-950 text-white'
-                          : 'border-zinc-200 bg-white hover:border-zinc-300'
+                          ? 'border-brand-primary bg-brand-primary text-white'
+                          : 'border-brand-surface-border bg-white hover:border-brand-surface-border'
                       }`}
                     >
                       <div className="flex min-w-0 flex-col gap-4">
@@ -612,7 +612,7 @@ export default function ReservationsWorkspace() {
                             </p>
                             <LtrText
                               className={`mt-1 text-sm font-medium ${
-                                isSelected ? 'text-white/70' : 'text-zinc-500'
+                                isSelected ? 'text-white/70' : 'text-brand-ink-muted'
                               }`}
                             >
                               {reservation.guestEmail || t('common.noGuestEmailProvided')}
@@ -622,7 +622,7 @@ export default function ReservationsWorkspace() {
                             className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${
                               isSelected
                                 ? 'border-white/20 bg-white/10 text-white'
-                                : 'border-zinc-200 bg-zinc-50 text-zinc-700'
+                                : 'border-brand-surface-border bg-brand-surface-light text-brand-ink'
                             }`}
                           >
                             {getReservationStatusLabel(reservation.status, t)}
@@ -634,10 +634,10 @@ export default function ReservationsWorkspace() {
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
                                 ? 'border-white/10 bg-white/5'
-                                : 'border-zinc-200 bg-zinc-50'
+                                : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                               {t('confirmationNumber')}
                             </p>
                             <LtrText className="mt-2 text-sm font-bold">
@@ -649,10 +649,10 @@ export default function ReservationsWorkspace() {
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
                                 ? 'border-white/10 bg-white/5'
-                                : 'border-zinc-200 bg-zinc-50'
+                                : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                               {t('common.room')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
@@ -660,7 +660,7 @@ export default function ReservationsWorkspace() {
                             </p>
                             <p
                               className={`mt-1 text-xs font-medium ${
-                                isSelected ? 'text-white/70' : 'text-zinc-500'
+                                isSelected ? 'text-white/70' : 'text-brand-ink-muted'
                               }`}
                             >
                               {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
@@ -671,10 +671,10 @@ export default function ReservationsWorkspace() {
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
                                 ? 'border-white/10 bg-white/5'
-                                : 'border-zinc-200 bg-zinc-50'
+                                : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                               {t('modifyReservationPage.stayDates')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
@@ -686,7 +686,7 @@ export default function ReservationsWorkspace() {
                             </p>
                             <p
                               className={`mt-1 text-xs font-medium ${
-                                isSelected ? 'text-white/70' : 'text-zinc-500'
+                                isSelected ? 'text-white/70' : 'text-brand-ink-muted'
                               }`}
                             >
                               {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
@@ -701,10 +701,10 @@ export default function ReservationsWorkspace() {
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
                                 ? 'border-white/10 bg-white/5'
-                                : 'border-zinc-200 bg-zinc-50'
+                                : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                               {t('checkInPage.reservationTotal')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
@@ -713,7 +713,7 @@ export default function ReservationsWorkspace() {
                             {reservation.outstandingBalance != null ? (
                               <p
                                 className={`mt-1 text-xs font-medium ${
-                                  isSelected ? 'text-white/70' : 'text-zinc-500'
+                                  isSelected ? 'text-white/70' : 'text-brand-ink-muted'
                                 }`}
                               >
                                 {t('checkoutPage.outstandingBalanceLabel')}:{' '}
@@ -730,12 +730,12 @@ export default function ReservationsWorkspace() {
 
                         <div
                           className={`flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between ${
-                            isSelected ? 'border-white/10' : 'border-zinc-200'
+                            isSelected ? 'border-white/10' : 'border-brand-surface-border'
                           }`}
                         >
                           <p
                             className={`text-sm font-medium ${
-                              isSelected ? 'text-white/80' : 'text-zinc-500'
+                              isSelected ? 'text-white/80' : 'text-brand-ink-muted'
                             }`}
                           >
                             {getReservationWorkspaceActionLabel(reservation, today, t)}

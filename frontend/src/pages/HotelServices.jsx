@@ -67,14 +67,14 @@ function ServiceModal({
     >
       <form onSubmit={onSubmit} className="space-y-5">
         {error ? (
-          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(t, 'nameLabel', 'Name')}
             </span>
             <input
@@ -82,7 +82,7 @@ function ServiceModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, name: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'hotelServicesPage.namePlaceholder',
@@ -93,7 +93,7 @@ function ServiceModal({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {translateWithFallback(
                 t,
                 'hotelServicesPage.categoryLabel',
@@ -105,7 +105,7 @@ function ServiceModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, category: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             >
               {SERVICE_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -121,7 +121,7 @@ function ServiceModal({
         </div>
 
         <label className="space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {translateWithFallback(t, 'price', 'Price')}
           </span>
           <input
@@ -132,20 +132,20 @@ function ServiceModal({
             onChange={(event) =>
               setFormData((current) => ({ ...current, price: event.target.value }))
             }
-            className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+            className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             required
           />
         </label>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
+        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <Checkbox
             checked={formData.active}
             onCheckedChange={(checked) =>
               setFormData((current) => ({ ...current, active: checked === true }))
             }
-            className="h-4 w-4 rounded border-zinc-300"
+            className="h-4 w-4 rounded border-brand-surface-border"
           />
-          <span className="text-sm font-medium text-zinc-700">
+          <span className="text-sm font-medium text-brand-ink">
             {translateWithFallback(
               t,
               'hotelServicesPage.activeToggle',
@@ -158,14 +158,14 @@ function ServiceModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+            className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {translateWithFallback(t, 'cancel', 'Cancel')}
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+            className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
           >
             {saving
               ? translateWithFallback(t, 'saving', 'Saving...')
@@ -341,7 +341,7 @@ export default function HotelServices() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {translateWithFallback(
               t,
               'hotelServicesPage.workspaceTitle',
@@ -422,7 +422,7 @@ export default function HotelServices() {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
           >
             <Plus className="h-4 w-4" />
             {translateWithFallback(t, 'hotelServicesPage.createAction', 'Add Service')}
@@ -462,14 +462,14 @@ export default function HotelServices() {
             {sortedServices.map((service) => (
               <div
                 key={service.id}
-                className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-lg font-black tracking-tight text-zinc-950">
+                    <p className="text-lg font-black tracking-tight text-brand-ink">
                       {service.name}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                    <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                       {translateWithFallback(
                         t,
                         `hotelServicesPage.categories.${String(service.category || 'OTHER').toLowerCase()}`,
@@ -481,15 +481,15 @@ export default function HotelServices() {
                     <span
                       className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
                         service.active
-                          ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-                          : 'border-zinc-200 bg-white text-zinc-600'
+                          ? 'border-brand-success/30 bg-brand-success/10 text-brand-success'
+                          : 'border-brand-surface-border bg-white text-brand-ink-muted'
                       }`}
                     >
                       {service.active
                         ? translateWithFallback(t, 'hotelServicesPage.availableLabel', 'Active')
                         : translateWithFallback(t, 'hotelServicesPage.unavailableLabel', 'Inactive')}
                     </span>
-                    <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700">
+                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink">
                       {formatLocalizedCurrency(service.price, i18n.language)}
                     </span>
                   </div>
@@ -499,7 +499,7 @@ export default function HotelServices() {
                   <button
                     type="button"
                     onClick={() => openEditModal(service)}
-                    className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+                    className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-white px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                   >
                     <Pencil className="h-4 w-4" />
                     {translateWithFallback(t, 'hotelServicesPage.editAction', 'Edit Service')}
@@ -510,8 +510,8 @@ export default function HotelServices() {
                     disabled={serviceActionId === service.id}
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       service.active
-                        ? 'border-amber-200 bg-amber-50 text-amber-900 hover:border-amber-300 hover:bg-amber-100'
-                        : 'border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 hover:bg-emerald-100'
+                        ? 'border-brand-warning/30 bg-brand-warning/10 text-brand-warning hover:border-brand-warning/40 hover:bg-brand-warning/15'
+                        : 'border-brand-success/30 bg-brand-success/10 text-brand-success hover:border-brand-success/40 hover:bg-brand-success/15'
                     }`}
                   >
                     {service.active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}

@@ -54,37 +54,37 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
       widthClassName="max-w-2xl"
     >
       <div className="space-y-5">
-          <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-4">
+          <div className="rounded-[1.5rem] border border-brand-danger/30 bg-brand-danger/10 p-4">
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-200 text-rose-950">
+              <span className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
                 <AlertTriangle className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-sm font-bold text-rose-950">
+                <p className="text-sm font-bold text-brand-ink">
                   {t('cancelWarning')}
                 </p>
-                <p className="mt-1 text-sm font-medium text-rose-900/80">
+                <p className="mt-1 text-sm font-medium text-brand-danger/80">
                   {t('cancelReservationPage.guestImpact')}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+          <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
               {t('cancelReservationPage.reservationSnapshot')}
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <div>
-                <p className="text-sm font-bold text-zinc-950">{reservation.guestName}</p>
-                <p className="mt-1 text-sm font-medium text-zinc-500">
+                <p className="text-sm font-bold text-brand-ink">{reservation.guestName}</p>
+                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                   {reservation.guestEmail || t('common.noGuestEmailProvided')}
                 </p>
               </div>
-              <div className="text-sm font-medium text-zinc-600 sm:text-right">
+              <div className="text-sm font-medium text-brand-ink-muted sm:text-right">
                 {t('roomNumber', { number: reservation.roomNumber })} | {translateKnownValue(reservation.roomTypeName, t)}
               </div>
-              <div className="text-sm font-medium text-zinc-600">
+              <div className="text-sm font-medium text-brand-ink-muted">
                 {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                   month: 'short',
                   day: 'numeric',
@@ -97,14 +97,14 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                   year: 'numeric',
                 })}
               </div>
-              <div className="text-sm font-bold text-zinc-950 sm:text-right">
+              <div className="text-sm font-bold text-brand-ink sm:text-right">
                 {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+            <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
               {error}
             </div>
           )}
@@ -112,7 +112,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
           <div className="space-y-2 flex flex-col">
             <label
               htmlFor="cancel-reason"
-              className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400"
+              className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint"
             >
               {t('reasonForCancellation')}
             </label>
@@ -122,7 +122,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
               onChange={(event) => setReason(event.target.value)}
               placeholder={t('cancelReasonPlaceholder')}
               rows={4}
-              className="w-full resize-none rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-950 focus-visible:border-zinc-400 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+              className="w-full resize-none rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
             />
           </div>
 
@@ -130,7 +130,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50"
+              className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
             >
               {t('keepReservation')}
             </button>
@@ -138,7 +138,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
               type="button"
               onClick={handleConfirm}
               disabled={confirming}
-              className="rounded-full bg-rose-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+              className="rounded-full bg-brand-danger px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-danger disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
             >
               {confirming ? t('cancelling') : t('cancelReservationPage.confirmCancellation')}
             </button>
@@ -202,7 +202,7 @@ export default function CancelReservation() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('cancelReservationPage.gateTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -242,7 +242,7 @@ export default function CancelReservation() {
               {t('cancelReservationPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 text-sm font-medium leading-6 text-brand-ink-muted"
                 >
                   {item}
                 </div>
@@ -257,28 +257,28 @@ export default function CancelReservation() {
               action={<StatusPill status={selected.status} />}
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('common.guest')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">{selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                  <p className="mt-2 text-lg font-black text-brand-ink">{selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                     {selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('confirmationNumber')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-zinc-950">
+                  <p className="mt-2 text-lg font-black text-brand-ink">
                     <LtrText>{selected.confirmationNumber}</LtrText>
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('common.stay')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
+                  <p className="mt-2 text-sm font-bold text-brand-ink">
                     {formatLocalizedDate(selected.checkInDate, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -291,25 +291,25 @@ export default function CancelReservation() {
                       year: 'numeric',
                     })}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-zinc-500">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                     {t('nightsCount', { count: selected.nights })}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+                <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                     {t('cancelReservationPage.roomAndTotal')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
+                  <p className="mt-2 text-sm font-bold text-brand-ink">
                     {t('roomNumber', { number: selected.roomNumber })} | {translateKnownValue(selected.roomTypeName, t)}
                   </p>
-                  <p className="mt-1 text-lg font-black text-zinc-950">
+                  <p className="mt-1 text-lg font-black text-brand-ink">
                     {formatLocalizedCurrency(selected.totalPrice, i18n.language)}
                   </p>
                 </div>
               </div>
 
               {!canCancel && (
-                <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                <div className="mt-4 rounded-[1.25rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm font-medium text-brand-warning">
                   {t('cancelReservationPage.statusBlocked', {
                     status: getReservationStatusLabel(selected.status, t),
                   })}
@@ -343,13 +343,13 @@ export default function CancelReservation() {
                   return (
                     <div
                       key={item.title}
-                      className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                      className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
                         <Icon className="h-4 w-4" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-zinc-950">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
                         {item.description}
                       </p>
                     </div>
@@ -361,7 +361,7 @@ export default function CancelReservation() {
                 type="button"
                 onClick={() => setShowDialog(true)}
                 disabled={!canCancel}
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-6 py-4 text-sm font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-brand-danger px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-danger disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
               >
                 {t('cancelReservationPage.confirmCancellation')}
               </button>

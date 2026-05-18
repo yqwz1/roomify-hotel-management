@@ -75,18 +75,18 @@ const attachValidNextStatuses = async (rooms) => {
 
 function LoadingCard() {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
+    <div className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3">
-          <div className="h-4 w-16 rounded-full bg-zinc-200" />
-          <div className="h-8 w-24 rounded-full bg-zinc-100" />
+          <div className="h-4 w-16 rounded-full bg-brand-surface-border" />
+          <div className="h-8 w-24 rounded-full bg-brand-primary-tint" />
         </div>
-        <div className="h-10 w-10 rounded-2xl bg-zinc-100" />
+        <div className="h-10 w-10 rounded-2xl bg-brand-primary-tint" />
       </div>
-      <div className="mt-6 h-6 w-28 rounded-full bg-zinc-200" />
+      <div className="mt-6 h-6 w-28 rounded-full bg-brand-surface-border" />
       <div className="mt-5 flex gap-2">
-        <div className="h-10 w-24 rounded-full bg-zinc-100" />
-        <div className="h-10 w-24 rounded-full bg-zinc-100" />
+        <div className="h-10 w-24 rounded-full bg-brand-primary-tint" />
+        <div className="h-10 w-24 rounded-full bg-brand-primary-tint" />
       </div>
     </div>
   );
@@ -268,7 +268,7 @@ export default function RoomStatus() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('roomStatusPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -301,8 +301,8 @@ export default function RoomStatus() {
                 onClick={() => setFilter(status)}
                 className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
                   filter === status
-                    ? 'border-zinc-950 bg-zinc-950 text-white'
-                    : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-white'
+                    ? 'border-brand-primary bg-brand-primary text-white'
+                    : 'border-brand-surface-border bg-brand-surface-light text-brand-ink hover:bg-white'
                 }`}
               >
                 {status === 'ALL' ? t('roomStatusPage.allRooms') : getRoomStatusLabel(status, t)}
@@ -311,19 +311,19 @@ export default function RoomStatus() {
           </div>
 
           <div className="relative w-full xl:w-72">
-            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
             <input
               type="text"
               placeholder={t('roomStatusPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
         </div>
 
         {error && rooms.length > 0 && (
-          <div className="mt-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+          <div className="mt-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {error}
           </div>
         )}
@@ -370,17 +370,17 @@ export default function RoomStatus() {
               return (
                 <article
                   key={room.id}
-                  className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]"
+                  className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                         {translateKnownValue(room.roomType?.name || t('roomStatusPage.roomTypeFallback'), t)}
                       </p>
-                      <p className="mt-2 text-3xl font-black tracking-tight text-zinc-950">
+                      <p className="mt-2 text-3xl font-black tracking-tight text-brand-ink">
                         {room.roomNumber}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {t('floorNum', { floor: room.floor ?? '-' })}
                       </p>
                     </div>
@@ -399,11 +399,11 @@ export default function RoomStatus() {
                   </div>
 
                   {room.roomType?.basePrice != null && (
-                    <div className="mt-5 rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                    <div className="mt-5 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                         {t('roomStatusPage.baseRate')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
                         {formatLocalizedCurrency(room.roomType.basePrice, i18n.language)} / {t('perNight')}
                       </p>
                     </div>
@@ -411,14 +411,14 @@ export default function RoomStatus() {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     {actionsUnavailable ? (
-                      <div className="rounded-[1.1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                      <div className="rounded-[1.1rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm text-brand-warning">
                         <p className="font-bold">{t('roomStatusPage.actionsUnavailableTitle')}</p>
-                        <p className="mt-1 font-medium text-amber-900/80">
+                        <p className="mt-1 font-medium text-brand-warning/80">
                           {t('roomStatusPage.actionsUnavailableDescription')}
                         </p>
                       </div>
                     ) : !hasActions ? (
-                      <div className="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-500">
+                      <div className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-medium text-brand-ink-muted">
                         {room.status === 'OCCUPIED'
                           ? t('roomStatusPage.occupiedLocked')
                           : t('roomStatusPage.managedAutomatically')}
@@ -430,7 +430,7 @@ export default function RoomStatus() {
                           type="button"
                           onClick={() => handleStatusChange(room.id, nextStatus)}
                           disabled={updatingRoomId === room.id}
-                          className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                          className="rounded-full border border-brand-surface-border bg-white px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                         >
                           {updatingRoomId === room.id
                             ? t('roomStatusPage.updating')

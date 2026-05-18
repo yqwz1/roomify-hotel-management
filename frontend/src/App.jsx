@@ -74,7 +74,7 @@ const AppContent = () => {
   }, [location.pathname, roles, t, i18n.resolvedLanguage]);
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-brand-surface-border">
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />

@@ -52,20 +52,20 @@ function Field({
     <div className="space-y-2">
       <label
         htmlFor={id}
-        className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400"
+        className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint"
       >
         {label}
         {required ? ' *' : ''}
       </label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
         <input
           id={id}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 ps-11 pe-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+          className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
         />
       </div>
     </div>
@@ -76,23 +76,23 @@ function ConflictBanner({ message, room, onSearchAlternatives }) {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-5">
+    <div className="rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
       <div className="flex items-start gap-4">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-200 text-rose-950">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
           <AlertTriangle className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-black tracking-tight text-rose-950">
+          <p className="text-lg font-black tracking-tight text-brand-ink">
             {t('roomAlreadyBooked')}
           </p>
-          <p className="mt-2 text-sm font-medium leading-6 text-rose-900/85">
+          <p className="mt-2 text-sm font-medium leading-6 text-brand-danger/85">
             {message}
           </p>
-          <div className="mt-4 rounded-[1.25rem] border border-rose-100 bg-white px-4 py-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-500">
+          <div className="mt-4 rounded-[1.25rem] border border-brand-danger/30 bg-white px-4 py-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-danger">
               {t('whatYouCanDo')}
             </p>
-            <p className="mt-2 text-sm font-medium text-zinc-700">
+            <p className="mt-2 text-sm font-medium text-brand-ink">
               {room?.roomNumber
                 ? t('tryDifferentDatesRoom', { room: room.roomNumber })
                 : t('searchAlternativeRooms')}
@@ -100,7 +100,7 @@ function ConflictBanner({ message, room, onSearchAlternatives }) {
             <button
               type="button"
               onClick={onSearchAlternatives}
-              className="mt-4 inline-flex items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-700"
+              className="mt-4 inline-flex items-center justify-center rounded-full bg-brand-danger px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-danger"
             >
               {t('searchAlternativeBtn')}
             </button>
@@ -249,16 +249,16 @@ export default function BookRoom() {
           title={t('bookRoomPage.noRoomPanelTitle')}
           description={t('bookRoomPage.noRoomPanelDescription')}
         >
-          <div className="rounded-[1.5rem] border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center">
-            <BedDouble className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-4 text-lg font-black text-zinc-950">{t('noRoomSelected')}</p>
-            <p className="mt-2 text-sm font-medium text-zinc-500">
+          <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+            <BedDouble className="mx-auto h-10 w-10 text-brand-ink-hint" />
+            <p className="mt-4 text-lg font-black text-brand-ink">{t('noRoomSelected')}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
               {t('bookRoomPage.noRoomMessage')}
             </p>
             <button
               type="button"
               onClick={() => navigate('/search')}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
             >
               <ArrowLeft className="h-4 w-4" />
               {t('backToRoomSearch')}
@@ -282,7 +282,7 @@ export default function BookRoom() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('bookRoomPage.snapshotTitle')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -321,14 +321,14 @@ export default function BookRoom() {
             description={t('bookRoomPage.formDescription')}
           >
             {validationError && (
-              <div className="mb-5 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+              <div className="mb-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                 {validationError}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t('bookRoomPage.stayWindow')}
                 </p>
                 <DateRangePicker
@@ -344,14 +344,14 @@ export default function BookRoom() {
                   }}
                 />
                 {nights > 0 && (
-                  <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-700">
+                  <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink">
                     {t('bookRoomPage.nightsSelected', { count: nights })}
                   </div>
                 )}
               </div>
 
               <div className="space-y-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t('bookRoomPage.guestProfile')}
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -416,7 +416,7 @@ export default function BookRoom() {
                   variant="outline"
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-zinc-200 px-6 py-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 h-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border px-6 py-4 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   {t('back')}
@@ -424,7 +424,7 @@ export default function BookRoom() {
                 <Button
                   type="submit"
                   disabled={submitting || nights <= 0}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 h-auto"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
                 >
                   {submitting
                     ? t('bookRoomPage.creatingReservation')
@@ -443,29 +443,29 @@ export default function BookRoom() {
             description={t('bookRoomPage.summaryDescription')}
           >
             <div className="space-y-5">
-              <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#f5f5f4_0%,#fafaf9_45%,#ede9e1_100%)]">
-                <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-zinc-950 shadow-sm">
+              <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
+                <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm">
                   <BedDouble className="h-7 w-7" />
                 </span>
               </div>
 
               <div>
-                <p className="text-2xl font-black tracking-tight text-zinc-950">
+                <p className="text-2xl font-black tracking-tight text-brand-ink">
                   {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
                 </p>
-                <p className="mt-1 text-sm font-medium text-zinc-500">
+                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                   {translateKnownValue(room?.roomType?.name, t) || t('bookRoomPage.roomTypeUnavailable')}
                   {room?.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                 </p>
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t('common.dates')}
                   </p>
-                  <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-zinc-950">
-                    <CalendarRange className="h-4 w-4 text-zinc-400" />
+                  <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
+                    <CalendarRange className="h-4 w-4 text-brand-ink-hint" />
                     {formatLocalizedDate(checkIn, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -479,44 +479,44 @@ export default function BookRoom() {
                     })}
                   </p>
                 </div>
-                <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t('bookRoomPage.capacityLabel')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-zinc-950">
+                  <p className="mt-2 text-sm font-bold text-brand-ink">
                     {t('upToGuests', { count: room?.roomType?.maxGuests ?? 0 })}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4">
+              <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
                 <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">{t('bookRoomPage.ratePerNight')}</span>
-                  <span className="font-bold text-zinc-950">
+                  <span className="font-medium text-brand-ink-muted">{t('bookRoomPage.ratePerNight')}</span>
+                  <span className="font-bold text-brand-ink">
                     {formatLocalizedCurrency(roomRate, i18n.language)}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">{t('nightsLabel')}</span>
-                  <span className="font-bold text-zinc-950">{nights || '-'}</span>
+                  <span className="font-medium text-brand-ink-muted">{t('nightsLabel')}</span>
+                  <span className="font-bold text-brand-ink">{nights || '-'}</span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">{t('subtotal')}</span>
-                  <span className="font-bold text-zinc-950">
+                  <span className="font-medium text-brand-ink-muted">{t('subtotal')}</span>
+                  <span className="font-bold text-brand-ink">
                     {formatLocalizedCurrency(subtotal, i18n.language)}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-zinc-500">{t('taxes15')}</span>
-                  <span className="font-bold text-zinc-950">
+                  <span className="font-medium text-brand-ink-muted">{t('taxes15')}</span>
+                  <span className="font-bold text-brand-ink">
                     {formatLocalizedCurrency(taxes, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-4 flex items-center justify-between gap-4 border-t border-zinc-200 pt-4">
-                  <span className="text-sm font-black uppercase tracking-[0.18em] text-zinc-500">
+                <div className="mt-4 flex items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
+                  <span className="text-sm font-black uppercase tracking-[0.18em] text-brand-ink-muted">
                     {t('total')}
                   </span>
-                  <span className="text-2xl font-black text-zinc-950">
+                  <span className="text-2xl font-black text-brand-ink">
                     {formatLocalizedCurrency(totalPrice, i18n.language)}
                   </span>
                 </div>
@@ -532,7 +532,7 @@ export default function BookRoom() {
                     .map((amenity) => (
                       <span
                         key={amenity}
-                        className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-600"
+                        className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
                       >
                         {translateKnownValue(amenity, t)}
                       </span>

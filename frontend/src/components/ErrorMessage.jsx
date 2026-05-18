@@ -17,7 +17,7 @@ const ErrorMessage = ({ message, onDismiss }) => {
 
   return (
     <div
-      className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative flex items-start gap-3"
+      className="bg-brand-danger/10 border border-brand-danger/30 text-brand-danger px-4 py-3 rounded-lg relative flex items-start gap-3"
       role="alert"
     >
       <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -34,7 +34,7 @@ const ErrorMessage = ({ message, onDismiss }) => {
         <button
           type="button"
           onClick={handleDismiss}
-          className="flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
+          className="flex-shrink-0 text-brand-danger hover:text-brand-danger transition-colors"
           aria-label={t('dismissError')}
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
