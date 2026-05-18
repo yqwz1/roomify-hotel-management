@@ -50,20 +50,20 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
       >
         <div className="flex h-full flex-col">
           <div className="border-b border-brand-surface-border px-5 py-5">
-            <div className="flex items-center justify-between gap-3">
-              <Link to={homePath} onClick={handleNavigation} className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-brand-ink-muted">
-                  {brandName}
-                </p>
-                <p className="mt-1 truncate text-2xl font-black tracking-tight text-brand-ink">
-                  {t('hotelConsole')}
-                </p>
+            <div className="relative flex items-center justify-center">
+              <Link to={homePath} onClick={handleNavigation} className="inline-flex items-center justify-center">
+                <img
+                  src="/roomify-mark.png"
+                  alt={brandName}
+                  className="h-12 w-auto object-contain select-none sm:h-14"
+                  draggable={false}
+                />
               </Link>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-2 text-brand-ink-muted transition hover:bg-white hover:text-brand-ink lg:hidden"
+                className="absolute end-0 top-1/2 -translate-y-1/2 rounded-full p-2 text-brand-ink-muted transition hover:bg-white hover:text-brand-ink lg:hidden"
                 aria-label={t('closeNavigation')}
               >
                 <X className="h-5 w-5" />

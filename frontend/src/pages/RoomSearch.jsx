@@ -15,6 +15,7 @@ import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { useAuth } from '../context/AuthProvider';
+import { useRoomTypes } from '../hooks/useRoomTypes';
 import { useSearch } from '../hooks/useSearch';
 import { getRoomSearchCardActions } from '../utils/roomSearchActions';
 import {
@@ -80,8 +81,13 @@ export default function RoomSearch() {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [sortOptionIndex, setSortOptionIndex] = useState(0);
 
+  const { roomTypes, fetchRoomTypes } = useRoomTypes();
   const { results, totalResults, loading, error, hasSearched, search, clearError } = useSearch();
   const sortOption = sortOptions[sortOptionIndex];
+
+  useEffect(() => {
+    fetchRoomTypes();
+  }, [fetchRoomTypes]);
 
   useEffect(() => {
     if (!hasRecoveredDates) return;
@@ -108,12 +114,17 @@ export default function RoomSearch() {
   }, [results]);
 
   const roomTypeOptions = useMemo(
-    () =>
-      [...new Set(results.map((room) => room.roomType?.name).filter(Boolean))].map((name) => ({
+    () => {
+      const roomTypeNames = roomTypes.length > 0
+        ? roomTypes.map((roomType) => roomType?.name).filter(Boolean)
+        : results.map((room) => room.roomType?.name).filter(Boolean);
+
+      return [...new Set(roomTypeNames)].map((name) => ({
         value: name,
         label: name,
-      })),
-    [results]
+      }));
+    },
+    [results, roomTypes]
   );
 
   const handleSearch = () => {
