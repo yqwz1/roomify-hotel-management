@@ -63,18 +63,18 @@ const METRIC_THEMES = {
     hint: 'text-sky-900/75',
   },
   active: {
-    card: 'border-emerald-200 bg-emerald-50/80',
-    icon: 'bg-white text-emerald-900 shadow-sm',
-    badge: 'border-emerald-200 bg-white/80 text-emerald-900',
-    value: 'text-emerald-950',
-    hint: 'text-emerald-900/75',
+    card: 'border-brand-success/30 bg-brand-success/10',
+    icon: 'bg-white text-brand-success shadow-sm',
+    badge: 'border-brand-success/30 bg-white/80 text-brand-success',
+    value: 'text-brand-ink',
+    hint: 'text-brand-success/75',
   },
   revenue: {
-    card: 'border-amber-200 bg-amber-50/85',
-    icon: 'bg-white text-amber-900 shadow-sm',
-    badge: 'border-amber-200 bg-white/80 text-amber-900',
-    value: 'text-amber-950',
-    hint: 'text-amber-900/75',
+    card: 'border-brand-warning/30 bg-brand-warning/10',
+    icon: 'bg-white text-brand-warning shadow-sm',
+    badge: 'border-brand-warning/30 bg-white/80 text-brand-warning',
+    value: 'text-brand-ink',
+    hint: 'text-brand-warning/75',
   },
   occupancy: {
     card: 'border-indigo-200 bg-indigo-50/85',
@@ -84,28 +84,28 @@ const METRIC_THEMES = {
     hint: 'text-indigo-900/75',
   },
   stay: {
-    card: 'border-rose-200 bg-rose-50/85',
-    icon: 'bg-white text-rose-900 shadow-sm',
-    badge: 'border-rose-200 bg-white/80 text-rose-900',
-    value: 'text-rose-950',
-    hint: 'text-rose-900/75',
+    card: 'border-brand-danger/30 bg-brand-danger/10',
+    icon: 'bg-white text-brand-danger shadow-sm',
+    badge: 'border-brand-danger/30 bg-white/80 text-brand-danger',
+    value: 'text-brand-ink',
+    hint: 'text-brand-danger/75',
   },
 };
 
 const SIGNAL_THEMES = {
   emerald: {
-    card: 'border-emerald-200 bg-emerald-50/80',
-    icon: 'bg-emerald-100 text-emerald-900',
-    eyebrow: 'text-emerald-700',
-    title: 'text-emerald-950',
-    body: 'text-emerald-900/80',
+    card: 'border-brand-success/30 bg-brand-success/10',
+    icon: 'bg-brand-success/15 text-brand-success',
+    eyebrow: 'text-brand-success',
+    title: 'text-brand-ink',
+    body: 'text-brand-success/80',
   },
   amber: {
-    card: 'border-amber-200 bg-amber-50/85',
-    icon: 'bg-amber-100 text-amber-900',
-    eyebrow: 'text-amber-700',
-    title: 'text-amber-950',
-    body: 'text-amber-900/80',
+    card: 'border-brand-warning/30 bg-brand-warning/10',
+    icon: 'bg-brand-warning/15 text-brand-warning',
+    eyebrow: 'text-brand-warning',
+    title: 'text-brand-ink',
+    body: 'text-brand-warning/80',
   },
   sky: {
     card: 'border-sky-200 bg-sky-50/85',
@@ -115,21 +115,21 @@ const SIGNAL_THEMES = {
     body: 'text-sky-900/80',
   },
   rose: {
-    card: 'border-rose-200 bg-rose-50/85',
-    icon: 'bg-rose-100 text-rose-900',
-    eyebrow: 'text-rose-700',
-    title: 'text-rose-950',
-    body: 'text-rose-900/80',
+    card: 'border-brand-danger/30 bg-brand-danger/10',
+    icon: 'bg-brand-danger/15 text-brand-danger',
+    eyebrow: 'text-brand-danger',
+    title: 'text-brand-ink',
+    body: 'text-brand-danger/80',
   },
 };
 
 const ROOM_TYPE_THEMES = [
   {
     accent: '#0f766e',
-    card: 'border-emerald-200 bg-emerald-50/85',
-    badge: 'border-emerald-200 bg-white/85 text-emerald-900',
-    progress: 'bg-emerald-500',
-    text: 'text-emerald-900',
+    card: 'border-brand-success/30 bg-brand-success/10',
+    badge: 'border-brand-success/30 bg-white/85 text-brand-success',
+    progress: 'bg-brand-success/100',
+    text: 'text-brand-success',
   },
   {
     accent: '#0369a1',
@@ -140,10 +140,10 @@ const ROOM_TYPE_THEMES = [
   },
   {
     accent: '#b45309',
-    card: 'border-amber-200 bg-amber-50/85',
-    badge: 'border-amber-200 bg-white/85 text-amber-900',
-    progress: 'bg-amber-500',
-    text: 'text-amber-900',
+    card: 'border-brand-warning/30 bg-brand-warning/10',
+    badge: 'border-brand-warning/30 bg-white/85 text-brand-warning',
+    progress: 'bg-brand-warning/100',
+    text: 'text-brand-warning',
   },
   {
     accent: '#4338ca',
@@ -154,10 +154,10 @@ const ROOM_TYPE_THEMES = [
   },
   {
     accent: '#be123c',
-    card: 'border-rose-200 bg-rose-50/85',
-    badge: 'border-rose-200 bg-white/85 text-rose-900',
-    progress: 'bg-rose-500',
-    text: 'text-rose-900',
+    card: 'border-brand-danger/30 bg-brand-danger/10',
+    badge: 'border-brand-danger/30 bg-white/85 text-brand-danger',
+    progress: 'bg-brand-danger/100',
+    text: 'text-brand-danger',
   },
 ];
 
@@ -243,7 +243,7 @@ function PerformanceMetricCard({
         ) : null}
       </div>
 
-      <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
+      <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted">
         {label}
       </p>
       <p className={cn('mt-3 text-3xl font-black tracking-tight', styles.value)}>
@@ -301,8 +301,8 @@ function RangePresetButton({ active, onClick, children }) {
       className={cn(
         'rounded-full border px-4 py-2 text-sm font-bold transition',
         active
-          ? 'border-emerald-300 bg-emerald-500 text-white shadow-sm'
-          : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+          ? 'border-brand-success/40 bg-brand-success/100 text-white shadow-sm'
+          : 'border-brand-surface-border bg-white text-brand-ink hover:border-brand-surface-border hover:bg-brand-surface-light'
       )}
     >
       {children}
@@ -335,7 +335,7 @@ function InteractiveTrendExplorer({
         ),
         accent: '#0f766e',
         accentSoft: 'rgba(15,118,110,0.14)',
-        accentSurface: 'border-emerald-200 bg-emerald-50/70',
+        accentSurface: 'border-brand-success/30 bg-brand-success/10/70',
         getValue: (point) => Number(point.occupancyRate ?? 0),
         formatValue: (value) => formatPercent(value),
         detailCards: (point) => [
@@ -379,7 +379,7 @@ function InteractiveTrendExplorer({
         ),
         accent: '#b45309',
         accentSoft: 'rgba(180,83,9,0.16)',
-        accentSurface: 'border-amber-200 bg-amber-50/80',
+        accentSurface: 'border-brand-warning/30 bg-brand-warning/10/80',
         getValue: (point) => Number(point.revenue ?? 0),
         formatValue: (value) =>
           formatLocalizedCurrency(value, language, {
@@ -450,13 +450,13 @@ function InteractiveTrendExplorer({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]" data-testid="occupancy-trend">
-      <div className="rounded-[1.6rem] border border-zinc-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+      <div className="rounded-[1.6rem] border border-brand-surface-border bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-lg font-black tracking-tight text-zinc-950">
+            <p className="text-lg font-black tracking-tight text-brand-ink">
               {activeMode.title}
             </p>
-            <p className="mt-1 text-sm font-medium leading-6 text-zinc-500">
+            <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
               {activeMode.description}
             </p>
           </div>
@@ -472,9 +472,9 @@ function InteractiveTrendExplorer({
                   'rounded-full border px-4 py-2 text-sm font-bold transition',
                   mode === nextMode
                     ? nextMode === 'occupancy'
-                      ? 'border-emerald-300 bg-emerald-500 text-white'
-                      : 'border-amber-300 bg-amber-500 text-white'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                      ? 'border-brand-success/40 bg-brand-success/100 text-white'
+                      : 'border-brand-warning/40 bg-brand-warning/100 text-white'
+                    : 'border-brand-surface-border bg-white text-brand-ink hover:border-brand-surface-border hover:bg-brand-surface-light'
                 )}
               >
                 {nextMode === 'occupancy'
@@ -516,7 +516,7 @@ function InteractiveTrendExplorer({
                 'rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] transition h-auto',
                 index === selectedIndex
                   ? activeMode.accentSurface
-                  : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700'
+                  : 'border-brand-surface-border bg-white text-brand-ink-muted hover:border-brand-surface-border hover:bg-brand-surface-light hover:text-brand-ink'
               )}
             >
               {point.label}
@@ -533,14 +533,14 @@ function InteractiveTrendExplorer({
               activeMode.accentSurface
             )}
           >
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted">
               {translateWithFallback(t, `${pageTx}.selectedDateLabel`, 'Selected date')}
             </p>
-            <p className="mt-2 text-sm font-bold text-zinc-700">{selectedPoint.fullLabel}</p>
-            <p className="mt-4 text-3xl font-black tracking-tight text-zinc-950">
+            <p className="mt-2 text-sm font-bold text-brand-ink">{selectedPoint.fullLabel}</p>
+            <p className="mt-4 text-3xl font-black tracking-tight text-brand-ink">
               {activeMode.formatValue(activeMode.getValue(selectedPoint))}
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-zinc-700">
+            <p className="mt-2 text-sm font-medium leading-6 text-brand-ink">
               {activeMode.summary(selectedPoint)}
             </p>
           </div>
@@ -549,12 +549,12 @@ function InteractiveTrendExplorer({
             {activeMode.detailCards(selectedPoint).map((item) => (
               <div
                 key={item.label}
-                className="rounded-[1.35rem] border border-zinc-200 bg-white p-4"
+                className="rounded-[1.35rem] border border-brand-surface-border bg-white p-4"
               >
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {item.label}
                 </p>
-                <p className="mt-2 text-lg font-black text-zinc-950">{item.value}</p>
+                <p className="mt-2 text-lg font-black text-brand-ink">{item.value}</p>
               </div>
             ))}
           </div>
@@ -635,8 +635,8 @@ function RoomTypeExplorer({
               className={cn(
                 'rounded-full border px-4 py-2 text-sm font-bold transition',
                 sortMode === key
-                  ? 'border-zinc-950 bg-zinc-950 text-white'
-                  : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                  ? 'border-brand-primary bg-brand-primary text-white'
+                  : 'border-brand-surface-border bg-white text-brand-ink hover:border-brand-surface-border hover:bg-brand-surface-light'
               )}
             >
               {label}
@@ -658,15 +658,15 @@ function RoomTypeExplorer({
                   'w-full rounded-[1.45rem] border p-4 text-left transition',
                   active
                     ? theme.card
-                    : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-white'
+                    : 'border-brand-surface-border bg-brand-surface-light hover:border-brand-surface-border hover:bg-white'
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-black text-zinc-950">
+                    <p className="text-sm font-black text-brand-ink">
                       {translateKnownValue(item.roomTypeName, t)}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-zinc-500">
+                    <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                       {translateWithFallback(
                         t,
                         `${pageTx}.distributionRate`,
@@ -684,7 +684,7 @@ function RoomTypeExplorer({
                   <span
                     className={cn(
                       'rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em]',
-                      active ? theme.badge : 'border-zinc-200 bg-white text-zinc-700'
+                      active ? theme.badge : 'border-brand-surface-border bg-white text-brand-ink'
                     )}
                   >
                     {formatPercent(item.occupancyRate)}
@@ -700,7 +700,7 @@ function RoomTypeExplorer({
                   />
                 </div>
 
-                <div className="mt-3 flex items-center justify-between text-sm font-medium text-zinc-600">
+                <div className="mt-3 flex items-center justify-between text-sm font-medium text-brand-ink-muted">
                   <span>
                     {translateWithFallback(
                       t,
@@ -727,17 +727,17 @@ function RoomTypeExplorer({
       <div className={cn('rounded-[1.75rem] border p-6', selectedTheme.card)}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-500">
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-muted">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionSelectedLabel`,
                 'Selected room type'
               )}
             </p>
-            <p className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
+            <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink">
               {translateKnownValue(selectedItem.roomTypeName, t)}
             </p>
-            <p className="mt-2 text-sm font-medium text-zinc-700">
+            <p className="mt-2 text-sm font-medium text-brand-ink">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionInsight`,
@@ -774,14 +774,14 @@ function RoomTypeExplorer({
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
                 {translateWithFallback(
                   t,
                   `${pageTx}.distributionTotalRooms`,
                   'Total rooms'
                 )}
               </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
                 <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedNumber(selectedItem.totalRooms, language)}
                 </span>
@@ -789,14 +789,14 @@ function RoomTypeExplorer({
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
                 {translateWithFallback(
                   t,
                   `${pageTx}.distributionOccupiedRooms`,
                   'Occupied rooms'
                 )}
               </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
                 <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
                 </span>
@@ -804,10 +804,10 @@ function RoomTypeExplorer({
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
                 {translateWithFallback(t, `${pageTx}.distributionVacantRooms`, 'Vacant rooms')}
               </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
                 <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedNumber(vacantRooms, language)}
                 </span>
@@ -815,10 +815,10 @@ function RoomTypeExplorer({
             </div>
 
             <div className="rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-zinc-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.1em] leading-5 text-brand-ink-hint">
                 {translateWithFallback(t, `${pageTx}.distributionRateLabel`, 'Base rate')}
               </p>
-              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-zinc-950">
+              <p className="mt-2 text-[clamp(1.8rem,3.5vw,2.25rem)] font-black leading-none tracking-tight text-brand-ink">
                 <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedCurrency(selectedItem.basePrice, language, {
                     minimumFractionDigits: 0,
@@ -1398,7 +1398,7 @@ export default function ManagerDashboard() {
         title={t('managerDashboardTitle')}
         description={t(`${pageTx}.description`, { name: welcomeName })}
         desktopAlign="start"
-        className="border-emerald-400/10 bg-[linear-gradient(135deg,#0f172a_0%,#0f766e_52%,#072f2a_100%)]"
+        className="border-brand-success/40/10 bg-[linear-gradient(135deg,#0f172a_0%,#0f766e_52%,#072f2a_100%)]"
         meta={[
           t(`${pageTx}.metaRange`, {
             start: formatLocalizedDate(appliedRange.startDate, i18n.language, {
@@ -1432,7 +1432,7 @@ export default function ManagerDashboard() {
         ]}
       >
         <div className="w-full max-w-[620px] rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur xl:ms-auto">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {translateWithFallback(t, `${pageTx}.heroSnapshotTitle`, 'Live Snapshot')}
           </p>
 
@@ -1489,7 +1489,7 @@ export default function ManagerDashboard() {
           </div>
 
           <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-300">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-ink-hint">
               {translateWithFallback(t, `${pageTx}.heroSignalLabel`, 'Manager signal')}
             </p>
             <p className="mt-2 text-sm font-medium leading-6 text-white/85">{heroSignal}</p>
@@ -1506,7 +1506,7 @@ export default function ManagerDashboard() {
             'Adjust the live date range with presets or manual inputs, then refresh the dashboard without losing context.'
           )}
           action={
-            <Button type="button" variant="outline" onClick={reload} className="border-zinc-200">
+            <Button type="button" variant="outline" onClick={reload} className="border-brand-surface-border">
               <RefreshCw className="h-4 w-4" />
               {t('retry')}
             </Button>
@@ -1527,32 +1527,32 @@ export default function ManagerDashboard() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t(`${pageTx}.startDateLabel`)}
                 </span>
                 <input
                   type="date"
                   value={draftRange.startDate}
                   onChange={(event) => handleRangeChange('startDate', event.target.value)}
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t(`${pageTx}.endDateLabel`)}
                 </span>
                 <input
                   type="date"
                   value={draftRange.endDate}
                   onChange={(event) => handleRangeChange('endDate', event.target.value)}
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
             </div>
 
             {filterError ? (
-              <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+              <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                 {filterError}
               </div>
             ) : null}
@@ -1561,7 +1561,7 @@ export default function ManagerDashboard() {
               <Button
                 type="button"
                 onClick={handleApplyRange}
-                className="h-12 bg-zinc-950 text-white hover:bg-zinc-800"
+                className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep"
               >
                 {t(`${pageTx}.applyFilters`)}
               </Button>
@@ -1569,30 +1569,30 @@ export default function ManagerDashboard() {
                 type="button"
                 variant="outline"
                 onClick={handleResetRange}
-                className="h-12 border-zinc-200"
+                className="h-12 border-brand-surface-border"
               >
                 {t(`${pageTx}.resetFilters`)}
               </Button>
             </div>
 
-            <div className="rounded-[1.45rem] border border-zinc-200 bg-zinc-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+            <div className="rounded-[1.45rem] border border-brand-surface-border bg-brand-surface-light p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                 {t(`${pageTx}.controlsSummaryTitle`)}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t(`${pageTx}.controlsSummaryReservations`)}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-zinc-950">
+                  <p className="mt-2 text-2xl font-black text-brand-ink">
                     {formatLocalizedNumber(metrics.totalReservations, i18n.language)}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t(`${pageTx}.controlsSummaryRevenue`)}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-zinc-950">
+                  <p className="mt-2 text-2xl font-black text-brand-ink">
                     {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1600,10 +1600,10 @@ export default function ManagerDashboard() {
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryExpenses`, 'Expenses')}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-zinc-950">
+                  <p className="mt-2 text-2xl font-black text-brand-ink">
                     {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1611,10 +1611,10 @@ export default function ManagerDashboard() {
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryNetProfit`, 'Net Profit')}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-zinc-950">
+                  <p className="mt-2 text-2xl font-black text-brand-ink">
                     {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1633,7 +1633,7 @@ export default function ManagerDashboard() {
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t(`${pageTx}.exportRoomTypeLabel`)}
                 </span>
                 <select
@@ -1644,7 +1644,7 @@ export default function ManagerDashboard() {
                       roomTypeId: event.target.value,
                     }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
                   <option value="">{t(`${pageTx}.allRoomTypes`)}</option>
                   {roomTypes.map((roomType) => (
@@ -1656,7 +1656,7 @@ export default function ManagerDashboard() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {t(`${pageTx}.exportStatusLabel`)}
                 </span>
                 <select
@@ -1667,7 +1667,7 @@ export default function ManagerDashboard() {
                       status: event.target.value,
                     }))
                   }
-                  className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
                   <option value="">{t(`${pageTx}.allStatuses`)}</option>
                   {EXPORTABLE_STATUSES.map((status) => (
@@ -1679,24 +1679,24 @@ export default function ManagerDashboard() {
               </label>
             </div>
 
-            <div className="rounded-[1.3rem] border border-amber-200 bg-amber-50 px-4 py-4 text-sm font-medium leading-6 text-amber-900">
+            <div className="rounded-[1.3rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-4 text-sm font-medium leading-6 text-brand-warning">
               {t(`${pageTx}.exportNote`)}
             </div>
 
             {exportError ? (
-              <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">
+              <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                 {exportError}
               </div>
             ) : null}
 
             {exportResult ? (
-              <div className="rounded-[1.35rem] border border-emerald-200 bg-emerald-50 p-4">
+              <div className="rounded-[1.35rem] border border-brand-success/30 bg-brand-success/10 p-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
                       {t(`${pageTx}.exportGeneratedAt`)}
                     </p>
-                    <p className="mt-1 text-sm font-bold text-emerald-950">
+                    <p className="mt-1 text-sm font-bold text-brand-ink">
                       {formatLocalizedDateTime(exportResult.generatedAt, i18n.language, {
                         dateStyle: 'medium',
                         timeStyle: 'short',
@@ -1705,10 +1705,10 @@ export default function ManagerDashboard() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
                       {t(`${pageTx}.exportRecords`)}
                     </p>
-                    <p className="mt-1 text-sm font-bold text-emerald-950">
+                    <p className="mt-1 text-sm font-bold text-brand-ink">
                       {formatLocalizedNumber(exportResult.totalRecords, i18n.language)}
                     </p>
                   </div>
@@ -1718,7 +1718,7 @@ export default function ManagerDashboard() {
                   <div className="mt-4">
                     <Button
                       asChild
-                      className="bg-emerald-700 text-white hover:bg-emerald-800"
+                      className="bg-brand-success text-white hover:bg-brand-success/85"
                     >
                       <a
                         href={exportUrl}
@@ -1737,7 +1737,7 @@ export default function ManagerDashboard() {
               type="button"
               onClick={handleExport}
               disabled={exporting}
-              className="h-12 bg-zinc-950 text-white hover:bg-zinc-800"
+              className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep"
             >
               <Download className="h-4 w-4" />
               {exporting ? t(`${pageTx}.exporting`) : t(`${pageTx}.exportAction`)}
@@ -1813,15 +1813,15 @@ export default function ManagerDashboard() {
           description={t(`${pageTx}.quickActionsDescription`)}
         >
           <div className="space-y-4">
-            <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-4 shadow-sm">
+            <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4 shadow-sm">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
                     <LineChart className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-zinc-950">AI Finance Dashboard</p>
-                    <p className="mt-1 text-xs font-medium leading-5 text-zinc-500">
+                    <p className="text-sm font-bold text-brand-ink">AI Finance Dashboard</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-brand-ink-muted">
                       View revenue forecasts and pricing recommendations.
                     </p>
                   </div>
@@ -1830,7 +1830,7 @@ export default function ManagerDashboard() {
                 <Button
                   type="button"
                   onClick={() => navigate('/manager/ai-finance')}
-                  className="h-10 flex-shrink-0 bg-zinc-950 px-4 text-white hover:bg-zinc-800"
+                  className="h-10 flex-shrink-0 bg-brand-primary px-4 text-white hover:bg-brand-primary-deep"
                 >
                   <LineChart className="h-4 w-4" />
                   Open AI Finance
@@ -1844,20 +1844,20 @@ export default function ManagerDashboard() {
               ))}
             </div>
 
-            <div className="rounded-[1.45rem] border border-zinc-200 bg-zinc-50 p-4">
+            <div className="rounded-[1.45rem] border border-brand-surface-border bg-brand-surface-light p-4">
               <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-950 shadow-sm">
+                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
                   <Layers3 className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-black text-zinc-950">
+                  <p className="text-sm font-black text-brand-ink">
                     {translateWithFallback(
                       t,
                       `${pageTx}.workflowHintTitle`,
                       'Recommended manager workflow'
                     )}
                   </p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-zinc-600">
+                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
                     {translateWithFallback(
                       t,
                       `${pageTx}.workflowHintDescription`,

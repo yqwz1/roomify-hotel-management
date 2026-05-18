@@ -211,7 +211,7 @@ export default function AdminDashboard() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {translateWithFallback(
               t,
               'adminDashboardPage.focusTitle',
@@ -347,23 +347,23 @@ export default function AdminDashboard() {
             />
           ) : (
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'adminDashboardPage.totalStaff', 'Total')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-zinc-950">{staff.length}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink">{staff.length}</p>
               </div>
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'adminDashboardPage.activeStaff', 'Active')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-zinc-950">{activeStaffCount}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink">{activeStaffCount}</p>
               </div>
-              <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+              <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                   {translateWithFallback(t, 'adminDashboardPage.inactiveStaff', 'Inactive')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-zinc-950">{inactiveStaffCount}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink">{inactiveStaffCount}</p>
               </div>
             </div>
           )}
@@ -410,14 +410,14 @@ export default function AdminDashboard() {
               {roomTypes.slice(0, 6).map((roomType) => (
                 <div
                   key={roomType.id}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-zinc-950">
+                      <p className="text-sm font-black text-brand-ink">
                         {translateKnownValue(roomType.name, t)}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {translateWithFallback(
                           t,
                           'adminDashboardPage.capacityLine',
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
                         )}
                       </p>
                     </div>
-                    <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-zinc-700">
+                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-brand-ink">
                       {formatLocalizedCurrency(roomType.basePrice, i18n.language)}
                     </span>
                   </div>
@@ -475,25 +475,25 @@ export default function AdminDashboard() {
               {auditLogs.map((entry) => (
                 <div
                   key={entry.id}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-zinc-950">{entry.action}</p>
-                      <p className="mt-1 text-sm font-medium text-zinc-600">
+                      <p className="text-sm font-black text-brand-ink">{entry.action}</p>
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {entry.target}
                       </p>
                     </div>
-                    <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-500">
+                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
                       {entry.actor}
                     </span>
                   </div>
                   {entry.metadata ? (
-                    <p className="mt-3 text-sm font-medium leading-6 text-zinc-500">
+                    <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
                       {entry.metadata}
                     </p>
                   ) : null}
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-400">
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {formatLocalizedDateTime(entry.createdAt, i18n.language, {
                       dateStyle: 'medium',
                       timeStyle: 'short',

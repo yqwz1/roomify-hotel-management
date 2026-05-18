@@ -118,7 +118,7 @@ export default function StaffDashboard() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.workspaceTitle`)}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -173,7 +173,7 @@ export default function StaffDashboard() {
           value={String(metrics.balancesDue)}
           hint={t(`${pageTx}.metrics.balanceHint`)}
           tone="light"
-          cardClassName="!bg-white !text-zinc-950 !border-zinc-200 !shadow-sm"
+          cardClassName="!bg-white !text-brand-ink !border-brand-surface-border !shadow-sm"
           labelClassName="whitespace-nowrap overflow-hidden text-ellipsis tracking-[0.14em]"
           hintClassName="whitespace-nowrap overflow-hidden text-ellipsis"
         />
@@ -202,14 +202,14 @@ export default function StaffDashboard() {
               {previewReservations.map((reservation) => (
                 <div
                   key={reservation.id ?? reservation.confirmationNumber}
-                  className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
+                  className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-lg font-black tracking-tight text-zinc-950 [overflow-wrap:anywhere]">
+                      <p className="text-lg font-black tracking-tight text-brand-ink [overflow-wrap:anywhere]">
                         {reservation.guestName || t('common.guest')}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-zinc-500">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
                         {getReservationWorkspaceActionLabel(reservation, today, t)}
                       </p>
                     </div>
@@ -218,37 +218,37 @@ export default function StaffDashboard() {
                       onClick={() =>
                         navigate(`/reservations?selected=${reservation.confirmationNumber}`)
                       }
-                      className="inline-flex h-10 items-center justify-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-950 transition hover:border-zinc-950 hover:bg-zinc-50"
+                      className="inline-flex h-10 items-center justify-center rounded-full border border-brand-surface-border bg-white px-4 text-sm font-bold text-brand-ink transition hover:border-brand-primary/40 hover:bg-brand-surface-light"
                     >
                       {t('staffDashboardPage.openReservation')}
                     </button>
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('confirmationNumber')}
                       </p>
-                      <LtrText className="mt-2 text-sm font-bold text-zinc-950">
+                      <LtrText className="mt-2 text-sm font-bold text-brand-ink">
                         {reservation.confirmationNumber}
                       </LtrText>
                     </div>
-                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('common.room')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
                         {reservation.roomNumber || t('unassigned')}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-zinc-500">
+                      <p className="mt-1 text-xs font-medium text-brand-ink-muted">
                         {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+                    <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                         {t('checkInPage.reservationTotal')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-zinc-950">
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
                         {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                       </p>
                     </div>
@@ -259,7 +259,7 @@ export default function StaffDashboard() {
               <button
                 type="button"
                 onClick={() => navigate('/reservations')}
-                className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
               >
                 {t('navReservations')}
               </button>
@@ -291,7 +291,7 @@ export default function StaffDashboard() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm font-medium leading-6 text-zinc-600"
+                  className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 text-sm font-medium leading-6 text-brand-ink-muted"
                 >
                   {item}
                 </div>

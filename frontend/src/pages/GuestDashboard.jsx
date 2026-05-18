@@ -51,70 +51,70 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
     : formatLocalizedCurrency(reservation.totalAmount, language);
 
   return (
-    <article className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5">
+    <article className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-400">
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
             {propertyName}
           </p>
-          <h4 className="mt-2 text-xl font-black tracking-tight text-zinc-950">
+          <h4 className="mt-2 text-xl font-black tracking-tight text-brand-ink">
             {roomTypeLabel}
           </h4>
-          <p className="mt-1 text-sm font-medium text-zinc-500">{roomLabel}</p>
+          <p className="mt-1 text-sm font-medium text-brand-ink-muted">{roomLabel}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-600">
+          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
             {statusLabel}
           </span>
-          <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-600">
+          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
             {paymentStatusLabel}
           </span>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('confirmationNumber')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {reservation.confirmation || '-'}
           </p>
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('checkInDate')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {formatLocalizedDate(reservation.checkInDate, language, { dateStyle: 'medium' })}
           </p>
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('checkOutDate')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">
+          <p className="mt-2 text-sm font-bold text-brand-ink">
             {formatLocalizedDate(reservation.checkOutDate, language, { dateStyle: 'medium' })}
           </p>
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('common.room')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">{roomLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink">{roomLabel}</p>
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('common.stayTotal')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">{totalAmountLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink">{totalAmountLabel}</p>
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+        <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('status')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">{statusLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink">{statusLabel}</p>
         </div>
       </div>
     </article>
@@ -250,7 +250,7 @@ export default function GuestDashboard() {
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-ink">
               <UserRound className="h-5 w-5" />
             </span>
             <div className="min-w-0">
@@ -286,7 +286,7 @@ export default function GuestDashboard() {
           value={SUPPORT_EMAIL}
           hint={SUPPORT_EMAIL}
           valueClassName="text-xl sm:text-2xl"
-          hintClassName="text-xs sm:text-sm text-zinc-400"
+          hintClassName="text-xs sm:text-sm text-brand-ink-hint"
         />
         <DashboardMetricCard
           icon={LifeBuoy}
@@ -321,14 +321,14 @@ export default function GuestDashboard() {
                 <button
                   type="button"
                   onClick={() => navigate('/bookings')}
-                  className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-800"
+                  className="inline-flex items-center justify-center rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                 >
                   {t('navGetHelp')}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/search')}
-                  className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-300 hover:bg-zinc-50"
+                  className="inline-flex items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-primary/30 hover:bg-brand-surface-light"
                 >
                   {t('navBrowseRooms')}
                 </button>
@@ -355,11 +355,11 @@ export default function GuestDashboard() {
         >
           <div className="grid gap-3">
             {accountItems.map((item) => (
-              <div key={item.label} className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+              <div key={item.label} className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                   {item.label}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-zinc-950">{item.value}</p>
+                <p className="mt-2 text-sm font-semibold text-brand-ink">{item.value}</p>
               </div>
             ))}
           </div>
@@ -421,7 +421,7 @@ export default function GuestDashboard() {
             {t(`${pageTx}.tips`, { returnObjects: true }).map((item) => (
               <div
                 key={item}
-                className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-6 text-zinc-600"
+                className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 text-sm font-medium leading-6 text-brand-ink-muted"
               >
                 {item}
               </div>
