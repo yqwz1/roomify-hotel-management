@@ -129,16 +129,16 @@ export default function StaffServiceRequests() {
           ),
         ]}
       >
-        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+        <div className="rounded-[1.75rem] border border-white/12 bg-card/10 p-5 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-foreground">
               <BriefcaseBusiness className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-white">
+              <p className="truncate text-sm font-bold text-primary-foreground">
                 {translateWithFallback(t, 'staffServiceRequests.heroTitle', 'Live request queue')}
               </p>
-              <p className="truncate text-sm text-white/65">
+              <p className="truncate text-sm text-primary-foreground/65">
                 {translateWithFallback(
                   t,
                   'staffServiceRequests.heroDescription',
@@ -248,12 +248,12 @@ export default function StaffServiceRequests() {
               return (
                 <article
                   key={request.id}
-                  className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
+                  className="rounded-[1.5rem] border border-border bg-muted p-5"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-xl font-black tracking-tight text-zinc-950">
+                        <h3 className="text-xl font-black tracking-tight text-foreground">
                           {request.guestName ||
                             translateWithFallback(t, 'common.guest', 'Guest')}
                         </h3>
@@ -268,7 +268,7 @@ export default function StaffServiceRequests() {
                           {getServiceRequestPriorityLabel(request.priority, t)}
                         </span>
                       </div>
-                      <p className="text-sm font-semibold text-zinc-600">
+                      <p className="text-sm font-semibold text-muted-foreground">
                         {request.roomNumber
                           ? translateWithFallback(
                               t,
@@ -277,16 +277,16 @@ export default function StaffServiceRequests() {
                               { roomNumber: request.roomNumber }
                             )
                           : translateWithFallback(t, 'unassigned', 'Unassigned')}
-                        {' · '}
+                        {' آ· '}
                         {getServiceRequestTypeLabel(request.serviceType, t)}
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-zinc-500">
+                    <p className="text-sm font-medium text-muted-foreground">
                       {formatLocalizedDateTime(request.createdAt, i18n.language)}
                     </p>
                   </div>
 
-                  <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700">
+                  <p className="mt-4 rounded-[1.25rem] border border-border bg-card px-4 py-4 text-sm leading-6 text-muted-foreground">
                     {request.description}
                   </p>
 
@@ -295,7 +295,7 @@ export default function StaffServiceRequests() {
                       type="button"
                       disabled={isBusy || request.status === 'IN_PROGRESS'}
                       onClick={() => handleStatusUpdate(request.id, 'IN_PROGRESS')}
-                      className="inline-flex h-11 items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-5 text-sm font-bold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400"
+                      className="inline-flex h-11 items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-5 text-sm font-bold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:border-border disabled:bg-muted/80 disabled:text-muted-foreground/80"
                     >
                       {translateWithFallback(
                         t,
@@ -307,7 +307,7 @@ export default function StaffServiceRequests() {
                       type="button"
                       disabled={isBusy || request.status === 'COMPLETED'}
                       onClick={() => handleStatusUpdate(request.id, 'COMPLETED')}
-                      className="inline-flex h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                      className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted/90 disabled:text-muted-foreground"
                     >
                       {translateWithFallback(
                         t,

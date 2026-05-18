@@ -79,11 +79,11 @@ export default function Footer({
       : 'bg-rose-400';
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent_45%),linear-gradient(180deg,#0a0a0a_0%,#000_100%)] text-white">
+    <footer className="theme-footer-surface relative overflow-hidden border-t text-white">
       {/* Decorative accent line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-px left-1/2 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-zinc-700 to-transparent"
+        className="theme-footer-accent pointer-events-none absolute -top-px left-1/2 h-px w-2/3 -translate-x-1/2"
       />
 
       {/* ── Top: brand + columns ── */}

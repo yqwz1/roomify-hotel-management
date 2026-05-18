@@ -20,7 +20,7 @@ export function TrendLineChart({
   yKey = "value",
   valueFormatter,
   labelFormatter,
-  color = "#0f766e",
+  color = "hsl(var(--chart-2))",
   height = 300,
   loading = false,
   error = null,
@@ -60,26 +60,26 @@ export function TrendLineChart({
                 <stop offset="95%" stopColor={areaFillColor} stopOpacity={fillColor ? 0.08 : 0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#e4e4e7" />
+            <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="var(--chart-grid)" />
             <XAxis
               dataKey={xKey}
               tickLine={false}
               axisLine={false}
               tickMargin={12}
-              tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+              tick={{ fill: "var(--chart-axis)", fontSize: 11, fontWeight: "bold" }}
               tickFormatter={labelFormatter}
               minTickGap={30}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+              tick={{ fill: "var(--chart-axis)", fontSize: 11, fontWeight: "bold" }}
               tickFormatter={valueFormatter}
               width={60}
             />
             <Tooltip
               content={<ChartTooltipContent formatter={valueFormatter} labelFormatter={labelFormatter} />}
-              cursor={{ stroke: "#d4d4d8", strokeWidth: 1, strokeDasharray: "4 4" }}
+              cursor={{ stroke: "var(--chart-cursor)", strokeWidth: 1, strokeDasharray: "4 4" }}
             />
             <Area
               type="monotone"
@@ -88,31 +88,31 @@ export function TrendLineChart({
               strokeWidth={3}
               fillOpacity={1}
               fill={`url(#${resolvedGradientId})`}
-              activeDot={{ r: 5, fill: "#ffffff", stroke: color, strokeWidth: 3 }}
+              activeDot={{ r: 5, fill: "var(--legacy-white)", stroke: color, strokeWidth: 3 }}
             />
           </AreaChart>
         ) : (
           <LineChart data={displayData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#e4e4e7" />
+            <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="var(--chart-grid)" />
             <XAxis
               dataKey={xKey}
               tickLine={false}
               axisLine={false}
               tickMargin={12}
-              tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+              tick={{ fill: "var(--chart-axis)", fontSize: 11, fontWeight: "bold" }}
               tickFormatter={labelFormatter}
               minTickGap={30}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "#71717a", fontSize: 11, fontWeight: "bold" }}
+              tick={{ fill: "var(--chart-axis)", fontSize: 11, fontWeight: "bold" }}
               tickFormatter={valueFormatter}
               width={60}
             />
             <Tooltip
               content={<ChartTooltipContent formatter={valueFormatter} labelFormatter={labelFormatter} />}
-              cursor={{ stroke: "#d4d4d8", strokeWidth: 1, strokeDasharray: "4 4" }}
+              cursor={{ stroke: "var(--chart-cursor)", strokeWidth: 1, strokeDasharray: "4 4" }}
             />
             <Line
               type="monotone"
@@ -120,7 +120,7 @@ export function TrendLineChart({
               stroke={color}
               strokeWidth={3}
               dot={false}
-              activeDot={{ r: 5, fill: "#ffffff", stroke: color, strokeWidth: 3 }}
+              activeDot={{ r: 5, fill: "var(--legacy-white)", stroke: color, strokeWidth: 3 }}
             />
           </LineChart>
         )}

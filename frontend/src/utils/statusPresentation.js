@@ -1,7 +1,7 @@
 const DEFAULT_STATUS_PRESENTATION = Object.freeze({
-  pill: 'bg-zinc-100 text-zinc-700 ring-zinc-200',
-  badge: 'border-zinc-200 bg-zinc-50 text-zinc-700',
-  dot: 'bg-zinc-500',
+  pill: 'bg-muted/80 text-muted-foreground ring-border',
+  badge: 'border-border bg-muted text-muted-foreground',
+  dot: 'bg-muted',
 });
 
 export const ROOM_STATUSES = new Set([
@@ -45,9 +45,9 @@ export const STATUS_PRESENTATION = Object.freeze({
     dot: 'bg-emerald-600',
   },
   CHECKED_OUT: {
-    pill: 'bg-zinc-100 text-zinc-700 ring-zinc-200',
-    badge: 'border-zinc-200 bg-zinc-50 text-zinc-700',
-    dot: 'bg-zinc-500',
+    pill: 'bg-muted/80 text-muted-foreground ring-border',
+    badge: 'border-border bg-muted text-muted-foreground',
+    dot: 'bg-muted',
   },
   CANCELLED: {
     pill: 'bg-rose-100 text-rose-950 ring-rose-200',

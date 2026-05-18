@@ -14,11 +14,11 @@ export default function DashboardHero({
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#09090b_0%,#18181b_55%,#27272a_100%)] px-6 py-7 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:px-8 sm:py-8',
+        'theme-hero-surface relative overflow-hidden rounded-[2rem] border px-6 py-7 text-white sm:px-8 sm:py-8',
         className
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.14),transparent_28%)]" />
+      <div className="theme-hero-overlay pointer-events-none absolute inset-0" />
 
       <div className={cn('relative flex flex-col gap-6 xl:flex-row xl:justify-between', desktopAlignClass)}>
         <div className="max-w-3xl">
@@ -40,7 +40,7 @@ export default function DashboardHero({
               {meta.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-zinc-100 backdrop-blur"
+                  className="theme-hero-chip rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] backdrop-blur"
                 >
                   {item}
                 </span>

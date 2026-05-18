@@ -39,7 +39,7 @@ const ChartTooltipContent = React.forwardRef(
               <div key={index} className="flex items-center gap-2">
                 <div
                   className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: item.color || item.payload?.fill || "#000" }}
+                  style={{ backgroundColor: item.color || item.payload?.fill || "var(--legacy-black)" }}
                 />
                 <span className="font-medium text-zinc-950">
                   {item.name !== "value" && item.name ? `${item.name}: ` : ""}{val}

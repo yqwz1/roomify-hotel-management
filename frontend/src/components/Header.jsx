@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { getDefaultRouteForRoles } from './navigation/navConfig';
 import { Button } from '@/components/ui/button';
+import ThemeModeToggle from './ThemeModeToggle';
 import {
   Sheet,
   SheetContent,
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui/sheet';
 
 /**
- * DesktopLink — pill nav link with animated underline on hover/active.
+ * DesktopLink â€” pill nav link with animated underline on hover/active.
  * `route` is used for matching; `to` is the actual navigation target (may include hash).
  */
 function DesktopLink({ to, route, hash, label, currentPath, currentHash }) {
@@ -98,7 +99,7 @@ export default function Header({ onMenuToggle }) {
     <header
       className={`sticky top-0 z-30 flex-shrink-0 border-b transition-all duration-300 ${
         scrolled
-          ? 'border-zinc-200 bg-white/85 shadow-[0_2px_20px_-12px_rgba(0,0,0,0.18)] backdrop-blur-md'
+          ? 'theme-surface-shadow border-zinc-200 bg-white/85 backdrop-blur-md'
           : 'border-transparent bg-white/70 backdrop-blur'
       }`}
     >
@@ -106,21 +107,21 @@ export default function Header({ onMenuToggle }) {
 
         {/* Left: hamburger + brand */}
         <div className="flex items-center gap-3">
-          {/* Authenticated-shell hamburger (sidebar toggle) — preserved */}
+          {/* Authenticated-shell hamburger (sidebar toggle) â€” preserved */}
           {isAuthenticated && onMenuToggle && (
             <Button
               variant="ghost"
               size="icon"
               type="button"
               onClick={onMenuToggle}
-              className="lg:hidden p-2 rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition"
+              className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted/80 hover:text-foreground transition"
               aria-label={t('openNavigation')}
             >
               <Menu className="h-5 w-5" />
             </Button>
           )}
 
-          {/* Public Sheet drawer — visible on small screens for everyone (no AppShell sidebar) */}
+          {/* Public Sheet drawer â€” visible on small screens for everyone (no AppShell sidebar) */}
           {!onMenuToggle && (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -134,7 +135,7 @@ export default function Header({ onMenuToggle }) {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[88%] max-w-sm flex-col bg-[#f7f3ed] p-0">
+              <SheetContent side="left" className="theme-page-background flex w-[88%] max-w-sm flex-col p-0">
                 <SheetHeader className="border-b border-zinc-200 px-6 py-5">
                   <SheetTitle className="text-left rtl:text-right text-xl font-black tracking-tighter text-zinc-950">
                     {brandName}
@@ -180,7 +181,10 @@ export default function Header({ onMenuToggle }) {
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
                       {t('language', { defaultValue: 'Language' })}
                     </span>
-                    <LanguageSwitcher />
+                    <div className="flex items-center gap-2">
+                      <ThemeModeToggle className="h-9 rounded-full px-3 text-xs font-bold" />
+                      <LanguageSwitcher />
+                    </div>
                   </div>
 
                   {!isAuthenticated ? (
@@ -229,7 +233,7 @@ export default function Header({ onMenuToggle }) {
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-950 text-[11px] font-black text-white shadow-sm transition-transform group-hover:-rotate-3">
               R
             </span>
-            <span className="text-xl font-black tracking-tighter">{brandName}</span>
+            <span className="text-xl font-black tracking-tighter text-zinc-950">{brandName}</span>
           </Link>
         </div>
 
@@ -250,6 +254,7 @@ export default function Header({ onMenuToggle }) {
 
         {/* Right: auth actions */}
         <div className="flex items-center gap-3">
+          <ThemeModeToggle className="h-9 rounded-full px-3 text-sm font-bold" />
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
@@ -263,7 +268,7 @@ export default function Header({ onMenuToggle }) {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              {/* User chip – desktop */}
+              {/* User chip â€“ desktop */}
               <div className="hidden xl:flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950">
                   <span className="text-[10px] font-bold uppercase text-white">
@@ -283,7 +288,7 @@ export default function Header({ onMenuToggle }) {
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-zinc-600 transition hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
+                className="flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-zinc-600 transition hover:border-zinc-200 hover:bg-white hover:text-zinc-950"
                 title={t('logout')}
               >
                 <LogOut className="h-4 w-4" />

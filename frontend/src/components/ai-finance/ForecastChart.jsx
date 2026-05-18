@@ -34,7 +34,7 @@ export default function ForecastChart({
   loading = false,
   error = null,
   accentClassName = 'text-emerald-700',
-  strokeColor = '#059669',
+  strokeColor = 'hsl(var(--chart-2))',
   fillColor,
 }) {
   if (loading) {

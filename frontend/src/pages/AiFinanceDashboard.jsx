@@ -370,8 +370,7 @@ function AiFinanceContent() {
                 loading={false}
                 error={null}
                 accentClassName="text-emerald-700"
-                strokeColor="#059669"
-                fillColor="rgba(5, 150, 105, 0.14)"
+                strokeColor="hsl(var(--chart-2))"
               />
             </>
           ) : (
@@ -393,8 +392,7 @@ function AiFinanceContent() {
             loading={loading}
             error={revenueTrendError}
             accentClassName="text-zinc-700"
-            strokeColor="#52525b"
-            fillColor="rgba(82, 82, 91, 0.12)"
+            strokeColor="var(--legacy-zinc-600)"
           />
         </div>
       </DashboardPanel>
@@ -454,8 +452,7 @@ function AiFinanceContent() {
                 loading={false}
                 error={null}
                 accentClassName="text-sky-700"
-                strokeColor="#0284c7"
-                fillColor="rgba(2, 132, 199, 0.14)"
+                strokeColor="hsl(var(--chart-1))"
               />
             </>
           ) : (
@@ -477,8 +474,7 @@ function AiFinanceContent() {
             loading={loading}
             error={occupancyTrendError}
             accentClassName="text-zinc-700"
-            strokeColor="#52525b"
-            fillColor="rgba(82, 82, 91, 0.12)"
+            strokeColor="var(--legacy-zinc-600)"
           />
         </div>
       </DashboardPanel>

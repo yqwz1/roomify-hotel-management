@@ -67,7 +67,7 @@ export const getServiceRequestPriorityBadgeClassName = (priority) => {
     case 'HIGH':
       return 'border-rose-200 bg-rose-50 text-rose-700';
     case 'LOW':
-      return 'border-zinc-200 bg-zinc-100 text-zinc-700';
+      return 'border-border bg-muted/80 text-muted-foreground';
     default:
       return 'border-violet-200 bg-violet-50 text-violet-700';
   }

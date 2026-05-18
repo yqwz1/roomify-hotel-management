@@ -32,13 +32,13 @@ import {
   ROLE_STAFF,
 } from './components/navigation/navConfig'
 
-// Day 1 Sprint — new pages (mock data, no API)
+// Day 1 Sprint â€” new pages (mock data, no API)
 import RoomsManagement from './pages/RoomsManagement'
 import RoomSearch from './pages/RoomSearch'
 import BookRoom from './pages/BookRoom'
 import ConfirmationPage from './pages/ConfirmationPage'
 
-// Day 4 Sprint — reservation management pages
+// Day 4 Sprint â€” reservation management pages
 import CheckIn from './pages/CheckIn'
 import ModifyReservation from './pages/ModifyReservation'
 import CancelReservation from './pages/CancelReservation'
@@ -74,7 +74,7 @@ const AppContent = () => {
   }, [location.pathname, roles, t, i18n.resolvedLanguage]);
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-background">
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />
@@ -172,7 +172,7 @@ const AppContent = () => {
           }
         />
 
-        {/* ── Day 1 Sprint: New Rooms / Booking Routes ── */}
+        {/* â”€â”€ Day 1 Sprint: New Rooms / Booking Routes â”€â”€ */}
         <Route
           path="/rooms-management"
           element={
@@ -209,7 +209,7 @@ const AppContent = () => {
           }
         />
 
-        {/* ── Day 4 Sprint: Reservation Management Routes ── */}
+        {/* â”€â”€ Day 4 Sprint: Reservation Management Routes â”€â”€ */}
         <Route
           path="/check-in"
           element={

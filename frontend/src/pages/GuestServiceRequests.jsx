@@ -75,11 +75,11 @@ const buildReservationLabel = (reservation, language, t) => {
     reservation.checkInDate,
     language,
     { dateStyle: 'medium' }
-  )} · ${formatLocalizedDate(reservation.checkOutDate, language, {
+  )} آ· ${formatLocalizedDate(reservation.checkOutDate, language, {
     dateStyle: 'medium',
   })}`;
 
-  return `${roomLabel} · ${dateRange}`;
+  return `${roomLabel} آ· ${dateRange}`;
 };
 
 export default function GuestServiceRequests() {
@@ -281,20 +281,20 @@ export default function GuestServiceRequests() {
           ),
         ]}
       >
-        <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+        <div className="rounded-[1.75rem] border border-white/12 bg-card/10 p-5 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-foreground">
               <BriefcaseBusiness className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-white">
+              <p className="truncate text-sm font-bold text-primary-foreground">
                 {translateWithFallback(
                   t,
                   'guestServiceRequests.heroTitle',
                   'Direct hotel support'
                 )}
               </p>
-              <p className="truncate text-sm text-white/65">
+              <p className="truncate text-sm text-primary-foreground/65">
                 {translateWithFallback(
                   t,
                   'guestServiceRequests.heroDescription',
@@ -435,7 +435,7 @@ export default function GuestServiceRequests() {
 
                 {showRoomSelector ? (
                   <label className="grid gap-2">
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
                       {translateWithFallback(
                         t,
                         'guestServiceRequests.selectRoomLabel',
@@ -445,7 +445,7 @@ export default function GuestServiceRequests() {
                     <select
                       value={formState.roomId}
                       onChange={handleChange('roomId')}
-                      className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
+                      className="h-12 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground outline-none transition focus:border-ring"
                       required
                     >
                       {activeReservations.map((reservation) => (
@@ -459,22 +459,22 @@ export default function GuestServiceRequests() {
                     </select>
                   </label>
                 ) : autoSelectedReservation ? (
-                  <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                  <div className="rounded-[1.35rem] border border-border bg-muted px-4 py-4">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
                       {translateWithFallback(
                         t,
                         'guestServiceRequests.selectedRoomLabel',
                         'Selected Room'
                       )}
                     </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950">
+                    <p className="mt-2 text-sm font-bold text-foreground">
                       {buildReservationLabel(autoSelectedReservation, i18n.language, t)}
                     </p>
                   </div>
                 ) : null}
 
                 <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.serviceTypeLabel',
@@ -484,7 +484,7 @@ export default function GuestServiceRequests() {
                   <select
                     value={formState.serviceType}
                     onChange={handleChange('serviceType')}
-                    className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
+                    className="h-12 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground outline-none transition focus:border-ring"
                     required
                   >
                     <option value="">
@@ -503,7 +503,7 @@ export default function GuestServiceRequests() {
                 </label>
 
                 <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.descriptionLabel',
@@ -515,7 +515,7 @@ export default function GuestServiceRequests() {
                     onChange={handleChange('description')}
                     rows={5}
                     maxLength={1000}
-                    className="rounded-[1.5rem] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-400"
+                    className="rounded-[1.5rem] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition focus:border-ring"
                     placeholder={translateWithFallback(
                       t,
                       'guestServiceRequests.descriptionPlaceholder',
@@ -526,7 +526,7 @@ export default function GuestServiceRequests() {
                 </label>
 
                 <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.priorityLabel',
@@ -536,7 +536,7 @@ export default function GuestServiceRequests() {
                   <select
                     value={formState.priority}
                     onChange={handleChange('priority')}
-                    className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
+                    className="h-12 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground outline-none transition focus:border-ring"
                   >
                     <option value="">
                       {translateWithFallback(
@@ -561,7 +561,7 @@ export default function GuestServiceRequests() {
                     !formState.serviceType ||
                     !formState.description.trim()
                   }
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted/90 disabled:text-muted-foreground"
                 >
                   {submitting
                     ? translateWithFallback(
@@ -610,12 +610,12 @@ export default function GuestServiceRequests() {
                 {requests.map((request) => (
                   <article
                     key={request.id}
-                    className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
+                    className="rounded-[1.5rem] border border-border bg-muted p-5"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-black tracking-tight text-zinc-950">
+                          <h3 className="text-lg font-black tracking-tight text-foreground">
                             {getServiceRequestTypeLabel(request.serviceType, t)}
                           </h3>
                           <span
@@ -629,7 +629,7 @@ export default function GuestServiceRequests() {
                             {getServiceRequestPriorityLabel(request.priority, t)}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-zinc-500">
+                        <p className="text-sm font-medium text-muted-foreground">
                           {request.roomNumber
                             ? translateWithFallback(
                                 t,
@@ -640,12 +640,12 @@ export default function GuestServiceRequests() {
                             : '-'}
                         </p>
                       </div>
-                      <p className="text-sm font-medium text-zinc-500">
+                      <p className="text-sm font-medium text-muted-foreground">
                         {formatLocalizedDateTime(request.createdAt, i18n.language)}
                       </p>
                     </div>
 
-                    <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700">
+                    <p className="mt-4 rounded-[1.25rem] border border-border bg-card px-4 py-4 text-sm leading-6 text-muted-foreground">
                       {request.description}
                     </p>
                   </article>
