@@ -74,7 +74,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Sidebar panel */}
       <aside
         className={`
-          fixed top-0 start-0 z-40 h-full w-64 bg-black flex flex-col shadow-2xl
+          fixed top-0 start-0 z-40 h-full w-64 bg-brand-ink flex flex-col shadow-2xl
           transform transition-transform duration-300 ease-in-out
           md:relative md:translate-x-0 md:flex-shrink-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}

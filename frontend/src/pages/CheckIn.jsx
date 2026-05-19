@@ -8,6 +8,8 @@ import ConfirmationToast from '../components/ConfirmationToast';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { checkInReservation, extractReservationError } from '../services/reservationService';
 import { reservationStatusRules, normalizeReservationStatusLabel } from '../domain/reservations/statusRules';
 import { readReservationLookupNavigationState } from '../utils/reservationLookup';

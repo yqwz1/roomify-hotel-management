@@ -279,7 +279,7 @@ export default function RoomTypes() {
 
             <Card className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-sm">
                 <CardHeader className="border-b border-brand-surface-border px-8 pb-4 pt-8">
-                    <CardTitle className="text-xl font-bold text-black">{t('allRoomTypes')}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-brand-ink">{t('allRoomTypes')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
@@ -312,10 +312,10 @@ export default function RoomTypes() {
                                 <Box className="h-10 w-10 text-brand-ink-hint" />
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-xl font-bold text-black">{t('noRoomTypesYet')}</p>
+                                <p className="text-xl font-bold text-brand-ink">{t('noRoomTypesYet')}</p>
                                 <p className="text-sm font-medium text-brand-ink-muted">{t('getStartedRoomType')}</p>
                             </div>
-                            <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-4 rounded-full bg-black hover:bg-brand-primary-deep text-white font-bold px-6">
+                            <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-4 rounded-full bg-brand-ink hover:bg-brand-primary-deep text-white font-bold px-6">
                                 <Plus className="h-4 w-4" /> {t('createNowBtn')}
                             </Button>
                         </div>
@@ -342,22 +342,22 @@ export default function RoomTypes() {
                                     {roomTypes.map((rt) => (
                                         <tr key={rt.id} className="border-b border-brand-surface-border transition-colors hover:bg-brand-surface-light data-[state=selected]:bg-brand-surface-light">
                                             <td className="p-6 align-middle font-medium">
-                                                <div className="font-extrabold text-black text-base">{rt.name}</div>
+                                                <div className="font-extrabold text-brand-ink text-base">{rt.name}</div>
                                                 <div className="mt-1 line-clamp-2 text-xs font-medium text-brand-ink-muted">{rt.description}</div>
                                             </td>
                                             <td className="p-6 align-middle">
                                                 <div className="flex flex-wrap gap-2">
                                                     {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
-                                                        <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-black drop-shadow-sm">
+                                                        <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm">
                                                             {translateKnownValue(amenity.trim(), t)}
                                                         </span>
                                                     )) : <span className="text-brand-ink-hint text-xs font-medium">-</span>}
                                                 </div>
                                             </td>
                                             <td className="p-6 align-middle text-end font-mono">
-                                                <span className="font-extrabold text-black">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
+                                                <span className="font-extrabold text-brand-ink">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
                                             </td>
-                                            <td className="p-6 align-middle text-end font-bold text-black">
+                                            <td className="p-6 align-middle text-end font-bold text-brand-ink">
                                                 {rt.maxGuests}
                                             </td>
                                             <td className="p-6 align-middle">
@@ -366,7 +366,7 @@ export default function RoomTypes() {
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleEdit(rt)}
-                                                        className="h-8 w-8 rounded-lg border border-brand-surface-border bg-white text-brand-ink shadow-sm transition-colors hover:bg-brand-primary-tint hover:text-black"
+                                                        className="h-8 w-8 rounded-lg border border-brand-surface-border bg-white text-brand-ink shadow-sm transition-colors hover:bg-brand-primary-tint hover:text-brand-ink"
                                                         aria-label={translateWithFallback(t, 'common.edit', 'Edit')}
                                                     >
                                                         <Pencil className="h-3.5 w-3.5" />
@@ -375,7 +375,7 @@ export default function RoomTypes() {
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleDelete(rt.id)}
-                                                        className="h-8 w-8 rounded-lg border border-black bg-black text-white shadow-sm transition-colors hover:bg-brand-primary-deep"
+                                                        className="h-8 w-8 rounded-lg border border-brand-ink bg-brand-ink text-white shadow-sm transition-colors hover:bg-brand-primary-deep"
                                                         aria-label={translateWithFallback(t, 'common.delete', 'Delete')}
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
@@ -418,7 +418,7 @@ export default function RoomTypes() {
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 placeholder={t('namePlaceholder')}
-                                className={`rounded-full border px-5 py-6 text-base font-bold text-black focus-visible:ring-black focus-visible:ring-offset-1 ${validationErrors.name ? "border-brand-danger" : "border-brand-surface-border"}`}
+                                className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.name ? "border-brand-danger" : "border-brand-surface-border"}`}
                                 required
                             />
                             {validationErrors.name && <p className="text-xs font-bold text-brand-danger">{validationErrors.name}</p>}
@@ -434,7 +434,7 @@ export default function RoomTypes() {
                                     step="0.01"
                                     value={formData.basePrice}
                                     onChange={handleInputChange}
-                                    className={`rounded-full border px-5 py-6 text-base font-bold text-black focus-visible:ring-black focus-visible:ring-offset-1 ${validationErrors.basePrice ? "border-brand-danger" : "border-brand-surface-border"}`}
+                                    className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.basePrice ? "border-brand-danger" : "border-brand-surface-border"}`}
                                     required
                                 />
                                 {validationErrors.basePrice && <p className="text-xs font-bold text-brand-danger">{validationErrors.basePrice}</p>}
@@ -450,7 +450,7 @@ export default function RoomTypes() {
                                     max="8"
                                     value={formData.maxGuests}
                                     onChange={handleInputChange}
-                                    className={`rounded-full border px-5 py-6 text-base font-bold text-black focus-visible:ring-black focus-visible:ring-offset-1 ${validationErrors.maxGuests ? "border-brand-danger" : "border-brand-surface-border"}`}
+                                    className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.maxGuests ? "border-brand-danger" : "border-brand-surface-border"}`}
                                     required
                                 />
                                 {validationErrors.maxGuests && <p className="text-xs font-bold text-brand-danger">{validationErrors.maxGuests}</p>}
@@ -461,9 +461,9 @@ export default function RoomTypes() {
                             <Label className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('amenitiesLabel')}</Label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {amenityOptions.map((amenity) => (
-                                    <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-black cursor-pointer p-3 border border-brand-surface-border rounded-2xl hover:bg-brand-surface-light transition-colors">
+                                    <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-brand-ink cursor-pointer p-3 border border-brand-surface-border rounded-2xl hover:bg-brand-surface-light transition-colors">
                                         <Checkbox
-                                            className="h-5 w-5 rounded-full border-brand-surface-border focus-visible:ring-black data-[state=checked]:bg-brand-success data-[state=checked]:border-brand-success"
+                                            className="h-5 w-5 rounded-full border-brand-surface-border focus-visible:ring-brand-primary data-[state=checked]:bg-brand-success data-[state=checked]:border-brand-success"
                                             checked={formData.amenities.includes(amenity)}
                                             onCheckedChange={() => handleAmenityToggle(amenity)}
                                         />
@@ -481,13 +481,13 @@ export default function RoomTypes() {
                                 value={formData.description}
                                 onChange={handleInputChange}
                                 placeholder={t('descPlaceholder')}
-                                className="rounded-full border border-brand-surface-border px-5 py-6 text-base font-medium text-black focus-visible:ring-black focus-visible:ring-offset-1"
+                                className="rounded-full border border-brand-surface-border px-5 py-6 text-base font-medium text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1"
                             />
                         </div>
 
                         <SheetFooter className="mt-10 mb-4 flex gap-3">
                             <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full py-6 font-bold flex-1">{t('cancel')}</Button>
-                            <Button type="submit" disabled={isSubmitting} className="rounded-full py-6 font-bold flex-1 bg-black text-white hover:bg-brand-primary-deep">
+                            <Button type="submit" disabled={isSubmitting} className="rounded-full py-6 font-bold flex-1 bg-brand-ink text-white hover:bg-brand-primary-deep">
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? t('updatingMsg') : t('creatingMsg')}

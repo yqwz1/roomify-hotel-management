@@ -8,6 +8,7 @@ import DashboardMetricCard from '../dashboard/DashboardMetricCard';
 import DashboardPanel from '../dashboard/DashboardPanel';
 import { DistributionBarChart } from '../charts/DistributionBarChart';
 import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
 import {
   adjustInventoryItem,
   createInventoryItem,

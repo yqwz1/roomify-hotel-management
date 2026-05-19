@@ -629,7 +629,7 @@ export default function ReservationsWorkspace() {
                           </span>
                         </div>
 
-                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]">
                           <div
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
@@ -637,7 +637,11 @@ export default function ReservationsWorkspace() {
                                 : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                            <p
+                              className={`text-[11px] font-black uppercase tracking-[0.08em] ${
+                                isSelected ? 'text-white/75' : 'text-brand-ink-hint'
+                              }`}
+                            >
                               {t('confirmationNumber')}
                             </p>
                             <LtrText className="mt-2 text-sm font-bold">
@@ -652,7 +656,11 @@ export default function ReservationsWorkspace() {
                                 : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                            <p
+                              className={`text-[11px] font-black uppercase tracking-[0.08em] ${
+                                isSelected ? 'text-white/75' : 'text-brand-ink-hint'
+                              }`}
+                            >
                               {t('common.room')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
@@ -674,7 +682,11 @@ export default function ReservationsWorkspace() {
                                 : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                            <p
+                              className={`text-[11px] font-black uppercase tracking-[0.08em] ${
+                                isSelected ? 'text-white/75' : 'text-brand-ink-hint'
+                              }`}
+                            >
                               {t('modifyReservationPage.stayDates')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
@@ -704,26 +716,30 @@ export default function ReservationsWorkspace() {
                                 : 'border-brand-surface-border bg-brand-surface-light'
                             }`}
                           >
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                            <p
+                              className={`text-[11px] font-black uppercase tracking-[0.08em] ${
+                                isSelected ? 'text-white/75' : 'text-brand-ink-hint'
+                              }`}
+                            >
                               {t('checkInPage.reservationTotal')}
                             </p>
                             <p className="mt-2 text-sm font-bold">
                               {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                             </p>
                             {reservation.outstandingBalance != null ? (
-                              <p
+                              <div
                                 className={`mt-1 text-xs font-medium ${
                                   isSelected ? 'text-white/70' : 'text-brand-ink-muted'
                                 }`}
                               >
-                                {t('checkoutPage.outstandingBalanceLabel')}:{' '}
-                                <LtrText>
+                                <p>{t('checkoutPage.outstandingBalanceLabel')}</p>
+                                <LtrText className="mt-0.5 whitespace-nowrap">
                                   {formatLocalizedCurrency(
                                     reservation.outstandingBalance,
                                     i18n.language
                                   )}
                                 </LtrText>
-                              </p>
+                              </div>
                             ) : null}
                           </div>
                         </div>

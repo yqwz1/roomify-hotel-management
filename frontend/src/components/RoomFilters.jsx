@@ -203,7 +203,6 @@ export default function RoomFilters({
                   id="filter-floor"
                   type="number"
                   min="1"
-                  placeholder="1"
                   value={filters.floor ?? ''}
                   onChange={(event) => handle('floor', event.target.value)}
                   className={inputClassName}
@@ -221,7 +220,6 @@ export default function RoomFilters({
                 id="filter-guests"
                 type="number"
                 min="1"
-                placeholder="2"
                 value={filters.guestCapacity ?? ''}
                 onChange={(event) => handle('guestCapacity', event.target.value)}
                 className={inputClassName}
@@ -235,7 +233,6 @@ export default function RoomFilters({
                 id="filter-min-price"
                 type="number"
                 min="0"
-                placeholder="0"
                 value={filters.minPrice ?? ''}
                 onChange={(event) => handle('minPrice', event.target.value)}
                 className={inputClassName}
@@ -249,7 +246,6 @@ export default function RoomFilters({
                 id="filter-max-price"
                 type="number"
                 min="0"
-                placeholder="1000"
                 value={filters.maxPrice ?? ''}
                 onChange={(event) => handle('maxPrice', event.target.value)}
                 className={inputClassName}

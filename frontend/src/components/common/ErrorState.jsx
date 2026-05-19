@@ -6,8 +6,10 @@ const ErrorState = ({ title, message, onRetry }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border border-brand-surface-border bg-brand-surface-light p-8 text-center">
-      <AlertCircle className="mb-4 h-12 w-12 text-brand-ink" />
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-brand-danger/25 bg-brand-danger/[0.05] p-8 text-center">
+      <div className="mb-4 rounded-full bg-white p-3 text-brand-danger shadow-sm ring-1 ring-brand-danger/20">
+        <AlertCircle className="h-8 w-8" />
+      </div>
       <h3 className="mb-2 font-heading text-lg font-bold text-brand-ink">
         {title || t('errorStateTitle')}
       </h3>

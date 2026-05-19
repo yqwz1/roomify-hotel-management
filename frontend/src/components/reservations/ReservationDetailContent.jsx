@@ -62,7 +62,7 @@ function ActionButton({
 
 function FactRow({ label, value, ltr = false }) {
   return (
-    <div className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-brand-surface-border bg-brand-primary-tint/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <dt className="text-sm font-medium text-brand-ink-muted">{label}</dt>
       <dd className="w-full text-sm font-bold text-brand-ink sm:w-auto sm:text-right">
         {ltr ? <LtrText>{value}</LtrText> : value}

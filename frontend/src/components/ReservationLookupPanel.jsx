@@ -153,13 +153,13 @@ const FILTER_INPUT_CLASS =
   'h-11 w-full rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
 const RESULT_DETAIL_GRID_CLASS =
-  'grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]';
+  'grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]';
 
 const RESULT_DETAIL_CARD_CLASS =
   'min-w-0 rounded-2xl border border-brand-surface-border bg-white px-4 py-3 shadow-sm';
 
 const RESULT_DETAIL_LABEL_CLASS =
-  'text-[11px] font-black uppercase tracking-[0.16em] text-brand-ink-hint';
+  'text-[11px] font-black uppercase tracking-[0.08em] text-brand-ink-hint';
 
 export default function ReservationLookupPanel({
   onSelect,
@@ -566,12 +566,12 @@ export default function ReservationLookupPanel({
                           {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                         </LtrText>
                         {reservation.outstandingBalance != null ? (
-                          <p className="mt-1 text-xs font-medium text-brand-ink-muted">
-                            {t('checkoutPage.outstandingBalanceLabel')}:{' '}
-                            <LtrText className="text-brand-ink">
+                          <div className="mt-1 text-xs font-medium text-brand-ink-muted">
+                            <p>{t('checkoutPage.outstandingBalanceLabel')}</p>
+                            <LtrText className="mt-0.5 whitespace-nowrap text-brand-ink">
                               {formatLocalizedCurrency(reservation.outstandingBalance, i18n.language)}
                             </LtrText>
-                          </p>
+                          </div>
                         ) : null}
                       </div>
                     </div>

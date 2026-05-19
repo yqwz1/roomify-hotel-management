@@ -9,7 +9,7 @@ export default function DashboardPanel({
   contentClassName,
 }) {
   return (
-    <section className={cn('rounded-[1.75rem] border border-black/5 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]', className)}>
+    <section className={cn('rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.28)]', className)}>
       <div className="flex flex-col gap-3 border-b border-brand-surface-border px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>

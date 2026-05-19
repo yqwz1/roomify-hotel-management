@@ -27,9 +27,9 @@ export default function ConfirmationToast({ message, type = 'success', duration 
   if (!message) return null;
 
   const styles = {
-    success: { bar: 'bg-brand-success', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: 'OK' },
-    error: { bar: 'bg-brand-danger/50', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: '!' },
-    info: { bar: 'bg-black', bg: 'bg-white border-brand-surface-border', text: 'text-black', icon: 'i' },
+    success: { bar: 'bg-brand-success', bg: 'bg-white border-brand-surface-border', text: 'text-brand-ink', icon: 'OK' },
+    error: { bar: 'bg-brand-danger/50', bg: 'bg-white border-brand-surface-border', text: 'text-brand-ink', icon: '!' },
+    info: { bar: 'bg-brand-ink', bg: 'bg-white border-brand-surface-border', text: 'text-brand-ink', icon: 'i' },
   };
 
   const tone = styles[type] ?? styles.success;
@@ -55,7 +55,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
           type="button"
           onClick={() => onClose?.()}
           aria-label={t('dismissToast')}
-          className="shrink-0 rounded-full p-1 text-brand-ink-hint transition hover:bg-brand-primary-tint hover:text-black focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+          className="shrink-0 rounded-full p-1 text-brand-ink-hint transition hover:bg-brand-primary-tint hover:text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
         >
           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path

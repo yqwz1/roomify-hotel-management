@@ -22,7 +22,7 @@ export default function DashboardMetricCard({
         value: '!text-white',
       }
     : {
-        card: 'border-black/5 bg-white text-brand-ink shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]',
+        card: 'border-brand-surface-border bg-white text-brand-ink shadow-[0_18px_40px_-30px_rgba(38,75,107,0.18)]',
         icon: 'bg-brand-primary-tint text-brand-ink',
         label: 'text-brand-ink-muted',
         hint: 'text-brand-ink-hint',

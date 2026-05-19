@@ -21,7 +21,7 @@ export default function ModalFrame({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-brand-surface-border p-2 text-brand-ink-muted transition hover:bg-brand-surface-light hover:text-black"
+            className="rounded-full border border-brand-surface-border p-2 text-brand-ink-muted transition hover:bg-brand-surface-light hover:text-brand-ink"
             aria-label={closeLabel}
           >
             <X className="h-4 w-4" />
