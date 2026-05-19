@@ -110,6 +110,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                 return findAll(specification);
         }
 
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        @Query("SELECT r FROM Reservation r " +
+                        "WHERE r.status IN (com.roomify.backend.entity.ReservationStatus.PENDING, " +
+                        "                   com.roomify.backend.entity.ReservationStatus.CONFIRMED, " +
+                        "                   com.roomify.backend.entity.ReservationStatus.CHECKED_IN) " +
+                        "AND r.checkInDate < :end AND r.checkOutDate > :start " +
+                        "ORDER BY r.checkInDate ASC")
+        List<Reservation> findActiveOverlappingForGrid(
+                        @Param("start") LocalDate start,
+                        @Param("end") LocalDate end);
+
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +

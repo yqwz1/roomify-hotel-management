@@ -46,6 +46,7 @@ describe('navConfig', () => {
     expect(labels).toEqual([
       'Front Desk',
       'Reservations',
+      'Room grid',
       'Arrivals',
       'Departures',
       'Billing',

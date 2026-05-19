@@ -47,6 +47,7 @@ import RoomStatus from './pages/RoomStatus'
 import InvoicePreview from './pages/InvoicePreview'
 import ReservationDetails from './pages/ReservationDetails'
 import ReservationsWorkspace from './pages/ReservationsWorkspace'
+import RoomGrid from './pages/RoomGrid'
 import AdminDashboard from './pages/AdminDashboard'
 import HotelServices from './pages/HotelServices'
 import ExpenseTracker from './pages/ExpenseTracker'
@@ -268,6 +269,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><ReservationsWorkspace /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/room-grid"
+          element={
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+              <Layout showSidebar={true}><RoomGrid /></Layout>
             </ProtectedRoute>
           }
         />

@@ -9,11 +9,14 @@ import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationPaymentRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.dto.RoomGridResponse;
 import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
 import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,6 +58,13 @@ public class ReservationController {
     public ResponseEntity<java.util.List<ReservationResponse>> getAllReservations(
             @ModelAttribute ReservationFilterRequest filters) {
         return ResponseEntity.ok(reservationService.getAllReservations(filters));
+    }
+
+    @GetMapping("/grid")
+    public ResponseEntity<RoomGridResponse> getGrid(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(reservationService.getGrid(startDate, endDate));
     }
 
     @GetMapping("/search")

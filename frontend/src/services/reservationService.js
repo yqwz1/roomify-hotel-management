@@ -120,6 +120,13 @@ export const modifyReservation = async (idOrConfirmation, data) => {
     return response.data;
 };
 
+export const fetchRoomGrid = async (startDate, endDate) => {
+    const response = await api.get('/reservations/grid', {
+        params: { startDate, endDate },
+    });
+    return response.data;
+};
+
 /**
  * Fetches the itemised bill for a reservation.
  * @param {string} confirmationNumber - The reservation confirmation number

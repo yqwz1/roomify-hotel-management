@@ -22,6 +22,9 @@ import com.roomify.backend.dto.ReservationFilterRequest;
 import com.roomify.backend.dto.ReservationGuestRequest;
 import com.roomify.backend.dto.ReservationModifyRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.dto.RoomGridReservationDto;
+import com.roomify.backend.dto.RoomGridResponse;
+import com.roomify.backend.dto.RoomGridRowDto;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
@@ -153,11 +156,24 @@ public class ReservationService {
 
         Reservation reservation = findReservationById(id);
 
-        if (reservation.getStatus() == ReservationStatus.CANCELLED
-                || reservation.getStatus() == ReservationStatus.CHECKED_IN
-                || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+        ReservationStatus currentStatus = reservation.getStatus();
+        if (currentStatus == ReservationStatus.CANCELLED
+                || currentStatus == ReservationStatus.CHECKED_OUT) {
             throw new ResourceConflictException(
-                    "Cannot modify reservation in status: " + reservation.getStatus());
+                    "Cannot modify reservation in status: " + currentStatus);
+        }
+
+        if (currentStatus == ReservationStatus.CHECKED_IN) {
+            boolean roomChangeRequested = request.getRoomId() != null
+                    && !request.getRoomId().equals(reservation.getRoom().getId());
+            boolean checkInChangeRequested = request.getCheckInDate() != null
+                    && !request.getCheckInDate().equals(reservation.getCheckInDate());
+
+            if (roomChangeRequested || checkInChangeRequested) {
+                throw new ResourceConflictException(
+                        "Checked-in reservations can only have their checkout date changed."
+                                + " Room and check-in date are locked once the guest has arrived.");
+            }
         }
 
         String oldRoom = reservation.getRoom().getRoomNumber();
@@ -559,6 +575,83 @@ public class ReservationService {
         }
 
         return PaymentStatus.PAID.name();
+    }
+
+    // =============================
+    // ROOM GRID (tape chart)
+    // =============================
+
+    private static final int GRID_MAX_WINDOW_DAYS = 60;
+
+    @Transactional(readOnly = true)
+    public RoomGridResponse getGrid(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("startDate and endDate are required");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("endDate must be on or after startDate");
+        }
+        long windowDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (windowDays > GRID_MAX_WINDOW_DAYS) {
+            throw new IllegalArgumentException(
+                    "Date range too wide. Maximum window is " + GRID_MAX_WINDOW_DAYS + " days.");
+        }
+
+        // Exclusive end for overlap math: a reservation overlaps the window when
+        // checkInDate < windowEndExclusive AND checkOutDate > startDate.
+        LocalDate windowEndExclusive = endDate.plusDays(1);
+
+        java.util.List<Room> rooms = roomRepository.findAllWithRoomTypeOrderByRoomNumber();
+        java.util.List<Reservation> overlapping = reservationRepository
+                .findActiveOverlappingForGrid(startDate, windowEndExclusive);
+
+        java.util.Map<Long, java.util.List<RoomGridReservationDto>> byRoomId = new java.util.HashMap<>();
+        for (Reservation reservation : overlapping) {
+            Long roomId = reservation.getRoom() != null ? reservation.getRoom().getId() : null;
+            if (roomId == null) {
+                continue;
+            }
+            byRoomId.computeIfAbsent(roomId, key -> new java.util.ArrayList<>())
+                    .add(new RoomGridReservationDto(
+                            reservation.getId(),
+                            reservation.getConfirmationNumber(),
+                            reservation.getGuest() != null ? reservation.getGuest().getName() : null,
+                            reservation.getCheckInDate(),
+                            reservation.getCheckOutDate(),
+                            reservation.getStatus(),
+                            null));
+        }
+
+        java.util.List<RoomGridRowDto> rows = new java.util.ArrayList<>(rooms.size());
+        for (Room room : rooms) {
+            String typeName = room.getRoomType() != null ? room.getRoomType().getName() : null;
+            rows.add(new RoomGridRowDto(
+                    room.getId(),
+                    room.getRoomNumber(),
+                    deriveRoomTypeCode(typeName),
+                    typeName,
+                    byRoomId.getOrDefault(room.getId(), new java.util.ArrayList<>())));
+        }
+
+        return new RoomGridResponse(startDate, endDate, rows);
+    }
+
+    private String deriveRoomTypeCode(String typeName) {
+        if (typeName == null || typeName.isBlank()) {
+            return null;
+        }
+        String trimmed = typeName.trim();
+        String[] words = trimmed.split("\\s+");
+        if (words.length >= 2) {
+            StringBuilder code = new StringBuilder();
+            for (int i = 0; i < words.length && code.length() < 3; i++) {
+                if (!words[i].isEmpty()) {
+                    code.append(words[i].charAt(0));
+                }
+            }
+            return code.toString().toUpperCase(Locale.ROOT);
+        }
+        return trimmed.substring(0, Math.min(3, trimmed.length())).toUpperCase(Locale.ROOT);
     }
 
     @Transactional(readOnly = true)

@@ -236,6 +236,128 @@ class ReservationServiceTest {
     }
 
     @Test
+    void modifyShouldAllowCheckoutExtensionForCheckedInReservation() {
+
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
+
+        when(reservationRepository.findOverlappingForUpdate(
+                eq(10L),
+                eq(LocalDate.of(2026, 4, 1)),
+                eq(LocalDate.of(2026, 4, 6)),
+                eq(71L)))
+                .thenReturn(Collections.emptyList());
+
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReservationActionPlaceholderResponse response = reservationService.modify(
+                71L,
+                new ReservationModifyRequest(
+                        null,
+                        null,
+                        LocalDate.of(2026, 4, 6),
+                        "Guest requested an extended stay"));
+
+        assertEquals(ReservationStatus.CHECKED_IN, reservation.getStatus());
+        assertEquals(LocalDate.of(2026, 4, 1), reservation.getCheckInDate());
+        assertEquals(LocalDate.of(2026, 4, 6), reservation.getCheckOutDate());
+        assertEquals(Long.valueOf(10L), reservation.getRoom().getId());
+        assertEquals("Reservation modified", response.getMessage());
+
+        verify(reservationRepository).save(any(Reservation.class));
+        verify(auditService).log(eq("RESERVATION_MODIFIED"), anyString(), anyString());
+    }
+
+    @Test
+    void modifyShouldRejectRoomChangeForCheckedInReservation() {
+
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.modify(
+                        71L,
+                        new ReservationModifyRequest(
+                                42L,
+                                null,
+                                LocalDate.of(2026, 4, 6),
+                                "Try to reassign room")));
+
+        assertTrue(
+                ex.getMessage().contains("Checked-in reservations can only have their checkout date changed"),
+                "Expected clearer checked-in error message but was: " + ex.getMessage());
+
+        verify(reservationRepository, never()).save(any());
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void modifyShouldRejectCheckInDateChangeForCheckedInReservation() {
+
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CHECKED_IN);
+
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.modify(
+                        71L,
+                        new ReservationModifyRequest(
+                                null,
+                                LocalDate.of(2026, 4, 2),
+                                LocalDate.of(2026, 4, 6),
+                                "Try to shift arrival")));
+
+        assertTrue(
+                ex.getMessage().contains("Checked-in reservations can only have their checkout date changed"),
+                "Expected clearer checked-in error message but was: " + ex.getMessage());
+
+        verify(reservationRepository, never()).save(any());
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void modifyShouldAllowRoomReassignmentForConfirmedReservation() {
+
+        Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);
+        Room targetRoom = buildRoom(42L, "405", "180.00");
+
+        when(reservationRepository.findById(71L))
+                .thenReturn(Optional.of(reservation));
+        when(roomRepository.findById(42L))
+                .thenReturn(Optional.of(targetRoom));
+
+        when(reservationRepository.findOverlappingForUpdate(
+                eq(42L),
+                eq(LocalDate.of(2026, 4, 1)),
+                eq(LocalDate.of(2026, 4, 4)),
+                eq(71L)))
+                .thenReturn(Collections.emptyList());
+
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        reservationService.modify(
+                71L,
+                new ReservationModifyRequest(
+                        42L,
+                        null,
+                        LocalDate.of(2026, 4, 4),
+                        "Upgrade room for confirmed reservation"));
+
+        assertEquals(Long.valueOf(42L), reservation.getRoom().getId());
+        assertEquals(LocalDate.of(2026, 4, 4), reservation.getCheckOutDate());
+        verify(reservationRepository).save(any(Reservation.class));
+    }
+
+    @Test
     void cancelShouldStoreNullReasonWhenRequestReasonIsBlank() {
 
         Reservation reservation = buildReservationForCancel(ReservationStatus.CONFIRMED);

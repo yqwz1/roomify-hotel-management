@@ -3,6 +3,7 @@ package com.roomify.backend.repository;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,4 +42,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
      * @return count of rooms
      */
     long countByRoomType(RoomType roomType);
+
+    /**
+     * Find all rooms with their room type eagerly loaded, ordered by room number.
+     * Used by the room grid endpoint to render every room as a row.
+     */
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType ORDER BY r.roomNumber ASC")
+    List<Room> findAllWithRoomTypeOrderByRoomNumber();
 }
