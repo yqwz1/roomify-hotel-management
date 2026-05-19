@@ -1,9 +1,9 @@
 {
   "modelType": "RandomForestRegressor",
-  "trainedAt": "2026-05-04T16:49:06Z",
-  "trainingRows": 2410,
-  "revenueMae": 20.1108,
-  "occupancyMae": 6.6309,
+  "trainedAt": "2026-05-19T19:18:14Z",
+  "trainingRows": 2193,
+  "revenueMae": 0.6272,
+  "occupancyMae": 0.963,
   "features": [
     "dayOfWeek",
     "month",
@@ -23,8 +23,8 @@
     "occupancyRate"
   ],
   "trainingDateRange": {
-    "start": "2025-01-01",
-    "end": "2026-04-27"
+    "start": "2024-05-19",
+    "end": "2026-05-19"
   },
   "modelVersion": "ai-finance-v1"
 }

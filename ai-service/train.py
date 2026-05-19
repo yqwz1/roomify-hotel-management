@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -8,15 +9,56 @@ import requests
 
 from model import DATA_DIR, normalize_training_frame, train_and_save_models
 
-DEFAULT_API_URL = "http://localhost:8080/api/ai-finance/training-data?start=2025-01-01&end=2026-04-27"
+
+def _build_default_api_url() -> str:
+    """Build the training-data URL relative to today so the demo never goes stale.
+
+    Spans the past 730 days (2 years of seeded history) through today, matching
+    the window that DemoDataBootstrap seeds.
+    """
+    end = date.today()
+    start = end - timedelta(days=730)
+    return f"http://localhost:8080/api/ai-finance/training-data?start={start.isoformat()}&end={end.isoformat()}"
+
+
+DEFAULT_API_URL = _build_default_api_url()
 DEFAULT_CSV_PATH = DATA_DIR / "training_data.csv"
+
+
+DEFAULT_LOGIN_URL = "http://localhost:8080/api/auth/login"
+DEFAULT_TRAIN_EMAIL = "manager@roomify.com"
+DEFAULT_TRAIN_PASSWORD = "password123"
+
+
+def _fetch_bearer_token(login_url: str = DEFAULT_LOGIN_URL,
+                        email: str = DEFAULT_TRAIN_EMAIL,
+                        password: str = DEFAULT_TRAIN_PASSWORD) -> str | None:
+    """Acquire a Bearer token from the backend so training-data calls authorise.
+
+    The /api/ai-finance/training-data endpoint requires MANAGER/ADMIN auth;
+    the seeded manager account is the default. Returns None on failure so the
+    caller falls back to the cached CSV path.
+    """
+    try:
+        response = requests.post(
+            login_url,
+            json={"email": email, "password": password},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json().get("token")
+    except Exception as exc:  # noqa: BLE001
+        print(f"Token fetch failed: {exc}")
+        return None
 
 
 def load_training_frame(api_url: str = DEFAULT_API_URL, csv_path: Path = DEFAULT_CSV_PATH) -> pd.DataFrame:
     api_error: str | None = None
     try:
         print(f"Trying Spring Boot training-data API: {api_url}")
-        response = requests.get(api_url, timeout=30)
+        token = _fetch_bearer_token()
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        response = requests.get(api_url, headers=headers, timeout=30)
         response.raise_for_status()
         payload = response.json()
         frame = pd.DataFrame(payload)
