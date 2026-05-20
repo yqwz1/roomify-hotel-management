@@ -11,6 +11,8 @@ const defaultFormatter = (value) =>
 
 const isFiniteNumber = (value) => Number.isFinite(Number(value));
 
+// The historical trend chart spans 2 calendar years; ticks without a year are
+// ambiguous (is "Jun 14" 2024 or 2025?). Include a 2-digit year on every tick.
 const formatDateLabel = (value) => {
   if (!value) return '';
 
@@ -20,6 +22,7 @@ const formatDateLabel = (value) => {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
+    year: '2-digit',
   }).format(date);
 };
 

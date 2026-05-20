@@ -1,8 +1,22 @@
 import api from './api';
 import { extractApiErrorMessage } from '../utils/apiError';
 
-export const DEFAULT_AI_FINANCE_START_DATE = '2025-01-01';
-export const DEFAULT_AI_FINANCE_END_DATE = '2026-04-27';
+const AI_FINANCE_HISTORY_DAYS = 730;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Resolved at call time so the demo window slides forward with the calendar
+// instead of going stale. Matches the 2-year seasonality window the seeder
+// populates and the AI service trains on.
+export const getDefaultAiFinanceStartDate = () =>
+  formatDate(new Date(Date.now() - AI_FINANCE_HISTORY_DAYS * MS_PER_DAY));
+export const getDefaultAiFinanceEndDate = () => formatDate(new Date());
 
 export const extractAiFinanceError = (err) =>
   extractApiErrorMessage(err, 'Failed to load AI finance data.');
@@ -18,8 +32,8 @@ export const getSummary = async () => {
 };
 
 export const getRevenueTrend = async (
-  start = DEFAULT_AI_FINANCE_START_DATE,
-  end = DEFAULT_AI_FINANCE_END_DATE
+  start = getDefaultAiFinanceStartDate(),
+  end = getDefaultAiFinanceEndDate()
 ) => {
   const response = await api.get('/ai-finance/revenue-trend', {
     params: { start, end },
@@ -28,8 +42,8 @@ export const getRevenueTrend = async (
 };
 
 export const getOccupancyTrend = async (
-  start = DEFAULT_AI_FINANCE_START_DATE,
-  end = DEFAULT_AI_FINANCE_END_DATE
+  start = getDefaultAiFinanceStartDate(),
+  end = getDefaultAiFinanceEndDate()
 ) => {
   const response = await api.get('/ai-finance/occupancy-trend', {
     params: { start, end },
@@ -43,8 +57,8 @@ export const getRoomTypeRevenue = async () => {
 };
 
 export const getTrainingData = async (
-  start = DEFAULT_AI_FINANCE_START_DATE,
-  end = DEFAULT_AI_FINANCE_END_DATE
+  start = getDefaultAiFinanceStartDate(),
+  end = getDefaultAiFinanceEndDate()
 ) => {
   const response = await api.get('/ai-finance/training-data', {
     params: { start, end },

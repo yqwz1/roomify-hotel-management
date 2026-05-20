@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  DEFAULT_AI_FINANCE_END_DATE,
-  DEFAULT_AI_FINANCE_START_DATE,
+  getDefaultAiFinanceEndDate,
+  getDefaultAiFinanceStartDate,
   askAiFinance as requestAiFinanceInsight,
   extractAiFinanceError,
   getAiHealth,
@@ -32,8 +32,8 @@ const settleValue = (result, fallback) =>
   result.status === 'fulfilled' ? result.value : fallback;
 
 export const useAiFinance = ({
-  start = DEFAULT_AI_FINANCE_START_DATE,
-  end = DEFAULT_AI_FINANCE_END_DATE,
+  start = getDefaultAiFinanceStartDate(),
+  end = getDefaultAiFinanceEndDate(),
 } = {}) => {
   const [dataSummary, setDataSummary] = useState(emptyState.dataSummary);
   const [summary, setSummary] = useState(emptyState.summary);

@@ -98,7 +98,10 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private static final long RANDOM_SEED = 42L;
 
     private static final int TARGET_GUEST_COUNT = 40;
-    private static final int TARGET_PAST_RESERVATIONS = 260;
+    // Bumped from 260 to 290 to densify the 2-year history chart. With ~3 nights
+    // per stay each reservation fills only 3 of 731 daily revenue points, so more
+    // samples are needed before the chart stops looking sparse in the older half.
+    private static final int TARGET_PAST_RESERVATIONS = 290;
     private static final int TARGET_CHECKED_IN = 8;
     private static final int TARGET_CONFIRMED_FUTURE = 28;
     private static final int TARGET_PENDING_FUTURE = 4;
@@ -679,10 +682,17 @@ public class DemoDataBootstrap implements ApplicationRunner {
     }
 
     private double computeTrendWeight(LocalDate d, LocalDate today) {
+        // Flattened from 0.85/1.0/1.15 to 0.95/1.0/1.05 so the older year is not
+        // visually starved on the AI Finance historical chart. The brief targeted
+        // a "mild year-over-year growth" signal; the steeper original weights
+        // compounded with the seasonality multipliers (and with the calendar
+        // accident that Ramadan/Eid Al-Fitr 2024 fall before the 730d window
+        // start) to produce a 2x revenue ratio between the two halves of the
+        // history, which read on screen as "the first year is almost empty".
         long daysAgo = today.toEpochDay() - d.toEpochDay();
-        if (daysAgo > 365) return 0.85;
+        if (daysAgo > 365) return 0.95;
         if (daysAgo > 90) return 1.0;
-        return 1.15;
+        return 1.05;
     }
 
     private LocalDate sampleWeightedDate(LocalDate start, double[] weights, Random random) {
