@@ -6,6 +6,8 @@ import {
   extractAiFinanceError,
   getAiHealth,
   getDataSummary,
+  getDemandHeatmap,
+  getElasticityForecasts,
   getModelInfo,
   getOccupancyTrend,
   getPricingRecommendations,
@@ -26,6 +28,8 @@ const emptyState = {
   revenueForecast: null,
   pricingRecommendationsResponse: null,
   pricingRecommendations: [],
+  elasticityForecasts: [],
+  demandHeatmap: [],
 };
 
 const settleValue = (result, fallback) =>
@@ -34,6 +38,8 @@ const settleValue = (result, fallback) =>
 export const useAiFinance = ({
   start = getDefaultAiFinanceStartDate(),
   end = getDefaultAiFinanceEndDate(),
+  demandMonth,
+  demandRoomTypeId,
 } = {}) => {
   const [dataSummary, setDataSummary] = useState(emptyState.dataSummary);
   const [summary, setSummary] = useState(emptyState.summary);
@@ -49,6 +55,8 @@ export const useAiFinance = ({
   const [pricingRecommendations, setPricingRecommendations] = useState(
     emptyState.pricingRecommendations
   );
+  const [elasticityForecasts, setElasticityForecasts] = useState(emptyState.elasticityForecasts);
+  const [demandHeatmap, setDemandHeatmap] = useState(emptyState.demandHeatmap);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [finalAiLoading, setFinalAiLoading] = useState(true);
@@ -59,6 +67,8 @@ export const useAiFinance = ({
   const [askError, setAskError] = useState(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const [finalAiRefreshToken, setFinalAiRefreshToken] = useState(0);
+  const [demandHeatmapLoading, setDemandHeatmapLoading] = useState(true);
+  const [demandHeatmapError, setDemandHeatmapError] = useState(null);
 
   const refresh = useCallback(() => {
     setRefreshToken((value) => value + 1);
@@ -143,6 +153,7 @@ export const useAiFinance = ({
         getModelInfo(),
         getRevenueForecast(),
         getPricingRecommendations(),
+        getElasticityForecasts(),
       ]);
 
       if (ignore) return;
@@ -151,6 +162,7 @@ export const useAiFinance = ({
       const nextModelInfo = settleValue(results[1], null);
       const nextRevenueForecast = settleValue(results[2], null);
       const nextPricingResponse = settleValue(results[3], null);
+      const nextElasticityForecasts = settleValue(results[4], []);
 
       setAiHealth(nextAiHealth);
       setModelInfo(nextModelInfo);
@@ -161,9 +173,10 @@ export const useAiFinance = ({
           ? nextPricingResponse.pricingRecommendations
           : []
       );
+      setElasticityForecasts(Array.isArray(nextElasticityForecasts) ? nextElasticityForecasts : []);
 
       const errorMap = {};
-      const labels = ['AI health', 'model info', 'revenue forecast', 'pricing recommendations'];
+      const labels = ['AI health', 'model info', 'revenue forecast', 'pricing recommendations', 'elasticity'];
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
           errorMap[labels[index]] = extractAiFinanceError(result.reason);
@@ -184,6 +197,37 @@ export const useAiFinance = ({
       ignore = true;
     };
   }, [finalAiRefreshToken]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadDemandHeatmap = async () => {
+      setDemandHeatmapLoading(true);
+      setDemandHeatmapError(null);
+
+      try {
+        const data = await getDemandHeatmap(demandMonth, demandRoomTypeId);
+        if (!ignore) {
+          setDemandHeatmap(data);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setDemandHeatmap([]);
+          setDemandHeatmapError(extractAiFinanceError(err));
+        }
+      } finally {
+        if (!ignore) {
+          setDemandHeatmapLoading(false);
+        }
+      }
+    };
+
+    loadDemandHeatmap();
+
+    return () => {
+      ignore = true;
+    };
+  }, [demandMonth, demandRoomTypeId, refreshToken]);
 
   const isAiFallback = Boolean(
     aiHealth?.status === 'DOWN' ||
@@ -209,6 +253,10 @@ export const useAiFinance = ({
     revenueForecast,
     pricingRecommendations,
     pricingRecommendationsResponse,
+    elasticityForecasts,
+    demandHeatmap,
+    demandHeatmapLoading,
+    demandHeatmapError,
     askResponse,
     askLoading,
     askError,

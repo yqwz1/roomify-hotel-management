@@ -8,6 +8,7 @@ import com.roomify.backend.dto.ai.AiFinanceDataSummaryResponse;
 import com.roomify.backend.dto.ai.AiFinanceSummaryResponse;
 import com.roomify.backend.dto.ai.AskAiFinanceRequest;
 import com.roomify.backend.dto.ai.AskAiFinanceResponse;
+import com.roomify.backend.dto.ai.DemandHeatmapPointResponse;
 import com.roomify.backend.dto.ai.OccupancyTrendPoint;
 import com.roomify.backend.dto.ai.PricingRecommendationResponse;
 import com.roomify.backend.dto.ai.RevenueTrendPoint;
@@ -15,6 +16,7 @@ import com.roomify.backend.dto.ai.RoomTypeRevenueResponse;
 import com.roomify.backend.dto.ai.TrainingDataRow;
 import com.roomify.backend.service.AiFinanceClient;
 import com.roomify.backend.service.AiFinanceFallbackService;
+import com.roomify.backend.service.DemandHeatmapService;
 import com.roomify.backend.service.FinanceAnalyticsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
@@ -52,16 +54,19 @@ public class AiFinanceController {
     private final FinanceAnalyticsService financeAnalyticsService;
     private final AiFinanceClient aiFinanceClient;
     private final AiFinanceFallbackService aiFinanceFallbackService;
+    private final DemandHeatmapService demandHeatmapService;
     private final ObjectMapper objectMapper;
 
     public AiFinanceController(
             FinanceAnalyticsService financeAnalyticsService,
             AiFinanceClient aiFinanceClient,
             AiFinanceFallbackService aiFinanceFallbackService,
+            DemandHeatmapService demandHeatmapService,
             ObjectMapper objectMapper) {
         this.financeAnalyticsService = financeAnalyticsService;
         this.aiFinanceClient = aiFinanceClient;
         this.aiFinanceFallbackService = aiFinanceFallbackService;
+        this.demandHeatmapService = demandHeatmapService;
         this.objectMapper = objectMapper;
     }
 
@@ -92,6 +97,13 @@ public class AiFinanceController {
     @GetMapping("/room-type-revenue")
     public ResponseEntity<List<RoomTypeRevenueResponse>> getRoomTypeRevenue() {
         return ResponseEntity.ok(financeAnalyticsService.getRoomTypeRevenue());
+    }
+
+    @GetMapping("/demand-heatmap")
+    public ResponseEntity<List<DemandHeatmapPointResponse>> getDemandHeatmap(
+            @RequestParam(required = false) String month,
+            @RequestParam(required = false) Long roomTypeId) {
+        return ResponseEntity.ok(demandHeatmapService.getDemandHeatmap(month, roomTypeId));
     }
 
     @GetMapping("/training-data")

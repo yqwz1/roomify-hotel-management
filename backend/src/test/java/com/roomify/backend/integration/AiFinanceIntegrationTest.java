@@ -13,9 +13,11 @@ import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.repository.AiPriceRecommendationRepository;
 import com.roomify.backend.repository.ExpenseRepository;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.PriceElasticityForecastRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -34,6 +36,7 @@ import java.time.LocalDateTime;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,6 +78,12 @@ class AiFinanceIntegrationTest {
     @Autowired
     private GuestRepository guestRepository;
 
+    @Autowired
+    private PriceElasticityForecastRepository priceElasticityForecastRepository;
+
+    @Autowired
+    private AiPriceRecommendationRepository aiPriceRecommendationRepository;
+
     private MockMvc mockMvc;
     private String managerToken;
     private String staffToken;
@@ -85,6 +94,8 @@ class AiFinanceIntegrationTest {
                 .apply(springSecurity())
                 .build();
 
+        priceElasticityForecastRepository.deleteAll();
+        aiPriceRecommendationRepository.deleteAll();
         expenseRepository.deleteAll();
         paymentRepository.deleteAll();
         reservationRepository.deleteAll();
@@ -100,6 +111,8 @@ class AiFinanceIntegrationTest {
 
     @Test
     void managerCanFetchAiFinanceAnalytics() throws Exception {
+        RoomType standard = roomTypeRepository.findByName("Standard").orElseThrow();
+
         mockMvc.perform(get("/api/ai-finance/data-summary")
                         .header("Authorization", "Bearer " + managerToken))
                 .andExpect(status().isOk())
@@ -170,6 +183,40 @@ class AiFinanceIntegrationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "date,dayOfWeek,month,weekend,roomType,roomTypeId,totalRooms")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-04-01")));
+
+        mockMvc.perform(get("/api/ai-finance/elasticity")
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].roomType").value("Deluxe"))
+                .andExpect(jsonPath("$[0].optimalPrice").exists())
+                .andExpect(jsonPath("$[0].priceSimulations.length()").value(9))
+                .andExpect(jsonPath("$[0].fallbackUsed").value(true));
+
+        mockMvc.perform(get("/api/ai-finance/elasticity/" + standard.getId())
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomTypeId").value(standard.getId()))
+                .andExpect(jsonPath("$.priceSimulations.length()").value(9));
+
+        mockMvc.perform(get("/api/ai-finance/demand-heatmap")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .param("month", "2026-04"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(30))
+                .andExpect(jsonPath("$[0].date").value("2026-04-01"))
+                .andExpect(jsonPath("$[0].demandScore").isNumber());
+
+        mockMvc.perform(post("/api/ai-assistant/chat")
+                        .header("Authorization", "Bearer " + managerToken)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "message": "Which room type performs best?"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.source").value("LOCAL_TEMPLATE_FALLBACK"))
+                .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Deluxe")));
     }
 
     @Test

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import ManagerAiAssistant from '../ai-assistant/ManagerAiAssistant';
+import { useAuth } from '../../context/AuthProvider';
 import AppSidebar from './AppSidebar';
 import AppTopbar from './AppTopbar';
 
 export default function AppShell({ children }) {
   const location = useLocation();
+  const { user } = useAuth();
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const [mobileSidebarState, setMobileSidebarState] = useState({
     isOpen: false,
@@ -21,6 +24,7 @@ export default function AppShell({ children }) {
   const mobileSidebarOpen =
     mobileSidebarState.isOpen && mobileSidebarState.locationKey === location.key;
   const sidebarOpen = isDesktop ? desktopSidebarOpen : mobileSidebarOpen;
+  const isManager = Array.isArray(user?.roles) && user.roles.includes('ROLE_MANAGER');
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -94,6 +98,7 @@ export default function AppShell({ children }) {
         <main className="relative flex-1 overflow-visible lg:min-h-0 lg:overflow-y-auto">
           {children}
         </main>
+        {isManager ? <ManagerAiAssistant /> : null}
       </div>
     </div>
   );

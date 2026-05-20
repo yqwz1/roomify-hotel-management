@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from fastapi import Body, FastAPI, HTTPException
 
+from elasticity_service import generate_elasticity_forecasts
 from model import generate_forecast, generate_pricing_recommendations, load_artifacts, load_model_metadata
 from schemas import (
+    ElasticityForecastResponse,
+    ElasticityRequest,
     ForecastRequest,
     ForecastResponse,
     HealthResponse,
@@ -56,3 +59,19 @@ def pricing_recommendations() -> list[PricingRecommendationResponse]:
         return [PricingRecommendationResponse(**item) for item in generate_pricing_recommendations(bundle)]
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=f"pricing recommendation generation failed: {exc}") from exc
+
+
+@app.post("/elasticity/simulate", response_model=list[ElasticityForecastResponse])
+def elasticity_simulation(request: ElasticityRequest) -> list[ElasticityForecastResponse]:
+    try:
+        bundle = load_artifacts()
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    try:
+        forecasts = generate_elasticity_forecasts(bundle, request)
+        return [ElasticityForecastResponse(**item) for item in forecasts]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"elasticity simulation failed: {exc}") from exc

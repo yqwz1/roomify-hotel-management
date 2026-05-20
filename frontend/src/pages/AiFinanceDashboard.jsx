@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   BarChart3,
   BedDouble,
@@ -14,6 +15,8 @@ import {
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import AiFallbackBanner from '../components/ai-finance/AiFallbackBanner';
+import DemandHeatmapPanel from '../components/ai-finance/DemandHeatmapPanel';
+import ElasticityOptimizer from '../components/ai-finance/ElasticityOptimizer';
 import AiInsightPanel from '../components/ai-finance/AiInsightPanel';
 import AiStatusBanner from '../components/ai-finance/AiStatusBanner';
 import ForecastChart from '../components/ai-finance/ForecastChart';
@@ -61,6 +64,13 @@ const formatConfidence = (value) => {
 
 const formatDateRange = (start, end) =>
   isPresent(start) && isPresent(end) ? `${start} to ${end}` : 'Date range unavailable';
+
+const getCurrentMonthValue = () => {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};
 
 const buildDataSummaryCards = ({ dataSummary, summary }) => [
   {
@@ -225,6 +235,10 @@ function ForecastMetricSkeletons() {
 }
 
 function AiFinanceContent() {
+  const [selectedElasticityRoomTypeId, setSelectedElasticityRoomTypeId] = useState(null);
+  const [selectedElasticitySimulationIndex, setSelectedElasticitySimulationIndex] = useState(0);
+  const [heatmapMonth, setHeatmapMonth] = useState(getCurrentMonthValue());
+  const [heatmapRoomTypeId, setHeatmapRoomTypeId] = useState('');
   const {
     loading,
     error,
@@ -240,19 +254,32 @@ function AiFinanceContent() {
     revenueForecast,
     pricingRecommendations,
     pricingRecommendationsResponse,
+    elasticityForecasts,
+    demandHeatmap,
+    demandHeatmapLoading,
+    demandHeatmapError,
     askResponse,
     askLoading,
     askError,
     refresh,
     refreshFinalAiData,
     askAiFinance,
-  } = useAiFinance();
+  } = useAiFinance({
+    demandMonth: heatmapMonth,
+    demandRoomTypeId: heatmapRoomTypeId ? Number(heatmapRoomTypeId) : undefined,
+  });
   const dataSummaryCards = buildDataSummaryCards({ dataSummary, summary });
   const hasSummaryData = Boolean(dataSummary || summary || roomTypeRevenue.length);
   const revenueTrendError = !loading && error && revenueTrend.length === 0 ? error : null;
   const occupancyTrendError = !loading && error && occupancyTrend.length === 0 ? error : null;
   const forecastPoints = Array.isArray(revenueForecast?.points) ? revenueForecast.points : [];
   const hasPricingRecommendations = pricingRecommendations.length > 0;
+  const activeElasticityRoomTypeId =
+    selectedElasticityRoomTypeId ?? elasticityForecasts[0]?.roomTypeId ?? null;
+  const roomTypeOptions = elasticityForecasts.map((forecast) => ({
+    id: String(forecast.roomTypeId),
+    label: forecast.roomType,
+  }));
   const aiStatus = getAiStatus({ aiHealth, modelInfo, loading: finalAiLoading });
   const aiStatusMessage = modelInfo?.message || (
     aiHealth?.status === 'DOWN'
@@ -262,6 +289,10 @@ function AiFinanceContent() {
   const aiStatusSource = aiHealth?.status === 'UP'
     ? 'Spring Boot -> FastAPI'
     : 'Spring Boot';
+  const handleElasticityRoomSelect = (roomTypeId) => {
+    setSelectedElasticityRoomTypeId(roomTypeId);
+    setSelectedElasticitySimulationIndex(0);
+  };
 
   return (
     <>
@@ -527,8 +558,41 @@ function AiFinanceContent() {
       </DashboardPanel>
 
       <DashboardPanel
+        title="AI Price Optimization"
+        description="Elasticity simulations compare occupancy, revenue, and profit across multiple price points for each room type."
+      >
+        <ElasticityOptimizer
+          forecasts={elasticityForecasts}
+          loading={finalAiLoading}
+          error={finalAiErrors.elasticity}
+          onRetry={refreshFinalAiData}
+          selectedRoomTypeId={activeElasticityRoomTypeId}
+          onSelectRoomType={handleElasticityRoomSelect}
+          sliderIndex={selectedElasticitySimulationIndex}
+          onSliderChange={setSelectedElasticitySimulationIndex}
+        />
+      </DashboardPanel>
+
+      <DashboardPanel
+        title="Demand Heatmap"
+        description="Daily demand intelligence blends occupancy, bookings, revenue, seasonality, weekends, and holidays into a visual month view."
+      >
+        <DemandHeatmapPanel
+          data={demandHeatmap}
+          loading={demandHeatmapLoading}
+          error={demandHeatmapError}
+          onRetry={refresh}
+          month={heatmapMonth}
+          onMonthChange={setHeatmapMonth}
+          roomTypeId={heatmapRoomTypeId}
+          onRoomTypeChange={setHeatmapRoomTypeId}
+          roomTypeOptions={roomTypeOptions}
+        />
+      </DashboardPanel>
+
+      <DashboardPanel
         title="AI Insights"
-        description="Demo-safe insight buttons call Spring Boot predefined intents. Free-text chat is not required."
+        description="Quick one-click finance prompts remain available here, and the floating manager assistant handles free-text follow-up questions."
       >
         <AiInsightPanel
           response={askResponse}

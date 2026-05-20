@@ -51,3 +51,45 @@ class PricingRecommendationResponse(BaseModel):
     adjustmentPercent: float
     riskLevel: str
     reason: str
+
+
+class ElasticityRoomRequest(BaseModel):
+    roomTypeId: int
+    roomType: str
+    currentPrice: float = Field(gt=0)
+    totalRooms: int = Field(gt=0)
+    currentOccupancy: float = Field(ge=0, le=100)
+    currentBookings: int = Field(ge=0)
+    cancellations: int = Field(ge=0)
+    averageDailyExpenses: float = Field(ge=0, default=0)
+
+
+class ElasticityRequest(BaseModel):
+    anchorDate: str | None = None
+    forecastDays: int = Field(default=30, ge=1, le=90)
+    roomTypes: list[ElasticityRoomRequest] = Field(default_factory=list)
+
+
+class ElasticitySimulationResponse(BaseModel):
+    price: float
+    occupancy: float
+    expectedBookings: int
+    revenue: float
+    profit: float
+    deltaPercentage: float
+    recommended: bool = False
+
+
+class ElasticityForecastResponse(BaseModel):
+    roomTypeId: int
+    roomType: str
+    currentPrice: float
+    optimalPrice: float
+    expectedOccupancy: float
+    expectedBookings: int
+    expectedRevenue: float
+    expectedProfit: float
+    confidenceScore: float
+    forecastDays: int
+    modelType: str
+    priceSimulations: list[ElasticitySimulationResponse]

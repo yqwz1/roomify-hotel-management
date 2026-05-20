@@ -55,6 +55,10 @@ public class AiFinanceClient {
         return executePost("/pricing/recommendations", null);
     }
 
+    public AiServiceCallResult simulateElasticity(Object requestBody) {
+        return executePost("/elasticity/simulate", requestBody);
+    }
+
     private AiServiceCallResult executeGet(String path) {
         HttpRequest request;
         try {
@@ -68,14 +72,27 @@ public class AiFinanceClient {
     }
 
     private AiServiceCallResult executePost(String path, String jsonBody) {
+        HttpRequest.BodyPublisher bodyPublisher = jsonBody == null
+                ? HttpRequest.BodyPublishers.noBody()
+                : HttpRequest.BodyPublishers.ofString(jsonBody);
+        return executePost(path, bodyPublisher, jsonBody != null);
+    }
+
+    private AiServiceCallResult executePost(String path, Object requestBody) {
+        try {
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+            return executePost(path, HttpRequest.BodyPublishers.ofString(jsonBody), true);
+        } catch (IOException exception) {
+            return fail(path, "failed to serialize AI service request: " + exception.getMessage(), exception);
+        }
+    }
+
+    private AiServiceCallResult executePost(String path, HttpRequest.BodyPublisher bodyPublisher, boolean includeJsonHeader) {
         HttpRequest request;
         try {
-            HttpRequest.BodyPublisher bodyPublisher = jsonBody == null
-                    ? HttpRequest.BodyPublishers.noBody()
-                    : HttpRequest.BodyPublishers.ofString(jsonBody);
             HttpRequest.Builder builder = baseRequest(path)
                     .POST(bodyPublisher);
-            if (jsonBody != null) {
+            if (includeJsonHeader) {
                 builder.header("Content-Type", "application/json");
             }
             request = builder.build();

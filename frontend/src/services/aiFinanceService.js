@@ -98,6 +98,26 @@ export const getPricingRecommendations = async () => {
   };
 };
 
+export const getElasticityForecasts = async () => {
+  const response = await api.get('/ai-finance/elasticity');
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+export const getElasticityForecast = async (roomTypeId) => {
+  const response = await api.get(`/ai-finance/elasticity/${roomTypeId}`);
+  return response.data;
+};
+
+export const getDemandHeatmap = async (month, roomTypeId) => {
+  const response = await api.get('/ai-finance/demand-heatmap', {
+    params: {
+      ...(month ? { month } : {}),
+      ...(roomTypeId ? { roomTypeId } : {}),
+    },
+  });
+  return Array.isArray(response.data) ? response.data : [];
+};
+
 export const askAiFinance = async (intent) => {
   const response = await api.post('/ai-finance/ask', { intent });
   return response.data;
