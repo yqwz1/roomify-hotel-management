@@ -106,7 +106,6 @@ export const AuthProvider = ({ children }) => {
 
             // Decode the token to get the REAL roles
             const decoded = jwtDecode(jwtToken);
-            console.log("Decoded JWT:", decoded);
 
             let roles = decoded.roles || decoded.role || [];
             // Handle case where roles might be a single string in JWT

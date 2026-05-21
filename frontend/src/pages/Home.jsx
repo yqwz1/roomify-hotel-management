@@ -18,14 +18,12 @@ import {
   CheckCircle2,
   Clock,
 } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import Footer from '../components/Footer';
 import Reveal, { EASE } from '../components/motion/Reveal';
 import { checkHealth } from '../services/healthService';
-import { useAuth } from '../context/AuthProvider';
-import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
 
 /* ════════════════════════════════════════════════════════════
    MOCK DATA — visual only, no API calls
@@ -100,11 +98,8 @@ const CAPABILITIES = [
    ════════════════════════════════════════════════════════════ */
 
 export default function Home() {
-  const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { t } = useTranslation();
   const brandName = t('brandName');
-  const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
-  const dashboardLabel = user?.roles?.includes('ROLE_GUEST') ? t('myDashboard') : t('dashboard');
   const [health, setHealth] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -130,10 +125,8 @@ export default function Home() {
     return () => { isMounted = false; };
   }, []);
 
-  /* ── Authenticated redirect (preserved) ── */
-  if (!authLoading && isAuthenticated) {
-    return <Navigate to={dashboardPath} replace />;
-  }
+  // Authenticated users are allowed to browse the landing page freely; the
+  // header CTA still routes them to their dashboard when they choose to.
 
   const hoverLift = reduceMotion ? {} : { y: -4 };
 
@@ -283,9 +276,9 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-brand-surface-border bg-brand-primary-tint p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-r border-white/10 bg-brand-primary-deep p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex items-center gap-1.5">
-                      <span className="text-[11px] font-black text-brand-ink">Roomify</span>
+                      <span className="text-[11px] font-black text-white">Roomify</span>
                     </div>
                     {['Dashboard', 'Reservations', 'Rooms', 'Guests', 'Billing', 'Reports'].map((item, i) => (
                       <motion.div
@@ -293,8 +286,8 @@ export default function Home() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: 0.7 + i * 0.05, ease: EASE }}
-                        className={`mb-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold ${
-                          i === 0 ? 'bg-brand-primary text-white shadow-sm' : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
+                        className={`mb-0.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold ${
+                          i === 0 ? 'bg-brand-primary text-white shadow-sm' : 'text-white/60 hover:bg-white/8 hover:text-white'
                         }`}
                       >
                         {item}

@@ -192,11 +192,10 @@ public class DemoDataBootstrap implements ApplicationRunner {
         int expenseCount = seedExpenses(managerUser, today, random);
         List<InventoryItem> inventoryItems = seedInventoryItems();
         int inventoryTxCount = seedInventoryTransactions(inventoryItems, managerUser, seededStaff, today, random);
-        int notificationCount = seedNotifications(today);
 
         Phase2Counts phase2 = new Phase2Counts(
                 services.size(), serviceChargeCount, expenseCount,
-                inventoryItems.size(), inventoryTxCount, notificationCount);
+                inventoryItems.size(), inventoryTxCount);
 
         long durationMs = System.currentTimeMillis() - startedAt;
         logSummary(report, phase2, durationMs);
@@ -863,7 +862,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
                 new ServiceSpec("Late Checkout (until 6pm)", ServiceCategory.OTHER, "200.00"),
                 new ServiceSpec("Breakfast Buffet", ServiceCategory.FOOD, "75.00"),
                 new ServiceSpec("In-room Dining (delivery fee)", ServiceCategory.FOOD, "25.00"),
-                new ServiceSpec("Spa Session (60 min)", ServiceCategory.OTHER, "400.00"),
                 new ServiceSpec("Laundry Service (per kg)", ServiceCategory.CLEANING, "35.00"),
                 new ServiceSpec("Extra Bed", ServiceCategory.OTHER, "120.00"));
 
@@ -1120,49 +1118,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
         return rows.size();
     }
 
-    // ─── Notifications (B6) ─────────────────────────────────────────────────
-
-    /**
-     * NotificationEventType only supports SERVICE_REQUEST_CREATED,
-     * PAYMENT_INCOMPLETE, PAYMENT_FAILED. The brief's hypothetical
-     * "new reservation" / "check-in today" / "maintenance request" types
-     * are not available, so we recast the 5 sample notifications to match:
-     *   - 3 PAYMENT_INCOMPLETE (read)
-     *   - 1 SERVICE_REQUEST_CREATED (unread, today)
-     *   - 1 PAYMENT_FAILED (unread, yesterday)
-     */
-    private int seedNotifications(LocalDate today) {
-        List<Object[]> rows = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
-            LocalDateTime created = today.minusDays(i + 1).atTime(14 + i, 5 * i);
-            rows.add(new Object[]{
-                    "PAYMENT_INCOMPLETE", "MANAGER", null,
-                    "Outstanding balance reminder",
-                    "Reservation has an outstanding balance that needs follow-up.",
-                    "RESERVATION", "RX-DEMO-" + i,
-                    true, created.plusHours(2), created});
-        }
-        rows.add(new Object[]{
-                "SERVICE_REQUEST_CREATED", "MANAGER", "Maintenance",
-                "Service request: A/C in Room 204",
-                "Guest reported a malfunctioning air conditioner. Maintenance team notified.",
-                "SERVICE_REQUEST", "SR-DEMO-AC",
-                false, null, today.atTime(8, 30)});
-        rows.add(new Object[]{
-                "PAYMENT_FAILED", "MANAGER", null,
-                "Payment failed at checkout",
-                "Card decline at front desk; guest will retry later.",
-                "RESERVATION", "RX-DEMO-FAIL",
-                false, null, today.minusDays(1).atTime(17, 15)});
-
-        jdbcTemplate.batchUpdate(
-                "INSERT INTO notifications (event_type, target_role, target_department, title, message, "
-                        + "reference_type, reference_id, is_read, read_at, created_at) "
-                        + "VALUES (?::varchar, ?::varchar, ?, ?, ?, ?, ?, ?, ?, ?)",
-                rows);
-        return rows.size();
-    }
-
     // ─── Reporting ──────────────────────────────────────────────────────────
 
     private void logSummary(SeedReport report, Phase2Counts phase2, long durationMs) {
@@ -1182,11 +1137,11 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
 
         log.info("Seeded {} guests, {} reservations ({} past 2yr / {} current / {} future), {} payments, {} invoices, "
-                        + "{} services, {} service charges, {} expenses, {} inventory items, {} inventory transactions, "
-                        + "{} notifications. Reservations per month: [{}]. Run took {}.{}s.",
+                        + "{} services, {} service charges, {} expenses, {} inventory items, {} inventory transactions. "
+                        + "Reservations per month: [{}]. Run took {}.{}s.",
                 TARGET_GUEST_COUNT, total, past, current, future, paymentsCount, invoicesCount,
                 phase2.services(), phase2.serviceCharges(), phase2.expenses(),
-                phase2.inventoryItems(), phase2.inventoryTransactions(), phase2.notifications(),
+                phase2.inventoryItems(), phase2.inventoryTransactions(),
                 months.toString(), durationMs / 1000, String.format("%03d", durationMs % 1000));
     }
 
@@ -1209,7 +1164,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
             int serviceCharges,
             int expenses,
             int inventoryItems,
-            int inventoryTransactions,
-            int notifications) {
+            int inventoryTransactions) {
     }
 }

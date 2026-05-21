@@ -20,3 +20,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 roomify-hotel-management/
+.venv/
+/audit/
+/migration/
