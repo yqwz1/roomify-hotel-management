@@ -18,14 +18,12 @@ import {
   CheckCircle2,
   Clock,
 } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import Footer from '../components/Footer';
 import Reveal, { EASE } from '../components/motion/Reveal';
 import { checkHealth } from '../services/healthService';
-import { useAuth } from '../context/AuthProvider';
-import { getDefaultRouteForRoles } from '../components/navigation/navConfig';
 
 /* ════════════════════════════════════════════════════════════
    MOCK DATA — visual only, no API calls
@@ -100,11 +98,8 @@ const CAPABILITIES = [
    ════════════════════════════════════════════════════════════ */
 
 export default function Home() {
-  const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { t } = useTranslation();
   const brandName = t('brandName');
-  const dashboardPath = getDefaultRouteForRoles(user?.roles ?? []);
-  const dashboardLabel = user?.roles?.includes('ROLE_GUEST') ? t('myDashboard') : t('dashboard');
   const [health, setHealth] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -130,10 +125,8 @@ export default function Home() {
     return () => { isMounted = false; };
   }, []);
 
-  /* ── Authenticated redirect (preserved) ── */
-  if (!authLoading && isAuthenticated) {
-    return <Navigate to={dashboardPath} replace />;
-  }
+  // Authenticated users are allowed to browse the landing page freely; the
+  // header CTA still routes them to their dashboard when they choose to.
 
   const hoverLift = reduceMotion ? {} : { y: -4 };
 
