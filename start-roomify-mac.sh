@@ -11,17 +11,22 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$SCRIPT_DIR"
 BACKEND_DIR="$REPO_ROOT/backend"
 FRONTEND_DIR="$REPO_ROOT/frontend"
+AI_SERVICE_DIR="$REPO_ROOT/ai-service"
 BACKEND_LOG="$BACKEND_DIR/demo-backend.log"
 BACKEND_PID_FILE="$BACKEND_DIR/demo-backend.pid"
 FRONTEND_LOG="$FRONTEND_DIR/demo-frontend.log"
 FRONTEND_PID_FILE="$FRONTEND_DIR/demo-frontend.pid"
+AI_SERVICE_LOG="$AI_SERVICE_DIR/demo-ai-service.log"
+AI_SERVICE_PID_FILE="$AI_SERVICE_DIR/demo-ai-service.pid"
 
 DB_PORT=5433
 BACKEND_PORT=8080
 FRONTEND_PORT=3000
+AI_SERVICE_PORT=8000
 MAILPIT_SMTP_PORT=1025
 MAILPIT_HTTP_PORT=8025
 BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}/api/health"
+AI_SERVICE_HEALTH_URL="http://127.0.0.1:${AI_SERVICE_PORT}/health"
 APP_URL="http://localhost:${FRONTEND_PORT}"
 LOGIN_URL="${APP_URL}/login"
 MAILPIT_URL="http://127.0.0.1:${MAILPIT_HTTP_PORT}"
@@ -29,6 +34,7 @@ DEMO_CREDENTIALS="admin@roomify.com / password123; staff@roomify.com / password1
 
 BACKEND_PID=""
 FRONTEND_PID=""
+AI_SERVICE_STATUS="not started"
 
 log() {
     printf '%s\n' "$1"
@@ -37,6 +43,10 @@ log() {
 fail() {
     printf 'ERROR: %s\n' "$1" >&2
     exit 1
+}
+
+warn() {
+    printf 'WARNING: %s\n' "$1" >&2
 }
 
 require_command() {
@@ -294,6 +304,95 @@ ensure_demo_infrastructure() {
     fi
 }
 
+# Launch the FastAPI AI finance service (port 8000) in the background.
+# Independent of the DB/backend. Never fatal: on any failure it warns and
+# returns so the rest of the stack still comes up (Spring Boot has a safe
+# fallback when the AI service is unreachable).
+start_ai_service() {
+    if [[ ! -d "$AI_SERVICE_DIR" ]]; then
+        warn "ai-service folder not found at ${AI_SERVICE_DIR}; skipping AI service (Spring Boot fallback still works)."
+        AI_SERVICE_STATUS="missing ai-service folder"
+        return
+    fi
+
+    if curl -fsS --max-time 2 "$AI_SERVICE_HEALTH_URL" >/dev/null 2>&1; then
+        log "AI service already running on port ${AI_SERVICE_PORT}."
+        AI_SERVICE_STATUS="already running"
+        return
+    fi
+
+    local venv_python="$AI_SERVICE_DIR/.venv/bin/python"
+    local requirements="$AI_SERVICE_DIR/requirements.txt"
+
+    # Create the venv on a fresh clone; reuse it if already present.
+    if [[ ! -x "$venv_python" ]]; then
+        local python_bin=""
+        if command -v python3 >/dev/null 2>&1; then
+            python_bin="python3"
+        elif command -v python >/dev/null 2>&1; then
+            python_bin="python"
+        else
+            warn "Python 3 not found; skipping AI service (Spring Boot fallback still works)."
+            AI_SERVICE_STATUS="python missing"
+            return
+        fi
+
+        log "Creating AI service virtualenv at ${AI_SERVICE_DIR}/.venv ..."
+        if ! ( cd "$AI_SERVICE_DIR" && "$python_bin" -m venv .venv ); then
+            warn "Failed to create ai-service/.venv; skipping AI service (Spring Boot fallback still works)."
+            AI_SERVICE_STATUS="venv creation failed"
+            return
+        fi
+    fi
+
+    if [[ ! -x "$venv_python" ]]; then
+        warn "ai-service/.venv/bin/python missing after venv creation; skipping AI service."
+        AI_SERVICE_STATUS="venv python missing"
+        return
+    fi
+
+    # Install pinned deps only when they are not already importable.
+    if ! "$venv_python" -c "import fastapi, uvicorn, pandas, sklearn, joblib, pydantic, requests, numpy" >/dev/null 2>&1; then
+        if [[ ! -f "$requirements" ]]; then
+            warn "ai-service/requirements.txt missing; skipping AI service."
+            AI_SERVICE_STATUS="requirements missing"
+            return
+        fi
+        log "Installing AI service Python requirements (first run)..."
+        if ! ( cd "$AI_SERVICE_DIR" && "$venv_python" -m pip install -r requirements.txt ); then
+            warn "AI service dependency install failed; skipping AI service (Spring Boot fallback still works)."
+            AI_SERVICE_STATUS="requirements install failed"
+            return
+        fi
+    fi
+
+    : >"$AI_SERVICE_LOG"
+    (
+        cd "$AI_SERVICE_DIR" || exit 1
+        nohup "$venv_python" -m uvicorn main:app --port "$AI_SERVICE_PORT" >>"$AI_SERVICE_LOG" 2>&1 &
+        echo $! >"$AI_SERVICE_PID_FILE"
+    )
+
+    if [[ ! -f "$AI_SERVICE_PID_FILE" ]]; then
+        warn "Could not capture AI service PID; it may not have started (Spring Boot fallback still works)."
+        AI_SERVICE_STATUS="startup failed"
+        return
+    fi
+
+    local elapsed=0
+    while (( elapsed < 10 )); do
+        if curl -fsS --max-time 2 "$AI_SERVICE_HEALTH_URL" >/dev/null 2>&1; then
+            AI_SERVICE_STATUS="ready"
+            return
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+
+    warn "AI service did not answer ${AI_SERVICE_HEALTH_URL} yet; check ${AI_SERVICE_LOG} (Spring Boot fallback still works)."
+    AI_SERVICE_STATUS="health not ready"
+}
+
 start_backend() {
     cleanup_stale_backend_pid
     : >"$BACKEND_LOG"
@@ -396,6 +495,7 @@ print_summary() {
     log "- Postgres: ready"
     log "- Mailpit: ready"
     log "- Backend: ready"
+    log "- AI Finance service: ${AI_SERVICE_STATUS} (${AI_SERVICE_HEALTH_URL})"
     log "- Frontend: ready"
     log "- App: ${APP_URL}"
     log "- Login: ${LOGIN_URL}"
@@ -443,6 +543,9 @@ main() {
     log "Waiting for backend health at ${BACKEND_HEALTH_URL}..."
     wait_for_backend
     log "Backend is ready."
+
+    log "Starting AI Finance service on port ${AI_SERVICE_PORT}..."
+    start_ai_service
 
     log "Starting frontend on ${APP_URL}..."
     start_frontend

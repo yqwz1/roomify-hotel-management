@@ -23,14 +23,11 @@ public class RoomService {
 
         private final RoomRepository roomRepository;
         private final RoomTypeRepository roomTypeRepository;
-        private final HousekeepingNotificationService housekeepingNotificationService;
 
         public RoomService(RoomRepository roomRepository,
-                        RoomTypeRepository roomTypeRepository,
-                        HousekeepingNotificationService housekeepingNotificationService) {
+                        RoomTypeRepository roomTypeRepository) {
                 this.roomRepository = roomRepository;
                 this.roomTypeRepository = roomTypeRepository;
-                this.housekeepingNotificationService = housekeepingNotificationService;
         }
 
         /**
@@ -209,11 +206,6 @@ public class RoomService {
         private void housekeepingHook(RoomStatus current,
                         RoomStatus target,
                         String roomNumber) {
-
-                if (current == RoomStatus.NEEDS_CLEANING
-                                && target == RoomStatus.AVAILABLE) {
-                        housekeepingNotificationService.notifyRoomReady(roomNumber);
-                }
 
                 if (current == RoomStatus.AVAILABLE
                                 && target == RoomStatus.UNDER_MAINTENANCE) {

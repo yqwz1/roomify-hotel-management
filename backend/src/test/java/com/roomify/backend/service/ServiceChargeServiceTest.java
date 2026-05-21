@@ -37,9 +37,6 @@ public class ServiceChargeServiceTest {
     @Mock
     private AuditService auditService;
 
-    @Mock
-    private NotificationService notificationService;
-
     @InjectMocks
     private ServiceChargeService serviceChargeService;
 
@@ -86,11 +83,6 @@ public class ServiceChargeServiceTest {
         ServiceCharge created = serviceChargeService.addCharge(1L, 10L, 2);
 
         assertEquals(BigDecimal.valueOf(100), created.getTotal());
-        verify(notificationService).notifyServiceRequestCreated(
-                eq(reservation),
-                eq(hotelService),
-                eq(2),
-                eq(BigDecimal.valueOf(100)));
     }
 
     @Test
@@ -103,7 +95,6 @@ public class ServiceChargeServiceTest {
 
         assertEquals("Service is inactive", exception.getMessage());
         verify(chargeRepo, never()).save(any(ServiceCharge.class));
-        verify(notificationService, never()).notifyServiceRequestCreated(any(), any(), anyInt(), any());
     }
 
     @Test

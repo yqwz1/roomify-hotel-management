@@ -21,7 +21,6 @@ public class ServiceChargeService {
     private final HotelServiceRepository serviceRepo;
     private final ReservationRepository reservationRepo;
     private final AuditService auditService;
-    private final NotificationService notificationService;
 
     public List<ServiceCharge> getByReservation(Long reservationId) {
         return chargeRepo.findByReservationId(reservationId);
@@ -62,7 +61,6 @@ public class ServiceChargeService {
                         + ", Quantity=" + quantity
                         + ", Amount=" + total);
 
-        notificationService.notifyServiceRequestCreated(reservation, service, quantity, total);
         return charge;
     }
 

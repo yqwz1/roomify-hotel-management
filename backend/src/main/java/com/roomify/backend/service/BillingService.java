@@ -34,7 +34,6 @@ public class BillingService {
         private final ReservationRepository reservationRepository;
         private final PaymentRepository paymentRepository;
         private final AuditService auditService;
-        private final NotificationService notificationService;
         private final ReservationFinancialService financialService;
         private final BigDecimal vatRate;
 
@@ -42,13 +41,11 @@ public class BillingService {
                         ReservationRepository reservationRepository,
                         PaymentRepository paymentRepository,
                         AuditService auditService,
-                        NotificationService notificationService,
                         ReservationFinancialService financialService,
                         @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
                 this.reservationRepository = reservationRepository;
                 this.paymentRepository = paymentRepository;
                 this.auditService = auditService;
-                this.notificationService = notificationService;
                 this.financialService = financialService;
                 this.vatRate = vatRate;
         }
@@ -99,9 +96,6 @@ public class BillingService {
                 BigDecimal projectedPaid = totalPaid.add(paymentAmount).setScale(MONEY_SCALE, ROUNDING);
 
                 if (projectedPaid.compareTo(totalPrice) > 0) {
-                        notificationService.notifyPaymentFailed(
-                                        normalized,
-                                        "Overpayment blocked. Remaining balance is " + currentOutstanding);
                         throw new PaymentValidationException(
                                         "PAYMENT_OVERPAYMENT_BLOCKED",
                                         "Overpayment is not allowed. Remaining balance is " + currentOutstanding,
@@ -135,12 +129,6 @@ public class BillingService {
                                 paymentAmount, projectedPaid, projectedOutstanding, isFullyPaid);
 
                 auditService.log("PAYMENT_RECORDED", normalized, metadata);
-                if (!isFullyPaid) {
-                        notificationService.notifyIncompletePayment(
-                                        normalized,
-                                        paymentAmount,
-                                        projectedOutstanding);
-                }
 
                 log.info(
                                 "Payment recorded for {} | amount={} totalPaid={} outstanding={} finalized={}",

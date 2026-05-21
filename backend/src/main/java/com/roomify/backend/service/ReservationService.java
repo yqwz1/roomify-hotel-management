@@ -52,7 +52,6 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final EmailService emailService;
     private final AuditService auditService;
-    private final HousekeepingNotificationService housekeepingNotificationService;
     private final ReservationFinancialService financialService;
     private final BigDecimal taxRate;
     private final InvoiceEmailService invoiceEmailService;
@@ -66,7 +65,6 @@ public class ReservationService {
             InvoiceEmailService invoiceEmailService,
             InvoiceDeliveryLogService invoiceDeliveryLogService,
             AuditService auditService,
-            HousekeepingNotificationService housekeepingNotificationService,
             ReservationFinancialService financialService,
             @Value("${roomify.billing.vat-rate:0.15}") BigDecimal taxRate) {
 
@@ -77,7 +75,6 @@ public class ReservationService {
         this.invoiceEmailService = invoiceEmailService;
         this.invoiceDeliveryLogService = invoiceDeliveryLogService;
         this.auditService = auditService;
-        this.housekeepingNotificationService = housekeepingNotificationService;
         this.financialService = financialService;
         this.taxRate = taxRate;
     }
@@ -468,7 +465,6 @@ public class ReservationService {
     // =============================
 
     private void triggerHousekeepingEvent(Room room) {
-        housekeepingNotificationService.notifyCheckoutNeedsCleaning(room.getRoomNumber());
         log.info("Housekeeping routing verified for checkout: room {}", room.getRoomNumber());
     }
 

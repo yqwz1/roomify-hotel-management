@@ -23,7 +23,6 @@ class RoomServiceTest {
 
     private RoomRepository roomRepository;
     private RoomTypeRepository roomTypeRepository;
-    private HousekeepingNotificationService housekeepingNotificationService;
     private RoomService roomService;
 
     private Room room;
@@ -32,12 +31,10 @@ class RoomServiceTest {
     void setUp() {
         roomRepository = mock(RoomRepository.class);
         roomTypeRepository = mock(RoomTypeRepository.class);
-        housekeepingNotificationService = mock(HousekeepingNotificationService.class);
 
         roomService = new RoomService(
                 roomRepository,
-                roomTypeRepository,
-                housekeepingNotificationService
+                roomTypeRepository
         );
 
         RoomType type = new RoomType();
@@ -62,7 +59,6 @@ class RoomServiceTest {
         roomService.updateStatus(1L, "AVAILABLE");
 
         assertEquals(RoomStatus.AVAILABLE, room.getStatus());
-        verify(housekeepingNotificationService, times(1)).notifyRoomReady("101");
     }
 
     @Test

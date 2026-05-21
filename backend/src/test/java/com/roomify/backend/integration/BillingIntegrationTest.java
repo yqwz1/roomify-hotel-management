@@ -29,19 +29,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
 import com.roomify.backend.entity.AuditLog;
-import com.roomify.backend.entity.Notification;
-import com.roomify.backend.entity.NotificationEventType;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.GuestRepository;
-import com.roomify.backend.repository.NotificationRepository;
 import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
-import com.roomify.backend.user.Role;
 
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -77,8 +73,6 @@ class BillingIntegrationTest {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
     @Autowired
-    private NotificationRepository notificationRepository;
-    @Autowired
     private AuditLogRepository auditLogRepository;
     @Autowired
     private JavaMailSender javaMailSender;
@@ -105,7 +99,6 @@ class BillingIntegrationTest {
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
         guestRepository.deleteAll();
-        notificationRepository.deleteAll();
         auditLogRepository.deleteAll();
         reset(javaMailSender);
         Mockito.when(javaMailSender.createMimeMessage())
@@ -282,8 +275,8 @@ class BillingIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /api/payments persists failed-payment notifications and audit logs on rollback")
-    void directPaymentsOverpaymentStillPersistsNotificationAndAudit() throws Exception {
+    @DisplayName("POST /api/payments persists failed-payment audit logs on rollback")
+    void directPaymentsOverpaymentStillPersistsAudit() throws Exception {
         String confirmationNumber = createReservation(
                 managerToken, LocalDate.now().plusDays(8), LocalDate.now().plusDays(11));
 
@@ -298,15 +291,6 @@ class BillingIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Payment exceeds remaining balance. Remaining balance is 690.00"));
-
-        Notification managerNotification = notificationRepository.findByTargetRoleOrderByCreatedAtDesc(Role.MANAGER)
-                .stream()
-                .filter(notification -> notification.getEventType() == NotificationEventType.PAYMENT_FAILED)
-                .filter(notification -> confirmationNumber.equals(notification.getReferenceId()))
-                .findFirst()
-                .orElseThrow();
-
-        org.junit.jupiter.api.Assertions.assertEquals("Payment failed", managerNotification.getTitle());
 
         AuditLog failedAudit = auditLogRepository.findAll().stream()
                 .filter(log -> "PAYMENT_FAILED".equals(log.getAction()))

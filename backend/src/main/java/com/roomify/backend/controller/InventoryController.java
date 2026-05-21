@@ -103,11 +103,6 @@ public class InventoryController {
         return serviceUsageTemplateService.listTemplates();
     }
 
-    @GetMapping("/templates/{id}")
-    public ServiceUsageTemplateResponse getTemplate(@PathVariable Long id) {
-        return serviceUsageTemplateService.getTemplate(id);
-    }
-
     @PostMapping("/templates")
     public ResponseEntity<ServiceUsageTemplateResponse> createTemplate(
             @Valid @RequestBody ServiceUsageTemplateRequest request) {

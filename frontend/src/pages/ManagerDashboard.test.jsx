@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import ManagerDashboard from './ManagerDashboard';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
 import { exportDashboardReport } from '../services/dashboardService';
-import { getNotifications } from '../services/notificationService';
 
 vi.mock('../context/AuthProvider', () => ({
   useAuth: () => ({
@@ -29,11 +28,6 @@ vi.mock('../hooks/useRoomTypes', () => ({
 vi.mock('../services/dashboardService', () => ({
   exportDashboardReport: vi.fn(),
   extractDashboardError: (err) => err?.message ?? 'Dashboard request failed',
-}));
-
-vi.mock('../services/notificationService', () => ({
-  getNotifications: vi.fn(),
-  extractNotificationError: (err) => err?.message ?? 'Notifications failed',
 }));
 
 vi.mock('../components/charts/TrendLineChart', () => ({
@@ -81,10 +75,8 @@ describe('ManagerDashboard', () => {
   beforeEach(() => {
     useManagerDashboard.mockReset();
     exportDashboardReport.mockReset();
-    getNotifications.mockReset();
     globalThis.URL.createObjectURL = vi.fn(() => 'blob:report');
     globalThis.URL.revokeObjectURL = vi.fn();
-    getNotifications.mockImplementation(() => new Promise(() => {}));
   });
 
   it('shows loading state while the live dashboard hook is loading', () => {
@@ -198,25 +190,6 @@ describe('ManagerDashboard', () => {
     const downloadLink = screen.getByRole('link', { name: /Download Excel Export/i });
     expect(downloadLink).toHaveAttribute('href', 'blob:report');
     expect(downloadLink).toHaveAttribute('download', expect.stringMatching(/\.xls$/));
-  });
-
-  it('shows recent notifications without exposing admin-only audit activity', async () => {
-    useManagerDashboard.mockReturnValue(dashboardData);
-    getNotifications.mockResolvedValue([
-      {
-        id: 1,
-        title: 'Payment failed',
-        message: 'Reservation RSV-9 payment failed: test gateway',
-        read: false,
-        createdAt: '2026-04-03T10:00:00',
-      },
-    ]);
-
-    renderPage();
-
-    expect(await screen.findByTestId('manager-notifications')).toBeInTheDocument();
-    expect(screen.getByText(/Reservation RSV-9 payment failed/i)).toBeInTheDocument();
-    expect(screen.queryByTestId('manager-audit-logs')).not.toBeInTheDocument();
   });
 
   it('removes admin-only quick actions from the manager dashboard', () => {
