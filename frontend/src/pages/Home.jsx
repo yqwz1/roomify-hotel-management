@@ -283,9 +283,9 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-brand-surface-border bg-brand-primary-tint p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-r border-white/10 bg-brand-ink p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex items-center gap-1.5">
-                      <span className="text-[11px] font-black text-brand-ink">Roomify</span>
+                      <span className="text-[11px] font-black text-white">Roomify</span>
                     </div>
                     {['Dashboard', 'Reservations', 'Rooms', 'Guests', 'Billing', 'Reports'].map((item, i) => (
                       <motion.div
@@ -293,8 +293,8 @@ export default function Home() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: 0.7 + i * 0.05, ease: EASE }}
-                        className={`mb-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold ${
-                          i === 0 ? 'bg-brand-primary text-white shadow-sm' : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
+                        className={`mb-0.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold ${
+                          i === 0 ? 'bg-brand-primary text-white shadow-sm' : 'text-white/60 hover:bg-white/8 hover:text-white'
                         }`}
                       >
                         {item}

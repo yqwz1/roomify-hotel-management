@@ -863,7 +863,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
                 new ServiceSpec("Late Checkout (until 6pm)", ServiceCategory.OTHER, "200.00"),
                 new ServiceSpec("Breakfast Buffet", ServiceCategory.FOOD, "75.00"),
                 new ServiceSpec("In-room Dining (delivery fee)", ServiceCategory.FOOD, "25.00"),
-                new ServiceSpec("Spa Session (60 min)", ServiceCategory.OTHER, "400.00"),
                 new ServiceSpec("Laundry Service (per kg)", ServiceCategory.CLEANING, "35.00"),
                 new ServiceSpec("Extra Bed", ServiceCategory.OTHER, "120.00"));
 
