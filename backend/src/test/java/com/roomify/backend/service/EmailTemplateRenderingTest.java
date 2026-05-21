@@ -2,6 +2,8 @@ package com.roomify.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.StaticApplicationContext;
@@ -59,5 +61,35 @@ class EmailTemplateRenderingTest {
         assertTrue(html.contains("Front Desk Agent"));
         assertTrue(html.contains("staff@roomify.test"));
         assertTrue(html.contains("TempPass123!"));
+    }
+
+    @Test
+    void rendersNotificationTemplate() {
+        Context context = new Context();
+        context.setVariable("brandName", "Roomify");
+        context.setVariable("rtl", false);
+        context.setVariable("preheader", "Reservation reminder");
+        context.setVariable("heroEyebrow", "Check-in reminder");
+        context.setVariable("heading", "Your arrival is tomorrow");
+        context.setVariable("greeting", "Dear Jane Guest");
+        context.setVariable("intro", "We look forward to welcoming you.");
+        context.setVariable("accentLabel", "Confirmation number");
+        context.setVariable("accentValue", "RSV-REMINDER001");
+        context.setVariable("details", new LinkedHashMap<>(java.util.Map.of(
+                "Check-in", "2026-06-01",
+                "Check-out", "2026-06-03")));
+        context.setVariable("bodyLines", List.of(
+                "Please bring your confirmation number.",
+                "Contact the front desk for late arrival support."));
+        context.setVariable("signature", "Roomify Team");
+        context.setVariable("footerText", "This is an operational message.");
+        context.setVariable("supportEmail", "support@roomify.com");
+        context.setVariable("currentYear", "2026");
+
+        String html = templateEngine.process("email/notification-email", context);
+
+        assertTrue(html.contains("RSV-REMINDER001"));
+        assertTrue(html.contains("Check-in reminder"));
+        assertTrue(html.contains("Roomify Team"));
     }
 }

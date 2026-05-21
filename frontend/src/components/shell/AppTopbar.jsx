@@ -3,6 +3,7 @@ import { LogOut, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import NotificationCenter from './NotificationCenter';
 import {
   getPageMeta,
   getRoleDisplayLabel,
@@ -64,6 +65,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
         </div>
 
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+          <NotificationCenter />
           <LanguageSwitcher />
           <Link
             to={homePath}

@@ -5,6 +5,7 @@ import com.roomify.backend.entity.HotelService;
 import com.roomify.backend.entity.Notification;
 import com.roomify.backend.entity.NotificationEventType;
 import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ServiceRequest;
 import com.roomify.backend.entity.ServiceCategory;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.NotificationRepository;
@@ -13,6 +14,7 @@ import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.security.access.AccessDeniedException;
@@ -43,10 +45,19 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationResponse> listVisibleForCurrentUser(Boolean readState) {
         NotificationViewer viewer = resolveViewer();
-        return notificationRepository.findByTargetRoleOrderByCreatedAtDesc(viewer.role())
-                .stream()
-                .filter(notification -> matchesDepartment(notification.getTargetDepartment(), viewer.department()))
+        List<Notification> notifications = new ArrayList<>();
+        if (viewer.role() != null) {
+            notifications.addAll(notificationRepository.findByTargetRoleOrderByCreatedAtDesc(viewer.role()));
+        }
+        if (viewer.actor() != null && !viewer.actor().isBlank()) {
+            notifications.addAll(notificationRepository.findByRecipientEmailIgnoreCaseOrderByCreatedAtDesc(viewer.actor()));
+        }
+
+        return notifications.stream()
+                .filter(notification -> canView(notification, viewer.role(), viewer.department(), viewer.actor()))
                 .filter(notification -> readState == null || notification.isRead() == readState)
+                .distinct()
+                .sorted(java.util.Comparator.comparing(Notification::getCreatedAt).reversed())
                 .map(NotificationResponse::from)
                 .toList();
     }
@@ -54,10 +65,9 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public long unreadCountForCurrentUser() {
         NotificationViewer viewer = resolveViewer();
-        return notificationRepository.findByTargetRoleOrderByCreatedAtDesc(viewer.role())
+        return listVisibleForCurrentUser(false)
                 .stream()
                 .filter(notification -> !notification.isRead())
-                .filter(notification -> matchesDepartment(notification.getTargetDepartment(), viewer.department()))
                 .count();
     }
 
@@ -67,7 +77,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
 
-        if (!canView(notification, viewer.role(), viewer.department())) {
+        if (!canView(notification, viewer.role(), viewer.department(), viewer.actor())) {
             throw new AccessDeniedException("You cannot update this notification");
         }
 
@@ -91,7 +101,7 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
 
-        if (!canView(notification, viewer.role(), viewer.department())) {
+        if (!canView(notification, viewer.role(), viewer.department(), viewer.actor())) {
             throw new AccessDeniedException("You cannot update this notification");
         }
 
@@ -182,6 +192,7 @@ public class NotificationService {
         notification.setEventType(eventType);
         notification.setTargetRole(targetRole);
         notification.setTargetDepartment(normalize(targetDepartment));
+        notification.setRecipientEmail(null);
         notification.setTitle(title);
         notification.setMessage(message);
         notification.setReferenceType(normalize(referenceType));
@@ -202,6 +213,102 @@ public class NotificationService {
                         saved.getReferenceId()));
 
         return NotificationResponse.from(saved);
+    }
+
+    public NotificationResponse createDirectNotification(
+            NotificationEventType eventType,
+            String recipientEmail,
+            String title,
+            String message,
+            String referenceType,
+            String referenceId) {
+        Notification notification = new Notification();
+        notification.setEventType(eventType);
+        notification.setTargetRole(null);
+        notification.setTargetDepartment(null);
+        notification.setRecipientEmail(normalize(recipientEmail));
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setReferenceType(normalize(referenceType));
+        notification.setReferenceId(normalize(referenceId));
+
+        Notification saved = notificationRepository.save(notification);
+        return NotificationResponse.from(saved);
+    }
+
+    public void notifyReservationCreated(Reservation reservation) {
+        createDirectNotification(
+                NotificationEventType.RESERVATION_CREATED,
+                reservation.getGuest().getEmail(),
+                "Reservation confirmed",
+                "Your reservation " + reservation.getConfirmationNumber() + " has been confirmed.",
+                "RESERVATION",
+                reservation.getConfirmationNumber());
+    }
+
+    public void notifyReservationCancelled(Reservation reservation) {
+        createDirectNotification(
+                NotificationEventType.RESERVATION_CANCELLED,
+                reservation.getGuest().getEmail(),
+                "Reservation cancelled",
+                "Your reservation " + reservation.getConfirmationNumber() + " has been cancelled.",
+                "RESERVATION",
+                reservation.getConfirmationNumber());
+    }
+
+    public void notifyPaymentCompleted(Reservation reservation, BigDecimal amount) {
+        createDirectNotification(
+                NotificationEventType.PAYMENT_COMPLETED,
+                reservation.getGuest().getEmail(),
+                "Payment received",
+                String.format(
+                        Locale.ROOT,
+                        "We received %s for reservation %s.",
+                        amount,
+                        reservation.getConfirmationNumber()),
+                "RESERVATION",
+                reservation.getConfirmationNumber());
+    }
+
+    public void notifyCheckInReminder(Reservation reservation) {
+        createDirectNotification(
+                NotificationEventType.CHECKIN_REMINDER,
+                reservation.getGuest().getEmail(),
+                "Check-in reminder",
+                "Your check-in for reservation " + reservation.getConfirmationNumber() + " is within 24 hours.",
+                "RESERVATION",
+                reservation.getConfirmationNumber());
+    }
+
+    public void notifyRoomReady(Reservation reservation) {
+        createDirectNotification(
+                NotificationEventType.ROOM_READY,
+                reservation.getGuest().getEmail(),
+                "Room ready",
+                "Your room " + reservation.getRoom().getRoomNumber() + " is ready.",
+                "RESERVATION",
+                reservation.getConfirmationNumber());
+    }
+
+    public void notifyServiceRequestCompleted(ServiceRequest request) {
+        createDirectNotification(
+                NotificationEventType.SERVICE_REQUEST_COMPLETED,
+                request.getGuest().getEmail(),
+                "Service request completed",
+                "Your request for room " + request.getRoom().getRoomNumber() + " has been completed.",
+                "SERVICE_REQUEST",
+                String.valueOf(request.getId()));
+    }
+
+    public void notifyEmailDeliveryFailed(String recipient, String subject) {
+        createNotification(
+                NotificationEventType.EMAIL_DELIVERY_FAILED,
+                Role.ADMIN,
+                null,
+                "Email delivery failed",
+                "Failed to deliver '" + subject + "' to " + recipient,
+                "EMAIL",
+                recipient);
     }
 
     private NotificationRoute routeForServiceRequest(ServiceCategory category) {
@@ -247,7 +354,10 @@ public class NotificationService {
         throw new AccessDeniedException("No role is present in token");
     }
 
-    private boolean canView(Notification notification, Role role, String department) {
+    private boolean canView(Notification notification, Role role, String department, String actorEmail) {
+        if (notification.getRecipientEmail() != null) {
+            return actorEmail != null && notification.getRecipientEmail().equalsIgnoreCase(actorEmail);
+        }
         if (notification.getTargetRole() != role) {
             return false;
         }

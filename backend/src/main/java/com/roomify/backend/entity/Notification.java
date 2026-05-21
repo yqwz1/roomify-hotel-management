@@ -25,11 +25,14 @@ public class Notification {
     private NotificationEventType eventType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "target_role", nullable = false, length = 20)
+    @Column(name = "target_role", length = 20)
     private Role targetRole;
 
     @Column(name = "target_department", length = 50)
     private String targetDepartment;
+
+    @Column(name = "recipient_email", length = 255)
+    private String recipientEmail;
 
     @Column(nullable = false, length = 150)
     private String title;
@@ -85,6 +88,14 @@ public class Notification {
 
     public void setTargetDepartment(String targetDepartment) {
         this.targetDepartment = targetDepartment;
+    }
+
+    public String getRecipientEmail() {
+        return recipientEmail;
+    }
+
+    public void setRecipientEmail(String recipientEmail) {
+        this.recipientEmail = recipientEmail;
     }
 
     public String getTitle() {

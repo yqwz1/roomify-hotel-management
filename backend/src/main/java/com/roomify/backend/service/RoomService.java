@@ -212,7 +212,10 @@ public class RoomService {
 
                 if (current == RoomStatus.NEEDS_CLEANING
                                 && target == RoomStatus.AVAILABLE) {
-                        housekeepingNotificationService.notifyRoomReady(roomNumber);
+                        Room room = roomRepository.findByRoomNumber(roomNumber).orElse(null);
+                        if (room != null) {
+                                housekeepingNotificationService.notifyRoomReady(room);
+                        }
                 }
 
                 if (current == RoomStatus.AVAILABLE

@@ -3,6 +3,7 @@ package com.roomify.backend.repository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -139,4 +140,34 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                         @Param("newIn") LocalDate newIn,
                         @Param("newOut") LocalDate newOut,
                         @Param("currentId") Long currentId);
+
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        List<Reservation> findAllByCheckInDateAndStatusIn(LocalDate checkInDate, Collection<ReservationStatus> statuses);
+
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        @Query("""
+                        select r from Reservation r
+                        where r.status in :statuses
+                          and r.outstandingBalance > 0
+                          and r.checkOutDate > :today
+                          and r.checkInDate <= :latestCheckIn
+                        order by r.checkInDate asc
+                        """)
+        List<Reservation> findOutstandingReservationsForReminder(
+                        @Param("statuses") Collection<ReservationStatus> statuses,
+                        @Param("today") LocalDate today,
+                        @Param("latestCheckIn") LocalDate latestCheckIn);
+
+        @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
+        @Query("""
+                        select r from Reservation r
+                        where r.room.id = :roomId
+                          and r.status in :statuses
+                          and r.checkOutDate >= :today
+                        order by r.checkInDate asc
+                        """)
+        List<Reservation> findUpcomingReservationsForRoom(
+                        @Param("roomId") Long roomId,
+                        @Param("statuses") Collection<ReservationStatus> statuses,
+                        @Param("today") LocalDate today);
 }

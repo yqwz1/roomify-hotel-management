@@ -31,7 +31,6 @@ import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
-import com.roomify.backend.exception.EmailDeliveryException;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
@@ -52,6 +51,7 @@ public class ReservationService {
     private final RoomRepository roomRepository;
     private final EmailService emailService;
     private final AuditService auditService;
+    private final NotificationService notificationService;
     private final HousekeepingNotificationService housekeepingNotificationService;
     private final ReservationFinancialService financialService;
     private final BigDecimal taxRate;
@@ -66,6 +66,7 @@ public class ReservationService {
             InvoiceEmailService invoiceEmailService,
             InvoiceDeliveryLogService invoiceDeliveryLogService,
             AuditService auditService,
+            NotificationService notificationService,
             HousekeepingNotificationService housekeepingNotificationService,
             ReservationFinancialService financialService,
             @Value("${roomify.billing.vat-rate:0.15}") BigDecimal taxRate) {
@@ -77,6 +78,7 @@ public class ReservationService {
         this.invoiceEmailService = invoiceEmailService;
         this.invoiceDeliveryLogService = invoiceDeliveryLogService;
         this.auditService = auditService;
+        this.notificationService = notificationService;
         this.housekeepingNotificationService = housekeepingNotificationService;
         this.financialService = financialService;
         this.taxRate = taxRate;
@@ -144,6 +146,7 @@ public class ReservationService {
         ReservationResponse response = toResponse(saved, financialService.summarize(saved));
 
         sendReservationConfirmationEmail(saved, response);
+        notificationService.notifyReservationCreated(saved);
 
         return response;
     }
@@ -300,6 +303,7 @@ public class ReservationService {
         } catch (RuntimeException ex) {
             log.warn("Failed to send cancellation email for reservation {}", reservation.getId(), ex);
         }
+        notificationService.notifyReservationCancelled(saved);
 
         auditService.log(
                 "RESERVATION_CANCELLED",
@@ -468,7 +472,7 @@ public class ReservationService {
     // =============================
 
     private void triggerHousekeepingEvent(Room room) {
-        housekeepingNotificationService.notifyCheckoutNeedsCleaning(room.getRoomNumber());
+        housekeepingNotificationService.notifyCheckoutNeedsCleaning(room);
         log.info("Housekeeping routing verified for checkout: room {}", room.getRoomNumber());
     }
 
@@ -522,7 +526,7 @@ public class ReservationService {
                     response);
 
         } catch (RuntimeException ex) {
-            throw new EmailDeliveryException("Failed to send confirmation email", ex);
+            log.warn("Failed to queue confirmation email for reservation {}", reservation.getId(), ex);
         }
     }
 

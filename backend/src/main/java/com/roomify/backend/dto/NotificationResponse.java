@@ -11,6 +11,7 @@ public class NotificationResponse {
     private NotificationEventType eventType;
     private Role targetRole;
     private String targetDepartment;
+    private String recipientEmail;
     private String title;
     private String message;
     private String referenceType;
@@ -25,6 +26,7 @@ public class NotificationResponse {
         response.eventType = notification.getEventType();
         response.targetRole = notification.getTargetRole();
         response.targetDepartment = notification.getTargetDepartment();
+        response.recipientEmail = notification.getRecipientEmail();
         response.title = notification.getTitle();
         response.message = notification.getMessage();
         response.referenceType = notification.getReferenceType();
@@ -49,6 +51,10 @@ public class NotificationResponse {
 
     public String getTargetDepartment() {
         return targetDepartment;
+    }
+
+    public String getRecipientEmail() {
+        return recipientEmail;
     }
 
     public String getTitle() {

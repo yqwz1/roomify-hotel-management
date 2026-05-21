@@ -53,6 +53,7 @@ class ReservationServiceTest {
     private InvoiceEmailService invoiceEmailService;
     private InvoiceDeliveryLogService invoiceDeliveryLogService;
     private AuditService auditService;
+    private NotificationService notificationService;
     private HousekeepingNotificationService housekeepingNotificationService;
     private ReservationFinancialService financialService;
 
@@ -69,6 +70,7 @@ class ReservationServiceTest {
         invoiceEmailService = mock(InvoiceEmailService.class);
         invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
         auditService = mock(AuditService.class);
+        notificationService = mock(NotificationService.class);
         housekeepingNotificationService = mock(HousekeepingNotificationService.class);
         financialService = new ReservationFinancialService(new BigDecimal("0.15"));
 
@@ -80,6 +82,7 @@ class ReservationServiceTest {
                 invoiceEmailService,
                 invoiceDeliveryLogService,
                 auditService,
+                notificationService,
                 housekeepingNotificationService,
                 financialService,
                 new BigDecimal("0.15"));
@@ -516,7 +519,7 @@ class ReservationServiceTest {
         assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
         assertNotNull(reservation.getActualCheckOutAt());
         assertEquals("Checkout completed successfully", response.getMessage());
-        verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning("301");
+        verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning(reservation.getRoom());
     }
 
     @Test

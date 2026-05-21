@@ -57,12 +57,13 @@ class RoomServiceTest {
     @Test
     void shouldAllowValidStatusTransition() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.findByRoomNumber("101")).thenReturn(Optional.of(room));
         when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
 
         roomService.updateStatus(1L, "AVAILABLE");
 
         assertEquals(RoomStatus.AVAILABLE, room.getStatus());
-        verify(housekeepingNotificationService, times(1)).notifyRoomReady("101");
+        verify(housekeepingNotificationService, times(1)).notifyRoomReady(room);
     }
 
     @Test

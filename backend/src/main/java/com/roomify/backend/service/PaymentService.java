@@ -136,6 +136,7 @@ public class PaymentService {
                         amount,
                         newRemainingBalance);
             }
+            notificationService.notifyPaymentCompleted(reservation, amount);
 
             log.info(
                     "Payment success for {} | method={} amount={} totalPaid={} remainingBalance={}",
