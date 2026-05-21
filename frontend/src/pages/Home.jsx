@@ -283,7 +283,7 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-white/10 bg-brand-ink p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-r border-white/10 bg-brand-primary-deep p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex items-center gap-1.5">
                       <span className="text-[11px] font-black text-white">Roomify</span>
                     </div>
