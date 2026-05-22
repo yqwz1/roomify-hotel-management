@@ -1,6 +1,8 @@
 package com.roomify.backend.service;
 
 import com.roomify.backend.dto.GuestReservationSummaryDto;
+import com.roomify.backend.dto.ReservationCreateRequest;
+import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
@@ -26,6 +28,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
 
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
+    private final ReservationService reservationService;
 
     @Override
     public List<GuestReservationSummaryDto> getGuestReservations() {
@@ -38,6 +41,12 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
+    }
+
+    @Override
+    public ReservationResponse createAuthenticatedGuestReservation(ReservationCreateRequest request) {
+        String email = requireAuthenticatedEmail();
+        return reservationService.createForAuthenticatedGuest(request, email);
     }
 
     @Override
@@ -79,16 +88,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
     }
 
     private List<Guest> resolveAuthenticatedGuests() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("Guest authentication required");
-        }
-
-        String email = normalizeEmail(authentication.getName());
-        if (email == null || email.isBlank()) {
-            throw new AccessDeniedException("Authenticated guest email is missing");
-        }
+        String email = requireAuthenticatedEmail();
 
         // Some legacy datasets can contain case-variant guest rows for the same
         // logical email. We merge them so the authenticated guest still sees a
@@ -100,6 +100,20 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         }
 
         return guests;
+    }
+
+    private String requireAuthenticatedEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Guest authentication required");
+        }
+
+        String email = normalizeEmail(authentication.getName());
+        if (email == null || email.isBlank()) {
+            throw new AccessDeniedException("Authenticated guest email is missing");
+        }
+        return email;
     }
 
     private String normalizeEmail(String email) {

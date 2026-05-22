@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   ArrowLeft,
   BedDouble,
-  CalendarRange,
+  CheckCircle2,
   Globe2,
   IdCard,
+  Lock,
   Mail,
   Phone,
   UserRound,
@@ -15,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import DateRangePicker from '../components/DateRangePicker';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import LoadingState from '../components/common/LoadingState';
+import ErrorState from '../components/common/ErrorState';
 import { Button } from '../components/ui/button';
 import {
   createReservation,
@@ -22,21 +25,30 @@ import {
   extractReservationError,
   isConflictError,
 } from '../services/reservationService';
+import { getPublicRoomDetails, extractSearchError } from '../services/searchService';
 import { useAuth } from '../context/AuthProvider';
 import {
   formatLocalizedCurrency,
   formatLocalizedDate,
   translateKnownValue,
+  translateWithFallback,
 } from '../utils/localization';
-import { VAT_RATE } from '../utils/billing';
 
-const EMPTY_GUEST = {
-  name: '',
-  email: '',
+const createDefaultDates = () => {
+  const todayDate = new Date();
+  const today = todayDate.toISOString().split('T')[0];
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  return { today, tomorrow: tomorrowDate.toISOString().split('T')[0] };
+};
+
+const createGuestDraft = (user, shouldPrefillIdentity = false) => ({
+  name: shouldPrefillIdentity ? (user?.username ?? '') : '',
+  email: shouldPrefillIdentity ? (user?.email ?? '') : '',
   phone: '',
   idNumber: '',
   nationality: '',
-};
+});
 
 function Field({
   id,
@@ -47,6 +59,8 @@ function Field({
   value,
   onChange,
   icon: Icon,
+  disabled = false,
+  locked = false,
 }) {
   return (
     <div className="space-y-2">
@@ -59,53 +73,18 @@ function Field({
       </label>
       <div className="relative">
         <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+        {locked ? (
+          <Lock className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+        ) : null}
         <input
           id={id}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+          disabled={disabled}
+          className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-10 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-muted"
         />
-      </div>
-    </div>
-  );
-}
-
-function ConflictBanner({ message, room, onSearchAlternatives }) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
-      <div className="flex items-start gap-4">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
-          <AlertTriangle className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-lg font-black tracking-tight text-brand-ink">
-            {t('roomAlreadyBooked')}
-          </p>
-          <p className="mt-2 text-sm font-medium leading-6 text-brand-danger/85">
-            {message}
-          </p>
-          <div className="mt-4 rounded-[1.25rem] border border-brand-danger/30 bg-white px-4 py-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-danger">
-              {t('whatYouCanDo')}
-            </p>
-            <p className="mt-2 text-sm font-medium text-brand-ink">
-              {room?.roomNumber
-                ? t('tryDifferentDatesRoom', { room: room.roomNumber })
-                : t('searchAlternativeRooms')}
-            </p>
-            <button
-              type="button"
-              onClick={onSearchAlternatives}
-              className="mt-4 inline-flex items-center justify-center rounded-full bg-brand-danger px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-danger"
-            >
-              {t('searchAlternativeBtn')}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -113,91 +92,132 @@ function ConflictBanner({ message, room, onSearchAlternatives }) {
 
 export default function BookRoom() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const location = useLocation();
-  const { hasRole } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { user, isAuthenticated, hasRole } = useAuth();
   const { t, i18n } = useTranslation();
+  const { today, tomorrow } = useMemo(() => createDefaultDates(), []);
 
-  const room = location.state?.room ?? null;
-  const roomId = room?.id ?? Number(searchParams.get('roomId'));
-
-  const stateCheckIn = location.state?.checkIn ?? '';
-  const stateCheckOut = location.state?.checkOut ?? '';
-
-  const todayDate = new Date();
-  const today = todayDate.toISOString().split('T')[0];
-  const tomorrowDate = new Date(todayDate);
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrow = tomorrowDate.toISOString().split('T')[0];
-
-  const [checkIn, setCheckIn] = useState(stateCheckIn || today);
-  const [checkOut, setCheckOut] = useState(stateCheckOut || tomorrow);
-  const [guest, setGuest] = useState(EMPTY_GUEST);
-  const [validationError, setValidationError] = useState(null);
-  const [conflictError, setConflictError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+  const roomId = Number(searchParams.get('roomId') ?? location.state?.room?.id ?? 0);
+  const initialCheckIn = searchParams.get('checkIn') ?? location.state?.checkIn ?? today;
+  const initialCheckOut = searchParams.get('checkOut') ?? location.state?.checkOut ?? tomorrow;
   const isGuest = hasRole('ROLE_GUEST');
+
+  const [checkIn, setCheckIn] = useState(initialCheckIn);
+  const [checkOut, setCheckOut] = useState(initialCheckOut);
+  const [guest, setGuest] = useState(() => createGuestDraft(user, isGuest));
+  const [room, setRoom] = useState(location.state?.room ?? null);
+  const [loadingRoom, setLoadingRoom] = useState(Boolean(roomId));
+  const [loadError, setLoadError] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const [conflictError, setConflictError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isGuest) {
+      return;
+    }
+    setGuest((current) => ({
+      ...current,
+      name: current.name || user?.username || '',
+      email: user?.email || current.email,
+    }));
+  }, [isGuest, user?.email, user?.username]);
+
+  useEffect(() => {
+    if (!roomId) {
+      setLoadingRoom(false);
+      setRoom(null);
+      return;
+    }
+
+    let ignore = false;
+
+    const loadRoom = async () => {
+      setLoadingRoom(true);
+      setLoadError('');
+
+      try {
+        const result = await getPublicRoomDetails(roomId, { checkIn, checkOut });
+        if (!ignore) {
+          setRoom(result);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setRoom(null);
+          setLoadError(extractSearchError(err));
+        }
+      } finally {
+        if (!ignore) {
+          setLoadingRoom(false);
+        }
+      }
+    };
+
+    loadRoom();
+
+    return () => {
+      ignore = true;
+    };
+  }, [checkIn, checkOut, roomId]);
+  const pricing = room?.pricing ?? null;
+  const nights = pricing?.nights ?? 0;
 
   const setField = (field, value) => {
     setGuest((prev) => ({ ...prev, [field]: value }));
   };
 
-  const nights = useMemo(() => {
-    if (!checkIn || !checkOut || checkOut <= checkIn) return 0;
-    return Math.round((new Date(checkOut) - new Date(checkIn)) / 86400000);
-  }, [checkIn, checkOut]);
-
-  const roomRate = Number(room?.roomType?.basePrice ?? 0);
-  const subtotal = roomRate * nights;
-  const taxes = subtotal * VAT_RATE;
-  const totalPrice = subtotal + taxes;
-
-  const handleSearchAlternatives = () => {
-    navigate('/search', { state: { checkIn, checkOut } });
+  const handleGoToLogin = () => {
+    navigate('/login', {
+      state: {
+        from: {
+          pathname: '/book',
+          search: `?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}`,
+        },
+      },
+    });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setValidationError(null);
-    setConflictError(null);
+    setValidationError('');
+    setConflictError('');
 
-    if (!checkIn || !checkOut) {
-      setValidationError(t('pleaseSelectDates'));
+    if (!isAuthenticated) {
+      handleGoToLogin();
       return;
     }
 
-    if (checkOut <= checkIn) {
-      setValidationError(t('checkoutAfterCheckin'));
-      return;
-    }
-
-    if (!guest.name.trim()) {
-      setValidationError(t('guestNameRequired'));
-      return;
-    }
-
-    if (!guest.email.trim()) {
-      setValidationError(t('guestEmailRequired'));
-      return;
-    }
-
-    if (!guest.phone.trim()) {
-      setValidationError(t('guestPhoneRequired'));
-      return;
-    }
-
-    if (!guest.idNumber.trim()) {
-      setValidationError(t('guestIdRequired'));
-      return;
-    }
-
-    if (!guest.nationality.trim()) {
-      setValidationError(t('guestNationalityRequired'));
-      return;
-    }
-
-    if (!roomId) {
+    if (!roomId || !room) {
       setValidationError(t('noRoomError'));
+      return;
+    }
+
+    if (!room.availableForRequestedStay) {
+      setValidationError(
+        translateWithFallback(
+          t,
+          'bookRoomPage.unavailableMessage',
+          'This room is no longer available for the selected stay.'
+        )
+      );
+      return;
+    }
+
+    if (
+      !guest.name.trim() ||
+      !guest.email.trim() ||
+      !guest.phone.trim() ||
+      !guest.idNumber.trim() ||
+      !guest.nationality.trim()
+    ) {
+      setValidationError(
+        translateWithFallback(
+          t,
+          'bookRoomPage.completeGuestProfile',
+          'Complete the guest profile before submitting the reservation.'
+        )
+      );
       return;
     }
 
@@ -208,10 +228,9 @@ export default function BookRoom() {
         roomId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
-        status: 'CONFIRMED',
         guest: {
           name: guest.name.trim(),
-          email: guest.email.trim(),
+          email: isGuest ? (user?.email ?? guest.email.trim()) : guest.email.trim(),
           phone: guest.phone.trim(),
           idNumber: guest.idNumber.trim(),
           nationality: guest.nationality.trim(),
@@ -231,7 +250,6 @@ export default function BookRoom() {
       });
     } catch (error) {
       const message = extractReservationError(error);
-
       if (isConflictError(error)) {
         setConflictError(message);
       } else {
@@ -242,7 +260,7 @@ export default function BookRoom() {
     }
   };
 
-  if (!room && !roomId) {
+  if (!roomId) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
         <DashboardPanel
@@ -269,16 +287,42 @@ export default function BookRoom() {
     );
   }
 
+  if (loadingRoom) {
+    return <LoadingState message={t('roomSearchPage.searchingRooms')} />;
+  }
+
+  if (loadError) {
+    return (
+      <ErrorState
+        title={t('bookARoom')}
+        message={loadError}
+        onRetry={() => navigate(0)}
+      />
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <DashboardHero
-        eyebrow={t('bookRoomPage.heroEyebrow')}
+        eyebrow={translateWithFallback(t, 'bookRoomPage.heroEyebrow', 'Secure reservation')}
         title={t('bookARoom')}
-        description={t('fillGuestDetails')}
+        description={
+          isAuthenticated
+            ? translateWithFallback(
+                t,
+                'bookRoomPage.authenticatedDescription',
+                'Review the stay, confirm your guest profile, and submit the reservation.'
+              )
+            : translateWithFallback(
+                t,
+                'bookRoomPage.publicDescription',
+                'Review the stay details now. You will sign in before the reservation is created.'
+              )
+        }
         meta={[
           room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`,
           t('nightsCount', { count: nights || 0 }),
-          formatLocalizedCurrency(totalPrice, i18n.language),
+          pricing?.total ? formatLocalizedCurrency(pricing.total, i18n.language) : t('common.pending'),
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
@@ -299,141 +343,194 @@ export default function BookRoom() {
                 {t('bookRoomPage.snapshotTotal')}
               </p>
               <p className="mt-2 text-lg font-black">
-                {formatLocalizedCurrency(totalPrice, i18n.language)}
+                {formatLocalizedCurrency(pricing?.total ?? 0, i18n.language)}
               </p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
+      {conflictError ? (
+        <div className="rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
+          <div className="flex items-start gap-4">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
+              <AlertTriangle className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-black tracking-tight text-brand-ink">
+                {t('roomAlreadyBooked')}
+              </p>
+              <p className="mt-2 text-sm font-medium leading-6 text-brand-danger/85">
+                {conflictError}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
         <div className="space-y-6">
-          {conflictError && (
-            <ConflictBanner
-              message={conflictError}
-              room={room}
-              onSearchAlternatives={handleSearchAlternatives}
-            />
-          )}
-
           <DashboardPanel
-            title={t('bookRoomPage.formTitle')}
-            description={t('bookRoomPage.formDescription')}
-          >
-            {validationError && (
-              <div className="mb-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
-                {validationError}
-              </div>
+            title={translateWithFallback(t, 'bookRoomPage.summaryTitle', 'Booking summary')}
+            description={translateWithFallback(
+              t,
+              'bookRoomPage.summaryDescription',
+              'Keep the stay details accurate. Totals update from the backend pricing quote.'
             )}
+          >
+            <div className="space-y-5">
+              {validationError ? (
+                <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                  {validationError}
+                </div>
+              ) : null}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
-                  {t('bookRoomPage.stayWindow')}
-                </p>
-                <DateRangePicker
-                  checkIn={checkIn}
-                  checkOut={checkOut}
-                  onCheckInChange={(value) => {
-                    setCheckIn(value);
-                    setConflictError(null);
-                  }}
-                  onCheckOutChange={(value) => {
-                    setCheckOut(value);
-                    setConflictError(null);
-                  }}
-                />
-                {nights > 0 && (
-                  <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink">
-                    {t('bookRoomPage.nightsSelected', { count: nights })}
+              <DateRangePicker
+                checkIn={checkIn}
+                checkOut={checkOut}
+                onCheckInChange={setCheckIn}
+                onCheckOutChange={setCheckOut}
+              />
+
+              {!isAuthenticated ? (
+                <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
+                  <p className="inline-flex items-center gap-2 text-sm font-black text-brand-ink">
+                    <Lock className="h-4 w-4" />
+                    {translateWithFallback(
+                      t,
+                      'bookRoomPage.loginCheckpointTitle',
+                      'Sign in to finalize the reservation'
+                    )}
+                  </p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                    {translateWithFallback(
+                      t,
+                      'bookRoomPage.loginCheckpointBody',
+                      'The room, dates, and quote stay here. Authentication is required only for the actual reservation submission.'
+                    )}
+                  </p>
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <Button type="button" className="h-auto flex-1 rounded-full py-4" onClick={handleGoToLogin}>
+                      {t('signIn')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className="h-auto flex-1 rounded-full border-brand-surface-border py-4"
+                      onClick={() => navigate(`/rooms/${roomId}?checkIn=${checkIn}&checkOut=${checkOut}`)}
+                    >
+                      {translateWithFallback(t, 'roomSearchPage.viewDetailsCta', 'View details')}
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <Field
+                        id="guest-name"
+                        label={t('fullName')}
+                        required
+                        placeholder={t('guestFullNamePlaceholder')}
+                        value={guest.name}
+                        onChange={(value) => setField('name', value)}
+                        icon={UserRound}
+                      />
+                    </div>
 
-              <div className="space-y-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
-                  {t('bookRoomPage.guestProfile')}
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="md:col-span-2">
                     <Field
-                      id="guest-name"
-                      label={t('fullName')}
+                      id="guest-email"
+                      label={t('emailAddress')}
                       required
-                      placeholder={t('guestFullNamePlaceholder')}
-                      value={guest.name}
-                      onChange={(value) => setField('name', value)}
-                      icon={UserRound}
+                      type="email"
+                      placeholder={t('guestEmailPlaceholder')}
+                      value={guest.email}
+                      onChange={(value) => setField('email', value)}
+                      icon={Mail}
+                      disabled={isGuest}
+                      locked={isGuest}
+                    />
+
+                    <Field
+                      id="guest-phone"
+                      label={t('phoneNumber')}
+                      required
+                      type="tel"
+                      placeholder={t('phonePlaceholder')}
+                      value={guest.phone}
+                      onChange={(value) => setField('phone', value)}
+                      icon={Phone}
+                    />
+
+                    <Field
+                      id="guest-id-number"
+                      label={t('idPassport')}
+                      required
+                      placeholder={t('idPlaceholder')}
+                      value={guest.idNumber}
+                      onChange={(value) => setField('idNumber', value)}
+                      icon={IdCard}
+                    />
+
+                    <Field
+                      id="guest-nationality"
+                      label={t('nationality')}
+                      required
+                      placeholder={t('nationalityPlaceholder')}
+                      value={guest.nationality}
+                      onChange={(value) => setField('nationality', value)}
+                      icon={Globe2}
                     />
                   </div>
 
-                  <Field
-                    id="guest-email"
-                    label={t('emailAddress')}
-                    required
-                    type="email"
-                    placeholder={t('guestEmailPlaceholder')}
-                    value={guest.email}
-                    onChange={(value) => setField('email', value)}
-                    icon={Mail}
-                  />
+                  <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                    <p className="text-sm font-black text-brand-ink">
+                      {translateWithFallback(
+                        t,
+                        'bookRoomPage.postAuthSubmissionTitle',
+                        'What happens next'
+                      )}
+                    </p>
+                    <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                      {translateWithFallback(
+                        t,
+                        'bookRoomPage.postAuthSubmissionBody',
+                        'The reservation is created in a pending payment/confirmation workflow. Front desk and payment operations finalize the stay status from the backend.'
+                      )}
+                    </p>
+                  </div>
 
-                  <Field
-                    id="guest-phone"
-                    label={t('phoneNumber')}
-                    required
-                    type="tel"
-                    placeholder={t('phonePlaceholder')}
-                    value={guest.phone}
-                    onChange={(value) => setField('phone', value)}
-                    icon={Phone}
-                  />
-
-                  <Field
-                    id="guest-id-number"
-                    label={t('idPassport')}
-                    required
-                    placeholder={t('idPlaceholder')}
-                    value={guest.idNumber}
-                    onChange={(value) => setField('idNumber', value)}
-                    icon={IdCard}
-                  />
-
-                  <Field
-                    id="guest-nationality"
-                    label={t('nationality')}
-                    required
-                    placeholder={t('nationalityPlaceholder')}
-                    value={guest.nationality}
-                    onChange={(value) => setField('nationality', value)}
-                    icon={Globe2}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border px-6 py-4 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {t('back')}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitting || nights <= 0}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
-                >
-                  {submitting
-                    ? t('bookRoomPage.creatingReservation')
-                    : t('confirmBookingPrice', {
-                        price: formatLocalizedCurrency(totalPrice, i18n.language),
-                      })}
-                </Button>
-              </div>
-            </form>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => navigate(-1)}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border px-6 py-4 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      {t('back')}
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={submitting || nights <= 0 || room?.availableForRequestedStay === false}
+                      className="inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
+                    >
+                      {submitting
+                        ? translateWithFallback(
+                            t,
+                            'bookRoomPage.creatingReservation',
+                            'Creating reservation...'
+                          )
+                        : translateWithFallback(
+                            t,
+                            'bookRoomPage.secureSubmitCta',
+                            'Create reservation'
+                          )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
           </DashboardPanel>
         </div>
 
@@ -445,7 +542,11 @@ export default function BookRoom() {
             <div className="space-y-5">
               <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
                 <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm">
-                  <BedDouble className="h-7 w-7" />
+                  {room?.availableForRequestedStay ? (
+                    <CheckCircle2 className="h-7 w-7 text-brand-success" />
+                  ) : (
+                    <BedDouble className="h-7 w-7" />
+                  )}
                 </span>
               </div>
 
@@ -464,8 +565,7 @@ export default function BookRoom() {
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t('common.dates')}
                   </p>
-                  <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
-                    <CalendarRange className="h-4 w-4 text-brand-ink-hint" />
+                  <p className="mt-2 text-sm font-bold text-brand-ink">
                     {formatLocalizedDate(checkIn, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -481,10 +581,10 @@ export default function BookRoom() {
                 </div>
                 <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
-                    {t('bookRoomPage.capacityLabel')}
+                    {t('status')}
                   </p>
                   <p className="mt-2 text-sm font-bold text-brand-ink">
-                    {t('upToGuests', { count: room?.roomType?.maxGuests ?? 0 })}
+                    {room?.availabilityMessage ?? t('common.pending')}
                   </p>
                 </div>
               </div>
@@ -493,23 +593,23 @@ export default function BookRoom() {
                 <div className="flex items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted">{t('bookRoomPage.ratePerNight')}</span>
                   <span className="font-bold text-brand-ink">
-                    {formatLocalizedCurrency(roomRate, i18n.language)}
+                    {formatLocalizedCurrency(pricing?.pricePerNight ?? 0, i18n.language)}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted">{t('nightsLabel')}</span>
-                  <span className="font-bold text-brand-ink">{nights || '-'}</span>
+                  <span className="font-bold text-brand-ink">{pricing?.nights ?? '-'}</span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted">{t('subtotal')}</span>
                   <span className="font-bold text-brand-ink">
-                    {formatLocalizedCurrency(subtotal, i18n.language)}
+                    {formatLocalizedCurrency(pricing?.subtotal ?? 0, i18n.language)}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted">{t('taxes15')}</span>
                   <span className="font-bold text-brand-ink">
-                    {formatLocalizedCurrency(taxes, i18n.language)}
+                    {formatLocalizedCurrency(pricing?.vatAmount ?? 0, i18n.language)}
                   </span>
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
@@ -517,28 +617,21 @@ export default function BookRoom() {
                     {t('total')}
                   </span>
                   <span className="text-2xl font-black text-brand-ink">
-                    {formatLocalizedCurrency(totalPrice, i18n.language)}
+                    {formatLocalizedCurrency(pricing?.total ?? 0, i18n.language)}
                   </span>
                 </div>
               </div>
 
-              {room?.roomType?.amenities && (
-                <div className="flex flex-wrap gap-2">
-                  {room.roomType.amenities
-                    .split(',')
-                    .map((item) => item.trim())
-                    .filter(Boolean)
-                    .slice(0, 6)
-                    .map((amenity) => (
-                      <span
-                        key={amenity}
-                        className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
-                      >
-                        {translateKnownValue(amenity, t)}
-                      </span>
-                    ))}
-                </div>
-              )}
+              <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4">
+                <p className="text-sm font-black text-brand-ink">
+                  {translateWithFallback(t, 'bookRoomPage.policySnapshotTitle', 'Stay policies')}
+                </p>
+                <ul className="mt-3 space-y-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                  <li>{translateWithFallback(t, 'bookRoomPage.cancellationPolicyBody', 'Free cancellation windows and refund decisions are handled by hotel policy and workflow status.')}</li>
+                  <li>{translateWithFallback(t, 'bookRoomPage.paymentPolicyBody', 'Taxes and totals are generated by the backend pricing engine and revalidated on reservation creation.')}</li>
+                  <li>{translateWithFallback(t, 'bookRoomPage.checkInRulesBody', 'Check-in and check-out remain staff-controlled operational actions after reservation confirmation.')}</li>
+                </ul>
+              </div>
             </div>
           </DashboardPanel>
         </div>

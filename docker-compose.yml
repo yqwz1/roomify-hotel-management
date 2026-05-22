@@ -35,6 +35,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: roomify_pass
       SPRING_MAIL_HOST: roomify-mailpit
       SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_PROTOCOL: smtp
+      SPRING_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_STARTTLS_ENABLE: "false"
+      ROOMIFY_MAIL_FROM: no-reply@roomify.local
       ROOMIFY_DEMO_BOOTSTRAP_ENABLED: "false"
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       SPRING_FLYWAY_BASELINE_VERSION: "12"

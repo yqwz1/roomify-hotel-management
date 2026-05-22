@@ -49,6 +49,7 @@ public class RoomOperationalService {
     private final InventoryService inventoryService;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final HousekeepingNotificationService housekeepingNotificationService;
 
     public RoomOperationalService(
             RoomRepository roomRepository,
@@ -56,13 +57,15 @@ public class RoomOperationalService {
             ServiceUsageRecordRepository serviceUsageRecordRepository,
             InventoryService inventoryService,
             UserRepository userRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            HousekeepingNotificationService housekeepingNotificationService) {
         this.roomRepository = roomRepository;
         this.serviceUsageTemplateRepository = serviceUsageTemplateRepository;
         this.serviceUsageRecordRepository = serviceUsageRecordRepository;
         this.inventoryService = inventoryService;
         this.userRepository = userRepository;
         this.auditService = auditService;
+        this.housekeepingNotificationService = housekeepingNotificationService;
     }
 
     @Transactional(readOnly = true)
@@ -212,6 +215,7 @@ public class RoomOperationalService {
 
         room.setStatus(RoomStatus.AVAILABLE);
         roomRepository.save(room);
+        housekeepingNotificationService.notifyRoomReady(room);
 
         auditService.log(
                 "ROOM_SERVICE_COMPLETED",

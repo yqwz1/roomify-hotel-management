@@ -2,6 +2,8 @@ import api from './api';
 import { extractApiErrorMessage } from '../utils/apiError';
 import { isLikelyConfirmationValue } from '../utils/reservationLookup';
 
+const RESERVATION_REQUEST_TIMEOUT_MS = 30000;
+
 export const extractReservationError = (err) => {
     return extractApiErrorMessage(err, 'Reservation request failed. Please try again.');
 };
@@ -50,12 +52,16 @@ const buildReservationParams = (filters = {}) => {
 };
 
 export const createReservation = async (data) => {
-    const response = await api.post('/reservations', data);
+    const response = await api.post('/reservations', data, {
+        timeout: RESERVATION_REQUEST_TIMEOUT_MS,
+    });
     return response.data;
 };
 
 export const createGuestReservation = async (data) => {
-    const response = await api.post('/guest/reservations', data);
+    const response = await api.post('/guest/reservations', data, {
+        timeout: RESERVATION_REQUEST_TIMEOUT_MS,
+    });
     return response.data;
 };
 

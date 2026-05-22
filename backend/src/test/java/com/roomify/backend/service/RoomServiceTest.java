@@ -6,6 +6,7 @@ import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.CannotDeleteException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,9 @@ class RoomServiceTest {
 
     private RoomRepository roomRepository;
     private RoomTypeRepository roomTypeRepository;
+    private ReservationRepository reservationRepository;
+    private HousekeepingNotificationService housekeepingNotificationService;
+    private ReservationFinancialService financialService;
     private RoomService roomService;
 
     private Room room;
@@ -31,10 +35,16 @@ class RoomServiceTest {
     void setUp() {
         roomRepository = mock(RoomRepository.class);
         roomTypeRepository = mock(RoomTypeRepository.class);
+        reservationRepository = mock(ReservationRepository.class);
+        housekeepingNotificationService = mock(HousekeepingNotificationService.class);
+        financialService = new ReservationFinancialService(new BigDecimal("0.15"));
 
         roomService = new RoomService(
                 roomRepository,
-                roomTypeRepository
+                roomTypeRepository,
+                reservationRepository,
+                housekeepingNotificationService,
+                financialService
         );
 
         RoomType type = new RoomType();
@@ -54,11 +64,13 @@ class RoomServiceTest {
     @Test
     void shouldAllowValidStatusTransition() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.findByRoomNumber("101")).thenReturn(Optional.of(room));
         when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
 
         roomService.updateStatus(1L, "AVAILABLE");
 
         assertEquals(RoomStatus.AVAILABLE, room.getStatus());
+        verify(housekeepingNotificationService, times(1)).notifyRoomReady(room);
     }
 
     @Test

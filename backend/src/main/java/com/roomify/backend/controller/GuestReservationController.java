@@ -7,7 +7,6 @@ import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.dto.BillResponse;
 import com.roomify.backend.service.GuestReservationService;
 import com.roomify.backend.service.BillingService;
-import com.roomify.backend.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,6 @@ import java.util.List;
 public class GuestReservationController {
 
     private final GuestReservationService guestReservationService;
-    private final ReservationService reservationService;
     private final BillingService billingService;
 
     @GetMapping
@@ -40,7 +38,7 @@ public class GuestReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createGuestReservation(
             @Valid @RequestBody ReservationCreateRequest request) {
-        ReservationResponse response = reservationService.create(request);
+        ReservationResponse response = guestReservationService.createAuthenticatedGuestReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

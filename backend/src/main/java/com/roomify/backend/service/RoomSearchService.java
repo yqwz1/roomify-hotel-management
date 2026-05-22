@@ -38,6 +38,11 @@ public class RoomSearchService {
 
     @PersistenceContext
     private EntityManager entityManager;
+    private final ReservationFinancialService financialService;
+
+    public RoomSearchService(ReservationFinancialService financialService) {
+        this.financialService = financialService;
+    }
 
     /**
      * Searches for available rooms matching the given criteria.
@@ -83,7 +88,7 @@ public class RoomSearchService {
         List<Room> rooms = query.getResultList();
 
         List<RoomResponse> roomResponses = rooms.stream()
-                .map(this::toResponse)
+                .map(room -> toResponse(room, request))
                 .collect(Collectors.toList());
 
         return new RoomSearchResponse(roomResponses, roomResponses.size());
@@ -108,5 +113,16 @@ public class RoomSearchService {
                 roomTypeResponse,
                 room.getFloor(),
                 room.getStatus());
+    }
+
+    private RoomResponse toResponse(Room room, RoomSearchRequest request) {
+        RoomResponse response = toResponse(room);
+        response.setAvailableForRequestedStay(Boolean.TRUE);
+        response.setAvailabilityMessage("Available for selected stay");
+        response.setPricing(financialService.quote(
+                room.getRoomType().getBasePrice(),
+                request.getCheckIn(),
+                request.getCheckOut()));
+        return response;
     }
 }

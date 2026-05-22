@@ -10,10 +10,12 @@ import com.roomify.backend.exception.CannotDeleteException;
 import com.roomify.backend.exception.DuplicateResourceException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,11 +25,20 @@ public class RoomService {
 
         private final RoomRepository roomRepository;
         private final RoomTypeRepository roomTypeRepository;
+        private final ReservationRepository reservationRepository;
+        private final HousekeepingNotificationService housekeepingNotificationService;
+        private final ReservationFinancialService financialService;
 
         public RoomService(RoomRepository roomRepository,
-                        RoomTypeRepository roomTypeRepository) {
+                        RoomTypeRepository roomTypeRepository,
+                        ReservationRepository reservationRepository,
+                        HousekeepingNotificationService housekeepingNotificationService,
+                        ReservationFinancialService financialService) {
                 this.roomRepository = roomRepository;
                 this.roomTypeRepository = roomTypeRepository;
+                this.reservationRepository = reservationRepository;
+                this.housekeepingNotificationService = housekeepingNotificationService;
+                this.financialService = financialService;
         }
 
         /**
@@ -76,9 +87,21 @@ public class RoomService {
          * Get room by ID.
          */
         public RoomResponse findById(Long id) {
+                return findById(id, null, null);
+        }
+
+        public RoomResponse findById(Long id, LocalDate checkIn, LocalDate checkOut) {
                 Room room = roomRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
-                return toResponse(room);
+                RoomResponse response = toResponse(room);
+                if (checkIn != null && checkOut != null && checkOut.isAfter(checkIn)) {
+                        boolean available = !reservationRepository.existsOverlapForAvailability(id, checkIn, checkOut);
+                        response.setAvailableForRequestedStay(available);
+                        response.setAvailabilityMessage(
+                                        available ? "Available for selected stay" : "Unavailable for selected stay");
+                        response.setPricing(financialService.quote(room.getRoomType().getBasePrice(), checkIn, checkOut));
+                }
+                return response;
         }
 
         /**
@@ -206,6 +229,14 @@ public class RoomService {
         private void housekeepingHook(RoomStatus current,
                         RoomStatus target,
                         String roomNumber) {
+
+                if (current == RoomStatus.NEEDS_CLEANING
+                                && target == RoomStatus.AVAILABLE) {
+                        Room room = roomRepository.findByRoomNumber(roomNumber).orElse(null);
+                        if (room != null) {
+                                housekeepingNotificationService.notifyRoomReady(room);
+                        }
+                }
 
                 if (current == RoomStatus.AVAILABLE
                                 && target == RoomStatus.UNDER_MAINTENANCE) {

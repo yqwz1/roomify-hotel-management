@@ -5,6 +5,9 @@ import com.roomify.backend.dto.JwtResponse;
 import com.roomify.backend.dto.LoginRequest;
 import com.roomify.backend.dto.TokenRefreshRequest;
 import com.roomify.backend.dto.TokenRefreshResponse;
+import com.roomify.backend.notification.PasswordResetService;
+import com.roomify.backend.notification.dto.PasswordResetConfirmRequest;
+import com.roomify.backend.notification.dto.PasswordResetRequest;
 import com.roomify.backend.service.AuditService;
 import com.roomify.backend.service.UserService;
 import com.roomify.backend.user.User;
@@ -20,6 +23,7 @@ import java.util.Locale;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,18 +44,21 @@ public class AuthController {
         private final UserRepository userRepository;
         private final UserService userService;
         private final PasswordEncoder passwordEncoder;
+        private final PasswordResetService passwordResetService;
 
         public AuthController(
                         AuditService auditService,
                         JwtUtils jwtUtils,
                         UserRepository userRepository,
                         UserService userService,
-                        PasswordEncoder passwordEncoder) {
+                        PasswordEncoder passwordEncoder,
+                        PasswordResetService passwordResetService) {
                 this.auditService = auditService;
                 this.jwtUtils = jwtUtils;
                 this.userRepository = userRepository;
                 this.userService = userService;
                 this.passwordEncoder = passwordEncoder;
+                this.passwordResetService = passwordResetService;
         }
 
         @PostMapping("/login")
@@ -153,6 +160,18 @@ public class AuthController {
                         );
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
                 }
+        }
+
+        @PostMapping("/password-reset/request")
+        public ResponseEntity<Void> requestPasswordReset(@Valid @RequestBody PasswordResetRequest request) {
+                passwordResetService.requestReset(request, LocaleContextHolder.getLocale().toLanguageTag());
+                return ResponseEntity.accepted().build();
+        }
+
+        @PostMapping("/password-reset/confirm")
+        public ResponseEntity<Void> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmRequest request) {
+                passwordResetService.confirmReset(request);
+                return ResponseEntity.noContent().build();
         }
 
         private boolean matchesPassword(User user, String rawPassword) {

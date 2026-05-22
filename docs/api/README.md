@@ -1,3 +1,3 @@
 # API Docs
 
-Add OpenAPI specs or Swagger notes here.
+- [Notification API](./notification-api.md)

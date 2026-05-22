@@ -83,6 +83,7 @@ const LoginPage = () => {
       setIsLoading(true);
       const user = await login(formData.email, formData.password);
       const from = location.state?.from?.pathname;
+      const fromSearch = location.state?.from?.search || '';
       const userRoles = user.roles ?? [];
       const canReturnToFrom =
         Boolean(from) &&
@@ -91,7 +92,7 @@ const LoginPage = () => {
         canAccessPathForRoles(from, userRoles);
 
       if (canReturnToFrom) {
-        navigate(from, { replace: true });
+        navigate(`${from}${fromSearch}`, { replace: true });
         return;
       }
       // Route by the user's HIGHEST-priority role (admin > manager > staff > guest)

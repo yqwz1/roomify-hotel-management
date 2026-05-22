@@ -128,6 +128,18 @@ class JwtAuthenticationFilterTest {
                 .anyMatch(a -> "ROLE_MANAGER".equals(a.getAuthority())));
     }
 
+    @Test
+    void publicRoomDetailsBypassesJwtFilter() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/rooms/123");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        jakarta.servlet.FilterChain chain = Mockito.mock(jakarta.servlet.FilterChain.class);
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(any(), any());
+        assertEquals(200, response.getStatus());
+    }
+
     private String createExpiredToken() {
         long now = System.currentTimeMillis();
         return Jwts.builder()

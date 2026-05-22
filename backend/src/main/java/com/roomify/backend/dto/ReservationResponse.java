@@ -5,6 +5,8 @@ import com.roomify.backend.entity.ReservationStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationResponse {
 
@@ -27,8 +29,16 @@ public class ReservationResponse {
     private BigDecimal outstandingBalance;
     private boolean invoiceFinalized;
     private String paymentStatus;
+    private String paymentMethod;
+    private String transactionId;
+    private LocalDateTime paymentTimestamp;
     private LocalDate actualCheckInDate;
     private LocalDateTime actualCheckOutAt;
+    private String staffNotes;
+    private LocalDateTime statusUpdatedAt;
+    private Long version;
+    private PricingBreakdownDto pricing;
+    private List<ReservationHistoryResponse> statusHistory = new ArrayList<>();
 
     public ReservationResponse() {
     }
@@ -264,6 +274,30 @@ public class ReservationResponse {
         this.paymentStatus = paymentStatus;
     }
 
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public LocalDateTime getPaymentTimestamp() {
+        return paymentTimestamp;
+    }
+
+    public void setPaymentTimestamp(LocalDateTime paymentTimestamp) {
+        this.paymentTimestamp = paymentTimestamp;
+    }
+
     public LocalDate getActualCheckInDate() {
         return actualCheckInDate;
     }
@@ -278,5 +312,45 @@ public class ReservationResponse {
 
     public void setActualCheckOutAt(LocalDateTime actualCheckOutAt) {
         this.actualCheckOutAt = actualCheckOutAt;
+    }
+
+    public String getStaffNotes() {
+        return staffNotes;
+    }
+
+    public void setStaffNotes(String staffNotes) {
+        this.staffNotes = staffNotes;
+    }
+
+    public LocalDateTime getStatusUpdatedAt() {
+        return statusUpdatedAt;
+    }
+
+    public void setStatusUpdatedAt(LocalDateTime statusUpdatedAt) {
+        this.statusUpdatedAt = statusUpdatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public PricingBreakdownDto getPricing() {
+        return pricing;
+    }
+
+    public void setPricing(PricingBreakdownDto pricing) {
+        this.pricing = pricing;
+    }
+
+    public List<ReservationHistoryResponse> getStatusHistory() {
+        return statusHistory;
+    }
+
+    public void setStatusHistory(List<ReservationHistoryResponse> statusHistory) {
+        this.statusHistory = statusHistory;
     }
 }

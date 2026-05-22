@@ -35,6 +35,7 @@ import {
 // Day 1 Sprint — new pages (mock data, no API)
 import RoomsManagement from './pages/RoomsManagement'
 import RoomSearch from './pages/RoomSearch'
+import RoomDetails from './pages/RoomDetails'
 import BookRoom from './pages/BookRoom'
 import ConfirmationPage from './pages/ConfirmationPage'
 
@@ -51,6 +52,7 @@ import RoomGrid from './pages/RoomGrid'
 import AdminDashboard from './pages/AdminDashboard'
 import HotelServices from './pages/HotelServices'
 import ExpenseTracker from './pages/ExpenseTracker'
+import AdminNotifications from './pages/AdminNotifications'
 
 import Layout from './components/Layout';
 
@@ -59,7 +61,6 @@ const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
 const STAFF_ONLY_ROLES = [ROLE_STAFF];
 const GUEST_ONLY_ROLES = [ROLE_GUEST];
 const STAFF_AND_MANAGER_ROLES = [ROLE_MANAGER, ROLE_STAFF];
-const AUTHENTICATED_ROLES = [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
 
 /**
  * AppContent component - handles routing logic
@@ -84,6 +85,10 @@ const AppContent = () => {
         <Route path="/integrations" element={<Layout showSidebar={false}><Integrations /></Layout>} />
         <Route path="/demo" element={<Layout showSidebar={false}><Demo /></Layout>} />
         <Route path="/bookings" element={<Layout showSidebar={false}><Bookings /></Layout>} />
+        <Route path="/search" element={<Layout showSidebar={false}><RoomSearch /></Layout>} />
+        <Route path="/rooms/:roomId" element={<Layout showSidebar={false}><RoomDetails /></Layout>} />
+        <Route path="/book" element={<Layout showSidebar={false}><BookRoom /></Layout>} />
+        <Route path="/confirmation" element={<Layout showSidebar={false}><ConfirmationPage /></Layout>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<Layout showSidebar={Boolean(user)}><Unauthorized /></Layout>} />
 
@@ -141,6 +146,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/admin/notifications"
+          element={
+            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
+              <Layout showSidebar={true}><AdminNotifications /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/staff/dashboard"
           element={
             <ProtectedRoute allowedRoles={STAFF_ONLY_ROLES}>
@@ -179,33 +192,6 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><RoomsManagement /></Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/search"
-          element={
-            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
-              <Layout showSidebar={true}><RoomSearch /></Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/book"
-          element={
-            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
-              <Layout showSidebar={true}><BookRoom /></Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/confirmation"
-          element={
-            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
-              <Layout showSidebar={true}><ConfirmationPage /></Layout>
             </ProtectedRoute>
           }
         />

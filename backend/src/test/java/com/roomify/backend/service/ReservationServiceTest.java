@@ -14,7 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -37,9 +39,12 @@ import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
+import com.roomify.backend.exception.DuplicateResourceException;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 
@@ -53,7 +58,11 @@ class ReservationServiceTest {
     private InvoiceEmailService invoiceEmailService;
     private InvoiceDeliveryLogService invoiceDeliveryLogService;
     private AuditService auditService;
+    private NotificationService notificationService;
+    private HousekeepingNotificationService housekeepingNotificationService;
     private ReservationFinancialService financialService;
+    private ReservationHistoryRepository reservationHistoryRepository;
+    private ReservationStatusTransitionService reservationStatusTransitionService;
 
     private ReservationService reservationService;
 
@@ -68,7 +77,17 @@ class ReservationServiceTest {
         invoiceEmailService = mock(InvoiceEmailService.class);
         invoiceDeliveryLogService = mock(InvoiceDeliveryLogService.class);
         auditService = mock(AuditService.class);
+        notificationService = mock(NotificationService.class);
+        housekeepingNotificationService = mock(HousekeepingNotificationService.class);
         financialService = new ReservationFinancialService(new BigDecimal("0.15"));
+        reservationHistoryRepository = mock(ReservationHistoryRepository.class);
+        ReservationAuditRepository reservationAuditRepository = mock(ReservationAuditRepository.class);
+        reservationStatusTransitionService = new ReservationStatusTransitionService(
+                reservationHistoryRepository,
+                reservationAuditRepository);
+
+        when(reservationHistoryRepository.findByReservation_IdOrderByChangedAtAsc(anyLong()))
+                .thenReturn(Collections.emptyList());
 
         reservationService = new ReservationService(
                 reservationRepository,
@@ -78,7 +97,11 @@ class ReservationServiceTest {
                 invoiceEmailService,
                 invoiceDeliveryLogService,
                 auditService,
+                notificationService,
+                housekeepingNotificationService,
                 financialService,
+                reservationStatusTransitionService,
+                reservationHistoryRepository,
                 new BigDecimal("0.15"));
     }
 
@@ -102,6 +125,8 @@ class ReservationServiceTest {
                 .thenReturn(Collections.emptyList());
 
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
+                .thenReturn(Optional.empty());
+        when(guestRepository.findByIdNumber("ID-77"))
                 .thenReturn(Optional.empty());
 
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
@@ -172,6 +197,8 @@ class ReservationServiceTest {
 
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
                 .thenReturn(Optional.empty());
+        when(guestRepository.findByIdNumber("ID-77"))
+                .thenReturn(Optional.empty());
 
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
             Guest guest = invocation.getArgument(0);
@@ -230,6 +257,166 @@ class ReservationServiceTest {
 
         verify(reservationRepository, never()).save(any());
         verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void createForAuthenticatedGuestShouldReuseExistingGuestByIdNumberAndIgnoreSubmittedEmail() {
+
+        Room room = buildRoom(10L, "301", "199.99");
+        Guest existingGuest = new Guest(
+                "Legacy Guest",
+                "legacy@example.com",
+                "0501111111",
+                "ID-77",
+                "USA");
+        existingGuest.setId(21L);
+
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 13),
+                ReservationStatus.CONFIRMED);
+        request.getGuest().setEmail("spoofed@example.com");
+        request.getGuest().setPhone("0509999999");
+
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 13))))
+                .thenReturn(Collections.emptyList());
+        when(guestRepository.findByEmailIgnoreCase("member@example.com"))
+                .thenReturn(Optional.empty());
+        when(guestRepository.findByIdNumber("ID-77"))
+                .thenReturn(Optional.of(existingGuest));
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.existsByConfirmationNumber(anyString())).thenReturn(false);
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
+            Reservation reservation = invocation.getArgument(0);
+            reservation.setId(71L);
+            return reservation;
+        });
+
+        ReservationResponse response = reservationService.createForAuthenticatedGuest(request, "member@example.com");
+
+        assertEquals(Long.valueOf(21L), response.getGuestId());
+        assertEquals("member@example.com", response.getGuestEmail());
+        assertEquals("member@example.com", existingGuest.getEmail());
+        assertEquals("0509999999", existingGuest.getPhone());
+        assertEquals(PaymentStatus.PENDING.name(), response.getPaymentStatus());
+        verify(guestRepository).save(existingGuest);
+    }
+
+    @Test
+    void createShouldReuseExistingGuestWhenIdNumberAlreadyExists() {
+
+        Room room = buildRoom(10L, "301", "199.99");
+        Guest existingGuest = new Guest(
+                "Returning Guest",
+                "returning@example.com",
+                "0501234567",
+                "ID-77",
+                "USA");
+        existingGuest.setId(21L);
+
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 13),
+                ReservationStatus.PENDING);
+        request.getGuest().setEmail("returning+new@example.com");
+
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 13))))
+                .thenReturn(Collections.emptyList());
+        when(guestRepository.findByEmailIgnoreCase("returning+new@example.com"))
+                .thenReturn(Optional.empty());
+        when(guestRepository.findByIdNumber("ID-77"))
+                .thenReturn(Optional.of(existingGuest));
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.existsByConfirmationNumber(anyString())).thenReturn(false);
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
+            Reservation reservation = invocation.getArgument(0);
+            reservation.setId(72L);
+            return reservation;
+        });
+
+        ReservationResponse response = reservationService.create(request);
+
+        assertEquals(Long.valueOf(21L), response.getGuestId());
+        assertEquals("returning+new@example.com", response.getGuestEmail());
+        verify(guestRepository).save(existingGuest);
+    }
+
+    @Test
+    void createShouldRejectConflictingGuestProfilesWhenEmailAndIdNumberBelongToDifferentGuests() {
+
+        Room room = buildRoom(10L, "301", "199.99");
+        Guest guestByEmail = new Guest("Email Guest", "guest@example.com", "0500000001", "ID-100", "USA");
+        guestByEmail.setId(21L);
+        Guest guestByIdNumber = new Guest("Id Guest", "other@example.com", "0500000002", "ID-77", "USA");
+        guestByIdNumber.setId(22L);
+
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 13),
+                ReservationStatus.PENDING);
+
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 13))))
+                .thenReturn(Collections.emptyList());
+        when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
+                .thenReturn(Optional.of(guestByEmail));
+        when(guestRepository.findByIdNumber("ID-77"))
+                .thenReturn(Optional.of(guestByIdNumber));
+
+        ResourceConflictException ex = assertThrows(
+                ResourceConflictException.class,
+                () -> reservationService.create(request));
+
+        assertEquals("Guest email and ID number belong to different guest profiles", ex.getMessage());
+        verify(guestRepository, never()).save(any(Guest.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void createShouldTranslateDuplicateGuestConstraintIntoDomainConflict() {
+
+        Room room = buildRoom(10L, "301", "199.99");
+        ReservationCreateRequest request = buildCreateRequest(
+                10L,
+                LocalDate.of(2026, 3, 10),
+                LocalDate.of(2026, 3, 13),
+                ReservationStatus.PENDING);
+
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+        when(reservationRepository.findOverlappingReservations(
+                eq(10L),
+                eq(LocalDate.of(2026, 3, 10)),
+                eq(LocalDate.of(2026, 3, 13))))
+                .thenReturn(Collections.emptyList());
+        when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
+                .thenReturn(Optional.empty());
+        when(guestRepository.findByIdNumber("ID-77"))
+                .thenReturn(Optional.empty());
+        when(guestRepository.save(any(Guest.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint \"uk_guest_id_number\""));
+
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
+                () -> reservationService.create(request));
+
+        assertEquals(
+                "A guest with this ID number already exists. Reuse the existing guest profile or verify the ID number.",
+                ex.getMessage());
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
@@ -385,7 +572,7 @@ class ReservationServiceTest {
                 () -> reservationService.checkIn("RSV-ABC123DEF456"));
 
         assertEquals(
-                "Only PENDING or CONFIRMED reservations can be checked in",
+                "Only PENDING, PAYMENT_PENDING, or CONFIRMED reservations can be checked in",
                 ex.getMessage());
     }
 
@@ -513,6 +700,7 @@ class ReservationServiceTest {
         assertEquals(RoomStatus.NEEDS_CLEANING, reservation.getRoom().getStatus());
         assertNotNull(reservation.getActualCheckOutAt());
         assertEquals("Checkout completed successfully", response.getMessage());
+        verify(housekeepingNotificationService).notifyCheckoutNeedsCleaning(reservation.getRoom());
     }
 
     @Test

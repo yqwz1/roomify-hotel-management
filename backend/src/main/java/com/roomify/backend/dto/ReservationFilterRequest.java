@@ -130,10 +130,14 @@ public class ReservationFilterRequest {
         return switch (canonicalTab) {
             case "ALL" -> null;
             case "PENDING" -> ReservationStatus.PENDING;
+            case "PAYMENT_PENDING" -> ReservationStatus.PAYMENT_PENDING;
             case "ARRIVALS", "CONFIRMED" -> ReservationStatus.CONFIRMED;
             case "IN_HOUSE", "DEPARTURES", "CHECKED_IN" -> ReservationStatus.CHECKED_IN;
             case "CHECKED_OUT" -> ReservationStatus.CHECKED_OUT;
+            case "COMPLETED" -> ReservationStatus.COMPLETED;
             case "CANCELLED" -> ReservationStatus.CANCELLED;
+            case "NO_SHOW" -> ReservationStatus.NO_SHOW;
+            case "REFUNDED" -> ReservationStatus.REFUNDED;
             default -> null;
         };
     }

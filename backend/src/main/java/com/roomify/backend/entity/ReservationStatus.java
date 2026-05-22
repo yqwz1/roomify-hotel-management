@@ -5,8 +5,12 @@ package com.roomify.backend.entity;
  */
 public enum ReservationStatus {
     PENDING,
+    PAYMENT_PENDING,
     CONFIRMED,
     CHECKED_IN,
     CHECKED_OUT,
-    CANCELLED
+    COMPLETED,
+    CANCELLED,
+    NO_SHOW,
+    REFUNDED
 }

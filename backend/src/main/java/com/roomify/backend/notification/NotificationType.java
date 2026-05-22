@@ -1,0 +1,14 @@
+package com.roomify.backend.notification;
+
+public enum NotificationType {
+    RESERVATION_CREATED,
+    RESERVATION_CANCELLED,
+    RESERVATION_MODIFIED,
+    PAYMENT_COMPLETED,
+    CHECKIN_REMINDER,
+    PAYMENT_REMINDER,
+    ROOM_READY,
+    SERVICE_REQUEST_COMPLETED,
+    PASSWORD_RESET,
+    STAFF_WELCOME
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${brandName}">Roomify</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4efe7;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            color: #1c2d3c;
+        }
+
+        .wrapper {
+            width: 100%;
+            padding: 24px 12px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 48px rgba(28, 45, 60, 0.14);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1d4f73 0%, #2f7a8f 55%, #d9a961 100%);
+            color: #ffffff;
+            padding: 32px 32px 28px;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.82;
+            margin: 0 0 10px;
+            font-weight: 700;
+        }
+
+        .heading {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.15;
+            font-weight: 800;
+        }
+
+        .intro {
+            margin: 14px 0 0;
+            font-size: 15px;
+            line-height: 1.8;
+            opacity: 0.94;
+        }
+
+        .content {
+            padding: 30px 32px 34px;
+        }
+
+        .greeting {
+            margin: 0 0 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .copy {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.9;
+            color: #4b5b67;
+        }
+
+        .highlight {
+            margin: 24px 0;
+            padding: 18px 20px;
+            border-radius: 20px;
+            background: #f4efe7;
+        }
+
+        .highlight-label {
+            margin: 0;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #7a7f83;
+            font-weight: 700;
+        }
+
+        .highlight-value {
+            margin: 8px 0 0;
+            font-size: 22px;
+            font-weight: 800;
+            color: #1d4f73;
+            word-break: break-word;
+        }
+
+        .details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0 0;
+        }
+
+        .details td {
+            padding: 12px 0;
+            border-bottom: 1px solid #ebe4da;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .details .label {
+            color: #7a7f83;
+            width: 42%;
+            font-weight: 600;
+        }
+
+        .details .value {
+            color: #1c2d3c;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .body-list {
+            margin: 22px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .body-list li {
+            margin: 0 0 10px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #4b5b67;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 14px 22px;
+            background: #1d9e75;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 800;
+            border-radius: 999px;
+        }
+
+        .footer {
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #ebe4da;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #7a7f83;
+        }
+
+        .footer strong {
+            color: #1c2d3c;
+        }
+
+        @media only screen and (max-width: 640px) {
+            .hero,
+            .content {
+                padding: 24px 20px;
+            }
+
+            .heading {
+                font-size: 25px;
+            }
+
+            .details td {
+                display: block;
+                width: 100%;
+                padding: 10px 0 0;
+                border-bottom: none;
+            }
+
+            .details tr {
+                display: block;
+                padding: 0 0 12px;
+                border-bottom: 1px solid #ebe4da;
+            }
+
+            .details .label {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body th:attr="dir=${rtl} ? 'rtl' : 'ltr'">
+<span
+    style="display:none;opacity:0;color:transparent;height:0;width:0;overflow:hidden;"
+    th:text="${preheader}">
+    Roomify notification
+</span>
+<div class="wrapper">
+    <div class="card">
+        <div class="hero">
+            <p class="eyebrow" th:text="${heroEyebrow}">Roomify update</p>
+            <h1 class="heading" th:text="${heading}">Your hotel update</h1>
+            <p class="intro" th:text="${intro}">Important information about your stay.</p>
+        </div>
+
+        <div class="content">
+            <p class="greeting" th:text="${greeting}">Dear Guest</p>
+            <p class="copy" th:text="${intro}">We have an update for you.</p>
+
+            <div class="highlight">
+                <p class="highlight-label" th:text="${accentLabel}">Reference</p>
+                <p class="highlight-value" th:text="${accentValue}">RSV-123456</p>
+            </div>
+
+            <table class="details" role="presentation" th:if="${details != null and !details.isEmpty()}">
+                <tbody>
+                <tr th:each="detail : ${details}">
+                    <td class="label" th:text="${detail.key}">Label</td>
+                    <td class="value" th:text="${detail.value}">Value</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <ul class="body-list" th:if="${bodyLines != null}">
+                <li th:each="line : ${bodyLines}" th:text="${line}">Additional guidance.</li>
+            </ul>
+
+            <a
+                class="cta"
+                th:if="${ctaText != null and ctaHref != null}"
+                th:href="${ctaHref}"
+                th:text="${ctaText}">
+                Open
+            </a>
+
+            <div class="footer">
+                <p th:text="${signature}">Roomify Team</p>
+                <p th:text="${footerText}">This is an operational email from Roomify.</p>
+                <p>
+                    <strong th:text="${brandName}">Roomify</strong>
+                    <span>&nbsp;&middot;&nbsp;</span>
+                    <span th:text="${supportEmail}">support@roomify.com</span>
+                </p>
+                <p>&copy; <span th:text="${currentYear}">2026</span> <span th:text="${brandName}">Roomify</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
