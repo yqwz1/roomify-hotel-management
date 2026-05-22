@@ -44,6 +44,10 @@ public class EmailService {
         delegate.sendStaffWelcomeEmail(to, name, password, localeTag());
     }
 
+    public void sendGuestWelcomeEmail(String to, String name) {
+        delegate.sendGuestWelcomeEmail(to, name, localeTag());
+    }
+
     public void sendReservationConfirmationEmail(String to, String guestName, ReservationResponse reservation) {
         delegate.sendReservationConfirmationEmail(to, guestName, reservation, localeTag());
     }

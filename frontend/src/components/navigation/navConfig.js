@@ -546,6 +546,7 @@ const PAGE_META = [
 const DOCUMENT_TITLE_OVERRIDES = {
   '/': ['homeNav', 'Home'],
   '/login': ['signIn', 'Sign In'],
+  '/signup': ['createAccount', 'Create Account'],
   '/unauthorized': ['unauthorizedPage.title', 'Access Denied'],
   '/bookings': ['bookings', 'Bookings'],
   '/admin/dashboard': ['adminDashboardTitle', 'Admin Dashboard'],

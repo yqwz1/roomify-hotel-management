@@ -1,5 +1,6 @@
 package com.roomify.backend.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,10 +10,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
+import com.roomify.backend.entity.Guest;
+import com.roomify.backend.notification.EmailNotification;
+import com.roomify.backend.notification.EmailNotificationRepository;
+import com.roomify.backend.notification.NotificationDeliveryStatus;
+import com.roomify.backend.notification.NotificationType;
+import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +62,12 @@ class AuthIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private GuestRepository guestRepository;
+
+    @Autowired
+    private EmailNotificationRepository emailNotificationRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private ObjectMapper objectMapper;
@@ -64,7 +78,9 @@ class AuthIntegrationTest {
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper();
+        emailNotificationRepository.deleteAll();
         userRepository.deleteAll();
+        guestRepository.deleteAll();
     }
 
     @Test
@@ -120,6 +136,111 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.email").value("demo.guest@roomify.dev"))
                 .andExpect(jsonPath("$.username").value("demo.guest@roomify.dev"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+    }
+
+    @Test
+    void registerGuestCreatesLoginAccountAndGuestProfile() throws Exception {
+        String registerJson = objectMapper.writeValueAsString(Map.of(
+                "name", "Guest Member",
+                "email", "guest.member@roomify.dev",
+                "password", "Strong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.guestId").isNumber())
+                .andExpect(jsonPath("$.name").value("Guest Member"))
+                .andExpect(jsonPath("$.email").value("guest.member@roomify.dev"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("guest.member@roomify.dev").orElseThrow();
+        Guest savedGuest = guestRepository.findByEmailIgnoreCase("guest.member@roomify.dev").orElseThrow();
+
+        assertThat(passwordEncoder.matches("Strong@Pass123", savedUser.getPasswordHash())).isTrue();
+        assertThat(savedUser.getRole()).isEqualTo(Role.GUEST);
+        assertThat(savedGuest.getName()).isEqualTo("Guest Member");
+
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", "guest.member@roomify.dev",
+                "password", "Strong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.email").value("guest.member@roomify.dev"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+
+        EmailNotification welcomeNotification = waitForGuestWelcome("guest.member@roomify.dev");
+        assertThat(welcomeNotification.getStatus()).isNotEqualTo(NotificationDeliveryStatus.FAILED);
+        assertThat(welcomeNotification.getType()).isEqualTo(NotificationType.GUEST_WELCOME);
+        assertThat(welcomeNotification.getTemplateName()).isEqualTo("email/notification-email");
+        assertThat(welcomeNotification.getTemplatePayload())
+                .doesNotContain("Strong@Pass123")
+                .doesNotContain("password")
+                .doesNotContain("Password");
+    }
+
+    @Test
+    void registerGuestRejectsExistingUserEmail() throws Exception {
+        userRepository.save(new User(
+                "guest.member@roomify.dev",
+                passwordEncoder.encode("Strong@Pass123"),
+                Role.GUEST,
+                true));
+
+        String registerJson = objectMapper.writeValueAsString(Map.of(
+                "name", "Guest Member",
+                "email", "guest.member@roomify.dev",
+                "password", "Strong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("An account with this email already exists"));
+    }
+
+    @Test
+    void registerGuestRejectsExistingGuestProfileEmail() throws Exception {
+        guestRepository.save(new Guest(
+                "Existing Guest",
+                "guest.member@roomify.dev",
+                "PENDING",
+                "SELF-EXISTING",
+                "UNKNOWN"));
+
+        String registerJson = objectMapper.writeValueAsString(Map.of(
+                "name", "Guest Member",
+                "email", "guest.member@roomify.dev",
+                "password", "Strong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("An account with this email already exists"));
+    }
+
+    private EmailNotification waitForGuestWelcome(String email) throws InterruptedException {
+        for (int attempt = 0; attempt < 20; attempt++) {
+            List<EmailNotification> notifications =
+                    emailNotificationRepository.search(email, null, NotificationType.GUEST_WELCOME);
+            if (!notifications.isEmpty()) {
+                return notifications.get(0);
+            }
+            Thread.sleep(100);
+        }
+
+        List<EmailNotification> notifications =
+                emailNotificationRepository.search(email, null, NotificationType.GUEST_WELCOME);
+        if (!notifications.isEmpty()) {
+            return notifications.get(0);
+        }
+        throw new AssertionError("Expected GUEST_WELCOME notification for " + email);
     }
 
     @Test

@@ -10,5 +10,6 @@ public enum NotificationType {
     ROOM_READY,
     SERVICE_REQUEST_COMPLETED,
     PASSWORD_RESET,
-    STAFF_WELCOME
+    STAFF_WELCOME,
+    GUEST_WELCOME
 }

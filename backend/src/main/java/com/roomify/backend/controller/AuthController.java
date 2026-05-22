@@ -3,12 +3,14 @@ package com.roomify.backend.controller;
 import com.roomify.backend.dto.ApiError;
 import com.roomify.backend.dto.JwtResponse;
 import com.roomify.backend.dto.LoginRequest;
+import com.roomify.backend.dto.RegisterRequest;
 import com.roomify.backend.dto.TokenRefreshRequest;
 import com.roomify.backend.dto.TokenRefreshResponse;
 import com.roomify.backend.notification.PasswordResetService;
 import com.roomify.backend.notification.dto.PasswordResetConfirmRequest;
 import com.roomify.backend.notification.dto.PasswordResetRequest;
 import com.roomify.backend.service.AuditService;
+import com.roomify.backend.service.GuestRegistrationService;
 import com.roomify.backend.service.UserService;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
@@ -45,6 +47,7 @@ public class AuthController {
         private final UserService userService;
         private final PasswordEncoder passwordEncoder;
         private final PasswordResetService passwordResetService;
+        private final GuestRegistrationService guestRegistrationService;
 
         public AuthController(
                         AuditService auditService,
@@ -52,13 +55,15 @@ public class AuthController {
                         UserRepository userRepository,
                         UserService userService,
                         PasswordEncoder passwordEncoder,
-                        PasswordResetService passwordResetService) {
+                        PasswordResetService passwordResetService,
+                        GuestRegistrationService guestRegistrationService) {
                 this.auditService = auditService;
                 this.jwtUtils = jwtUtils;
                 this.userRepository = userRepository;
                 this.userService = userService;
                 this.passwordEncoder = passwordEncoder;
                 this.passwordResetService = passwordResetService;
+                this.guestRegistrationService = guestRegistrationService;
         }
 
         @PostMapping("/login")
@@ -109,6 +114,13 @@ public class AuthController {
 
                 auditFailure(email, ipAddress, "wrong-email-or-password");
                 return unauthorized(httpRequest, "Wrong email or password");
+        }
+
+        @PostMapping("/register")
+        public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(guestRegistrationService.register(request));
         }
 
         @PostMapping("/refresh")

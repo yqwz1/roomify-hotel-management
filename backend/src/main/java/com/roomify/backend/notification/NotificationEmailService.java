@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
@@ -46,6 +47,7 @@ public class NotificationEmailService {
     private final EmailNotificationRepository emailNotificationRepository;
     private final NotificationProperties notificationProperties;
     private final ObjectMapper objectMapper;
+    private final ObjectProvider<NotificationEmailService> selfProvider;
 
     @Value("${roomify.mail.from}")
     private String fromAddress;
@@ -58,12 +60,14 @@ public class NotificationEmailService {
             EmailTemplateService templateService,
             EmailNotificationRepository emailNotificationRepository,
             NotificationProperties notificationProperties,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            ObjectProvider<NotificationEmailService> selfProvider) {
         this.mailSender = mailSender;
         this.templateService = templateService;
         this.emailNotificationRepository = emailNotificationRepository;
         this.notificationProperties = notificationProperties;
         this.objectMapper = objectMapper;
+        this.selfProvider = selfProvider;
     }
 
     public void sendReservationConfirmationEmail(
@@ -146,6 +150,13 @@ public class NotificationEmailService {
             String password,
             String localeTag) {
         queue(buildStaffWelcomeEvent(recipient, name, password, localeTag));
+    }
+
+    public void sendGuestWelcomeEmail(
+            String recipient,
+            String name,
+            String localeTag) {
+        queue(buildGuestWelcomeEvent(recipient, name, localeTag));
     }
 
     public void sendCheckInReminderEmail(Reservation reservation, String localeTag) {
@@ -377,12 +388,16 @@ public class NotificationEmailService {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    dispatchAsync(notificationId);
+                    dispatchThroughProxy(notificationId);
                 }
             });
             return;
         }
-        dispatchAsync(notificationId);
+        dispatchThroughProxy(notificationId);
+    }
+
+    private void dispatchThroughProxy(Long notificationId) {
+        selfProvider.getObject().dispatchAsync(notificationId);
     }
 
     private String writePayload(Map<String, Object> payload) {
@@ -787,6 +802,41 @@ public class NotificationEmailService {
                 "STAFF",
                 recipient,
                 "staff-welcome:" + recipient,
+                model);
+    }
+
+    private NotificationEvent buildGuestWelcomeEvent(
+            String recipient,
+            String name,
+            String localeTag) {
+        boolean arabic = templateService.isArabic(localeTag);
+        Map<String, Object> model = baseModel(localeTag);
+        model.put("preheader", arabic ? "Ø­Ø³Ø§Ø¨ Ø§Ù„Ø¶ÙŠÙ Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ Ø¬Ø§Ù‡Ø²." : "Your Roomify guest account is ready.");
+        model.put("heroEyebrow", arabic ? "Ø­Ø³Ø§Ø¨ Ø§Ù„Ø¶ÙŠÙ" : "Guest access");
+        model.put("heading", arabic ? "Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ ÙÙŠ Ø±ÙˆÙ…ÙŠÙØ§ÙŠ" : "Welcome to Roomify");
+        model.put("greeting", arabic ? "Ù…Ø±Ø­Ø¨Ø§Ù‹ " + name : "Hello " + name);
+        model.put("intro", arabic
+                ? "ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø§Ù„Ø¶ÙŠÙ Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ. ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¢Ù† ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ù…ØªØ§Ø¨Ø¹Ø© Ø¥Ù‚Ø§Ù…Ø§ØªÙƒ ÙˆØ®Ø¯Ù…Ø§ØªÙƒ."
+                : "Your Roomify guest account has been created. You can now sign in to manage your stays and services.");
+        model.put("accentLabel", arabic ? "Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ" : "Account email");
+        model.put("accentValue", recipient);
+        model.put("details", orderedMap(
+                arabic ? "Ù†ÙˆØ¹ Ø§Ù„Ø­Ø³Ø§Ø¨" : "Account type", arabic ? "Ø¶ÙŠÙ" : "Guest",
+                arabic ? "Ø§Ù„Ø®Ø·ÙˆØ© Ø§Ù„ØªØ§Ù„ÙŠØ©" : "Next step", arabic ? "Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ø§Ø³ØªØ¹Ø±Ø§Ø¶ Ø§Ù„Ø­Ø¬ÙˆØ²Ø§Øª ÙˆØ·Ù„Ø¨ Ø§Ù„Ø®Ø¯Ù…Ø§Øª" : "Sign in to view reservations and request services"));
+        model.put("bodyLines", arabic
+                ? List.of("Ø­Ø³Ø§Ø¨Ùƒ Ø¬Ø§Ù‡Ø² Ù…ØªÙ‰ Ù…Ø§ Ø§Ø­ØªØ¬ØªÙ‡.", "Ø¥Ø°Ø§ Ø§Ø­ØªØ¬Øª Ø¥Ù„Ù‰ Ù…Ø³Ø§Ø¹Ø¯Ø©ØŒ ÙØ±ÙŠÙ‚ Ø±ÙˆÙ…ÙŠÙØ§ÙŠ Ø¬Ø§Ù‡Ø² Ù„Ø®Ø¯Ù…ØªÙƒ.")
+                : List.of("Your account is ready whenever you are.", "If you need help before or during your stay, the Roomify team is ready to assist."));
+        model.put("signature", arabic ? "ÙØ±ÙŠÙ‚ Ø±ÙˆÙ…ÙŠÙØ§ÙŠ" : "Roomify Team");
+        return new NotificationEvent(
+                NotificationType.GUEST_WELCOME,
+                recipient,
+                name,
+                arabic ? "Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ ÙÙŠ Ø±ÙˆÙ…ÙŠÙØ§ÙŠ" : "Welcome to Roomify",
+                TEMPLATE_NAME,
+                localeTag,
+                "GUEST",
+                recipient,
+                "guest-welcome:" + recipient,
                 model);
     }
 

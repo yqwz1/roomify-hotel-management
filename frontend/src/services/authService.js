@@ -28,6 +28,31 @@ export const login = async (email, password) => {
     }
 };
 
+export const register = async ({ name, email, password }) => {
+    try {
+        const response = await api.post('/auth/register', {
+            name,
+            email,
+            password
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.validationErrors) {
+            const messages = Object.values(error.response.data.validationErrors).filter(Boolean);
+            if (messages.length) {
+                throw new Error(localizeKnownServerMessage(messages.join(' · '), i18n.t.bind(i18n)));
+            }
+        }
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(localizeKnownServerMessage(error.response.data.message, i18n.t.bind(i18n)));
+        }
+        if (error.response && error.response.data && typeof error.response.data === 'string') {
+            throw new Error(localizeKnownServerMessage(error.response.data, i18n.t.bind(i18n)));
+        }
+        throw new Error(i18n.t('signupFailedDefault', { defaultValue: 'Unable to create your account. Please try again.' }));
+    }
+};
+
 /**
  * Logout function - clears authentication data
  */

@@ -14,6 +14,7 @@ import Staff from './pages/Staff'
 import Bookings from './pages/Bookings'
 import NotFound from './pages/NotFound'
 import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
 import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
 import AiFinanceDashboard from './pages/AiFinanceDashboard'
@@ -90,6 +91,7 @@ const AppContent = () => {
         <Route path="/book" element={<Layout showSidebar={false}><BookRoom /></Layout>} />
         <Route path="/confirmation" element={<Layout showSidebar={false}><ConfirmationPage /></Layout>} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/unauthorized" element={<Layout showSidebar={Boolean(user)}><Unauthorized /></Layout>} />
 
         {/* Protected Routes */}

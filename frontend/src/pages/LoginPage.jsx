@@ -47,6 +47,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const [focused, setFocused] = useState(null);
+  const signupSuccess = Boolean(location.state?.signupSuccess);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -369,6 +370,29 @@ const LoginPage = () => {
             </Button>
           </motion.div>
         </motion.form>
+
+        {signupSuccess && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.35 }}
+            className="mt-5 text-sm font-semibold text-emerald-700"
+          >
+            {t('signupSuccess', { defaultValue: 'Account created. Sign in with your new password.' })}
+          </motion.p>
+        )}
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.38 }}
+          className="mt-7 text-sm font-medium text-brand-ink-muted"
+        >
+          {t('newToRoomify', { defaultValue: 'New to Roomify?' })}{' '}
+          <Link to="/signup" className="font-bold text-brand-primary underline-offset-4 hover:underline">
+            {t('createAccount', { defaultValue: 'Create an account' })}
+          </Link>
+        </motion.p>
 
         {/* Demo accounts (dev only) */}
         {showDemoCredentials && (
