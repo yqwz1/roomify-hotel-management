@@ -303,7 +303,7 @@ class ReservationServiceTest {
         assertEquals("member@example.com", response.getGuestEmail());
         assertEquals("member@example.com", existingGuest.getEmail());
         assertEquals("0509999999", existingGuest.getPhone());
-        assertEquals(PaymentStatus.PENDING.name(), response.getPaymentStatus());
+        assertEquals(PaymentStatus.UNPAID.name(), response.getPaymentStatus());
         verify(guestRepository).save(existingGuest);
     }
 

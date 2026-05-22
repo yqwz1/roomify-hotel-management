@@ -52,12 +52,12 @@ public class ReservationCreateRequest {
         return checkOutDate.isAfter(checkInDate);
     }
 
-    @AssertTrue(message = "Reservation status must be PENDING or CONFIRMED")
+    @AssertTrue(message = "Reservation status must be PENDING")
     public boolean isInitialStatusValid() {
         if (status == null) {
             return true;
         }
-        return status == ReservationStatus.PENDING || status == ReservationStatus.CONFIRMED;
+        return status == ReservationStatus.PENDING;
     }
 
     public Long getRoomId() {

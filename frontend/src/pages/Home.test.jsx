@@ -18,6 +18,7 @@ describe('Home', () => {
   it('keeps the authenticated manager on the home page with dashboard and bookings links', async () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
+      hasRole: (role) => role === 'ROLE_MANAGER',
       user: {
         roles: ['ROLE_MANAGER'],
       },
@@ -31,7 +32,7 @@ describe('Home', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: /Run rooms, reservations, staff, and billing from one polished PMS\./i,
+        name: /The operating system for your hotel/i,
       })
     ).toBeInTheDocument();
 

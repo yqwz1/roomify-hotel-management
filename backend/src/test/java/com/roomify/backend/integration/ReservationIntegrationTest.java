@@ -9,6 +9,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
-import com.roomify.backend.dto.EmailDeliveryStatus;
+import com.roomify.backend.notification.EmailNotificationRepository;
+import com.roomify.backend.notification.NotificationType;
 import com.roomify.backend.entity.AuditLog;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
@@ -30,6 +32,8 @@ import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.EmailLogRepository;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -78,6 +82,12 @@ class ReservationIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private ReservationAuditRepository reservationAuditRepository;
+
+    @Autowired
+    private ReservationHistoryRepository reservationHistoryRepository;
+
+    @Autowired
     private PaymentRepository paymentRepository;
 
     @Autowired
@@ -91,6 +101,9 @@ class ReservationIntegrationTest {
 
     @Autowired
     private EmailLogRepository emailLogRepository;
+
+    @Autowired
+    private EmailNotificationRepository emailNotificationRepository;
 
     @Autowired
     private AuditLogRepository auditLogRepository;
@@ -118,6 +131,8 @@ class ReservationIntegrationTest {
         guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
         paymentRepository.deleteAll();
+        reservationAuditRepository.deleteAll();
+        reservationHistoryRepository.deleteAll();
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
@@ -1354,10 +1369,12 @@ class ReservationIntegrationTest {
         assertEquals("Guest changed plans", cancelled.getCancellationReason());
         assertNotNull(cancelled.getCancellationAt());
 
-        assertTrue(emailLogRepository.findAll().stream()
-                .anyMatch(log -> created.confirmationNumber().equals(log.getConfirmationNumber())
-                        && "Reservation Cancelled".equals(log.getSubject())
-                        && log.getStatus() == EmailDeliveryStatus.SENT));
+        // Email delivery is now decoupled: cancelling enqueues a notification that
+        // is dispatched asynchronously (scheduling is disabled in tests), so the
+        // deterministic guarantee here is that the cancellation email was enqueued.
+        assertTrue(emailNotificationRepository.findAll().stream()
+                .anyMatch(n -> created.confirmationNumber().equals(n.getReferenceId())
+                        && n.getType() == NotificationType.RESERVATION_CANCELLED));
 
         assertTrue(auditLogRepository.findAll().stream()
                 .anyMatch(log -> "RESERVATION_CANCELLED".equals(log.getAction())));
@@ -1386,10 +1403,11 @@ class ReservationIntegrationTest {
         Reservation cancelled = reservationRepository.findById(created.id()).orElseThrow();
         assertEquals(ReservationStatus.CANCELLED, cancelled.getStatus());
 
-        assertTrue(emailLogRepository.findAll().stream()
-                .anyMatch(log -> created.confirmationNumber().equals(log.getConfirmationNumber())
-                        && "Reservation Cancelled".equals(log.getSubject())
-                        && log.getStatus() == EmailDeliveryStatus.FAILED));
+        // The cancel operation succeeds regardless of mail-delivery health; the
+        // notification is enqueued and dispatched asynchronously out of band.
+        assertTrue(emailNotificationRepository.findAll().stream()
+                .anyMatch(n -> created.confirmationNumber().equals(n.getReferenceId())
+                        && n.getType() == NotificationType.RESERVATION_CANCELLED));
     }
 
     @Test
@@ -1398,7 +1416,7 @@ class ReservationIntegrationTest {
                 room1Id,
                 LocalDate.now().plusDays(6).toString(),
                 LocalDate.now().plusDays(8).toString(),
-                "CHECKED_OUT",
+                "CONFIRMED",
                 "Guest " + UUID.randomUUID().toString().substring(0, 6),
                 "guest." + UUID.randomUUID().toString().substring(0, 8) + "@example.com",
                 "0500000000",
@@ -1412,7 +1430,7 @@ class ReservationIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Validation Error"))
                 .andExpect(jsonPath("$.validationErrors.initialStatusValid")
-                        .value("Reservation status must be PENDING or CONFIRMED"));
+                        .value("Reservation status must be PENDING"));
     }
 
     @Test
@@ -1761,10 +1779,11 @@ class ReservationIntegrationTest {
         assertEquals(LocalDate.now().plusDays(7), modified.getCheckInDate());
         assertEquals(LocalDate.now().plusDays(10), modified.getCheckOutDate());
 
-        assertTrue(emailLogRepository.findAll().stream()
-                .anyMatch(log -> created.confirmationNumber().equals(log.getConfirmationNumber())
-                        && "Reservation Modified".equals(log.getSubject())
-                        && log.getStatus() == EmailDeliveryStatus.FAILED));
+        // Modification email is enqueued and dispatched asynchronously; the modify
+        // operation itself succeeds independently of mail-delivery health.
+        assertTrue(emailNotificationRepository.findAll().stream()
+                .anyMatch(n -> created.confirmationNumber().equals(n.getReferenceId())
+                        && n.getType() == NotificationType.RESERVATION_MODIFIED));
     }
 
     @Test
@@ -1855,11 +1874,13 @@ class ReservationIntegrationTest {
 
     @Test
     void guestCannotCreateReservation() throws Exception {
+        // A valid (PENDING) body so the request reaches the role check and the
+        // test exercises authorization (403), not request validation (400).
         Map<String, Object> request = buildCreateReservationRequest(
                 room1Id,
                 LocalDate.now().plusDays(5).toString(),
                 LocalDate.now().plusDays(7).toString(),
-                "CONFIRMED",
+                "PENDING",
                 "Guest Blocked",
                 "guest-create@example.com",
                 "0500000000",
@@ -2003,11 +2024,13 @@ class ReservationIntegrationTest {
             String guestName,
             String guestEmail) throws Exception {
 
+        // The create endpoint only accepts PENDING as an initial status, so the
+        // create body always sends PENDING regardless of the desired final status.
         Map<String, Object> request = buildCreateReservationRequest(
                 roomId,
                 checkIn.toString(),
                 checkOut.toString(),
-                status,
+                "PENDING",
                 guestName,
                 guestEmail,
                 "0500000000",
@@ -2024,7 +2047,22 @@ class ReservationIntegrationTest {
                 .getContentAsString();
 
         JsonNode json = objectMapper.readTree(response);
-        return new CreatedReservation(json.get("id").asLong(), json.get("confirmationNumber").asText());
+        long reservationId = json.get("id").asLong();
+        String confirmationNumber = json.get("confirmationNumber").asText();
+
+        // To set up a CONFIRMED fixture, drive the reservation to CONFIRMED through
+        // the real status-transition workflow, the same wired action the app uses.
+        if ("CONFIRMED".equalsIgnoreCase(status)) {
+            Map<String, Object> statusRequest = new HashMap<>();
+            statusRequest.put("status", "CONFIRMED");
+            mockMvc.perform(patch("/api/reservations/{confirmationNumber}/status", confirmationNumber)
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(statusRequest)))
+                    .andExpect(status().isOk());
+        }
+
+        return new CreatedReservation(reservationId, confirmationNumber);
     }
 
     private Map<String, Object> buildCreateReservationRequest(

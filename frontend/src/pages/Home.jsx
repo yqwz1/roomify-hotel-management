@@ -24,6 +24,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Footer from '../components/Footer';
 import Reveal, { EASE } from '../components/motion/Reveal';
 import { checkHealth } from '../services/healthService';
+import { useAuth } from '../context/AuthProvider';
 
 /* ════════════════════════════════════════════════════════════
    MOCK DATA — visual only, no API calls
@@ -99,6 +100,7 @@ const CAPABILITIES = [
 
 export default function Home() {
   const { t } = useTranslation();
+  const { isAuthenticated, hasRole } = useAuth();
   const brandName = t('brandName');
   const [health, setHealth] = useState(null);
   const [statusFetchedAt, setStatusFetchedAt] = useState(null);
@@ -204,6 +206,18 @@ export default function Home() {
                     {t('m.home.ctaLogin')}
                   </Link>
                 </motion.div>
+                {isAuthenticated && hasRole('ROLE_MANAGER') ? (
+                  <motion.div whileHover={reduceMotion ? {} : { scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                    <Link
+                      to="/manager/dashboard"
+                      id="hero-dashboard-cta"
+                      className="group inline-flex items-center gap-1.5 rounded-full border border-brand-primary/30 bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition-all hover:border-brand-primary/50 hover:bg-brand-primary-tint hover:text-brand-ink"
+                    >
+                      {t('dashboard')}
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
+                    </Link>
+                  </motion.div>
+                ) : null}
                 <motion.div whileHover={reduceMotion ? {} : { scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Link
                     to="/bookings"

@@ -21,6 +21,8 @@ import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.InvoiceDeliveryLogRepository;
 import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -68,6 +70,12 @@ class InvoiceIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private ReservationAuditRepository reservationAuditRepository;
+
+    @Autowired
+    private ReservationHistoryRepository reservationHistoryRepository;
+
+    @Autowired
     private PaymentRepository paymentRepository;
 
     @Autowired
@@ -105,6 +113,8 @@ class InvoiceIntegrationTest {
         paymentRepository.deleteAll();
         invoiceDeliveryLogRepository.deleteAll();
         auditLogRepository.deleteAll();
+        reservationAuditRepository.deleteAll();
+        reservationHistoryRepository.deleteAll();
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
@@ -191,7 +201,7 @@ class InvoiceIntegrationTest {
         request.put("roomId", roomId);
         request.put("checkInDate", LocalDate.now().plusDays(1).toString());
         request.put("checkOutDate", LocalDate.now().plusDays(4).toString());
-        request.put("status", "CONFIRMED");
+        request.put("status", "PENDING");
         request.put("guest", guest);
 
         String response = mockMvc.perform(post("/api/reservations")

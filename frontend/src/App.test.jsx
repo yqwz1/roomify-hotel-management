@@ -32,7 +32,7 @@ describe('App', () => {
       expect(screen.getAllByText(/Roomify/i).length).toBeGreaterThan(0)
       expect(
         screen.getByRole('heading', {
-          name: /Run rooms, reservations, staff, and billing from one polished PMS\./i,
+          name: /The operating system for your hotel/i,
         })
       ).toBeTruthy()
       expect(screen.getAllByRole('link', { name: /Sign In/i }).length).toBeGreaterThan(0)

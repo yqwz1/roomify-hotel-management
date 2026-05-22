@@ -35,6 +35,8 @@ import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.AuditLogRepository;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
@@ -64,6 +66,10 @@ class BillingIntegrationTest {
     private JwtUtils jwtUtils;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationAuditRepository reservationAuditRepository;
+    @Autowired
+    private ReservationHistoryRepository reservationHistoryRepository;
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
@@ -95,6 +101,8 @@ class BillingIntegrationTest {
         guestToken = jwtUtils.generateToken("guest@roomify.com", "ROLE_GUEST");
 
         paymentRepository.deleteAll();
+        reservationAuditRepository.deleteAll();
+        reservationHistoryRepository.deleteAll();
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
@@ -378,7 +386,7 @@ class BillingIntegrationTest {
         request.put("roomId", roomId);
         request.put("checkInDate", checkIn.toString());
         request.put("checkOutDate", checkOut.toString());
-        request.put("status", "CONFIRMED");
+        request.put("status", "PENDING");
         request.put("guest", guest);
 
         String response = mockMvc.perform(post("/api/reservations")

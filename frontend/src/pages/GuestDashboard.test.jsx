@@ -90,7 +90,7 @@ describe('GuestDashboard', () => {
     expect(await screen.findByText('RSV-1001')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Get Help/i }));
-    await user.click(screen.getByRole('button', { name: /Browse Rooms/i }));
+    await user.click(screen.getByRole('button', { name: /Book room/i }));
 
     expect(mockNavigate).toHaveBeenNthCalledWith(1, '/bookings');
     expect(mockNavigate).toHaveBeenNthCalledWith(2, '/search');

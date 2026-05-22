@@ -63,12 +63,11 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         // Check for main heading
-        // Check for main heading
-        expect(screen.getByRole('heading', { name: /Sign in/i })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /Welcome back/i })).toBeInTheDocument();
 
         // Check for form fields
         expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+        expect(screen.getByLabelText('Password')).toBeInTheDocument();
 
         // Check for submit button
         expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
@@ -99,7 +98,7 @@ describe('LoginPage', () => {
 
         const emailInput = screen.getByLabelText(/Email/i);
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
 
         // Enter valid email but no password
         await user.clear(emailInput);
@@ -131,7 +130,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         // Fill in form
@@ -156,7 +155,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         // Fill in form
@@ -188,7 +187,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         // Fill in form
@@ -219,7 +218,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         await user.type(emailInput, 'admin@test.com');
@@ -247,7 +246,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         // Fill in form
@@ -279,7 +278,7 @@ describe('LoginPage', () => {
         renderLoginPage();
 
         const emailInput = screen.getByLabelText(/Email/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+        const passwordInput = screen.getByLabelText('Password');
         const submitButton = screen.getByRole('button', { name: /Sign In/i });
 
         // Fill in form

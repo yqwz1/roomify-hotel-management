@@ -58,13 +58,19 @@ describe('navConfig', () => {
     expect(getDefaultRouteForRoles([ROLE_ADMIN])).toBe('/admin/dashboard');
   });
 
-  it('combines admin and manager navigation for owner users with both roles', () => {
+  it('shows only admin navigation for owner users with admin and manager roles', () => {
     const paths = getPathsForRoles([ROLE_ADMIN, ROLE_MANAGER]);
 
-    expect(paths).toContain('/staff');
-    expect(paths).toContain('/room-types');
-    expect(paths).toContain('/manager/dashboard');
-    expect(paths).toContain('/manager/expenses');
+    expect(paths).toEqual([
+      '/',
+      '/admin/dashboard',
+      '/admin/notifications',
+      '/staff',
+      '/room-types',
+      '/services',
+    ]);
+    expect(paths).not.toContain('/manager/dashboard');
+    expect(paths).not.toContain('/manager/expenses');
     expect(getDefaultRouteForRoles([ROLE_ADMIN, ROLE_MANAGER])).toBe('/admin/dashboard');
   });
 

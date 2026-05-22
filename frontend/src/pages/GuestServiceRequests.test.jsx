@@ -23,6 +23,11 @@ vi.mock('../services/serviceRequestService', () => ({
   extractGuestServiceRequestError: vi.fn((err) => err?.message ?? 'Unable to load requests'),
 }));
 
+// Reservations are only "active" while checkOutDate >= today, so fixtures must
+// use dates relative to now — hardcoded calendar dates silently expire.
+const isoDaysFromNow = (days) =>
+  new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
 const renderPage = () =>
   render(
     <MemoryRouter>
@@ -44,8 +49,8 @@ describe('GuestServiceRequests', () => {
         roomId: 11,
         roomNumber: '204',
         status: 'CONFIRMED',
-        checkInDate: '2026-05-18',
-        checkOutDate: '2026-05-20',
+        checkInDate: isoDaysFromNow(-1),
+        checkOutDate: isoDaysFromNow(2),
       },
     ]);
     getGuestServiceRequests.mockResolvedValue([]);
@@ -92,16 +97,16 @@ describe('GuestServiceRequests', () => {
         roomId: 11,
         roomNumber: '204',
         status: 'CONFIRMED',
-        checkInDate: '2026-05-18',
-        checkOutDate: '2026-05-20',
+        checkInDate: isoDaysFromNow(-1),
+        checkOutDate: isoDaysFromNow(2),
       },
       {
         confirmationNumber: 'RSV-1002',
         roomId: 12,
         roomNumber: '305',
         status: 'CHECKED_IN',
-        checkInDate: '2026-05-18',
-        checkOutDate: '2026-05-22',
+        checkInDate: isoDaysFromNow(-1),
+        checkOutDate: isoDaysFromNow(4),
       },
     ]);
     getGuestServiceRequests.mockResolvedValue([]);
