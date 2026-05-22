@@ -35,8 +35,10 @@ public class ZatcaQrService {
 
     private String buildField(int tag, String value) {
 
+        int byteLength = value.getBytes(StandardCharsets.UTF_8).length;
+
         return (char) tag +
-                String.valueOf((char) value.length()) +
+                String.valueOf((char) byteLength) +
                 value;
     }
 }

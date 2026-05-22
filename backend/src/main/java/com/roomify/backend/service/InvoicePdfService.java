@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,12 @@ public class InvoicePdfService {
 
         @Value("${roomify.billing.vat-rate}")
         private BigDecimal vatRate;
+
+        @Value("${roomify.invoice.seller-name:Roomify Hotel}")
+        private String sellerName;
+
+        @Value("${roomify.invoice.seller-vat-number:1234567890}")
+        private String sellerVatNumber;
 
         public byte[] generateInvoice(
                         Reservation reservation,
@@ -138,10 +147,16 @@ public class InvoicePdfService {
                         // ZATCA QR
                         // ======================
 
+                        // ZATCA Tag 3 requires a timezone-aware ISO-8601 instant.
+                        // Use KSA local time (+03:00) truncated to whole seconds.
+                        String qrTimestamp = OffsetDateTime.now(ZoneOffset.ofHours(3))
+                                        .truncatedTo(ChronoUnit.SECONDS)
+                                        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
                         String payload = zatcaQrService.generateQrPayload(
-                                        "Roomify Hotel",
-                                        "1234567890",
-                                        now,
+                                        sellerName,
+                                        sellerVatNumber,
+                                        qrTimestamp,
                                         total.toString(),
                                         vat.toString());
 
