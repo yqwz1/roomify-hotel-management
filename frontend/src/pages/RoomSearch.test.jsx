@@ -6,6 +6,7 @@ import RoomSearch from './RoomSearch';
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseSearch = vi.hoisted(() => vi.fn());
+const mockUseRoomTypes = vi.hoisted(() => vi.fn());
 
 vi.mock('../context/AuthProvider', () => ({
   useAuth: () => mockUseAuth(),
@@ -13,6 +14,10 @@ vi.mock('../context/AuthProvider', () => ({
 
 vi.mock('../hooks/useSearch', () => ({
   useSearch: () => mockUseSearch(),
+}));
+
+vi.mock('../hooks/useRoomTypes', () => ({
+  useRoomTypes: () => mockUseRoomTypes(),
 }));
 
 vi.mock('../components/DateRangePicker', () => ({
@@ -68,23 +73,25 @@ describe('RoomSearch CTA behavior', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseSearch.mockReturnValue(roomSearchState);
+    mockUseRoomTypes.mockReturnValue({
+      roomTypes: [],
+      loading: false,
+      error: '',
+      fetchRoomTypes: vi.fn(),
+    });
   });
 
-  it('shows only safe guest actions on room result cards for guest users', () => {
+  it('keeps public browsing and booking actions available for guest users', () => {
     mockUseAuth.mockReturnValue({
       user: { roles: ['ROLE_GUEST'], email: 'guest@roomify.com' },
     });
 
     renderPage();
 
-    expect(screen.queryByRole('button', { name: 'Book Room' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Get Help' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Book Room' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View Details' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Contact Front Desk' })).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /Guests can browse availability here, but booking and stay changes still go through hotel support\./i
-      )
-    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Get Help' })).not.toBeInTheDocument();
   });
 
   it('keeps the booking CTA for non-guest users', () => {

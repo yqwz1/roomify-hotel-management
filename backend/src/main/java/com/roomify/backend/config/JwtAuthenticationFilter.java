@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +46,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             path = path.substring(contextPath.length());
         }
         return "/api/health".equals(path) || path.startsWith("/api/auth/")
-                || "/api/rooms/search".equals(path);
+                || "/api/rooms/search".equals(path)
+                || isPublicRoomDetailsRequest(request, path);
+    }
+
+    private boolean isPublicRoomDetailsRequest(HttpServletRequest request, String path) {
+        return HttpMethod.GET.matches(request.getMethod())
+                && path != null
+                && path.matches("^/api/rooms/\\d+$");
     }
 
     @Override

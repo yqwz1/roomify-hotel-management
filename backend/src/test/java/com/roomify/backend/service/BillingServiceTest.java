@@ -25,6 +25,8 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.exception.PaymentValidationException;
 import com.roomify.backend.exception.ResourceNotFoundException;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
 
@@ -34,6 +36,7 @@ class BillingServiceTest {
         private PaymentRepository paymentRepository;
         private AuditService auditService;
         private ReservationFinancialService financialService;
+        private ReservationStatusTransitionService reservationStatusTransitionService;
         private BillingService billingService;
 
         @BeforeEach
@@ -42,12 +45,18 @@ class BillingServiceTest {
                 paymentRepository = mock(PaymentRepository.class);
                 auditService = mock(AuditService.class);
                 financialService = new ReservationFinancialService(new BigDecimal("0.15"));
+                ReservationHistoryRepository reservationHistoryRepository = mock(ReservationHistoryRepository.class);
+                ReservationAuditRepository reservationAuditRepository = mock(ReservationAuditRepository.class);
+                reservationStatusTransitionService = new ReservationStatusTransitionService(
+                                reservationHistoryRepository,
+                                reservationAuditRepository);
 
                 billingService = new BillingService(
                                 reservationRepository,
                                 paymentRepository,
                                 auditService,
                                 financialService,
+                                reservationStatusTransitionService,
                                 new BigDecimal("0.15"));
         }
 

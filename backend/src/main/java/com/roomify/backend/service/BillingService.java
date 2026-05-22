@@ -2,9 +2,11 @@ package com.roomify.backend.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ public class BillingService {
         private final PaymentRepository paymentRepository;
         private final AuditService auditService;
         private final ReservationFinancialService financialService;
+        private final ReservationStatusTransitionService reservationStatusTransitionService;
         private final BigDecimal vatRate;
 
         public BillingService(
@@ -42,11 +45,13 @@ public class BillingService {
                         PaymentRepository paymentRepository,
                         AuditService auditService,
                         ReservationFinancialService financialService,
+                        ReservationStatusTransitionService reservationStatusTransitionService,
                         @Value("${roomify.billing.vat-rate:0.15}") BigDecimal vatRate) {
                 this.reservationRepository = reservationRepository;
                 this.paymentRepository = paymentRepository;
                 this.auditService = auditService;
                 this.financialService = financialService;
+                this.reservationStatusTransitionService = reservationStatusTransitionService;
                 this.vatRate = vatRate;
         }
 
@@ -115,6 +120,17 @@ public class BillingService {
                 reservation.setOutstandingBalance(projectedOutstanding);
                 reservation.setPaymentStatus(projectedStatus);
                 reservation.setInvoiceFinalized(isFullyPaid);
+                reservation.setPaymentMethod(PaymentMethod.CASH);
+                reservation.setTransactionId("BILL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT));
+                reservation.setPaymentTimestamp(LocalDateTime.now());
+                if (isFullyPaid) {
+                        reservationStatusTransitionService.transition(
+                                        reservation,
+                                        reservationStatusTransitionService.resolvePostPaymentStatus(reservation),
+                                        new ReservationStatusTransitionService.ReservationActor("billing@roomify.local", "ROLE_STAFF"),
+                                        "Payment completed",
+                                        true);
+                }
                 reservationRepository.saveAndFlush(reservation);
 
                 Payment payment = new Payment();

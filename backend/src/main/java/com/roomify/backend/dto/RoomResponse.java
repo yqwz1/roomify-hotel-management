@@ -12,6 +12,9 @@ public class RoomResponse {
     private RoomTypeResponse roomType;
     private Integer floor;
     private RoomStatus status;
+    private Boolean availableForRequestedStay;
+    private String availabilityMessage;
+    private PricingBreakdownDto pricing;
 
     // Constructors
     public RoomResponse() {}
@@ -63,5 +66,29 @@ public class RoomResponse {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    public Boolean getAvailableForRequestedStay() {
+        return availableForRequestedStay;
+    }
+
+    public void setAvailableForRequestedStay(Boolean availableForRequestedStay) {
+        this.availableForRequestedStay = availableForRequestedStay;
+    }
+
+    public String getAvailabilityMessage() {
+        return availabilityMessage;
+    }
+
+    public void setAvailabilityMessage(String availabilityMessage) {
+        this.availabilityMessage = availabilityMessage;
+    }
+
+    public PricingBreakdownDto getPricing() {
+        return pricing;
+    }
+
+    public void setPricing(PricingBreakdownDto pricing) {
+        this.pricing = pricing;
     }
 }

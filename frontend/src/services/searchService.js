@@ -41,3 +41,12 @@ export const searchRooms = async (params) => {
   const response = await publicApi.get('/rooms/search', { params: query });
   return response.data;
 };
+
+export const getPublicRoomDetails = async (roomId, params = {}) => {
+  const query = {};
+  if (params.checkIn) query.checkIn = params.checkIn;
+  if (params.checkOut) query.checkOut = params.checkOut;
+
+  const response = await publicApi.get(`/rooms/${roomId}`, { params: query });
+  return response.data;
+};

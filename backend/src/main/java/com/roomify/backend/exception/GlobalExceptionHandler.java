@@ -2,6 +2,7 @@ package com.roomify.backend.exception;
 
 import com.roomify.backend.dto.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -195,6 +196,18 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
 
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ApiError> handleDataIntegrityViolation(
+                        DataIntegrityViolationException ex,
+                        HttpServletRequest request) {
+                ApiError error = new ApiError(
+                                HttpStatus.CONFLICT.value(),
+                                "Conflict",
+                                resolveIntegrityViolationMessage(ex),
+                                request.getRequestURI());
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
+
         @ExceptionHandler(CannotDeleteException.class)
         public ResponseEntity<ApiError> handleCannotDelete(
                         CannotDeleteException ex,
@@ -262,5 +275,20 @@ public class GlobalExceptionHandler {
                                 "An unexpected error occurred: " + ex.getMessage(),
                                 request.getRequestURI());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+
+        private String resolveIntegrityViolationMessage(DataIntegrityViolationException ex) {
+                String message = ex.getMostSpecificCause() != null
+                                ? ex.getMostSpecificCause().getMessage()
+                                : ex.getMessage();
+                String normalized = message != null ? message.toLowerCase() : "";
+
+                if (normalized.contains("uk_guest_id_number") || normalized.contains("id_number")) {
+                        return "A guest with this ID number already exists. Reuse the existing guest profile or verify the ID number.";
+                }
+                if (normalized.contains("uk_guest_email") || normalized.contains("email")) {
+                        return "A guest with this email already exists. Reuse the existing guest profile or verify the email address.";
+                }
+                return "The request conflicts with existing data.";
         }
 }

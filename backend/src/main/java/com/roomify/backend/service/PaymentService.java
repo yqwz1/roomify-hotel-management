@@ -34,6 +34,7 @@ public class PaymentService {
     private final NotificationService notificationService;
     private final EmailService emailService;
     private final ReservationFinancialService financialService;
+    private final ReservationStatusTransitionService reservationStatusTransitionService;
 
     public PaymentService(
             ReservationRepository reservationRepository,
@@ -41,13 +42,15 @@ public class PaymentService {
             AuditService auditService,
             NotificationService notificationService,
             EmailService emailService,
-            ReservationFinancialService financialService) {
+            ReservationFinancialService financialService,
+            ReservationStatusTransitionService reservationStatusTransitionService) {
         this.reservationRepository = reservationRepository;
         this.paymentRepository = paymentRepository;
         this.auditService = auditService;
         this.notificationService = notificationService;
         this.emailService = emailService;
         this.financialService = financialService;
+        this.reservationStatusTransitionService = reservationStatusTransitionService;
     }
 
     public PaymentResponse createPayment(PaymentRequest request) {
@@ -114,6 +117,17 @@ public class PaymentService {
             reservation.setOutstandingBalance(newRemainingBalance);
             reservation.setPaymentStatus(reservationPaymentStatus);
             reservation.setInvoiceFinalized(newRemainingBalance.compareTo(BigDecimal.ZERO) == 0);
+            reservation.setPaymentMethod(request.getPaymentMethod());
+            reservation.setTransactionId(gatewayReference);
+            reservation.setPaymentTimestamp(savedTimestampCandidate());
+            if (newRemainingBalance.compareTo(BigDecimal.ZERO) == 0) {
+                reservationStatusTransitionService.transition(
+                        reservation,
+                        reservationStatusTransitionService.resolvePostPaymentStatus(reservation),
+                        new ReservationStatusTransitionService.ReservationActor("payments@roomify.local", "ROLE_STAFF"),
+                        "Payment processed",
+                        true);
+            }
 
             payment.setPaymentStatus(PaymentStatus.PAID);
             payment.setGatewayReference(gatewayReference);
@@ -260,5 +274,9 @@ public class PaymentService {
 
     private BigDecimal calculateOutstanding(BigDecimal totalPrice, BigDecimal totalPaid) {
         return financialService.calculateOutstanding(totalPrice, totalPaid);
+    }
+
+    private java.time.LocalDateTime savedTimestampCandidate() {
+        return java.time.LocalDateTime.now();
     }
 }

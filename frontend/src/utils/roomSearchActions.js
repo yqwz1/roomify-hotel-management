@@ -3,12 +3,22 @@ import { ROLE_GUEST } from '../components/navigation/navConfig';
 export const ROOM_SEARCH_CARD_ACTIONS = {
   default: [
     {
+      id: 'details',
+      labelKey: 'roomSearchPage.viewDetailsCta',
+      tone: 'secondary',
+    },
+    {
       id: 'book',
       labelKey: 'roomSearchPage.bookRoomCta',
       tone: 'primary',
     },
   ],
   guest: [
+    {
+      id: 'details',
+      labelKey: 'roomSearchPage.viewDetailsCta',
+      tone: 'secondary',
+    },
     {
       id: 'book',
       labelKey: 'roomSearchPage.bookRoomCta',

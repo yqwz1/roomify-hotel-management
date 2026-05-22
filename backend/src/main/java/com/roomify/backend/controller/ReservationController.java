@@ -7,8 +7,10 @@ import com.roomify.backend.dto.ReservationCreateRequest;
 import com.roomify.backend.dto.ReservationFilterRequest;
 import com.roomify.backend.dto.ReservationLookupResponse;
 import com.roomify.backend.dto.ReservationModifyRequest;
+import com.roomify.backend.dto.ReservationNoteRequest;
 import com.roomify.backend.dto.ReservationPaymentRequest;
 import com.roomify.backend.dto.ReservationResponse;
+import com.roomify.backend.dto.ReservationStatusUpdateRequest;
 import com.roomify.backend.dto.RoomGridResponse;
 import com.roomify.backend.service.BillingService;
 import com.roomify.backend.service.ReservationLookupService;
@@ -22,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -116,6 +119,20 @@ public class ReservationController {
             @PathVariable String confirmationNumber) {
         ReservationActionPlaceholderResponse response = reservationService.checkOut(confirmationNumber);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{confirmationNumber}/status")
+    public ResponseEntity<ReservationResponse> updateStatus(
+            @PathVariable String confirmationNumber,
+            @Valid @RequestBody ReservationStatusUpdateRequest request) {
+        return ResponseEntity.ok(reservationService.updateStatus(confirmationNumber, request));
+    }
+
+    @PatchMapping("/{id}/notes")
+    public ResponseEntity<ReservationResponse> updateNotes(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservationNoteRequest request) {
+        return ResponseEntity.ok(reservationService.updateStaffNotes(id, request));
     }
 
     @GetMapping("/{confirmationNumber}/bill")

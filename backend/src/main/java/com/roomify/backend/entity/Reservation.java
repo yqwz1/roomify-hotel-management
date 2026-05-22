@@ -15,6 +15,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -123,6 +124,27 @@ public class Reservation {
     @Column(name = "invoice_finalized", nullable = false)
     private boolean invoiceFinalized = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 30)
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "transaction_id", length = 120)
+    private String transactionId;
+
+    @Column(name = "payment_timestamp")
+    private LocalDateTime paymentTimestamp;
+
+    @Size(max = 1000, message = "Staff notes cannot exceed 1000 characters")
+    @Column(name = "staff_notes", length = 1000)
+    private String staffNotes;
+
+    @Column(name = "status_updated_at")
+    private LocalDateTime statusUpdatedAt;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     public Reservation() {
     }
 
@@ -163,11 +185,20 @@ public class Reservation {
         if (paymentStatus == null) {
             paymentStatus = PaymentStatus.PENDING;
         }
+        if (statusUpdatedAt == null) {
+            statusUpdatedAt = LocalDateTime.now();
+        }
+        if (version == null) {
+            version = 0L;
+        }
     }
 
     @PreUpdate
     public void touchModifiedAt() {
         modifiedAt = LocalDateTime.now();
+        if (statusUpdatedAt == null) {
+            statusUpdatedAt = modifiedAt;
+        }
     }
 
     @AssertTrue(message = "Check-out date must be after check-in date")
@@ -344,5 +375,53 @@ public class Reservation {
 
     public void setInvoiceFinalized(boolean invoiceFinalized) {
         this.invoiceFinalized = invoiceFinalized;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public LocalDateTime getPaymentTimestamp() {
+        return paymentTimestamp;
+    }
+
+    public void setPaymentTimestamp(LocalDateTime paymentTimestamp) {
+        this.paymentTimestamp = paymentTimestamp;
+    }
+
+    public String getStaffNotes() {
+        return staffNotes;
+    }
+
+    public void setStaffNotes(String staffNotes) {
+        this.staffNotes = staffNotes;
+    }
+
+    public LocalDateTime getStatusUpdatedAt() {
+        return statusUpdatedAt;
+    }
+
+    public void setStatusUpdatedAt(LocalDateTime statusUpdatedAt) {
+        this.statusUpdatedAt = statusUpdatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

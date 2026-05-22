@@ -114,6 +114,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @EntityGraph(attributePaths = { "room", "room.roomType", "guest" })
         @Query("SELECT r FROM Reservation r " +
                         "WHERE r.status IN (com.roomify.backend.entity.ReservationStatus.PENDING, " +
+                        "                   com.roomify.backend.entity.ReservationStatus.PAYMENT_PENDING, " +
                         "                   com.roomify.backend.entity.ReservationStatus.CONFIRMED, " +
                         "                   com.roomify.backend.entity.ReservationStatus.CHECKED_IN) " +
                         "AND r.checkInDate < :end AND r.checkOutDate > :start " +
@@ -124,16 +125,33 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
-                        "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
+                        "AND r.status NOT IN (com.roomify.backend.entity.ReservationStatus.CANCELLED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.NO_SHOW, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.REFUNDED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.COMPLETED) " +
                         "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
         List<Reservation> findOverlappingReservations(
                         @Param("roomId") Long roomId,
                         @Param("newIn") LocalDate newIn,
                         @Param("newOut") LocalDate newOut);
 
+        @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.room.id = :roomId " +
+                        "AND r.status NOT IN (com.roomify.backend.entity.ReservationStatus.CANCELLED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.NO_SHOW, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.REFUNDED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.COMPLETED) " +
+                        "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
+        boolean existsOverlapForAvailability(
+                        @Param("roomId") Long roomId,
+                        @Param("newIn") LocalDate newIn,
+                        @Param("newOut") LocalDate newOut);
+
         @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
                         "AND r.id <> :currentId " +
-                        "AND r.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED " +
+                        "AND r.status NOT IN (com.roomify.backend.entity.ReservationStatus.CANCELLED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.NO_SHOW, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.REFUNDED, " +
+                        "                     com.roomify.backend.entity.ReservationStatus.COMPLETED) " +
                         "AND (:newIn < r.checkOutDate AND :newOut > r.checkInDate)")
         List<Reservation> findOverlappingForUpdate(
                         @Param("roomId") Long roomId,

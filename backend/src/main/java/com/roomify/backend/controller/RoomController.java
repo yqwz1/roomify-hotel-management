@@ -10,9 +10,11 @@ import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.service.RoomOperationalService;
 import com.roomify.backend.service.RoomService;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +25,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/rooms")
-@PreAuthorize("hasRole('MANAGER')")
 public class RoomController {
 
     private final RoomService roomService;
@@ -39,6 +40,7 @@ public class RoomController {
      * POST /api/rooms
      */
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomResponse> create(
             @Valid @RequestBody RoomRequest request) {
 
@@ -51,6 +53,7 @@ public class RoomController {
      * GET /api/rooms?status=AVAILABLE&floor=2&type=Deluxe
      */
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<RoomResponse>> getAll(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Integer floor,
@@ -65,8 +68,11 @@ public class RoomController {
      * GET /api/rooms/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> getById(@PathVariable Long id) {
-        RoomResponse response = roomService.findById(id);
+    public ResponseEntity<RoomResponse> getById(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut) {
+        RoomResponse response = roomService.findById(id, checkIn, checkOut);
         return ResponseEntity.ok(response);
     }
 
@@ -75,6 +81,7 @@ public class RoomController {
      * GET /api/rooms/{id}/valid-next-statuses
      */
     @GetMapping("/{id}/valid-next-statuses")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<RoomStatus>> getValidNextStatuses(@PathVariable Long id) {
         return ResponseEntity.ok(roomService.getValidNextStatuses(id));
     }
@@ -84,6 +91,7 @@ public class RoomController {
      * PUT /api/rooms/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody RoomRequest request) {
@@ -97,6 +105,7 @@ public class RoomController {
      * PUT /api/rooms/{id}/status
      */
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomResponse> updateStatus(
             @PathVariable Long id,
             @RequestParam String status) {
@@ -105,6 +114,7 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/service-preview")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomServicePreviewResponse> previewRoomService(
             @PathVariable Long id,
             @RequestBody(required = false) RoomServicePreviewRequest request) {
@@ -113,6 +123,7 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/complete-service")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<RoomServiceCompletionResponse> completeRoomService(
             @PathVariable Long id,
             @Valid @RequestBody RoomServiceCompletionRequest request) {
@@ -124,6 +135,7 @@ public class RoomController {
      * DELETE /api/rooms/{id}
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         roomService.delete(id);
         return ResponseEntity.noContent().build();

@@ -22,12 +22,18 @@ import {
   formatLocalizedCurrency,
   getRoomStatusLabel,
   translateKnownValue,
+  translateWithFallback,
 } from '../utils/localization';
 import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 const EMPTY_FILTERS = { roomName: '', type: '', guestCapacity: '', minPrice: '', maxPrice: '' };
 const FRONT_DESK_EMAIL = 'info@roomify.com';
 const FRONT_DESK_LINK = `mailto:${FRONT_DESK_EMAIL}?subject=Roomify%20Front%20Desk%20Support`;
+const CARD_ACTION_FALLBACKS = {
+  details: 'View Details',
+  book: 'Book Room',
+  contactFrontDesk: 'Contact Front Desk',
+};
 
 function SearchSkeletonCard() {
   return (
@@ -144,7 +150,13 @@ export default function RoomSearch() {
   };
 
   const handleBookNow = (room) => {
-    navigate(`/book?roomId=${room.id}`, {
+    navigate(`/book?roomId=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}`, {
+      state: { checkIn, checkOut, room },
+    });
+  };
+
+  const handleViewDetails = (room) => {
+    navigate(`/rooms/${room.id}?checkIn=${checkIn}&checkOut=${checkOut}`, {
       state: { checkIn, checkOut, room },
     });
   };
@@ -152,6 +164,9 @@ export default function RoomSearch() {
 
   const handleCardAction = (actionId, room) => {
     switch (actionId) {
+      case 'details':
+        handleViewDetails(room);
+        break;
       case 'book':
         handleBookNow(room);
         break;
@@ -328,8 +343,11 @@ export default function RoomSearch() {
             {!loading && results.length > 0 && (
               <div className="space-y-4">
                 {results.map((room) => {
-                  const basePrice = Number(room.roomType?.basePrice ?? 0);
-                  const totalCost = nights > 0 ? basePrice * nights : basePrice;
+                  const pricing = room.pricing ?? null;
+                  const basePrice = Number(pricing?.pricePerNight ?? room.roomType?.basePrice ?? 0);
+                  const subtotal = Number(pricing?.subtotal ?? (nights > 0 ? basePrice * nights : basePrice));
+                  const taxes = Number(pricing?.vatAmount ?? 0);
+                  const totalCost = Number(pricing?.total ?? subtotal);
                   const amenities = room.roomType?.amenities
                     ? room.roomType.amenities
                         .split(',')
@@ -414,6 +432,11 @@ export default function RoomSearch() {
                             <p className="mt-2 text-sm font-bold text-brand-ink">
                               {formatLocalizedCurrency(totalCost, i18n.language)}
                             </p>
+                            {taxes > 0 ? (
+                              <p className="mt-1 text-xs font-medium text-brand-ink-muted">
+                                {t('taxes15')}: {formatLocalizedCurrency(taxes, i18n.language)}
+                              </p>
+                            ) : null}
                           </div>
                         </div>
 
@@ -429,17 +452,15 @@ export default function RoomSearch() {
                                   : 'inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep'
                               }
                             >
-                              {t(action.labelKey)}
+                              {translateWithFallback(
+                                t,
+                                action.labelKey,
+                                CARD_ACTION_FALLBACKS[action.id] ?? action.id
+                              )}
                               <ArrowRight className="h-4 w-4" />
                             </button>
                           ))}
                         </div>
-
-                        {isGuest && (
-                          <p className="border-t border-brand-surface-border pt-4 text-sm font-medium leading-6 text-brand-ink-muted">
-                            {t(`${pageTx}.guestCtaNote`)}
-                          </p>
-                        )}
                       </div>
                     </article>
                   );

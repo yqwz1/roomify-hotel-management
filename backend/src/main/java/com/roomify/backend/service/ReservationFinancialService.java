@@ -1,9 +1,11 @@
 package com.roomify.backend.service;
 
+import com.roomify.backend.dto.PricingBreakdownDto;
 import com.roomify.backend.entity.PaymentStatus;
 import com.roomify.backend.entity.Reservation;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,28 +23,52 @@ public class ReservationFinancialService {
     }
 
     public ReservationFinancialSummary summarize(Reservation reservation) {
-        BigDecimal roomRate = sanitize(reservation.getRoom().getRoomType().getBasePrice());
-        long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
-        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights)).setScale(MONEY_SCALE, ROUNDING);
-        BigDecimal taxes = subtotal.multiply(vatRate).setScale(MONEY_SCALE, ROUNDING);
-        BigDecimal totalPrice = subtotal.add(taxes).setScale(MONEY_SCALE, ROUNDING);
+        PricingBreakdownDto quote = quote(
+                reservation.getRoom().getRoomType().getBasePrice(),
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate());
         BigDecimal totalPaid = sanitize(reservation.getTotalPaid());
-        BigDecimal outstandingBalance = calculateOutstanding(totalPrice, totalPaid);
+        BigDecimal outstandingBalance = calculateOutstanding(quote.getTotal(), totalPaid);
         PaymentStatus paymentStatus = resolvePaymentStatus(reservation.getPaymentStatus(), totalPaid, outstandingBalance);
         boolean invoiceFinalized = reservation.isInvoiceFinalized()
                 || (totalPaid.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)) > 0
                         && outstandingBalance.compareTo(BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING)) == 0);
 
         return new ReservationFinancialSummary(
-                nights,
-                roomRate,
-                subtotal,
-                taxes,
-                totalPrice,
+                quote.getNights(),
+                quote.getPricePerNight(),
+                quote.getSubtotal(),
+                quote.getVatAmount(),
+                quote.getTotal(),
                 totalPaid,
                 outstandingBalance,
                 paymentStatus,
                 invoiceFinalized);
+    }
+
+    public PricingBreakdownDto quote(BigDecimal basePrice, LocalDate checkInDate, LocalDate checkOutDate) {
+        BigDecimal roomRate = sanitize(basePrice);
+        long nights = checkInDate != null && checkOutDate != null
+                ? Math.max(ChronoUnit.DAYS.between(checkInDate, checkOutDate), 0)
+                : 0;
+        BigDecimal subtotal = roomRate.multiply(BigDecimal.valueOf(nights)).setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal seasonalAdjustment = BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal discountAmount = BigDecimal.ZERO.setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal taxableBase = subtotal.add(seasonalAdjustment).subtract(discountAmount);
+        BigDecimal vatAmount = taxableBase.multiply(vatRate).setScale(MONEY_SCALE, ROUNDING);
+        BigDecimal total = taxableBase.add(vatAmount).setScale(MONEY_SCALE, ROUNDING);
+
+        return new PricingBreakdownDto(
+                nights,
+                roomRate,
+                subtotal,
+                seasonalAdjustment,
+                discountAmount,
+                vatRate.setScale(MONEY_SCALE, ROUNDING),
+                vatAmount,
+                total,
+                "STANDARD_VAT_READY",
+                null);
     }
 
     public boolean syncReservation(Reservation reservation) {

@@ -49,7 +49,11 @@ public class WebConfig implements WebMvcConfigurer {
       return switch (canonical) {
         case "CHECKEDIN", "CHECKED_IN", "INHOUSE", "IN_HOUSE" -> ReservationStatus.CHECKED_IN;
         case "CHECKEDOUT", "CHECKED_OUT" -> ReservationStatus.CHECKED_OUT;
+        case "PAYMENTPENDING", "PAYMENT_PENDING" -> ReservationStatus.PAYMENT_PENDING;
+        case "NOSHOW", "NO_SHOW" -> ReservationStatus.NO_SHOW;
         case "CANCELED", "CANCELLED" -> ReservationStatus.CANCELLED;
+        case "REFUND", "REFUNDED" -> ReservationStatus.REFUNDED;
+        case "COMPLETE", "COMPLETED" -> ReservationStatus.COMPLETED;
         case "PENDING" -> ReservationStatus.PENDING;
         case "CONFIRMED" -> ReservationStatus.CONFIRMED;
         default -> ReservationStatus.valueOf(canonical);
