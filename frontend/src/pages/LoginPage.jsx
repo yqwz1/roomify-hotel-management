@@ -9,6 +9,7 @@ import {
   EyeOff,
   ArrowRight,
   ArrowLeft,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
 import { canAccessPathForRoles, getDefaultRouteForRoles } from '../components/navigation/navConfig';
@@ -50,6 +51,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
   const [focused, setFocused] = useState(null);
   const signupSuccess = Boolean(location.state?.signupSuccess);
   const accountDeleted = Boolean(location.state?.accountDeleted);
@@ -351,28 +353,6 @@ const LoginPage = () => {
             )}
           </div>
 
-          {showDemoQuickLogin && (
-            <div className="space-y-2 rounded-lg border border-brand-primary/15 bg-white/45 p-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
-                Quick login (demo)
-              </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {DEMO_ACCOUNTS.map((account) => (
-                  <Button
-                    key={account.label}
-                    type="button"
-                    variant="outline"
-                    disabled={isLoading}
-                    onClick={() => handleQuickLogin(account)}
-                    className="h-9 rounded-full border-brand-primary/20 bg-brand-surface/70 px-3 text-xs font-bold text-brand-ink shadow-none transition-colors hover:border-brand-primary/40 hover:bg-brand-primary/10"
-                  >
-                    {account.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Submit */}
           <motion.div
             whileHover={reduceMotion || isLoading ? {} : { y: -1 }}
@@ -404,6 +384,60 @@ const LoginPage = () => {
             </Button>
           </motion.div>
         </motion.form>
+
+        {/* Demo accounts (dev only) */}
+        {showDemoQuickLogin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.45, ease: EASE }}
+            className="mt-8"
+          >
+            <button
+              type="button"
+              onClick={() => setDemoOpen((v) => !v)}
+              className="group inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint transition-colors hover:text-brand-primary"
+            >
+              {demoOpen
+                ? isAr ? 'إخفاء حسابات التجربة' : 'Hide demo accounts'
+                : isAr ? 'حسابات تجريبية' : 'Demo accounts'}
+              <ChevronDown
+                className={`h-3 w-3 transition-transform ${demoOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            <AnimatePresence initial={false}>
+              {demoOpen && (
+                <motion.div
+                  key="demo-list"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-3 grid grid-cols-2 gap-1.5">
+                    {DEMO_ACCOUNTS.map((account) => (
+                      <button
+                        key={account.email}
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => handleQuickLogin(account)}
+                        className="group flex items-center justify-between rounded-lg border border-brand-surface-border bg-white/60 px-3 py-2 text-start transition-all hover:border-brand-primary/30 hover:bg-white disabled:opacity-50"
+                      >
+                        <span className="text-[11px] font-black text-brand-ink">{account.label}</span>
+                        <ArrowRight className="h-3 w-3 text-brand-ink-hint transition-all group-hover:translate-x-0.5 group-hover:text-brand-primary rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[10px] font-medium text-brand-ink-hint" dir="ltr">
+                    Admin · <span className="font-mono font-bold text-brand-ink-muted">{import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || 'RealAdminPass123!'}</span> | Others · <span className="font-mono font-bold text-brand-ink-muted">Demo@2026</span>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {(signupSuccess || accountDeleted) && (
           <motion.p
