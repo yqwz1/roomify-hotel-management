@@ -8,7 +8,9 @@ import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -48,7 +50,18 @@ public class GuestRegistrationService {
         String name = normalizeRequired(request.getName());
 
         passwordValidatorService.validatePassword(request.getPassword());
-        rejectDuplicateEmail(email);
+
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (user.isActive() || !isGuestAccount(user)) {
+                throw new DuplicateResourceException("An account with this email already exists");
+            }
+
+            return reactivateGuestAccount(user, name, request.getPassword());
+        }
+
+        rejectDuplicateGuestProfile(email);
 
         User savedUser;
         Guest savedGuest;
@@ -79,6 +92,40 @@ public class GuestRegistrationService {
                         .toList());
     }
 
+    private RegisterResponse reactivateGuestAccount(User user, String name, String password) {
+        Guest guest = guestRepository.findByEmailIgnoreCase(user.getEmail())
+                .orElseGet(() -> {
+                    Guest newGuest = new Guest();
+                    newGuest.setEmail(user.getEmail());
+                    newGuest.setPhone(PENDING_PHONE);
+                    newGuest.setIdNumber("SELF-" + user.getId());
+                    newGuest.setNationality(PENDING_NATIONALITY);
+                    return newGuest;
+                });
+
+        user.setActive(true);
+        user.setRole(Role.GUEST);
+        user.setRoles(List.of(Role.GUEST));
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
+
+        guest.setName(name);
+        Guest savedGuest = guestRepository.save(guest);
+        User savedUser = userRepository.save(user);
+
+        sendGuestWelcomeEmail(savedGuest);
+
+        return new RegisterResponse(
+                savedUser.getId(),
+                savedGuest.getId(),
+                savedGuest.getName(),
+                savedUser.getEmail(),
+                savedUser.getRoles().stream()
+                        .map(role -> "ROLE_" + role.name())
+                        .toList());
+    }
+
     private void sendGuestWelcomeEmail(Guest guest) {
         try {
             emailService.sendGuestWelcomeEmail(guest.getEmail(), guest.getName());
@@ -87,9 +134,12 @@ public class GuestRegistrationService {
         }
     }
 
-    private void rejectDuplicateEmail(String email) {
-        if (userRepository.findByEmailIgnoreCase(email).isPresent()
-                || guestRepository.findByEmailIgnoreCase(email).isPresent()) {
+    private boolean isGuestAccount(User user) {
+        return user.getRole() == Role.GUEST || user.getRoles().contains(Role.GUEST);
+    }
+
+    private void rejectDuplicateGuestProfile(String email) {
+        if (guestRepository.findByEmailIgnoreCase(email).isPresent()) {
             throw new DuplicateResourceException("An account with this email already exists");
         }
     }

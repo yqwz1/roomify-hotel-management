@@ -2,6 +2,7 @@ package com.roomify.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,15 +12,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
 import com.roomify.backend.entity.Guest;
+import com.roomify.backend.entity.PaymentStatus;
+import com.roomify.backend.entity.Reservation;
+import com.roomify.backend.entity.ReservationStatus;
+import com.roomify.backend.entity.Room;
+import com.roomify.backend.entity.RoomStatus;
+import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.notification.EmailNotification;
 import com.roomify.backend.notification.EmailNotificationRepository;
 import com.roomify.backend.notification.NotificationDeliveryStatus;
 import com.roomify.backend.notification.NotificationType;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.ReservationRepository;
+import com.roomify.backend.repository.RoomRepository;
+import com.roomify.backend.repository.RoomTypeRepository;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +80,15 @@ class AuthIntegrationTest {
     private GuestRepository guestRepository;
 
     @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private RoomRepository roomRepository;
+
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
+
+    @Autowired
     private EmailNotificationRepository emailNotificationRepository;
 
     @Autowired
@@ -82,6 +103,9 @@ class AuthIntegrationTest {
                 .build();
         objectMapper = new ObjectMapper();
         emailNotificationRepository.deleteAll();
+        reservationRepository.deleteAll();
+        roomRepository.deleteAll();
+        roomTypeRepository.deleteAll();
         userRepository.deleteAll();
         guestRepository.deleteAll();
     }
@@ -223,6 +247,91 @@ class AuthIntegrationTest {
                 .content(registerJson))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("An account with this email already exists"));
+    }
+
+    @Test
+    void registerGuestReactivatesSoftDeletedAccountWithNewPasswordAndPreservesReservations() throws Exception {
+        String email = "reactivate.guest@roomify.dev";
+        User user = userRepository.save(new User(
+                email,
+                passwordEncoder.encode("OldStrong@Pass123"),
+                Role.GUEST,
+                true));
+        Guest guest = guestRepository.save(new Guest(
+                "Original Guest",
+                email,
+                "+966500000001",
+                "REACTIVATE-001",
+                "Saudi"));
+        Reservation reservation = seedReservation(guest);
+        String token = jwtUtils.generateToken(email, "ROLE_GUEST");
+
+        mockMvc.perform(delete("/api/account")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        assertThat(userRepository.findById(user.getId()).orElseThrow().isActive()).isFalse();
+
+        String oldLoginJson = objectMapper.writeValueAsString(Map.of(
+                "email", email,
+                "password", "OldStrong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(oldLoginJson))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Account is inactive"));
+
+        String registerJson = objectMapper.writeValueAsString(Map.of(
+                "name", "Reactivated Guest",
+                "email", email,
+                "password", "NewStrong@Pass123"));
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.guestId").value(guest.getId()))
+                .andExpect(jsonPath("$.name").value("Reactivated Guest"))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+
+        User reactivatedUser = userRepository.findByEmailIgnoreCase(email).orElseThrow();
+        Guest reactivatedGuest = guestRepository.findByEmailIgnoreCase(email).orElseThrow();
+
+        assertThat(reactivatedUser.isActive()).isTrue();
+        assertThat(reactivatedUser.getRole()).isEqualTo(Role.GUEST);
+        assertThat(reactivatedUser.getRoles()).containsExactly(Role.GUEST);
+        assertThat(passwordEncoder.matches("NewStrong@Pass123", reactivatedUser.getPasswordHash())).isTrue();
+        assertThat(passwordEncoder.matches("OldStrong@Pass123", reactivatedUser.getPasswordHash())).isFalse();
+        assertThat(reactivatedGuest.getId()).isEqualTo(guest.getId());
+        assertThat(reactivatedGuest.getName()).isEqualTo("Reactivated Guest");
+        assertThat(reservationRepository.findById(reservation.getId())).isPresent();
+        assertThat(reservationRepository.findByGuest_Id(guest.getId()))
+                .extracting(Reservation::getConfirmationNumber)
+                .contains("AUTH-REACTIVATE-001");
+
+        String newLoginJson = objectMapper.writeValueAsString(Map.of(
+                "email", email,
+                "password", "NewStrong@Pass123"));
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(newLoginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"))
+                .andReturn();
+
+        String newToken = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("token")
+                .asText();
+
+        mockMvc.perform(get("/api/guest/reservations")
+                .header("Authorization", "Bearer " + newToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].confirmationNumber").value("AUTH-REACTIVATE-001"));
     }
 
     @Test
@@ -408,5 +517,27 @@ class AuthIntegrationTest {
         User admin = new User(ADMIN_EMAIL, passwordEncoder.encode(ADMIN_PASSWORD), Role.ADMIN, true);
         admin.addRole(Role.MANAGER);
         userRepository.save(admin);
+    }
+
+    private Reservation seedReservation(Guest guest) {
+        RoomType roomType = roomTypeRepository.save(new RoomType(
+                "Auth Test Suite",
+                new BigDecimal("200.00"),
+                2,
+                "WiFi",
+                "Auth test room"));
+        Room room = roomRepository.save(new Room("AU-501", roomType, 5, RoomStatus.AVAILABLE));
+        Reservation reservation = new Reservation(
+                guest,
+                room,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(3),
+                new BigDecimal("400.00"),
+                ReservationStatus.CONFIRMED,
+                "AUTH-REACTIVATE-001");
+        reservation.setPaymentStatus(PaymentStatus.PENDING);
+        reservation.setTotalPaid(BigDecimal.ZERO);
+        reservation.setOutstandingBalance(new BigDecimal("400.00"));
+        return reservationRepository.save(reservation);
     }
 }
