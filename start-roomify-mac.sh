@@ -515,6 +515,11 @@ main() {
     assert_file "$BACKEND_DIR/mvnw" "The backend Maven wrapper is missing at ${BACKEND_DIR}/mvnw."
     assert_file "$FRONTEND_DIR/package.json" "frontend/package.json is missing at ${FRONTEND_DIR}/package.json."
 
+    if [[ -f "$FRONTEND_DIR/.env.example" && ! -f "$FRONTEND_DIR/.env" ]]; then
+        log "Creating frontend/.env from .env.example..."
+        cp "$FRONTEND_DIR/.env.example" "$FRONTEND_DIR/.env"
+    fi
+
     if ! docker compose version >/dev/null 2>&1; then
         fail "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
     fi

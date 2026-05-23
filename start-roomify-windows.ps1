@@ -396,6 +396,13 @@ Assert-File -Path $ComposeFile -Message "docker-compose.yml was not found in $Re
 Assert-File -Path (Join-Path $BackendDir 'mvnw.cmd') -Message "The backend Maven wrapper is missing at $BackendDir\mvnw.cmd."
 Assert-File -Path (Join-Path $FrontendDir 'package.json') -Message "frontend\package.json is missing at $FrontendDir\package.json."
 
+$FrontendEnvExample = Join-Path $FrontendDir '.env.example'
+$FrontendEnv = Join-Path $FrontendDir '.env'
+if ((Test-Path -LiteralPath $FrontendEnvExample) -and -not (Test-Path -LiteralPath $FrontendEnv)) {
+    Write-Info "Creating frontend/.env from .env.example..."
+    Copy-Item -LiteralPath $FrontendEnvExample -Destination $FrontendEnv
+}
+
 try {
     & docker compose version *> $null
     if ($LASTEXITCODE -ne 0) {
