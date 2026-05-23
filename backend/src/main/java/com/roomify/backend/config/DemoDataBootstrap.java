@@ -45,8 +45,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -88,7 +90,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private static final String DEMO_MANAGER_EMAIL = "manager@roomify.com";
     private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
     private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
-    private static final String DEMO_PASSWORD = "password123";
 
     // Idempotency marker — one of the new Phase-1 staff accounts.
     private static final String SEED_MARKER_EMAIL = "noura.alharbi@roomify.demo";
@@ -204,7 +205,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     // ─── Users ──────────────────────────────────────────────────────────────
 
     private void seedCoreUsers() {
-        upsertSimpleUser(DEMO_ADMIN_EMAIL, Role.ADMIN);
+        upsertAdminUser();
         upsertSimpleUser(DEMO_MANAGER_EMAIL, Role.MANAGER);
         upsertStaffUser(DEMO_STAFF_EMAIL, "Demo Staff", "Front Desk");
         upsertSimpleUser(DEMO_GUEST_EMAIL, Role.GUEST);
@@ -217,8 +218,21 @@ public class DemoDataBootstrap implements ApplicationRunner {
                 upsertStaffUser("sara.almutairi@roomify.demo", "Sara Al-Mutairi", "Housekeeping"));
     }
 
+    private User upsertAdminUser() {
+        Optional<User> existingAdmin = userRepository.findByEmailIgnoreCase(DEMO_ADMIN_EMAIL);
+        User user = existingAdmin.orElseGet(() ->
+                new User(DEMO_ADMIN_EMAIL, encodeDisabledDemoPassword(), Role.ADMIN, true));
+        user.setEmail(DEMO_ADMIN_EMAIL);
+        user.setRole(Role.ADMIN);
+        user.setRoles(EnumSet.of(Role.ADMIN));
+        user.setActive(true);
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
+        return userRepository.save(user);
+    }
+
     private User upsertSimpleUser(String email, Role role) {
-        String encoded = passwordEncoder.encode(DEMO_PASSWORD);
+        String encoded = encodeDisabledDemoPassword();
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseGet(() -> new User(email, encoded, role, true));
         user.setEmail(email);
@@ -232,7 +246,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     }
 
     private User upsertStaffUser(String email, String name, String department) {
-        String encoded = passwordEncoder.encode(DEMO_PASSWORD);
+        String encoded = encodeDisabledDemoPassword();
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseGet(() -> new User(email, encoded, Role.STAFF, true));
         user.setEmail(email);
@@ -252,6 +266,10 @@ public class DemoDataBootstrap implements ApplicationRunner {
         staff.setDepartment(department);
         staff.setActive(true);
         return userRepository.save(user);
+    }
+
+    private String encodeDisabledDemoPassword() {
+        return passwordEncoder.encode("disabled-demo-" + UUID.randomUUID());
     }
 
     // ─── Room types and rooms ───────────────────────────────────────────────

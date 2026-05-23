@@ -50,6 +50,9 @@ import org.springframework.web.context.WebApplicationContext;
 })
 class AuthIntegrationTest {
 
+    private static final String ADMIN_EMAIL = "admin@roomify.com";
+    private static final String ADMIN_PASSWORD = "RealAdminPass123!";
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -85,19 +88,37 @@ class AuthIntegrationTest {
 
     @Test
     void loginWithCorrectCredentialsReturnsToken() throws Exception {
+        seedAdminUser();
+
         String loginJson = objectMapper.writeValueAsString(Map.of(
-                "email", "admin@roomify.com",
-                "password", "password123"));
+                "email", ADMIN_EMAIL,
+                "password", ADMIN_PASSWORD));
 
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.email").value("admin@roomify.com"))
-                .andExpect(jsonPath("$.username").value("Admin"))
+                .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
+                .andExpect(jsonPath("$.username").value(ADMIN_EMAIL))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"))
                 .andExpect(jsonPath("$.roles[1]").value("ROLE_MANAGER"));
+    }
+
+    @Test
+    void legacyDemoAdminPasswordIsRejectedForPersistedAdmin() throws Exception {
+        seedAdminUser();
+
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", ADMIN_EMAIL,
+                "password", "password123"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Wrong email or password"));
     }
 
     @Test
@@ -273,10 +294,12 @@ class AuthIntegrationTest {
 
     @Test
     void loginTokenWorksForAuthenticatedEndpoints() throws Exception {
+        seedAdminUser();
+
         // First, login to get token
         String loginJson = objectMapper.writeValueAsString(Map.of(
-                "email", "admin@roomify.com",
-                "password", "password123"));
+                "email", ADMIN_EMAIL,
+                "password", ADMIN_PASSWORD));
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -379,5 +402,11 @@ class AuthIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    private void seedAdminUser() {
+        User admin = new User(ADMIN_EMAIL, passwordEncoder.encode(ADMIN_PASSWORD), Role.ADMIN, true);
+        admin.addRole(Role.MANAGER);
+        userRepository.save(admin);
     }
 }

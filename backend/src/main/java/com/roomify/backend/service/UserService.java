@@ -34,11 +34,16 @@ public class UserService {
      * Creates a staff user with password validation, encoding, and audit logging.
      */
     public User createStaffUser(String email, String plainPassword, String name, String department) {
+        return createStaffUser(email, plainPassword, name, department, Role.STAFF);
+    }
+
+    public User createStaffUser(String email, String plainPassword, String name, String department, Role role) {
         passwordValidatorService.validatePassword(plainPassword);
 
         String passwordHash = passwordEncoder.encode(plainPassword);
+        Role accountRole = resolveStaffAccountRole(role);
 
-        User user = new User(email, passwordHash, Role.STAFF, true);
+        User user = new User(email, passwordHash, accountRole, true);
         Staff staff = new Staff(user, name, department);
         user.setStaff(staff);
 
@@ -49,9 +54,19 @@ public class UserService {
                 "SYSTEM",
                 "USER_CREATED",
                 "User:" + email,
-                "{ \"role\": \"STAFF\", \"name\": \"" + name + "\" }");
+                "{ \"role\": \"" + accountRole.name() + "\", \"name\": \"" + name + "\" }");
 
         return savedUser;
+    }
+
+    private Role resolveStaffAccountRole(Role role) {
+        if (role == null) {
+            return Role.STAFF;
+        }
+        if (role != Role.STAFF && role != Role.MANAGER) {
+            throw new IllegalArgumentException("Role must be STAFF or MANAGER");
+        }
+        return role;
     }
 
     /**

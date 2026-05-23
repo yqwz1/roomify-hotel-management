@@ -76,9 +76,7 @@ npm run dev
 
 [http://localhost:3000](http://localhost:3000)
 
-Admin login: `admin@roomify.com` / `password123`
-Staff login: `staff@roomify.com` / `password123`
-Guest login: `demo.guest@roomify.dev` / `password123`
+Demo password shortcuts are disabled. Use the seeded real admin credentials for this environment.
 
 Quick smoke:
 - Open `/search` and run the default same-day search (`today -> tomorrow`)

@@ -9,7 +9,6 @@ import {
   EyeOff,
   ArrowRight,
   ArrowLeft,
-  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
 import { canAccessPathForRoles, getDefaultRouteForRoles } from '../components/navigation/navConfig';
@@ -22,14 +21,6 @@ import { EASE } from '@/components/motion/Reveal';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
-const showDemoCredentials = import.meta.env?.MODE === 'development';
-
-const DEMO_ACCOUNTS = [
-  { role: 'Admin', email: 'admin@roomify.com' },
-  { role: 'Manager', email: 'manager@roomify.com' },
-  { role: 'Staff', email: 'staff@roomify.com' },
-  { role: 'Guest', email: 'demo.guest@roomify.dev' },
-];
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -45,7 +36,6 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(false);
   const [focused, setFocused] = useState(null);
   const signupSuccess = Boolean(location.state?.signupSuccess);
 
@@ -107,12 +97,6 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fillDemoCredentials = (email) => {
-    setFormData({ email, password: 'password123' });
-    setErrors({ email: '', password: '' });
-    setLoginError('');
   };
 
   const headline = isAr ? 'أهلاً بعودتك.' : 'Welcome back.';
@@ -393,59 +377,6 @@ const LoginPage = () => {
             {t('createAccount', { defaultValue: 'Create an account' })}
           </Link>
         </motion.p>
-
-        {/* Demo accounts (dev only) */}
-        {showDemoCredentials && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.45, ease: EASE }}
-            className="mt-8"
-          >
-            <button
-              type="button"
-              onClick={() => setDemoOpen((v) => !v)}
-              className="group inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint transition-colors hover:text-brand-primary"
-            >
-              {demoOpen
-                ? isAr ? 'إخفاء حسابات التجربة' : 'Hide demo accounts'
-                : isAr ? 'حسابات تجريبية' : 'Demo accounts'}
-              <ChevronDown
-                className={`h-3 w-3 transition-transform ${demoOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            <AnimatePresence initial={false}>
-              {demoOpen && (
-                <motion.div
-                  key="demo-list"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3, ease: EASE }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-3 grid grid-cols-2 gap-1.5">
-                    {DEMO_ACCOUNTS.map((acc) => (
-                      <button
-                        key={acc.email}
-                        type="button"
-                        onClick={() => fillDemoCredentials(acc.email)}
-                        className="group flex items-center justify-between rounded-lg border border-brand-surface-border bg-white/60 px-3 py-2 text-start transition-all hover:border-brand-primary/30 hover:bg-white"
-                      >
-                        <span className="text-[11px] font-black text-brand-ink">{acc.role}</span>
-                        <ArrowRight className="h-3 w-3 text-brand-ink-hint transition-all group-hover:translate-x-0.5 group-hover:text-brand-primary rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-2 text-[10px] font-medium text-brand-ink-hint" dir="ltr">
-                    Password · <span className="font-mono font-bold text-brand-ink-muted">password123</span>
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
 
         {/* Footer */}
         <motion.p

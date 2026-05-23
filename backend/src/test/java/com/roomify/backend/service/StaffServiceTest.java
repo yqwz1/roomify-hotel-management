@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -73,7 +74,7 @@ class StaffServiceTest {
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(passwordGeneratorService.generatePassword()).thenReturn("Strong@Pass123");
-        when(userService.createStaffUser(anyString(), anyString(), anyString(), anyString()))
+        when(userService.createStaffUser(anyString(), anyString(), anyString(), anyString(), any(Role.class)))
                 .thenReturn(dummyUser);
 
         // Act
@@ -81,8 +82,37 @@ class StaffServiceTest {
 
         // Assert
         verify(passwordGeneratorService).generatePassword();
-        verify(userService).createStaffUser(eq("staff@roomify.com"), eq("Strong@Pass123"), anyString(), anyString());
+        verify(userService).createStaffUser(
+                eq("staff@roomify.com"),
+                eq("Strong@Pass123"),
+                anyString(),
+                anyString(),
+                eq(Role.STAFF));
         verify(emailService).sendStaffWelcomeEmail(eq("staff@roomify.com"), anyString(), eq("Strong@Pass123"));
+    }
+
+    @Test
+    @DisplayName("Should pass requested manager role when creating a manager account")
+    void shouldPassRequestedManagerRoleOnCreate() {
+        StaffCreateRequest request =
+                new StaffCreateRequest("manager.new@roomify.com", "Manager", "Management", "MANAGER");
+        User dummyUser = new User("manager.new@roomify.com", "hashed", Role.MANAGER, true);
+        dummyUser.setStaff(new Staff(dummyUser, "Manager", "Management"));
+
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(passwordGeneratorService.generatePassword()).thenReturn("Strong@Pass123");
+        when(userService.createStaffUser(anyString(), anyString(), anyString(), anyString(), any(Role.class)))
+                .thenReturn(dummyUser);
+
+        staffService.createStaff(request);
+
+        verify(userService).createStaffUser(
+                eq("manager.new@roomify.com"),
+                eq("Strong@Pass123"),
+                anyString(),
+                anyString(),
+                eq(Role.MANAGER));
+        verify(emailService).sendStaffWelcomeEmail(eq("manager.new@roomify.com"), anyString(), eq("Strong@Pass123"));
     }
 
     @Test

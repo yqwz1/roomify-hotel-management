@@ -101,6 +101,26 @@ function StaffFormModal({
         </div>
 
         {!editingId && (
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+              {t('roleLabel')}
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={onChange}
+              className={inputClassName}
+            >
+              <option value="STAFF">{t('staffRole')}</option>
+              <option value="MANAGER">{t('managerRole')}</option>
+            </select>
+            {validationErrors.roleAllowed && (
+              <p className="text-sm font-medium text-brand-danger">{validationErrors.roleAllowed}</p>
+            )}
+          </div>
+        )}
+
+        {!editingId && (
           <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink-muted">
             {t(`${pageTx}.passwordNote`)}
           </div>
@@ -165,6 +185,7 @@ export default function Staff() {
     email: '',
     name: '',
     department: '',
+    role: 'STAFF',
   });
   const [formError, setFormError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
@@ -174,7 +195,7 @@ export default function Staff() {
   }, [fetchStaff]);
 
   const resetForm = () => {
-    setFormData({ email: '', name: '', department: '' });
+    setFormData({ email: '', name: '', department: '', role: 'STAFF' });
     setFormError(null);
     setValidationErrors({});
     setEditingId(null);
@@ -198,6 +219,7 @@ export default function Staff() {
       email: staffMember.email,
       name: staffMember.name,
       department: staffMember.department,
+      role: 'STAFF',
     });
     setEditingId(staffMember.id);
     setFormError(null);

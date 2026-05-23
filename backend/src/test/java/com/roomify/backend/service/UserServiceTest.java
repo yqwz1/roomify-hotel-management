@@ -63,6 +63,26 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Should create a manager user with the requested role")
+    void shouldCreateManagerUserWithRequestedRole() {
+        String email = "manager.new@roomify.com";
+        String plainPass = "Strong@Pass123";
+        String hashedPass = "encrypted_version";
+
+        when(passwordEncoder.encode(plainPass)).thenReturn(hashedPass);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = userService.createStaffUser(email, plainPass, "Manager", "Management", Role.MANAGER);
+
+        assertEquals(Role.MANAGER, result.getRole());
+        assertTrue(result.getRoles().contains(Role.MANAGER));
+        assertNotNull(result.getStaff());
+        verify(passwordValidatorService).validatePassword(plainPass);
+        verify(auditService).log(eq("SYSTEM"), eq("USER_CREATED"), eq("User:" + email), anyString());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
     @DisplayName("Should lock account after 5 failed attempts and log it")
     void shouldLockAccountAfterFiveAttempts() {
         User user = new User("moaz@roomify.com", "hash", Role.STAFF, true);

@@ -113,7 +113,7 @@
   - PostgreSQL reachable on `localhost:5432`
   - Spring Boot running on `http://localhost:8080`
   - FastAPI running on `http://localhost:8000`
-  - Manager login worked with `admin@roomify.com / password123`
+  - Manager login worked with seeded real admin credentials
   - Day 2 endpoints still worked: `data-summary`, `training-data`
   - Day 3 endpoints worked with FastAPI ON
   - FastAPI stop triggered deterministic safe fallback

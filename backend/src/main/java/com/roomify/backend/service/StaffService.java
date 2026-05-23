@@ -53,12 +53,14 @@ public class StaffService {
         }
 
         String plainPassword = passwordGeneratorService.generatePassword();
+        Role requestedRole = request.getResolvedRole();
 
         User savedUser = userService.createStaffUser(
                 request.getEmail(),
                 plainPassword,
                 request.getName(),
-                request.getDepartment());
+                request.getDepartment(),
+                requestedRole);
 
         sendWelcomeEmail(savedUser, plainPassword);
 
@@ -67,7 +69,7 @@ public class StaffService {
                 getCurrentActor(),
                 "STAFF_CREATED",
                 "Staff:" + savedUser.getEmail(),
-                "{ \"department\": \"" + request.getDepartment() + "\" }");
+                "{ \"department\": \"" + request.getDepartment() + "\", \"role\": \"" + requestedRole.name() + "\" }");
 
         return StaffResponse.from(savedUser.getStaff());
     }

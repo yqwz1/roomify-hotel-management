@@ -148,6 +148,48 @@ class StaffIntegrationTest {
     }
 
     @Test
+    void createsManagerProfileWhenRoleIsRequested() throws Exception {
+        mockMvc.perform(post("/api/staff")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new.manager@roomify.com",
+                                  "name": "New Manager",
+                                  "department": "Management",
+                                  "role": "MANAGER"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value("new.manager@roomify.com"))
+                .andExpect(jsonPath("$.name").value("New Manager"))
+                .andExpect(jsonPath("$.department").value("Management"))
+                .andExpect(jsonPath("$.active").value(true));
+
+        User manager = getUserByEmail("new.manager@roomify.com");
+        assertEquals(Role.MANAGER, manager.getRole());
+        assertEquals(Role.MANAGER, manager.getRoles().iterator().next());
+        assertNotNull(manager.getStaff());
+    }
+
+    @Test
+    void rejectsUnsupportedStaffCreationRole() throws Exception {
+        mockMvc.perform(post("/api/staff")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new.admin@roomify.com",
+                                  "name": "New Admin",
+                                  "department": "Management",
+                                  "role": "ADMIN"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors.roleAllowed").value("Role must be STAFF or MANAGER"));
+    }
+
+    @Test
     void staffCannotAccessManagerOnlyStaffResources() throws Exception {
         Long aliceId = getUserIdByEmail("alice@roomify.com");
         Long bobId = getUserIdByEmail("bob@roomify.com");

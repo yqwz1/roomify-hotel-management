@@ -27,6 +27,7 @@ export const getStaff = async (params = {}) => {
  * @param {string} data.email - Staff email address
  * @param {string} data.name - Staff full name
  * @param {string} data.department - Department name
+ * @param {string} data.role - Account role (STAFF or MANAGER)
  * @returns {Promise<Object>} Created staff member
  */
 export const createStaff = async (data) => {

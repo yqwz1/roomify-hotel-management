@@ -27,7 +27,7 @@ $AiServiceHealthUrl = "http://127.0.0.1:$AiServicePort/health"
 $AppUrl = 'http://localhost:3000'
 $LoginUrl = "$AppUrl/login"
 $MailpitUrl = "http://127.0.0.1:$MailpitHttpPort"
-$DemoCredentials = 'admin@roomify.com / password123'
+$DemoAccessNote = 'Demo password shortcuts are disabled. Use the seeded real admin credentials for this environment.'
 $AiServiceStatus = 'not started'
 
 function Write-Info {
@@ -352,7 +352,7 @@ function Write-ReadySummary {
     Write-Host "- Login: $LoginUrl"
     Write-Host "- Mail inbox: $MailpitUrl"
     Write-Host "- AI service health: $AiServiceHealthUrl"
-    Write-Host "- Demo credentials: $DemoCredentials"
+    Write-Host "- Demo access: $DemoAccessNote"
     Write-Host "- Backend log: $BackendLog"
     Write-Host "- Backend PID file: $BackendPidFile"
 }

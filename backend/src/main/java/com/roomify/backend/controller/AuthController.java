@@ -38,9 +38,6 @@ import com.roomify.backend.config.JwtUtils;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-        private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
-        private static final String DEMO_ADMIN_PASSWORD = "password123";
-
         private final AuditService auditService;
         private final JwtUtils jwtUtils;
         private final UserRepository userRepository;
@@ -94,22 +91,9 @@ public class AuthController {
                                 return ResponseEntity.ok(buildJwtResponse(user));
                         }
 
-                        if (!isLegacyDemoAdminLogin(email, request.getPassword())) {
-                                userService.handleFailedLogin(user);
-                                auditFailure(email, ipAddress, "wrong-password");
-                                return unauthorized(httpRequest, "Wrong email or password");
-                        }
-                }
-
-                if (isLegacyDemoAdminLogin(email, request.getPassword())) {
-                        auditSuccess(email, ipAddress);
-                        List<String> roles = List.of("ROLE_ADMIN", "ROLE_MANAGER");
-                        return ResponseEntity.ok(new JwtResponse(
-                                        jwtUtils.generateToken(DEMO_ADMIN_EMAIL, roles),
-                                        1L,
-                                        "Admin",
-                                        DEMO_ADMIN_EMAIL,
-                                        roles));
+                        userService.handleFailedLogin(user);
+                        auditFailure(email, ipAddress, "wrong-password");
+                        return unauthorized(httpRequest, "Wrong email or password");
                 }
 
                 auditFailure(email, ipAddress, "wrong-email-or-password");
@@ -192,11 +176,6 @@ public class AuthController {
                 } catch (IllegalArgumentException ex) {
                         return false;
                 }
-        }
-
-        private boolean isLegacyDemoAdminLogin(String email, String password) {
-                        return DEMO_ADMIN_EMAIL.equalsIgnoreCase(email)
-                                        && DEMO_ADMIN_PASSWORD.equals(password);
         }
 
         private JwtResponse buildJwtResponse(User user) {

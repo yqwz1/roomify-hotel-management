@@ -50,7 +50,7 @@ Demo rooms kept stable for room search:
 ## Browser smoke path
 
 1. Open `http://localhost:3000/login`
-2. Sign in with `admin@roomify.com` / `password123`
+2. Sign in with the seeded real admin credentials for this environment
 3. Open `/search`
 4. Keep the default dates (`today` to `tomorrow`) and run search
 5. Confirm same-day availability returns demo rooms, including `D102`, `D201`, `D202`, `D301`, and `D302`

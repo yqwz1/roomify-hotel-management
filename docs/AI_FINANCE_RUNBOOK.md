@@ -193,9 +193,7 @@ Expected:
 
 ### Manager login
 
-Use an existing Manager account for the local environment. A commonly used demo account in project docs is:
-- Email: `admin@roomify.com`
-- Password: `password123`
+Use the seeded real admin credentials for the local environment.
 
 If login fails, confirm the active profile, database, seed state, and user roles in the local DB.
 
@@ -430,7 +428,7 @@ Invoke-RestMethod -Uri 'http://localhost:8080/api/health'
 $login = Invoke-RestMethod -Uri 'http://localhost:8080/api/auth/login' `
   -Method Post `
   -ContentType 'application/json' `
-  -Body '{"email":"admin@roomify.com","password":"password123"}'
+  -Body '{"email":"admin@roomify.com","password":"<seeded-real-admin-password>"}'
 
 $headers = @{ Authorization = "Bearer $($login.token)" }
 
