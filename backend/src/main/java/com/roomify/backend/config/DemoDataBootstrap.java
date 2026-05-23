@@ -89,7 +89,9 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
     private static final String DEMO_MANAGER_EMAIL = "manager@roomify.com";
     private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
-    private static final String DEMO_GUEST_EMAIL = "demo.guest@roomify.dev";
+    private static final String DEMO_GUEST_EMAIL = "guest@roomify.com";
+    private static final String DEMO_PASSWORD = "Demo@2026";
+    private static final String DEMO_GUEST_CONFIRMATION = "DEMO-GUEST-QUICK";
 
     // Idempotency marker — one of the new Phase-1 staff accounts.
     private static final String SEED_MARKER_EMAIL = "noura.alharbi@roomify.demo";
@@ -156,16 +158,18 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        LocalDate today = LocalDate.now();
+        seedCoreUsers();
+        seedDemoGuestReservationIfPossible(today);
+
         if (userRepository.findByEmailIgnoreCase(SEED_MARKER_EMAIL).isPresent()) {
             log.info("Demo data already present, skipping seeding.");
             return;
         }
 
         long startedAt = System.currentTimeMillis();
-        LocalDate today = LocalDate.now();
         Random random = new Random(RANDOM_SEED);
 
-        seedCoreUsers();
         List<User> seededStaff = seedAdditionalStaff();
         User managerUser = userRepository.findByEmailIgnoreCase(DEMO_MANAGER_EMAIL).orElseThrow();
 
@@ -177,6 +181,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
         // demoGuest excluded from generated list so existing scripted reservations stay attached to it.
 
         SeedReport report = seedReservations(today, rooms, generatedGuests, demoGuest, random);
+        seedDemoGuestReservationIfPossible(today);
 
         seedPayments(report.reservationsByStatus().getOrDefault(ReservationStatus.CHECKED_OUT, List.of()), random);
         seedInvoices(report.reservationsByStatus().getOrDefault(ReservationStatus.CHECKED_OUT, List.of()), random);
@@ -205,71 +210,48 @@ public class DemoDataBootstrap implements ApplicationRunner {
     // ─── Users ──────────────────────────────────────────────────────────────
 
     private void seedCoreUsers() {
-        upsertAdminUser();
-        upsertSimpleUser(DEMO_MANAGER_EMAIL, Role.MANAGER);
-        upsertStaffUser(DEMO_STAFF_EMAIL, "Demo Staff", "Front Desk");
-        upsertSimpleUser(DEMO_GUEST_EMAIL, Role.GUEST);
+        createSimpleUserIfMissing(DEMO_MANAGER_EMAIL, Role.MANAGER, DEMO_PASSWORD);
+        createStaffUserIfMissing(DEMO_STAFF_EMAIL, "Demo Staff", "Front Desk", DEMO_PASSWORD);
+        createSimpleUserIfMissing(DEMO_GUEST_EMAIL, Role.GUEST, DEMO_PASSWORD);
     }
 
     private List<User> seedAdditionalStaff() {
         return List.of(
-                upsertStaffUser(SEED_MARKER_EMAIL, "Noura Al-Harbi", "Front Desk"),
-                upsertStaffUser("khalid.alqahtani@roomify.demo", "Khalid Al-Qahtani", "Reservations"),
-                upsertStaffUser("sara.almutairi@roomify.demo", "Sara Al-Mutairi", "Housekeeping"));
+                createStaffUserIfMissing(SEED_MARKER_EMAIL, "Noura Al-Harbi", "Front Desk", randomDisabledDemoPassword()),
+                createStaffUserIfMissing("khalid.alqahtani@roomify.demo", "Khalid Al-Qahtani", "Reservations", randomDisabledDemoPassword()),
+                createStaffUserIfMissing("sara.almutairi@roomify.demo", "Sara Al-Mutairi", "Housekeeping", randomDisabledDemoPassword()));
     }
 
-    private User upsertAdminUser() {
-        Optional<User> existingAdmin = userRepository.findByEmailIgnoreCase(DEMO_ADMIN_EMAIL);
-        User user = existingAdmin.orElseGet(() ->
-                new User(DEMO_ADMIN_EMAIL, encodeDisabledDemoPassword(), Role.ADMIN, true));
-        user.setEmail(DEMO_ADMIN_EMAIL);
-        user.setRole(Role.ADMIN);
-        user.setRoles(EnumSet.of(Role.ADMIN));
-        user.setActive(true);
-        user.setFailedAttempts(0);
-        user.setLockUntil(null);
-        return userRepository.save(user);
-    }
-
-    private User upsertSimpleUser(String email, Role role) {
-        String encoded = encodeDisabledDemoPassword();
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseGet(() -> new User(email, encoded, role, true));
-        user.setEmail(email);
-        user.setPasswordHash(encoded);
-        user.setRole(role);
-        user.setRoles(EnumSet.of(role));
-        user.setActive(true);
-        user.setFailedAttempts(0);
-        user.setLockUntil(null);
-        return userRepository.save(user);
-    }
-
-    private User upsertStaffUser(String email, String name, String department) {
-        String encoded = encodeDisabledDemoPassword();
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseGet(() -> new User(email, encoded, Role.STAFF, true));
-        user.setEmail(email);
-        user.setPasswordHash(encoded);
-        user.setRole(Role.STAFF);
-        user.setRoles(EnumSet.of(Role.STAFF));
-        user.setActive(true);
-        user.setFailedAttempts(0);
-        user.setLockUntil(null);
-
-        Staff staff = user.getStaff();
-        if (staff == null) {
-            staff = new Staff(user, name, department);
-            user.setStaff(staff);
+    private User createSimpleUserIfMissing(String email, Role role, String rawPassword) {
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            return existing.get();
         }
+
+        User user = new User(email, passwordEncoder.encode(rawPassword), role, true);
+        user.setRoles(EnumSet.of(role));
+        return userRepository.save(user);
+    }
+
+    private User createStaffUserIfMissing(String email, String name, String department, String rawPassword) {
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        User user = new User(email, passwordEncoder.encode(rawPassword), Role.STAFF, true);
+        user.setRoles(EnumSet.of(Role.STAFF));
+
+        Staff staff = new Staff(user, name, department);
+        user.setStaff(staff);
         staff.setName(name);
         staff.setDepartment(department);
         staff.setActive(true);
         return userRepository.save(user);
     }
 
-    private String encodeDisabledDemoPassword() {
-        return passwordEncoder.encode("disabled-demo-" + UUID.randomUUID());
+    private String randomDisabledDemoPassword() {
+        return "disabled-demo-" + UUID.randomUUID();
     }
 
     // ─── Room types and rooms ───────────────────────────────────────────────
@@ -336,9 +318,29 @@ public class DemoDataBootstrap implements ApplicationRunner {
         guest.setName("Demo Guest");
         guest.setEmail(DEMO_GUEST_EMAIL);
         guest.setPhone("+966500000111");
-        guest.setIdNumber("ROOMIFY-DEMO-GUEST");
+        guest.setIdNumber("ROOMIFY-DEMO-GUEST-LOGIN");
         guest.setNationality("SA");
         return guestRepository.save(guest);
+    }
+
+    private void seedDemoGuestReservationIfPossible(LocalDate today) {
+        if (reservationRepository.existsByConfirmationNumber(DEMO_GUEST_CONFIRMATION)) {
+            return;
+        }
+
+        Optional<Room> room = roomRepository.findByRoomNumber("306");
+        if (room.isEmpty()) {
+            return;
+        }
+
+        Guest demoGuest = upsertDemoGuestRecord();
+        saveScripted(
+                DEMO_GUEST_CONFIRMATION,
+                demoGuest,
+                room.get(),
+                today.plusDays(10),
+                today.plusDays(12),
+                ReservationStatus.CONFIRMED);
     }
 
     private static final String[] AR_FIRST_NAMES = {

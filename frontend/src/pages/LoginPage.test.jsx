@@ -55,6 +55,7 @@ const renderLoginPage = () => {
 describe('LoginPage', () => {
     beforeEach(() => {
         // Clear all mocks before each test
+        vi.unstubAllEnvs();
         vi.clearAllMocks();
         mockNavigate.mockClear();
     });
@@ -72,6 +73,49 @@ describe('LoginPage', () => {
         // Check for submit button
         expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
         expect(screen.queryByText(/admin@roomify\.com/i)).not.toBeInTheDocument();
+    });
+
+    it('renders demo quick login buttons only when the demo flag is enabled', () => {
+        renderLoginPage();
+        expect(screen.queryByText(/Quick login \(demo\)/i)).not.toBeInTheDocument();
+
+        vi.stubEnv('VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED', 'true');
+        renderLoginPage();
+
+        expect(screen.getByText(/Quick login \(demo\)/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Manager' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Staff' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Guest' })).toBeInTheDocument();
+    });
+
+    it('quick login fills the masked password field and submits through normal login', async () => {
+        vi.stubEnv('VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED', 'true');
+        const user = userEvent.setup();
+
+        authService.login.mockResolvedValue({
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6WyJST0xFX01BTkFHRVIiXSwiZXhwIjoxOTk5OTk5OTk5fQ.signature',
+            type: 'Bearer',
+            id: 4,
+            username: 'manager',
+            email: 'manager@roomify.com',
+            roles: ['ROLE_MANAGER']
+        });
+
+        renderLoginPage();
+
+        await user.click(screen.getByRole('button', { name: 'Manager' }));
+
+        const emailInput = screen.getByLabelText(/Email/i);
+        const passwordInput = screen.getByLabelText('Password');
+
+        await waitFor(() => {
+            expect(authService.login).toHaveBeenCalledWith('manager@roomify.com', 'Demo@2026');
+        });
+        expect(emailInput).toHaveValue('manager@roomify.com');
+        expect(passwordInput).toHaveValue('Demo@2026');
+        expect(passwordInput).toHaveAttribute('type', 'password');
+        expect(screen.queryByText('Demo@2026')).not.toBeInTheDocument();
     });
 
     // it('displays validation error for invalid email format', async () => {

@@ -21,6 +21,20 @@ import { EASE } from '@/components/motion/Reveal';
 
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
+const DEMO_PASSWORD = 'Demo@2026';
+const DEMO_ACCOUNTS = [
+  {
+    label: 'Admin',
+    email: 'admin@roomify.com',
+    password: import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || DEMO_PASSWORD,
+  },
+  { label: 'Manager', email: 'manager@roomify.com', password: DEMO_PASSWORD },
+  { label: 'Staff', email: 'staff@roomify.com', password: DEMO_PASSWORD },
+  { label: 'Guest', email: 'guest@roomify.com', password: DEMO_PASSWORD },
+];
+
+const isDemoQuickLoginEnabled = () =>
+  import.meta.env.VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED === 'true';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -49,17 +63,17 @@ const LoginPage = () => {
     if (loginError) setLoginError('');
   };
 
-  const validateForm = () => {
+  const validateForm = (values = formData) => {
     const nextErrors = { email: '', password: '' };
     let valid = true;
-    if (!formData.email) {
+    if (!values.email) {
       nextErrors.email = t('emailRequired');
       valid = false;
-    } else if (!emailRegex.test(formData.email)) {
+    } else if (!emailRegex.test(values.email)) {
       nextErrors.email = t('invalidEmail');
       valid = false;
     }
-    if (!formData.password) {
+    if (!values.password) {
       nextErrors.password = t('passwordRequired');
       valid = false;
     }
@@ -67,13 +81,12 @@ const LoginPage = () => {
     return valid;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const submitLogin = async (values) => {
     setLoginError('');
-    if (!validateForm()) return;
+    if (!validateForm(values)) return;
     try {
       setIsLoading(true);
-      const user = await login(formData.email, formData.password);
+      const user = await login(values.email, values.password);
       const from = location.state?.from?.pathname;
       const fromSearch = location.state?.from?.search || '';
       const userRoles = user.roles ?? [];
@@ -100,8 +113,22 @@ const LoginPage = () => {
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await submitLogin(formData);
+  };
+
+  const handleQuickLogin = async (account) => {
+    const nextFormData = { email: account.email, password: account.password };
+    setShowPassword(false);
+    setFormData(nextFormData);
+    await submitLogin(nextFormData);
+  };
+
   const headline = isAr ? 'أهلاً بعودتك.' : 'Welcome back.';
   const subline = isAr ? 'سجّل دخولك لإدارة فندقك.' : 'Sign in to manage your hotel.';
+
+  const showDemoQuickLogin = isDemoQuickLoginEnabled();
 
   return (
     <div
@@ -323,6 +350,28 @@ const LoginPage = () => {
               </motion.p>
             )}
           </div>
+
+          {showDemoQuickLogin && (
+            <div className="space-y-2 rounded-lg border border-brand-primary/15 bg-white/45 p-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                Quick login (demo)
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {DEMO_ACCOUNTS.map((account) => (
+                  <Button
+                    key={account.label}
+                    type="button"
+                    variant="outline"
+                    disabled={isLoading}
+                    onClick={() => handleQuickLogin(account)}
+                    className="h-9 rounded-full border-brand-primary/20 bg-brand-surface/70 px-3 text-xs font-bold text-brand-ink shadow-none transition-colors hover:border-brand-primary/40 hover:bg-brand-primary/10"
+                  >
+                    {account.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Submit */}
           <motion.div

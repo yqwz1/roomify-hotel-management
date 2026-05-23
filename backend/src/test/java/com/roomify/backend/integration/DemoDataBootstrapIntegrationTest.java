@@ -1,7 +1,6 @@
 package com.roomify.backend.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -108,38 +107,41 @@ class DemoDataBootstrapIntegrationTest {
     }
 
     @Test
-    void demoBootstrapKeepsAdminAccountWithoutPassword123() {
-        User adminUser = userRepository.findByEmailIgnoreCase("admin@roomify.com").orElseThrow();
-
-        // Admin is intentionally ADMIN-only; manager is a separate seeded account so
-        // the two dashboards stay cleanly isolated.
-        assertTrue(adminUser.isActive());
-        assertEquals(Role.ADMIN, adminUser.getRole());
-        assertTrue(adminUser.getRoles().contains(Role.ADMIN));
-        assertFalse(passwordEncoder.matches("password123", adminUser.getPasswordHash()));
+    void demoBootstrapDoesNotCreateOrMutateAdminAccount() {
+        assertTrue(userRepository.findByEmailIgnoreCase("admin@roomify.com").isEmpty());
     }
 
     @Test
-    void demoBootstrapKeepsStaffAccountWithoutPassword123() {
+    void demoBootstrapCreatesManagerAccountWithDemoPassword() {
+        User managerUser = userRepository.findByEmailIgnoreCase("manager@roomify.com").orElseThrow();
+
+        assertTrue(managerUser.isActive());
+        assertEquals(Role.MANAGER, managerUser.getRole());
+        assertTrue(managerUser.getRoles().contains(Role.MANAGER));
+        assertTrue(passwordEncoder.matches("Demo@2026", managerUser.getPasswordHash()));
+    }
+
+    @Test
+    void demoBootstrapCreatesStaffAccountWithDemoPassword() {
         User staffUser = userRepository.findByEmailIgnoreCase("staff@roomify.com").orElseThrow();
 
         assertTrue(staffUser.isActive());
         assertEquals(Role.STAFF, staffUser.getRole());
         assertTrue(staffUser.getRoles().contains(Role.STAFF));
-        assertFalse(passwordEncoder.matches("password123", staffUser.getPasswordHash()));
+        assertTrue(passwordEncoder.matches("Demo@2026", staffUser.getPasswordHash()));
         assertEquals(0, staffUser.getFailedAttempts());
         assertEquals("Demo Staff", staffUser.getStaff().getName());
         assertTrue(staffUser.getStaff().isActive());
     }
 
     @Test
-    void demoBootstrapKeepsGuestAccountWithoutPassword123() {
-        User guestUser = userRepository.findByEmailIgnoreCase("demo.guest@roomify.dev").orElseThrow();
+    void demoBootstrapCreatesGuestAccountWithDemoPassword() {
+        User guestUser = userRepository.findByEmailIgnoreCase("guest@roomify.com").orElseThrow();
 
         assertTrue(guestUser.isActive());
         assertEquals(Role.GUEST, guestUser.getRole());
         assertTrue(guestUser.getRoles().contains(Role.GUEST));
-        assertFalse(passwordEncoder.matches("password123", guestUser.getPasswordHash()));
+        assertTrue(passwordEncoder.matches("Demo@2026", guestUser.getPasswordHash()));
         assertEquals(0, guestUser.getFailedAttempts());
     }
 }
