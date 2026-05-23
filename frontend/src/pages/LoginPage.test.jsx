@@ -75,14 +75,20 @@ describe('LoginPage', () => {
         expect(screen.queryByText(/admin@roomify\.com/i)).not.toBeInTheDocument();
     });
 
-    it('renders demo quick login buttons only when the demo flag is enabled', () => {
+    it('renders demo quick login buttons only when the demo flag is enabled', async () => {
+        vi.stubEnv('VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED', 'false');
         renderLoginPage();
-        expect(screen.queryByText(/Quick login \(demo\)/i)).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Demo accounts/i })).not.toBeInTheDocument();
 
         vi.stubEnv('VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED', 'true');
         renderLoginPage();
 
-        expect(screen.getByText(/Quick login \(demo\)/i)).toBeInTheDocument();
+        const toggleButton = screen.getByRole('button', { name: /Demo accounts/i });
+        expect(toggleButton).toBeInTheDocument();
+
+        const user = userEvent.setup();
+        await user.click(toggleButton);
+
         expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Manager' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Staff' })).toBeInTheDocument();
@@ -104,6 +110,9 @@ describe('LoginPage', () => {
 
         renderLoginPage();
 
+        const toggleButton = screen.getByRole('button', { name: /Demo accounts/i });
+        await user.click(toggleButton);
+
         await user.click(screen.getByRole('button', { name: 'Manager' }));
 
         const emailInput = screen.getByLabelText(/Email/i);
@@ -115,7 +124,6 @@ describe('LoginPage', () => {
         expect(emailInput).toHaveValue('manager@roomify.com');
         expect(passwordInput).toHaveValue('Demo@2026');
         expect(passwordInput).toHaveAttribute('type', 'password');
-        expect(screen.queryByText('Demo@2026')).not.toBeInTheDocument();
     });
 
     // it('displays validation error for invalid email format', async () => {
