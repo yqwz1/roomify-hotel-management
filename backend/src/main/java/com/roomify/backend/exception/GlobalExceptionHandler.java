@@ -283,9 +283,6 @@ public class GlobalExceptionHandler {
                                 : ex.getMessage();
                 String normalized = message != null ? message.toLowerCase() : "";
 
-                if (normalized.contains("uk_guest_id_number") || normalized.contains("id_number")) {
-                        return "A guest with this ID number already exists. Reuse the existing guest profile or verify the ID number.";
-                }
                 if (normalized.contains("uk_guest_email") || normalized.contains("email")) {
                         return "A guest with this email already exists. Reuse the existing guest profile or verify the email address.";
                 }

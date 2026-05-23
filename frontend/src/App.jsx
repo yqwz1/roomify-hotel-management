@@ -19,6 +19,7 @@ import Unauthorized from './pages/Unauthorized'
 import ManagerDashboard from './pages/ManagerDashboard'
 import AiFinanceDashboard from './pages/AiFinanceDashboard'
 import StaffDashboard from './pages/StaffDashboard'
+import StaffGuestInbox from './pages/StaffGuestInbox'
 import StaffServiceRequests from './pages/StaffServiceRequests'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
@@ -179,6 +180,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><StaffServiceRequests /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/staff/guest-inbox"
+          element={
+            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+              <Layout showSidebar={true}><StaffGuestInbox /></Layout>
             </ProtectedRoute>
           }
         />

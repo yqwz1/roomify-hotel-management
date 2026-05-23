@@ -537,46 +537,20 @@ public class ReservationService {
 
     private Guest resolveOrCreateGuest(ReservationGuestRequest request, String authenticatedEmail) {
         String normalizedAuthenticatedEmail = normalizeEmail(authenticatedEmail);
-        boolean authenticatedBooking = normalizedAuthenticatedEmail != null;
-        String effectiveEmail = authenticatedBooking
+        String effectiveEmail = normalizedAuthenticatedEmail != null
                 ? normalizedAuthenticatedEmail
                 : normalizeRequiredValue(request.getEmail(), "Guest email is required");
         String normalizedIdNumber = normalizeRequiredValue(request.getIdNumber(), "Guest ID number is required");
 
         Guest guestByEmail = guestRepository.findByEmailIgnoreCase(effectiveEmail).orElse(null);
-        Guest guestByIdNumber = guestRepository.findByIdNumber(normalizedIdNumber).orElse(null);
-        Guest existingGuest = resolveExistingGuest(guestByEmail, guestByIdNumber, authenticatedBooking);
-
-        if (existingGuest == null) {
+        if (guestByEmail == null) {
             Guest newGuest = new Guest();
             applyGuestProfile(newGuest, request, effectiveEmail, normalizedIdNumber);
             return persistGuest(newGuest);
         }
 
-        applyGuestProfile(existingGuest, request, effectiveEmail, normalizedIdNumber);
-        return persistGuest(existingGuest);
-    }
-
-    private Guest resolveExistingGuest(Guest guestByEmail, Guest guestByIdNumber, boolean authenticatedBooking) {
-        if (guestByEmail != null && guestByIdNumber != null && !isSameGuest(guestByEmail, guestByIdNumber)) {
-            if (authenticatedBooking) {
-                throw new ResourceConflictException(
-                        "Authenticated guest identity does not match the provided ID number");
-            }
-            throw new ResourceConflictException(
-                    "Guest email and ID number belong to different guest profiles");
-        }
-        return guestByEmail != null ? guestByEmail : guestByIdNumber;
-    }
-
-    private boolean isSameGuest(Guest first, Guest second) {
-        if (first == null || second == null) {
-            return false;
-        }
-        if (first.getId() != null && second.getId() != null) {
-            return first.getId().equals(second.getId());
-        }
-        return first == second;
+        applyGuestProfile(guestByEmail, request, effectiveEmail, normalizedIdNumber);
+        return persistGuest(guestByEmail);
     }
 
     private void applyGuestProfile(
@@ -605,9 +579,6 @@ public class ReservationService {
                 : ex.getMessage();
         String normalizedMessage = message != null ? message.toLowerCase(Locale.ROOT) : "";
 
-        if (normalizedMessage.contains("uk_guest_id_number") || normalizedMessage.contains("id_number")) {
-            return "A guest with this ID number already exists. Reuse the existing guest profile or verify the ID number.";
-        }
         if (normalizedMessage.contains("uk_guest_email") || normalizedMessage.contains("email")) {
             return "A guest with this email already exists. Reuse the existing guest profile or verify the email address.";
         }

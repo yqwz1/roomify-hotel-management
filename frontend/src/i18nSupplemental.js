@@ -34,7 +34,7 @@ const supplementalResources = {
       "bookingsPage.supportTitle": "Before You Contact Support",
       "bookRoomPage.capacityLabel": "Capacity",
       "bookRoomPage.creatingReservation": "Creating Reservation...",
-      "bookRoomPage.formDescription": "Validate the date range and complete the required guest identity fields before confirming the booking.",
+      "bookRoomPage.formDescription": "Validate the date range and complete the required guest profile fields before confirming the booking.",
       "bookRoomPage.formTitle": "Guest and Stay Details",
       "bookRoomPage.guestProfile": "Guest Profile",
       "bookRoomPage.heroEyebrow": "Reservation creation",

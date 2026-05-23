@@ -16,8 +16,7 @@ import jakarta.validation.constraints.Size;
  */
 @Entity
 @Table(name = "guests", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email", name = "uk_guest_email"),
-        @UniqueConstraint(columnNames = "id_number", name = "uk_guest_id_number")
+        @UniqueConstraint(columnNames = "email", name = "uk_guest_email")
 })
 public class Guest {
 
@@ -43,7 +42,7 @@ public class Guest {
 
     @NotBlank(message = "Guest ID number is required")
     @Size(max = 50, message = "Guest ID number cannot exceed 50 characters")
-    @Column(name = "id_number", nullable = false, unique = true, length = 50)
+    @Column(name = "id_number", nullable = false, length = 50)
     private String idNumber;
 
     @NotBlank(message = "Guest nationality is required")

@@ -48,7 +48,7 @@ describe('GuestServiceRequests', () => {
         confirmationNumber: 'RSV-1001',
         roomId: 11,
         roomNumber: '204',
-        status: 'CONFIRMED',
+        status: 'CHECKED_IN',
         checkInDate: isoDaysFromNow(-1),
         checkOutDate: isoDaysFromNow(2),
       },
@@ -96,7 +96,7 @@ describe('GuestServiceRequests', () => {
         confirmationNumber: 'RSV-1001',
         roomId: 11,
         roomNumber: '204',
-        status: 'CONFIRMED',
+        status: 'CHECKED_IN',
         checkInDate: isoDaysFromNow(-1),
         checkOutDate: isoDaysFromNow(2),
       },
@@ -116,6 +116,26 @@ describe('GuestServiceRequests', () => {
     expect(await screen.findByLabelText(/Select Room/i)).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Room 204/i })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Room 305/i })).toBeInTheDocument();
+  });
+
+  it('shows a check-in message when the guest has reservations but none are checked in', async () => {
+    getGuestReservations.mockResolvedValue([
+      {
+        confirmationNumber: 'RSV-1001',
+        roomId: 11,
+        roomNumber: '204',
+        status: 'CHECKED_OUT',
+        checkInDate: isoDaysFromNow(-4),
+        checkOutDate: isoDaysFromNow(-1),
+      },
+    ]);
+    getGuestServiceRequests.mockResolvedValue([]);
+
+    renderPage();
+
+    expect(await screen.findByText('Services unavailable after checkout')).toBeInTheDocument();
+    expect(screen.getByText('Room services are available only during an active stay.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Submit request/i })).not.toBeInTheDocument();
   });
 
   it('shows a retryable error state when reservations fail to load', async () => {

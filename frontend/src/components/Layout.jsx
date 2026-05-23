@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from './Header'
+import FloatingGuestAssistant from './guest-assistant/FloatingGuestAssistant'
 import AppShell from './shell/AppShell'
 import SmoothScroll from './motion/SmoothScroll'
 
@@ -30,6 +31,7 @@ export default function Layout({ children, showSidebar = false }) {
       <HashScroller />
       <Header />
       <main className="flex-1">{children}</main>
+      <FloatingGuestAssistant />
     </div>
   )
 }

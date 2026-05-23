@@ -52,6 +52,7 @@ describe('navConfig', () => {
       'Departures',
       'Billing',
       'Service Requests',
+      'Guest Inbox',
     ]);
   });
 

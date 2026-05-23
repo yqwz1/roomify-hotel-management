@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rooms/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/*").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/guest/reservations/**").hasRole("GUEST")
 
                         // ❗ باقي endpoints تحتاج Authentication
