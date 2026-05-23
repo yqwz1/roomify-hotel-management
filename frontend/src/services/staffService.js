@@ -81,3 +81,15 @@ export const unlockStaff = async (id) => {
     const response = await api.patch(`/staff/${id}/unlock`);
     return response.data;
 };
+
+/**
+ * Permanently remove (soft-delete) a staff/manager account
+ * Disables their login while keeping the row for financial integrity
+ * Admin-only endpoint
+ * @param {number} id - Staff ID
+ * @returns {Promise<Object>} Updated staff member
+ */
+export const deleteStaff = async (id) => {
+    const response = await api.delete(`/staff/${id}`);
+    return response.data;
+};

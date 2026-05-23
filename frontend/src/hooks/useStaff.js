@@ -14,7 +14,7 @@ export const useStaff = () => {
       const data = await staffService.getStaff(filters);
       setStaff(data);
     } catch (err) {
-      setError(extractApiErrorMessage(err, 'Failed to fetch staff'));
+      setError(extractApiErrorMessage(err, 'Failed to fetch team members'));
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ export const useStaff = () => {
     } catch (err) {
       return {
         success: false,
-        error: extractApiErrorMessage(err, 'Failed to create staff'),
+        error: extractApiErrorMessage(err, 'Failed to create team member'),
         validationErrors: err.response?.data?.validationErrors,
       };
     } finally {
@@ -48,7 +48,7 @@ export const useStaff = () => {
     } catch (err) {
       return {
         success: false,
-        error: extractApiErrorMessage(err, 'Failed to update staff'),
+        error: extractApiErrorMessage(err, 'Failed to update team member'),
         validationErrors: err.response?.data?.validationErrors,
       };
     } finally {
@@ -66,7 +66,7 @@ export const useStaff = () => {
     } catch (err) {
       return {
         success: false,
-        error: extractApiErrorMessage(err, 'Failed to activate staff'),
+        error: extractApiErrorMessage(err, 'Failed to activate team member'),
       };
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ export const useStaff = () => {
 
       return {
         success: false,
-        error: extractApiErrorMessage(err, 'Failed to deactivate staff'),
+        error: extractApiErrorMessage(err, 'Failed to deactivate team member'),
       };
     } finally {
       setLoading(false);
@@ -107,7 +107,31 @@ export const useStaff = () => {
     } catch (err) {
       return {
         success: false,
-        error: extractApiErrorMessage(err, 'Failed to unlock staff account'),
+        error: extractApiErrorMessage(err, 'Failed to unlock team member account'),
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteStaff = async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedStaff = await staffService.deleteStaff(id);
+      setStaff((prev) => prev.map((staffMember) => (staffMember.id === id ? updatedStaff : staffMember)));
+      return { success: true, data: updatedStaff };
+    } catch (err) {
+      if (err.response?.status === 409) {
+        return {
+          success: false,
+          error: extractApiErrorMessage(err, 'You cannot delete your own account'),
+        };
+      }
+
+      return {
+        success: false,
+        error: extractApiErrorMessage(err, 'Failed to delete team member'),
       };
     } finally {
       setLoading(false);
@@ -124,5 +148,6 @@ export const useStaff = () => {
     activateStaff,
     deactivateStaff,
     unlockStaff,
+    deleteStaff,
   };
 };

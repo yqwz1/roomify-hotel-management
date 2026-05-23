@@ -110,7 +110,7 @@ export default function AdminDashboard() {
   const quickActions = [
     {
       icon: Users,
-      title: translateWithFallback(t, 'staffMenu', 'Staff'),
+      title: translateWithFallback(t, 'staffMenu', 'Staff & Managers'),
       description: translateWithFallback(
         t,
         'adminDashboardPage.quickActions.staffDescription',

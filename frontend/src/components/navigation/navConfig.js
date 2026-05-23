@@ -166,13 +166,13 @@ const ADMIN_NAVIGATION_CONFIG = [
   {
     id: 'staff-access',
     translationKey: 'navStaffAccess',
-    fallbackLabel: 'Staff & Access',
+    fallbackLabel: 'Staff & Managers',
     roles: [ROLE_ADMIN],
     items: [
       {
         path: '/staff',
         translationKey: 'staffMenu',
-        fallbackLabel: 'Staff',
+        fallbackLabel: 'Staff & Managers',
         icon: Users,
         roles: [ROLE_ADMIN],
       },
@@ -559,7 +559,7 @@ const DOCUMENT_TITLE_OVERRIDES = {
   '/manager/ai-finance': ['aiFinanceTitle', 'AI Finance'],
   '/manager/expenses': ['expenseTrackerTitle', 'Expense Tracker'],
   '/room-types': ['roomTypes', 'Room Types'],
-  '/staff': ['staffMenu', 'Staff'],
+  '/staff': ['staffMenu', 'Staff & Managers'],
   '/services': ['servicesTitle', 'Services'],
   '/rooms': ['rooms', 'Rooms'],
   '/rooms-management': ['roomsManagement', 'Rooms Management'],

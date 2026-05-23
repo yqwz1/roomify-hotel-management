@@ -53,6 +53,10 @@ export const register = async ({ name, email, password }) => {
     }
 };
 
+export const deleteMyAccount = async () => {
+    await api.delete('/account');
+};
+
 /**
  * Logout function - clears authentication data
  */

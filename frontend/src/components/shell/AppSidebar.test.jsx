@@ -124,7 +124,7 @@ describe('AppSidebar', () => {
     );
 
     expect(screen.getAllByText('Admin Dashboard').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Staff').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Staff & Managers').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Room Types').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Services').length).toBeGreaterThan(0);
   });

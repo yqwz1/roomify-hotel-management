@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -320,6 +322,79 @@ class StaffIntegrationTest {
         User unlockedAlice = getUserByEmail("alice@roomify.com");
         assertEquals(0, unlockedAlice.getFailedAttempts());
         assertNull(unlockedAlice.getLockUntil());
+    }
+
+    @Test
+    void adminCanSoftDeleteStaffMemberDisablingLoginWhileKeepingRow() throws Exception {
+        Long aliceId = getUserIdByEmail("alice@roomify.com");
+
+        mockMvc.perform(delete("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("alice@roomify.com"))
+                .andExpect(jsonPath("$.active").value(false));
+
+        // Row is soft-deleted, not removed: both staff and user records still exist.
+        Staff alice = staffRepository.findById(aliceId).orElseThrow();
+        User aliceUser = getUserByEmail("alice@roomify.com");
+        assertFalse(alice.isActive());
+        assertFalse(aliceUser.isActive());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "alice@roomify.com",
+                                  "password": "irrelevant"
+                                }
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Account is inactive"));
+    }
+
+    @Test
+    void adminCanSoftDeleteManagerDisablingLoginWhileKeepingRow() throws Exception {
+        Long monaId = getUserIdByEmail("mona@roomify.com");
+
+        mockMvc.perform(delete("/api/staff/{id}", monaId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("mona@roomify.com"))
+                .andExpect(jsonPath("$.active").value(false));
+
+        Staff mona = staffRepository.findById(monaId).orElseThrow();
+        User monaUser = getUserByEmail("mona@roomify.com");
+        assertEquals(Role.MANAGER, monaUser.getRole());
+        assertFalse(mona.isActive());
+        assertFalse(monaUser.isActive());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "mona@roomify.com",
+                                  "password": "irrelevant"
+                                }
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Account is inactive"));
+    }
+
+    @Test
+    void nonAdminCannotSoftDeleteStaff() throws Exception {
+        Long aliceId = getUserIdByEmail("alice@roomify.com");
+
+        mockMvc.perform(delete("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + staffToken))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/api/staff/{id}", aliceId)
+                        .header("Authorization", "Bearer " + managerToken))
+                .andExpect(status().isForbidden());
+
+        Staff alice = staffRepository.findById(aliceId).orElseThrow();
+        assertTrue(alice.isActive());
+        assertTrue(getUserByEmail("alice@roomify.com").isActive());
     }
 
     private Long getUserIdByEmail(String email) {

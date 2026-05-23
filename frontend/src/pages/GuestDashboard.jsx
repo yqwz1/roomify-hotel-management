@@ -9,6 +9,7 @@ import {
   Mail,
   ReceiptText,
   Receipt,
+  Trash2,
   UserRound,
 } from 'lucide-react';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -19,6 +20,7 @@ import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import { useAuth } from '../context/AuthProvider';
+import { deleteMyAccount } from '../services/authService';
 import {
   extractGuestReservationError,
   getGuestReservations,
@@ -122,7 +124,7 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
 }
 
 export default function GuestDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const pageTx = 'guestDashboardPage';
@@ -130,6 +132,24 @@ export default function GuestDashboard() {
   const [loadingReservations, setLoadingReservations] = useState(true);
   const [reservationError, setReservationError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const isGuest = (user?.roles ?? []).includes('ROLE_GUEST');
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm(t('confirmDeleteMyAccount'))) return;
+
+    try {
+      setIsDeletingAccount(true);
+      await deleteMyAccount();
+      logout();
+      navigate('/login', { replace: true, state: { accountDeleted: true } });
+    } catch {
+      window.alert(t('deleteMyAccountFailed'));
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
 
   const displayName = useMemo(
     () => user?.username || user?.email || t('guestFallback') || t('roleGuest'),
@@ -429,6 +449,31 @@ export default function GuestDashboard() {
           </div>
         </DashboardPanel>
       </div>
+
+      {isGuest && (
+        <div className="rounded-[1.5rem] border border-brand-danger/30 bg-brand-danger/5 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-danger">
+                {t(`${pageTx}.dangerZoneTitle`)}
+              </p>
+              <p className="mt-2 max-w-xl text-sm font-medium text-brand-ink-muted">
+                {t(`${pageTx}.dangerZoneDescription`)}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-brand-danger/40 bg-white px-5 py-3 text-sm font-bold text-brand-danger transition hover:border-brand-danger/60 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:opacity-60"
+              title={t('deleteMyAccount')}
+            >
+              <Trash2 className="h-4 w-4" />
+              {isDeletingAccount ? t('deletingMyAccount') : t('deleteMyAccount')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

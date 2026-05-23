@@ -38,6 +38,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(null);
   const signupSuccess = Boolean(location.state?.signupSuccess);
+  const accountDeleted = Boolean(location.state?.accountDeleted);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -355,14 +356,16 @@ const LoginPage = () => {
           </motion.div>
         </motion.form>
 
-        {signupSuccess && (
+        {(signupSuccess || accountDeleted) && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35 }}
             className="mt-5 text-sm font-semibold text-emerald-700"
           >
-            {t('signupSuccess', { defaultValue: 'Account created. Sign in with your new password.' })}
+            {accountDeleted
+              ? t('accountDeletedSuccess')
+              : t('signupSuccess', { defaultValue: 'Account created. Sign in with your new password.' })}
           </motion.p>
         )}
 

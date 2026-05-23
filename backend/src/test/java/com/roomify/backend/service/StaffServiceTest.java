@@ -155,6 +155,46 @@ class StaffServiceTest {
     }
 
     @Test
+    @DisplayName("Should prevent deleting the current user's own account")
+    void shouldPreventSelfDelete() {
+        User user = new User("manager@roomify.com", "hash", Role.MANAGER, true);
+        Staff staff = new Staff(user, "Manager", "Management");
+        user.setStaff(staff);
+
+        when(staffRepository.findById(1L)).thenReturn(Optional.of(staff));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "manager@roomify.com",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+
+        assertThrows(ResourceConflictException.class, () -> staffService.softDeleteStaff(1L));
+    }
+
+    @Test
+    @DisplayName("Should soft-delete another staff member by disabling their account")
+    void shouldSoftDeleteOtherStaff() {
+        User user = new User("staff@roomify.com", "hash", Role.STAFF, true);
+        Staff staff = new Staff(user, "Staff", "Front Desk");
+        user.setStaff(staff);
+
+        when(staffRepository.findById(2L)).thenReturn(Optional.of(staff));
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin@roomify.com",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+
+        staffService.softDeleteStaff(2L);
+
+        assertFalse(staff.isActive());
+        assertFalse(user.isActive());
+        verify(auditService).log(anyString(), eq("STAFF_DELETED"), anyString(), anyString());
+    }
+
+    @Test
     @DisplayName("Should return staff without requiring a search keyword")
     void shouldReturnStaffWithoutSearchKeyword() {
         User aliceUser = new User("alice@roomify.com", "hash", Role.STAFF, true);

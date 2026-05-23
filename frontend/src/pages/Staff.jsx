@@ -6,6 +6,7 @@ import {
   Pencil,
   Power,
   PowerOff,
+  Trash2,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -166,6 +167,7 @@ export default function Staff() {
     deactivateStaff,
     activateStaff,
     unlockStaff,
+    deleteStaff,
   } = useStaff();
   const { user, hasRole } = useAuth();
 
@@ -290,6 +292,20 @@ export default function Staff() {
     const result = await unlockStaff(staffMember.id);
     if (result.success) {
       setSuccessMessage(t(`${pageTx}.unlockedSuccess`));
+      setTimeout(() => setSuccessMessage(null), 3000);
+      return;
+    }
+
+    setPageError(result.error);
+    setTimeout(() => setPageError(null), 4000);
+  };
+
+  const handleDelete = async (staffMember) => {
+    if (!window.confirm(t(`${pageTx}.confirmDelete`, { name: staffMember.name }))) return;
+
+    const result = await deleteStaff(staffMember.id);
+    if (result.success) {
+      setSuccessMessage(t(`${pageTx}.deletedSuccess`));
       setTimeout(() => setSuccessMessage(null), 3000);
       return;
     }
@@ -554,6 +570,16 @@ export default function Staff() {
                               {t(`${pageTx}.unlock`)}
                             </button>
                           )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(member)}
+                            disabled={isCurrentUser}
+                            className="inline-flex items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            {t(`${pageTx}.delete`)}
+                          </button>
                         </div>
                       </td>
                     </tr>

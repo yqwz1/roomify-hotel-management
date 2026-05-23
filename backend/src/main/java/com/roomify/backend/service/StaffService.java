@@ -150,6 +150,29 @@ public class StaffService {
         return StaffResponse.from(staff);
     }
 
+    public StaffResponse softDeleteStaff(Long id) {
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+        if (isCurrentUser(staff)) {
+            throw new ResourceConflictException("You cannot delete your own account");
+        }
+
+        staff.setActive(false);
+        if (staff.getUser() != null) {
+            staff.getUser().setActive(false);
+        }
+
+        // Audit log for permanent (soft) deletion — distinct from STAFF_DEACTIVATED
+        auditService.log(
+                getCurrentActor(),
+                "STAFF_DELETED",
+                "Staff:" + id,
+                "{ \"deleted\": true }");
+
+        return StaffResponse.from(staff);
+    }
+
     public StaffResponse unlockStaff(Long id) {
         Staff staff = staffRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
