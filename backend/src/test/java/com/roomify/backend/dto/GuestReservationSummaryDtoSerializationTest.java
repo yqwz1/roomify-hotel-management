@@ -23,6 +23,7 @@ class GuestReservationSummaryDtoSerializationTest {
     @Test
     void serializesCanonicalAndLegacyAliasFieldsWithSameValues() throws Exception {
         GuestReservationSummaryDto dto = new GuestReservationSummaryDto(
+                1L,
                 "RSV-123456",
                 "CONFIRMED",
                 12L,
@@ -50,6 +51,7 @@ class GuestReservationSummaryDtoSerializationTest {
     @Test
     void serializesLegacyAliasFieldsNullSafelyWhenCanonicalValuesAreNull() throws Exception {
         GuestReservationSummaryDto dto = new GuestReservationSummaryDto(
+                null,
                 null,
                 "PENDING",
                 null,
