@@ -364,6 +364,13 @@ const STAFF_NAVIGATION_CONFIG = [
         icon: LayoutDashboard,
         roles: [ROLE_STAFF],
       },
+      {
+        path: '/search',
+        translationKey: 'roomSearch',
+        fallbackLabel: 'Room Search',
+        icon: Search,
+        roles: [ROLE_STAFF],
+      },
     ],
   },
   {

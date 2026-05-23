@@ -71,6 +71,8 @@ const AppContent = () => {
   const { user } = useAuth();
   const location = useLocation();
   const roles = user?.roles;
+  const showFrontDeskSidebar = Array.isArray(roles)
+    && roles.some((role) => STAFF_AND_MANAGER_ROLES.includes(role));
 
   useEffect(() => {
     document.title = getDocumentTitle(location.pathname, roles ?? [], t);
@@ -86,10 +88,19 @@ const AppContent = () => {
         <Route path="/integrations" element={<Layout showSidebar={false}><Integrations /></Layout>} />
         <Route path="/demo" element={<Layout showSidebar={false}><Demo /></Layout>} />
         <Route path="/bookings" element={<Layout showSidebar={false}><Bookings /></Layout>} />
-        <Route path="/search" element={<Layout showSidebar={false}><RoomSearch /></Layout>} />
+        <Route
+          path="/search"
+          element={<Layout showSidebar={showFrontDeskSidebar}><RoomSearch /></Layout>}
+        />
         <Route path="/rooms/:roomId" element={<Layout showSidebar={false}><RoomDetails /></Layout>} />
-        <Route path="/book" element={<Layout showSidebar={false}><BookRoom /></Layout>} />
-        <Route path="/confirmation" element={<Layout showSidebar={false}><ConfirmationPage /></Layout>} />
+        <Route
+          path="/book"
+          element={<Layout showSidebar={showFrontDeskSidebar}><BookRoom /></Layout>}
+        />
+        <Route
+          path="/confirmation"
+          element={<Layout showSidebar={showFrontDeskSidebar}><ConfirmationPage /></Layout>}
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/unauthorized" element={<Layout showSidebar={Boolean(user)}><Unauthorized /></Layout>} />

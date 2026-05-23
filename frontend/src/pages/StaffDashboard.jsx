@@ -63,7 +63,7 @@ export default function StaffDashboard() {
         icon: BedDouble,
         title: t('bookRoom'),
         description: t(`${pageTx}.actions.bookRoomDescription`),
-        onClick: () => navigate('/book'),
+        onClick: () => navigate('/search'),
       },
       {
         icon: CalendarDays,
