@@ -126,8 +126,6 @@ class ReservationServiceTest {
 
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
                 .thenReturn(Optional.empty());
-        when(guestRepository.findByIdNumber("ID-77"))
-                .thenReturn(Optional.empty());
 
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
             Guest guest = invocation.getArgument(0);
@@ -197,8 +195,6 @@ class ReservationServiceTest {
 
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
                 .thenReturn(Optional.empty());
-        when(guestRepository.findByIdNumber("ID-77"))
-                .thenReturn(Optional.empty());
 
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
             Guest guest = invocation.getArgument(0);
@@ -260,7 +256,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void createForAuthenticatedGuestShouldReuseExistingGuestByIdNumberAndIgnoreSubmittedEmail() {
+    void createForAuthenticatedGuestShouldReuseExistingGuestByEmailAndIgnoreSubmittedEmail() {
 
         Room room = buildRoom(10L, "301", "199.99");
         Guest existingGuest = new Guest(
@@ -286,8 +282,6 @@ class ReservationServiceTest {
                 eq(LocalDate.of(2026, 3, 13))))
                 .thenReturn(Collections.emptyList());
         when(guestRepository.findByEmailIgnoreCase("member@example.com"))
-                .thenReturn(Optional.empty());
-        when(guestRepository.findByIdNumber("ID-77"))
                 .thenReturn(Optional.of(existingGuest));
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(reservationRepository.existsByConfirmationNumber(anyString())).thenReturn(false);
@@ -303,28 +297,22 @@ class ReservationServiceTest {
         assertEquals("member@example.com", response.getGuestEmail());
         assertEquals("member@example.com", existingGuest.getEmail());
         assertEquals("0509999999", existingGuest.getPhone());
+        assertEquals("ID-77", existingGuest.getIdNumber());
         assertEquals(PaymentStatus.UNPAID.name(), response.getPaymentStatus());
         verify(guestRepository).save(existingGuest);
     }
 
     @Test
-    void createShouldReuseExistingGuestWhenIdNumberAlreadyExists() {
+    void createShouldAllowDuplicateIdNumberWhenEmailIsNew() {
 
         Room room = buildRoom(10L, "301", "199.99");
-        Guest existingGuest = new Guest(
-                "Returning Guest",
-                "returning@example.com",
-                "0501234567",
-                "ID-77",
-                "USA");
-        existingGuest.setId(21L);
-
         ReservationCreateRequest request = buildCreateRequest(
                 10L,
                 LocalDate.of(2026, 3, 10),
                 LocalDate.of(2026, 3, 13),
                 ReservationStatus.PENDING);
         request.getGuest().setEmail("returning+new@example.com");
+        request.getGuest().setIdNumber("ID-77");
 
         when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
         when(reservationRepository.findOverlappingReservations(
@@ -334,9 +322,11 @@ class ReservationServiceTest {
                 .thenReturn(Collections.emptyList());
         when(guestRepository.findByEmailIgnoreCase("returning+new@example.com"))
                 .thenReturn(Optional.empty());
-        when(guestRepository.findByIdNumber("ID-77"))
-                .thenReturn(Optional.of(existingGuest));
-        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
+            Guest guest = invocation.getArgument(0);
+            guest.setId(21L);
+            return guest;
+        });
         when(reservationRepository.existsByConfirmationNumber(anyString())).thenReturn(false);
         when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
             Reservation reservation = invocation.getArgument(0);
@@ -346,19 +336,16 @@ class ReservationServiceTest {
 
         ReservationResponse response = reservationService.create(request);
 
-        assertEquals(Long.valueOf(21L), response.getGuestId());
         assertEquals("returning+new@example.com", response.getGuestEmail());
-        verify(guestRepository).save(existingGuest);
+        verify(guestRepository).save(any(Guest.class));
     }
 
     @Test
-    void createShouldRejectConflictingGuestProfilesWhenEmailAndIdNumberBelongToDifferentGuests() {
+    void createShouldReuseGuestByEmailEvenWhenIdNumberMatchesAnotherRecord() {
 
         Room room = buildRoom(10L, "301", "199.99");
         Guest guestByEmail = new Guest("Email Guest", "guest@example.com", "0500000001", "ID-100", "USA");
         guestByEmail.setId(21L);
-        Guest guestByIdNumber = new Guest("Id Guest", "other@example.com", "0500000002", "ID-77", "USA");
-        guestByIdNumber.setId(22L);
 
         ReservationCreateRequest request = buildCreateRequest(
                 10L,
@@ -374,16 +361,20 @@ class ReservationServiceTest {
                 .thenReturn(Collections.emptyList());
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
                 .thenReturn(Optional.of(guestByEmail));
-        when(guestRepository.findByIdNumber("ID-77"))
-                .thenReturn(Optional.of(guestByIdNumber));
+        when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.existsByConfirmationNumber(anyString())).thenReturn(false);
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
+            Reservation reservation = invocation.getArgument(0);
+            reservation.setId(73L);
+            return reservation;
+        });
 
-        ResourceConflictException ex = assertThrows(
-                ResourceConflictException.class,
-                () -> reservationService.create(request));
+        ReservationResponse response = reservationService.create(request);
 
-        assertEquals("Guest email and ID number belong to different guest profiles", ex.getMessage());
-        verify(guestRepository, never()).save(any(Guest.class));
-        verify(reservationRepository, never()).save(any(Reservation.class));
+        assertEquals(Long.valueOf(21L), response.getGuestId());
+        assertEquals("guest@example.com", response.getGuestEmail());
+        verify(guestRepository).save(guestByEmail);
+        verify(reservationRepository).save(any(Reservation.class));
     }
 
     @Test
@@ -404,17 +395,15 @@ class ReservationServiceTest {
                 .thenReturn(Collections.emptyList());
         when(guestRepository.findByEmailIgnoreCase("guest@example.com"))
                 .thenReturn(Optional.empty());
-        when(guestRepository.findByIdNumber("ID-77"))
-                .thenReturn(Optional.empty());
         when(guestRepository.save(any(Guest.class)))
-                .thenThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint \"uk_guest_id_number\""));
+                .thenThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint \"uk_guest_email\""));
 
         DuplicateResourceException ex = assertThrows(
                 DuplicateResourceException.class,
                 () -> reservationService.create(request));
 
         assertEquals(
-                "A guest with this ID number already exists. Reuse the existing guest profile or verify the ID number.",
+                "A guest with this email already exists. Reuse the existing guest profile or verify the email address.",
                 ex.getMessage());
         verify(reservationRepository, never()).save(any(Reservation.class));
     }

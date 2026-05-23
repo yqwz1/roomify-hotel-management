@@ -213,12 +213,13 @@ public class AiFinanceDemoDataSeeder implements ApplicationRunner {
         List<Guest> guests = new ArrayList<>(TARGET_GUEST_COUNT);
 
         for (int index = 1; index <= TARGET_GUEST_COUNT; index++) {
-            Guest guest = guestRepository.findByIdNumber(GUEST_PREFIX + formatSixDigits(index)).orElseGet(Guest::new);
             String firstName = FIRST_NAMES.get((index - 1) % FIRST_NAMES.size());
             String lastName = LAST_NAMES.get(((index - 1) / 3) % LAST_NAMES.size());
+            String email = "ai.demo.guest" + formatSixDigits(index) + "@roomify.dev";
+            Guest guest = guestRepository.findByEmailIgnoreCase(email).orElseGet(Guest::new);
 
             guest.setName(firstName + " " + lastName);
-            guest.setEmail("ai.demo.guest" + formatSixDigits(index) + "@roomify.dev");
+            guest.setEmail(email);
             guest.setPhone("+9665" + String.format(Locale.ROOT, "%08d", 10000000 + index));
             guest.setIdNumber(GUEST_PREFIX + formatSixDigits(index));
             guest.setNationality(NATIONALITIES.get((index - 1) % NATIONALITIES.size()));

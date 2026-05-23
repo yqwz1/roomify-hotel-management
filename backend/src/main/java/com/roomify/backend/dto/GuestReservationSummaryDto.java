@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 public class GuestReservationSummaryDto {
 
+    private Long id;
     private String confirmationNumber;
     private String status;
     private Long roomId;
@@ -24,6 +25,7 @@ public class GuestReservationSummaryDto {
     }
 
     public GuestReservationSummaryDto(
+            Long id,
             String confirmationNumber,
             String status,
             Long roomId,
@@ -37,6 +39,7 @@ public class GuestReservationSummaryDto {
             boolean invoiceFinalized,
             BigDecimal totalPaid,
             BigDecimal outstandingBalance) {
+        this.id = id;
         this.confirmationNumber = confirmationNumber;
         this.status = status;
         this.roomId = roomId;
@@ -50,6 +53,14 @@ public class GuestReservationSummaryDto {
         this.invoiceFinalized = invoiceFinalized;
         this.totalPaid = totalPaid;
         this.outstandingBalance = outstandingBalance;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getConfirmationNumber() {

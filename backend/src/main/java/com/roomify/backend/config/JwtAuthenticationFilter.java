@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return "/api/health".equals(path) || path.startsWith("/api/auth/")
                 || "/api/rooms/search".equals(path)
+                || path.startsWith("/ws/")
                 || isPublicRoomDetailsRequest(request, path);
     }
 

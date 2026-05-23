@@ -122,7 +122,7 @@ describe('BookRoom', () => {
     expect(screen.getByRole('button', { name: /create reservation/i })).toBeInTheDocument();
   });
 
-  it('does not prefill guest identity for staff-managed bookings', async () => {
+  it('does not prefill guest profile for staff-managed bookings', async () => {
     mockUseAuth.mockReturnValue({
       user: { username: 'Front Desk', email: 'staff@roomify.com', roles: ['ROLE_STAFF'] },
       isAuthenticated: true,

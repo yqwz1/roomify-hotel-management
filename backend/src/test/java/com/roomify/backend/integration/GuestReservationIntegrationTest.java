@@ -2,8 +2,10 @@ package com.roomify.backend.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -172,6 +175,7 @@ class GuestReservationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").exists())
                 .andExpect(jsonPath("$[0].confirmationNumber").exists())
                 .andExpect(jsonPath("$[0].status").exists())
                 .andExpect(jsonPath("$[0].checkInDate").exists())
@@ -238,6 +242,56 @@ class GuestReservationIntegrationTest {
         for (String guestBConfirm : guestBConfirmationNumbers) {
             assertFalse(returnedConfirmationNumbers.contains(guestBConfirm));
         }
+    }
+
+    @Test
+    void guestCreatedReservationAppearsInGuestReservationsWhilePaymentIsPending() throws Exception {
+        Room room = roomRepository.save(new Room("401", roomTypeRepository.findAll().get(0), 4, RoomStatus.AVAILABLE));
+
+        String createRequest = """
+                {
+                  "roomId": %d,
+                  "checkInDate": "%s",
+                  "checkOutDate": "%s",
+                  "guest": {
+                    "name": "Guest A",
+                    "email": "guestA@test.com",
+                    "phone": "0501234567",
+                    "idNumber": "ID-A-UPDATED",
+                    "nationality": "SA"
+                  }
+                }
+                """.formatted(
+                room.getId(),
+                LocalDate.now().plusDays(7),
+                LocalDate.now().plusDays(9));
+
+        mockMvc.perform(post("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + guestAToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createRequest))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("PAYMENT_PENDING"));
+
+        String response = mockMvc.perform(get("/api/guest/reservations")
+                        .header("Authorization", "Bearer " + guestAToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode json = objectMapper.readTree(response);
+        boolean includesPendingReservation = false;
+        for (JsonNode reservationNode : json) {
+            if ("401".equals(reservationNode.path("roomNumber").asText())
+                    && "PAYMENT_PENDING".equals(reservationNode.path("status").asText())) {
+                includesPendingReservation = true;
+                break;
+            }
+        }
+
+        assertTrue(includesPendingReservation);
     }
 
     @Test

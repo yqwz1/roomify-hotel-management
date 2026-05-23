@@ -384,9 +384,6 @@ public class DemoDataBootstrap implements ApplicationRunner {
         guest.setPhone("+9665" + String.format(Locale.ROOT, "%08d", 10_000_000 + sequence));
         guest.setIdNumber(idNumber);
         guest.setNationality(nationality);
-        // (Guest entity has no notes column; we rely on the id_number "NDB-" prefix
-        // as the seed marker rather than the brief's "notes" field. See class
-        // javadoc for the actual idempotency check.)
         return guest;
     }
 

@@ -6,6 +6,7 @@ import com.roomify.backend.dto.ReservationResponse;
 import com.roomify.backend.entity.Guest;
 import com.roomify.backend.entity.Reservation;
 import com.roomify.backend.entity.ReservationStatus;
+import java.util.EnumSet;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.GuestRepository;
 import com.roomify.backend.repository.ReservationRepository;
@@ -26,6 +27,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GuestReservationServiceImpl implements GuestReservationService {
 
+    private static final EnumSet<ReservationStatus> VISIBLE_GUEST_RESERVATION_STATUSES = EnumSet.of(
+            ReservationStatus.PAYMENT_PENDING,
+            ReservationStatus.CONFIRMED,
+            ReservationStatus.CHECKED_IN);
+
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
     private final ReservationService reservationService;
@@ -38,6 +44,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 .map(Guest::getId)
                 .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
                 .filter(distinctByReservationId())
+                .filter(reservation -> isActiveGuestReservation(reservation, today))
                 .sorted(buildReservationSort(today))
                 .map(this::mapToDto)
                 .toList();
@@ -80,7 +87,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 .flatMap(guestId -> reservationRepository.findByGuest_Id(guestId).stream())
                 .filter(this::hasAssignedRoom)
                 .filter(reservation -> roomId.equals(reservation.getRoomId()))
-                .filter(reservation -> isActiveReservation(reservation, today))
+                .filter(reservation -> isActiveGuestReservation(reservation, today))
                 .sorted(buildReservationSort(today))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -159,13 +166,12 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 && reservation.getCheckOutDate().isBefore(today);
     }
 
-    private boolean isActiveReservation(Reservation reservation, LocalDate today) {
+    private boolean isActiveGuestReservation(Reservation reservation, LocalDate today) {
         if (!hasAssignedRoom(reservation) || reservation.getCheckOutDate() == null) {
             return false;
         }
 
-        ReservationStatus status = reservation.getStatus();
-        if (status != ReservationStatus.CONFIRMED && status != ReservationStatus.CHECKED_IN) {
+        if (!VISIBLE_GUEST_RESERVATION_STATUSES.contains(reservation.getStatus())) {
             return false;
         }
 
@@ -191,6 +197,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
         }
 
         return new GuestReservationSummaryDto(
+                reservation.getId(),
                 reservation.getConfirmationNumber(),
                 reservation.getStatus() != null ? reservation.getStatus().name() : null,
                 roomId,

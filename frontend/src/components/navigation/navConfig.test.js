@@ -45,12 +45,14 @@ describe('navConfig', () => {
 
     expect(labels).toEqual([
       'Front Desk',
+      'Room Search',
       'Reservations',
       'Room grid',
       'Arrivals',
       'Departures',
       'Billing',
       'Service Requests',
+      'Guest Inbox',
     ]);
   });
 

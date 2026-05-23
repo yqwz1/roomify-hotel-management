@@ -17,6 +17,10 @@ import {
   getGuestServiceRequests,
 } from '../services/serviceRequestService';
 import {
+  buildGuestReservationRoomContextLabel,
+  getGuestAssistantReservationAccess,
+} from '../utils/guestAssistant';
+import {
   formatLocalizedDate,
   formatLocalizedDateTime,
   translateWithFallback,
@@ -32,7 +36,6 @@ import {
 } from '../utils/serviceRequestPresentation';
 
 const POLL_INTERVAL_MS = 12000;
-const ACTIVE_RESERVATION_STATUSES = new Set(['CONFIRMED', 'CHECKED_IN']);
 
 const createInitialFormState = () => ({
   roomId: '',
@@ -41,45 +44,19 @@ const createInitialFormState = () => ({
   priority: '',
 });
 
-const isActiveReservation = (reservation) => {
-  if (!reservation?.roomId || !reservation?.roomNumber) {
-    return false;
-  }
-
-  if (!ACTIVE_RESERVATION_STATUSES.has(reservation.status)) {
-    return false;
-  }
-
-  if (!reservation.checkOutDate) {
-    return true;
-  }
-
-  const checkout = new Date(`${reservation.checkOutDate}T12:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return !Number.isNaN(checkout.getTime()) && checkout >= today;
-};
-
 const buildReservationLabel = (reservation, language, t) => {
-  const roomLabel = reservation.roomNumber
-    ? translateWithFallback(
-        t,
-        'guestServiceRequests.roomLabel',
-        'Room {{roomNumber}}',
-        { roomNumber: reservation.roomNumber }
-      )
-    : translateWithFallback(t, 'unassigned', 'Unassigned');
+  const roomLabel = buildGuestReservationRoomContextLabel(reservation)
+    || translateWithFallback(t, 'unassigned', 'Unassigned');
 
   const dateRange = `${formatLocalizedDate(
     reservation.checkInDate,
     language,
     { dateStyle: 'medium' }
-  )} · ${formatLocalizedDate(reservation.checkOutDate, language, {
+  )} - ${formatLocalizedDate(reservation.checkOutDate, language, {
     dateStyle: 'medium',
   })}`;
 
-  return `${roomLabel} · ${dateRange}`;
+  return `${roomLabel} - ${dateRange}`;
 };
 
 export default function GuestServiceRequests() {
@@ -159,10 +136,11 @@ export default function GuestServiceRequests() {
     };
   }, [requestsReloadToken]);
 
-  const activeReservations = useMemo(
-    () => reservations.filter(isActiveReservation),
+  const reservationAccess = useMemo(
+    () => getGuestAssistantReservationAccess(reservations),
     [reservations]
   );
+  const activeReservations = reservationAccess.activeReservations;
 
   useEffect(() => {
     if (activeReservations.length === 1) {
@@ -255,6 +233,24 @@ export default function GuestServiceRequests() {
   const showRoomSelector = activeReservations.length > 1;
   const autoSelectedReservation =
     activeReservations.length === 1 ? activeReservations[0] : null;
+  const canRequestServices = activeReservations.length > 0;
+  const serviceAccessMessage = reservationAccess.checkedOutOnly
+    ? translateWithFallback(
+        t,
+        'guestServiceRequests.checkedOutRoomMessage',
+        'Room services are available only during an active stay.'
+      )
+    : reservationAccess.hasAnyReservations
+      ? translateWithFallback(
+          t,
+          'guestServiceRequests.checkInRequiredMessage',
+          'Room services are available only during an active stay.'
+        )
+      : translateWithFallback(
+          t,
+          'guestServiceRequests.noReservationMessage',
+          'Room services are available only during an active stay.'
+        );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -268,11 +264,11 @@ export default function GuestServiceRequests() {
         )}
         meta={[
           translateWithFallback(
-            t,
-            'guestServiceRequests.activeRoomsMeta',
-            '{{count}} active room selections available for service requests.',
-            { count: activeReservations.length }
-          ),
+          t,
+          'guestServiceRequests.activeRoomsMeta',
+          '{{count}} active room selections available for service requests.',
+          { count: activeReservations.length }
+        ),
           translateWithFallback(
             t,
             'guestServiceRequests.openRequestsMeta',
@@ -314,7 +310,7 @@ export default function GuestServiceRequests() {
           hint={translateWithFallback(
             t,
             'guestServiceRequests.metrics.roomsHint',
-            'Only confirmed and checked-in stays can receive service requests.'
+            'Only active stays can receive service requests.'
           )}
         />
         <DashboardMetricCard
@@ -406,19 +402,19 @@ export default function GuestServiceRequests() {
               'Choose the room and service details so the hotel team can act on the correct stay.'
             )}
           >
-            {activeReservations.length === 0 ? (
+            {!canRequestServices ? (
               <EmptyState
                 icon={BedDouble}
                 title={translateWithFallback(
                   t,
-                  'guestServiceRequests.noActiveRoomTitle',
-                  'No active room available'
+                  reservationAccess.checkedOutOnly
+                    ? 'guestServiceRequests.checkedOutTitle'
+                    : 'guestServiceRequests.noActiveRoomTitle',
+                  reservationAccess.checkedOutOnly
+                    ? 'Services unavailable after checkout'
+                    : 'No active room available'
                 )}
-                message={translateWithFallback(
-                  t,
-                  'guestServiceRequests.noActiveRoomMessage',
-                  'You need a confirmed or checked-in reservation before you can request hotel services.'
-                )}
+                message={serviceAccessMessage}
               />
             ) : (
               <form className="space-y-4" onSubmit={handleSubmit}>
