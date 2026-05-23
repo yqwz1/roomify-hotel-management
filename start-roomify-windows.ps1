@@ -457,6 +457,11 @@ $env:ROOMIFY_DEMO_BOOTSTRAP_ENABLED = 'true'
 $env:ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED = 'false'
 $env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = 'true'
 $env:SPRING_FLYWAY_BASELINE_VERSION = '12'
+$env:SPRING_MAIL_HOST = '127.0.0.1'
+$env:SPRING_MAIL_PORT = '1025'
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH = 'false'
+$env:SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE = 'false'
+$env:ROOMIFY_MAIL_FROM = 'no-reply@roomify.local'
 $backendCommand = ".\mvnw.cmd spring-boot:run >> `"$BackendLog`" 2>&1"
 $backendProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $backendCommand -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
 $backendProcess.Id | Set-Content -LiteralPath $BackendPidFile

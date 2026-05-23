@@ -400,6 +400,11 @@ start_backend() {
     (
         cd "$BACKEND_DIR" || exit 1
         nohup env DB_PORT="$DB_PORT" ROOMIFY_DEMO_BOOTSTRAP_ENABLED="true" ROOMIFY_AI_FINANCE_DEMO_SEED_ENABLED="false" \
+            SPRING_MAIL_HOST="127.0.0.1" \
+            SPRING_MAIL_PORT="1025" \
+            SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH="false" \
+            SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE="false" \
+            ROOMIFY_MAIL_FROM="no-reply@roomify.local" \
             SPRING_JPA_HIBERNATE_DDL_AUTO="update" \
             sh ./mvnw spring-boot:run >>"$BACKEND_LOG" 2>&1 &
         echo $! >"$BACKEND_PID_FILE"
