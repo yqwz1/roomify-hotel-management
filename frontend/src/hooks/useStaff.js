@@ -118,9 +118,9 @@ export const useStaff = () => {
     setLoading(true);
     setError(null);
     try {
-      const updatedStaff = await staffService.deleteStaff(id);
-      setStaff((prev) => prev.map((staffMember) => (staffMember.id === id ? updatedStaff : staffMember)));
-      return { success: true, data: updatedStaff };
+      await staffService.deleteStaff(id);
+      setStaff((prev) => prev.filter((staffMember) => staffMember.id !== id));
+      return { success: true };
     } catch (err) {
       if (err.response?.status === 409) {
         return {

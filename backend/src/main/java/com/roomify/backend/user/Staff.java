@@ -30,6 +30,9 @@ public class Staff {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
     protected Staff() {}
 
     public Staff(User user, String name, String department) {
@@ -43,6 +46,11 @@ public class Staff {
     public String getName() { return name; }
     public String getDepartment() { return department; }
     public boolean isActive() { return isActive; }
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 
     public void setUser(User user) {
         this.user = user;

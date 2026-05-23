@@ -80,6 +80,7 @@ public class StaffService {
         String normalizedDepartment = normalize(department);
 
         return staffRepository.findAll().stream()
+                .filter(staff -> !staff.isDeleted())
                 .filter(staff -> matchesSearch(staff, normalizedSearch))
                 .filter(staff -> role == null || (staff.getUser() != null && staff.getUser().getRole() == role))
                 .filter(staff -> normalizedDepartment == null || normalizedDepartment.equals(staff.getDepartment()))
@@ -159,6 +160,7 @@ public class StaffService {
         }
 
         staff.setActive(false);
+        staff.setDeleted(true);
         if (staff.getUser() != null) {
             staff.getUser().setActive(false);
         }
