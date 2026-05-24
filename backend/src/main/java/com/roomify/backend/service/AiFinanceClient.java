@@ -29,7 +29,7 @@ public class AiFinanceClient {
 
     public AiFinanceClient(
             ObjectMapper objectMapper,
-            @Value("${roomify.ai-service.base-url:http://localhost:8000}") String baseUrl,
+            @Value("${roomify.ai-service.base-url:}") String baseUrl,
             @Value("${roomify.ai-service.timeout-ms:3000}") long timeoutMs) {
         this.objectMapper = objectMapper;
         this.baseUrl = normalizeBaseUrl(baseUrl);
@@ -147,7 +147,7 @@ public class AiFinanceClient {
 
     private String normalizeBaseUrl(String configuredBaseUrl) {
         if (configuredBaseUrl == null || configuredBaseUrl.isBlank()) {
-            return "http://localhost:8000";
+            return "";
         }
         return configuredBaseUrl.endsWith("/")
                 ? configuredBaseUrl.substring(0, configuredBaseUrl.length() - 1)

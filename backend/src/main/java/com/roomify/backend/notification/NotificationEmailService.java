@@ -52,7 +52,7 @@ public class NotificationEmailService {
     @Value("${roomify.mail.from}")
     private String fromAddress;
 
-    @Value("${roomify.mail.reset-base-url:http://localhost:5173/reset-password}")
+    @Value("${roomify.mail.reset-base-url}")
     private String passwordResetBaseUrl;
 
     public NotificationEmailService(

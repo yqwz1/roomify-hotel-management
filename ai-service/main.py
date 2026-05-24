@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from elasticity_service import generate_elasticity_forecasts
 from model import generate_forecast, generate_pricing_recommendations, load_artifacts, load_model_metadata
@@ -15,6 +18,22 @@ from schemas import (
 )
 
 app = FastAPI(title="Roomify AI Finance Service", version="1.0.0")
+
+
+def _allowed_origins() -> list[str]:
+    raw_value = os.getenv("AI_SERVICE_CORS_ALLOWED_ORIGINS", "")
+    return [origin.strip() for origin in raw_value.split(",") if origin.strip()]
+
+
+allowed_origins = _allowed_origins()
+if allowed_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 @app.get("/health", response_model=HealthResponse)

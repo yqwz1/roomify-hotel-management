@@ -1,5 +1,6 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { API_WS_BASE_URL } from '../config/runtime';
 
 export const createGuestAssistantSocket = ({
   token,
@@ -9,7 +10,7 @@ export const createGuestAssistantSocket = ({
   onError,
 }) => {
   const client = new Client({
-    webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_WS_URL || ''}/ws/guest-assistant`),
+    webSocketFactory: () => new SockJS(`${API_WS_BASE_URL}/ws/guest-assistant`),
     connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
     reconnectDelay: 5000,
     heartbeatIncoming: 10000,
