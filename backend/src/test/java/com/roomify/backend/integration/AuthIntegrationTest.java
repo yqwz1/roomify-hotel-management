@@ -58,7 +58,8 @@ import org.springframework.web.context.WebApplicationContext;
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "roomify.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
-        "roomify.jwt.expiration=3600000"
+        "roomify.jwt.expiration=3600000",
+        "roomify.demo.bootstrap.enabled=true"
 })
 class AuthIntegrationTest {
 
@@ -181,6 +182,44 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.email").value("demo.guest@roomify.dev"))
                 .andExpect(jsonPath("$.username").value("demo.guest@roomify.dev"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+    }
+
+    @Test
+    void demoAdminQuickLoginCreatesMissingAccountAndReturnsAllPrivilegeRoles() throws Exception {
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", ADMIN_EMAIL,
+                "password", ADMIN_PASSWORD));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"))
+                .andExpect(jsonPath("$.roles[1]").value("ROLE_MANAGER"))
+                .andExpect(jsonPath("$.roles[2]").value("ROLE_STAFF"));
+
+        User adminUser = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
+        assertThat(adminUser.getRoles()).containsExactly(Role.ADMIN, Role.MANAGER, Role.STAFF);
+        assertThat(passwordEncoder.matches(ADMIN_PASSWORD, adminUser.getPasswordHash())).isTrue();
+    }
+
+    @Test
+    void demoGuestQuickLoginCreatesMissingGuestProfile() throws Exception {
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", "guest@roomify.com",
+                "password", "Demo@2026"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("guest@roomify.com"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"));
+
+        Guest guest = guestRepository.findByEmailIgnoreCase("guest@roomify.com").orElseThrow();
+        assertThat(guest.getName()).isEqualTo("Demo Guest");
+        assertThat(guest.getIdNumber()).isEqualTo("ROOMIFY-DEMO-GUEST-LOGIN");
     }
 
     @Test

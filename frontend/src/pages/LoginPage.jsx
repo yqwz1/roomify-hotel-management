@@ -23,11 +23,12 @@ import { EASE } from '@/components/motion/Reveal';
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
 const DEMO_PASSWORD = 'Demo@2026';
+const DEMO_ADMIN_PASSWORD = import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || 'RealAdminPass123!';
 const DEMO_ACCOUNTS = [
   {
     label: 'Admin',
     email: 'admin@roomify.com',
-    password: import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || DEMO_PASSWORD,
+    password: DEMO_ADMIN_PASSWORD,
   },
   { label: 'Manager', email: 'manager@roomify.com', password: DEMO_PASSWORD },
   { label: 'Staff', email: 'staff@roomify.com', password: DEMO_PASSWORD },
@@ -431,7 +432,7 @@ const LoginPage = () => {
                     ))}
                   </div>
                   <p className="mt-2 text-[10px] font-medium text-brand-ink-hint" dir="ltr">
-                    Admin · <span className="font-mono font-bold text-brand-ink-muted">{import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || 'RealAdminPass123!'}</span> | Others · <span className="font-mono font-bold text-brand-ink-muted">Demo@2026</span>
+                    Admin · <span className="font-mono font-bold text-brand-ink-muted">{DEMO_ADMIN_PASSWORD}</span> | Others · <span className="font-mono font-bold text-brand-ink-muted">Demo@2026</span>
                   </p>
                 </motion.div>
               )}

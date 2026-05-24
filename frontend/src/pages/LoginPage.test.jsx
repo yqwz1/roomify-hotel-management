@@ -126,6 +126,30 @@ describe('LoginPage', () => {
         expect(passwordInput).toHaveAttribute('type', 'password');
     });
 
+    it('admin quick login uses the real admin demo password by default', async () => {
+        vi.stubEnv('VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED', 'true');
+        const user = userEvent.setup();
+
+        authService.login.mockResolvedValue({
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6WyJST0xFX0FETUlOIl0sImV4cCI6MTk5OTk5OTk5OX0.signature',
+            type: 'Bearer',
+            id: 1,
+            username: 'admin',
+            email: 'admin@roomify.com',
+            roles: ['ROLE_ADMIN']
+        });
+
+        renderLoginPage();
+
+        const toggleButton = screen.getByRole('button', { name: /Demo accounts/i });
+        await user.click(toggleButton);
+        await user.click(screen.getByRole('button', { name: 'Admin' }));
+
+        await waitFor(() => {
+            expect(authService.login).toHaveBeenCalledWith('admin@roomify.com', 'RealAdminPass123!');
+        });
+    });
+
     // it('displays validation error for invalid email format', async () => {
     //     const user = userEvent.setup();
     //     renderLoginPage();

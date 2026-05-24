@@ -107,8 +107,13 @@ class DemoDataBootstrapIntegrationTest {
     }
 
     @Test
-    void demoBootstrapDoesNotCreateOrMutateAdminAccount() {
-        assertTrue(userRepository.findByEmailIgnoreCase("admin@roomify.com").isEmpty());
+    void demoBootstrapCreatesAdminAccountWithDemoPassword() {
+        User adminUser = userRepository.findByEmailIgnoreCase("admin@roomify.com").orElseThrow();
+
+        assertTrue(adminUser.isActive());
+        assertEquals(Role.ADMIN, adminUser.getRole());
+        assertTrue(adminUser.getRoles().contains(Role.ADMIN));
+        assertTrue(passwordEncoder.matches("RealAdminPass123!", adminUser.getPasswordHash()));
     }
 
     @Test
