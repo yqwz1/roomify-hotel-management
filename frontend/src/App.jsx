@@ -54,7 +54,6 @@ import RoomGrid from './pages/RoomGrid'
 import AdminDashboard from './pages/AdminDashboard'
 import HotelServices from './pages/HotelServices'
 import ExpenseTracker from './pages/ExpenseTracker'
-import AdminNotifications from './pages/AdminNotifications'
 
 import Layout from './components/Layout';
 
@@ -156,14 +155,6 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
               <Layout showSidebar={true}><AdminDashboard /></Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/notifications"
-          element={
-            <ProtectedRoute allowedRoles={ADMIN_ONLY_ROLES}>
-              <Layout showSidebar={true}><AdminNotifications /></Layout>
             </ProtectedRoute>
           }
         />

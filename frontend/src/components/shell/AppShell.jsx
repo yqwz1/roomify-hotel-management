@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import ManagerAiAssistant from '../ai-assistant/ManagerAiAssistant';
 import FloatingGuestAssistant from '../guest-assistant/FloatingGuestAssistant';
 import { useAuth } from '../../context/AuthProvider';
+import { getPrimaryRole, ROLE_MANAGER } from '../navigation/navConfig';
 import AppSidebar from './AppSidebar';
 import AppTopbar from './AppTopbar';
 
@@ -25,7 +26,8 @@ export default function AppShell({ children }) {
   const mobileSidebarOpen =
     mobileSidebarState.isOpen && mobileSidebarState.locationKey === location.key;
   const sidebarOpen = isDesktop ? desktopSidebarOpen : mobileSidebarOpen;
-  const isManager = Array.isArray(user?.roles) && user.roles.includes('ROLE_MANAGER');
+  const primaryRole = getPrimaryRole(user?.roles ?? []);
+  const showManagerAiAssistant = primaryRole === ROLE_MANAGER;
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -100,7 +102,7 @@ export default function AppShell({ children }) {
           {children}
         </main>
         <FloatingGuestAssistant />
-        {isManager ? <ManagerAiAssistant /> : null}
+        {showManagerAiAssistant ? <ManagerAiAssistant /> : null}
       </div>
     </div>
   );

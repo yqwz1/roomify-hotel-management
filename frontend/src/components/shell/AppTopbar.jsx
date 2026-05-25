@@ -5,8 +5,10 @@ import { useAuth } from '../../context/AuthProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import NotificationCenter from './NotificationCenter';
 import {
+  getPrimaryRole,
   getPageMeta,
   getRoleDisplayLabel,
+  ROLE_ADMIN,
 } from '../navigation/navConfig';
 
 export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
@@ -16,9 +18,11 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   const { user, logout } = useAuth();
 
   const roles = user?.roles ?? [];
+  const primaryRole = getPrimaryRole(roles);
   const homePath = '/';
   const pageMeta = getPageMeta(location.pathname, roles, t);
   const roleLabel = getRoleDisplayLabel(roles, t);
+  const showNotificationCenter = primaryRole !== ROLE_ADMIN;
   const currentDate = new Intl.DateTimeFormat(i18n.language?.startsWith('ar') ? 'ar-SA' : 'en-US', {
     weekday: 'short',
     month: 'long',
@@ -65,7 +69,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
         </div>
 
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
-          <NotificationCenter />
+          {showNotificationCenter ? <NotificationCenter /> : null}
           <LanguageSwitcher />
           <Link
             to={homePath}

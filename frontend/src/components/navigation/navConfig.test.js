@@ -66,7 +66,6 @@ describe('navConfig', () => {
     expect(paths).toEqual([
       '/',
       '/admin/dashboard',
-      '/admin/notifications',
       '/staff',
       '/room-types',
       '/services',
