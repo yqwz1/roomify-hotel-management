@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
-import java.util.List;
-
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
@@ -222,7 +220,7 @@ class ReservationSchemaAlignmentTest {
     }
 
     @Test
-    void convertsBinaryStaffAndUserColumnsBackToTextForSearch() throws Exception {
+    void convertsBinaryStaffAndUserColumnsBackToText() throws Exception {
         User user = new User("alice@roomify.com", "hashed-password", Role.STAFF, true);
         Staff staff = new Staff(user, "Alice Johnson", "Front Desk");
         user.setStaff(staff);
@@ -231,6 +229,7 @@ class ReservationSchemaAlignmentTest {
         jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN email SET DATA TYPE VARBINARY");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN password_hash SET DATA TYPE VARBINARY");
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN role SET DATA TYPE VARCHAR(20)");
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN role SET DATA TYPE VARBINARY");
         jdbcTemplate.execute("ALTER TABLE staff ALTER COLUMN name SET DATA TYPE VARBINARY");
         jdbcTemplate.execute("ALTER TABLE staff ALTER COLUMN department SET DATA TYPE VARBINARY");
@@ -249,13 +248,23 @@ class ReservationSchemaAlignmentTest {
 
         reservationSchemaAlignment.run(new DefaultApplicationArguments(new String[0]));
 
-        List<Staff> byName = staffRepository.searchStaff("alice", Role.STAFF, "Front Desk", true);
-        List<Staff> byEmail = staffRepository.searchStaff("roomify.com", Role.STAFF, null, true);
+        User repairedUser = userRepository.findById(user.getId()).orElseThrow();
+        Staff repairedStaff = staffRepository.findById(user.getId()).orElseThrow();
+        String roleType = jdbcTemplate.queryForObject(
+                """
+                SELECT DATA_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'USERS'
+                  AND COLUMN_NAME = 'ROLE'
+                """,
+                String.class);
 
-        assertEquals(1, byName.size());
-        assertEquals("Alice Johnson", byName.getFirst().getName());
-        assertEquals(1, byEmail.size());
-        assertFalse(userRepository.findById(byEmail.getFirst().getId()).orElseThrow().getEmail().isBlank());
+        assertEquals("alice@roomify.com", repairedUser.getEmail());
+        assertFalse(repairedUser.getEmail().isBlank());
+        assertEquals(Role.STAFF, repairedUser.getRole());
+        assertEquals("Alice Johnson", repairedStaff.getName());
+        assertEquals("Front Desk", repairedStaff.getDepartment());
+        assertEquals("CHARACTER VARYING", roleType);
     }
 
     @Test
@@ -286,6 +295,7 @@ class ReservationSchemaAlignmentTest {
         User user = userRepository.save(new User("prefixed@roomify.com", "hashed-password", Role.STAFF, true));
 
         jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN role SET DATA TYPE VARCHAR(20)");
         jdbcTemplate.update("UPDATE users SET role = 'ROLE_ADMIN' WHERE id = ?", user.getId());
 
         reservationSchemaAlignment.run(new DefaultApplicationArguments(new String[0]));

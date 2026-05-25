@@ -2,6 +2,8 @@ package com.roomify.backend.exception;
 
 import com.roomify.backend.dto.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +23,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+        private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<ApiError> handleValidationErrors(
@@ -64,6 +69,18 @@ public class GlobalExceptionHandler {
                                 request.getRequestURI(),
                                 validationErrors);
 
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<ApiError> handleUnreadableMessage(
+                        HttpMessageNotReadableException ex,
+                        HttpServletRequest request) {
+                ApiError error = new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                "Malformed JSON request body",
+                                request.getRequestURI());
                 return ResponseEntity.badRequest().body(error);
         }
 
@@ -269,6 +286,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiError> handleGeneralError(
                         Exception ex,
                         HttpServletRequest request) {
+                log.error("Unhandled exception for {} {}", request.getMethod(), request.getRequestURI(), ex);
                 ApiError error = new ApiError(
                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                 "Internal Server Error",

@@ -139,8 +139,9 @@ public class DashboardController {
      *
      * Generates a filtered reservation report.  The request body carries the
      * date range and optional filters (status, roomTypeId, exportFormat).
-     * The response always uses JSON in this foundation phase; "CSV" in
-     * {@code exportFormat} is recorded but does not change the content type.
+     * The response returns structured JSON data in all cases. The
+     * {@code exportFormat} field is treated as caller metadata for the
+     * frontend export flow and does not change the response content type.
      *
      * @param filter validated report filter from request body
      * @return 200 OK with {@link ReportExportResponse}

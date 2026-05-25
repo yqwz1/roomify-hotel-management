@@ -105,7 +105,7 @@ describe('AppSidebar', () => {
     expect(screen.getAllByText('Departures').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Billing').length).toBeGreaterThan(0);
     expect(screen.queryByText('Staff Dashboard')).not.toBeInTheDocument();
-    expect(screen.queryByText('Room Search')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Room Search').length).toBeGreaterThan(0);
   });
 
   it('renders the admin navigation labels for the system workspace', () => {

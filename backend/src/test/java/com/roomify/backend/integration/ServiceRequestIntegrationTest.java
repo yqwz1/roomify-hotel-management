@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomify.backend.config.JwtUtils;
 import com.roomify.backend.config.TestConfig;
 import com.roomify.backend.entity.Guest;
@@ -30,7 +31,10 @@ import com.roomify.backend.user.Role;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +87,7 @@ class ServiceRequestIntegrationTest {
     private UserRepository userRepository;
 
     private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
     private String guestToken;
     private String staffToken;
     private Room activeRoom;
@@ -95,6 +100,7 @@ class ServiceRequestIntegrationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
+        objectMapper = new ObjectMapper();
 
         serviceRequestRepository.deleteAll();
         reservationRepository.deleteAll();
@@ -146,17 +152,17 @@ class ServiceRequestIntegrationTest {
 
     @Test
     void guestCanCreateAndListOwnServiceRequests() throws Exception {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("roomId", activeRoom.getId());
+        request.put("serviceType", "ROOM_CLEANING");
+        request.put("description", "Fresh towels and a quick tidy-up.");
+        request.put("priority", "HIGH");
+
         mockMvc.perform(post("/api/guest/service-requests")
                         .header("Authorization", "Bearer " + guestToken)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "roomId": %d,
-                                  "serviceType": "ROOM_CLEANING",
-                                  "description": "Fresh towels and a quick tidy-up.",
-                                  "priority": "HIGH"
-                                }
-                                """.formatted(activeRoom.getId())))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.guestId").value(guest.getId()))
                 .andExpect(jsonPath("$.roomId").value(activeRoom.getId()))
@@ -174,29 +180,23 @@ class ServiceRequestIntegrationTest {
 
     @Test
     void guestCannotCreateRequestForPastOrForeignRoom() throws Exception {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("serviceType", "MAINTENANCE");
+        request.put("description", "The AC needs attention.");
+
         mockMvc.perform(post("/api/guest/service-requests")
                         .header("Authorization", "Bearer " + guestToken)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "roomId": %d,
-                                  "serviceType": "MAINTENANCE",
-                                  "description": "The AC needs attention."
-                                }
-                                """.formatted(pastRoom.getId())))
+                        .content(writeServiceRequestPayload(request, pastRoom.getId())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Selected room is not part of an active reservation."));
 
         mockMvc.perform(post("/api/guest/service-requests")
                         .header("Authorization", "Bearer " + guestToken)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "roomId": %d,
-                                  "serviceType": "MAINTENANCE",
-                                  "description": "The AC needs attention."
-                                }
-                                """.formatted(otherGuestRoom.getId())))
+                        .content(writeServiceRequestPayload(request, otherGuestRoom.getId())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Selected room is not part of an active reservation."));
     }
@@ -252,5 +252,11 @@ class ServiceRequestIntegrationTest {
         reservation.setOutstandingBalance(new BigDecimal("250.00"));
         reservation.setInvoiceFinalized(false);
         return reservation;
+    }
+
+    private String writeServiceRequestPayload(Map<String, Object> request, Long roomId) throws Exception {
+        Map<String, Object> payload = new LinkedHashMap<>(request);
+        payload.put("roomId", roomId);
+        return objectMapper.writeValueAsString(payload);
     }
 }

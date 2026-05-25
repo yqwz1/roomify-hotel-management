@@ -2,14 +2,20 @@ package com.roomify.backend.dto;
 
 import com.roomify.backend.entity.ReservationStatus;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.AssertTrue;
 
 import java.time.LocalDate;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Request DTO for report generation filters.
  * Used as @RequestBody for POST /api/dashboard/reports/export
  */
 public class ReportFilterRequest {
+
+    private static final String DEFAULT_EXPORT_FORMAT = "JSON";
+    private static final Set<String> SUPPORTED_EXPORT_FORMATS = Set.of("JSON", "CSV", "EXCEL");
 
     /** Period start date (inclusive). Required. */
     @NotNull(message = "Start date is required")
@@ -32,11 +38,11 @@ public class ReportFilterRequest {
     private ReservationStatus status;
 
     /**
-     * Export format. Accepted values: "JSON" (default), "CSV".
-     * The controller returns JSON in all cases for this foundation;
-     * "CSV" is a placeholder for future streaming export work.
+     * Export format metadata requested by the caller.
+     * Supported values are normalized to uppercase and limited to
+     * JSON, CSV, or EXCEL. Unsupported values fall back to JSON.
      */
-    private String exportFormat = "JSON";
+    private String exportFormat = DEFAULT_EXPORT_FORMAT;
 
     public ReportFilterRequest() {}
 
@@ -50,7 +56,7 @@ public class ReportFilterRequest {
         this.endDate = endDate;
         this.roomTypeId = roomTypeId;
         this.status = status;
-        this.exportFormat = exportFormat != null ? exportFormat : "JSON";
+        this.exportFormat = normalizeExportFormat(exportFormat);
     }
 
     public LocalDate getStartDate() { return startDate; }
@@ -66,5 +72,19 @@ public class ReportFilterRequest {
     public void setStatus(ReservationStatus status) { this.status = status; }
 
     public String getExportFormat() { return exportFormat; }
-    public void setExportFormat(String exportFormat) { this.exportFormat = exportFormat; }
+    public void setExportFormat(String exportFormat) { this.exportFormat = normalizeExportFormat(exportFormat); }
+
+    @AssertTrue(message = "End date must be on or after start date")
+    public boolean isDateRangeValid() {
+        return startDate == null || endDate == null || !endDate.isBefore(startDate);
+    }
+
+    private String normalizeExportFormat(String exportFormat) {
+        if (exportFormat == null || exportFormat.isBlank()) {
+            return DEFAULT_EXPORT_FORMAT;
+        }
+
+        String normalized = exportFormat.trim().toUpperCase(Locale.ROOT);
+        return SUPPORTED_EXPORT_FORMATS.contains(normalized) ? normalized : DEFAULT_EXPORT_FORMAT;
+    }
 }

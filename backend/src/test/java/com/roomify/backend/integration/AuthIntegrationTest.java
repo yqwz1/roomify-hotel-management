@@ -1,6 +1,8 @@
 package com.roomify.backend.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,10 +24,15 @@ import com.roomify.backend.notification.EmailNotification;
 import com.roomify.backend.notification.EmailNotificationRepository;
 import com.roomify.backend.notification.NotificationDeliveryStatus;
 import com.roomify.backend.notification.NotificationType;
+import com.roomify.backend.repository.ExpenseRepository;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
+import com.roomify.backend.repository.ServiceChargeRepository;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
@@ -40,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -85,6 +93,21 @@ class AuthIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private ReservationAuditRepository reservationAuditRepository;
+
+    @Autowired
+    private ReservationHistoryRepository reservationHistoryRepository;
+
+    @Autowired
+    private ServiceChargeRepository serviceChargeRepository;
+
+    @Autowired
+    private ExpenseRepository expenseRepository;
+
+    @Autowired
     private RoomRepository roomRepository;
 
     @Autowired
@@ -96,6 +119,9 @@ class AuthIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -104,12 +130,40 @@ class AuthIntegrationTest {
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper();
-        emailNotificationRepository.deleteAll();
-        reservationRepository.deleteAll();
-        roomRepository.deleteAll();
-        roomTypeRepository.deleteAll();
-        userRepository.deleteAll();
-        guestRepository.deleteAll();
+        deleteAllTestData();
+    }
+
+    private void deleteAllTestData() {
+        deleteFromTable("guest_conversation_messages");
+        deleteFromTable("guest_conversations");
+        deleteFromTable("inventory_transactions");
+        deleteFromTable("service_usage_record_items");
+        deleteFromTable("service_usage_records");
+        deleteFromTable("service_usage_template_items");
+        deleteFromTable("service_usage_templates");
+        deleteFromTable("password_reset_tokens");
+        deleteFromTable("invoice_delivery_logs");
+        deleteFromTable("notifications");
+        deleteFromTable("email_notifications");
+        deleteFromTable("audit_logs");
+        deleteFromTable("expenses");
+        deleteFromTable("service_charges");
+        deleteFromTable("payments");
+        deleteFromTable("reservation_audits");
+        deleteFromTable("reservation_history");
+        deleteFromTable("reservations");
+        deleteFromTable("services");
+        deleteFromTable("inventory_items");
+        deleteFromTable("rooms");
+        deleteFromTable("room_types");
+        deleteFromTable("staff");
+        deleteFromTable("user_roles");
+        deleteFromTable("guests");
+        deleteFromTable("users");
+    }
+
+    private void deleteFromTable(String tableName) {
+        jdbcTemplate.execute("DELETE FROM " + tableName);
     }
 
     @Test
@@ -127,8 +181,11 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
                 .andExpect(jsonPath("$.username").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"))
-                .andExpect(jsonPath("$.roles[1]").value("ROLE_MANAGER"));
+                .andExpect(jsonPath("$.roles", hasSize(3)))
+                .andExpect(jsonPath("$.roles", containsInAnyOrder(
+                        "ROLE_ADMIN",
+                        "ROLE_MANAGER",
+                        "ROLE_STAFF")));
     }
 
     @Test
@@ -196,12 +253,14 @@ class AuthIntegrationTest {
                 .content(loginJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
-                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"))
-                .andExpect(jsonPath("$.roles[1]").value("ROLE_MANAGER"))
-                .andExpect(jsonPath("$.roles[2]").value("ROLE_STAFF"));
+                .andExpect(jsonPath("$.roles", hasSize(3)))
+                .andExpect(jsonPath("$.roles", containsInAnyOrder(
+                        "ROLE_ADMIN",
+                        "ROLE_MANAGER",
+                        "ROLE_STAFF")));
 
         User adminUser = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
-        assertThat(adminUser.getRoles()).containsExactly(Role.ADMIN, Role.MANAGER, Role.STAFF);
+        assertThat(adminUser.getRoles()).containsExactlyInAnyOrder(Role.ADMIN, Role.MANAGER, Role.STAFF);
         assertThat(passwordEncoder.matches(ADMIN_PASSWORD, adminUser.getPasswordHash())).isTrue();
     }
 
@@ -226,7 +285,7 @@ class AuthIntegrationTest {
         assertThat(repairedAdmin.getId()).isEqualTo(legacyAdmin.getId());
         assertThat(repairedAdmin.isActive()).isTrue();
         assertThat(repairedAdmin.getRole()).isEqualTo(Role.ADMIN);
-        assertThat(repairedAdmin.getRoles()).containsExactly(Role.ADMIN, Role.MANAGER, Role.STAFF);
+        assertThat(repairedAdmin.getRoles()).containsExactlyInAnyOrder(Role.ADMIN, Role.MANAGER, Role.STAFF);
         assertThat(passwordEncoder.matches(ADMIN_PASSWORD, repairedAdmin.getPasswordHash())).isTrue();
         assertThat(userRepository.findByEmailIgnoreCase(LEGACY_ADMIN_EMAIL)).isEmpty();
     }

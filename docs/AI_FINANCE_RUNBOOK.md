@@ -4,11 +4,11 @@
 
 AI Revenue Forecasting & Pricing Advisor is a Manager-only Roomify feature for reviewing revenue forecasts, occupancy demand, pricing recommendations, and AI-generated finance insights.
 
-Current Day 2 frontend state:
+Current implemented frontend state:
 - `/manager/ai-finance` is available only to Manager users.
-- The React page uses static mock data and polished placeholders.
-- No React-to-backend AI Finance API integration is enabled yet.
-- Real AI/ML behavior is owned by backend and `ai-service` integration work, not by the Day 2 frontend skeleton.
+- The React page loads live data from Spring Boot AI Finance endpoints.
+- React does not call FastAPI directly; all browser traffic stays behind Spring Boot APIs.
+- The UI handles live model responses, backend errors, and safe fallback payloads.
 
 ## Current Architecture
 
@@ -32,7 +32,7 @@ Current implementation notes:
 - Architecture details: `docs/AI_FINANCE_ARCHITECTURE.md`
 - Python FastAPI service folder: `ai-service/`
 
-Do not call FastAPI directly from React. Frontend integration should go through the Spring Boot API when later Person B integration tasks begin.
+Do not call FastAPI directly from React. The supported browser integration path is already Spring Boot -> FastAPI.
 
 ## How To Run Locally
 
@@ -147,7 +147,7 @@ Documented AI service endpoints:
 - `POST /forecast/full`
 - `POST /pricing/recommendations`
 
-Day 2 frontend work does not connect React to this service. Spring Boot to FastAPI integration is documented as later integration work in the AI Finance docs.
+The frontend does not connect directly to this service. Spring Boot owns the integration, auth boundary, and fallback handling.
 
 ## DB Strategy and Migration Status
 
@@ -165,7 +165,7 @@ Locked strategy based on current project files:
 Current status:
 - Backend health works on the existing demo database.
 - AI Finance relies on existing hotel domain tables such as guests, room types, rooms, reservations, payments, and expenses.
-- Fresh DB wipe verification has not been completed in this Day 2 frontend/docs task.
+- Fresh DB wipe verification has not been completed in this documented local-demo path.
 - `docker compose down -v` was intentionally not run because it deletes the local PostgreSQL volume and can destroy demo data.
 - Fresh DB verification is postponed until a backup or separate disposable environment is available.
 
@@ -174,13 +174,13 @@ Resolved migration review items:
 - Hibernate `ddl-auto` is locked to `validate`, so Hibernate is not being used to mutate schema during normal startup.
 - The existing demo DB baseline is documented as version `12`.
 - The old missing inventory/service usage schema gap is addressed by migration `V13`.
-- Backend health on the existing demo DB is treated as the current Day 2 working path.
+- Backend health on the existing demo DB is treated as the current working path.
 
-Legacy notes that are not active Day 2 blockers:
+Legacy notes that are not active blockers:
 - `V4__create_staff_table.sql.sql` still has a double `.sql` suffix in the repository history.
 - The existing migration set is being used with baseline version `12` for the demo DB, so older migration oddities should not be treated as active blockers unless a fresh disposable DB verification proves otherwise.
 
-## Verify Current Day 2 State
+## Verify Current State
 
 ### Backend health
 
@@ -218,7 +218,7 @@ http://localhost:5173/manager/ai-finance
 ```
 
 Expected:
-- Page renders a polished static Manager AI Finance preview.
+- Page renders the live Manager AI Finance dashboard through Spring Boot.
 - Sections appear in this order:
   1. Header
   2. AI Status
@@ -226,8 +226,10 @@ Expected:
   4. Revenue Forecast
   5. Occupancy Forecast
   6. Pricing Recommendations
-  7. AI Insights
-- No live backend or FastAPI calls are made from React.
+  7. AI Price Optimization
+  8. Demand Heatmap
+  9. AI Insights
+- React calls Spring Boot AI Finance endpoints; React does not call FastAPI directly.
 
 ### Frontend build
 
@@ -239,7 +241,7 @@ npm run build
 Expected:
 - Vite production build completes.
 
-### Optional frontend tests
+### Frontend tests
 
 ```powershell
 cd frontend
@@ -247,7 +249,7 @@ npm test
 ```
 
 Expected:
-- Existing Vitest suite should pass, or failures should be recorded with file/test names.
+- Existing Vitest suite should pass.
 
 ## Common Problems And Fixes
 
@@ -379,7 +381,7 @@ Use these URLs to check the FastAPI service once it is running:
 - `http://127.0.0.1:8000/health`
 - `http://127.0.0.1:8000/model-info`
 
-Do not wire React directly to FastAPI. Later integration should keep the frontend behind Spring Boot routes and Manager-only authorization.
+Do not wire React directly to FastAPI. Keep the frontend behind Spring Boot routes and Manager-only authorization.
 
 ## Manager-Only Access Note
 

@@ -41,6 +41,7 @@ export default function FloatingGuestAssistant() {
   const [selectedReservationId, setSelectedReservationId] = useState('');
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [conversationLoading, setConversationLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [input, setInput] = useState('');
   const [reservationLoading, setReservationLoading] = useState(true);
@@ -221,6 +222,7 @@ export default function FloatingGuestAssistant() {
     let ignore = false;
 
     const load = async () => {
+      setConversationLoading(true);
       try {
         const items = await listGuestConversations();
         if (ignore) return;
@@ -228,6 +230,10 @@ export default function FloatingGuestAssistant() {
       } catch (error) {
         if (!ignore) {
           setToast({ message: extractGuestAssistantError(error), type: 'error' });
+        }
+      } finally {
+        if (!ignore) {
+          setConversationLoading(false);
         }
       }
     };
@@ -268,7 +274,7 @@ export default function FloatingGuestAssistant() {
 
   useEffect(() => {
     if (!open || !isGuest) return;
-    if (reservationLoading) return;
+    if (reservationLoading || conversationLoading) return;
 
     if (checkedInReservations.length === 0) {
       if (selectedReservationId) {
@@ -282,8 +288,12 @@ export default function FloatingGuestAssistant() {
     if (checkedInReservations.length === 1) {
       const onlyReservation = checkedInReservations[0];
       const onlyReservationId = String(onlyReservation.id ?? '');
+      const matchedConversation = findConversationForReservation(onlyReservation);
       if (selectedReservationId !== onlyReservationId) {
         setSelectedReservationId(onlyReservationId);
+      }
+      if (matchedConversation?.publicId === activeConversationId) {
+        return;
       }
       void ensureConversationForReservation(onlyReservation);
       return;
@@ -311,6 +321,7 @@ export default function FloatingGuestAssistant() {
     findConversationForReservation,
     isGuest,
     open,
+    conversationLoading,
     reservationLoading,
     selectedReservation,
     selectedReservationId,
@@ -704,7 +715,7 @@ export default function FloatingGuestAssistant() {
                 <textarea
                   value={input}
                   onChange={(event) => handleTypingChange(event.target.value)}
-                  disabled={assistantBlockedByNoStay || sending}
+                  disabled={assistantMessagingLocked || sending}
                   rows={3}
                   placeholder={translateWithFallback(t, 'guestAssistant.placeholder', 'Write a message to the hotel team...')}
                   className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
@@ -712,7 +723,7 @@ export default function FloatingGuestAssistant() {
                 <button
                   type="button"
                   onClick={handleSendMessage}
-                  disabled={sending || !normalizedInput || assistantBlockedByNoStay}
+                  disabled={sending || !normalizedInput || assistantMessagingLocked}
                   className="pointer-events-auto relative z-10 inline-flex h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send guest assistant message"
                 >

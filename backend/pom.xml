@@ -23,6 +23,7 @@
         <java.version>21</java.version>
         <lombok.version>1.18.40</lombok.version>
         <jjwt.version>0.11.5</jjwt.version>
+        <roomify.build.dir>${user.home}/.roomify-build/${project.artifactId}</roomify.build.dir>
     </properties>
 
     <dependencies>
@@ -173,6 +174,7 @@
     </dependencies>
 
     <build>
+        <directory>${roomify.build.dir}</directory>
         <plugins>
 
             <!-- Compiler Plugin -->

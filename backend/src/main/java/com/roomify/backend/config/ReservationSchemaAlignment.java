@@ -275,13 +275,44 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
 
         alignTextColumn("users", "email", 255);
         alignTextColumn("users", "password_hash", 255);
-        alignTextColumn("users", "role", 20);
+        alignUserRoleColumn();
 
         normalizeUserRoles();
         alignUserRoleConstraint();
 
         alignTextColumn("staff", "name", 100);
         alignTextColumn("staff", "department", 50);
+    }
+
+    private void alignUserRoleColumn() {
+        Optional<ColumnMetadata> metadata = findColumn("users", "role");
+
+        if (metadata.isEmpty() || metadata.get().isTextual()) {
+            return;
+        }
+
+        if (isH2() && metadata.get().isBinary()) {
+            execute("""
+                    ALTER TABLE users
+                    ADD COLUMN IF NOT EXISTS role_text VARCHAR(20)
+                    """);
+            execute("""
+                    UPDATE users
+                    SET role_text = UTF8TOSTRING(role)
+                    WHERE role IS NOT NULL
+                    """);
+            execute("""
+                    ALTER TABLE users
+                    DROP COLUMN role
+                    """);
+            execute("""
+                    ALTER TABLE users
+                    RENAME COLUMN role_text TO role
+                    """);
+            return;
+        }
+
+        alignTextColumn("users", "role", 20);
     }
 
     private void normalizeUserRoles() {
@@ -595,7 +626,7 @@ public class ReservationSchemaAlignment implements ApplicationRunner {
 
             return """
                     ALTER TABLE %s
-                    ALTER COLUMN %s SET DATA TYPE VARCHAR(%d)
+                    ALTER COLUMN %s VARCHAR(%d)
                     USING UTF8TOSTRING(%s)
                     """.formatted(
                     tableName,

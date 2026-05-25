@@ -34,14 +34,14 @@ import {
   ROLE_STAFF,
 } from './components/navigation/navConfig'
 
-// Day 1 Sprint — new pages (mock data, no API)
+// Public booking and room-browsing surfaces
 import RoomsManagement from './pages/RoomsManagement'
 import RoomSearch from './pages/RoomSearch'
 import RoomDetails from './pages/RoomDetails'
 import BookRoom from './pages/BookRoom'
 import ConfirmationPage from './pages/ConfirmationPage'
 
-// Day 4 Sprint — reservation management pages
+// Reservation management pages
 import CheckIn from './pages/CheckIn'
 import ModifyReservation from './pages/ModifyReservation'
 import CancelReservation from './pages/CancelReservation'

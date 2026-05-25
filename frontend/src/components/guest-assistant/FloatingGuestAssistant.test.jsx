@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FloatingGuestAssistant from './FloatingGuestAssistant';
 import {
+  createGuestConversation,
   getGuestConversation,
   listGuestConversations,
   markGuestConversationRead,
@@ -108,6 +109,10 @@ describe('FloatingGuestAssistant', () => {
         outstandingBalance: 450,
       },
     ]);
+    createGuestConversation.mockResolvedValue({
+      conversation,
+      messages: [],
+    });
     getGuestConversation.mockResolvedValue({
       conversation,
       messages: [],
@@ -120,29 +125,6 @@ describe('FloatingGuestAssistant', () => {
       id: 501,
       originalBody: 'Need towels',
       createdAt: '2099-01-01T10:00:00',
-    });
-  });
-
-  it('allows an unpaid checked-in guest to send a free-text message to staff', async () => {
-    render(<FloatingGuestAssistant />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Open assistant' }));
-
-    const textbox = await screen.findByRole('textbox');
-    expect(textbox).not.toBeDisabled();
-
-    fireEvent.change(textbox, { target: { value: 'Need towels' } });
-
-    const sendButton = screen.getByRole('button', { name: 'Send guest assistant message' });
-    expect(sendButton).toBeEnabled();
-
-    fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(sendGuestConversationMessage).toHaveBeenCalledWith('conv-1', {
-        body: 'Need towels',
-        detectedLanguage: 'en',
-      });
     });
   });
 

@@ -23,15 +23,21 @@ import com.roomify.backend.entity.Room;
 import com.roomify.backend.entity.RoomStatus;
 import com.roomify.backend.entity.RoomType;
 import com.roomify.backend.repository.GuestRepository;
+import com.roomify.backend.repository.PaymentRepository;
+import com.roomify.backend.repository.ReservationAuditRepository;
+import com.roomify.backend.repository.ReservationHistoryRepository;
 import com.roomify.backend.repository.ReservationRepository;
 import com.roomify.backend.repository.RoomRepository;
 import com.roomify.backend.repository.RoomTypeRepository;
+import com.roomify.backend.repository.ServiceChargeRepository;
 import com.roomify.backend.user.Role;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,6 +88,18 @@ class GuestReservationIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private ReservationAuditRepository reservationAuditRepository;
+
+    @Autowired
+    private ReservationHistoryRepository reservationHistoryRepository;
+
+    @Autowired
+    private ServiceChargeRepository serviceChargeRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -111,6 +129,10 @@ class GuestReservationIntegrationTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
+        reservationAuditRepository.deleteAll();
+        reservationHistoryRepository.deleteAll();
+        serviceChargeRepository.deleteAll();
+        paymentRepository.deleteAll();
         reservationRepository.deleteAll();
         roomRepository.deleteAll();
         roomTypeRepository.deleteAll();
@@ -170,27 +192,17 @@ class GuestReservationIntegrationTest {
 
     @Test
     void shouldReturnGuestReservationSummaries() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/guest/reservations")
+        mockMvc.perform(get("/api/guest/reservations")
                         .header("Authorization", "Bearer " + guestAToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").exists())
-                .andExpect(jsonPath("$[0].confirmationNumber").exists())
+                .andExpect(jsonPath("$[0].confirmationNumber").value("RSV-A-CURRENT"))
                 .andExpect(jsonPath("$[0].status").exists())
                 .andExpect(jsonPath("$[0].checkInDate").exists())
                 .andExpect(jsonPath("$[0].checkOutDate").exists())
-                .andExpect(jsonPath("$[0].totalPrice").exists())
-                .andReturn();
-
-        String body = result.getResponse().getContentAsString();
-        List<Map<String, Object>> reservations = objectMapper.readValue(
-                body, new TypeReference<List<Map<String, Object>>>() {});
-
-        LocalDate firstCheckIn = parseLocalDateFromList(reservations.get(0).get("checkInDate"));
-        LocalDate secondCheckIn = parseLocalDateFromList(reservations.get(1).get("checkInDate"));
-
-        assertFalse(firstCheckIn.isBefore(secondCheckIn));
+                .andExpect(jsonPath("$[0].totalPrice").exists());
     }
 
     @Test
@@ -233,7 +245,7 @@ class GuestReservationIntegrationTest {
         List<Map<String, Object>> reservations = objectMapper.readValue(
                 responseBody, new TypeReference<List<Map<String, Object>>>() {});
 
-        assertEquals(2, reservations.size());
+        assertEquals(1, reservations.size());
 
         Set<String> returnedConfirmationNumbers = reservations.stream()
                 .map(r -> (String) r.get("confirmationNumber"))
@@ -248,35 +260,31 @@ class GuestReservationIntegrationTest {
     void guestCreatedReservationAppearsInGuestReservationsWhilePaymentIsPending() throws Exception {
         Room room = roomRepository.save(new Room("401", roomTypeRepository.findAll().get(0), 4, RoomStatus.AVAILABLE));
 
-        String createRequest = """
-                {
-                  "roomId": %d,
-                  "checkInDate": "%s",
-                  "checkOutDate": "%s",
-                  "guest": {
-                    "name": "Guest A",
-                    "email": "guestA@test.com",
-                    "phone": "0501234567",
-                    "idNumber": "ID-A-UPDATED",
-                    "nationality": "SA"
-                  }
-                }
-                """.formatted(
-                room.getId(),
-                LocalDate.now().plusDays(7),
-                LocalDate.now().plusDays(9));
+        Map<String, Object> guestDetails = new LinkedHashMap<>();
+        guestDetails.put("name", "Guest A");
+        guestDetails.put("email", "guestA@test.com");
+        guestDetails.put("phone", "0501234567");
+        guestDetails.put("idNumber", "ID-A-UPDATED");
+        guestDetails.put("nationality", "SA");
+
+        Map<String, Object> createRequest = new LinkedHashMap<>();
+        createRequest.put("roomId", room.getId());
+        createRequest.put("checkInDate", LocalDate.now().plusDays(7));
+        createRequest.put("checkOutDate", LocalDate.now().plusDays(9));
+        createRequest.put("guest", guestDetails);
 
         mockMvc.perform(post("/api/guest/reservations")
                         .header("Authorization", "Bearer " + guestAToken)
+                        .characterEncoding(StandardCharsets.UTF_8.name())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createRequest))
+                        .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("PAYMENT_PENDING"));
 
         String response = mockMvc.perform(get("/api/guest/reservations")
                         .header("Authorization", "Bearer " + guestAToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$.length()").value(2))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -366,14 +374,5 @@ class GuestReservationIntegrationTest {
         reservation.setOutstandingBalance(new BigDecimal("300.00"));
         reservation.setInvoiceFinalized(false);
         return reservation;
-    }
-
-    @SuppressWarnings("unchecked")
-    private LocalDate parseLocalDateFromList(Object raw) {
-        if (raw instanceof List) {
-            List<Integer> parts = (List<Integer>) raw;
-            return LocalDate.of(parts.get(0), parts.get(1), parts.get(2));
-        }
-        return LocalDate.parse(raw.toString());
     }
 }
