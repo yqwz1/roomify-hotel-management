@@ -43,6 +43,10 @@ import org.springframework.web.context.WebApplicationContext;
 })
 class DemoDataBootstrapIntegrationTest {
 
+    private static final String ADMIN_EMAIL = "admin@roomify.demo";
+    private static final String LEGACY_ADMIN_EMAIL = "admin@roomify.com";
+    private static final String ADMIN_PASSWORD = "Admin@12345";
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -108,12 +112,33 @@ class DemoDataBootstrapIntegrationTest {
 
     @Test
     void demoBootstrapCreatesAdminAccountWithDemoPassword() {
-        User adminUser = userRepository.findByEmailIgnoreCase("admin@roomify.com").orElseThrow();
+        User adminUser = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
 
         assertTrue(adminUser.isActive());
         assertEquals(Role.ADMIN, adminUser.getRole());
         assertTrue(adminUser.getRoles().contains(Role.ADMIN));
-        assertTrue(passwordEncoder.matches("RealAdminPass123!", adminUser.getPasswordHash()));
+        assertTrue(passwordEncoder.matches(ADMIN_PASSWORD, adminUser.getPasswordHash()));
+    }
+
+    @Test
+    void rerunRepairsLegacyAdminWithoutCreatingDuplicate() throws Exception {
+        User adminUser = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
+        adminUser.setEmail(LEGACY_ADMIN_EMAIL);
+        adminUser.setPasswordHash(passwordEncoder.encode("WrongPassword1!"));
+        adminUser.setRole(Role.STAFF);
+        adminUser.setRoles(java.util.EnumSet.of(Role.STAFF));
+        adminUser.setActive(false);
+        userRepository.save(adminUser);
+
+        demoDataBootstrap.run(new DefaultApplicationArguments(new String[0]));
+
+        User repairedAdmin = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
+        assertEquals(adminUser.getId(), repairedAdmin.getId());
+        assertTrue(repairedAdmin.isActive());
+        assertEquals(Role.ADMIN, repairedAdmin.getRole());
+        assertTrue(repairedAdmin.getRoles().contains(Role.ADMIN));
+        assertTrue(passwordEncoder.matches(ADMIN_PASSWORD, repairedAdmin.getPasswordHash()));
+        assertTrue(userRepository.findByEmailIgnoreCase(LEGACY_ADMIN_EMAIL).isEmpty());
     }
 
     @Test

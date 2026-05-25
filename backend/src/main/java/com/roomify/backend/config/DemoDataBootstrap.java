@@ -86,11 +86,12 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataBootstrap.class);
 
-    private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
+    private static final String DEMO_ADMIN_EMAIL = "admin@roomify.demo";
+    private static final String LEGACY_DEMO_ADMIN_EMAIL = "admin@roomify.com";
     private static final String DEMO_MANAGER_EMAIL = "manager@roomify.com";
     private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
     private static final String DEMO_GUEST_EMAIL = "guest@roomify.com";
-    private static final String DEMO_ADMIN_PASSWORD = "RealAdminPass123!";
+    private static final String DEMO_ADMIN_PASSWORD = "Admin@12345";
     private static final String DEMO_PASSWORD = "Demo@2026";
     private static final String DEMO_GUEST_CONFIRMATION = "DEMO-GUEST-QUICK";
 
@@ -211,10 +212,29 @@ public class DemoDataBootstrap implements ApplicationRunner {
     // ─── Users ──────────────────────────────────────────────────────────────
 
     private void seedCoreUsers() {
-        createSimpleUserIfMissing(DEMO_ADMIN_EMAIL, Role.ADMIN, DEMO_ADMIN_PASSWORD);
+        upsertDemoAdminUser();
         createSimpleUserIfMissing(DEMO_MANAGER_EMAIL, Role.MANAGER, DEMO_PASSWORD);
         createStaffUserIfMissing(DEMO_STAFF_EMAIL, "Demo Staff", "Front Desk", DEMO_PASSWORD);
         createSimpleUserIfMissing(DEMO_GUEST_EMAIL, Role.GUEST, DEMO_PASSWORD);
+    }
+
+    private User upsertDemoAdminUser() {
+        User user = userRepository.findByEmailIgnoreCase(DEMO_ADMIN_EMAIL)
+                .or(() -> userRepository.findByEmailIgnoreCase(LEGACY_DEMO_ADMIN_EMAIL))
+                .orElseGet(() -> new User(
+                        DEMO_ADMIN_EMAIL,
+                        passwordEncoder.encode(DEMO_ADMIN_PASSWORD),
+                        Role.ADMIN,
+                        true));
+
+        user.setEmail(DEMO_ADMIN_EMAIL);
+        user.setPasswordHash(passwordEncoder.encode(DEMO_ADMIN_PASSWORD));
+        user.setRole(Role.ADMIN);
+        user.setRoles(EnumSet.of(Role.ADMIN, Role.MANAGER, Role.STAFF));
+        user.setActive(true);
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
+        return userRepository.save(user);
     }
 
     private List<User> seedAdditionalStaff() {

@@ -63,8 +63,9 @@ import org.springframework.web.context.WebApplicationContext;
 })
 class AuthIntegrationTest {
 
-    private static final String ADMIN_EMAIL = "admin@roomify.com";
-    private static final String ADMIN_PASSWORD = "RealAdminPass123!";
+    private static final String ADMIN_EMAIL = "admin@roomify.demo";
+    private static final String LEGACY_ADMIN_EMAIL = "admin@roomify.com";
+    private static final String ADMIN_PASSWORD = "Admin@12345";
 
     private MockMvc mockMvc;
 
@@ -202,6 +203,32 @@ class AuthIntegrationTest {
         User adminUser = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
         assertThat(adminUser.getRoles()).containsExactly(Role.ADMIN, Role.MANAGER, Role.STAFF);
         assertThat(passwordEncoder.matches(ADMIN_PASSWORD, adminUser.getPasswordHash())).isTrue();
+    }
+
+    @Test
+    void demoAdminQuickLoginRepairsLegacyAdminAccountWithoutCreatingDuplicate() throws Exception {
+        User legacyAdmin = new User(LEGACY_ADMIN_EMAIL, passwordEncoder.encode("OldAdminPass1!"), Role.STAFF, false);
+        legacyAdmin.setRoles(java.util.EnumSet.of(Role.STAFF));
+        legacyAdmin = userRepository.save(legacyAdmin);
+
+        String loginJson = objectMapper.writeValueAsString(Map.of(
+                "email", ADMIN_EMAIL,
+                "password", ADMIN_PASSWORD));
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(ADMIN_EMAIL))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"));
+
+        User repairedAdmin = userRepository.findByEmailIgnoreCase(ADMIN_EMAIL).orElseThrow();
+        assertThat(repairedAdmin.getId()).isEqualTo(legacyAdmin.getId());
+        assertThat(repairedAdmin.isActive()).isTrue();
+        assertThat(repairedAdmin.getRole()).isEqualTo(Role.ADMIN);
+        assertThat(repairedAdmin.getRoles()).containsExactly(Role.ADMIN, Role.MANAGER, Role.STAFF);
+        assertThat(passwordEncoder.matches(ADMIN_PASSWORD, repairedAdmin.getPasswordHash())).isTrue();
+        assertThat(userRepository.findByEmailIgnoreCase(LEGACY_ADMIN_EMAIL)).isEmpty();
     }
 
     @Test
@@ -415,7 +442,7 @@ class AuthIntegrationTest {
     @Test
     void loginWithWrongPasswordReturnsUnauthorized() throws Exception {
         String loginJson = objectMapper.writeValueAsString(Map.of(
-                "email", "admin@roomify.com",
+                "email", ADMIN_EMAIL,
                 "password", "wrongpassword"));
 
         mockMvc.perform(post("/api/auth/login")
@@ -542,7 +569,7 @@ class AuthIntegrationTest {
     @Test
     void loginWithMissingFieldsReturnsBadRequest() throws Exception {
         String loginJson = objectMapper.writeValueAsString(Map.of(
-                "email", "admin@roomify.com"
+                "email", ADMIN_EMAIL
         // password missing
         ));
 

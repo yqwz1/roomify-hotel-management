@@ -23,11 +23,15 @@ import { EASE } from '@/components/motion/Reveal';
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Access%20Support`;
 const DEMO_PASSWORD = 'Demo@2026';
-const DEMO_ADMIN_PASSWORD = import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD || 'RealAdminPass123!';
+const RAW_DEMO_ADMIN_PASSWORD = import.meta.env.VITE_ROOMIFY_DEMO_ADMIN_PASSWORD;
+const DEMO_ADMIN_PASSWORD =
+  RAW_DEMO_ADMIN_PASSWORD && RAW_DEMO_ADMIN_PASSWORD !== 'RealAdminPass123!'
+    ? RAW_DEMO_ADMIN_PASSWORD
+    : 'Admin@12345';
 const DEMO_ACCOUNTS = [
   {
     label: 'Admin',
-    email: 'admin@roomify.com',
+    email: 'admin@roomify.demo',
     password: DEMO_ADMIN_PASSWORD,
   },
   { label: 'Manager', email: 'manager@roomify.com', password: DEMO_PASSWORD },

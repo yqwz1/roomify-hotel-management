@@ -44,11 +44,12 @@ import com.roomify.backend.config.JwtUtils;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-        private static final String DEMO_ADMIN_EMAIL = "admin@roomify.com";
+        private static final String DEMO_ADMIN_EMAIL = "admin@roomify.demo";
+        private static final String LEGACY_DEMO_ADMIN_EMAIL = "admin@roomify.com";
         private static final String DEMO_MANAGER_EMAIL = "manager@roomify.com";
         private static final String DEMO_STAFF_EMAIL = "staff@roomify.com";
         private static final String DEMO_GUEST_EMAIL = "guest@roomify.com";
-        private static final String DEMO_ADMIN_PASSWORD = "RealAdminPass123!";
+        private static final String DEMO_ADMIN_PASSWORD = "Admin@12345";
         private static final String DEMO_PASSWORD = "Demo@2026";
 
         private final AuditService auditService;
@@ -208,7 +209,7 @@ public class AuthController {
                         return;
                 }
 
-                User user = userRepository.findByEmailIgnoreCase(demoAccount.email())
+                User user = findDemoUserForUpsert(demoAccount)
                                 .orElseGet(() -> new User(
                                                 demoAccount.email(),
                                                 passwordEncoder.encode(demoAccount.password()),
@@ -247,6 +248,14 @@ public class AuthController {
                         guest.setNationality("SA");
                         guestRepository.save(guest);
                 }
+        }
+
+        private Optional<User> findDemoUserForUpsert(DemoAccount demoAccount) {
+                if (demoAccount.primaryRole() == Role.ADMIN) {
+                        return userRepository.findByEmailIgnoreCase(demoAccount.email())
+                                        .or(() -> userRepository.findByEmailIgnoreCase(LEGACY_DEMO_ADMIN_EMAIL));
+                }
+                return userRepository.findByEmailIgnoreCase(demoAccount.email());
         }
 
         private DemoAccount resolveDemoAccount(String email, String rawPassword) {

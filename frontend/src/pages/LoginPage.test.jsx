@@ -72,7 +72,7 @@ describe('LoginPage', () => {
 
         // Check for submit button
         expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
-        expect(screen.queryByText(/admin@roomify\.com/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/admin@roomify\.demo/i)).not.toBeInTheDocument();
     });
 
     it('renders demo quick login buttons only when the demo flag is enabled', async () => {
@@ -135,7 +135,7 @@ describe('LoginPage', () => {
             type: 'Bearer',
             id: 1,
             username: 'admin',
-            email: 'admin@roomify.com',
+            email: 'admin@roomify.demo',
             roles: ['ROLE_ADMIN']
         });
 
@@ -146,7 +146,7 @@ describe('LoginPage', () => {
         await user.click(screen.getByRole('button', { name: 'Admin' }));
 
         await waitFor(() => {
-            expect(authService.login).toHaveBeenCalledWith('admin@roomify.com', 'RealAdminPass123!');
+            expect(authService.login).toHaveBeenCalledWith('admin@roomify.demo', 'Admin@12345');
         });
     });
 

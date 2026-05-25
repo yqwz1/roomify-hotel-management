@@ -7,6 +7,7 @@ import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.RoomTypeRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -143,10 +144,8 @@ public class DemandHeatmapService {
     }
 
     private boolean isWeekend(LocalDate date) {
-        return switch (date.getDayOfWeek()) {
-            case FRIDAY, SATURDAY -> true;
-            default -> false;
-        };
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        return dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY;
     }
 
     private Optional<String> resolveHoliday(LocalDate date) {
