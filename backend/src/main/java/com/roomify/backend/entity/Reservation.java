@@ -124,6 +124,9 @@ public class Reservation {
     @Column(name = "invoice_finalized", nullable = false)
     private boolean invoiceFinalized = false;
 
+    @Column(name = "invoice_status", nullable = false, length = 20)
+    private String invoiceStatus = "PENDING";
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", length = 30)
     private PaymentMethod paymentMethod;
@@ -375,6 +378,14 @@ public class Reservation {
 
     public void setInvoiceFinalized(boolean invoiceFinalized) {
         this.invoiceFinalized = invoiceFinalized;
+    }
+
+    public String getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(String invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
     }
 
     public PaymentMethod getPaymentMethod() {

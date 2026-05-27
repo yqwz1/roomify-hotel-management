@@ -173,6 +173,104 @@ class RoomSearchIntegrationTest {
         }
 
         @Test
+        void searchExcludesRoomWithPaymentPendingReservation() throws Exception {
+                LocalDate checkIn = LocalDate.now().plusDays(5);
+                LocalDate checkOut = LocalDate.now().plusDays(10);
+
+                reservationRepository.save(new Reservation(
+                                testGuest, room101,
+                                LocalDate.now().plusDays(6), LocalDate.now().plusDays(8),
+                                new BigDecimal("200.00"), ReservationStatus.PAYMENT_PENDING, "CONF-005"));
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", checkIn.toString())
+                                .param("checkOut", checkOut.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(2))
+                                .andExpect(jsonPath("$.rooms", hasSize(2)));
+        }
+
+        @Test
+        void searchIncludesRoomWithTerminalReservationStatuses() throws Exception {
+                LocalDate checkIn = LocalDate.now().plusDays(5);
+                LocalDate checkOut = LocalDate.now().plusDays(10);
+
+                reservationRepository.save(new Reservation(
+                                testGuest, room101,
+                                LocalDate.now().plusDays(6), LocalDate.now().plusDays(8),
+                                new BigDecimal("200.00"), ReservationStatus.CHECKED_OUT, "CONF-006"));
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", checkIn.toString())
+                                .param("checkOut", checkOut.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(3))
+                                .andExpect(jsonPath("$.rooms", hasSize(3)));
+        }
+
+        @Test
+        void searchIncludesRoomAfterFailedPaymentCancellation() throws Exception {
+                LocalDate checkIn = LocalDate.now().plusDays(5);
+                LocalDate checkOut = LocalDate.now().plusDays(10);
+
+                reservationRepository.save(new Reservation(
+                                testGuest, room101,
+                                LocalDate.now().plusDays(6), LocalDate.now().plusDays(8),
+                                new BigDecimal("200.00"), ReservationStatus.CANCELLED, "CONF-FAILED-PAY"));
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", checkIn.toString())
+                                .param("checkOut", checkOut.toString()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(3))
+                                .andExpect(jsonPath("$.rooms", hasSize(3)));
+        }
+
+        @Test
+        void searchAllowsBackToBackStayOnCheckoutDate() throws Exception {
+                LocalDate existingCheckIn = LocalDate.now().plusDays(5);
+                LocalDate existingCheckOut = LocalDate.now().plusDays(6);
+                LocalDate requestedCheckIn = existingCheckOut;
+                LocalDate requestedCheckOut = requestedCheckIn.plusDays(1);
+
+                reservationRepository.save(new Reservation(
+                                testGuest, room101,
+                                existingCheckIn, existingCheckOut,
+                                new BigDecimal("100.00"), ReservationStatus.CONFIRMED, "CONF-BACK-TO-BACK"));
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", requestedCheckIn.toString())
+                                .param("checkOut", requestedCheckOut.toString())
+                                .param("roomName", "101"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(1))
+                                .andExpect(jsonPath("$.rooms[0].roomNumber").value("101"));
+        }
+
+        @Test
+        void searchAndReservationConflictQueryUseSameBlockingLogic() throws Exception {
+                LocalDate checkIn = LocalDate.now().plusDays(5);
+                LocalDate checkOut = LocalDate.now().plusDays(10);
+
+                reservationRepository.save(new Reservation(
+                                testGuest, room101,
+                                LocalDate.now().plusDays(6), LocalDate.now().plusDays(8),
+                                new BigDecimal("200.00"), ReservationStatus.PAYMENT_PENDING, "CONF-CONSISTENCY"));
+
+                org.junit.jupiter.api.Assertions.assertTrue(
+                                reservationRepository.existsOverlapForAvailability(
+                                                room101.getId(), checkIn, checkOut));
+
+                mockMvc.perform(get("/api/rooms/search")
+                                .param("checkIn", checkIn.toString())
+                                .param("checkOut", checkOut.toString())
+                                .param("roomName", "101"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.totalResults").value(0))
+                                .andExpect(jsonPath("$.rooms", hasSize(0)));
+        }
+
+        @Test
         void searchExcludesRoomWithNonOverlappingReservation() throws Exception {
                 LocalDate checkIn = LocalDate.now().plusDays(10);
                 LocalDate checkOut = LocalDate.now().plusDays(15);

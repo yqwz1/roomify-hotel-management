@@ -95,7 +95,8 @@ public class RoomService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
                 RoomResponse response = toResponse(room);
                 if (checkIn != null && checkOut != null && checkOut.isAfter(checkIn)) {
-                        boolean available = !reservationRepository.existsOverlapForAvailability(id, checkIn, checkOut);
+                        boolean available = room.getStatus() == RoomStatus.AVAILABLE
+                                        && !reservationRepository.existsOverlapForAvailability(id, checkIn, checkOut);
                         response.setAvailableForRequestedStay(available);
                         response.setAvailabilityMessage(
                                         available ? "Available for selected stay" : "Unavailable for selected stay");

@@ -46,6 +46,7 @@ const roomSearchState = {
       roomNumber: '204',
       floor: 2,
       status: 'AVAILABLE',
+      availableForRequestedStay: true,
       roomType: {
         name: 'Deluxe Room',
         basePrice: 180,
@@ -104,6 +105,28 @@ describe('RoomSearch CTA behavior', () => {
     expect(screen.getByRole('button', { name: 'Book Room' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Get Help' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Contact Front Desk' })).not.toBeInTheDocument();
+  });
+
+  it('does not show the booking CTA when backend availability is false', () => {
+    mockUseAuth.mockReturnValue({
+      user: { roles: ['ROLE_GUEST'], email: 'guest@roomify.com' },
+    });
+    mockUseSearch.mockReturnValue({
+      ...roomSearchState,
+      results: [
+        {
+          ...roomSearchState.results[0],
+          availableForRequestedStay: false,
+          availabilityMessage: 'Unavailable for selected stay',
+        },
+      ],
+    });
+
+    renderPage();
+
+    expect(screen.queryByRole('button', { name: 'Book Room' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View Details' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Contact Front Desk' })).toBeInTheDocument();
   });
 
   it('submits the room name or number search filter', async () => {

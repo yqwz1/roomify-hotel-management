@@ -1,0 +1,63 @@
+"filename", "language", "Markdown", "PowerShell", "JavaScript", "HTML", "JavaScript JSX", "JSON", "PostCSS", "Java", "MS SQL", "comment", "blank", "total"
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\README.md", "Markdown", -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\RUNNING.md", "Markdown", -11, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5, -16
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\config\SecurityConfig.java", "Java", 0, 0, 0, 0, 0, 0, 0, 4, 0, 15, 2, 21
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\controller\GuestReservationController.java", "Java", 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 2, 34
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\controller\PaymentController.java", "Java", 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 8, 58
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\GuestReservationSummaryDto.java", "Java", 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 3, 44
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\MockPaymentRequest.java", "Java", 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 12, 42
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\MockRefundRequest.java", "Java", 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 6, 18
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\PaymentResponse.java", "Java", 0, 0, 0, 0, 0, 0, 0, 98, 0, 0, 29, 127
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\ReservationResponse.java", "Java", 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 2, 9
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\Payment.java", "Java", 0, 0, 0, 0, 0, 0, 0, 48, 0, 0, 18, 66
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\PaymentMethod.java", "Java", 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\PaymentStatus.java", "Java", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\Reservation.java", "Java", 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 3, 11
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\ReservationStatus.java", "Java", 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 2, 7
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\repository\PaymentRepository.java", "Java", 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 5, 13
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\repository\ReservationRepository.java", "Java", 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 3, 24
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\search\AvailabilityQueryStrategy.java", "Java", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\GuestReservationServiceImpl.java", "Java", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\PaymentService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 222, 0, 0, 26, 248
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationFinancialService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 1, 7
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 3, 22
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationStatusTransitionService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\RoomSearchService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\RoomService.java", "Java", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V26__mock_payment_gateway_metadata.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 3, 20
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V27__align_notification_event_type_check.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 2, 20
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V28__align_reservation_status_check.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 2, 16
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\test\java\com\roomify\backend\integration\RoomSearchIntegrationTest.java", "Java", 0, 0, 0, 0, 0, 0, 0, 82, 0, 0, 16, 98
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\test\java\com\roomify\backend\service\PaymentServiceTest.java", "Java", 0, 0, 0, 0, 0, 0, 0, 162, 0, 0, 25, 187
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\index.html", "HTML", 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 12
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\public\manifest.webmanifest", "JSON", 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 1, 27
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\public\sw.js", "JavaScript", 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 9, 55
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\App.jsx", "JavaScript JSX", 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 1, 12
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\Sidebar.jsx", "JavaScript JSX", 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 11
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\common\ModalFrame.jsx", "JavaScript JSX", 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\navigation\navConfig.js", "JavaScript", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 14
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\navigation\navConfig.test.js", "JavaScript", 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppShell.jsx", "JavaScript JSX", 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 6
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppShell.test.jsx", "JavaScript JSX", 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 13, 65
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppTopbar.jsx", "JavaScript JSX", 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 9
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppTopbar.test.jsx", "JavaScript JSX", 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 13, 77
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\MobileBottomNav.jsx", "JavaScript JSX", 0, 0, 0, 0, 91, 0, 0, 0, 0, 0, 7, 98
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\domain\reservations\statusRules.js", "JavaScript", 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\hooks\useMediaQuery.js", "JavaScript", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 9, 33
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\index.css", "PostCSS", 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 6, 45
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\main.jsx", "JavaScript JSX", 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 3
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\BookRoom.jsx", "JavaScript JSX", 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 1, 12
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\CancelReservation.jsx", "JavaScript JSX", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\DemoPaymentGateway.jsx", "JavaScript JSX", 0, 0, 0, 0, 257, 0, 0, 0, 0, 0, 19, 276
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\GuestDashboard.jsx", "JavaScript JSX", 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 1, 21
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\PaymentHistory.jsx", "JavaScript JSX", 0, 0, 0, 0, 194, 0, 0, 0, 0, 0, 13, 207
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomDetails.jsx", "JavaScript JSX", 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomSearch.jsx", "JavaScript JSX", 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 6
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomSearch.test.jsx", "JavaScript JSX", 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 3, 23
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomTypes.jsx", "JavaScript JSX", 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 3, 75
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomsManagement.jsx", "JavaScript JSX", 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 4, 117
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\Staff.jsx", "JavaScript JSX", 0, 0, 0, 0, 106, 0, 0, 0, 0, 0, 6, 112
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\registerServiceWorker.js", "JavaScript", 0, 0, 9, 0, 0, 0, 0, 0, 0, 1, 2, 12
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\services\paymentService.js", "JavaScript", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 5, 26
+"c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\start-roomify-windows.ps1", "PowerShell", 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 19, 113
+"Total", "-", -12, 94, 123, 12, 1053, 26, 39, 868, 49, 17, 305, 2574

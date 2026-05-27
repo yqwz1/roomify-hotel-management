@@ -16,19 +16,24 @@ $AiServiceDir = Join-Path $RepoRoot 'ai-service'
 $ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
 $BackendLog = Join-Path $BackendDir 'demo-backend.log'
 $BackendPidFile = Join-Path $BackendDir 'demo-backend.pid'
+$FrontendLog = Join-Path $FrontendDir 'demo-frontend.log'
+$FrontendPidFile = Join-Path $FrontendDir 'demo-frontend.pid'
 
-$DbPort = 5432
+$DbPort = 5433
 $BackendPort = 8080
 $AiServicePort = 8000
 $MailpitSmtpPort = 1025
 $MailpitHttpPort = 8025
 $BackendHealthUrl = "http://127.0.0.1:$BackendPort/api/health"
 $AiServiceHealthUrl = "http://127.0.0.1:$AiServicePort/health"
+$FrontendHealthUrl = 'http://127.0.0.1:3000'
 $AppUrl = 'http://localhost:3000'
 $LoginUrl = "$AppUrl/login"
 $MailpitUrl = "http://127.0.0.1:$MailpitHttpPort"
 $DemoAccessNote = 'Demo password shortcuts are disabled. Use the seeded real admin credentials for this environment.'
 $AiServiceStatus = 'not started'
+$FrontendStatus = 'not started'
+$DockerComposeCommand = $null
 
 function Write-Info {
     param([string]$Message)
@@ -172,6 +177,49 @@ function Show-BackendLogTail {
     }
 }
 
+function Initialize-DockerComposeCommand {
+    try {
+        & docker compose version *> $null
+        if ($LASTEXITCODE -eq 0) {
+            $script:DockerComposeCommand = 'docker compose'
+            return
+        }
+    }
+    catch {
+    }
+
+    try {
+        & docker-compose version *> $null
+        if ($LASTEXITCODE -eq 0) {
+            $script:DockerComposeCommand = 'docker-compose'
+            return
+        }
+    }
+    catch {
+    }
+
+    Stop-Script "Docker Compose is required. Install Docker Compose v2 or ensure 'docker-compose' is available after Docker Desktop is up."
+}
+
+function Invoke-DockerCompose {
+    param([string[]]$Arguments)
+
+    if ($DockerComposeCommand -eq 'docker compose') {
+        & docker compose @Arguments
+        return
+    }
+
+    & docker-compose @Arguments
+}
+
+function Show-FrontendLogTail {
+    if (Test-Path -LiteralPath $FrontendLog) {
+        Write-Host ''
+        Write-Host 'Last frontend log lines:' -ForegroundColor Yellow
+        Get-Content -LiteralPath $FrontendLog -Tail 40
+    }
+}
+
 function Wait-ForBackend {
     param(
         [System.Diagnostics.Process]$Process,
@@ -207,6 +255,16 @@ function Test-AiServiceHealth {
     try {
         $response = Invoke-WebRequest -Uri $AiServiceHealthUrl -TimeoutSec 2 -UseBasicParsing
         return ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Test-FrontendHealth {
+    try {
+        $response = Invoke-WebRequest -Uri $FrontendHealthUrl -TimeoutSec 2 -UseBasicParsing
+        return ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400)
     }
     catch {
         return $false
@@ -340,6 +398,54 @@ function Start-AiFinanceService {
     }
 }
 
+function Start-Frontend {
+    if (Test-FrontendHealth) {
+        Write-Ok "Frontend already running at $AppUrl"
+        $script:FrontendStatus = 'already running'
+        return
+    }
+
+    if (Test-TcpPort -TargetHost '127.0.0.1' -Port 3000) {
+        Stop-ProcessesOnPort -Port 3000
+    }
+
+    Test-RequiredCommand -CommandName 'npm.cmd' -Message 'npm is required but was not found in PATH.'
+
+    $nodeModulesPath = Join-Path $FrontendDir 'node_modules'
+    if (-not (Test-Path -LiteralPath $nodeModulesPath -PathType Container)) {
+        Stop-Script "frontend\node_modules is missing. Run 'npm install' inside $FrontendDir, then retry."
+    }
+
+    Write-Info "Starting frontend at $AppUrl..."
+    '' | Set-Content -LiteralPath $FrontendLog
+    $frontendCommand = "npm.cmd run dev -- --host 127.0.0.1 >> `"$FrontendLog`" 2>&1"
+    $frontendProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $frontendCommand -WorkingDirectory $FrontendDir -PassThru -WindowStyle Hidden
+    $frontendProcess.Id | Set-Content -LiteralPath $FrontendPidFile
+    $script:FrontendStatus = 'starting'
+
+    for ($elapsed = 0; $elapsed -lt 60; $elapsed++) {
+        $frontendProcess.Refresh()
+        if ($frontendProcess.HasExited) {
+            Show-FrontendLogTail
+            if (Test-Path -LiteralPath $FrontendPidFile) {
+                Remove-Item -LiteralPath $FrontendPidFile -Force
+            }
+            Stop-Script 'Frontend process exited before it became ready.'
+        }
+
+        if (Test-FrontendHealth) {
+            Write-Ok "Frontend is ready at $AppUrl."
+            $script:FrontendStatus = 'ready'
+            return
+        }
+
+        Start-Sleep -Seconds 1
+    }
+
+    Show-FrontendLogTail
+    Stop-Script "Frontend did not become ready at $AppUrl within 60s."
+}
+
 function Write-ReadySummary {
     Write-Host ''
     Write-Host 'Ready checklist' -ForegroundColor White
@@ -347,7 +453,7 @@ function Write-ReadySummary {
     Write-Host '- Mailpit: ready'
     Write-Host '- Backend: ready'
     Write-Host "- AI Finance FastAPI: $AiServiceStatus"
-    Write-Host "- Frontend: run manually with ``Set-Location `"$FrontendDir`"; npm run dev``"
+    Write-Host "- Frontend: $FrontendStatus"
     Write-Host "- App: $AppUrl"
     Write-Host "- Login: $LoginUrl"
     Write-Host "- Mail inbox: $MailpitUrl"
@@ -355,6 +461,8 @@ function Write-ReadySummary {
     Write-Host "- Demo access: $DemoAccessNote"
     Write-Host "- Backend log: $BackendLog"
     Write-Host "- Backend PID file: $BackendPidFile"
+    Write-Host "- Frontend log: $FrontendLog"
+    Write-Host "- Frontend PID file: $FrontendPidFile"
 }
 
 function Stop-ProcessesOnPort {
@@ -403,18 +511,10 @@ if ((Test-Path -LiteralPath $FrontendEnvExample) -and -not (Test-Path -LiteralPa
     Copy-Item -LiteralPath $FrontendEnvExample -Destination $FrontendEnv
 }
 
-try {
-    & docker compose version *> $null
-    if ($LASTEXITCODE -ne 0) {
-        Stop-Script "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
-    }
-}
-catch {
-    Stop-Script "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
-}
+Initialize-DockerComposeCommand
 
 try {
-    & docker info *> $null
+    & docker ps *> $null
     if ($LASTEXITCODE -ne 0) {
         Stop-Script 'Docker is not running. Start Docker Desktop and retry.'
     }
@@ -426,9 +526,20 @@ catch {
 Write-Info 'Starting demo infrastructure with docker compose...'
 Push-Location $RepoRoot
 try {
-    & docker compose up -d postgres mailpit
+    Invoke-DockerCompose -Arguments @('up', '-d', 'postgres', 'mailpit')
     if ($LASTEXITCODE -ne 0) {
-        Stop-Script 'docker compose up failed. Check Docker and whether ports 5433, 1025, or 8025 are already in use.'
+        Stop-Script "$DockerComposeCommand up failed. Check Docker and whether ports 5433, 1025, or 8025 are already in use."
+    }
+
+    try {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        Invoke-DockerCompose -Arguments @('stop', 'backend') *> $null
+    }
+    catch {
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
     }
 }
 finally {
@@ -479,5 +590,7 @@ Start-AiFinanceService
 Write-Info "Waiting for backend health at $BackendHealthUrl..."
 Wait-ForBackend -Process $backendProcess -TimeoutSeconds 120
 Write-Ok 'Backend is ready.'
+
+Start-Frontend
 
 Write-ReadySummary

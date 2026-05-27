@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
-import { X, LayoutDashboard, Tag, Users, Settings, Search, CalendarDays, Key, Sparkles } from 'lucide-react'
+import { X, LayoutDashboard, Tag, Users, Settings, Search, CalendarDays, Key, Sparkles, Receipt } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
@@ -17,6 +17,7 @@ const ICON_MAP = {
   '/checkout': CalendarDays,
   '/room-status': Sparkles,
   '/invoice-preview': CalendarDays,
+  '/payments': Receipt,
 }
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -40,6 +41,15 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/checkout', label: t('checkoutTitle') },
       { path: '/room-status', label: t('roomStatus') },
       { path: '/invoice-preview', label: t('invoicePreview') },
+      { path: '/payments', label: 'Payments' },
+    )
+  } else if (hasRole('ROLE_ADMIN')) {
+    menuItems.push(
+      { path: '/admin/dashboard', label: t('dashboard') },
+      { path: '/staff', label: t('staffMenu') },
+      { path: '/room-types', label: t('roomTypes') },
+      { path: '/services', label: t('servicesTitle') },
+      { path: '/payments', label: 'Payments' },
     )
   } else if (hasRole('ROLE_STAFF')) {
     menuItems.push(
@@ -50,6 +60,7 @@ export default function Sidebar({ isOpen, onClose }) {
       { path: '/reservations/cancel', label: t('cancelReservationTitle') },
       { path: '/checkout', label: t('checkoutTitle') },
       { path: '/invoice-preview', label: t('invoicePreview') },
+      { path: '/payments', label: 'Payments' },
     )
   } else if (hasRole('ROLE_GUEST')) {
     menuItems.push(
@@ -58,7 +69,7 @@ export default function Sidebar({ isOpen, onClose }) {
     )
   }
 
-  const roleLabel = hasRole('ROLE_MANAGER') ? t('roleManager') : hasRole('ROLE_STAFF') ? t('roleStaff') : t('roleGuest')
+  const roleLabel = hasRole('ROLE_ADMIN') ? t('roleAdmin') : hasRole('ROLE_MANAGER') ? t('roleManager') : hasRole('ROLE_STAFF') ? t('roleStaff') : t('roleGuest')
 
   return (
     <>

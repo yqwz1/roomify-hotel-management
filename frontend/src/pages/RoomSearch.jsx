@@ -161,6 +161,12 @@ export default function RoomSearch() {
     });
   };
   const cardActions = getRoomSearchCardActions(primaryRole);
+  const getAvailableCardActions = (room) => {
+    const isAvailable = room?.availableForRequestedStay === true;
+    return isAvailable
+      ? cardActions
+      : cardActions.filter((action) => action.id !== 'book');
+  };
 
   const handleCardAction = (actionId, room) => {
     switch (actionId) {
@@ -441,7 +447,7 @@ export default function RoomSearch() {
                         </div>
 
                         <div className="flex flex-col gap-3 border-t border-brand-surface-border pt-4 sm:flex-row sm:items-center sm:justify-end">
-                          {cardActions.map((action) => (
+                          {getAvailableCardActions(room).map((action) => (
                             <button
                               key={action.id}
                               type="button"

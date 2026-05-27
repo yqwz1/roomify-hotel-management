@@ -23,6 +23,8 @@ import StaffGuestInbox from './pages/StaffGuestInbox'
 import StaffServiceRequests from './pages/StaffServiceRequests'
 import GuestDashboard from './pages/GuestDashboard'
 import GuestBillingStatus from './pages/GuestBillingStatus'
+import DemoPaymentGateway from './pages/DemoPaymentGateway'
+import PaymentHistory from './pages/PaymentHistory'
 import GuestServiceRequests from './pages/GuestServiceRequests'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
@@ -62,6 +64,8 @@ const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
 const STAFF_ONLY_ROLES = [ROLE_STAFF];
 const GUEST_ONLY_ROLES = [ROLE_GUEST];
 const STAFF_AND_MANAGER_ROLES = [ROLE_MANAGER, ROLE_STAFF];
+const ADMIN_STAFF_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
+const PAYMENT_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
 
 /**
  * AppContent component - handles routing logic
@@ -198,6 +202,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/guest/payments/:confirmationNumber"
+          element={
+            <ProtectedRoute allowedRoles={GUEST_ONLY_ROLES}>
+              <Layout showSidebar={true}><DemoPaymentGateway /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* ── Day 1 Sprint: New Rooms / Booking Routes ── */}
         <Route
@@ -231,7 +243,7 @@ const AppContent = () => {
         <Route
           path="/reservations/cancel"
           element={
-            <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
+            <ProtectedRoute allowedRoles={ADMIN_STAFF_MANAGER_ROLES}>
               <Layout showSidebar={true}><CancelReservation /></Layout>
             </ProtectedRoute>
           }
@@ -259,6 +271,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={STAFF_AND_MANAGER_ROLES}>
               <Layout showSidebar={true}><InvoicePreview /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute allowedRoles={PAYMENT_MANAGER_ROLES}>
+              <Layout showSidebar={true}><PaymentHistory /></Layout>
             </ProtectedRoute>
           }
         />

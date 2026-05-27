@@ -1,5 +1,6 @@
 export const ReservationStatus = Object.freeze({
   PENDING: 'PENDING',
+  PAYMENT_PENDING: 'PAYMENT_PENDING',
   CONFIRMED: 'CONFIRMED',
   CHECKED_IN: 'CHECKED_IN',
   CHECKED_OUT: 'CHECKED_OUT',
@@ -19,7 +20,9 @@ export const reservationStatusRules = Object.freeze({
   canCheckIn: (status) =>
     status === ReservationStatus.PENDING || status === ReservationStatus.CONFIRMED,
   canCancel: (status) =>
-    status === ReservationStatus.PENDING || status === ReservationStatus.CONFIRMED,
+    status === ReservationStatus.PENDING ||
+    status === ReservationStatus.PAYMENT_PENDING ||
+    status === ReservationStatus.CONFIRMED,
   canModify: (status) =>
     status === ReservationStatus.PENDING || status === ReservationStatus.CONFIRMED,
   canCollectPayment: (status) =>

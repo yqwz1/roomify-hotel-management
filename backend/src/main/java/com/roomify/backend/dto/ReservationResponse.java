@@ -28,6 +28,7 @@ public class ReservationResponse {
     private BigDecimal totalPaid;
     private BigDecimal outstandingBalance;
     private boolean invoiceFinalized;
+    private String invoiceStatus;
     private String paymentStatus;
     private String paymentMethod;
     private String transactionId;
@@ -272,6 +273,14 @@ public class ReservationResponse {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(String invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
     }
 
     public String getPaymentMethod() {

@@ -51,6 +51,7 @@ describe('navConfig', () => {
       'Arrivals',
       'Departures',
       'Billing',
+      'Payments',
       'Service Requests',
       'Guest Inbox',
     ]);
@@ -69,10 +70,17 @@ describe('navConfig', () => {
       '/staff',
       '/room-types',
       '/services',
+      '/payments',
     ]);
     expect(paths).not.toContain('/manager/dashboard');
     expect(paths).not.toContain('/manager/expenses');
     expect(getDefaultRouteForRoles([ROLE_ADMIN, ROLE_MANAGER])).toBe('/admin/dashboard');
+  });
+
+  it('exposes payments navigation for staff managers and admins', () => {
+    expect(getPathsForRoles([ROLE_STAFF])).toContain('/payments');
+    expect(getPathsForRoles([ROLE_MANAGER])).toContain('/payments');
+    expect(getPathsForRoles([ROLE_ADMIN])).toContain('/payments');
   });
 
   it('keeps staff and room type navigation off the manager sidebar', () => {

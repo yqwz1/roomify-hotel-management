@@ -9,6 +9,7 @@ import ModalFrame from '../components/common/ModalFrame';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { Textarea } from '../components/ui/textarea';
 import {
   cancelReservation,
   extractReservationError,

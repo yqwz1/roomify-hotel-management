@@ -30,7 +30,8 @@ public class GuestReservationServiceImpl implements GuestReservationService {
     private static final EnumSet<ReservationStatus> VISIBLE_GUEST_RESERVATION_STATUSES = EnumSet.of(
             ReservationStatus.PAYMENT_PENDING,
             ReservationStatus.CONFIRMED,
-            ReservationStatus.CHECKED_IN);
+            ReservationStatus.CHECKED_IN,
+            ReservationStatus.CANCELLED);
 
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
@@ -209,6 +210,7 @@ public class GuestReservationServiceImpl implements GuestReservationService {
                 reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null,
                 reservation.getInvoiceNumber(),
                 reservation.isInvoiceFinalized(),
+                reservation.getInvoiceStatus(),
                 reservation.getTotalPaid() != null ? reservation.getTotalPaid() : BigDecimal.ZERO,
                 reservation.getOutstandingBalance() != null ? reservation.getOutstandingBalance() : BigDecimal.ZERO
         );

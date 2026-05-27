@@ -62,13 +62,14 @@ const PROTECTED_ROUTE_ROLE_MAP = {
   '/staff/service-requests': [ROLE_MANAGER, ROLE_STAFF],
   '/guest/dashboard': [ROLE_GUEST],
   '/guest/service-requests': [ROLE_GUEST],
+  '/payments': [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   '/rooms-management': [ROLE_MANAGER],
   '/search': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
   '/book': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
   '/confirmation': [ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
   '/check-in': [ROLE_MANAGER, ROLE_STAFF],
   '/reservations/modify': [ROLE_MANAGER, ROLE_STAFF],
-  '/reservations/cancel': [ROLE_MANAGER, ROLE_STAFF],
+  '/reservations/cancel': [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   '/checkout': [ROLE_MANAGER, ROLE_STAFF],
   '/room-status': [ROLE_MANAGER],
   '/invoice-preview': [ROLE_MANAGER, ROLE_STAFF],
@@ -81,6 +82,7 @@ const PROTECTED_ROUTE_ROLE_MAP = {
 
 const PROTECTED_ROUTE_ROLE_PATTERNS = [
   { matcher: (pathname) => /^\/reservations\/[^/]+$/.test(pathname), roles: [ROLE_MANAGER, ROLE_STAFF] },
+  { matcher: (pathname) => /^\/guest\/payments\/[^/]+$/.test(pathname), roles: [ROLE_GUEST] },
 ];
 
 const normalizePathname = (pathname = '') => {
@@ -180,6 +182,13 @@ const ADMIN_NAVIGATION_CONFIG = [
         translationKey: 'servicesTitle',
         fallbackLabel: 'Services',
         icon: BriefcaseBusiness,
+        roles: [ROLE_ADMIN],
+      },
+      {
+        path: '/payments',
+        translationKey: 'paymentHistory',
+        fallbackLabel: 'Payments',
+        icon: Receipt,
         roles: [ROLE_ADMIN],
       },
     ],
@@ -310,6 +319,13 @@ const MANAGER_NAVIGATION_CONFIG = [
         roles: [ROLE_MANAGER],
       },
       {
+        path: '/payments',
+        translationKey: 'paymentHistory',
+        fallbackLabel: 'Payments',
+        icon: Receipt,
+        roles: [ROLE_MANAGER],
+      },
+      {
         path: '/manager/expenses',
         translationKey: 'expenseTrackerTitle',
         fallbackLabel: 'Expenses',
@@ -434,6 +450,13 @@ const STAFF_NAVIGATION_CONFIG = [
         path: '/invoice-preview',
         translationKey: 'navBilling',
         fallbackLabel: 'Billing',
+        icon: Receipt,
+        roles: [ROLE_STAFF],
+      },
+      {
+        path: '/payments',
+        translationKey: 'paymentHistory',
+        fallbackLabel: 'Payments',
         icon: Receipt,
         roles: [ROLE_STAFF],
       },
@@ -569,6 +592,7 @@ const DOCUMENT_TITLE_OVERRIDES = {
   '/staff/service-requests': ['navServiceRequests', 'Service Requests'],
   '/guest/dashboard': ['guestDashboardTitle', 'Guest Dashboard'],
   '/guest/service-requests': ['navRequestService', 'Request Service'],
+  '/payments': ['paymentHistory', 'Payments'],
   '/manager/ai-finance': ['aiFinanceTitle', 'AI Finance'],
   '/manager/expenses': ['expenseTrackerTitle', 'Expense Tracker'],
   '/room-types': ['roomTypes', 'Room Types'],

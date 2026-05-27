@@ -38,6 +38,7 @@ const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Guest%20Support`;
 
 function GuestStayCard({ reservation, propertyName, language, t }) {
+  const navigate = useNavigate();
   const roomLabel = reservation.roomNumber
     ? t('roomNumber', { number: reservation.roomNumber })
     : t('guestDashboardPage.roomPending');
@@ -51,6 +52,11 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
   const totalAmountLabel = reservation.totalAmount == null
     ? '-'
     : formatLocalizedCurrency(reservation.totalAmount, language);
+  const reservationStatus = String(reservation.status || '').toUpperCase();
+  const paymentStatus = String(reservation.paymentStatus || '').toUpperCase();
+  const needsPayment = reservationStatus !== 'CANCELLED'
+    && (['PENDING', 'UNPAID', 'FAILED', 'PARTIALLY_PAID'].includes(paymentStatus)
+      || reservationStatus === 'PAYMENT_PENDING');
 
   return (
     <article className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
@@ -119,6 +125,21 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
           <p className="mt-2 text-sm font-bold text-brand-ink">{statusLabel}</p>
         </div>
       </div>
+
+      {needsPayment ? (
+        <div className="mt-5 rounded-[1.25rem] border border-brand-primary/25 bg-white p-4">
+          <p className="text-sm font-bold text-brand-ink">Payment is required before this reservation can be confirmed.</p>
+          <button
+            type="button"
+            onClick={() => navigate(`/guest/payments/${reservation.confirmationNumber || reservation.confirmation}`, {
+              state: { reservation },
+            })}
+            className="mt-3 inline-flex rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
+          >
+            {paymentStatus === 'FAILED' ? 'Retry Payment' : 'Pay Now'}
+          </button>
+        </div>
+      ) : null}
     </article>
   );
 }

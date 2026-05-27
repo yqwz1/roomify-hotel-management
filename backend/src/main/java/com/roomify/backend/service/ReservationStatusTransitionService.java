@@ -71,6 +71,7 @@ public class ReservationStatusTransitionService {
         return switch (reservation.getPaymentStatus()) {
             case PAID, PARTIALLY_PAID -> ReservationStatus.CONFIRMED;
             case REFUNDED -> ReservationStatus.REFUNDED;
+            case PROCESSING, CANCELLED -> ReservationStatus.PAYMENT_PENDING;
             default -> ReservationStatus.PAYMENT_PENDING;
         };
     }

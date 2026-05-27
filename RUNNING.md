@@ -13,11 +13,11 @@ Each script does all of the following:
 - Frees backend port `8080` automatically if another local process is already listening there
 - Starts the backend with `DB_PORT=5433` and `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`
 - Waits for backend health at `http://127.0.0.1:8080/api/health`
-- Prints the ready checklist and the exact manual frontend command
+- Windows PowerShell starts the frontend on `http://localhost:3000`
+- Prints the ready checklist, logs, and PID files
 
 ## Prerequisites
 - Docker Desktop must be open and running
-- Run the frontend in a separate terminal after the script reports `Backend: ready`
 - Demo mail UI: `http://127.0.0.1:8025`
 - Demo SMTP sink: `127.0.0.1:1025`
 
@@ -53,26 +53,7 @@ The demo bootstrap resets these reservations on each backend start:
 
 ---
 
-### 2. Start the Frontend Manually
-
-```bash
-# macOS / Linux
-cd roomify-hotel-management/frontend
-npm run dev
-```
-
-```powershell
-# Windows PowerShell
-Set-Location "$env:USERPROFILE\roomify-hotel-management\frontend"
-npm run dev
-```
-
-> [!IMPORTANT]
-> The startup scripts intentionally leave the frontend manual. Run it in a real terminal tab — never as a background job (`&`), as Vite will suspend itself and stop responding.
-
----
-
-### 3. Open the App
+### 2. Open the App
 
 [http://localhost:3000](http://localhost:3000)
 
@@ -87,7 +68,10 @@ Quick smoke:
 
 ## Stopping Everything
 
-- **Frontend:** `Ctrl+C` in the frontend terminal
+- **Frontend Windows PowerShell:**
+  ```powershell
+  Stop-Process -Id (Get-Content .\frontend\demo-frontend.pid)
+  ```
 - **Backend macOS / Linux:**
   ```bash
   kill "$(cat backend/demo-backend.pid)"

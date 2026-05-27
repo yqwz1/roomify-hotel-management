@@ -139,6 +139,13 @@ public class ReservationFinancialService {
             return PaymentStatus.FAILED;
         }
 
+        if (currentStatus == PaymentStatus.PENDING
+                || currentStatus == PaymentStatus.PROCESSING
+                || currentStatus == PaymentStatus.CANCELLED
+                || currentStatus == PaymentStatus.REFUNDED) {
+            return currentStatus;
+        }
+
         return PaymentStatus.UNPAID;
     }
 

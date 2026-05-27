@@ -103,9 +103,8 @@ npm run build
   - starts backend with `DB_PORT=5433` and `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`
   - starts the AI Finance FastAPI service when available, unless `-SkipAiService` is used
   - waits for backend health
-  - prints the exact manual frontend command
-- Manual frontend step after the script reports ready:
-  - `cd frontend && npm run dev`
+  - Windows PowerShell starts the frontend on `http://localhost:3000`
+  - prints the ready checklist, logs, and PID files
 - Mail UI: [http://127.0.0.1:8025](http://127.0.0.1:8025)
 - Browser smoke runbook: [docs/demo-smoke-runbook.md](/C:/Users/Alwaj/OneDrive/المستندات/GitHub/roomify-hotel-management/docs/demo-smoke-runbook.md)
 

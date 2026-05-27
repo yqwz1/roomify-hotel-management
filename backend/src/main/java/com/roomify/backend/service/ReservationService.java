@@ -127,6 +127,10 @@ public class ReservationService {
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new ResourceConflictException("Room is not available for booking");
+        }
+
         long nights = ChronoUnit.DAYS.between(
                 request.getCheckInDate(),
                 request.getCheckOutDate());
@@ -157,8 +161,9 @@ public class ReservationService {
         reservation.setTotalPrice(quote.getTotal());
         reservation.setTotalPaid(BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP));
         reservation.setOutstandingBalance(quote.getTotal());
-        reservation.setPaymentStatus(authenticatedEmail == null ? PaymentStatus.UNPAID : PaymentStatus.PENDING);
+        reservation.setPaymentStatus(PaymentStatus.UNPAID);
         reservation.setInvoiceFinalized(false);
+        reservation.setInvoiceStatus("PENDING");
         reservation.setConfirmationNumber(generateUniqueConfirmationNumber());
         reservation.setStatusUpdatedAt(LocalDateTime.now());
 
@@ -279,6 +284,22 @@ public class ReservationService {
     public ReservationActionPlaceholderResponse cancel(Long id, ReservationCancelRequest request) {
 
         Reservation reservation = findReservationById(id);
+        return cancelReservation(reservation, request);
+    }
+
+    public ReservationActionPlaceholderResponse cancelByConfirmationNumber(
+            String confirmationNumber,
+            ReservationCancelRequest request) {
+        Reservation reservation = reservationRepository
+                .findByConfirmationNumber(normalizeConfirmationNumber(confirmationNumber))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Reservation not found with confirmation number: " + confirmationNumber));
+        return cancelReservation(reservation, request);
+    }
+
+    private ReservationActionPlaceholderResponse cancelReservation(
+            Reservation reservation,
+            ReservationCancelRequest request) {
 
         if (reservation.getStatus() == ReservationStatus.CHECKED_IN
                 || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
@@ -840,6 +861,7 @@ public class ReservationService {
                 summary.paymentStatus().name());
         response.setPaymentMethod(reservation.getPaymentMethod() != null ? reservation.getPaymentMethod().name() : null);
         response.setTransactionId(reservation.getTransactionId());
+        response.setInvoiceStatus(reservation.getInvoiceStatus());
         response.setPaymentTimestamp(reservation.getPaymentTimestamp());
         response.setActualCheckInDate(reservation.getActualCheckInDate());
         response.setActualCheckOutAt(reservation.getActualCheckOutAt());

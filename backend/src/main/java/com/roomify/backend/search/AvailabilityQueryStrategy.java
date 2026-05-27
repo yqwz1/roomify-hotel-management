@@ -210,13 +210,14 @@ public class AvailabilityQueryStrategy {
          * We negate this with NOT EXISTS so that only rooms with ZERO
          * overlapping active reservations are returned.
          *
-         * CANCELLED reservations are excluded from the overlap check
-         * since they no longer block availability.
+         * Only active reservation lifecycle states block availability.
+         * Terminal states such as cancelled, no-show, refunded, checked-out,
+         * and completed no longer hold the room.
          */
         jpql.append("AND NOT EXISTS (");
         jpql.append("SELECT 1 FROM Reservation res ");
         jpql.append("WHERE res.room = r ");
-        jpql.append("AND res.status <> com.roomify.backend.entity.ReservationStatus.CANCELLED ");
+        jpql.append("AND res.status IN :blockingStatuses ");
         jpql.append("AND res.checkInDate < :checkOut ");
         jpql.append("AND res.checkOutDate > :checkIn");
         jpql.append(") ");

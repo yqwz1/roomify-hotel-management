@@ -1,5 +1,8 @@
 package com.roomify.backend.entity;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * Reservation lifecycle states.
  */
@@ -12,5 +15,9 @@ public enum ReservationStatus {
     COMPLETED,
     CANCELLED,
     NO_SHOW,
-    REFUNDED
+    REFUNDED;
+
+    public static Set<ReservationStatus> availabilityBlockingStatuses() {
+        return EnumSet.of(PENDING, PAYMENT_PENDING, CONFIRMED, CHECKED_IN);
+    }
 }

@@ -18,6 +18,7 @@ public class GuestReservationSummaryDto {
     private String paymentStatus;
     private String invoiceNumber;
     private boolean invoiceFinalized;
+    private String invoiceStatus;
     private BigDecimal totalPaid;
     private BigDecimal outstandingBalance;
 
@@ -37,6 +38,7 @@ public class GuestReservationSummaryDto {
             String paymentStatus,
             String invoiceNumber,
             boolean invoiceFinalized,
+            String invoiceStatus,
             BigDecimal totalPaid,
             BigDecimal outstandingBalance) {
         this.id = id;
@@ -51,8 +53,42 @@ public class GuestReservationSummaryDto {
         this.paymentStatus = paymentStatus;
         this.invoiceNumber = invoiceNumber;
         this.invoiceFinalized = invoiceFinalized;
+        this.invoiceStatus = invoiceStatus;
         this.totalPaid = totalPaid;
         this.outstandingBalance = outstandingBalance;
+    }
+
+    public GuestReservationSummaryDto(
+            Long id,
+            String confirmationNumber,
+            String status,
+            Long roomId,
+            String roomNumber,
+            String roomTypeName,
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            BigDecimal totalPrice,
+            String paymentStatus,
+            String invoiceNumber,
+            boolean invoiceFinalized,
+            BigDecimal totalPaid,
+            BigDecimal outstandingBalance) {
+        this(
+                id,
+                confirmationNumber,
+                status,
+                roomId,
+                roomNumber,
+                roomTypeName,
+                checkInDate,
+                checkOutDate,
+                totalPrice,
+                paymentStatus,
+                invoiceNumber,
+                invoiceFinalized,
+                invoiceFinalized ? "PAID" : "PENDING",
+                totalPaid,
+                outstandingBalance);
     }
 
     public Long getId() {
@@ -177,6 +213,14 @@ public class GuestReservationSummaryDto {
 
     public void setInvoiceFinalized(boolean invoiceFinalized) {
         this.invoiceFinalized = invoiceFinalized;
+    }
+
+    public String getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(String invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
     }
 
     public BigDecimal getTotalPaid() {

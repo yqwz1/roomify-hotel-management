@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/reservations")
-@PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+@PreAuthorize("hasAnyRole('MANAGER', 'STAFF', 'ADMIN')")
 public class ReservationController {
 
     private final ReservationService reservationService;

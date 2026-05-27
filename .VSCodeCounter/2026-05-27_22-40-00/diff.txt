@@ -1,0 +1,133 @@
+Date : 2026-05-27 22:40:00
+Directory : c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management
+Total : 61 files,  2252 codes, 17 comments, 305 blanks, all 2574 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| JavaScript JSX |         20 |      1,053 |          0 |         85 |      1,138 |
+| Java           |         25 |        868 |         16 |        166 |      1,050 |
+| JavaScript     |          7 |        123 |          1 |         26 |        150 |
+| PowerShell     |          1 |         94 |          0 |         19 |        113 |
+| MS SQL         |          3 |         49 |          0 |          7 |         56 |
+| PostCSS        |          1 |         39 |          0 |          6 |         45 |
+| JSON           |          1 |         26 |          0 |          1 |         27 |
+| HTML           |          1 |         12 |          0 |          0 |         12 |
+| Markdown       |          2 |        -12 |          0 |         -5 |        -17 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                                                        | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                                           |         61 |      2,252 |         17 |        305 |      2,574 |
+| . (Files)                                                                                                                                                   |          3 |         82 |          0 |         14 |         96 |
+| backend                                                                                                                                                     |         28 |        917 |         16 |        173 |      1,106 |
+| backend\src                                                                                                                                                 |         28 |        917 |         16 |        173 |      1,106 |
+| backend\src\main                                                                                                                                            |         26 |        673 |         16 |        132 |        821 |
+| backend\src\main\java                                                                                                                                       |         23 |        624 |         16 |        125 |        765 |
+| backend\src\main\java\com                                                                                                                                   |         23 |        624 |         16 |        125 |        765 |
+| backend\src\main\java\com\roomify                                                                                                                           |         23 |        624 |         16 |        125 |        765 |
+| backend\src\main\java\com\roomify\backend                                                                                                                   |         23 |        624 |         16 |        125 |        765 |
+| backend\src\main\java\com\roomify\backend\config                                                                                                            |          1 |          4 |         15 |          2 |         21 |
+| backend\src\main\java\com\roomify\backend\controller                                                                                                        |          2 |         82 |          0 |         10 |         92 |
+| backend\src\main\java\com\roomify\backend\dto                                                                                                               |          5 |        188 |          0 |         52 |        240 |
+| backend\src\main\java\com\roomify\backend\entity                                                                                                            |          5 |         68 |          0 |         23 |         91 |
+| backend\src\main\java\com\roomify\backend\repository                                                                                                        |          2 |         29 |          0 |          8 |         37 |
+| backend\src\main\java\com\roomify\backend\search                                                                                                            |          1 |          0 |          1 |          0 |          1 |
+| backend\src\main\java\com\roomify\backend\service                                                                                                           |          7 |        253 |          0 |         30 |        283 |
+| backend\src\main\resources                                                                                                                                  |          3 |         49 |          0 |          7 |         56 |
+| backend\src\main\resources\db                                                                                                                               |          3 |         49 |          0 |          7 |         56 |
+| backend\src\main\resources\db\migration                                                                                                                     |          3 |         49 |          0 |          7 |         56 |
+| backend\src\test                                                                                                                                            |          2 |        244 |          0 |         41 |        285 |
+| backend\src\test\java                                                                                                                                       |          2 |        244 |          0 |         41 |        285 |
+| backend\src\test\java\com                                                                                                                                   |          2 |        244 |          0 |         41 |        285 |
+| backend\src\test\java\com\roomify                                                                                                                           |          2 |        244 |          0 |         41 |        285 |
+| backend\src\test\java\com\roomify\backend                                                                                                                   |          2 |        244 |          0 |         41 |        285 |
+| backend\src\test\java\com\roomify\backend\integration                                                                                                       |          1 |         82 |          0 |         16 |         98 |
+| backend\src\test\java\com\roomify\backend\service                                                                                                           |          1 |        162 |          0 |         25 |        187 |
+| frontend                                                                                                                                                    |         30 |      1,253 |          1 |        118 |      1,372 |
+| frontend (Files)                                                                                                                                            |          1 |         12 |          0 |          0 |         12 |
+| frontend\public                                                                                                                                             |          2 |         72 |          0 |         10 |         82 |
+| frontend\src                                                                                                                                                |         27 |      1,169 |          1 |        108 |      1,278 |
+| frontend\src (Files)                                                                                                                                        |          4 |         61 |          1 |         10 |         72 |
+| frontend\src\components                                                                                                                                     |          9 |        257 |          0 |         34 |        291 |
+| frontend\src\components (Files)                                                                                                                             |          1 |         11 |          0 |          0 |         11 |
+| frontend\src\components\common                                                                                                                              |          1 |          4 |          0 |          0 |          4 |
+| frontend\src\components\navigation                                                                                                                          |          2 |         20 |          0 |          1 |         21 |
+| frontend\src\components\shell                                                                                                                               |          5 |        222 |          0 |         33 |        255 |
+| frontend\src\domain                                                                                                                                         |          1 |          3 |          0 |          0 |          3 |
+| frontend\src\domain\reservations                                                                                                                            |          1 |          3 |          0 |          0 |          3 |
+| frontend\src\hooks                                                                                                                                          |          1 |         24 |          0 |          9 |         33 |
+| frontend\src\pages                                                                                                                                          |         11 |        803 |          0 |         50 |        853 |
+| frontend\src\services                                                                                                                                       |          1 |         21 |          0 |          5 |         26 |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                                                                    | language       | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\README.md                                                                                 | Markdown       |         -1 |          0 |          0 |         -1 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\RUNNING.md                                                                                | Markdown       |        -11 |          0 |         -5 |        -16 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\config\SecurityConfig.java                      | Java           |          4 |         15 |          2 |         21 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\controller\GuestReservationController.java      | Java           |         32 |          0 |          2 |         34 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\controller\PaymentController.java               | Java           |         50 |          0 |          8 |         58 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\GuestReservationSummaryDto.java             | Java           |         41 |          0 |          3 |         44 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\MockPaymentRequest.java                     | Java           |         30 |          0 |         12 |         42 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\MockRefundRequest.java                      | Java           |         12 |          0 |          6 |         18 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\PaymentResponse.java                        | Java           |         98 |          0 |         29 |        127 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\dto\ReservationResponse.java                    | Java           |          7 |          0 |          2 |          9 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\Payment.java                             | Java           |         48 |          0 |         18 |         66 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\PaymentMethod.java                       | Java           |          5 |          0 |          0 |          5 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\PaymentStatus.java                       | Java           |          2 |          0 |          0 |          2 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\Reservation.java                         | Java           |          8 |          0 |          3 |         11 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\entity\ReservationStatus.java                   | Java           |          5 |          0 |          2 |          7 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\repository\PaymentRepository.java               | Java           |          8 |          0 |          5 |         13 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\repository\ReservationRepository.java           | Java           |         21 |          0 |          3 |         24 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\search\AvailabilityQueryStrategy.java           | Java           |          0 |          1 |          0 |          1 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\GuestReservationServiceImpl.java        | Java           |          2 |          0 |          0 |          2 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\PaymentService.java                     | Java           |        222 |          0 |         26 |        248 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationFinancialService.java        | Java           |          6 |          0 |          1 |          7 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationService.java                 | Java           |         19 |          0 |          3 |         22 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\ReservationStatusTransitionService.java | Java           |          1 |          0 |          0 |          1 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\RoomSearchService.java                  | Java           |          2 |          0 |          0 |          2 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\java\com\roomify\backend\service\RoomService.java                        | Java           |          1 |          0 |          0 |          1 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V26__mock_payment_gateway_metadata.sql            | MS SQL         |         17 |          0 |          3 |         20 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V27__align_notification_event_type_check.sql      | MS SQL         |         18 |          0 |          2 |         20 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\main\resources\db\migration\V28__align_reservation_status_check.sql           | MS SQL         |         14 |          0 |          2 |         16 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\test\java\com\roomify\backend\integration\RoomSearchIntegrationTest.java      | Java           |         82 |          0 |         16 |         98 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\backend\src\test\java\com\roomify\backend\service\PaymentServiceTest.java                 | Java           |        162 |          0 |         25 |        187 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\index.html                                                                       | HTML           |         12 |          0 |          0 |         12 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\public\manifest.webmanifest                                                      | JSON           |         26 |          0 |          1 |         27 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\public\sw.js                                                                     | JavaScript     |         46 |          0 |          9 |         55 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\App.jsx                                                                      | JavaScript JSX |         11 |          0 |          1 |         12 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\Sidebar.jsx                                                       | JavaScript JSX |         11 |          0 |          0 |         11 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\common\ModalFrame.jsx                                             | JavaScript JSX |          4 |          0 |          0 |          4 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\navigation\navConfig.js                                           | JavaScript     |         14 |          0 |          0 |         14 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\navigation\navConfig.test.js                                      | JavaScript     |          6 |          0 |          1 |          7 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppShell.jsx                                                | JavaScript JSX |          6 |          0 |          0 |          6 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppShell.test.jsx                                           | JavaScript JSX |         52 |          0 |         13 |         65 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppTopbar.jsx                                               | JavaScript JSX |          9 |          0 |          0 |          9 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\AppTopbar.test.jsx                                          | JavaScript JSX |         64 |          0 |         13 |         77 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\components\shell\MobileBottomNav.jsx                                         | JavaScript JSX |         91 |          0 |          7 |         98 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\domain\reservations\statusRules.js                                           | JavaScript     |          3 |          0 |          0 |          3 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\hooks\useMediaQuery.js                                                       | JavaScript     |         24 |          0 |          9 |         33 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\index.css                                                                    | PostCSS        |         39 |          0 |          6 |         45 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\main.jsx                                                                     | JavaScript JSX |          2 |          0 |          1 |          3 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\BookRoom.jsx                                                           | JavaScript JSX |         11 |          0 |          1 |         12 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\CancelReservation.jsx                                                  | JavaScript JSX |          1 |          0 |          0 |          1 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\DemoPaymentGateway.jsx                                                 | JavaScript JSX |        257 |          0 |         19 |        276 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\GuestDashboard.jsx                                                     | JavaScript JSX |         20 |          0 |          1 |         21 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\PaymentHistory.jsx                                                     | JavaScript JSX |        194 |          0 |         13 |        207 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomDetails.jsx                                                        | JavaScript JSX |          3 |          0 |          0 |          3 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomSearch.jsx                                                         | JavaScript JSX |          6 |          0 |          0 |          6 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomSearch.test.jsx                                                    | JavaScript JSX |         20 |          0 |          3 |         23 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomTypes.jsx                                                          | JavaScript JSX |         72 |          0 |          3 |         75 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\RoomsManagement.jsx                                                    | JavaScript JSX |        113 |          0 |          4 |        117 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\pages\Staff.jsx                                                              | JavaScript JSX |        106 |          0 |          6 |        112 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\registerServiceWorker.js                                                     | JavaScript     |          9 |          1 |          2 |         12 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\frontend\src\services\paymentService.js                                                   | JavaScript     |         21 |          0 |          5 |         26 |
+| c:\Users\Alwaj\OneDrive\المستندات\GitHub\roomify-hotel-management\start-roomify-windows.ps1                                                                 | PowerShell     |         94 |          0 |         19 |        113 |
+| Total                                                                                                                                                       |                |      2,252 |         17 |        305 |      2,574 |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

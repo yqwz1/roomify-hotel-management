@@ -68,6 +68,7 @@ export default function RoomDetails() {
   }, [checkIn, checkOut, roomId]);
 
   const pricing = room?.pricing;
+  const canBookRoom = room?.availableForRequestedStay === true;
   const amenities = room?.roomType?.amenities
     ? room.roomType.amenities.split(',').map((item) => item.trim()).filter(Boolean)
     : [];
@@ -306,18 +307,20 @@ export default function RoomDetails() {
                 >
                   {t('backToRoomSearch')}
                 </Button>
-                <Button
-                  type="button"
-                  className="h-auto flex-1 rounded-full py-4"
-                  onClick={() =>
-                    navigate(`/book?roomId=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}`, {
-                      state: { room, checkIn, checkOut },
-                    })
-                  }
-                >
-                  {t('roomSearchPage.bookRoomCta')}
-                  <ChevronRight className="ms-2 h-4 w-4" />
-                </Button>
+                {canBookRoom ? (
+                  <Button
+                    type="button"
+                    className="h-auto flex-1 rounded-full py-4"
+                    onClick={() =>
+                      navigate(`/book?roomId=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}`, {
+                        state: { room, checkIn, checkOut },
+                      })
+                    }
+                  >
+                    {t('roomSearchPage.bookRoomCta')}
+                    <ChevronRight className="ms-2 h-4 w-4" />
+                  </Button>
+                ) : null}
               </div>
             </div>
           </DashboardPanel>

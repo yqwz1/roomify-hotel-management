@@ -3,6 +3,7 @@ package com.roomify.backend.service;
 import com.roomify.backend.dto.RoomResponse;
 import com.roomify.backend.dto.RoomSearchResponse;
 import com.roomify.backend.dto.RoomTypeResponse;
+import com.roomify.backend.entity.ReservationStatus;
 import com.roomify.backend.entity.Room;
 import com.roomify.backend.search.AvailabilityQueryStrategy;
 import com.roomify.backend.search.RoomSearchRequest;
@@ -66,6 +67,7 @@ public class RoomSearchService {
         // 4. Bind required parameters (always present)
         query.setParameter("checkIn", request.getCheckIn());
         query.setParameter("checkOut", request.getCheckOut());
+        query.setParameter("blockingStatuses", ReservationStatus.availabilityBlockingStatuses());
 
         // 5. Bind optional parameters (only when the filter is set)
         if (request.getRoomName() != null && !request.getRoomName().isBlank()) {

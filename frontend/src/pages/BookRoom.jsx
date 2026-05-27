@@ -240,6 +240,18 @@ export default function BookRoom() {
         ? await createGuestReservation(reservationPayload)
         : await createReservation(reservationPayload);
 
+      if (isGuest) {
+        navigate(`/guest/payments/${reservation.confirmationNumber}`, {
+          state: {
+            reservation,
+            room,
+            checkIn,
+            checkOut,
+          },
+        });
+        return;
+      }
+
       navigate('/confirmation', {
         state: {
           reservation,
