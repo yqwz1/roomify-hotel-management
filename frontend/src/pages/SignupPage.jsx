@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,}$/;
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const SignupPage = () => {
     if (!formData.password) {
       nextErrors.password = t('passwordRequired');
       valid = false;
-    } else if (formData.password.length < 8) {
+    } else if (!passwordRegex.test(formData.password)) {
       nextErrors.password = t('signupPasswordHint', {
         defaultValue: 'Use at least 8 characters with upper case, lower case, a number, and a special character.',
       });
