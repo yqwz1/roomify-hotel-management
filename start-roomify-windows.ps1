@@ -510,6 +510,10 @@ if ((Test-Path -LiteralPath $FrontendEnvExample) -and -not (Test-Path -LiteralPa
     Write-Info "Creating frontend/.env from .env.example..."
     Copy-Item -LiteralPath $FrontendEnvExample -Destination $FrontendEnv
 }
+if ((Test-Path -LiteralPath $FrontendEnv) -and -not (Select-String -LiteralPath $FrontendEnv -Pattern '^VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED=' -Quiet)) {
+    Write-Info "Enabling frontend demo account shortcuts in frontend\.env..."
+    Add-Content -LiteralPath $FrontendEnv -Value "`nVITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true"
+}
 
 Initialize-DockerComposeCommand
 
