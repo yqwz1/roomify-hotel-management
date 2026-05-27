@@ -5,6 +5,7 @@ import FloatingGuestAssistant from '../guest-assistant/FloatingGuestAssistant';
 import { useAuth } from '../../context/AuthProvider';
 import { getPrimaryRole, ROLE_MANAGER } from '../navigation/navConfig';
 import AppSidebar from './AppSidebar';
+import MobileBottomNav from './MobileBottomNav';
 import AppTopbar from './AppTopbar';
 
 export default function AppShell({ children }) {
@@ -98,9 +99,12 @@ export default function AppShell({ children }) {
           onMenuToggle={handleSidebarToggle}
         />
 
-        <main className="relative flex-1 overflow-visible lg:min-h-0 lg:overflow-y-auto">
+        <main className="relative flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
           {children}
         </main>
+        {!isDesktop ? (
+          <MobileBottomNav onOpenMenu={handleSidebarToggle} />
+        ) : null}
         <FloatingGuestAssistant />
         {showManagerAiAssistant ? <ManagerAiAssistant /> : null}
       </div>

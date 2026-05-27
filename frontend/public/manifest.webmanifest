@@ -1,0 +1,26 @@
+{
+  "name": "Roomify Hotel Management",
+  "short_name": "Roomify",
+  "description": "Mobile-friendly hotel operations, guest, and finance management.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F2EA",
+  "theme_color": "#264B6B",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/roomify-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/roomify-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

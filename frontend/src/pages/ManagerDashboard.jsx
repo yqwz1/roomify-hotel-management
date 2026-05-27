@@ -763,7 +763,7 @@ function RoomTypeExplorer({
         </div>
 
         {/* 4 stat cards: always 2 cols to avoid label wrapping in narrow xl widths */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
             <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
               {translateWithFallback(

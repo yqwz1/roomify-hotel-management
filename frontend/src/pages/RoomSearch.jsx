@@ -182,7 +182,7 @@ export default function RoomSearch() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(isGuest ? `${pageTx}.guestHeroEyebrow` : `${pageTx}.heroEyebrow`)}
         title={t('roomSearchTitle')}
@@ -197,7 +197,7 @@ export default function RoomSearch() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.snapshotTitle`)}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('common.dates')}
@@ -323,7 +323,7 @@ export default function RoomSearch() {
             )}
 
             {loading && (
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-2">
                 {[...Array(4)].map((_, index) => (
                   <SearchSkeletonCard key={index} />
                 ))}
@@ -448,8 +448,8 @@ export default function RoomSearch() {
                               onClick={() => handleCardAction(action.id, room)}
                               className={
                                 action.tone === 'secondary'
-                                  ? 'inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light'
-                                  : 'inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep'
+                                  ? 'inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light sm:w-auto'
+                                  : 'inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep sm:w-auto'
                               }
                             >
                               {translateWithFallback(

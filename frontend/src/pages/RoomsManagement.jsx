@@ -13,6 +13,7 @@ import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomTypes } from '../hooks/useRoomTypes';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import {
   formatLocalizedCurrency,
   getRoomStatusLabel,
@@ -224,6 +225,7 @@ export default function RoomsManagement() {
   const navigate = useNavigate();
   const { rooms, loading, error, fetchRooms, addRoom, editRoom, removeRoom, clearError } = useRooms();
   const { roomTypes, fetchRoomTypes } = useRoomTypes();
+  const showMobileCards = useMediaQuery('(max-width: 767px)');
 
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [showRoomModal, setShowRoomModal] = useState(false);
@@ -342,7 +344,7 @@ export default function RoomsManagement() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t('roomsManagementPage.heroEyebrow')}
         title={t('roomsManagement')}
@@ -357,7 +359,7 @@ export default function RoomsManagement() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('roomsManagementPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('roomsManagementPage.cleaning')}
@@ -439,8 +441,121 @@ export default function RoomsManagement() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
-            <Table className="min-w-full">
+          <>
+            {showMobileCards ? (
+            <div className="space-y-4">
+              {displayedRooms.map((room) => {
+                const amenities = room.roomType?.amenities
+                  ? room.roomType.amenities
+                      .split(',')
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                  : [];
+
+                return (
+                  <article
+                    key={room.id}
+                    className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xl font-black tracking-tight text-brand-ink">
+                          {room.roomNumber}
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                          {translateKnownValue(room.roomType?.name, t)}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${getStatusBadgeClasses(room.status)}`}
+                      >
+                        {getRoomStatusLabel(room.status, t)}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                          {t('roomsManagementPage.tableFloor')}
+                        </p>
+                        <p className="mt-2 text-sm font-bold text-brand-ink">{room.floor ?? '-'}</p>
+                      </div>
+                      <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                          {t('roomsManagementPage.tableBasePrice')}
+                        </p>
+                        <p className="mt-2 text-sm font-bold text-brand-ink">
+                          {formatLocalizedCurrency(room.roomType?.basePrice, i18n.language)}
+                        </p>
+                      </div>
+                      <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                          {t('roomsManagementPage.tableCapacity')}
+                        </p>
+                        <p className="mt-2 text-sm font-bold text-brand-ink">
+                          {room.roomType?.maxGuests ?? '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {amenities.slice(0, 4).map((amenity) => (
+                        <span
+                          key={amenity}
+                          className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
+                        >
+                          {translateKnownValue(amenity, t)}
+                        </span>
+                      ))}
+                      {amenities.length > 4 ? (
+                        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted">
+                          +{amenities.length - 4}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => handleOpenEdit(room)}
+                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        {t('roomsManagementPage.editButton')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() =>
+                          navigate('/room-status', {
+                            state: {
+                              initialFilter: room.status,
+                              initialQuery: room.roomNumber,
+                            },
+                          })
+                        }
+                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                      >
+                        {t('roomsManagementPage.openStatusBoard')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => handleDelete(room)}
+                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {t('roomsManagementPage.deleteButton')}
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            ) : (
+            <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
+              <Table className="min-w-full">
               <TableHeader className="bg-brand-surface-light">
                 <TableRow>
                   {[
@@ -547,7 +662,9 @@ export default function RoomsManagement() {
                 })}
               </TableBody>
             </Table>
-          </div>
+            </div>
+            )}
+          </>
         )}
       </DashboardPanel>
 

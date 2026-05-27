@@ -102,7 +102,7 @@ export default function NotificationCenter() {
         </button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-[24rem] rounded-[1.5rem] border-brand-surface-border bg-white p-0 shadow-[0_20px_48px_-28px_rgba(15,23,42,0.26)]">
+      <PopoverContent align="end" className="w-[min(24rem,calc(100vw-1rem))] rounded-[1.5rem] border-brand-surface-border bg-white p-0 shadow-[0_20px_48px_-28px_rgba(15,23,42,0.26)]">
         <div className="border-b border-brand-surface-border px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <div>

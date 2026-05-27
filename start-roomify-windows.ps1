@@ -17,7 +17,7 @@ $ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
 $BackendLog = Join-Path $BackendDir 'demo-backend.log'
 $BackendPidFile = Join-Path $BackendDir 'demo-backend.pid'
 
-$DbPort = 5433
+$DbPort = 5432
 $BackendPort = 8080
 $AiServicePort = 8000
 $MailpitSmtpPort = 1025

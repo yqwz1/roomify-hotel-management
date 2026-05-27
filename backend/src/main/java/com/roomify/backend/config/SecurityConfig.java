@@ -3,7 +3,7 @@ package com.roomify.backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // ✅ مهم
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity // 🔥 تفعيل @PreAuthorize
+@EnableMethodSecurity // تفعيل @PreAuthorize
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -29,55 +29,77 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Public endpoints
+                        // Public endpoints
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rooms/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/*").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+
+                        // Guest endpoints
                         .requestMatchers("/api/guest/reservations/**").hasRole("GUEST")
 
-                        // ❗ باقي endpoints تحتاج Authentication
-                        .anyRequest().authenticated())
-                // ✅ JWT Filter
+                        // باقي endpoints تحتاج Authentication
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ✅ Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ CORS Configuration
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
 
-        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        org.springframework.web.cors.CorsConfiguration configuration =
+                new org.springframework.web.cors.CorsConfiguration();
 
-        configuration.setAllowedOrigins(java.util.List.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://localhost:3001",
-                "http://127.0.0.1:3001",
-                "http://localhost:3002",
-                "http://127.0.0.1:3002",
-                "http://localhost:3003",
-                "http://127.0.0.1:3003",
-                "http://localhost:4173",
-                "http://127.0.0.1:4173"));
+        /*
+         * Development CORS origins:
+         *
+         * localhost / 127.0.0.1:
+         * - Used when opening the frontend from the same PC.
+         *
+         * 192.168.*.*:
+         * - Used when opening the frontend from a phone on the same Wi-Fi network.
+         *
+         * Important:
+         * - allowedOriginPatterns is used instead of allowedOrigins because the local IP
+         *   may change, for example: 192.168.100.9, 192.168.1.10, etc.
+         * - This is suitable for local development.
+         * - For production, replace these patterns with the real deployed frontend domain.
+         */
+        configuration.setAllowedOriginPatterns(java.util.List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://192.168.*.*:*"
+        ));
 
         configuration.setAllowedMethods(java.util.List.of(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
 
         configuration.setAllowedHeaders(java.util.List.of("*"));
+
+        // Useful if the frontend needs to read Authorization or other response headers.
+        configuration.setExposedHeaders(java.util.List.of(
+                "Authorization"
+        ));
+
+        // Keep this true if your frontend sends credentials or Authorization headers.
         configuration.setAllowCredentials(true);
 
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
+                new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration("/**", configuration);
 

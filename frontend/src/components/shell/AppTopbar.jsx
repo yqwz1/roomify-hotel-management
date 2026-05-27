@@ -36,12 +36,12 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-brand-surface-border bg-brand-surface/90 backdrop-blur-xl">
-      <div className="flex min-h-20 flex-wrap items-start gap-3 px-4 py-3 sm:items-center sm:px-6 lg:px-8">
+      <div className="flex min-h-20 flex-wrap items-start gap-3 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:items-center sm:px-6 sm:pt-3 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-brand-surface-border bg-white p-2.5 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+            className="rounded-2xl border border-brand-surface-border bg-white p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
             aria-label={isSidebarOpen ? t('closeNavigation') : t('openNavigation')}
             aria-pressed={isSidebarOpen}
           >
@@ -68,12 +68,17 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
           </div>
         </div>
 
-        <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap sm:gap-3">
           {showNotificationCenter ? <NotificationCenter /> : null}
-          <LanguageSwitcher />
+          <div className="sm:hidden">
+            <LanguageSwitcher />
+          </div>
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
           <Link
             to={homePath}
-            className="inline-flex shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+            className="inline-flex shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep max-[380px]:hidden"
           >
             {t('homeNav')}
           </Link>

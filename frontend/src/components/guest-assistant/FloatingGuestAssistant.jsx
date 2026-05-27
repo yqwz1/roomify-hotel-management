@@ -545,7 +545,7 @@ export default function FloatingGuestAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed bottom-24 right-4 z-[69] flex h-[min(42rem,calc(100vh-7rem))] w-[min(27rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:right-6"
+            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] right-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:right-6 sm:h-[min(42rem,calc(100vh-7rem))]"
           >
             <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
               <div className="flex items-start justify-between gap-4">

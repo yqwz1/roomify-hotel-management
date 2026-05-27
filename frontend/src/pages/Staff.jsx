@@ -14,6 +14,7 @@ import ModalFrame from '../components/common/ModalFrame';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { useAuth } from '../context/AuthProvider';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStaff } from '../hooks/useStaff';
 import { translateKnownValue, translateWithFallback } from '../utils/localization';
 
@@ -170,6 +171,7 @@ export default function Staff() {
     deleteStaff,
   } = useStaff();
   const { user, hasRole } = useAuth();
+  const showMobileCards = useMediaQuery('(max-width: 767px)');
 
   const currentUserEmail = user?.email;
   const canUnlock = hasRole('ROLE_ADMIN');
@@ -346,7 +348,7 @@ export default function Staff() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.heroEyebrow`)}
         title={t('staffManagementTitle')}
@@ -361,7 +363,7 @@ export default function Staff() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t(`${pageTx}.teamSnapshot`)}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t(`${pageTx}.active`)}
@@ -405,7 +407,7 @@ export default function Staff() {
         title={t(`${pageTx}.addFiltersTitle`)}
         description={t(`${pageTx}.addFiltersDescription`)}
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('searchLabel')}
@@ -470,8 +472,116 @@ export default function Staff() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
-            <table className="min-w-full border-collapse">
+          <>
+            {showMobileCards ? (
+            <div className="space-y-4">
+              {filteredStaff.map((member) => {
+                const isCurrentUser = member.email === currentUserEmail;
+
+                return (
+                  <article
+                    key={member.id}
+                    className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-black text-brand-ink">{member.name}</p>
+                          {isCurrentUser ? (
+                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted">
+                              {t(`${pageTx}.you`)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-sm font-medium text-brand-ink-muted">{member.email}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {member.active ? (
+                          <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+                            {t(`${pageTx}.active`)}
+                          </span>
+                        ) : (
+                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                            {t(`${pageTx}.inactive`)}
+                          </span>
+                        )}
+                        {member.locked ? (
+                          <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning">
+                            {translateWithFallback(t, `${pageTx}.locked`, 'Locked')}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                        {t(`${pageTx}.tableDepartment`)}
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                        {translateKnownValue(member.department || '-', t)}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(member)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        {t(`${pageTx}.edit`)}
+                      </button>
+
+                      {member.active ? (
+                        <button
+                          type="button"
+                          onClick={() => handleDeactivate(member)}
+                          disabled={isCurrentUser}
+                          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                        >
+                          <PowerOff className="h-4 w-4" />
+                          {t(`${pageTx}.deactivate`)}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleActivate(member)}
+                          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                        >
+                          <Power className="h-4 w-4" />
+                          {t(`${pageTx}.activate`)}
+                        </button>
+                      )}
+
+                      {canUnlock ? (
+                        <button
+                          type="button"
+                          onClick={() => handleUnlock(member)}
+                          disabled={!member.locked}
+                          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                        >
+                          <LockOpen className="h-4 w-4" />
+                          {t(`${pageTx}.unlock`)}
+                        </button>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(member)}
+                        disabled={isCurrentUser}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {t(`${pageTx}.delete`)}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            ) : (
+            <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
+              <table className="min-w-full border-collapse">
               <thead className="bg-brand-surface-light">
                 <tr>
                   {[t(`${pageTx}.tableDetails`), t(`${pageTx}.tableDepartment`), t(`${pageTx}.tableStatus`), t(`${pageTx}.tableActions`)].map((heading) => (
@@ -587,7 +697,9 @@ export default function Staff() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+            )}
+          </>
         )}
       </DashboardPanel>
 

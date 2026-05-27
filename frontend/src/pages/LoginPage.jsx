@@ -192,7 +192,7 @@ const LoginPage = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE }}
-        className="relative z-10 w-full max-w-[400px]"
+        className="relative z-10 w-full max-w-[400px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]"
       >
         {/* Brand mark — solo, sized as the page's only brand moment */}
         <motion.div
@@ -421,7 +421,7 @@ const LoginPage = () => {
                   transition={{ duration: 0.3, ease: EASE }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-3 grid grid-cols-2 gap-1.5">
+                  <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
                     {DEMO_ACCOUNTS.map((account) => (
                       <button
                         key={account.email}

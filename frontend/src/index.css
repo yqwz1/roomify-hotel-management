@@ -28,9 +28,20 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
-html, body, #root {
+:root {
+  color-scheme: light;
+  --roomify-mobile-nav-height: 0px;
+}
+html,
+body,
+#root {
   height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: #f5f2ea;
 }
 
 body {
@@ -41,8 +52,36 @@ body {
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
   overflow-y: auto;
+  min-width: 320px;
+  overscroll-behavior-y: none;
+  background: #f5f2ea;
 }
 code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
+
+#root {
+  isolation: isolate;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
 
 /* Subtle custom scrollbars for data-dense tables */
 ::-webkit-scrollbar {
@@ -129,5 +168,11 @@ code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
   .font-heading {
     font-family: 'Thmanyah Serif Display', serif;
     letter-spacing: -0.015em;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --roomify-mobile-nav-height: 5.75rem;
   }
 }

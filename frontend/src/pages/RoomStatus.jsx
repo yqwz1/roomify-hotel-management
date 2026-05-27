@@ -271,7 +271,7 @@ export default function RoomStatus() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {t('roomStatusPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('roomStatusAvailable')}

@@ -10,6 +10,7 @@ import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { formatLocalizedCurrency, translateKnownValue, translateWithFallback } from '../utils/localization';
 
 const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Safe", "Balcony", "Breakfast"];
@@ -48,6 +49,7 @@ function SkeletonRow() {
 export default function RoomTypes() {
     const { t, i18n } = useTranslation();
     const { roomTypes, loading, error, fetchRoomTypes, createRoomType, updateRoomType, deleteRoomType } = useRoomTypes();
+    const showMobileCards = useMediaQuery('(max-width: 767px)');
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -209,7 +211,7 @@ export default function RoomTypes() {
     };
 
     return (
-        <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
             <DashboardHero
                 eyebrow={translateWithFallback(t, 'roomTypesPage.heroEyebrow', 'Catalog control')}
                 title={t('roomTypesTitle')}
@@ -233,7 +235,7 @@ export default function RoomTypes() {
                     <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
                         {translateWithFallback(t, 'roomTypesPage.catalogSnapshot', 'Catalog Snapshot')}
                     </p>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                                 {translateWithFallback(t, 'roomTypesPage.typesLabel', 'Types')}
@@ -320,7 +322,78 @@ export default function RoomTypes() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="relative w-full overflow-x-auto">
+                        <>
+                            {showMobileCards ? (
+                            <div className="space-y-4">
+                                {roomTypes.map((rt) => (
+                                    <article
+                                        key={rt.id}
+                                        className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-lg font-black text-brand-ink">{rt.name}</p>
+                                                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                                                    {rt.description || '-'}
+                                                </p>
+                                            </div>
+                                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink">
+                                                {rt.maxGuests} {t('guestsLabel', { defaultValue: 'guests' })}
+                                            </span>
+                                        </div>
+
+                                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                            <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                                                    {t('colPrice')}
+                                                </p>
+                                                <p className="mt-2 text-sm font-bold text-brand-ink">
+                                                    {formatLocalizedCurrency(rt.basePrice, i18n.language)}
+                                                </p>
+                                            </div>
+                                            <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                                                    {t('colAmenities')}
+                                                </p>
+                                                <p className="mt-2 text-sm font-bold text-brand-ink">
+                                                    {rt.amenities ? rt.amenities.split(',').filter(Boolean).length : 0}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
+                                                <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm">
+                                                    {translateKnownValue(amenity.trim(), t)}
+                                                </span>
+                                            )) : <span className="text-brand-ink-hint text-xs font-medium">-</span>}
+                                        </div>
+
+                                        <div className="mt-4 flex gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleEdit(rt)}
+                                                className="h-10 w-10 rounded-full border border-brand-surface-border bg-white text-brand-ink shadow-sm transition-colors hover:bg-brand-primary-tint hover:text-brand-ink"
+                                                aria-label={translateWithFallback(t, 'common.edit', 'Edit')}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDelete(rt.id)}
+                                                className="h-10 w-10 rounded-full border border-brand-ink bg-brand-ink text-white shadow-sm transition-colors hover:bg-brand-primary-deep"
+                                                aria-label={translateWithFallback(t, 'common.delete', 'Delete')}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                            ) : (
+                            <div className="relative w-full overflow-x-auto">
                             <table className="w-full table-fixed caption-bottom text-sm text-start">
                                 <colgroup>
                                     <col className="w-[30%]" />
@@ -386,7 +459,9 @@ export default function RoomTypes() {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
+                            </div>
+                            )}
+                        </>
                     )}
                 </CardContent>
             </Card>
@@ -424,7 +499,7 @@ export default function RoomTypes() {
                             {validationErrors.name && <p className="text-xs font-bold text-brand-danger">{validationErrors.name}</p>}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-5">
+                        <div className="grid gap-5 sm:grid-cols-2">
                             <div className="space-y-3">
                                 <Label htmlFor="basePrice" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('basePriceLabel')} <span className="text-brand-danger">*</span></Label>
                                 <Input

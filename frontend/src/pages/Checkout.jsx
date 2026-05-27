@@ -599,7 +599,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <ConfirmationToast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
 
       {paymentModalOpen ? (
@@ -627,7 +627,7 @@ export default function Checkout() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
             {gateTitle}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
                 {t('checkoutPage.outstanding')}

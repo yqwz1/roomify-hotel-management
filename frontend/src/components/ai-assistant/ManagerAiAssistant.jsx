@@ -75,7 +75,7 @@ export default function ManagerAiAssistant() {
   return (
     <>
       {open ? (
-        <div className="fixed bottom-24 right-4 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_24px_80px_-28px_rgba(15,23,42,0.45)] sm:right-6">
+        <div className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] right-4 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_24px_80px_-28px_rgba(15,23,42,0.45)] sm:bottom-24 sm:right-6">
           <div className="flex items-center justify-between rounded-t-[1.75rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
             <div className="min-w-0">
               <p className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-white/60">
@@ -176,7 +176,7 @@ export default function ManagerAiAssistant() {
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="fixed bottom-5 right-4 z-50 inline-flex items-center gap-3 rounded-full bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-4 py-3 text-white shadow-[0_22px_50px_-22px_rgba(15,23,42,0.55)] transition hover:translate-y-[-1px] hover:shadow-[0_28px_60px_-24px_rgba(15,23,42,0.55)] sm:bottom-6 sm:right-6"
+        className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+1rem)] right-4 z-50 inline-flex items-center gap-3 rounded-full bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-4 py-3 text-white shadow-[0_22px_50px_-22px_rgba(15,23,42,0.55)] transition hover:translate-y-[-1px] hover:shadow-[0_28px_60px_-24px_rgba(15,23,42,0.55)] sm:bottom-6 sm:right-6"
       >
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
           {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
