@@ -525,6 +525,11 @@ main() {
         cp "$FRONTEND_DIR/.env.example" "$FRONTEND_DIR/.env"
     fi
 
+    if [[ -f "$FRONTEND_DIR/.env" ]] && ! grep -q '^VITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED=' "$FRONTEND_DIR/.env"; then
+        log "Enabling frontend demo account shortcuts in frontend/.env..."
+        printf '\nVITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true\n' >>"$FRONTEND_DIR/.env"
+    fi
+
     if ! docker compose version >/dev/null 2>&1; then
         fail "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."
     fi

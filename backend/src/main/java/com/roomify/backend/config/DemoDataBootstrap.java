@@ -161,8 +161,11 @@ public class DemoDataBootstrap implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         LocalDate today = LocalDate.now();
+        cleanupKnownLocalDemoClutter();
         seedCoreUsers();
+        seedStableDemoSearchInventory();
         seedDemoGuestReservationIfPossible(today);
+        seedMissingPageDemoData(today);
 
         if (userRepository.findByEmailIgnoreCase(SEED_MARKER_EMAIL).isPresent()) {
             log.info("Demo data already present, skipping seeding.");
@@ -324,6 +327,26 @@ public class DemoDataBootstrap implements ApplicationRunner {
         return rooms;
     }
 
+    private List<Room> seedStableDemoSearchInventory() {
+        RoomType standard = upsertRoomType("Demo Standard", new BigDecimal("430.00"), 2,
+                "WiFi, Smart TV, Breakfast",
+                "Stable demo inventory for quick front-desk walkthroughs.");
+        RoomType deluxe = upsertRoomType("Demo Deluxe", new BigDecimal("690.00"), 3,
+                "WiFi, Smart TV, Coffee Station, City View",
+                "Mid-tier demo inventory for booking and modification flows.");
+        RoomType suite = upsertRoomType("Demo Suite", new BigDecimal("980.00"), 4,
+                "WiFi, Smart TV, Lounge Area, Balcony",
+                "Premium demo inventory kept open for same-day availability searches.");
+
+        return List.of(
+                upsertRoom("D101", standard, 1),
+                upsertRoom("D102", standard, 1),
+                upsertRoom("D201", deluxe, 2),
+                upsertRoom("D202", deluxe, 2),
+                upsertRoom("D301", suite, 3),
+                upsertRoom("D302", standard, 3));
+    }
+
     private Room upsertRoom(String number, RoomType type, int floor) {
         Room room = roomRepository.findByRoomNumber(number).orElseGet(Room::new);
         room.setRoomNumber(number);
@@ -331,6 +354,394 @@ public class DemoDataBootstrap implements ApplicationRunner {
         room.setFloor(floor);
         room.setStatus(RoomStatus.AVAILABLE);
         return roomRepository.save(room);
+    }
+
+    private void cleanupKnownLocalDemoClutter() {
+        int removed = 0;
+        String staleRoomReservationSubquery = """
+                SELECT res.id
+                FROM reservations res
+                JOIN rooms room ON room.id = res.room_id
+                WHERE room.room_number LIKE 'AI-%'
+                   OR room.room_number LIKE '981%'
+                   OR res.confirmation_number LIKE 'AI-DEMO-%'
+                """;
+        removed += jdbcTemplate.update("""
+                DELETE FROM payments
+                WHERE reservation_id IN (""" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("""
+                DELETE FROM invoice
+                WHERE confirmation_number IN (
+                    SELECT confirmation_number FROM reservations WHERE id IN (""" + staleRoomReservationSubquery + "))");
+        removed += jdbcTemplate.update("""
+                DELETE FROM guest_conversation_messages
+                WHERE service_request_id IN (
+                    SELECT req.id
+                    FROM service_requests req
+                    JOIN rooms room ON room.id = req.room_id
+                    WHERE room.room_number LIKE 'AI-%'
+                       OR room.room_number LIKE '981%'
+                )
+                """);
+        removed += jdbcTemplate.update("""
+                DELETE FROM guest_conversations
+                WHERE service_request_id IN (
+                    SELECT req.id
+                    FROM service_requests req
+                    JOIN rooms room ON room.id = req.room_id
+                    WHERE room.room_number LIKE 'AI-%'
+                       OR room.room_number LIKE '981%'
+                )
+                   OR reservation_id IN (""" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("""
+                DELETE FROM service_requests
+                WHERE room_id IN (
+                    SELECT id FROM rooms WHERE room_number LIKE 'AI-%' OR room_number LIKE '981%'
+                )
+                """);
+        removed += jdbcTemplate.update("""
+                DELETE FROM service_charges
+                WHERE reservation_id IN (""" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("""
+                DELETE FROM reservation_audits
+                WHERE reservation_id IN (""" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("""
+                DELETE FROM reservation_history
+                WHERE reservation_id IN (""" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("DELETE FROM reservations WHERE id IN (" + staleRoomReservationSubquery + ")");
+        removed += jdbcTemplate.update("DELETE FROM expenses WHERE receipt_file_name LIKE 'AI-DEMO-%'");
+        removed += jdbcTemplate.update("DELETE FROM rooms WHERE room_number LIKE 'AI-%'");
+        removed += jdbcTemplate.update("DELETE FROM guests WHERE id_number LIKE 'AI-DEMO-GUEST-%'");
+        removed += jdbcTemplate.update("DELETE FROM rooms WHERE room_number LIKE '981%'");
+        removed += jdbcTemplate.update("DELETE FROM room_types WHERE name LIKE 'VERIFY-TYPE-%'");
+
+        if (removed > 0) {
+            log.info("Removed {} stale local demo/test records so the intended Roomify demo data is visible.", removed);
+        }
+    }
+
+    private void seedMissingPageDemoData(LocalDate today) {
+        int serviceRequests = seedDemoServiceRequests(today);
+        int conversations = seedDemoGuestConversations(today);
+        int templates = seedDemoServiceUsageTemplates();
+        int usageRecords = seedDemoServiceUsageRecords(today);
+
+        if (serviceRequests + conversations + templates + usageRecords > 0) {
+            log.info("Filled missing page demo data: serviceRequests={}, conversations={}, serviceUsageTemplates={}, serviceUsageRecords={}.",
+                    serviceRequests, conversations, templates, usageRecords);
+        }
+    }
+
+    private int seedDemoServiceRequests(LocalDate today) {
+        Integer existing = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM service_requests", Integer.class);
+        if (existing != null && existing > 0) {
+            return 0;
+        }
+
+        Long guestId = queryLong("SELECT id FROM guests WHERE lower(email) = lower(?)", DEMO_GUEST_EMAIL);
+        if (guestId == null) {
+            return 0;
+        }
+
+        Object[][] requests = {
+                {"D101", "ROOM_CLEANING", "HIGH", "PENDING", "Please refresh towels and bottled water before dinner.", today.atTime(9, 15)},
+                {"D201", "FOOD_DELIVERY", "MEDIUM", "IN_PROGRESS", "Breakfast tray requested for 8:30 AM.", today.minusDays(1).atTime(21, 35)},
+                {"D301", "MAINTENANCE", "HIGH", "PENDING", "Air conditioning is not cooling consistently.", today.atTime(15, 20).minusHours(2)},
+                {"D102", "LAUNDRY", "LOW", "COMPLETED", "Two shirts and one jacket for express laundry.", today.minusDays(2).atTime(10, 5)}
+        };
+
+        int inserted = 0;
+        for (Object[] request : requests) {
+            Long roomId = queryLong("SELECT id FROM rooms WHERE room_number = ?", request[0]);
+            if (roomId == null) {
+                continue;
+            }
+            inserted += jdbcTemplate.update("""
+                    INSERT INTO service_requests
+                        (guest_id, room_id, service_type, description, priority, status, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    guestId, roomId, request[1], request[4], request[2], request[3], request[5]);
+        }
+        return inserted;
+    }
+
+    private int seedDemoGuestConversations(LocalDate today) {
+        Integer existing = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM guest_conversations", Integer.class);
+        if (existing != null && existing > 0) {
+            return 0;
+        }
+
+        Long guestId = queryLong("SELECT id FROM guests WHERE lower(email) = lower(?)", DEMO_GUEST_EMAIL);
+        Long staffUserId = queryLong("SELECT id FROM users WHERE lower(email) = lower(?)", DEMO_STAFF_EMAIL);
+        Long reservationId = queryLong("SELECT id FROM reservations WHERE confirmation_number = ?", DEMO_GUEST_CONFIRMATION);
+        Long serviceRequestId = queryLong("SELECT id FROM service_requests ORDER BY created_at DESC LIMIT 1");
+        Long roomId = queryLong("SELECT room_id FROM reservations WHERE id = ?", reservationId);
+        if (guestId == null || roomId == null) {
+            return 0;
+        }
+
+        Long activeConversationId = insertConversation(
+                guestId,
+                reservationId,
+                roomId,
+                serviceRequestId,
+                staffUserId,
+                "Towels and room refresh",
+                "ACTIVE",
+                "Extra towels are on the way.",
+                today.atTime(12, 40),
+                0,
+                1);
+        insertMessage(activeConversationId, "GUEST", null, guestId, serviceRequestId,
+                "Could we get extra towels and water bottles?", "en",
+                "هل يمكننا الحصول على مناشف إضافية وزجاجات ماء؟",
+                "Could we get extra towels and water bottles?",
+                false,
+                "HOUSEKEEPING",
+                today.atTime(12, 24));
+        insertMessage(activeConversationId, "STAFF", staffUserId, null, serviceRequestId,
+                "Extra towels are on the way.", "en",
+                "المناشف الإضافية في الطريق.",
+                "Extra towels are on the way.",
+                false,
+                null,
+                today.atTime(12, 40));
+
+        Long aiConversationId = insertConversation(
+                guestId,
+                reservationId,
+                roomId,
+                null,
+                staffUserId,
+                "Restaurant recommendation",
+                "PENDING",
+                "I can recommend our rooftop restaurant for dinner tonight.",
+                today.minusDays(1).atTime(18, 10),
+                0,
+                1);
+        insertMessage(aiConversationId, "GUEST", null, guestId, null,
+                "What is a good dinner option at the hotel?", "en",
+                "ما هو خيار العشاء الجيد في الفندق؟",
+                "What is a good dinner option at the hotel?",
+                false,
+                "RESTAURANT",
+                today.minusDays(1).atTime(18, 3));
+        insertMessage(aiConversationId, "AI", null, null, null,
+                "I can recommend our rooftop restaurant for dinner tonight.", "en",
+                "يمكنني ترشيح مطعم السطح لدينا لعشاء الليلة.",
+                "I can recommend our rooftop restaurant for dinner tonight.",
+                true,
+                "ASK_AI",
+                today.minusDays(1).atTime(18, 10));
+
+        return 2;
+    }
+
+    private Long insertConversation(
+            Long guestId,
+            Long reservationId,
+            Long roomId,
+            Long serviceRequestId,
+            Long staffUserId,
+            String subject,
+            String status,
+            String preview,
+            LocalDateTime lastMessageAt,
+            int unreadGuestCount,
+            int unreadStaffCount) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO guest_conversations
+                    (public_id, guest_id, reservation_id, room_id, service_request_id, assigned_staff_user_id,
+                     status, subject, preferred_language, ai_fallback_enabled, ai_handled,
+                     unread_guest_count, unread_staff_count, last_message_preview, last_message_at, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'en', true, false, ?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                UUID.randomUUID(), guestId, reservationId, roomId, serviceRequestId, staffUserId,
+                status, subject, unreadGuestCount, unreadStaffCount, preview, lastMessageAt, lastMessageAt, lastMessageAt);
+    }
+
+    private void insertMessage(
+            Long conversationId,
+            String senderRole,
+            Long senderUserId,
+            Long senderGuestId,
+            Long serviceRequestId,
+            String originalBody,
+            String detectedLanguage,
+            String arabicTranslation,
+            String englishTranslation,
+            boolean aiGenerated,
+            String quickActionType,
+            LocalDateTime createdAt) {
+        jdbcTemplate.update("""
+                INSERT INTO guest_conversation_messages
+                    (conversation_id, sender_role, sender_user_id, sender_guest_id, service_request_id,
+                     message_status, original_body, detected_language, arabic_translation, english_translation,
+                     guest_localized_body, guest_localized_language, ai_generated, quick_action_type,
+                     delivered_at, created_at)
+                VALUES (?, ?, ?, ?, ?, 'DELIVERED', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                conversationId, senderRole, senderUserId, senderGuestId, serviceRequestId,
+                originalBody, detectedLanguage, arabicTranslation, englishTranslation,
+                originalBody, detectedLanguage, aiGenerated, quickActionType, createdAt, createdAt);
+    }
+
+    private int seedDemoServiceUsageTemplates() {
+        Integer existing = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM service_usage_templates", Integer.class);
+        if (existing != null && existing > 0) {
+            return 0;
+        }
+
+        Long standardTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Demo Standard");
+        Long deluxeTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Demo Deluxe");
+
+        Long towelId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Bath towels (large)");
+        Long waterId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Bottled water (500ml)");
+        Long shampooId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Shampoo bottles (200ml)");
+        Long solutionId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Cleaning solution (5L)");
+        Long linenId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Bed linens (queen)");
+        if (towelId == null || waterId == null || shampooId == null || solutionId == null || linenId == null) {
+            return 0;
+        }
+
+        Long standardTemplateId = insertUsageTemplate(
+                "Demo Standard Room Turnover",
+                "STANDARD_ROOM_CLEANING",
+                standardTypeId,
+                "Default cleaning bundle for demo standard rooms.");
+        insertTemplateItem(standardTemplateId, towelId, "2.000", "Two large towels");
+        insertTemplateItem(standardTemplateId, waterId, "2.000", "Welcome waters");
+        insertTemplateItem(standardTemplateId, shampooId, "1.000", "Bathroom amenity");
+        insertTemplateItem(standardTemplateId, solutionId, "0.150", "Cleaning allocation");
+
+        Long deluxeTemplateId = insertUsageTemplate(
+                "Demo Deluxe Checkout Cleaning",
+                "CHECKOUT_CLEANING",
+                deluxeTypeId,
+                "Checkout cleaning bundle for demo deluxe rooms.");
+        insertTemplateItem(deluxeTemplateId, towelId, "3.000", "Towel replacement");
+        insertTemplateItem(deluxeTemplateId, linenId, "1.000", "Fresh queen linens");
+        insertTemplateItem(deluxeTemplateId, waterId, "2.000", "Welcome waters");
+        insertTemplateItem(deluxeTemplateId, solutionId, "0.250", "Deep cleaning allocation");
+
+        return 2;
+    }
+
+    private Long insertUsageTemplate(String name, String serviceType, Long roomTypeId, String notes) {
+        LocalDateTime now = LocalDateTime.now();
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO service_usage_templates
+                    (name, service_type, room_type_id, active, notes, created_at, updated_at)
+                VALUES (?, ?, ?, true, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class, name, serviceType, roomTypeId, notes, now, now);
+    }
+
+    private void insertTemplateItem(Long templateId, Long itemId, String quantity, String notes) {
+        LocalDateTime now = LocalDateTime.now();
+        jdbcTemplate.update("""
+                INSERT INTO service_usage_template_items
+                    (template_id, inventory_item_id, standard_quantity, active, notes, created_at, updated_at)
+                VALUES (?, ?, ?, true, ?, ?, ?)
+                """,
+                templateId, itemId, new BigDecimal(quantity), notes, now, now);
+    }
+
+    private int seedDemoServiceUsageRecords(LocalDate today) {
+        Integer existing = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM service_usage_records", Integer.class);
+        if (existing != null && existing > 0) {
+            return 0;
+        }
+
+        Long actorId = queryLong("SELECT id FROM users WHERE lower(email) = lower(?)", DEMO_STAFF_EMAIL);
+        List<Long> templateIds = jdbcTemplate.queryForList(
+                "SELECT id FROM service_usage_templates ORDER BY id LIMIT 2",
+                Long.class);
+        if (templateIds.isEmpty()) {
+            return 0;
+        }
+
+        String[][] rooms = {
+                {"D101", "STANDARD_ROOM_CLEANING", "AVAILABLE", "Routine morning refresh"},
+                {"D201", "CHECKOUT_CLEANING", "AVAILABLE", "Checkout reset completed"},
+                {"D301", "DEEP_CLEANING", "AVAILABLE", "Suite deep clean after extended stay"}
+        };
+
+        int inserted = 0;
+        for (int i = 0; i < rooms.length; i++) {
+            Long roomId = queryLong("SELECT id FROM rooms WHERE room_number = ?", rooms[i][0]);
+            Long roomTypeId = queryLong("SELECT room_type_id FROM rooms WHERE id = ?", roomId);
+            Long templateId = templateIds.get(Math.min(i, templateIds.size() - 1));
+            if (roomId == null || roomTypeId == null) {
+                continue;
+            }
+
+            LocalDateTime performedAt = today.minusDays(i).atTime(11 + i, 15);
+            Long recordId = jdbcTemplate.queryForObject("""
+                    INSERT INTO service_usage_records
+                        (room_id, room_type_id, service_type, template_id, applied_standard_template,
+                         source_room_status, service_date, performed_at, total_cost, notes,
+                         created_by_user_id, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, true, ?, ?, ?, 0.00, ?, ?, ?, ?)
+                    RETURNING id
+                    """,
+                    Long.class,
+                    roomId, roomTypeId, rooms[i][1], templateId, rooms[i][2],
+                    performedAt.toLocalDate(), performedAt, rooms[i][3], actorId, performedAt, performedAt);
+
+            BigDecimal total = copyTemplateItemsToUsageRecord(recordId, templateId);
+            jdbcTemplate.update("UPDATE service_usage_records SET total_cost = ? WHERE id = ?", total, recordId);
+            inserted++;
+        }
+        return inserted;
+    }
+
+    private BigDecimal copyTemplateItemsToUsageRecord(Long recordId, Long templateId) {
+        List<Map<String, Object>> items = jdbcTemplate.queryForList("""
+                SELECT ti.id AS template_item_id,
+                       ti.inventory_item_id,
+                       ti.standard_quantity,
+                       ii.default_unit_cost
+                FROM service_usage_template_items ti
+                JOIN inventory_items ii ON ii.id = ti.inventory_item_id
+                WHERE ti.template_id = ?
+                ORDER BY ti.id
+                """,
+                templateId);
+
+        BigDecimal total = BigDecimal.ZERO;
+        LocalDateTime now = LocalDateTime.now();
+        for (Map<String, Object> item : items) {
+            BigDecimal quantity = (BigDecimal) item.get("standard_quantity");
+            BigDecimal unitCost = (BigDecimal) item.get("default_unit_cost");
+            BigDecimal lineTotal = quantity.multiply(unitCost).setScale(2, java.math.RoundingMode.HALF_UP);
+            total = total.add(lineTotal);
+            jdbcTemplate.update("""
+                    INSERT INTO service_usage_record_items
+                        (usage_record_id, inventory_item_id, template_item_id, standard_quantity,
+                         actual_quantity, unit_cost, total_cost, notes, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'Seeded demo consumption', ?, ?)
+                    """,
+                    recordId,
+                    item.get("inventory_item_id"),
+                    item.get("template_item_id"),
+                    quantity,
+                    quantity,
+                    unitCost,
+                    lineTotal,
+                    now,
+                    now);
+        }
+        return total;
+    }
+
+    private Long queryLong(String sql, Object... args) {
+        List<Long> values = jdbcTemplate.queryForList(sql, Long.class, args);
+        return values.isEmpty() ? null : values.get(0);
     }
 
     // ─── Guests ─────────────────────────────────────────────────────────────
