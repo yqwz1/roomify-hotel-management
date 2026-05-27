@@ -1573,7 +1573,7 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t(`${pageTx}.controlsSummaryReservations`)}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
                     {formatLocalizedNumber(metrics.totalReservations, i18n.language)}
                   </p>
                 </div>
@@ -1581,7 +1581,7 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {t(`${pageTx}.controlsSummaryRevenue`)}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
                     {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1592,7 +1592,7 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryExpenses`, 'Expenses')}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
                     {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1603,7 +1603,7 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryNetProfit`, 'Net Profit')}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
                     {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
