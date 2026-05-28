@@ -699,21 +699,27 @@ public class DemoDataBootstrap implements ApplicationRunner {
         return inserted;
     }
 
-    private Long insertAndReturnId(String sql, Object... args) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            for (int i = 0; i < args.length; i++) {
-                statement.setObject(i + 1, args[i]);
-            }
-            return statement;
-        }, keyHolder);
-        Number key = keyHolder.getKey();
-        if (key == null) {
-            throw new IllegalStateException("Insert did not return a generated id.");
+private Long insertAndReturnId(String sql, Object... args) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    jdbcTemplate.update(connection -> {
+        PreparedStatement statement = connection.prepareStatement(sql, new String[] {"id"});
+
+        for (int i = 0; i < args.length; i++) {
+            statement.setObject(i + 1, args[i]);
         }
-        return key.longValue();
+
+        return statement;
+    }, keyHolder);
+
+    Number key = keyHolder.getKey();
+
+    if (key == null) {
+        throw new IllegalStateException("Insert did not return a generated id.");
     }
+
+    return key.longValue();
+}
 
     private BigDecimal copyTemplateItemsToUsageRecord(Long recordId, Long templateId) {
         List<Map<String, Object>> items = jdbcTemplate.queryForList("""
