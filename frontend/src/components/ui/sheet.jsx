@@ -6,8 +6,14 @@ import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { useRadixDir } from "@/components/ui/use-radix-dir";
 
-const Sheet = SheetPrimitive.Root;
+const Sheet = ({ dir, ...props }) => {
+  const resolvedDir = useRadixDir(dir);
+
+  return <SheetPrimitive.Root dir={resolvedDir} {...props} />;
+};
+Sheet.displayName = SheetPrimitive.Root.displayName;
 const SheetTrigger = SheetPrimitive.Trigger;
 const SheetClose = SheetPrimitive.Close;
 const SheetPortal = SheetPrimitive.Portal;

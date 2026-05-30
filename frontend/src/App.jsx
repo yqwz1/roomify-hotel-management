@@ -82,8 +82,15 @@ const AppContent = () => {
     document.title = getDocumentTitle(location.pathname, roles ?? [], t);
   }, [location.pathname, roles, t, i18n.resolvedLanguage]);
 
+  const appDirection = i18n.dir(i18n.resolvedLanguage || i18n.language) === 'rtl' ? 'rtl' : 'ltr';
+
+  useEffect(() => {
+    document.documentElement.dir = appDirection;
+    document.documentElement.lang = i18n.resolvedLanguage || i18n.language || 'en';
+  }, [appDirection, i18n.language, i18n.resolvedLanguage]);
+
   return (
-    <div className="h-full bg-brand-surface-border">
+    <div className="h-full bg-brand-surface-border" dir={appDirection}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />

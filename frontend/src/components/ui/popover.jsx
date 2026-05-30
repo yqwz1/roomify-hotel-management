@@ -4,8 +4,14 @@ import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
+import { useRadixDir } from "@/components/ui/use-radix-dir"
 
-const Popover = PopoverPrimitive.Root
+const Popover = ({ dir, ...props }) => {
+  const resolvedDir = useRadixDir(dir)
+
+  return <PopoverPrimitive.Root dir={resolvedDir} {...props} />
+}
+Popover.displayName = PopoverPrimitive.Root.displayName
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
