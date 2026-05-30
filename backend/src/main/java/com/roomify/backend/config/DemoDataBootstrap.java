@@ -34,6 +34,8 @@ import com.roomify.backend.user.Staff;
 import com.roomify.backend.user.User;
 import com.roomify.backend.user.UserRepository;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,6 +58,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -550,15 +554,13 @@ public class DemoDataBootstrap implements ApplicationRunner {
             LocalDateTime lastMessageAt,
             int unreadGuestCount,
             int unreadStaffCount) {
-        return jdbcTemplate.queryForObject("""
+        return insertAndReturnId("""
                 INSERT INTO guest_conversations
                     (public_id, guest_id, reservation_id, room_id, service_request_id, assigned_staff_user_id,
                      status, subject, preferred_language, ai_fallback_enabled, ai_handled,
                      unread_guest_count, unread_staff_count, last_message_preview, last_message_at, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'en', true, false, ?, ?, ?, ?, ?, ?)
-                RETURNING id
                 """,
-                Long.class,
                 UUID.randomUUID(), guestId, reservationId, roomId, serviceRequestId, staffUserId,
                 status, subject, unreadGuestCount, unreadStaffCount, preview, lastMessageAt, lastMessageAt, lastMessageAt);
     }
@@ -632,13 +634,12 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private Long insertUsageTemplate(String name, String serviceType, Long roomTypeId, String notes) {
         LocalDateTime now = LocalDateTime.now();
-        return jdbcTemplate.queryForObject("""
+        return insertAndReturnId("""
                 INSERT INTO service_usage_templates
                     (name, service_type, room_type_id, active, notes, created_at, updated_at)
                 VALUES (?, ?, ?, true, ?, ?, ?)
-                RETURNING id
                 """,
-                Long.class, name, serviceType, roomTypeId, notes, now, now);
+                name, serviceType, roomTypeId, notes, now, now);
     }
 
     private void insertTemplateItem(Long templateId, Long itemId, String quantity, String notes) {
@@ -681,15 +682,13 @@ public class DemoDataBootstrap implements ApplicationRunner {
             }
 
             LocalDateTime performedAt = today.minusDays(i).atTime(11 + i, 15);
-            Long recordId = jdbcTemplate.queryForObject("""
+            Long recordId = insertAndReturnId("""
                     INSERT INTO service_usage_records
                         (room_id, room_type_id, service_type, template_id, applied_standard_template,
                          source_room_status, service_date, performed_at, total_cost, notes,
                          created_by_user_id, created_at, updated_at)
                     VALUES (?, ?, ?, ?, true, ?, ?, ?, 0.00, ?, ?, ?, ?)
-                    RETURNING id
                     """,
-                    Long.class,
                     roomId, roomTypeId, rooms[i][1], templateId, rooms[i][2],
                     performedAt.toLocalDate(), performedAt, rooms[i][3], actorId, performedAt, performedAt);
 
@@ -699,6 +698,28 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
         return inserted;
     }
+
+private Long insertAndReturnId(String sql, Object... args) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    jdbcTemplate.update(connection -> {
+        PreparedStatement statement = connection.prepareStatement(sql, new String[] {"id"});
+
+        for (int i = 0; i < args.length; i++) {
+            statement.setObject(i + 1, args[i]);
+        }
+
+        return statement;
+    }, keyHolder);
+
+    Number key = keyHolder.getKey();
+
+    if (key == null) {
+        throw new IllegalStateException("Insert did not return a generated id.");
+    }
+
+    return key.longValue();
+}
 
     private BigDecimal copyTemplateItemsToUsageRecord(Long recordId, Long templateId) {
         List<Map<String, Object>> items = jdbcTemplate.queryForList("""

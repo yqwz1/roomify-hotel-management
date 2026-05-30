@@ -87,4 +87,19 @@ describe('SignupPage', () => {
 
     expect(await screen.findByText('An account with this email already exists')).toBeInTheDocument();
   });
+
+  it('blocks passwords that the backend would reject', async () => {
+    const user = userEvent.setup();
+
+    renderSignupPage();
+
+    await user.type(screen.getByLabelText(/Name/i), 'Guest Member');
+    await user.type(screen.getByLabelText(/Email/i), 'guest.member@roomify.dev');
+    await user.type(screen.getByLabelText('Password'), 'password');
+    await user.click(screen.getByRole('button', { name: /Create account/i }));
+
+    expect(await screen.findByText(/Use at least 8 characters/i)).toBeInTheDocument();
+    expect(authService.register).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
 });
