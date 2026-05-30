@@ -27,6 +27,7 @@ import {
 } from '../utils/localization';
 import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
+import { Button } from "@/components/ui/button";
 const STATUSES = ['ALL', 'AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
 const STATUS_META = {
@@ -76,7 +77,7 @@ const attachValidNextStatuses = async (rooms) => {
 function LoadingCard() {
   return (
     <div className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex min-w-0 items-start justify-between gap-4">
         <div className="space-y-3">
           <div className="h-4 w-16 rounded-full bg-brand-surface-border" />
           <div className="h-8 w-24 rounded-full bg-brand-primary-tint" />
@@ -84,7 +85,7 @@ function LoadingCard() {
         <div className="h-10 w-10 rounded-2xl bg-brand-primary-tint" />
       </div>
       <div className="mt-6 h-6 w-28 rounded-full bg-brand-surface-border" />
-      <div className="mt-5 flex gap-2">
+      <div className="mt-5 flex min-w-0 gap-2">
         <div className="h-10 w-24 rounded-full bg-brand-primary-tint" />
         <div className="h-10 w-24 rounded-full bg-brand-primary-tint" />
       </div>
@@ -268,21 +269,21 @@ export default function RoomStatus() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('roomStatusPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('roomStatusAvailable')}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.AVAILABLE}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.AVAILABLE}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('roomStatusOccupied')}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.OCCUPIED}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.OCCUPIED}</p>
             </div>
           </div>
         </div>
@@ -292,10 +293,10 @@ export default function RoomStatus() {
         title={t('roomStatusPage.filtersTitle')}
         description={t('roomStatusPage.filtersDescription')}
       >
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex min-w-0 flex-wrap gap-2">
             {STATUSES.map((status) => (
-              <button
+              <Button variant="unstyled" size="none"
                 key={status}
                 type="button"
                 onClick={() => setFilter(status)}
@@ -306,12 +307,12 @@ export default function RoomStatus() {
                 }`}
               >
                 {status === 'ALL' ? t('roomStatusPage.allRooms') : getRoomStatusLabel(status, t)}
-              </button>
+              </Button>
             ))}
           </div>
 
           <div className="relative w-full xl:w-72">
-            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+            <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
             <input
               type="text"
               placeholder={t('roomStatusPage.searchPlaceholder')}
@@ -334,7 +335,7 @@ export default function RoomStatus() {
         description={t('roomStatusPage.boardDescription')}
       >
         {loading && (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {[...Array(6)].map((_, index) => (
               <LoadingCard key={index} />
             ))}
@@ -358,7 +359,7 @@ export default function RoomStatus() {
         )}
 
         {!loading && filteredRooms.length > 0 && (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {filteredRooms.map((room) => {
               const meta = STATUS_META[room.status] || STATUS_META.AVAILABLE;
               const statusClasses = getStatusBadgeClasses(room.status);
@@ -372,15 +373,15 @@ export default function RoomStatus() {
                   key={room.id}
                   className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                         {translateKnownValue(room.roomType?.name || t('roomStatusPage.roomTypeFallback'), t)}
                       </p>
-                      <p className="mt-2 text-3xl font-black tracking-tight text-brand-ink">
+                      <p className="mt-2 text-3xl font-black tracking-tight text-brand-ink break-words">
                         {room.roomNumber}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {t('floorNum', { floor: room.floor ?? '-' })}
                       </p>
                     </div>
@@ -388,7 +389,7 @@ export default function RoomStatus() {
                     <span
                       className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${statusClasses}`}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-5 w-5 shrink-0" />
                     </span>
                   </div>
 
@@ -400,20 +401,20 @@ export default function RoomStatus() {
 
                   {room.roomType?.basePrice != null && (
                     <div className="mt-5 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                         {t('roomStatusPage.baseRate')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                      <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                         {formatLocalizedCurrency(room.roomType.basePrice, i18n.language)} / {t('perNight')}
                       </p>
                     </div>
                   )}
 
-                  <div className="mt-5 flex flex-wrap gap-2">
+                  <div className="mt-5 flex min-w-0 flex-wrap gap-2">
                     {actionsUnavailable ? (
                       <div className="rounded-[1.1rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm text-brand-warning">
-                        <p className="font-bold">{t('roomStatusPage.actionsUnavailableTitle')}</p>
-                        <p className="mt-1 font-medium text-brand-warning/80">
+                        <p className="font-bold break-words">{t('roomStatusPage.actionsUnavailableTitle')}</p>
+                        <p className="mt-1 font-medium text-brand-warning/80 break-words">
                           {t('roomStatusPage.actionsUnavailableDescription')}
                         </p>
                       </div>
@@ -425,7 +426,7 @@ export default function RoomStatus() {
                       </div>
                     ) : (
                       actions.map((nextStatus) => (
-                        <button
+                        <Button variant="unstyled" size="none"
                           key={nextStatus}
                           type="button"
                           onClick={() => handleStatusChange(room.id, nextStatus)}
@@ -435,7 +436,7 @@ export default function RoomStatus() {
                           {updatingRoomId === room.id
                             ? t('roomStatusPage.updating')
                             : getRoomStatusLabel(nextStatus, t)}
-                        </button>
+                        </Button>
                       ))
                     )}
                   </div>

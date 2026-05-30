@@ -14,6 +14,7 @@ import {
 } from '../services/reservationService';
 import { formatLocalizedDate } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
 const WINDOW_DAYS = 14;
 const ROOM_LABEL_WIDTH = 140;
 const DAY_MIN_WIDTH = 72;
@@ -120,23 +121,6 @@ export default function RoomGrid() {
   };
 
   const showToast = (message, type = 'success') => setToast({ message, type });
-
-  const buildModificationPayload = (reservation, changes, reason) => {
-    // Always include a modificationReason (required). Send only the dates that
-    // changed so we don't trip @FutureOrPresent validation for unchanged
-    // historical check-in dates.
-    const payload = { modificationReason: reason };
-    if (changes.roomId != null && changes.roomId !== reservation.currentRoomId) {
-      payload.roomId = changes.roomId;
-    }
-    if (changes.checkInDate && changes.checkInDate !== reservation.checkInDate) {
-      payload.checkInDate = changes.checkInDate;
-    }
-    if (changes.checkOutDate && changes.checkOutDate !== reservation.checkOutDate) {
-      payload.checkOutDate = changes.checkOutDate;
-    }
-    return payload;
-  };
 
   const applyLocalUpdate = (reservationId, fromRoomId, toRoomId, updates) => {
     setGrid((current) => {
@@ -313,13 +297,13 @@ export default function RoomGrid() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl text-brand-ink">{t('roomGrid.title')}</h1>
-        <p className="text-sm text-brand-ink-muted">{t('roomGrid.subtitle')}</p>
+        <h1 className="font-serif text-3xl text-brand-ink break-words">{t('roomGrid.title')}</h1>
+        <p className="text-sm text-brand-ink-muted break-words">{t('roomGrid.subtitle')}</p>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card p-4">
-        <label className="flex items-center gap-2 text-sm font-medium text-brand-ink-muted">
-          <CalendarRange className="h-4 w-4" />
+      <div className="flex min-w-0 flex-wrap items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card p-4">
+        <label className="flex min-w-0 items-center gap-2 text-sm font-medium text-brand-ink-muted">
+          <CalendarRange className="h-4 w-4 shrink-0" />
           <input
             type="date"
             value={startDate}
@@ -327,32 +311,32 @@ export default function RoomGrid() {
             className="rounded-lg border border-brand-surface-border bg-brand-surface-light px-3 py-2 text-sm text-brand-ink focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
           />
         </label>
-        <button
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={handleResetToday}
           className="rounded-full border border-brand-surface-border bg-brand-card px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-primary-tint focus:outline-none focus:ring-2 focus:ring-brand-focus"
         >
           {t('roomGrid.today')}
-        </button>
-        <div className="ms-auto flex items-center gap-2">
-          <button
+        </Button>
+        <div className="ms-auto flex min-w-0 items-center gap-2">
+          <Button variant="unstyled" size="none"
             type="button"
             onClick={() => handleShiftWindow(-7)}
             aria-label={t('roomGrid.prevWeek')}
             className="rounded-full border border-brand-surface-border bg-brand-card p-2 text-brand-ink transition hover:bg-brand-primary-tint focus:outline-none focus:ring-2 focus:ring-brand-focus"
           >
-            <ChevronLeft className="h-4 w-4 rtl:hidden" />
-            <ChevronRight className="hidden h-4 w-4 rtl:block" />
-          </button>
-          <button
+            <ChevronLeft className="h-4 w-4 rtl:hidden shrink-0" />
+            <ChevronRight className="hidden h-4 w-4 rtl:block shrink-0" />
+          </Button>
+          <Button variant="unstyled" size="none"
             type="button"
             onClick={() => handleShiftWindow(7)}
             aria-label={t('roomGrid.nextWeek')}
             className="rounded-full border border-brand-surface-border bg-brand-card p-2 text-brand-ink transition hover:bg-brand-primary-tint focus:outline-none focus:ring-2 focus:ring-brand-focus"
           >
-            <ChevronRight className="h-4 w-4 rtl:hidden" />
-            <ChevronLeft className="hidden h-4 w-4 rtl:block" />
-          </button>
+            <ChevronRight className="h-4 w-4 rtl:hidden shrink-0" />
+            <ChevronLeft className="hidden h-4 w-4 rtl:block shrink-0" />
+          </Button>
         </div>
       </div>
 
@@ -362,7 +346,7 @@ export default function RoomGrid() {
         <div className="overflow-x-auto rounded-lg border border-brand-surface-border bg-brand-card">
           <div ref={gridContentRef} className="min-w-max">
             <div
-              className="sticky top-0 z-20 grid border-b border-brand-surface-border bg-brand-card"
+              className="sticky top-0 z-20 grid min-w-0 border-b border-brand-surface-border bg-brand-card"
               style={{ gridTemplateColumns }}
             >
               <div className="sticky start-0 z-30 border-e border-brand-surface-border bg-brand-card px-3 py-3 text-xs font-bold uppercase tracking-wide text-brand-ink-muted">
@@ -468,18 +452,17 @@ function RoomRow({
   }, [columns.length]);
 
   const windowStart = parseIsoDate(startDate);
-  const windowEndExclusive = addDays(windowStart, columns.length);
 
   return (
     <div
       ref={rowRef}
-      className="relative grid border-b border-brand-surface-border"
+      className="relative grid min-w-0 border-b border-brand-surface-border"
       style={{ gridTemplateColumns, minHeight: ROW_HEIGHT }}
     >
-      <div className="sticky start-0 z-10 flex items-center gap-1 border-e border-brand-surface-border bg-brand-card px-3">
-        <span className="font-medium text-brand-ink">{room.roomNumber}</span>
+      <div className="sticky start-0 z-10 flex min-w-0 items-center gap-1 border-e border-brand-surface-border bg-brand-card px-3">
+        <span className="font-medium text-brand-ink break-words">{room.roomNumber}</span>
         {room.roomTypeCode ? (
-          <span className="text-xs text-brand-ink-hint">{room.roomTypeCode}</span>
+          <span className="text-xs text-brand-ink-hint break-words">{room.roomTypeCode}</span>
         ) : null}
       </div>
       {columns.map((col) => {
@@ -541,7 +524,7 @@ function RoomRow({
             tabIndex={0}
             role="button"
             aria-label={`${reservation.guestName} · ${reservation.confirmationNumber}`}
-            className={`absolute top-1/2 flex -translate-y-1/2 items-center gap-2 truncate rounded-full px-3 py-1.5 text-sm font-sans text-brand-primary-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-brand-focus focus:ring-offset-1 ${bgClass} ${
+            className={`absolute top-1/2 flex min-w-0 -translate-y-1/2 items-center gap-2 truncate rounded-full px-3 py-1.5 text-sm font-sans text-brand-primary-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-brand-focus focus:ring-offset-1 ${bgClass} ${
               canEdit ? 'cursor-grab hover:-translate-y-[calc(50%+1px)] hover:shadow-brand-cta active:cursor-grabbing' : 'cursor-default'
             } ${isDragging ? 'opacity-60 shadow-brand-cta-hover' : ''}`}
             style={{
@@ -551,7 +534,7 @@ function RoomRow({
               marginRight: isRtl ? 3 : 0,
             }}
           >
-            <span className="truncate">
+            <span className="min-w-0 flex-1 truncate pe-2">
               <span className="font-bold">{reservation.confirmationNumber}</span>
               <span className="opacity-80"> · {reservation.guestName}</span>
             </span>

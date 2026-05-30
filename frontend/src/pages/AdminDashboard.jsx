@@ -211,39 +211,39 @@ export default function AdminDashboard() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {translateWithFallback(
               t,
               'adminDashboardPage.focusTitle',
               'Admin focus'
             )}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {translateWithFallback(
                   t,
                   'adminDashboardPage.focusStaff',
                   'Active staff'
                 )}
               </p>
-              <p className="mt-2 text-3xl font-black">{activeStaffCount}</p>
+              <p className="mt-2 text-3xl font-black break-words">{activeStaffCount}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {translateWithFallback(
                   t,
                   'adminDashboardPage.focusAudit',
                   'Audit trail'
                 )}
               </p>
-              <p className="mt-2 text-3xl font-black">{auditLogs.length}</p>
+              <p className="mt-2 text-3xl font-black break-words">{auditLogs.length}</p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={Users}
           label={translateWithFallback(
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <DashboardPanel
           title={translateWithFallback(
             t,
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
             'Move directly into the core system configuration surfaces.'
           )}
         >
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {quickActions.map((action) => (
               <DashboardQuickAction key={action.title} {...action} />
             ))}
@@ -346,31 +346,31 @@ export default function AdminDashboard() {
               onRetry={handleReload}
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-3">
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'adminDashboardPage.totalStaff', 'Total')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-brand-ink">{staff.length}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink break-words">{staff.length}</p>
               </div>
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'adminDashboardPage.activeStaff', 'Active')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-brand-ink">{activeStaffCount}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink break-words">{activeStaffCount}</p>
               </div>
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'adminDashboardPage.inactiveStaff', 'Inactive')}
                 </p>
-                <p className="mt-2 text-2xl font-black text-brand-ink">{inactiveStaffCount}</p>
+                <p className="mt-2 text-2xl font-black text-brand-ink break-words">{inactiveStaffCount}</p>
               </div>
             </div>
           )}
         </DashboardPanel>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
         <DashboardPanel
           title={translateWithFallback(
             t,
@@ -412,12 +412,12 @@ export default function AdminDashboard() {
                   key={roomType.id}
                   className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-brand-ink">
+                      <p className="text-sm font-black text-brand-ink break-words">
                         {translateKnownValue(roomType.name, t)}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {translateWithFallback(
                           t,
                           'adminDashboardPage.capacityLine',
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
                         )}
                       </p>
                     </div>
-                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-brand-ink">
+                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-brand-ink break-words">
                       {formatLocalizedCurrency(roomType.basePrice, i18n.language)}
                     </span>
                   </div>
@@ -477,23 +477,23 @@ export default function AdminDashboard() {
                   key={entry.id}
                   className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-brand-ink">{entry.action}</p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="text-sm font-black text-brand-ink break-words">{entry.action}</p>
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {entry.target}
                       </p>
                     </div>
-                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                    <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                       {entry.actor}
                     </span>
                   </div>
                   {entry.metadata ? (
-                    <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
+                    <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                       {entry.metadata}
                     </p>
                   ) : null}
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {formatLocalizedDateTime(entry.createdAt, i18n.language, {
                       dateStyle: 'medium',
                       timeStyle: 'short',

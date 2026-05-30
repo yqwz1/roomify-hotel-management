@@ -29,6 +29,7 @@ import {
   getReservationWorkspaceActionLabel,
 } from '../utils/reservationWorkspace';
 
+import { Button } from "@/components/ui/button";
 export default function StaffDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -118,20 +119,20 @@ export default function StaffDashboard() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t(`${pageTx}.workspaceTitle`)}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="flex min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
+            <div className="flex min-w-0 min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60 break-words">
                 {t(`${pageTx}.currentFocus`)}
               </p>
               <p className="mt-auto whitespace-nowrap text-[clamp(1.2rem,1.4vw,1.5rem)] font-black leading-none tracking-tight">
                 {t('navReservations')}
               </p>
             </div>
-            <div className="flex min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+            <div className="flex min-w-0 min-h-[136px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60 break-words">
                 {t(`${pageTx}.activeQueue`)}
               </p>
               <p className="mt-auto whitespace-nowrap text-[clamp(1.2rem,1.4vw,1.5rem)] font-black leading-none tracking-tight">
@@ -142,7 +143,7 @@ export default function StaffDashboard() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardMetricCard
           icon={CalendarDays}
           label={t(`${pageTx}.metrics.visibleLabel`)}
@@ -179,7 +180,7 @@ export default function StaffDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <DashboardPanel
           title={t('navReservations')}
           description={t('staffDashboardPage.queueDescription')}
@@ -204,29 +205,29 @@ export default function StaffDashboard() {
                   key={reservation.id ?? reservation.confirmationNumber}
                   className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-lg font-black tracking-tight text-brand-ink [overflow-wrap:anywhere]">
+                      <p className="text-lg font-black tracking-tight text-brand-ink [overflow-wrap:anywhere] break-words">
                         {reservation.guestName || t('common.guest')}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {getReservationWorkspaceActionLabel(reservation, today, t)}
                       </p>
                     </div>
-                    <button
+                    <Button variant="unstyled" size="none"
                       type="button"
                       onClick={() =>
                         navigate(`/reservations?selected=${reservation.confirmationNumber}`)
                       }
-                      className="inline-flex h-10 items-center justify-center rounded-full border border-brand-surface-border bg-white px-4 text-sm font-bold text-brand-ink transition hover:border-brand-primary/40 hover:bg-brand-surface-light"
+                      className="inline-flex min-w-0 h-10 items-center justify-center rounded-full border border-brand-surface-border bg-white px-4 text-sm font-bold text-brand-ink transition hover:border-brand-primary/40 hover:bg-brand-surface-light"
                     >
                       {t('staffDashboardPage.openReservation')}
-                    </button>
+                    </Button>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                         {t('confirmationNumber')}
                       </p>
                       <LtrText className="mt-2 text-sm font-bold text-brand-ink">
@@ -234,21 +235,21 @@ export default function StaffDashboard() {
                       </LtrText>
                     </div>
                     <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                         {t('common.room')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                      <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                         {reservation.roomNumber || t('unassigned')}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-xs font-medium text-brand-ink-muted break-words">
                         {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
                       </p>
                     </div>
                     <div className="rounded-2xl border border-brand-surface-border bg-white px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                         {t('checkInPage.reservationTotal')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                      <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                         {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                       </p>
                     </div>
@@ -256,13 +257,13 @@ export default function StaffDashboard() {
                 </div>
               ))}
 
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => navigate('/reservations')}
-                className="inline-flex h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                className="inline-flex min-w-0 h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
               >
                 {t('navReservations')}
-              </button>
+              </Button>
             </div>
           )}
         </DashboardPanel>
@@ -272,7 +273,7 @@ export default function StaffDashboard() {
             title={t(`${pageTx}.actionsTitle`)}
             description={t(`${pageTx}.actionsDescription`)}
           >
-            <div className="grid gap-3">
+            <div className="grid min-w-0 gap-3">
               {quickActions.map((action) => (
                 <DashboardQuickAction key={action.title} {...action} />
               ))}
@@ -283,7 +284,7 @@ export default function StaffDashboard() {
             title={t(`${pageTx}.workspaceNotesTitle`)}
             description={t(`${pageTx}.workspaceNotesDescription`)}
           >
-            <div className="grid gap-3">
+            <div className="grid min-w-0 gap-3">
               {[
                 t(`${pageTx}.workspaceNote1`),
                 t(`${pageTx}.workspaceNote2`),

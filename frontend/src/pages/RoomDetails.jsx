@@ -117,23 +117,23 @@ export default function RoomDetails() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('bookRoomPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('roomSearchPage.capacityLabel')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {t('upToGuests', { count: room.roomType?.maxGuests ?? 0 })}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('status')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {room.availabilityMessage ?? t('common.pending')}
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function RoomDetails() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
           <DashboardPanel
             title={t('common.stay')}
@@ -161,22 +161,22 @@ export default function RoomDetails() {
                 }}
               />
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                 <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t('roomSearchPage.capacityLabel')}
                   </p>
-                  <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
-                    <Users className="h-4 w-4 text-brand-ink-hint" />
+                  <p className="mt-2 inline-flex min-w-0 items-center gap-2 text-sm font-bold text-brand-ink break-words">
+                    <Users className="h-4 w-4 text-brand-ink-hint shrink-0" />
                     {t('upToGuests', { count: room.roomType?.maxGuests ?? 0 })}
                   </p>
                 </div>
                 <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t('status')}
                   </p>
-                  <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
-                    <CalendarRange className="h-4 w-4 text-brand-ink-hint" />
+                  <p className="mt-2 inline-flex min-w-0 items-center gap-2 text-sm font-bold text-brand-ink break-words">
+                    <CalendarRange className="h-4 w-4 text-brand-ink-hint shrink-0" />
                     {room.availabilityMessage ?? t('common.pending')}
                   </p>
                 </div>
@@ -189,11 +189,11 @@ export default function RoomDetails() {
               ) : null}
 
               {amenities.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex min-w-0 flex-wrap gap-2">
                   {amenities.map((amenity) => (
                     <span
                       key={amenity}
-                      className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-xs font-bold text-brand-ink-muted"
+                      className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-xs font-bold text-brand-ink-muted break-words"
                     >
                       {translateKnownValue(amenity, t)}
                     </span>
@@ -211,16 +211,16 @@ export default function RoomDetails() {
               'Review cancellation, payment, and arrival rules before you continue to the reservation flow.'
             )}
           >
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-sm font-black text-brand-ink">
+                <p className="text-sm font-black text-brand-ink break-words">
                   {translateWithFallback(
                     t,
                     'bookRoomPage.cancellationPolicyTitle',
                     'Cancellation policy'
                   )}
                 </p>
-                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                   {translateWithFallback(
                     t,
                     'bookRoomPage.cancellationPolicyBody',
@@ -229,10 +229,10 @@ export default function RoomDetails() {
                 </p>
               </div>
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-sm font-black text-brand-ink">
+                <p className="text-sm font-black text-brand-ink break-words">
                   {translateWithFallback(t, 'bookRoomPage.paymentPolicyTitle', 'Payment policy')}
                 </p>
-                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                   {translateWithFallback(
                     t,
                     'bookRoomPage.paymentPolicyBody',
@@ -241,11 +241,11 @@ export default function RoomDetails() {
                 </p>
               </div>
               <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4 md:col-span-2">
-                <p className="inline-flex items-center gap-2 text-sm font-black text-brand-ink">
-                  <ShieldCheck className="h-4 w-4" />
+                <p className="inline-flex min-w-0 items-center gap-2 text-sm font-black text-brand-ink break-words">
+                  <ShieldCheck className="h-4 w-4 shrink-0" />
                   {translateWithFallback(t, 'bookRoomPage.checkInRulesTitle', 'Check-in and stay rules')}
                 </p>
-                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                   {translateWithFallback(
                     t,
                     'bookRoomPage.checkInRulesBody',
@@ -263,46 +263,46 @@ export default function RoomDetails() {
             description={t('bookRoomPage.summaryDescription')}
           >
             <div className="space-y-5">
-              <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
-                <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm">
-                  <BedDouble className="h-7 w-7" />
+              <div className="flex min-w-0 h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
+                <span className="flex min-w-0 h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm break-words">
+                  <BedDouble className="h-7 w-7 shrink-0" />
                 </span>
               </div>
 
               <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('bookRoomPage.ratePerNight')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('bookRoomPage.ratePerNight')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.pricePerNight ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('subtotal')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="mt-3 flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('subtotal')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.subtotal ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('taxes15')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="mt-3 flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('taxes15')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.vatAmount ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-4 flex items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
-                  <span className="text-sm font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                <div className="mt-4 flex min-w-0 items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
+                  <span className="text-sm font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                     {t('total')}
                   </span>
-                  <span className="text-2xl font-black text-brand-ink">
+                  <span className="text-2xl font-black text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.total ?? 0, i18n.language)}
                   </span>
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex min-w-0 gap-3">
                 <Button
                   variant="outline"
                   type="button"
-                  className="h-auto flex-1 rounded-full border-brand-surface-border py-4"
+                  className="h-auto min-w-0 flex-1 rounded-full border-brand-surface-border py-4"
                   onClick={() => navigate('/search')}
                 >
                   {t('backToRoomSearch')}
@@ -310,7 +310,7 @@ export default function RoomDetails() {
                 {canBookRoom ? (
                   <Button
                     type="button"
-                    className="h-auto flex-1 rounded-full py-4"
+                    className="h-auto min-w-0 flex-1 rounded-full py-4"
                     onClick={() =>
                       navigate(`/book?roomId=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}`, {
                         state: { room, checkIn, checkOut },
@@ -318,7 +318,7 @@ export default function RoomDetails() {
                     }
                   >
                     {t('roomSearchPage.bookRoomCta')}
-                    <ChevronRight className="ms-2 h-4 w-4" />
+                    <ChevronRight className="ms-2 h-4 w-4 shrink-0" />
                   </Button>
                 ) : null}
               </div>

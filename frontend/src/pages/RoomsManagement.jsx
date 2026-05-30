@@ -3,10 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2, Waves } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import ModalFrame from '../components/common/ModalFrame';
 import RoomFilters from '../components/RoomFilters';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -21,6 +18,7 @@ import {
 } from '../utils/localization';
 import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
+import { NativeSelect } from "@/components/ui/native-select";
 const EMPTY_FILTERS = { status: '', type: '', floor: '', minPrice: '', maxPrice: '' };
 const BACKEND_STATUSES = ['AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
@@ -126,7 +124,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
           <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('roomType')}
           </label>
-          <select
+          <NativeSelect
             id="room-type"
             aria-label={t('roomType')}
             value={form.roomTypeId}
@@ -138,10 +136,10 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                 {translateKnownValue(roomType.name, t)}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('floor')}
@@ -163,7 +161,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                 {t('roomsManagementPage.currentStatus')}
               </label>
               <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center justify-between gap-3">
                   <span
                     className={`inline-flex rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${
                       getStatusBadgeClasses(form.status)
@@ -171,7 +169,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                   >
                     {getRoomStatusLabel(form.status, t)}
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t('roomsManagementPage.statusManagedOnBoard')}
                   </span>
                 </div>
@@ -182,7 +180,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
               <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                 {t('initialStatusLabel')}
               </label>
-              <select
+              <NativeSelect
                 id="room-status"
                 aria-label={t('initialStatusLabel')}
                 value={form.status}
@@ -194,26 +192,26 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
                     {getRoomStatusLabel(status, t)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none"
             type="button"
             onClick={onClose}
             className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {t('cancel')}
-          </button>
-          <button
+          </Button>
+          <Button variant="unstyled" size="none"
             type="submit"
             disabled={saving}
             className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
           >
             {saving ? t('roomsManagementPage.savingRoom') : t('roomsManagementPage.saveRoom')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -356,42 +354,42 @@ export default function RoomsManagement() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('roomsManagementPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('roomsManagementPage.cleaning')}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.NEEDS_CLEANING}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.NEEDS_CLEANING}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('roomsManagementPage.maintenance')}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.UNDER_MAINTENANCE}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.UNDER_MAINTENANCE}</p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="flex justify-end">
+      <div className="flex min-w-0 justify-end">
         <Button
           type="button"
           onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep h-auto"
+          className="inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep h-auto"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 shrink-0" />
           {t('roomsManagementPage.addRoomCta')}
         </Button>
       </div>
 
       {(bannerError || error) && (
         <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start justify-between gap-3">
             <span>{bannerError || error}</span>
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={() => {
                 setBannerError(null);
@@ -400,7 +398,7 @@ export default function RoomsManagement() {
               className="text-xs font-bold uppercase tracking-[0.18em] text-brand-danger"
             >
               {t('dismissError')}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -434,9 +432,9 @@ export default function RoomsManagement() {
           </div>
         ) : displayedRooms.length === 0 ? (
           <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
-            <Waves className="mx-auto h-10 w-10 text-brand-ink-hint" />
-            <p className="mt-4 text-lg font-black text-brand-ink">{t('roomsManagementPage.noRoomsTitle')}</p>
-            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+            <Waves className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
+            <p className="mt-4 text-lg font-black text-brand-ink break-words">{t('roomsManagementPage.noRoomsTitle')}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
               {t('roomsManagementPage.noRoomsDescription')}
             </p>
           </div>
@@ -457,12 +455,12 @@ export default function RoomsManagement() {
                     key={room.id}
                     className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-xl font-black tracking-tight text-brand-ink">
+                        <p className="text-xl font-black tracking-tight text-brand-ink break-words">
                           {room.roomNumber}
                         </p>
-                        <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                        <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                           {translateKnownValue(room.roomType?.name, t)}
                         </p>
                       </div>
@@ -473,55 +471,55 @@ export default function RoomsManagement() {
                       </span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
                       <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                           {t('roomsManagementPage.tableFloor')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-brand-ink">{room.floor ?? '-'}</p>
+                        <p className="mt-2 text-sm font-bold text-brand-ink break-words">{room.floor ?? '-'}</p>
                       </div>
                       <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                           {t('roomsManagementPage.tableBasePrice')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-brand-ink">
+                        <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                           {formatLocalizedCurrency(room.roomType?.basePrice, i18n.language)}
                         </p>
                       </div>
                       <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                           {t('roomsManagementPage.tableCapacity')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-brand-ink">
+                        <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                           {room.roomType?.maxGuests ?? '-'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex min-w-0 flex-wrap gap-2">
                       {amenities.slice(0, 4).map((amenity) => (
                         <span
                           key={amenity}
-                          className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
+                          className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted break-words"
                         >
                           {translateKnownValue(amenity, t)}
                         </span>
                       ))}
                       {amenities.length > 4 ? (
-                        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted">
+                        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted break-words">
                           +{amenities.length - 4}
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="mt-4 flex flex-col gap-2">
+                    <div className="mt-4 flex min-w-0 flex-col gap-2">
                       <Button
                         variant="outline"
                         type="button"
                         onClick={() => handleOpenEdit(room)}
-                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                        className="inline-flex min-w-0 h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 shrink-0" />
                         {t('roomsManagementPage.editButton')}
                       </Button>
                       <Button
@@ -535,7 +533,7 @@ export default function RoomsManagement() {
                             },
                           })
                         }
-                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                        className="inline-flex min-w-0 h-auto items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                       >
                         {t('roomsManagementPage.openStatusBoard')}
                       </Button>
@@ -543,9 +541,9 @@ export default function RoomsManagement() {
                         variant="outline"
                         type="button"
                         onClick={() => handleDelete(room)}
-                        className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10"
+                        className="inline-flex min-w-0 h-auto items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 shrink-0" />
                         {t('roomsManagementPage.deleteButton')}
                       </Button>
                     </div>
@@ -604,31 +602,31 @@ export default function RoomsManagement() {
                         {room.roomType?.maxGuests ?? '-'}
                       </TableCell>
                       <TableCell className="px-4 py-4">
-                        <div className="flex max-w-xs flex-wrap gap-2">
+                        <div className="flex min-w-0 max-w-xs flex-wrap gap-2">
                           {amenities.slice(0, 3).map((amenity) => (
                             <span
                               key={amenity}
-                              className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted"
+                              className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted break-words"
                             >
                               {translateKnownValue(amenity, t)}
                             </span>
                           ))}
                           {amenities.length > 3 && (
-                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted">
+                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink-muted break-words">
                               +{amenities.length - 3}
                             </span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <Button
                             variant="outline"
                             type="button"
                             onClick={() => handleOpenEdit(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
+                            className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4 shrink-0" />
                             {t('roomsManagementPage.editButton')}
                           </Button>
                           <Button
@@ -642,7 +640,7 @@ export default function RoomsManagement() {
                                 },
                               })
                             }
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
+                            className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                           >
                             {t('roomsManagementPage.openStatusBoard')}
                           </Button>
@@ -650,9 +648,9 @@ export default function RoomsManagement() {
                             variant="outline"
                             type="button"
                             onClick={() => handleDelete(room)}
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10 h-auto"
+                            className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:bg-brand-danger/10 h-auto"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4 shrink-0" />
                             {t('roomsManagementPage.deleteButton')}
                           </Button>
                         </div>

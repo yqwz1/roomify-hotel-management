@@ -66,7 +66,7 @@ export default function Demo() {
         />
 
         <div className="relative mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
-          <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.05fr]">
+          <div className="grid min-w-0 items-start gap-10 lg:grid-cols-[1fr_1.05fr]">
 
             {/* LEFT — Pitch */}
             <div>
@@ -74,9 +74,9 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, ease: EASE }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
+                className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
               >
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-3 w-3 shrink-0" />
                 {t('m.demo.eyebrow')}
               </motion.div>
               <motion.h1
@@ -110,12 +110,12 @@ export default function Demo() {
                     key={id}
                     variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
                     transition={{ duration: 0.55, ease: EASE }}
-                    className="flex items-start gap-3 rounded-2xl border border-brand-surface-border bg-white px-4 py-3"
+                    className="flex min-w-0 items-start gap-3 rounded-2xl border border-brand-surface-border bg-white px-4 py-3"
                   >
                     <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-success" />
                     <div>
-                      <p className="text-sm font-black text-brand-ink">{t(`m.demo.hi.${id}.label`)}</p>
-                      <p className="text-[12px] font-medium leading-snug text-brand-ink-muted">{t(`m.demo.hi.${id}.desc`)}</p>
+                      <p className="text-sm font-black text-brand-ink break-words">{t(`m.demo.hi.${id}.label`)}</p>
+                      <p className="text-[12px] font-medium leading-snug text-brand-ink-muted break-words">{t(`m.demo.hi.${id}.desc`)}</p>
                     </div>
                   </motion.li>
                 ))}
@@ -127,8 +127,8 @@ export default function Demo() {
               <div className="rounded-[2rem] border border-brand-surface-border bg-white p-6 shadow-xl shadow-brand-primary-deep/10 sm:p-8">
                 {!submitted ? (
                   <>
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.demo.formStep')}</p>
-                    <h2 className="mt-1 text-lg font-black tracking-tight text-brand-ink">{t('m.demo.formTitle')}</h2>
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">{t('m.demo.formStep')}</p>
+                    <h2 className="mt-1 text-lg font-black tracking-tight text-brand-ink break-words">{t('m.demo.formTitle')}</h2>
 
                     {error && (
                       <motion.p
@@ -149,7 +149,7 @@ export default function Demo() {
                         onChange={handleChange}
                         placeholder={t('m.demo.field.hotelNamePh')}
                       />
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                         <FieldRow
                           icon={User}
                           id="name"
@@ -166,7 +166,7 @@ export default function Demo() {
                           placeholder={t('m.demo.field.rolePh')}
                         />
                       </div>
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                         <FieldRow
                           icon={Mail}
                           id="email"
@@ -191,12 +191,12 @@ export default function Demo() {
                       {/* Room range chips */}
                       <div>
                         <Label className="text-sm font-bold text-brand-ink">
-                          <BedDouble className="me-1.5 inline h-3.5 w-3.5" />
+                          <BedDouble className="me-1.5 inline h-3.5 w-3.5 shrink-0" />
                           {t('m.demo.field.rooms')}
                         </Label>
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="mt-2 flex min-w-0 flex-wrap gap-2">
                           {ROOM_RANGES.map((r) => (
-                            <button
+                            <Button variant="unstyled" size="none"
                               key={r}
                               type="button"
                               onClick={() => setForm((p) => ({ ...p, rooms: r }))}
@@ -207,14 +207,14 @@ export default function Demo() {
                               }`}
                             >
                               {r}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>
 
                       <div>
                         <Label htmlFor="notes" className="text-sm font-bold text-brand-ink">
-                          {t('m.demo.field.notes')} <span className="font-medium text-brand-ink-hint">{t('m.demo.field.optional')}</span>
+                          {t('m.demo.field.notes')} <span className="font-medium text-brand-ink-hint break-words">{t('m.demo.field.optional')}</span>
                         </Label>
                         <textarea
                           id="notes"
@@ -235,19 +235,19 @@ export default function Demo() {
                         >
                           {submitting ? (
                             <>
-                              <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                              <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" />
                               {t('m.demo.submitting')}
                             </>
                           ) : (
                             <>
                               {t('m.demo.submit')}
-                              <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+                              <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180 shrink-0" />
                             </>
                           )}
                         </Button>
                       </motion.div>
 
-                      <p className="text-center text-[11px] font-medium text-brand-ink-hint">
+                      <p className="text-center text-[11px] font-medium text-brand-ink-hint break-words">
                         {t('m.demo.privacy')}
                       </p>
                     </form>
@@ -259,13 +259,13 @@ export default function Demo() {
                     transition={{ duration: 0.5, ease: EASE }}
                     className="py-6 text-center"
                   >
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-success/15">
-                      <CheckCircle2 className="h-7 w-7 text-brand-success" />
+                    <div className="mx-auto flex min-w-0 h-14 w-14 items-center justify-center rounded-full bg-brand-success/15">
+                      <CheckCircle2 className="h-7 w-7 text-brand-success shrink-0" />
                     </div>
-                    <h2 className="mt-5 text-lg font-black tracking-tight text-brand-ink">
+                    <h2 className="mt-5 text-lg font-black tracking-tight text-brand-ink break-words">
                       {t('m.demo.success.titlePrefix')}, {form.name.split(' ')[0] || t('m.demo.success.fallbackName')} ✓
                     </h2>
-                    <p className="mt-2 max-w-sm mx-auto text-sm font-medium leading-relaxed text-brand-ink-muted">
+                    <p className="mt-2 max-w-sm mx-auto text-sm font-medium leading-relaxed text-brand-ink-muted break-words">
                       {t('m.demo.success.bodyA')} {form.hotelName || t('m.demo.success.fallbackHotel')}.
                     </p>
                     <Button
@@ -295,7 +295,7 @@ function FieldRow({ icon: Icon, id, label, value, onChange, placeholder, type = 
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id} className="text-sm font-bold text-brand-ink">
-        {Icon && <Icon className="me-1.5 inline h-3.5 w-3.5" />}
+        {Icon && <Icon className="me-1.5 inline h-3.5 w-3.5 shrink-0" />}
         {label}
       </Label>
       <Input

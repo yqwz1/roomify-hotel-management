@@ -24,6 +24,7 @@ import {
 } from '../utils/guestAssistant';
 import { getReservationStatusLabel, translateWithFallback } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
 const FILTERS = ['ALL', 'ACTIVE', 'PENDING', 'RESOLVED'];
 
 const buildConversationContextLabel = (conversation) => {
@@ -247,12 +248,12 @@ export default function StaffGuestInbox() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'staffGuestInbox.snapshot', 'Support snapshot')}
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex min-w-0 flex-wrap gap-3">
             {FILTERS.map((option) => (
-              <button
+              <Button variant="unstyled" size="none"
                 key={option}
                 type="button"
                 onClick={() => setFilter(option)}
@@ -263,13 +264,13 @@ export default function StaffGuestInbox() {
                 }`}
               >
                 {option}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
         <DashboardPanel
           title={translateWithFallback(t, 'staffGuestInbox.queueTitle', 'Conversations')}
           description={translateWithFallback(t, 'staffGuestInbox.queueDescription', 'Unread indicators, room context, and AI-handled threads appear here first.')}
@@ -285,27 +286,27 @@ export default function StaffGuestInbox() {
           ) : (
             <div className="space-y-3">
               {filteredConversations.map((conversation) => (
-                <button
+                <Button variant="unstyled" size="none"
                   key={conversation.publicId}
                   type="button"
                   onClick={() => setSelectedConversationId(conversation.publicId)}
-                  className={`w-full rounded-[1.35rem] border p-4 text-left transition ${
+                  className={`w-full rounded-[1.35rem] border p-4 text-start transition ${
                     conversation.publicId === detail?.conversation?.publicId
                       ? 'border-brand-primary/30 bg-brand-primary/10'
                       : 'border-brand-surface-border bg-white hover:bg-brand-surface-light'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-brand-ink">
                         {conversation.guestName || 'Guest'}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-xs font-medium text-brand-ink-muted break-words">
                         {conversation.roomNumber ? `Room ${conversation.roomNumber}` : 'No room assigned'}
                       </p>
                     </div>
                     {conversation.unreadStaffCount > 0 ? (
-                      <span className="rounded-full bg-brand-danger px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+                      <span className="shrink-0 rounded-full bg-brand-danger px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white">
                         {conversation.unreadStaffCount}
                       </span>
                     ) : null}
@@ -313,18 +314,18 @@ export default function StaffGuestInbox() {
                   <p className="mt-3 truncate text-sm font-medium text-brand-ink-muted">
                     {conversation.lastMessagePreview}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-brand-ink-hint">
-                    <span className="rounded-full border border-brand-surface-border px-2 py-1">{conversation.status}</span>
-                    <span className="rounded-full border border-brand-surface-border px-2 py-1">
+                  <div className="mt-3 flex min-w-0 flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-brand-ink-hint">
+                    <span className="max-w-full shrink-0 truncate rounded-full border border-brand-surface-border px-2 py-1">{conversation.status}</span>
+                    <span className="max-w-full shrink-0 truncate rounded-full border border-brand-surface-border px-2 py-1">
                       {conversation.reservationStatus || 'NO_STATUS'}
                     </span>
                     {conversation.aiHandled ? (
-                      <span className="rounded-full border border-brand-primary/20 bg-brand-primary/10 px-2 py-1 text-brand-primary">
+                      <span className="max-w-full shrink-0 truncate rounded-full border border-brand-primary/20 bg-brand-primary/10 px-2 py-1 text-brand-primary">
                         AI Handled
                       </span>
                     ) : null}
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -343,19 +344,19 @@ export default function StaffGuestInbox() {
             />
           ) : (
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <div>
-                  <p className="text-lg font-black text-brand-ink">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-lg font-black text-brand-ink break-words">
                     {detail.conversation.guestName || 'Guest'}
                     {detail.conversation.roomNumber ? ` - Room ${detail.conversation.roomNumber}` : ''}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {detail.conversation.assignedStaffName || 'Unassigned'} - {detail.conversation.staffOnline ? 'Support online' : 'AI fallback active'}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex min-w-0 flex-wrap gap-2">
                   {['original', 'ar', 'en'].map((mode) => (
-                    <button
+                    <Button variant="unstyled" size="none"
                       key={mode}
                       type="button"
                       onClick={() => setTranslationMode(mode)}
@@ -366,67 +367,67 @@ export default function StaffGuestInbox() {
                       }`}
                     >
                       {mode}
-                    </button>
+                    </Button>
                   ))}
-                  <button
+                  <Button variant="unstyled" size="none"
                     type="button"
                     onClick={() => setSoundEnabled((current) => !current)}
-                    className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-brand-ink-muted"
+                    className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-brand-ink-muted"
                   >
-                    {soundEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+                    {soundEnabled ? <Volume2 className="h-3.5 w-3.5 shrink-0" /> : <VolumeX className="h-3.5 w-3.5 shrink-0" />}
                     Alerts
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="unstyled" size="none"
                     type="button"
                     onClick={handleResolve}
-                    className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white"
+                    className="inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white"
                   >
-                    <CheckCheck className="h-3.5 w-3.5" />
+                    <CheckCheck className="h-3.5 w-3.5 shrink-0" />
                     Resolve
-                  </button>
+                  </Button>
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 <div className="rounded-[1.2rem] border border-brand-surface-border bg-white px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     Guest name
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {detail.conversation.guestName || 'Guest'}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-brand-surface-border bg-white px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     Room number
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {detail.conversation.roomNumber ? `Room ${detail.conversation.roomNumber}` : 'No room assigned'}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-brand-surface-border bg-white px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     Reservation status
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {detail.conversation.reservationStatus
                       ? getReservationStatusLabel(detail.conversation.reservationStatus, t)
                       : 'Unknown'}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-brand-surface-border bg-white px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     Selected room context
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {buildConversationContextLabel(detail.conversation)}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-brand-surface-border bg-white px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     Preferred language
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {(detail.conversation.preferredLanguage || 'en').toUpperCase()}
                   </p>
                 </div>
@@ -442,35 +443,35 @@ export default function StaffGuestInbox() {
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-brand-ink-muted">
-                <span className="inline-flex items-center gap-1 rounded-full border border-brand-surface-border bg-white px-3 py-1.5">
-                  <Bot className="h-3.5 w-3.5" />
-                  {detail.conversation.aiHandled ? 'AI assisted thread' : 'Human handled thread'}
+              <div className="flex min-w-0 flex-wrap items-center gap-3 text-xs font-bold text-brand-ink-muted">
+                <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-full border border-brand-surface-border bg-white px-3 py-1.5">
+                  <Bot className="h-3.5 w-3.5 shrink-0" />
+                  <span className="min-w-0 truncate">{detail.conversation.aiHandled ? 'AI assisted thread' : 'Human handled thread'}</span>
                 </span>
                 {detail.conversation.unreadStaffCount > 0 ? (
-                  <span className="rounded-full border border-brand-danger/20 bg-brand-danger/10 px-3 py-1.5 text-brand-danger">
+                  <span className="max-w-full shrink-0 truncate rounded-full border border-brand-danger/20 bg-brand-danger/10 px-3 py-1.5 text-brand-danger">
                     {detail.conversation.unreadStaffCount} unread guest messages
                   </span>
                 ) : null}
               </div>
 
-              <div className="flex items-end gap-3">
+              <div className="flex min-w-0 items-end gap-3">
                 <textarea
                   value={reply}
                   onChange={(event) => handleTypingChange(event.target.value)}
                   rows={3}
                   placeholder={translateWithFallback(t, 'staffGuestInbox.replyPlaceholder', 'Reply to the guest...')}
-                  className="min-h-[4.5rem] flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
                 />
-                <button
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={handleReply}
                   disabled={replying || !reply.trim() || !connected}
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-w-0 h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send reply"
                 >
-                  {replying ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizonal className="h-4 w-4" />}
-                </button>
+                  {replying ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="h-4 w-4 shrink-0" />}
+                </Button>
               </div>
             </div>
           )}

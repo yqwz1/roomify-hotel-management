@@ -18,6 +18,8 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStaff } from '../hooks/useStaff';
 import { translateKnownValue, translateWithFallback } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 function StaffFormModal({
   editingId,
   formData,
@@ -63,9 +65,9 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.email && (
-            <p className="text-sm font-medium text-brand-danger">{validationErrors.email}</p>
+            <p className="text-sm font-medium text-brand-danger break-words">{validationErrors.email}</p>
           )}
-          <p className="text-sm font-medium text-brand-ink-muted">
+          <p className="text-sm font-medium text-brand-ink-muted break-words">
             {editingId ? t(`${pageTx}.emailNoteEdit`) : t(`${pageTx}.emailNoteCreate`)}
           </p>
         </div>
@@ -82,7 +84,7 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.name && (
-            <p className="text-sm font-medium text-brand-danger">{validationErrors.name}</p>
+            <p className="text-sm font-medium text-brand-danger break-words">{validationErrors.name}</p>
           )}
         </div>
 
@@ -98,7 +100,7 @@ function StaffFormModal({
             className={inputClassName}
           />
           {validationErrors.department && (
-            <p className="text-sm font-medium text-brand-danger">{validationErrors.department}</p>
+            <p className="text-sm font-medium text-brand-danger break-words">{validationErrors.department}</p>
           )}
         </div>
 
@@ -107,7 +109,7 @@ function StaffFormModal({
             <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('roleLabel')}
             </label>
-            <select
+            <NativeSelect
               name="role"
               value={formData.role}
               onChange={onChange}
@@ -115,9 +117,9 @@ function StaffFormModal({
             >
               <option value="STAFF">{t('staffRole')}</option>
               <option value="MANAGER">{t('managerRole')}</option>
-            </select>
+            </NativeSelect>
             {validationErrors.roleAllowed && (
-              <p className="text-sm font-medium text-brand-danger">{validationErrors.roleAllowed}</p>
+              <p className="text-sm font-medium text-brand-danger break-words">{validationErrors.roleAllowed}</p>
             )}
           </div>
         )}
@@ -128,15 +130,15 @@ function StaffFormModal({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none"
             type="button"
             onClick={onClose}
             className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
           >
             {t('cancel')}
-          </button>
-          <button
+          </Button>
+          <Button variant="unstyled" size="none"
             type="submit"
             disabled={isSubmitting}
             className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
@@ -148,7 +150,7 @@ function StaffFormModal({
               : editingId
                 ? t('updateStaffBtn')
                 : t('createStaffBtn')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -360,35 +362,35 @@ export default function Staff() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t(`${pageTx}.teamSnapshot`)}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t(`${pageTx}.active`)}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.active}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.active}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t(`${pageTx}.inactive`)}
               </p>
-              <p className="mt-2 text-lg font-black">{summary.inactive}</p>
+              <p className="mt-2 text-lg font-black break-words">{summary.inactive}</p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="flex justify-end">
-        <button
+      <div className="flex min-w-0 justify-end">
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+          className="inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
         >
-          <UserPlus className="h-4 w-4" />
+          <UserPlus className="h-4 w-4 shrink-0" />
           {t(`${pageTx}.addStaff`)}
-        </button>
+        </Button>
       </div>
 
       {successMessage && (
@@ -407,7 +409,7 @@ export default function Staff() {
         title={t(`${pageTx}.addFiltersTitle`)}
         description={t(`${pageTx}.addFiltersDescription`)}
       >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('searchLabel')}
@@ -438,7 +440,7 @@ export default function Staff() {
             <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t(`${pageTx}.accountState`)}
             </label>
-            <select
+            <NativeSelect
               value={filters.active}
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, active: event.target.value }))
@@ -448,7 +450,7 @@ export default function Staff() {
               <option value="all">{t('allStaff')}</option>
               <option value="true">{t('activeOnly')}</option>
               <option value="false">{t('inactiveOnly')}</option>
-            </select>
+            </NativeSelect>
           </div>
         </div>
       </DashboardPanel>
@@ -465,9 +467,9 @@ export default function Staff() {
           </div>
         ) : filteredStaff.length === 0 ? (
           <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
-            <Users className="mx-auto h-10 w-10 text-brand-ink-hint" />
-            <p className="mt-4 text-lg font-black text-brand-ink">{t(`${pageTx}.noStaffTitle`)}</p>
-            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+            <Users className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
+            <p className="mt-4 text-lg font-black text-brand-ink break-words">{t(`${pageTx}.noStaffTitle`)}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
               {t(`${pageTx}.noStaffDescription`)}
             </p>
           </div>
@@ -483,30 +485,30 @@ export default function Staff() {
                     key={member.id}
                     className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-lg font-black text-brand-ink">{member.name}</p>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <p className="text-lg font-black text-brand-ink break-words">{member.name}</p>
                           {isCurrentUser ? (
-                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted">
+                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted break-words">
                               {t(`${pageTx}.you`)}
                             </span>
                           ) : null}
                         </div>
-                        <p className="mt-1 text-sm font-medium text-brand-ink-muted">{member.email}</p>
+                        <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">{member.email}</p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex min-w-0 flex-wrap gap-2">
                         {member.active ? (
-                          <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+                          <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
                             {t(`${pageTx}.active`)}
                           </span>
                         ) : (
-                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                             {t(`${pageTx}.inactive`)}
                           </span>
                         )}
                         {member.locked ? (
-                          <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning">
+                          <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning break-words">
                             {translateWithFallback(t, `${pageTx}.locked`, 'Locked')}
                           </span>
                         ) : null}
@@ -514,66 +516,66 @@ export default function Staff() {
                     </div>
 
                     <div className="mt-4 rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                         {t(`${pageTx}.tableDepartment`)}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                      <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                         {translateKnownValue(member.department || '-', t)}
                       </p>
                     </div>
 
-                    <div className="mt-4 flex flex-col gap-2">
-                      <button
+                    <div className="mt-4 flex min-w-0 flex-col gap-2">
+                      <Button variant="unstyled" size="none"
                         type="button"
                         onClick={() => handleEdit(member)}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                        className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 shrink-0" />
                         {t(`${pageTx}.edit`)}
-                      </button>
+                      </Button>
 
                       {member.active ? (
-                        <button
+                        <Button variant="unstyled" size="none"
                           type="button"
                           onClick={() => handleDeactivate(member)}
                           disabled={isCurrentUser}
-                          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                         >
-                          <PowerOff className="h-4 w-4" />
+                          <PowerOff className="h-4 w-4 shrink-0" />
                           {t(`${pageTx}.deactivate`)}
-                        </button>
+                        </Button>
                       ) : (
-                        <button
+                        <Button variant="unstyled" size="none"
                           type="button"
                           onClick={() => handleActivate(member)}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                         >
-                          <Power className="h-4 w-4" />
+                          <Power className="h-4 w-4 shrink-0" />
                           {t(`${pageTx}.activate`)}
-                        </button>
+                        </Button>
                       )}
 
                       {canUnlock ? (
-                        <button
+                        <Button variant="unstyled" size="none"
                           type="button"
                           onClick={() => handleUnlock(member)}
                           disabled={!member.locked}
-                          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                         >
-                          <LockOpen className="h-4 w-4" />
+                          <LockOpen className="h-4 w-4 shrink-0" />
                           {t(`${pageTx}.unlock`)}
-                        </button>
+                        </Button>
                       ) : null}
 
-                      <button
+                      <Button variant="unstyled" size="none"
                         type="button"
                         onClick={() => handleDelete(member)}
                         disabled={isCurrentUser}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                        className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 shrink-0" />
                         {t(`${pageTx}.delete`)}
-                      </button>
+                      </Button>
                     </div>
                   </article>
                 );
@@ -602,94 +604,94 @@ export default function Staff() {
                     <tr key={member.id}>
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-black text-brand-ink">{member.name}</p>
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="text-sm font-black text-brand-ink break-words">{member.name}</p>
                             {isCurrentUser && (
-                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted">
+                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-ink-muted break-words">
                                 {t(`${pageTx}.you`)}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm font-medium text-brand-ink-muted">{member.email}</p>
+                          <p className="text-sm font-medium text-brand-ink-muted break-words">{member.email}</p>
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-sm font-medium text-brand-ink">
-                          <Briefcase className="h-4 w-4 text-brand-ink-hint" />
+                        <div className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-sm font-medium text-brand-ink">
+                          <Briefcase className="h-4 w-4 text-brand-ink-hint shrink-0" />
                           {translateKnownValue(member.department || '-', t)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         {member.active ? (
-                          <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+                          <div className="flex min-w-0 flex-wrap gap-2">
+                            <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
                               {t(`${pageTx}.active`)}
                             </span>
                             {member.locked && (
-                              <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning">
+                              <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-warning break-words">
                                 {translateWithFallback(t, `${pageTx}.locked`, 'Locked')}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                          <span className="rounded-full border border-brand-surface-border bg-brand-primary-tint px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                             {t(`${pageTx}.inactive`)}
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          <button
+                        <div className="flex min-w-0 flex-wrap gap-2">
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => handleEdit(member)}
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
+                            className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4 shrink-0" />
                             {t(`${pageTx}.edit`)}
-                          </button>
+                          </Button>
 
                           {member.active ? (
-                            <button
+                            <Button variant="unstyled" size="none"
                               type="button"
                               onClick={() => handleDeactivate(member)}
                               disabled={isCurrentUser}
-                              className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                              className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                             >
-                              <PowerOff className="h-4 w-4" />
+                              <PowerOff className="h-4 w-4 shrink-0" />
                               {t(`${pageTx}.deactivate`)}
-                            </button>
+                            </Button>
                           ) : (
-                            <button
+                            <Button variant="unstyled" size="none"
                               type="button"
                               onClick={() => handleActivate(member)}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                              className="inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                             >
-                              <Power className="h-4 w-4" />
+                              <Power className="h-4 w-4 shrink-0" />
                               {t(`${pageTx}.activate`)}
-                            </button>
+                            </Button>
                           )}
 
                           {canUnlock && (
-                            <button
+                            <Button variant="unstyled" size="none"
                               type="button"
                               onClick={() => handleUnlock(member)}
                               disabled={!member.locked}
-                              className="inline-flex items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                              className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                             >
-                              <LockOpen className="h-4 w-4" />
+                              <LockOpen className="h-4 w-4 shrink-0" />
                               {t(`${pageTx}.unlock`)}
-                            </button>
+                            </Button>
                           )}
 
-                          <button
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => handleDelete(member)}
                             disabled={isCurrentUser}
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
+                            className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-danger/30 px-4 py-2 text-sm font-bold text-brand-danger transition hover:border-brand-danger/50 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4 shrink-0" />
                             {t(`${pageTx}.delete`)}
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>

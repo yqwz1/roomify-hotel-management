@@ -35,6 +35,8 @@ import {
   SERVICE_REQUEST_TYPES,
 } from '../utils/serviceRequestPresentation';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 const POLL_INTERVAL_MS = 12000;
 
 const createInitialFormState = () => ({
@@ -278,9 +280,9 @@ export default function GuestServiceRequests() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950">
-              <BriefcaseBusiness className="h-5 w-5" />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex min-w-0 h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950 break-words">
+              <BriefcaseBusiness className="h-5 w-5 shrink-0" />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">
@@ -302,7 +304,7 @@ export default function GuestServiceRequests() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={BedDouble}
           label={translateWithFallback(t, 'guestServiceRequests.metrics.rooms', 'Active rooms')}
@@ -389,7 +391,7 @@ export default function GuestServiceRequests() {
           onRetry={handleRetry}
         />
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <DashboardPanel
             title={translateWithFallback(
               t,
@@ -430,15 +432,15 @@ export default function GuestServiceRequests() {
                 ) : null}
 
                 {showRoomSelector ? (
-                  <label className="grid gap-2">
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                  <label className="grid min-w-0 gap-2">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                       {translateWithFallback(
                         t,
                         'guestServiceRequests.selectRoomLabel',
                         'Select Room'
                       )}
                     </span>
-                    <select
+                    <NativeSelect
                       value={formState.roomId}
                       onChange={handleChange('roomId')}
                       className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
@@ -452,32 +454,32 @@ export default function GuestServiceRequests() {
                           {buildReservationLabel(reservation, i18n.language, t)}
                         </option>
                       ))}
-                    </select>
+                    </NativeSelect>
                   </label>
                 ) : autoSelectedReservation ? (
                   <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 px-4 py-4">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                       {translateWithFallback(
                         t,
                         'guestServiceRequests.selectedRoomLabel',
                         'Selected Room'
                       )}
                     </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950">
+                    <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
                       {buildReservationLabel(autoSelectedReservation, i18n.language, t)}
                     </p>
                   </div>
                 ) : null}
 
-                <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                <label className="grid min-w-0 gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.serviceTypeLabel',
                       'Service Type'
                     )}
                   </span>
-                  <select
+                  <NativeSelect
                     value={formState.serviceType}
                     onChange={handleChange('serviceType')}
                     className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
@@ -495,11 +497,11 @@ export default function GuestServiceRequests() {
                         {getServiceRequestTypeLabel(serviceType, t)}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </label>
 
-                <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                <label className="grid min-w-0 gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.descriptionLabel',
@@ -521,15 +523,15 @@ export default function GuestServiceRequests() {
                   />
                 </label>
 
-                <label className="grid gap-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+                <label className="grid min-w-0 gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                     {translateWithFallback(
                       t,
                       'guestServiceRequests.priorityLabel',
                       'Priority'
                     )}
                   </span>
-                  <select
+                  <NativeSelect
                     value={formState.priority}
                     onChange={handleChange('priority')}
                     className="h-12 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-950 outline-none transition focus:border-zinc-400"
@@ -546,10 +548,10 @@ export default function GuestServiceRequests() {
                         {getServiceRequestPriorityLabel(priority, t)}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </label>
 
-                <button
+                <Button variant="unstyled" size="none"
                   type="submit"
                   disabled={
                     submitting ||
@@ -557,7 +559,7 @@ export default function GuestServiceRequests() {
                     !formState.serviceType ||
                     !formState.description.trim()
                   }
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                  className="inline-flex min-w-0 h-12 items-center justify-center rounded-full bg-zinc-950 px-6 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                 >
                   {submitting
                     ? translateWithFallback(
@@ -570,7 +572,7 @@ export default function GuestServiceRequests() {
                         'guestServiceRequests.submitLabel',
                         'Submit request'
                       )}
-                </button>
+                </Button>
               </form>
             )}
           </DashboardPanel>
@@ -602,16 +604,16 @@ export default function GuestServiceRequests() {
                 )}
               />
             ) : (
-              <div className="grid gap-4">
+              <div className="grid min-w-0 gap-4">
                 {requests.map((request) => (
                   <article
                     key={request.id}
                     className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                       <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-black tracking-tight text-zinc-950">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-black tracking-tight text-zinc-950 break-words">
                             {getServiceRequestTypeLabel(request.serviceType, t)}
                           </h3>
                           <span
@@ -625,7 +627,7 @@ export default function GuestServiceRequests() {
                             {getServiceRequestPriorityLabel(request.priority, t)}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-zinc-500">
+                        <p className="text-sm font-medium text-zinc-500 break-words">
                           {request.roomNumber
                             ? translateWithFallback(
                                 t,
@@ -636,12 +638,12 @@ export default function GuestServiceRequests() {
                             : '-'}
                         </p>
                       </div>
-                      <p className="text-sm font-medium text-zinc-500">
+                      <p className="text-sm font-medium text-zinc-500 break-words">
                         {formatLocalizedDateTime(request.createdAt, i18n.language)}
                       </p>
                     </div>
 
-                    <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700">
+                    <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700 break-words">
                       {request.description}
                     </p>
                   </article>

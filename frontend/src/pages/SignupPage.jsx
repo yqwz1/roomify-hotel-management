@@ -93,15 +93,15 @@ const SignupPage = () => {
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-surface px-5 py-16 font-sans sm:px-8 sm:py-20"
+      className="relative flex min-w-0 min-h-screen items-center justify-center overflow-hidden bg-brand-surface px-5 py-16 font-sans sm:px-8 sm:py-20"
       dir={isAr ? 'rtl' : 'ltr'}
     >
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
+      <div className="absolute inset-x-0 top-0 z-20 flex min-w-0 items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
         <Link
           to="/"
-          className="group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-brand-ink-muted transition-colors hover:text-brand-ink"
+          className="group inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-brand-ink-muted transition-colors hover:text-brand-ink"
         >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5" />
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5 shrink-0" />
           {t('backToSite', { defaultValue: 'Back to site' })}
         </Link>
         <LanguageSwitcher />
@@ -178,7 +178,7 @@ const SignupPage = () => {
                 variant="destructive"
                 className="mt-7 rounded-xl border-brand-danger/20 bg-brand-danger/[0.04] text-brand-danger"
               >
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <AlertTitle className="font-black">{t('authFailed')}</AlertTitle>
                 <AlertDescription>{signupError}</AlertDescription>
               </Alert>
@@ -248,15 +248,15 @@ const SignupPage = () => {
                   : 'border-b-[#D8D1BF] focus-visible:border-b-brand-primary'
                   }`}
               />
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 className="absolute end-0 top-1/2 -translate-y-1/2 rounded-md p-1 text-brand-ink-hint transition-colors hover:text-brand-primary"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+                {showPassword ? <EyeOff className="h-4 w-4 shrink-0" /> : <Eye className="h-4 w-4 shrink-0" />}
+              </Button>
             </div>
             {errors.password && <FieldError>{errors.password}</FieldError>}
           </div>
@@ -271,16 +271,16 @@ const SignupPage = () => {
               disabled={isLoading}
               className="group relative h-12 w-full overflow-hidden rounded-full bg-brand-ink text-[14px] font-bold tracking-tight text-white shadow-[0_18px_38px_-14px_rgba(26,43,58,0.55)] transition-all hover:bg-brand-primary-deep hover:shadow-[0_22px_44px_-14px_rgba(38,75,107,0.6)] disabled:opacity-70"
             >
-              <span className="relative flex items-center justify-center">
+              <span className="relative flex min-w-0 items-center justify-center">
                 {isLoading ? (
                   <>
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" role="status" aria-label={t('loadingLabel')} />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" role="status" aria-label={t('loadingLabel')} />
                     {t('creatingAccount', { defaultValue: 'Creating account...' })}
                   </>
                 ) : (
                   <>
                     {t('createAccount', { defaultValue: 'Create account' })}
-                    <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+                    <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 shrink-0" />
                   </>
                 )}
               </span>

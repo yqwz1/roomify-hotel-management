@@ -9,6 +9,7 @@ import { extractPaymentError, payGuestReservation } from '../services/paymentSer
 import { formatLocalizedCurrency, formatLocalizedDate } from '../utils/localization';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from "@/components/ui/button";
 const formatCardNumber = (value) =>
   value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
 
@@ -17,19 +18,19 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
 
   return (
     <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-5 print:border-0 print:p-0">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-brand-surface-border pb-4">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-brand-surface-border pb-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
             Demo Payment Gateway
           </p>
-          <h2 className="mt-2 text-2xl font-black text-brand-ink">Roomify Payment Receipt</h2>
+          <h2 className="mt-2 text-2xl font-black text-brand-ink break-words">Roomify Payment Receipt</h2>
         </div>
-        <span className="rounded-full bg-brand-success/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+        <span className="rounded-full bg-brand-success/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
           {payment?.paymentStatus}
         </span>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
         {[
           ['Reservation ID', payment?.reservationId || reservation?.id],
           ['Invoice ID', payment?.invoiceNumber || reservation?.invoiceNumber || 'Pending'],
@@ -45,28 +46,28 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
           ['Date/time', dateTime ? new Date(dateTime).toLocaleString() : '-'],
         ].map(([label, value]) => (
           <div key={label} className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">{label}</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">{label}</p>
             <p className="mt-2 break-words text-sm font-bold text-brand-ink">{value || '-'}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row print:hidden">
-        <button
+      <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row print:hidden">
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
+          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
         >
-          <Printer className="h-4 w-4" />
+          <Printer className="h-4 w-4 shrink-0" />
           Print Receipt
-        </button>
-        <button
+        </Button>
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={onRetry}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
+          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
         >
           Back to My Reservations
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -147,12 +148,12 @@ export default function DemoPaymentGateway() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary">Demo Payment Gateway</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-ink">Complete mock payment</h1>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Demo Payment Gateway</p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-ink break-words">Complete mock payment</h1>
           </div>
-          <ShieldCheck className="h-10 w-10 text-brand-primary" />
+          <ShieldCheck className="h-10 w-10 text-brand-primary shrink-0" />
         </div>
       </div>
 
@@ -169,26 +170,26 @@ export default function DemoPaymentGateway() {
           description="Use the provided demo card numbers. This form never sends data to an external payment provider."
         >
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">Reservation</p>
-                <p className="mt-2 text-sm font-bold text-brand-ink">{confirmationNumber}</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Reservation</p>
+                <p className="mt-2 text-sm font-bold text-brand-ink break-words">{confirmationNumber}</p>
               </div>
               <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">Amount</p>
-                <p className="mt-2 text-sm font-bold text-brand-ink">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Amount</p>
+                <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                   {formatLocalizedCurrency(payableAmount, i18n.language)} SAR
                 </p>
               </div>
               <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">Invoice</p>
-                <p className="mt-2 text-sm font-bold text-brand-ink">{reservation?.invoiceStatus || 'PENDING'}</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Invoice</p>
+                <p className="mt-2 text-sm font-bold text-brand-ink break-words">{reservation?.invoiceStatus || 'PENDING'}</p>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">Cardholder name</span>
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Cardholder name</span>
                 <input
                   value={cardholderName}
                   onChange={(event) => setCardholderName(event.target.value)}
@@ -197,9 +198,9 @@ export default function DemoPaymentGateway() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">Card number</span>
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Card number</span>
                 <div className="relative">
-                  <CreditCard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+                  <CreditCard className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
                   <input
                     value={cardNumber}
                     onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
@@ -210,7 +211,7 @@ export default function DemoPaymentGateway() {
                 </div>
               </label>
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">Expiry</span>
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Expiry</span>
                 <input
                   value={expiry}
                   onChange={(event) => setExpiry(event.target.value.replace(/[^\d/]/g, '').slice(0, 5))}
@@ -220,7 +221,7 @@ export default function DemoPaymentGateway() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">CVV</span>
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">CVV</span>
                 <input
                   value={cvv}
                   onChange={(event) => setCvv(event.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -248,24 +249,24 @@ export default function DemoPaymentGateway() {
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
               {!isFailed ? (
-                <button
+                <Button variant="unstyled" size="none"
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
+                  className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
                 >
                   {submitting ? 'Processing...' : 'Pay Now'}
-                </button>
+                </Button>
               ) : null}
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => navigate('/guest/dashboard')}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
+                className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-4 w-4 shrink-0" />
                 Back to My Reservations
-              </button>
+              </Button>
             </div>
           </form>
         </DashboardPanel>

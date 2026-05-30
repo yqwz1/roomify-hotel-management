@@ -50,7 +50,7 @@ import {
 function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
   if (!invoiceFinalized) {
     return (
-        <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-warning">
+        <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-warning break-words">
         {t('invoicePreviewPage.notFinalized')}
       </span>
     );
@@ -58,7 +58,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'LOADING') {
     return (
-        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
+        <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted break-words">
         {t('invoicePreviewPage.loadingDelivery')}
       </span>
     );
@@ -66,7 +66,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'SENT') {
     return (
-        <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-success">
+        <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-success break-words">
         {t('invoicePreviewPage.delivered')}
       </span>
     );
@@ -74,7 +74,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'ATTEMPT') {
     return (
-      <span className="rounded-full border border-brand-primary bg-brand-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-primary">
+      <span className="rounded-full border border-brand-primary bg-brand-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-primary break-words">
         {getInvoiceDeliveryStatusLabel(deliveryStatus, t)}
       </span>
     );
@@ -82,7 +82,7 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'FAILED') {
     return (
-        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger">
+        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger break-words">
         {t('invoicePreviewPage.deliveryFailed')}
         {deliveryMeta?.errorMessage ? `: ${deliveryMeta.errorMessage}` : ''}
       </span>
@@ -91,14 +91,14 @@ function DeliveryBadge({ deliveryStatus, invoiceFinalized, deliveryMeta, t }) {
 
   if (deliveryStatus === 'ERROR') {
     return (
-        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger">
+        <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-danger break-words">
         {t('invoicePreviewPage.deliveryUnavailable')}
       </span>
     );
   }
 
   return (
-    <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
+    <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted break-words">
       {t('invoicePreviewPage.deliveryPending')}
     </span>
   );
@@ -420,21 +420,21 @@ export default function InvoicePreview() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('invoicePreviewPage.stateTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('common.finalized')}
               </p>
-              <p className="mt-2 text-lg font-black">{getBooleanLabel(invoiceFinalized, t)}</p>
+              <p className="mt-2 text-lg font-black break-words">{getBooleanLabel(invoiceFinalized, t)}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('common.delivery')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {invoiceFinalized ? getInvoiceDeliveryStatusLabel(deliveryStatus, t) : t('common.pending')}
               </p>
             </div>
@@ -442,7 +442,7 @@ export default function InvoicePreview() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <ReservationLookupPanel
           initialFilters={initialFilters}
           initialQuery={initialQuery}
@@ -454,7 +454,7 @@ export default function InvoicePreview() {
             title={t('invoicePreviewPage.selectTitle')}
             description={t('invoicePreviewPage.selectDescription')}
           >
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid min-w-0 gap-3 md:grid-cols-3">
               {t('invoicePreviewPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
@@ -491,26 +491,26 @@ export default function InvoicePreview() {
                 />
               ) : (
                 <>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid min-w-0 gap-4 md:grid-cols-2">
                     <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                         {t('common.guest')}
                       </p>
-                      <p className="mt-2 text-lg font-black text-brand-ink">
+                      <p className="mt-2 text-lg font-black text-brand-ink break-words">
                         {selected?.guestName || '-'}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {selected?.guestEmail || t('common.noGuestEmailProvided')}
                       </p>
                     </div>
                     <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                         {t('reservationDetails')}
                       </p>
-                      <p className="mt-2 text-sm font-bold text-brand-ink">
+                      <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                         <LtrText>{selected?.confirmationNumber}</LtrText>
                       </p>
-                      <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                      <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                         {t('roomNumber', { number: selected?.roomNumber })} |{' '}
                         {formatLocalizedDate(selected?.checkInDate, i18n.language, {
                           month: 'short',
@@ -527,7 +527,7 @@ export default function InvoicePreview() {
                     </div>
                   </div>
 
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row">
                     {!invoiceFinalized ? (
                       <Button
                         type="button"
@@ -535,7 +535,7 @@ export default function InvoicePreview() {
                         disabled={!selected?.id || generating}
                         className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                       >
-                        <FilePlus2 className="h-4 w-4" />
+                        <FilePlus2 className="h-4 w-4 shrink-0" />
                         {generating ? t('invoicePreviewPage.generating') : t('invoicePreviewPage.generate')}
                       </Button>
                     ) : (
@@ -547,7 +547,7 @@ export default function InvoicePreview() {
                           disabled={emailing}
                           className="h-14 w-full border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                         >
-                          <Mail className="h-4 w-4" />
+                          <Mail className="h-4 w-4 shrink-0" />
                           {emailing
                             ? t('invoicePreviewPage.sendingEmail')
                             : deliveryStatus === 'FAILED'
@@ -560,7 +560,7 @@ export default function InvoicePreview() {
                           onClick={handlePrint}
                           className="h-14 w-full border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                         >
-                          <Printer className="h-4 w-4" />
+                          <Printer className="h-4 w-4 shrink-0" />
                           {t('invoicePreviewPage.print')}
                         </Button>
                         <Button
@@ -569,7 +569,7 @@ export default function InvoicePreview() {
                           disabled={downloading}
                           className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                         >
-                          <Download className="h-4 w-4" />
+                          <Download className="h-4 w-4 shrink-0" />
                           {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
                         </Button>
                       </>
@@ -605,7 +605,7 @@ export default function InvoicePreview() {
                       className="h-[22rem] w-full bg-white sm:h-[28rem]"
                     />
                   </div>
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
                     <Button
                       type="button"
                       variant="outline"
@@ -620,7 +620,7 @@ export default function InvoicePreview() {
                       onClick={handlePrint}
                       className="h-12 border-brand-surface-border text-sm font-bold text-brand-ink hover:bg-brand-surface-light"
                     >
-                      <Printer className="h-4 w-4" />
+                      <Printer className="h-4 w-4 shrink-0" />
                       {t('invoicePreviewPage.print')}
                     </Button>
                     <Button
@@ -629,7 +629,7 @@ export default function InvoicePreview() {
                       disabled={downloading}
                       className="h-12 bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
                     >
-                      <Download className="h-4 w-4" />
+                      <Download className="h-4 w-4 shrink-0" />
                       {downloading ? t('invoicePreviewPage.downloading') : t('invoicePreviewPage.download')}
                     </Button>
                   </div>
@@ -654,7 +654,7 @@ export default function InvoicePreview() {
               title={t('invoicePreviewPage.signalsTitle')}
               description={t('invoicePreviewPage.signalsDescription')}
             >
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid min-w-0 gap-3 md:grid-cols-3">
                 {[
                   {
                     icon: Receipt,
@@ -688,11 +688,11 @@ export default function InvoicePreview() {
                       key={item.title}
                       className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                        <Icon className="h-4 w-4" />
+                      <span className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                        <Icon className="h-4 w-4 shrink-0" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+                      <p className="mt-3 text-sm font-bold text-brand-ink break-words">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                         {item.description}
                       </p>
                     </div>

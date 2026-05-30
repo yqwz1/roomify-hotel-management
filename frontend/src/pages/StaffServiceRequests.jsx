@@ -24,6 +24,7 @@ import {
   getServiceRequestTypeLabel,
 } from '../utils/serviceRequestPresentation';
 
+import { Button } from "@/components/ui/button";
 const POLL_INTERVAL_MS = 10000;
 
 export default function StaffServiceRequests() {
@@ -130,9 +131,9 @@ export default function StaffServiceRequests() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950">
-              <BriefcaseBusiness className="h-5 w-5" />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex min-w-0 h-12 w-12 items-center justify-center rounded-2xl bg-white text-zinc-950 break-words">
+              <BriefcaseBusiness className="h-5 w-5 shrink-0" />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">
@@ -150,7 +151,7 @@ export default function StaffServiceRequests() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={BriefcaseBusiness}
           label={translateWithFallback(t, 'staffServiceRequests.metrics.total', 'Total requests')}
@@ -241,7 +242,7 @@ export default function StaffServiceRequests() {
             )}
           />
         ) : (
-          <div className="grid gap-4">
+          <div className="grid min-w-0 gap-4">
             {requests.map((request) => {
               const isBusy = busyRequestId === request.id;
 
@@ -250,10 +251,10 @@ export default function StaffServiceRequests() {
                   key={request.id}
                   className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-xl font-black tracking-tight text-zinc-950">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <h3 className="text-xl font-black tracking-tight text-zinc-950 break-words">
                           {request.guestName ||
                             translateWithFallback(t, 'common.guest', 'Guest')}
                         </h3>
@@ -268,7 +269,7 @@ export default function StaffServiceRequests() {
                           {getServiceRequestPriorityLabel(request.priority, t)}
                         </span>
                       </div>
-                      <p className="text-sm font-semibold text-zinc-600">
+                      <p className="text-sm font-semibold text-zinc-600 break-words">
                         {request.roomNumber
                           ? translateWithFallback(
                               t,
@@ -281,40 +282,40 @@ export default function StaffServiceRequests() {
                         {getServiceRequestTypeLabel(request.serviceType, t)}
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-zinc-500">
+                    <p className="text-sm font-medium text-zinc-500 break-words">
                       {formatLocalizedDateTime(request.createdAt, i18n.language)}
                     </p>
                   </div>
 
-                  <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700">
+                  <p className="mt-4 rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-700 break-words">
                     {request.description}
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <button
+                  <div className="mt-4 flex min-w-0 flex-wrap gap-3">
+                    <Button variant="unstyled" size="none"
                       type="button"
                       disabled={isBusy || request.status === 'IN_PROGRESS'}
                       onClick={() => handleStatusUpdate(request.id, 'IN_PROGRESS')}
-                      className="inline-flex h-11 items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-5 text-sm font-bold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400"
+                      className="inline-flex min-w-0 h-11 items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-5 text-sm font-bold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400"
                     >
                       {translateWithFallback(
                         t,
                         'staffServiceRequests.markInProgress',
                         'Mark In Progress'
                       )}
-                    </button>
-                    <button
+                    </Button>
+                    <Button variant="unstyled" size="none"
                       type="button"
                       disabled={isBusy || request.status === 'COMPLETED'}
                       onClick={() => handleStatusUpdate(request.id, 'COMPLETED')}
-                      className="inline-flex h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                      className="inline-flex min-w-0 h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                     >
                       {translateWithFallback(
                         t,
                         'staffServiceRequests.markCompleted',
                         'Mark Completed'
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </article>
               );

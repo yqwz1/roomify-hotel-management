@@ -72,9 +72,9 @@ function Field({
         {required ? ' *' : ''}
       </label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+        <Icon className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
         {locked ? (
-          <Lock className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+          <Lock className="pointer-events-none absolute end-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
         ) : null}
         <input
           id={id}
@@ -280,19 +280,19 @@ export default function BookRoom() {
           description={t('bookRoomPage.noRoomPanelDescription')}
         >
           <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
-            <BedDouble className="mx-auto h-10 w-10 text-brand-ink-hint" />
-            <p className="mt-4 text-lg font-black text-brand-ink">{t('noRoomSelected')}</p>
-            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+            <BedDouble className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
+            <p className="mt-4 text-lg font-black text-brand-ink break-words">{t('noRoomSelected')}</p>
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
               {t('bookRoomPage.noRoomMessage')}
             </p>
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={() => navigate('/search')}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+              className="mt-5 inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 shrink-0" />
               {t('backToRoomSearch')}
-            </button>
+            </Button>
           </div>
         </DashboardPanel>
       </div>
@@ -338,23 +338,23 @@ export default function BookRoom() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('bookRoomPage.snapshotTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('bookRoomPage.snapshotRoom')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('bookRoomPage.snapshotTotal')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {formatLocalizedCurrency(pricing?.total ?? 0, i18n.language)}
               </p>
             </div>
@@ -364,15 +364,15 @@ export default function BookRoom() {
 
       {conflictError ? (
         <div className="rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
-          <div className="flex items-start gap-4">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
-              <AlertTriangle className="h-5 w-5" />
+          <div className="flex min-w-0 items-start gap-4">
+            <span className="flex min-w-0 h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink break-words">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-lg font-black tracking-tight text-brand-ink">
+              <p className="text-lg font-black tracking-tight text-brand-ink break-words">
                 {t('roomAlreadyBooked')}
               </p>
-              <p className="mt-2 text-sm font-medium leading-6 text-brand-danger/85">
+              <p className="mt-2 text-sm font-medium leading-6 text-brand-danger/85 break-words">
                 {conflictError}
               </p>
             </div>
@@ -380,7 +380,7 @@ export default function BookRoom() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.08fr_0.92fr]">
         <div className="space-y-6">
           <DashboardPanel
             title={translateWithFallback(t, 'bookRoomPage.summaryTitle', 'Booking summary')}
@@ -406,29 +406,29 @@ export default function BookRoom() {
 
               {!isAuthenticated ? (
                 <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
-                  <p className="inline-flex items-center gap-2 text-sm font-black text-brand-ink">
-                    <Lock className="h-4 w-4" />
+                  <p className="inline-flex min-w-0 items-center gap-2 text-sm font-black text-brand-ink break-words">
+                    <Lock className="h-4 w-4 shrink-0" />
                     {translateWithFallback(
                       t,
                       'bookRoomPage.loginCheckpointTitle',
                       'Sign in to finalize the reservation'
                     )}
                   </p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                     {translateWithFallback(
                       t,
                       'bookRoomPage.loginCheckpointBody',
                       'The room, dates, and quote stay here. Authentication is required only for the actual reservation submission.'
                     )}
                   </p>
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                    <Button type="button" className="h-auto flex-1 rounded-full py-4" onClick={handleGoToLogin}>
+                  <div className="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row">
+                    <Button type="button" className="h-auto min-w-0 flex-1 rounded-full py-4" onClick={handleGoToLogin}>
                       {t('signIn')}
                     </Button>
                     <Button
                       variant="outline"
                       type="button"
-                      className="h-auto flex-1 rounded-full border-brand-surface-border py-4"
+                      className="h-auto min-w-0 flex-1 rounded-full border-brand-surface-border py-4"
                       onClick={() => navigate(`/rooms/${roomId}?checkIn=${checkIn}&checkOut=${checkOut}`)}
                     >
                       {translateWithFallback(t, 'roomSearchPage.viewDetailsCta', 'View details')}
@@ -437,7 +437,7 @@ export default function BookRoom() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid min-w-0 gap-4 md:grid-cols-2">
                     <div className="md:col-span-2">
                       <Field
                         id="guest-name"
@@ -496,14 +496,14 @@ export default function BookRoom() {
                   </div>
 
                   <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                    <p className="text-sm font-black text-brand-ink">
+                    <p className="text-sm font-black text-brand-ink break-words">
                       {translateWithFallback(
                         t,
                         'bookRoomPage.postAuthSubmissionTitle',
                         'What happens next'
                       )}
                     </p>
-                    <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                    <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                       {translateWithFallback(
                         t,
                         'bookRoomPage.postAuthSubmissionBody',
@@ -512,20 +512,20 @@ export default function BookRoom() {
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
                     <Button
                       variant="outline"
                       type="button"
                       onClick={() => navigate(-1)}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border px-6 py-4 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
+                      className="inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border px-6 py-4 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light h-auto"
                     >
-                      <ArrowLeft className="h-4 w-4" />
+                      <ArrowLeft className="h-4 w-4 shrink-0" />
                       {t('back')}
                     </Button>
                     <Button
                       type="submit"
                       disabled={submitting || nights <= 0 || room?.availableForRequestedStay === false}
-                      className="inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
+                      className="inline-flex min-w-0 w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
                     >
                       {submitting
                         ? translateWithFallback(
@@ -552,32 +552,32 @@ export default function BookRoom() {
             description={t('bookRoomPage.summaryDescription')}
           >
             <div className="space-y-5">
-              <div className="flex h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
-                <span className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm">
+              <div className="flex min-w-0 h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
+                <span className="flex min-w-0 h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm break-words">
                   {room?.availableForRequestedStay ? (
-                    <CheckCircle2 className="h-7 w-7 text-brand-success" />
+                    <CheckCircle2 className="h-7 w-7 text-brand-success shrink-0" />
                   ) : (
-                    <BedDouble className="h-7 w-7" />
+                    <BedDouble className="h-7 w-7 shrink-0" />
                   )}
                 </span>
               </div>
 
               <div>
-                <p className="text-2xl font-black tracking-tight text-brand-ink">
+                <p className="text-2xl font-black tracking-tight text-brand-ink break-words">
                   {room ? t('roomNum', { number: room.roomNumber }) : `#${roomId}`}
                 </p>
-                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                   {translateKnownValue(room?.roomType?.name, t) || t('bookRoomPage.roomTypeUnavailable')}
                   {room?.floor ? ` | ${t('floorNum', { floor: room.floor })}` : ''}
                 </p>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid min-w-0 gap-3 md:grid-cols-2">
                 <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t('common.dates')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {formatLocalizedDate(checkIn, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -592,50 +592,50 @@ export default function BookRoom() {
                   </p>
                 </div>
                 <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t('status')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {room?.availabilityMessage ?? t('common.pending')}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('bookRoomPage.ratePerNight')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('bookRoomPage.ratePerNight')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.pricePerNight ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('nightsLabel')}</span>
-                  <span className="font-bold text-brand-ink">{pricing?.nights ?? '-'}</span>
+                <div className="mt-3 flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('nightsLabel')}</span>
+                  <span className="font-bold text-brand-ink break-words">{pricing?.nights ?? '-'}</span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('subtotal')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="mt-3 flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('subtotal')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.subtotal ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium text-brand-ink-muted">{t('taxes15')}</span>
-                  <span className="font-bold text-brand-ink">
+                <div className="mt-3 flex min-w-0 items-center justify-between gap-4 text-sm">
+                  <span className="font-medium text-brand-ink-muted break-words">{t('taxes15')}</span>
+                  <span className="font-bold text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.vatAmount ?? 0, i18n.language)}
                   </span>
                 </div>
-                <div className="mt-4 flex items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
-                  <span className="text-sm font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                <div className="mt-4 flex min-w-0 items-center justify-between gap-4 border-t border-brand-surface-border pt-4">
+                  <span className="text-sm font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                     {t('total')}
                   </span>
-                  <span className="text-2xl font-black text-brand-ink">
+                  <span className="text-2xl font-black text-brand-ink break-words">
                     {formatLocalizedCurrency(pricing?.total ?? 0, i18n.language)}
                   </span>
                 </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4">
-                <p className="text-sm font-black text-brand-ink">
+                <p className="text-sm font-black text-brand-ink break-words">
                   {translateWithFallback(t, 'bookRoomPage.policySnapshotTitle', 'Stay policies')}
                 </p>
                 <ul className="mt-3 space-y-2 text-sm font-medium leading-6 text-brand-ink-muted">

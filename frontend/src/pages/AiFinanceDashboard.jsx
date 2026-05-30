@@ -142,18 +142,18 @@ function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
   return (
     <Card className={cn('rounded-[1.5rem] border p-0 shadow-sm', className)}>
       <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
+            <p className="text-xs font-black uppercase tracking-[0.18em] opacity-70 break-words">
               {label}
             </p>
             <p className="mt-3 break-words text-2xl font-black tracking-tight sm:text-3xl">
               {value}
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p>
+            <p className="mt-2 text-sm font-medium leading-6 opacity-75 break-words">{hint}</p>
           </div>
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
-            <Icon className="h-5 w-5" />
+          <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
+            <Icon className="h-5 w-5 shrink-0" />
           </span>
         </div>
       </CardContent>
@@ -165,7 +165,7 @@ function DataSummarySkeletonCard() {
   return (
     <Card className="rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0 flex-1 animate-pulse">
             <div className="h-3 w-24 rounded-full bg-brand-surface-border" />
             <div className="mt-4 h-8 w-28 rounded-xl bg-brand-surface-border" />
@@ -183,7 +183,7 @@ function DataSummarySkeletonCard() {
 
 function DataSummaryCards({ cards, loading }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
       {loading
         ? Array.from({ length: 6 }).map((_, index) => (
             <DataSummarySkeletonCard key={`summary-skeleton-${index}`} />
@@ -199,16 +199,16 @@ function ForecastMetricCard({ icon: Icon, label, value, hint, className }) {
   return (
     <Card className={cn('rounded-[1.35rem] border p-0 shadow-sm', className)}>
       <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.16em] opacity-70">
+            <p className="text-xs font-black uppercase tracking-[0.16em] opacity-70 break-words">
               {label}
             </p>
             <p className="mt-3 break-words text-2xl font-black tracking-tight">{value}</p>
-            {hint ? <p className="mt-2 text-sm font-medium leading-6 opacity-75">{hint}</p> : null}
+            {hint ? <p className="mt-2 text-sm font-medium leading-6 opacity-75 break-words">{hint}</p> : null}
           </div>
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
-            <Icon className="h-5 w-5" />
+          <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
+            <Icon className="h-5 w-5 shrink-0" />
           </span>
         </div>
       </CardContent>
@@ -218,7 +218,7 @@ function ForecastMetricCard({ icon: Icon, label, value, hint, className }) {
 
 function ForecastMetricSkeletons() {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid min-w-0 gap-4 md:grid-cols-3">
       {Array.from({ length: 3 }).map((_, index) => (
         <Card key={`forecast-skeleton-${index}`} className="rounded-[1.35rem] border border-brand-surface-border bg-white p-0 shadow-sm">
           <CardContent className="p-5">
@@ -367,7 +367,7 @@ function AiFinanceContent() {
             />
           ) : revenueForecast ? (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid min-w-0 gap-4 md:grid-cols-3">
                 <ForecastMetricCard
                   icon={WalletCards}
                   label={`Predicted Revenue Next ${revenueForecast.forecastDays || 30} Days`}
@@ -451,7 +451,7 @@ function AiFinanceContent() {
             />
           ) : revenueForecast ? (
             <>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid min-w-0 gap-4 md:grid-cols-3">
                 <ForecastMetricCard
                   icon={Percent}
                   label="Predicted Average Occupancy"
@@ -538,7 +538,7 @@ function AiFinanceContent() {
               onRetry={refreshFinalAiData}
             />
           ) : hasPricingRecommendations ? (
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
               {pricingRecommendations.map((recommendation) => (
                 <PricingRecommendationCard
                   key={recommendation.roomType}
@@ -616,21 +616,21 @@ export default function AiFinanceDashboard() {
         meta={['Manager only', 'Spring Boot AI bridge', 'Fallback ready']}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             Advisor Snapshot
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55 break-words">
                 Model status
               </p>
-              <p className="mt-2 text-2xl font-black">Spring routed</p>
+              <p className="mt-2 text-2xl font-black break-words">Spring routed</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55 break-words">
                 Data mode
               </p>
-              <p className="mt-2 text-2xl font-black">Live + fallback</p>
+              <p className="mt-2 text-2xl font-black break-words">Live + fallback</p>
             </div>
           </div>
         </div>

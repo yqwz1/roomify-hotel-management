@@ -37,10 +37,11 @@ import {
   createReservationWorkspaceFiltersFromSearchParams,
   formatDateInputValue,
   getReservationWorkspaceActionLabel,
-  normalizeReservationWorkspaceFilters,
   normalizeWorkspaceValue,
 } from '../utils/reservationWorkspace';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 const useDesktopWorkspace = () => {
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -56,8 +57,6 @@ const useDesktopWorkspace = () => {
 
     const mediaQuery = window.matchMedia('(min-width: 1280px)');
     const handleChange = (event) => setIsDesktop(event.matches);
-
-    setIsDesktop(mediaQuery.matches);
 
     if (typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', handleChange);
@@ -279,27 +278,27 @@ export default function ReservationsWorkspace() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t(`${pageTx}.workspaceTitle`)}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t(`${pageTx}.currentFocus`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{activeTab.label}</p>
+              <p className="mt-2 text-3xl font-black break-words">{activeTab.label}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t(`${pageTx}.activeQueue`)}
               </p>
-              <p className="mt-2 text-3xl font-black">{metrics.visibleCount}</p>
+              <p className="mt-2 text-3xl font-black break-words">{metrics.visibleCount}</p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={CalendarDays}
           label={t(`${pageTx}.metrics.visibleLabel`)}
@@ -328,18 +327,18 @@ export default function ReservationsWorkspace() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
         <DashboardPanel
           title={t(`${pageTx}.queueTitle`)}
           description={t(`${pageTx}.queueDescription`)}
         >
           <div className="space-y-5">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex min-w-0 flex-wrap gap-2">
               {queueTabs.map((tab) => {
                 const isActive = tab.id === activeTab.id;
 
                 return (
-                  <button
+                  <Button variant="unstyled" size="none"
                     key={tab.id}
                     type="button"
                     onClick={() => handleTabChange(tab.id)}
@@ -350,7 +349,7 @@ export default function ReservationsWorkspace() {
                     }`}
                   >
                     {tab.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -401,7 +400,7 @@ export default function ReservationsWorkspace() {
                   <span className={FILTER_LABEL_CLASS}>
                     {t('status')}
                   </span>
-                  <select
+                  <NativeSelect
                     value={draftFilters.status}
                     onChange={(event) =>
                       setDraftFilters((current) => ({
@@ -417,7 +416,7 @@ export default function ReservationsWorkspace() {
                         {getReservationStatusLabel(status, t)}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </label>
 
                 <label className={FILTER_FIELD_CLASS}>
@@ -455,26 +454,26 @@ export default function ReservationsWorkspace() {
                 </label>
               </div>
 
-              <div className="flex flex-wrap gap-3 sm:justify-end">
-                <button
+              <div className="flex min-w-0 flex-wrap gap-3 sm:justify-end">
+                <Button variant="unstyled" size="none"
                   type="submit"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                  className="inline-flex min-w-0 h-12 items-center justify-center rounded-full bg-brand-primary px-6 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                 >
                   {t(`${pageTx}.applyFilters`)}
-                </button>
-                <button
+                </Button>
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={handleReset}
                   disabled={isAtQueueDefault}
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-w-0 h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {t('common.clearFilters')}
-                </button>
+                </Button>
               </div>
 
               <div className="rounded-[1.25rem] border border-brand-surface-border bg-white px-4 py-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
+                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                     {hasPendingFilterChanges
                       ? translateWithFallback(
                           t,
@@ -488,7 +487,7 @@ export default function ReservationsWorkspace() {
                         )}
                   </p>
                   {hasPendingFilterChanges ? (
-                    <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1 text-xs font-bold text-brand-warning">
+                    <span className="rounded-full border border-brand-warning/30 bg-brand-warning/10 px-3 py-1 text-xs font-bold text-brand-warning break-words">
                       {translateWithFallback(
                         t,
                         'staffDashboardPage.pendingFiltersHint',
@@ -499,13 +498,13 @@ export default function ReservationsWorkspace() {
                 </div>
 
                 {visibleFilterChips.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 flex min-w-0 flex-wrap gap-2">
                     {visibleFilterChips.map((chip) => (
                       <span
                         key={chip.key}
-                        className="inline-flex max-w-full items-center gap-1 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold text-brand-ink"
+                        className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-xs font-bold text-brand-ink break-words"
                       >
-                        <span className="text-brand-ink-muted">{chip.label}:</span>
+                        <span className="text-brand-ink-muted break-words">{chip.label}:</span>
                         {chip.ltr ? (
                           <LtrText className="text-brand-ink">{chip.value}</LtrText>
                         ) : (
@@ -517,7 +516,7 @@ export default function ReservationsWorkspace() {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-3 text-sm font-medium text-brand-ink-muted break-words">
                     {translateWithFallback(
                       t,
                       'staffDashboardPage.emptyFiltersNote',
@@ -526,7 +525,7 @@ export default function ReservationsWorkspace() {
                   </p>
                 )}
 
-                <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
+                <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                   {hasConfirmationPrecedence
                     ? translateWithFallback(
                         t,
@@ -558,14 +557,14 @@ export default function ReservationsWorkspace() {
                   onRetry={reload}
                 />
                 {!isAtQueueDefault ? (
-                  <div className="flex flex-wrap gap-3">
-                    <button
+                  <div className="flex min-w-0 flex-wrap gap-3">
+                    <Button variant="unstyled" size="none"
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
+                      className="inline-flex min-w-0 h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
                     >
                       {t('common.clearFilters')}
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </div>
@@ -576,14 +575,14 @@ export default function ReservationsWorkspace() {
                   message={t(`${pageTx}.emptyDescription`)}
                 />
                 {!isAtQueueDefault ? (
-                  <div className="flex flex-wrap gap-3">
-                    <button
+                  <div className="flex min-w-0 flex-wrap gap-3">
+                    <Button variant="unstyled" size="none"
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
+                      className="inline-flex min-w-0 h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
                     >
                       {t('common.clearFilters')}
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </div>
@@ -594,7 +593,7 @@ export default function ReservationsWorkspace() {
                     selectedConfirmation === reservation.confirmationNumber && isDesktop;
 
                   return (
-                    <button
+                    <Button variant="unstyled" size="none"
                       key={reservation.id ?? reservation.confirmationNumber}
                       type="button"
                       onClick={() => handleOpenReservation(reservation)}
@@ -605,9 +604,9 @@ export default function ReservationsWorkspace() {
                       }`}
                     >
                       <div className="flex min-w-0 flex-col gap-4">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
-                            <p className="text-lg font-black tracking-tight [overflow-wrap:anywhere]">
+                            <p className="text-lg font-black tracking-tight [overflow-wrap:anywhere] break-words">
                               {reservation.guestName || t('common.guest')}
                             </p>
                             <LtrText
@@ -629,7 +628,7 @@ export default function ReservationsWorkspace() {
                           </span>
                         </div>
 
-                        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]">
+                        <div className="grid min-w-0 gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))]">
                           <div
                             className={`rounded-2xl border px-4 py-3 ${
                               isSelected
@@ -663,7 +662,7 @@ export default function ReservationsWorkspace() {
                             >
                               {t('common.room')}
                             </p>
-                            <p className="mt-2 text-sm font-bold">
+                            <p className="mt-2 text-sm font-bold break-words">
                               {reservation.roomNumber || t('unassigned')}
                             </p>
                             <p
@@ -689,7 +688,7 @@ export default function ReservationsWorkspace() {
                             >
                               {t('modifyReservationPage.stayDates')}
                             </p>
-                            <p className="mt-2 text-sm font-bold">
+                            <p className="mt-2 text-sm font-bold break-words">
                               {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                                 month: 'short',
                                 day: 'numeric',
@@ -723,7 +722,7 @@ export default function ReservationsWorkspace() {
                             >
                               {t('checkInPage.reservationTotal')}
                             </p>
-                            <p className="mt-2 text-sm font-bold">
+                            <p className="mt-2 text-sm font-bold break-words">
                               {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
                             </p>
                             {reservation.outstandingBalance != null ? (
@@ -756,14 +755,14 @@ export default function ReservationsWorkspace() {
                           >
                             {getReservationWorkspaceActionLabel(reservation, today, t)}
                           </p>
-                          <span className="text-sm font-bold">
+                          <span className="text-sm font-bold break-words">
                             {isDesktop
                               ? t('common.selectReservation')
                               : t(`${pageTx}.openReservation`)}
                           </span>
                         </div>
                       </div>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>

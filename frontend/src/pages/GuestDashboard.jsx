@@ -34,6 +34,7 @@ import {
   translateWithFallback,
 } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Guest%20Support`;
 
@@ -60,84 +61,84 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
 
   return (
     <article className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
             {propertyName}
           </p>
-          <h4 className="mt-2 text-xl font-black tracking-tight text-brand-ink">
+          <h4 className="mt-2 text-xl font-black tracking-tight text-brand-ink break-words">
             {roomTypeLabel}
           </h4>
-          <p className="mt-1 text-sm font-medium text-brand-ink-muted">{roomLabel}</p>
+          <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">{roomLabel}</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+        <div className="flex min-w-0 flex-wrap gap-2">
+          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
             {statusLabel}
           </span>
-          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+          <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
             {paymentStatusLabel}
           </span>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('confirmationNumber')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">
             {reservation.confirmation || '-'}
           </p>
         </div>
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('checkInDate')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">
             {formatLocalizedDate(reservation.checkInDate, language, { dateStyle: 'medium' })}
           </p>
         </div>
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('checkOutDate')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">
             {formatLocalizedDate(reservation.checkOutDate, language, { dateStyle: 'medium' })}
           </p>
         </div>
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('common.room')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">{roomLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">{roomLabel}</p>
         </div>
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('common.stayTotal')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">{totalAmountLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">{totalAmountLabel}</p>
         </div>
         <div className="rounded-[1.15rem] border border-brand-surface-border bg-white px-4 py-3">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('status')}
           </p>
-          <p className="mt-2 text-sm font-bold text-brand-ink">{statusLabel}</p>
+          <p className="mt-2 text-sm font-bold text-brand-ink break-words">{statusLabel}</p>
         </div>
       </div>
 
       {needsPayment ? (
         <div className="mt-5 rounded-[1.25rem] border border-brand-primary/25 bg-white p-4">
-          <p className="text-sm font-bold text-brand-ink">Payment is required before this reservation can be confirmed.</p>
-          <button
+          <p className="text-sm font-bold text-brand-ink break-words">Payment is required before this reservation can be confirmed.</p>
+          <Button variant="unstyled" size="none"
             type="button"
             onClick={() => navigate(`/guest/payments/${reservation.confirmationNumber || reservation.confirmation}`, {
               state: { reservation },
             })}
-            className="mt-3 inline-flex rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
+            className="mt-3 inline-flex min-w-0 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
           >
             {paymentStatus === 'FAILED' ? 'Retry Payment' : 'Pay Now'}
-          </button>
+          </Button>
         </div>
       ) : null}
     </article>
@@ -290,9 +291,9 @@ export default function GuestDashboard() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-ink">
-              <UserRound className="h-5 w-5" />
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex min-w-0 h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-ink break-words">
+              <UserRound className="h-5 w-5 shrink-0" />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">{displayName}</p>
@@ -302,7 +303,7 @@ export default function GuestDashboard() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={CalendarDays}
           label={t(`${pageTx}.metrics.staysLabel`)}
@@ -338,7 +339,7 @@ export default function GuestDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <DashboardPanel
           title={t(`${pageTx}.stayTitle`)}
           description={t(`${pageTx}.stayDescription`)}
@@ -358,25 +359,25 @@ export default function GuestDashboard() {
                 title={t(`${pageTx}.emptyTitle`)}
                 message={t(`${pageTx}.emptyMessage`)}
               />
-              <div className="flex flex-wrap justify-center gap-3">
-                <button
+              <div className="flex min-w-0 flex-wrap justify-center gap-3">
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={() => navigate('/bookings')}
-                  className="inline-flex items-center justify-center rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
+                  className="inline-flex min-w-0 items-center justify-center rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep"
                 >
                   {t('navGetHelp')}
-                </button>
-                <button
+                </Button>
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={() => navigate('/search')}
-                  className="inline-flex items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-primary/30 hover:bg-brand-surface-light"
+                  className="inline-flex min-w-0 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-primary/30 hover:bg-brand-surface-light"
                 >
                   {t('navBrowseRooms')}
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid min-w-0 gap-4">
               {reservations.map((reservation) => (
                 <GuestStayCard
                   key={`${reservation.confirmation}-${reservation.checkInDate}`}
@@ -394,25 +395,25 @@ export default function GuestDashboard() {
           title={t(`${pageTx}.accountTitle`)}
           description={t(`${pageTx}.accountDescription`)}
         >
-          <div className="grid gap-3">
+          <div className="grid min-w-0 gap-3">
             {accountItems.map((item) => (
               <div key={item.label} className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                   {item.label}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-brand-ink">{item.value}</p>
+                <p className="mt-2 text-sm font-semibold text-brand-ink break-words">{item.value}</p>
               </div>
             ))}
           </div>
         </DashboardPanel>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <DashboardPanel
           title={t(`${pageTx}.actionsTitle`)}
           description={t(`${pageTx}.actionsDescription`)}
         >
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
             <DashboardQuickAction
               icon={LifeBuoy}
               title={t('navGetHelp')}
@@ -458,7 +459,7 @@ export default function GuestDashboard() {
           title={t(`${pageTx}.reservationHelpTitle`)}
           description={t(`${pageTx}.reservationHelpDescription`)}
         >
-          <div className="grid gap-4 md:grid-cols-1 xl:grid-cols-1">
+          <div className="grid min-w-0 gap-4 md:grid-cols-1 xl:grid-cols-1">
             {t(`${pageTx}.tips`, { returnObjects: true }).map((item) => (
               <div
                 key={item}
@@ -473,25 +474,25 @@ export default function GuestDashboard() {
 
       {isGuest && (
         <div className="rounded-[1.5rem] border border-brand-danger/30 bg-brand-danger/5 p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-danger">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-danger break-words">
                 {t(`${pageTx}.dangerZoneTitle`)}
               </p>
-              <p className="mt-2 max-w-xl text-sm font-medium text-brand-ink-muted">
+              <p className="mt-2 max-w-xl text-sm font-medium text-brand-ink-muted break-words">
                 {t(`${pageTx}.dangerZoneDescription`)}
               </p>
             </div>
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={handleDeleteAccount}
               disabled={isDeletingAccount}
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-brand-danger/40 bg-white px-5 py-3 text-sm font-bold text-brand-danger transition hover:border-brand-danger/60 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-w-0 shrink-0 items-center gap-2 rounded-full border border-brand-danger/40 bg-white px-5 py-3 text-sm font-bold text-brand-danger transition hover:border-brand-danger/60 hover:bg-brand-danger/5 disabled:cursor-not-allowed disabled:opacity-60"
               title={t('deleteMyAccount')}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 shrink-0" />
               {isDeletingAccount ? t('deletingMyAccount') : t('deleteMyAccount')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

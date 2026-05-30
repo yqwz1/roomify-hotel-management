@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../context/AuthProvider';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from "@/components/ui/button";
 const SUPPORT_EMAIL = 'info@roomify.com';
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Roomify%20Booking%20Support`;
 
@@ -21,16 +22,16 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }
     if (href) {
         return (
             <a href={href} className={className}>
-                <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
-                        <Icon className="h-5 w-5 text-brand-ink group-hover:text-white" />
+                <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex min-w-0 h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
+                        <Icon className="h-5 w-5 text-brand-ink group-hover:text-white shrink-0" />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-brand-ink">{title}</p>
-                        <p className="mt-1 text-xs text-brand-ink-muted">{description}</p>
+                        <p className="text-sm font-bold text-brand-ink break-words">{title}</p>
+                        <p className="mt-1 text-xs text-brand-ink-muted break-words">{description}</p>
                     </div>
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink break-words">
                     {openLabel}
                 </span>
             </a>
@@ -38,20 +39,20 @@ const ActionCard = ({ icon: Icon, title, description, onClick, href, openLabel }
     }
 
     return (
-        <button type="button" onClick={onClick} className={className}>
-            <div className="flex items-center gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
-                    <Icon className="h-5 w-5 text-brand-ink group-hover:text-white" />
+        <Button variant="unstyled" size="none" type="button" onClick={onClick} className={className}>
+            <div className="flex min-w-0 items-center gap-4">
+                <div className="flex min-w-0 h-11 w-11 items-center justify-center rounded-full bg-brand-primary-tint transition-colors group-hover:bg-brand-primary">
+                    <Icon className="h-5 w-5 text-brand-ink group-hover:text-white shrink-0" />
                 </div>
                 <div>
-                    <p className="text-sm font-bold text-brand-ink">{title}</p>
-                    <p className="mt-1 text-xs text-brand-ink-muted">{description}</p>
+                    <p className="text-sm font-bold text-brand-ink break-words">{title}</p>
+                    <p className="mt-1 text-xs text-brand-ink-muted break-words">{description}</p>
                 </div>
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-ink-hint transition group-hover:text-brand-ink break-words">
                 {openLabel}
             </span>
-        </button>
+        </Button>
     );
 };
 
@@ -82,23 +83,23 @@ export default function Bookings() {
         <div className="h-full bg-brand-surface p-6 lg:p-8">
             <div className="mx-auto max-w-6xl space-y-6">
                 <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-muted">
+                    <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-muted break-words">
                         {t('bookings')}
                     </p>
-                    <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-brand-ink">
+                    <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-brand-ink break-words">
                         {t('bookings')}
                     </h1>
-                    <p className="mt-3 max-w-3xl text-sm font-medium text-brand-ink-muted">{intro}</p>
+                    <p className="mt-3 max-w-3xl text-sm font-medium text-brand-ink-muted break-words">{intro}</p>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+                <div className="grid min-w-0 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                     <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <CalendarDays className="h-5 w-5 text-brand-ink" />
-                            <h2 className="text-lg font-extrabold text-brand-ink">{t('bookingsPage.actionsTitle')}</h2>
+                        <div className="flex min-w-0 items-center gap-3">
+                            <CalendarDays className="h-5 w-5 text-brand-ink shrink-0" />
+                            <h2 className="text-lg font-extrabold text-brand-ink break-words">{t('bookingsPage.actionsTitle')}</h2>
                         </div>
 
-                        <div className="mt-5 grid gap-3 md:grid-cols-2">
+                        <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-2">
                             {roleView === 'staff' ? (
                                 <>
                                     <ActionCard
@@ -191,9 +192,9 @@ export default function Bookings() {
 
                     {showSupportTips ? (
                         <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <ShieldCheck className="h-5 w-5 text-brand-ink" />
-                                <h2 className="text-lg font-extrabold text-brand-ink">{t('bookingsPage.supportTitle')}</h2>
+                            <div className="flex min-w-0 items-center gap-3">
+                                <ShieldCheck className="h-5 w-5 text-brand-ink shrink-0" />
+                                <h2 className="text-lg font-extrabold text-brand-ink break-words">{t('bookingsPage.supportTitle')}</h2>
                             </div>
                             <div className="mt-5 space-y-3">
                                 {supportTips.map((item) => (

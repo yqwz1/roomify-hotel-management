@@ -139,16 +139,16 @@ const LoginPage = () => {
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-surface px-5 py-16 sm:px-8 sm:py-20 font-sans"
+      className="relative flex min-w-0 min-h-screen items-center justify-center overflow-hidden bg-brand-surface px-5 py-16 sm:px-8 sm:py-20 font-sans"
       dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* Minimal top bar — back link + language. No nav, no marketing chrome. */}
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
+      <div className="absolute inset-x-0 top-0 z-20 flex min-w-0 items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
         <Link
           to="/"
-          className="group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-brand-ink-muted transition-colors hover:text-brand-ink"
+          className="group inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-brand-ink-muted transition-colors hover:text-brand-ink"
         >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5" />
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5 shrink-0" />
           {isAr ? 'العودة' : 'Back to site'}
         </Link>
         <LanguageSwitcher />
@@ -242,7 +242,7 @@ const LoginPage = () => {
                 variant="destructive"
                 className="mt-7 rounded-xl border-brand-danger/20 bg-brand-danger/[0.04] text-brand-danger"
               >
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <AlertTitle className="font-black">{t('authFailed')}</AlertTitle>
                 <AlertDescription>{loginError}</AlertDescription>
               </Alert>
@@ -302,7 +302,7 @@ const LoginPage = () => {
 
           {/* Password */}
           <div className="relative">
-            <div className="flex items-baseline justify-between">
+            <div className="flex min-w-0 items-baseline justify-between">
               <Label
                 htmlFor="password"
                 className={`text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${errors.password
@@ -336,15 +336,15 @@ const LoginPage = () => {
                     : 'border-b-[#D8D1BF] focus-visible:border-b-brand-primary'
                   }`}
               />
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 className="absolute end-0 top-1/2 -translate-y-1/2 rounded-md p-1 text-brand-ink-hint transition-colors hover:text-brand-primary"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+                {showPassword ? <EyeOff className="h-4 w-4 shrink-0" /> : <Eye className="h-4 w-4 shrink-0" />}
+              </Button>
             </div>
             {errors.password && (
               <motion.p
@@ -369,11 +369,10 @@ const LoginPage = () => {
               disabled={isLoading}
               className="group relative h-12 w-full overflow-hidden rounded-full bg-brand-ink text-[14px] font-bold tracking-tight text-white shadow-[0_18px_38px_-14px_rgba(26,43,58,0.55)] transition-all hover:bg-brand-primary-deep hover:shadow-[0_22px_44px_-14px_rgba(38,75,107,0.6)] disabled:opacity-70"
             >
-              <span className="relative flex items-center justify-center">
+              <span className="relative flex min-w-0 items-center justify-center">
                 {isLoading ? (
                   <>
-                    <Loader2
-                      className="me-2 h-4 w-4 animate-spin"
+                    <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0"
                       role="status"
                       aria-label={t('loadingLabel')}
                     />
@@ -382,7 +381,7 @@ const LoginPage = () => {
                 ) : (
                   <>
                     {t('signIn')}
-                    <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+                    <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 shrink-0" />
                   </>
                 )}
               </span>
@@ -398,10 +397,10 @@ const LoginPage = () => {
             transition={{ duration: 0.5, delay: 0.45, ease: EASE }}
             className="mt-8"
           >
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={() => setDemoOpen((v) => !v)}
-              className="group inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint transition-colors hover:text-brand-primary"
+              className="group inline-flex min-w-0 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint transition-colors hover:text-brand-primary"
             >
               {demoOpen
                 ? isAr ? 'إخفاء حسابات التجربة' : 'Hide demo accounts'
@@ -409,7 +408,7 @@ const LoginPage = () => {
               <ChevronDown
                 className={`h-3 w-3 transition-transform ${demoOpen ? 'rotate-180' : ''}`}
               />
-            </button>
+            </Button>
 
             <AnimatePresence initial={false}>
               {demoOpen && (
@@ -421,21 +420,21 @@ const LoginPage = () => {
                   transition={{ duration: 0.3, ease: EASE }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+                  <div className="mt-3 grid min-w-0 gap-1.5 sm:grid-cols-2">
                     {DEMO_ACCOUNTS.map((account) => (
-                      <button
+                      <Button variant="unstyled" size="none"
                         key={account.email}
                         type="button"
                         disabled={isLoading}
                         onClick={() => handleQuickLogin(account)}
-                        className="group flex items-center justify-between rounded-lg border border-brand-surface-border bg-white/60 px-3 py-2 text-start transition-all hover:border-brand-primary/30 hover:bg-white disabled:opacity-50"
+                        className="group flex min-w-0 items-center justify-between rounded-lg border border-brand-surface-border bg-white/60 px-3 py-2 text-start transition-all hover:border-brand-primary/30 hover:bg-white disabled:opacity-50"
                       >
-                        <span className="text-[11px] font-black text-brand-ink">{account.label}</span>
-                        <ArrowRight className="h-3 w-3 text-brand-ink-hint transition-all group-hover:translate-x-0.5 group-hover:text-brand-primary rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
-                      </button>
+                        <span className="text-[11px] font-black text-brand-ink break-words">{account.label}</span>
+                        <ArrowRight className="h-3 w-3 text-brand-ink-hint transition-all group-hover:translate-x-0.5 group-hover:text-brand-primary rtl:rotate-180 rtl:group-hover:-translate-x-0.5 shrink-0" />
+                      </Button>
                     ))}
                   </div>
-                  <p className="mt-2 text-[10px] font-medium text-brand-ink-hint" dir="ltr">
+                  <p className="mt-2 text-[10px] font-medium text-brand-ink-hint break-words" dir="ltr">
                     Admin · <span className="font-mono font-bold text-brand-ink-muted">{DEMO_ADMIN_PASSWORD}</span> | Others · <span className="font-mono font-bold text-brand-ink-muted">Demo@2026</span>
                   </p>
                 </motion.div>

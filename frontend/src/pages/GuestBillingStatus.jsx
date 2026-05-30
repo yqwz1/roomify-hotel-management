@@ -24,6 +24,7 @@ import {
   translateWithFallback,
 } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
 function GuestPaymentForm({
   reservation,
   language,
@@ -39,14 +40,14 @@ function GuestPaymentForm({
 
   return (
     <div className="mt-4 rounded-[1.35rem] border border-zinc-200 bg-white p-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
             {translateWithFallback(t, 'guestBillingStatusPage.payNowLabel', 'Pay now')}
           </p>
-          <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="mt-3 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
             <label className="space-y-2">
-              <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                 {t('checkoutPage.paymentAmountLabel')}
               </span>
               <input
@@ -58,11 +59,11 @@ function GuestPaymentForm({
                 className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               />
             </label>
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               disabled={submitting}
               onClick={() => onSubmit(reservation)}
-              className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+              className="inline-flex min-w-0 h-12 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
             >
               {submitting
                 ? translateWithFallback(
@@ -71,22 +72,22 @@ function GuestPaymentForm({
                     'Processing payment...'
                   )
                 : translateWithFallback(t, 'guestBillingStatusPage.payNowAction', 'Pay balance')}
-            </button>
+            </Button>
           </div>
           {paymentState.error ? (
-            <p className="mt-3 text-sm font-medium text-rose-700">{paymentState.error}</p>
+            <p className="mt-3 text-sm font-medium text-rose-700 break-words">{paymentState.error}</p>
           ) : null}
           {paymentState.successMessage ? (
-            <p className="mt-3 text-sm font-semibold text-emerald-700">
+            <p className="mt-3 text-sm font-semibold text-emerald-700 break-words">
               {paymentState.successMessage}
             </p>
           ) : null}
         </div>
         <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
             {t('checkoutPage.outstandingBalanceLabel')}
           </p>
-          <p className="mt-2 text-sm font-bold text-zinc-950">
+          <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
             {formatLocalizedCurrency(outstandingBalance, language)}
           </p>
         </div>
@@ -294,16 +295,16 @@ export default function GuestBillingStatus() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-zinc-300 break-words">
             {translateWithFallback(t, `${pageTx}.heroCardTitle`, 'Current balance')}
           </p>
-          <p className="mt-4 text-3xl font-black">
+          <p className="mt-4 text-3xl font-black break-words">
             {formatLocalizedCurrency(billingSummary.outstandingBalance, i18n.language)}
           </p>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={Receipt}
           label={translateWithFallback(t, `${pageTx}.metrics.trackedLabel`, 'Tracked Stays')}
@@ -347,7 +348,7 @@ export default function GuestBillingStatus() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <DashboardPanel
           title={translateWithFallback(t, `${pageTx}.billingTitle`, 'Billing by Reservation')}
           description={translateWithFallback(
@@ -391,12 +392,12 @@ export default function GuestBillingStatus() {
                     key={`${confirmation}-${reservation.checkInDate}`}
                     className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-lg font-black tracking-tight text-zinc-950">
+                        <p className="text-lg font-black tracking-tight text-zinc-950 break-words">
                           {confirmation}
                         </p>
-                        <p className="mt-1 text-sm font-medium text-zinc-500">
+                        <p className="mt-1 text-sm font-medium text-zinc-500 break-words">
                           {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                             dateStyle: 'medium',
                           })}{' '}
@@ -406,43 +407,43 @@ export default function GuestBillingStatus() {
                           })}
                         </p>
                       </div>
-                      <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700">
+                      <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-700 break-words">
                         {reservation.paymentStatus
                           ? getPaymentStatusLabel(reservation.paymentStatus, t)
                           : t('common.pending')}
                       </span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                       <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
                           {translateWithFallback(t, `${pageTx}.invoiceNumberLabel`, 'Invoice')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-zinc-950">
+                        <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
                           {reservation.invoiceNumber || '-'}
                         </p>
                       </div>
                       <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
                           {translateWithFallback(t, `${pageTx}.invoiceFinalizedLabel`, 'Finalized')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-zinc-950">
+                        <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
                           {getBooleanLabel(Boolean(reservation.invoiceFinalized), t)}
                         </p>
                       </div>
                       <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
                           {t('checkoutPage.totalPaidLabel')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-zinc-950">
+                        <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
                           {formatLocalizedCurrency(reservation.totalPaid ?? 0, i18n.language)}
                         </p>
                       </div>
                       <div className="rounded-[1.15rem] border border-zinc-200 bg-white px-4 py-3">
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
                           {t('checkoutPage.outstandingBalanceLabel')}
                         </p>
-                        <p className="mt-2 text-sm font-bold text-zinc-950">
+                        <p className="mt-2 text-sm font-bold text-zinc-950 break-words">
                           {formatLocalizedCurrency(
                             reservation.outstandingBalance ?? 0,
                             i18n.language
@@ -480,33 +481,33 @@ export default function GuestBillingStatus() {
             'Use these paths when you need hotel assistance with balances or invoice delivery.'
           )}
         >
-          <div className="grid gap-3">
+          <div className="grid min-w-0 gap-3">
             <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400 break-words">
                 {translateWithFallback(t, `${pageTx}.summaryBalanceDue`, 'Balances Due')}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
+              <p className="mt-2 text-2xl font-black text-zinc-950 break-words">
                 {billingSummary.balancesDue}
               </p>
             </div>
             <div className="rounded-[1.35rem] border border-zinc-200 bg-zinc-50 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-400 break-words">
                 {translateWithFallback(t, `${pageTx}.summaryOutstanding`, 'Outstanding Balance')}
               </p>
-              <p className="mt-2 text-2xl font-black text-zinc-950">
+              <p className="mt-2 text-2xl font-black text-zinc-950 break-words">
                 {formatLocalizedCurrency(billingSummary.outstandingBalance, i18n.language)}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex min-w-0 flex-wrap gap-3 pt-2">
               <Link
                 to="/bookings"
-                className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-black"
+                className="inline-flex min-w-0 items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:text-black"
               >
                 {t('navGetHelp')}
               </Link>
               <Link
                 to="/guest/dashboard"
-                className="inline-flex items-center rounded-full border border-zinc-900 bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
+                className="inline-flex min-w-0 items-center rounded-full border border-zinc-900 bg-zinc-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-black"
               >
                 {t('navMyStay')}
               </Link>

@@ -23,6 +23,7 @@ import {
 } from '../utils/localization';
 import { readReservationLookupNavigationState } from '../utils/reservationLookup';
 
+import { Button } from "@/components/ui/button";
 function CancelDialog({ reservation, onClose, onConfirm }) {
   const { t, i18n } = useTranslation();
   const [reason, setReason] = useState('');
@@ -56,15 +57,15 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
     >
       <div className="space-y-5">
           <div className="rounded-[1.5rem] border border-brand-danger/30 bg-brand-danger/10 p-4">
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink">
-                <AlertTriangle className="h-5 w-5" />
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="mt-0.5 flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink break-words">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
               </span>
               <div>
-                <p className="text-sm font-bold text-brand-ink">
+                <p className="text-sm font-bold text-brand-ink break-words">
                   {t('cancelWarning')}
                 </p>
-                <p className="mt-1 text-sm font-medium text-brand-danger/80">
+                <p className="mt-1 text-sm font-medium text-brand-danger/80 break-words">
                   {t('cancelReservationPage.guestImpact')}
                 </p>
               </div>
@@ -72,13 +73,13 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
           </div>
 
           <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
               {t('cancelReservationPage.reservationSnapshot')}
             </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2">
               <div>
-                <p className="text-sm font-bold text-brand-ink">{reservation.guestName}</p>
-                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                <p className="text-sm font-bold text-brand-ink break-words">{reservation.guestName}</p>
+                <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                   {reservation.guestEmail || t('common.noGuestEmailProvided')}
                 </p>
               </div>
@@ -110,7 +111,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
             </div>
           )}
 
-          <div className="space-y-2 flex flex-col">
+          <div className="space-y-2 flex min-w-0 flex-col">
             <label
               htmlFor="cancel-reason"
               className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint"
@@ -127,22 +128,22 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
             />
           </div>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-            <button
+          <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={onClose}
               className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
             >
               {t('keepReservation')}
-            </button>
-            <button
+            </Button>
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={handleConfirm}
               disabled={confirming}
               className="rounded-full bg-brand-danger px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-danger disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
             >
               {confirming ? t('cancelling') : t('cancelReservationPage.confirmCancellation')}
-            </button>
+            </Button>
           </div>
       </div>
     </ModalFrame>
@@ -203,23 +204,23 @@ export default function CancelReservation() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('cancelReservationPage.gateTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('cancelReservationPage.selected')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {selected ? <LtrText>{selected.confirmationNumber}</LtrText> : t('notSelected')}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('cancelReservationPage.eligibility')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {!selected ? t('common.pending') : canCancel ? t('common.allowed') : t('common.blocked')}
               </p>
             </div>
@@ -227,7 +228,7 @@ export default function CancelReservation() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <ReservationLookupPanel
           initialFilters={initialFilters}
           initialQuery={initialQuery}
@@ -239,7 +240,7 @@ export default function CancelReservation() {
             title={t('cancelReservationPage.selectTitle')}
             description={t('cancelReservationPage.selectDescription')}
           >
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid min-w-0 gap-3 md:grid-cols-3">
               {t('cancelReservationPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
@@ -257,29 +258,29 @@ export default function CancelReservation() {
               description={t('cancelReservationPage.snapshotDescription')}
               action={<StatusPill status={selected.status} />}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('common.guest')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">{selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">{selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('confirmationNumber')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">
                     <LtrText>{selected.confirmationNumber}</LtrText>
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('common.stay')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {formatLocalizedDate(selected.checkInDate, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -292,18 +293,18 @@ export default function CancelReservation() {
                       year: 'numeric',
                     })}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {t('nightsCount', { count: selected.nights })}
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('cancelReservationPage.roomAndTotal')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {t('roomNumber', { number: selected.roomNumber })} | {translateKnownValue(selected.roomTypeName, t)}
                   </p>
-                  <p className="mt-1 text-lg font-black text-brand-ink">
+                  <p className="mt-1 text-lg font-black text-brand-ink break-words">
                     {formatLocalizedCurrency(selected.totalPrice, i18n.language)}
                   </p>
                 </div>
@@ -322,7 +323,7 @@ export default function CancelReservation() {
               title={t('cancelReservationPage.controlsTitle')}
               description={t('cancelReservationPage.controlsDescription')}
             >
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid min-w-0 gap-3 md:grid-cols-3">
                 {[
                   {
                     icon: AlertTriangle,
@@ -346,11 +347,11 @@ export default function CancelReservation() {
                       key={item.title}
                       className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                        <Icon className="h-4 w-4" />
+                      <span className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                        <Icon className="h-4 w-4 shrink-0" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+                      <p className="mt-3 text-sm font-bold text-brand-ink break-words">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                         {item.description}
                       </p>
                     </div>
@@ -358,14 +359,14 @@ export default function CancelReservation() {
                 })}
               </div>
 
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => setShowDialog(true)}
                 disabled={!canCancel}
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-brand-danger px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-danger disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
+                className="mt-5 inline-flex min-w-0 w-full items-center justify-center rounded-full bg-brand-danger px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-danger disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
               >
                 {t('cancelReservationPage.confirmCancellation')}
-              </button>
+              </Button>
             </DashboardPanel>
           </div>
         )}

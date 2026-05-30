@@ -46,6 +46,7 @@ import {
 } from '../utils/localization';
 import { buildDashboardReportExcelBlob } from '../utils/reportExport';
 
+import { NativeSelect } from "@/components/ui/native-select";
 const EXPORTABLE_STATUSES = [
   'PENDING',
   'CONFIRMED',
@@ -227,14 +228,14 @@ function PerformanceMetricCard({
         styles.card
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex min-w-0 items-start justify-between gap-4">
         <span
           className={cn(
             'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl',
             styles.icon
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5 shrink-0" />
         </span>
 
         {eyebrow ? (
@@ -249,7 +250,7 @@ function PerformanceMetricCard({
         ) : null}
       </div>
 
-      <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted">
+      <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted break-words">
         {label}
       </p>
       <p className={cn('mt-3 text-3xl font-black tracking-tight', styles.value)}>
@@ -271,14 +272,14 @@ function SignalCard({
 
   return (
     <div className={cn('rounded-[1.6rem] border p-5', styles.card)}>
-      <div className="flex items-start gap-4">
+      <div className="flex min-w-0 items-start gap-4">
         <span
           className={cn(
             'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl',
             styles.icon
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5 shrink-0" />
         </span>
 
         <div>
@@ -299,7 +300,7 @@ function SignalCard({
 
 function RangePresetButton({ active, onClick, children }) {
   return (
-    <button
+    <Button variant="unstyled" size="none"
       type="button"
       onClick={onClick}
       className={cn(
@@ -310,7 +311,7 @@ function RangePresetButton({ active, onClick, children }) {
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -453,21 +454,21 @@ function InteractiveTrendExplorer({
   }));
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]" data-testid="occupancy-trend">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[1.3fr_0.7fr]" data-testid="occupancy-trend">
       <div className="rounded-[1.6rem] border border-brand-surface-border bg-[linear-gradient(180deg,#ffffff_0%,#FBF9F4_100%)] p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-lg font-black tracking-tight text-brand-ink">
+            <p className="text-lg font-black tracking-tight text-brand-ink break-words">
               {activeMode.title}
             </p>
-            <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+            <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
               {activeMode.description}
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             {['occupancy', 'revenue'].map((nextMode) => (
-              <button
+              <Button variant="unstyled" size="none"
                 key={nextMode}
                 type="button"
                 aria-pressed={mode === nextMode}
@@ -492,7 +493,7 @@ function InteractiveTrendExplorer({
                       `${pageTx}.revenueTrendTitle`,
                       'Revenue Trend'
                     )}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -509,7 +510,7 @@ function InteractiveTrendExplorer({
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-5 flex min-w-0 flex-wrap gap-2">
           {points.map((point, index) => (
             <Button
               key={point.key}
@@ -537,28 +538,28 @@ function InteractiveTrendExplorer({
               activeMode.accentSurface
             )}
           >
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-muted break-words">
               {translateWithFallback(t, `${pageTx}.selectedDateLabel`, 'Selected date')}
             </p>
-            <p className="mt-2 text-sm font-bold text-brand-ink">{selectedPoint.fullLabel}</p>
-            <p className="mt-4 text-3xl font-black tracking-tight text-brand-ink">
+            <p className="mt-2 text-sm font-bold text-brand-ink break-words">{selectedPoint.fullLabel}</p>
+            <p className="mt-4 text-3xl font-black tracking-tight text-brand-ink break-words">
               {activeMode.formatValue(activeMode.getValue(selectedPoint))}
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-brand-ink">
+            <p className="mt-2 text-sm font-medium leading-6 text-brand-ink break-words">
               {activeMode.summary(selectedPoint)}
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-3 xl:grid-cols-1">
             {activeMode.detailCards(selectedPoint).map((item) => (
               <div
                 key={item.label}
                 className="rounded-[1.35rem] border border-brand-surface-border bg-white p-4"
               >
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {item.label}
                 </p>
-                <p className="mt-2 text-lg font-black text-brand-ink">{item.value}</p>
+                <p className="mt-2 text-lg font-black text-brand-ink break-words">{item.value}</p>
               </div>
             ))}
           </div>
@@ -628,11 +629,11 @@ function RoomTypeExplorer({
   );
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[0.82fr_1.18fr]">
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           {Object.entries(sortLabels).map(([key, label]) => (
-            <button
+            <Button variant="unstyled" size="none"
               key={key}
               type="button"
               onClick={() => onSortModeChange(key)}
@@ -644,7 +645,7 @@ function RoomTypeExplorer({
               )}
             >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -655,7 +656,7 @@ function RoomTypeExplorer({
             const theme = ROOM_TYPE_THEMES[index % ROOM_TYPE_THEMES.length];
 
             return (
-              <button
+              <Button variant="unstyled" size="none"
                 key={item.roomTypeName}
                 type="button"
                 onClick={() => onSelectRoomType(item.roomTypeName)}
@@ -666,7 +667,7 @@ function RoomTypeExplorer({
                     : 'border-brand-surface-border bg-brand-surface-light hover:border-brand-surface-border hover:bg-white'
                 )}
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-black text-brand-ink">
                       {translateKnownValue(item.roomTypeName, t)}
@@ -708,26 +709,26 @@ function RoomTypeExplorer({
                     }}
                   />
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
       </div>
 
       <div className={cn('rounded-[1.75rem] border p-6', selectedTheme.card)}>
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-muted break-words">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionSelectedLabel`,
                 'Selected room type'
               )}
             </p>
-            <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink">
+            <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink break-words">
               {translateKnownValue(selectedItem.roomTypeName, t)}
             </p>
-            <p className="mt-2 text-sm font-medium text-brand-ink">
+            <p className="mt-2 text-sm font-medium text-brand-ink break-words">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionInsight`,
@@ -747,7 +748,7 @@ function RoomTypeExplorer({
         </div>
 
         {/* Radial chart — centered, doesn't squeeze the 4 stat cards below */}
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex min-w-0 justify-center">
           <RadialStatusChart
             value={occupiedPercent}
             max={100}
@@ -763,16 +764,16 @@ function RoomTypeExplorer({
         </div>
 
         {/* 4 stat cards: always 2 cols to avoid label wrapping in narrow xl widths */}
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid min-w-0 gap-3 sm:grid-cols-2">
           <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint break-words">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionTotalRooms`,
                 'Total rooms'
               )}
             </p>
-            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl break-words">
               <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
                 {formatLocalizedNumber(selectedItem.totalRooms, language)}
               </span>
@@ -780,14 +781,14 @@ function RoomTypeExplorer({
           </div>
 
           <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint break-words">
               {translateWithFallback(
                 t,
                 `${pageTx}.distributionOccupiedRooms`,
                 'Occupied rooms'
               )}
             </p>
-            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl break-words">
               <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
                 {formatLocalizedNumber(selectedItem.occupiedRooms, language)}
               </span>
@@ -795,10 +796,10 @@ function RoomTypeExplorer({
           </div>
 
           <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint break-words">
               {translateWithFallback(t, `${pageTx}.distributionVacantRooms`, 'Vacant rooms')}
             </p>
-            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl">
+            <p className="mt-2 text-xl font-black leading-none tracking-tight text-brand-ink sm:text-2xl break-words">
               <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
                 {formatLocalizedNumber(vacantRooms, language)}
               </span>
@@ -806,10 +807,10 @@ function RoomTypeExplorer({
           </div>
 
           <div className="min-w-0 rounded-[1.25rem] border border-white bg-white/85 p-4 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] leading-5 text-brand-ink-hint break-words">
               {translateWithFallback(t, `${pageTx}.distributionRateLabel`, 'Base rate')}
             </p>
-            <p className="mt-2 text-lg font-black leading-tight tracking-tight text-brand-ink sm:text-xl">
+            <p className="mt-2 text-lg font-black leading-tight tracking-tight text-brand-ink sm:text-xl break-words">
               <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate]">
                 {formatLocalizedCurrency(selectedItem.basePrice, language, {
                   minimumFractionDigits: 0,
@@ -1421,27 +1422,27 @@ export default function ManagerDashboard() {
         ]}
       >
         <div className="w-full max-w-[620px] rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur xl:ms-auto">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {translateWithFallback(t, `${pageTx}.heroSnapshotTitle`, 'Live Snapshot')}
           </p>
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
+          <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2">
+            <div className="flex min-w-0 min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroActiveReservations`, 'Active reservations')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
                 <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedNumber(metrics.activeReservations, i18n.language)}
                 </span>
               </p>
             </div>
 
-            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
+            <div className="flex min-w-0 min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroRevenuePerReservation`, 'Revenue per reservation')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
                 <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedCurrency(revenuePerReservation, i18n.language, {
                     minimumFractionDigits: 0,
@@ -1451,11 +1452,11 @@ export default function ManagerDashboard() {
               </p>
             </div>
 
-            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
+            <div className="flex min-w-0 min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroNetProfit`, 'Net profit')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
                 <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
                     minimumFractionDigits: 0,
@@ -1465,11 +1466,11 @@ export default function ManagerDashboard() {
               </p>
             </div>
 
-            <div className="flex min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70">
+            <div className="flex min-w-0 min-h-[118px] flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroDaysInView`, 'Days in view')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight">
+              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
                 <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
                   {formatLocalizedNumber(getDaysInRange(appliedRange), i18n.language)}
                 </span>
@@ -1478,15 +1479,15 @@ export default function ManagerDashboard() {
           </div>
 
           <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-ink-hint">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-ink-hint break-words">
               {translateWithFallback(t, `${pageTx}.heroSignalLabel`, 'Manager signal')}
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-white/85">{heroSignal}</p>
+            <p className="mt-2 text-sm font-medium leading-6 text-white/85 break-words">{heroSignal}</p>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <DashboardPanel
           title={translateWithFallback(t, `${pageTx}.filterDeckTitle`, 'View Filters')}
           description={translateWithFallback(
@@ -1496,13 +1497,13 @@ export default function ManagerDashboard() {
           )}
           action={
             <Button type="button" variant="outline" onClick={reload} className="border-brand-surface-border">
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4 shrink-0" />
               {t('retry')}
             </Button>
           }
         >
           <div className="space-y-5">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex min-w-0 flex-wrap gap-2">
               {rangePresets.map((preset) => (
                 <RangePresetButton
                   key={preset.id}
@@ -1514,9 +1515,9 @@ export default function ManagerDashboard() {
               ))}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {t(`${pageTx}.startDateLabel`)}
                 </span>
                 <input
@@ -1528,7 +1529,7 @@ export default function ManagerDashboard() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {t(`${pageTx}.endDateLabel`)}
                 </span>
                 <input
@@ -1546,7 +1547,7 @@ export default function ManagerDashboard() {
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
               <Button
                 type="button"
                 onClick={handleApplyRange}
@@ -1565,23 +1566,23 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="rounded-[1.45rem] border border-brand-surface-border bg-brand-surface-light p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                 {t(`${pageTx}.controlsSummaryTitle`)}
               </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t(`${pageTx}.controlsSummaryReservations`)}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
                     {formatLocalizedNumber(metrics.totalReservations, i18n.language)}
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t(`${pageTx}.controlsSummaryRevenue`)}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
                     {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1589,10 +1590,10 @@ export default function ManagerDashboard() {
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryExpenses`, 'Expenses')}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
                     {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1600,10 +1601,10 @@ export default function ManagerDashboard() {
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryNetProfit`, 'Net Profit')}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink">
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
                     {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -1620,12 +1621,12 @@ export default function ManagerDashboard() {
           description={t(`${pageTx}.exportDescription`)}
         >
           <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {t(`${pageTx}.exportRoomTypeLabel`)}
                 </span>
-                <select
+                <NativeSelect
                   value={exportFilters.roomTypeId}
                   onChange={(event) =>
                     setExportFilters((current) => ({
@@ -1641,14 +1642,14 @@ export default function ManagerDashboard() {
                       {translateKnownValue(roomType.name, t)}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {t(`${pageTx}.exportStatusLabel`)}
                 </span>
-                <select
+                <NativeSelect
                   value={exportFilters.status}
                   onChange={(event) =>
                     setExportFilters((current) => ({
@@ -1664,7 +1665,7 @@ export default function ManagerDashboard() {
                       {getReservationStatusLabel(status, t)}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
             </div>
 
@@ -1680,12 +1681,12 @@ export default function ManagerDashboard() {
 
             {exportResult ? (
               <div className="rounded-[1.35rem] border border-brand-success/30 bg-brand-success/10 p-4">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
                       {t(`${pageTx}.exportGeneratedAt`)}
                     </p>
-                    <p className="mt-1 text-sm font-bold text-brand-ink">
+                    <p className="mt-1 text-sm font-bold text-brand-ink break-words">
                       {formatLocalizedDateTime(exportResult.generatedAt, i18n.language, {
                         dateStyle: 'medium',
                         timeStyle: 'short',
@@ -1694,10 +1695,10 @@ export default function ManagerDashboard() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
                       {t(`${pageTx}.exportRecords`)}
                     </p>
-                    <p className="mt-1 text-sm font-bold text-brand-ink">
+                    <p className="mt-1 text-sm font-bold text-brand-ink break-words">
                       {formatLocalizedNumber(exportResult.totalRecords, i18n.language)}
                     </p>
                   </div>
@@ -1713,7 +1714,7 @@ export default function ManagerDashboard() {
                         href={exportUrl}
                         download={`roomify-report-${appliedRange.startDate}-${appliedRange.endDate}.xls`}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-4 w-4 shrink-0" />
                         {t(`${pageTx}.downloadExport`)}
                       </a>
                     </Button>
@@ -1728,14 +1729,14 @@ export default function ManagerDashboard() {
               disabled={exporting}
               className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 shrink-0" />
               {exporting ? t(`${pageTx}.exporting`) : t(`${pageTx}.exportAction`)}
             </Button>
           </div>
         </DashboardPanel>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {metricCards.map((card) => (
           <PerformanceMetricCard key={card.label} {...card} />
         ))}
@@ -1749,7 +1750,7 @@ export default function ManagerDashboard() {
           'Read the dashboard as a story: what demand is doing, what revenue is doing, and what still needs attention.'
         )}
       >
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-3">
           {managerSignals.map((signal) => (
             <SignalCard key={signal.title} {...signal} />
           ))}
@@ -1776,7 +1777,7 @@ export default function ManagerDashboard() {
         />
       </DashboardPanel>
 
-      <div className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.12fr_0.88fr]">
         <DashboardPanel
           title={t(`${pageTx}.distributionTitle`)}
           description={translateWithFallback(
@@ -1803,14 +1804,14 @@ export default function ManagerDashboard() {
         >
           <div className="space-y-4">
             <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4 shadow-sm">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                    <LineChart className="h-5 w-5" />
+                  <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                    <LineChart className="h-5 w-5 shrink-0" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-brand-ink">AI Finance Dashboard</p>
-                    <p className="mt-1 text-xs font-medium leading-5 text-brand-ink-muted">
+                    <p className="text-sm font-bold text-brand-ink break-words">AI Finance Dashboard</p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-brand-ink-muted break-words">
                       View revenue forecasts and pricing recommendations.
                     </p>
                   </div>
@@ -1821,33 +1822,33 @@ export default function ManagerDashboard() {
                   onClick={() => navigate('/manager/ai-finance')}
                   className="h-10 flex-shrink-0 bg-brand-primary px-4 text-white hover:bg-brand-primary-deep"
                 >
-                  <LineChart className="h-4 w-4" />
+                  <LineChart className="h-4 w-4 shrink-0" />
                   Open AI Finance
                 </Button>
               </div>
             </div>
 
             {/* 2-col grid; the orphan (when count is odd) stretches to full width */}
-            <div className="grid gap-3 sm:grid-cols-2 [&>*:last-child:nth-child(odd)]:sm:col-span-2">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 [&>*:last-child:nth-child(odd)]:sm:col-span-2">
               {quickActions.map((action) => (
                 <DashboardQuickAction key={action.title} {...action} />
               ))}
             </div>
 
             <div className="rounded-[1.45rem] border border-brand-surface-border bg-brand-surface-light p-4">
-              <div className="flex items-start gap-3">
-                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                  <Layers3 className="h-5 w-5" />
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                  <Layers3 className="h-5 w-5 shrink-0" />
                 </span>
                 <div>
-                  <p className="text-sm font-black text-brand-ink">
+                  <p className="text-sm font-black text-brand-ink break-words">
                     {translateWithFallback(
                       t,
                       `${pageTx}.workflowHintTitle`,
                       'Recommended manager workflow'
                     )}
                   </p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">
+                  <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                     {translateWithFallback(
                       t,
                       `${pageTx}.workflowHintDescription`,

@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CalendarRange, FileText, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
@@ -25,6 +23,7 @@ import {
 } from '../utils/localization';
 import { VAT_RATE } from '../utils/billing';
 
+import { NativeSelect } from "@/components/ui/native-select";
 function ModifyModal({ reservation, onClose, onSave }) {
   const { t, i18n } = useTranslation();
   const [checkIn, setCheckIn] = useState(reservation.checkInDate);
@@ -166,13 +165,13 @@ function ModifyModal({ reservation, onClose, onSave }) {
           <ErrorBanner message={error} onClose={() => setError(null)} />
 
           <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
               {t('modifyReservationPage.currentBookingTitle')}
             </p>
-            <p className="mt-2 text-sm font-bold text-brand-ink">
+            <p className="mt-2 text-sm font-bold text-brand-ink break-words">
               {t('roomNumber', { number: reservation.roomNumber })} | {reservation.guestName}
             </p>
-            <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+            <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
               {formatLocalizedDate(reservation.checkInDate, i18n.language, {
                 month: 'short',
                 day: 'numeric',
@@ -189,7 +188,7 @@ function ModifyModal({ reservation, onClose, onSave }) {
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
               {t('modifyReservationPage.stayDates')}
             </p>
             <DateRangePicker
@@ -202,14 +201,14 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
           {nights > 0 && (
             <div className="space-y-3">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                 {t('modifyReservationPage.roomSelection')}
               </p>
 
               {loadingRooms ? (
                 <div className="h-12 animate-pulse rounded-full bg-brand-primary-tint" />
               ) : availableRooms.length > 0 ? (
-                <select
+                <NativeSelect
                   value={selectedRoomId}
                   onChange={(e) => setSelectedRoomId(e.target.value)}
                   className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-bold text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
@@ -225,9 +224,9 @@ function ModifyModal({ reservation, onClose, onSave }) {
                         : ''}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               ) : (
-                <p className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                <p className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger break-words">
                   {t('noRoomsAvailableForDates') || t('noRoomsAvailable')}
                 </p>
               )}
@@ -236,22 +235,22 @@ function ModifyModal({ reservation, onClose, onSave }) {
 
           {nights > 0 && (
             <div className="rounded-[1.5rem] border border-brand-warning/30 bg-brand-warning/10 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-warning">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-warning break-words">
                 {t('modifyReservationPage.pricePreviewTitle')}
               </p>
               <div className="mt-3 space-y-2 text-sm font-medium text-brand-ink">
-                <div className="flex items-center justify-between">
+                <div className="flex min-w-0 items-center justify-between">
                   <span>
                     {t('nightsCount', { count: nights })} x{' '}
                     {formatLocalizedCurrency(nightlyRate, i18n.language)}
                   </span>
                   <span>{formatLocalizedCurrency(subtotal, i18n.language)}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex min-w-0 items-center justify-between">
                   <span>{t('taxes15')}</span>
                   <span>{formatLocalizedCurrency(taxes, i18n.language)}</span>
                 </div>
-                <div className="flex items-center justify-between border-t border-brand-warning/30 pt-2 font-bold">
+                <div className="flex min-w-0 items-center justify-between border-t border-brand-warning/30 pt-2 font-bold">
                   <span>{t('newTotal')}</span>
                   <span>{formatLocalizedCurrency(totalPrice, i18n.language)}</span>
                 </div>
@@ -273,22 +272,22 @@ function ModifyModal({ reservation, onClose, onSave }) {
             />
           </div>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-            <button
+          <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={onClose}
               className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
             >
               {t('cancel')}
-            </button>
-            <button
+            </Button>
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={handleSave}
               disabled={saving || unchanged || nights <= 0 || !selectedRoomId}
               className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
             >
               {saving ? t('saving') : t('saveChanges')}
-            </button>
+            </Button>
           </div>
       </div>
     </ModalFrame>
@@ -345,27 +344,27 @@ export default function ModifyReservation() {
         ]}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('modifyReservationPage.changeScope')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('modifyReservationPage.dates')}
               </p>
-              <p className="mt-2 text-lg font-black">{t('modifyReservationPage.editable')}</p>
+              <p className="mt-2 text-lg font-black break-words">{t('modifyReservationPage.editable')}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('modifyReservationPage.room')}
               </p>
-              <p className="mt-2 text-lg font-black">{t('modifyReservationPage.reassignable')}</p>
+              <p className="mt-2 text-lg font-black break-words">{t('modifyReservationPage.reassignable')}</p>
             </div>
           </div>
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <ReservationLookupPanel
           initialFilters={initialFilters}
           initialQuery={initialQuery}
@@ -377,7 +376,7 @@ export default function ModifyReservation() {
             title={t('modifyReservationPage.selectTitle')}
             description={t('modifyReservationPage.selectDescription')}
           >
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid min-w-0 gap-3 md:grid-cols-3">
               {t('modifyReservationPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
@@ -395,29 +394,29 @@ export default function ModifyReservation() {
               description={t('modifyReservationPage.snapshotDescription')}
               action={<StatusPill status={selected.status} />}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('common.guest')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">{selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">{selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('common.room')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {t('roomNumber', { number: selected.roomNumber })} | {translateKnownValue(selected.roomTypeName, t)}
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('modifyReservationPage.stayDates')}
                   </p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {formatLocalizedDate(selected.checkInDate, i18n.language, {
                       month: 'short',
                       day: 'numeric',
@@ -432,10 +431,10 @@ export default function ModifyReservation() {
                   </p>
                 </div>
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('modifyReservationPage.currentTotal')}
                   </p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">
                     {formatLocalizedCurrency(selected.totalPrice, i18n.language)}
                   </p>
                 </div>
@@ -454,7 +453,7 @@ export default function ModifyReservation() {
               title={t('modifyReservationPage.controlsTitle')}
               description={t('modifyReservationPage.controlsDescription')}
             >
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid min-w-0 gap-3 md:grid-cols-3">
                 {[
                   {
                     icon: CalendarRange,
@@ -478,11 +477,11 @@ export default function ModifyReservation() {
                       key={item.title}
                       className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                        <Icon className="h-4 w-4" />
+                      <span className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                        <Icon className="h-4 w-4 shrink-0" />
                       </span>
-                      <p className="mt-3 text-sm font-bold text-brand-ink">{item.title}</p>
-                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">{item.description}</p>
+                      <p className="mt-3 text-sm font-bold text-brand-ink break-words">{item.title}</p>
+                      <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">{item.description}</p>
                     </div>
                   );
                 })}
@@ -492,7 +491,7 @@ export default function ModifyReservation() {
                 type="button"
                 onClick={() => setShowModal(true)}
                 disabled={!reservationStatusRules.canModify(selected.status)}
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
+                className="mt-5 inline-flex min-w-0 w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
               >
                 {t('modifyReservationPage.saveChangesCta')}
               </Button>

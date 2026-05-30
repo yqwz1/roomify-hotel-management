@@ -25,7 +25,7 @@ function SkeletonRow() {
                 </div>
             </td>
             <td className="p-5">
-                <div className="flex gap-2">
+                <div className="flex min-w-0 gap-2">
                     <div className="h-6 w-16 bg-brand-surface-border rounded-full animate-pulse" />
                     <div className="h-6 w-20 bg-brand-primary-tint rounded-full animate-pulse" />
                 </div>
@@ -37,7 +37,7 @@ function SkeletonRow() {
                 <div className="h-5 w-8 bg-brand-primary-tint rounded animate-pulse ms-auto" />
             </td>
             <td className="p-5 text-end">
-                <div className="flex justify-end gap-2">
+                <div className="flex min-w-0 justify-end gap-2">
                     <div className="h-10 w-10 bg-brand-surface-border rounded-full animate-pulse" />
                     <div className="h-10 w-10 bg-brand-primary-tint rounded-full animate-pulse" />
                 </div>
@@ -232,18 +232,18 @@ export default function RoomTypes() {
                 ]}
             >
                 <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
                         {translateWithFallback(t, 'roomTypesPage.catalogSnapshot', 'Catalog Snapshot')}
                     </p>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                                 {translateWithFallback(t, 'roomTypesPage.typesLabel', 'Types')}
                             </p>
-                            <p className="mt-2 text-lg font-black">{summary.total}</p>
+                            <p className="mt-2 text-lg font-black break-words">{summary.total}</p>
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                                 {translateWithFallback(t, 'roomTypesPage.avgRateLabel', 'Avg Rate')}
                             </p>
                             <p className="mt-2 whitespace-nowrap text-lg font-black">
@@ -257,15 +257,15 @@ export default function RoomTypes() {
                 </div>
             </DashboardHero>
 
-            <div className="flex justify-end">
+            <div className="flex min-w-0 justify-end">
                 <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep">
-                    <Plus className="h-4 w-4" /> {t('createNewBtn')}
+                    <Plus className="h-4 w-4 shrink-0" /> {t('createNewBtn')}
                 </Button>
             </div>
 
             {successMessage && (
                 <Alert className="bg-brand-success border-brand-success text-brand-success">
-                    <Info className="h-4 w-4 text-brand-success" />
+                    <Info className="h-4 w-4 text-brand-success shrink-0" />
                     <AlertTitle>{t('success')}</AlertTitle>
                     <AlertDescription>{successMessage}</AlertDescription>
                 </Alert>
@@ -273,7 +273,7 @@ export default function RoomTypes() {
 
             {(error || pageError) && (
                 <Alert variant="destructive">
-                    <Info className="h-4 w-4" />
+                    <Info className="h-4 w-4 shrink-0" />
                     <AlertTitle>{t('error')}</AlertTitle>
                     <AlertDescription>{pageError || error}</AlertDescription>
                 </Alert>
@@ -309,16 +309,16 @@ export default function RoomTypes() {
                             </table>
                         </div>
                     ) : roomTypes.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 space-y-5">
-                            <div className="flex items-center justify-center h-20 w-20 rounded-full bg-brand-primary-tint">
-                                <Box className="h-10 w-10 text-brand-ink-hint" />
+                        <div className="flex min-w-0 flex-col items-center justify-center py-20 space-y-5">
+                            <div className="flex min-w-0 items-center justify-center h-20 w-20 rounded-full bg-brand-primary-tint">
+                                <Box className="h-10 w-10 text-brand-ink-hint shrink-0" />
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-xl font-bold text-brand-ink">{t('noRoomTypesYet')}</p>
-                                <p className="text-sm font-medium text-brand-ink-muted">{t('getStartedRoomType')}</p>
+                                <p className="text-xl font-bold text-brand-ink break-words">{t('noRoomTypesYet')}</p>
+                                <p className="text-sm font-medium text-brand-ink-muted break-words">{t('getStartedRoomType')}</p>
                             </div>
                             <Button onClick={() => { setIsSheetOpen(true); resetForm(); }} className="gap-2 mt-4 rounded-full bg-brand-ink hover:bg-brand-primary-deep text-white font-bold px-6">
-                                <Plus className="h-4 w-4" /> {t('createNowBtn')}
+                                <Plus className="h-4 w-4 shrink-0" /> {t('createNowBtn')}
                             </Button>
                         </div>
                     ) : (
@@ -330,46 +330,46 @@ export default function RoomTypes() {
                                         key={rt.id}
                                         className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4 shadow-sm"
                                     >
-                                        <div className="flex items-start justify-between gap-3">
+                                        <div className="flex min-w-0 items-start justify-between gap-3">
                                             <div>
-                                                <p className="text-lg font-black text-brand-ink">{rt.name}</p>
-                                                <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                                                <p className="text-lg font-black text-brand-ink break-words">{rt.name}</p>
+                                                <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                                                     {rt.description || '-'}
                                                 </p>
                                             </div>
-                                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink">
+                                            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold text-brand-ink break-words">
                                                 {rt.maxGuests} {t('guestsLabel', { defaultValue: 'guests' })}
                                             </span>
                                         </div>
 
-                                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                        <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
                                             <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                                                     {t('colPrice')}
                                                 </p>
-                                                <p className="mt-2 text-sm font-bold text-brand-ink">
+                                                <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                                                     {formatLocalizedCurrency(rt.basePrice, i18n.language)}
                                                 </p>
                                             </div>
                                             <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
-                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                                                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                                                     {t('colAmenities')}
                                                 </p>
-                                                <p className="mt-2 text-sm font-bold text-brand-ink">
+                                                <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                                                     {rt.amenities ? rt.amenities.split(',').filter(Boolean).length : 0}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="mt-4 flex flex-wrap gap-2">
+                                        <div className="mt-4 flex min-w-0 flex-wrap gap-2">
                                             {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
-                                                <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm">
+                                                <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm break-words">
                                                     {translateKnownValue(amenity.trim(), t)}
                                                 </span>
-                                            )) : <span className="text-brand-ink-hint text-xs font-medium">-</span>}
+                                            )) : <span className="text-brand-ink-hint text-xs font-medium break-words">-</span>}
                                         </div>
 
-                                        <div className="mt-4 flex gap-2">
+                                        <div className="mt-4 flex min-w-0 gap-2">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -377,7 +377,7 @@ export default function RoomTypes() {
                                                 className="h-10 w-10 rounded-full border border-brand-surface-border bg-white text-brand-ink shadow-sm transition-colors hover:bg-brand-primary-tint hover:text-brand-ink"
                                                 aria-label={translateWithFallback(t, 'common.edit', 'Edit')}
                                             >
-                                                <Pencil className="h-4 w-4" />
+                                                <Pencil className="h-4 w-4 shrink-0" />
                                             </Button>
                                             <Button
                                                 variant="ghost"
@@ -386,7 +386,7 @@ export default function RoomTypes() {
                                                 className="h-10 w-10 rounded-full border border-brand-ink bg-brand-ink text-white shadow-sm transition-colors hover:bg-brand-primary-deep"
                                                 aria-label={translateWithFallback(t, 'common.delete', 'Delete')}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 shrink-0" />
                                             </Button>
                                         </div>
                                     </article>
@@ -419,22 +419,22 @@ export default function RoomTypes() {
                                                 <div className="mt-1 line-clamp-2 text-xs font-medium text-brand-ink-muted">{rt.description}</div>
                                             </td>
                                             <td className="p-6 align-middle">
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex min-w-0 flex-wrap gap-2">
                                                     {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
-                                                        <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm">
+                                                        <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm break-words">
                                                             {translateKnownValue(amenity.trim(), t)}
                                                         </span>
-                                                    )) : <span className="text-brand-ink-hint text-xs font-medium">-</span>}
+                                                    )) : <span className="text-brand-ink-hint text-xs font-medium break-words">-</span>}
                                                 </div>
                                             </td>
                                             <td className="p-6 align-middle text-end font-mono">
-                                                <span className="font-extrabold text-brand-ink">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
+                                                <span className="font-extrabold text-brand-ink break-words">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
                                             </td>
                                             <td className="p-6 align-middle text-end font-bold text-brand-ink">
                                                 {rt.maxGuests}
                                             </td>
                                             <td className="p-6 align-middle">
-                                                <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                                <div className="inline-flex min-w-0 items-center justify-end gap-1.5 whitespace-nowrap">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -442,7 +442,7 @@ export default function RoomTypes() {
                                                         className="h-8 w-8 rounded-lg border border-brand-surface-border bg-white text-brand-ink shadow-sm transition-colors hover:bg-brand-primary-tint hover:text-brand-ink"
                                                         aria-label={translateWithFallback(t, 'common.edit', 'Edit')}
                                                     >
-                                                        <Pencil className="h-3.5 w-3.5" />
+                                                        <Pencil className="h-3.5 w-3.5 shrink-0" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
@@ -451,7 +451,7 @@ export default function RoomTypes() {
                                                         className="h-8 w-8 rounded-lg border border-brand-ink bg-brand-ink text-white shadow-sm transition-colors hover:bg-brand-primary-deep"
                                                         aria-label={translateWithFallback(t, 'common.delete', 'Delete')}
                                                     >
-                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        <Trash2 className="h-3.5 w-3.5 shrink-0" />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -480,13 +480,13 @@ export default function RoomTypes() {
 
                         {formError && (
                             <Alert variant="destructive">
-                                <Info className="h-4 w-4" />
+                                <Info className="h-4 w-4 shrink-0" />
                                 <AlertDescription>{formError}</AlertDescription>
                             </Alert>
                         )}
 
                         <div className="space-y-3">
-                            <Label htmlFor="name" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('nameLabel')} <span className="text-brand-danger">*</span></Label>
+                            <Label htmlFor="name" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('nameLabel')} <span className="text-brand-danger break-words">*</span></Label>
                             <Input
                                 id="name"
                                 name="name"
@@ -496,12 +496,12 @@ export default function RoomTypes() {
                                 className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.name ? "border-brand-danger" : "border-brand-surface-border"}`}
                                 required
                             />
-                            {validationErrors.name && <p className="text-xs font-bold text-brand-danger">{validationErrors.name}</p>}
+                            {validationErrors.name && <p className="text-xs font-bold text-brand-danger break-words">{validationErrors.name}</p>}
                         </div>
 
-                        <div className="grid gap-5 sm:grid-cols-2">
+                        <div className="grid min-w-0 gap-5 sm:grid-cols-2">
                             <div className="space-y-3">
-                                <Label htmlFor="basePrice" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('basePriceLabel')} <span className="text-brand-danger">*</span></Label>
+                                <Label htmlFor="basePrice" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('basePriceLabel')} <span className="text-brand-danger break-words">*</span></Label>
                                 <Input
                                     id="basePrice"
                                     name="basePrice"
@@ -512,11 +512,11 @@ export default function RoomTypes() {
                                     className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.basePrice ? "border-brand-danger" : "border-brand-surface-border"}`}
                                     required
                                 />
-                                {validationErrors.basePrice && <p className="text-xs font-bold text-brand-danger">{validationErrors.basePrice}</p>}
+                                {validationErrors.basePrice && <p className="text-xs font-bold text-brand-danger break-words">{validationErrors.basePrice}</p>}
                             </div>
 
                             <div className="space-y-3">
-                                <Label htmlFor="maxGuests" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('maxGuestsLabel')} <span className="text-brand-danger">*</span></Label>
+                                <Label htmlFor="maxGuests" className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('maxGuestsLabel')} <span className="text-brand-danger break-words">*</span></Label>
                                 <Input
                                     id="maxGuests"
                                     name="maxGuests"
@@ -528,17 +528,16 @@ export default function RoomTypes() {
                                     className={`rounded-full border px-5 py-6 text-base font-bold text-brand-ink focus-visible:ring-brand-primary focus-visible:ring-offset-1 ${validationErrors.maxGuests ? "border-brand-danger" : "border-brand-surface-border"}`}
                                     required
                                 />
-                                {validationErrors.maxGuests && <p className="text-xs font-bold text-brand-danger">{validationErrors.maxGuests}</p>}
+                                {validationErrors.maxGuests && <p className="text-xs font-bold text-brand-danger break-words">{validationErrors.maxGuests}</p>}
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <Label className="text-xs font-bold text-brand-ink-muted uppercase tracking-widest">{t('amenitiesLabel')}</Label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="grid min-w-0 grid-cols-2 sm:grid-cols-3 gap-3">
                                 {amenityOptions.map((amenity) => (
-                                    <label key={amenity} className="flex items-center space-x-3 text-sm font-bold text-brand-ink cursor-pointer p-3 border border-brand-surface-border rounded-2xl hover:bg-brand-surface-light transition-colors">
-                                        <Checkbox
-                                            className="h-5 w-5 rounded-full border-brand-surface-border focus-visible:ring-brand-primary data-[state=checked]:bg-brand-success data-[state=checked]:border-brand-success"
+                                    <label key={amenity} className="flex min-w-0 items-center space-x-3 text-sm font-bold text-brand-ink cursor-pointer p-3 border border-brand-surface-border rounded-2xl hover:bg-brand-surface-light transition-colors">
+                                        <Checkbox className="h-5 w-5 rounded-full border-brand-surface-border focus-visible:ring-brand-primary data-[state=checked]:bg-brand-success data-[state=checked]:border-brand-success shrink-0"
                                             checked={formData.amenities.includes(amenity)}
                                             onCheckedChange={() => handleAmenityToggle(amenity)}
                                         />
@@ -560,12 +559,12 @@ export default function RoomTypes() {
                             />
                         </div>
 
-                        <SheetFooter className="mt-10 mb-4 flex gap-3">
-                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full py-6 font-bold flex-1">{t('cancel')}</Button>
-                            <Button type="submit" disabled={isSubmitting} className="rounded-full py-6 font-bold flex-1 bg-brand-ink text-white hover:bg-brand-primary-deep">
+                        <SheetFooter className="mt-10 mb-4 flex min-w-0 gap-3">
+                            <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="rounded-full border-brand-surface-border bg-white py-6 font-bold text-brand-ink hover:bg-brand-surface-light min-w-0 flex-1">{t('cancel')}</Button>
+                            <Button type="submit" disabled={isSubmitting} className="rounded-full py-6 font-bold min-w-0 flex-1 bg-brand-ink text-white hover:bg-brand-primary-deep">
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="me-2 h-4 w-4 animate-spin" /> {editingId ? t('updatingMsg') : t('creatingMsg')}
+                                        <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" /> {editingId ? t('updatingMsg') : t('creatingMsg')}
                                     </>
                                 ) : (
                                     editingId ? t('updateRoomTypeBtn') : t('createRoomTypeBtn')

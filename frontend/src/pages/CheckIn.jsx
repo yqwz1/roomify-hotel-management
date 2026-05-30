@@ -115,23 +115,23 @@ export default function CheckIn() {
         meta={heroMeta}
       >
         <div className="rounded-[1.75rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">
             {t('checkInPage.gateTitle')}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('checkInPage.checklist')}
               </p>
-              <p className="mt-2 text-3xl font-black">
+              <p className="mt-2 text-3xl font-black break-words">
                 {completedCount}/{CHECKLIST_ITEMS.length}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {t('checkInPage.reservation')}
               </p>
-              <p className="mt-2 text-lg font-black">
+              <p className="mt-2 text-lg font-black break-words">
                 {selected ? <LtrText>{selected.confirmationNumber}</LtrText> : t('notSelected')}
               </p>
             </div>
@@ -139,7 +139,7 @@ export default function CheckIn() {
         </div>
       </DashboardHero>
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <ReservationLookupPanel
           initialFilters={initialFilters}
           initialQuery={initialQuery}
@@ -151,7 +151,7 @@ export default function CheckIn() {
             title={t('checkInPage.selectTitle')}
             description={t('checkInPage.selectDescription')}
           >
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid min-w-0 gap-3 md:grid-cols-3">
               {t('checkInPage.tips', { returnObjects: true }).map((item) => (
                 <div
                   key={item}
@@ -169,36 +169,36 @@ export default function CheckIn() {
               description={t('checkInPage.summaryDescription')}
               action={<StatusPill status={selected.status} />}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('common.guest')}</p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">{selected.guest?.name || selected.guestName}</p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('common.guest')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">{selected.guest?.name || selected.guestName}</p>
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {selected.guest?.email || selected.guestEmail || t('common.noGuestEmailProvided')}
                   </p>
                 </div>
 
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('checkInPage.confirmation')}</p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('checkInPage.confirmation')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">
                     <LtrText>{selected.confirmationNumber}</LtrText>
                   </p>
                 </div>
 
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('common.room')}</p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('common.room')}</p>
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {t('roomNum', { number: selected.room?.roomNumber || selected.roomNumber })} |{' '}
                     {translateKnownValue(selected.room?.roomTypeName || selected.roomTypeName, t)}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {t('floorNum', { floor: selected.room?.floor || selected.floor || '-' })}
                   </p>
                 </div>
 
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('common.stay')}</p>
-                  <p className="mt-2 text-sm font-bold text-brand-ink">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('common.stay')}</p>
+                  <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                     {formatLocalizedDate(selected.dates?.checkIn || selected.checkInDate, i18n.language, {
                       weekday: 'short',
                       month: 'long',
@@ -206,7 +206,7 @@ export default function CheckIn() {
                       year: 'numeric',
                     })}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+                  <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                     {formatLocalizedDate(selected.dates?.checkOut || selected.checkOutDate, i18n.language, {
                       weekday: 'short',
                       month: 'long',
@@ -217,15 +217,15 @@ export default function CheckIn() {
                 </div>
 
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('nights')}</p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('nights')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">
                     {selected.dates?.nights || selected.nights || 0}
                   </p>
                 </div>
 
                 <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('checkInPage.reservationTotal')}</p>
-                  <p className="mt-2 text-lg font-black text-brand-ink">
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('checkInPage.reservationTotal')}</p>
+                  <p className="mt-2 text-lg font-black text-brand-ink break-words">
                     {formatLocalizedCurrency(selected.pricing?.totalPrice || selected.totalPrice || 0, i18n.language)}
                   </p>
                 </div>
@@ -245,7 +245,7 @@ export default function CheckIn() {
                 title={t('preCheckInChecklist')}
                 description={t('completeAllItems')}
               >
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid min-w-0 gap-3 md:grid-cols-2">
                   {CHECKLIST_ITEMS.map((item) => {
                     const Icon = item.icon;
                     const checked = Boolean(checklist[item.id]);
@@ -261,13 +261,13 @@ export default function CheckIn() {
                       >
                         <Checkbox
                           checked={checked}
-                          onCheckedChange={(c) => toggleCheck(item.id)}
+                          onCheckedChange={() => toggleCheck(item.id)}
                           className="mt-0.5 h-5 w-5 rounded border-brand-surface-border focus-visible:ring-black/10 data-[state=checked]:bg-brand-success data-[state=checked]:border-brand-success"
                         />
                         <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl ${
                           checked ? 'bg-brand-success/20 text-brand-success' : 'bg-white text-brand-ink-muted shadow-sm'
                         }`}>
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-4 w-4 shrink-0" />
                         </span>
                         <span className="min-w-0">
                           <p className={`text-sm font-bold ${checked ? 'text-brand-success' : 'text-brand-ink'}`}>
@@ -283,7 +283,7 @@ export default function CheckIn() {
                 </div>
 
                 <div className="mt-5">
-                  <div className="mb-2 flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.2em] text-brand-ink-hint">
+                  <div className="mb-2 flex min-w-0 items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.2em] text-brand-ink-hint">
                     <span>{t('progress')}</span>
                     <span>{completedCount}/{CHECKLIST_ITEMS.length}</span>
                   </div>
@@ -302,7 +302,7 @@ export default function CheckIn() {
                 type="button"
                 onClick={handleCheckIn}
                 disabled={!canCheckIn || submitting}
-                className="inline-flex w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
+                className="inline-flex min-w-0 w-full items-center justify-center rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted h-auto"
               >
                 {submitting
                   ? t('processing')

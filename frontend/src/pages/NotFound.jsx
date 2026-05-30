@@ -5,9 +5,9 @@ export default function NotFound() {
   const { t } = useTranslation();
 
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-brand-surface p-8 text-center">
-      <h1 className="mb-4 text-8xl font-extrabold tracking-tighter text-brand-ink">404</h1>
-      <p className="mb-10 text-lg font-bold uppercase tracking-widest text-brand-ink-muted">
+    <div className="h-full flex min-w-0 flex-col items-center justify-center bg-brand-surface p-8 text-center">
+      <h1 className="mb-4 text-8xl font-extrabold tracking-tighter text-brand-ink break-words">404</h1>
+      <p className="mb-10 text-lg font-bold uppercase tracking-widest text-brand-ink-muted break-words">
         {t('notFoundPage.title')}
       </p>
       <Link

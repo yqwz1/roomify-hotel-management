@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MailCheck, MailWarning, RefreshCcw, Search } from 'lucide-react';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -20,6 +20,7 @@ import {
   translateWithFallback,
 } from '../utils/localization';
 
+import { NativeSelect } from "@/components/ui/native-select";
 const STATUS_OPTIONS = ['', 'PENDING', 'PROCESSING', 'SENT', 'FAILED'];
 const TYPE_OPTIONS = [
   '',
@@ -47,7 +48,7 @@ export default function AdminNotifications() {
   });
   const [retryingId, setRetryingId] = useState(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -68,11 +69,11 @@ export default function AdminNotifications() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.recipient, filters.status, filters.type]);
 
   useEffect(() => {
     loadData();
-  }, [filters.status, filters.type]);
+  }, [loadData]);
 
   const filteredDeliveries = useMemo(() => {
     if (!filters.recipient) {
@@ -134,7 +135,7 @@ export default function AdminNotifications() {
         ]}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardMetricCard
           icon={MailCheck}
           label={translateWithFallback(t, 'adminNotifications.metrics.sent', 'Sent')}
@@ -166,14 +167,14 @@ export default function AdminNotifications() {
         description={translateWithFallback(t, 'adminNotifications.filtersDescription', 'Filter by recipient, delivery status, or notification type.')}
         action={
           <Button type="button" variant="outline" onClick={loadData} className="border-brand-surface-border">
-            <RefreshCcw className="h-4 w-4" />
+            <RefreshCcw className="h-4 w-4 shrink-0" />
             {t('retry')}
           </Button>
         }
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-3">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'adminNotifications.recipientFilter', 'Recipient')}
             </span>
             <input
@@ -186,10 +187,10 @@ export default function AdminNotifications() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'adminNotifications.statusFilter', 'Status')}
             </span>
-            <select
+            <NativeSelect
               value={filters.status}
               onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
               className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none"
@@ -199,14 +200,14 @@ export default function AdminNotifications() {
                   {status || translateWithFallback(t, 'adminNotifications.allStatuses', 'All statuses')}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'adminNotifications.typeFilter', 'Type')}
             </span>
-            <select
+            <NativeSelect
               value={filters.type}
               onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value }))}
               className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none"
@@ -216,7 +217,7 @@ export default function AdminNotifications() {
                   {type || translateWithFallback(t, 'adminNotifications.allTypes', 'All types')}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         </div>
       </DashboardPanel>
@@ -246,34 +247,34 @@ export default function AdminNotifications() {
                 key={delivery.id}
                 className="rounded-[1.4rem] border border-brand-surface-border bg-brand-surface-light p-4"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                         {delivery.status}
                       </span>
-                      <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                      <span className="rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                         {delivery.type}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm font-black text-brand-ink">{delivery.subject}</p>
-                    <p className="mt-1 text-sm font-medium text-brand-ink-muted">{delivery.recipient}</p>
-                    <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <p className="mt-3 text-sm font-black text-brand-ink break-words">{delivery.subject}</p>
+                    <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">{delivery.recipient}</p>
+                    <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {translateWithFallback(t, 'adminNotifications.attempts', 'Attempts: {{count}}', { count: delivery.attemptCount })}
                     </p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {formatLocalizedDateTime(delivery.createdAt, i18n.language)}
                     </p>
                     {delivery.errorMessage ? (
-                      <p className="mt-3 rounded-2xl border border-brand-danger/20 bg-brand-danger/10 px-3 py-3 text-sm font-medium text-brand-danger">
+                      <p className="mt-3 rounded-2xl border border-brand-danger/20 bg-brand-danger/10 px-3 py-3 text-sm font-medium text-brand-danger break-words">
                         {delivery.errorMessage}
                       </p>
                     ) : null}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex min-w-0 shrink-0 items-center gap-2">
                     {delivery.sentAt ? (
-                      <span className="text-xs font-semibold text-brand-ink-muted">
+                      <span className="text-xs font-semibold text-brand-ink-muted break-words">
                         {formatLocalizedDateTime(delivery.sentAt, i18n.language)}
                       </span>
                     ) : null}
@@ -284,7 +285,7 @@ export default function AdminNotifications() {
                         disabled={retryingId === delivery.id}
                         className="rounded-full bg-brand-primary px-4 text-white hover:bg-brand-primary-deep"
                       >
-                        <RefreshCcw className="h-4 w-4" />
+                        <RefreshCcw className="h-4 w-4 shrink-0" />
                         {retryingId === delivery.id
                           ? translateWithFallback(t, 'adminNotifications.retrying', 'Retrying...')
                           : translateWithFallback(t, 'adminNotifications.retry', 'Retry')}

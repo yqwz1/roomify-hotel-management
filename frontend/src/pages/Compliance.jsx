@@ -44,9 +44,9 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/[0.06] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-success shadow-sm"
+            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/[0.06] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-success shadow-sm"
           >
-            <ShieldCheck className="h-3 w-3" />
+            <ShieldCheck className="h-3 w-3 shrink-0" />
             {t('m.compliance.eyebrow')}
           </motion.div>
           <motion.h1
@@ -75,41 +75,41 @@ export default function Compliance() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-            className="mt-10 grid gap-5 sm:grid-cols-[1.3fr_1fr]"
+            className="mt-10 grid min-w-0 gap-5 sm:grid-cols-[1.3fr_1fr]"
           >
             <div className="rounded-[1.75rem] border border-brand-surface-border bg-white p-6 shadow-sm">
-              <div className="flex items-start justify-between">
+              <div className="flex min-w-0 items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">{t('m.compliance.invoice.label')}</p>
-                  <p className="mt-1 text-sm font-black text-brand-ink">{t('m.compliance.invoice.hotel')}</p>
-                  <p className="text-[11px] font-medium text-brand-ink-muted" dir="ltr">{t('m.compliance.invoice.trn')}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">{t('m.compliance.invoice.label')}</p>
+                  <p className="mt-1 text-sm font-black text-brand-ink break-words">{t('m.compliance.invoice.hotel')}</p>
+                  <p className="text-[11px] font-medium text-brand-ink-muted break-words" dir="ltr">{t('m.compliance.invoice.trn')}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-surface-border bg-brand-primary p-2.5">
-                  <QrCode className="h-12 w-12 text-white" />
+                  <QrCode className="h-12 w-12 text-white shrink-0" />
                 </div>
               </div>
               <div className="mt-5 space-y-1.5 text-[13px]">
-                <div className="flex justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineRoom')}</span><span className="font-mono" dir="ltr">1,200.00</span></div>
-                <div className="flex justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineFB')}</span><span className="font-mono" dir="ltr">185.00</span></div>
-                <div className="flex justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.subtotal')}</span><span className="font-mono" dir="ltr">1,385.00</span></div>
-                <div className="flex justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.vat')}</span><span className="font-mono" dir="ltr">207.75</span></div>
-                <div className="mt-2 flex justify-between border-t border-brand-surface-border pt-2 text-sm font-black text-brand-ink">
+                <div className="flex min-w-0 justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineRoom')}</span><span className="font-mono" dir="ltr">1,200.00</span></div>
+                <div className="flex min-w-0 justify-between text-brand-ink-muted"><span>{t('m.compliance.invoice.lineFB')}</span><span className="font-mono" dir="ltr">185.00</span></div>
+                <div className="flex min-w-0 justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.subtotal')}</span><span className="font-mono" dir="ltr">1,385.00</span></div>
+                <div className="flex min-w-0 justify-between text-brand-ink-hint text-xs"><span>{t('m.compliance.invoice.vat')}</span><span className="font-mono" dir="ltr">207.75</span></div>
+                <div className="mt-2 flex min-w-0 justify-between border-t border-brand-surface-border pt-2 text-sm font-black text-brand-ink">
                   <span>{t('m.compliance.invoice.total')}</span><span className="font-mono" dir="ltr">1,592.75</span>
                 </div>
               </div>
-              <p className="mt-4 text-[10px] font-medium text-brand-ink-hint">{t('m.compliance.invoice.signed')}</p>
+              <p className="mt-4 text-[10px] font-medium text-brand-ink-hint break-words">{t('m.compliance.invoice.signed')}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
+            <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-1">
               <Reveal className="rounded-2xl border border-brand-success/25 bg-brand-success/[0.06] p-4">
-                <ShieldCheck className="h-5 w-5 text-brand-success" />
-                <p className="mt-3 text-sm font-black text-brand-ink">{t('m.compliance.cleared.title')}</p>
-                <p className="mt-1 text-[12px] font-medium text-brand-success">{t('m.compliance.cleared.sub')}</p>
+                <ShieldCheck className="h-5 w-5 text-brand-success shrink-0" />
+                <p className="mt-3 text-sm font-black text-brand-ink break-words">{t('m.compliance.cleared.title')}</p>
+                <p className="mt-1 text-[12px] font-medium text-brand-success break-words">{t('m.compliance.cleared.sub')}</p>
               </Reveal>
               <Reveal delay={0.1} className="rounded-2xl border border-brand-warning/25 bg-brand-warning/[0.06] p-4">
-                <FileCheck2 className="h-5 w-5 text-brand-warning" />
-                <p className="mt-3 text-sm font-black text-brand-ink">{t('m.compliance.vatcard.title')}</p>
-                <p className="mt-1 text-[12px] font-medium text-brand-warning">{t('m.compliance.vatcard.sub')}</p>
+                <FileCheck2 className="h-5 w-5 text-brand-warning shrink-0" />
+                <p className="mt-3 text-sm font-black text-brand-ink break-words">{t('m.compliance.vatcard.title')}</p>
+                <p className="mt-1 text-[12px] font-medium text-brand-warning break-words">{t('m.compliance.vatcard.sub')}</p>
               </Reveal>
             </div>
           </motion.div>
@@ -132,7 +132,7 @@ export default function Compliance() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.12 } },
             }}
-            className="mt-8 grid gap-5 lg:grid-cols-2"
+            className="mt-8 grid min-w-0 gap-5 lg:grid-cols-2"
           >
             {PILLARS.map((p) => {
               const Icon = p.icon;
@@ -148,13 +148,13 @@ export default function Compliance() {
                   className={`rounded-[1.75rem] border p-6 transition-shadow hover:shadow-lg ${p.accent}`}
                 >
                   <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${p.iconBg} text-white shadow-sm`}>
-                    <Icon className="h-[18px] w-[18px]" />
+                    <Icon className="h-[18px] w-[18px] shrink-0" />
                   </div>
-                  <h3 className="mt-4 text-base font-black tracking-tight text-brand-ink">{t(`m.compliance.pillar.${p.id}.title`)}</h3>
-                  <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-brand-ink-muted">{t(`m.compliance.pillar.${p.id}.desc`)}</p>
-                  <ul className="mt-4 grid grid-cols-2 gap-1.5">
+                  <h3 className="mt-4 text-base font-black tracking-tight text-brand-ink break-words">{t(`m.compliance.pillar.${p.id}.title`)}</h3>
+                  <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-brand-ink-muted break-words">{t(`m.compliance.pillar.${p.id}.desc`)}</p>
+                  <ul className="mt-4 grid min-w-0 grid-cols-2 gap-1.5">
                     {[1, 2, 3, 4].map((n) => (
-                      <li key={n} className="flex items-start gap-1.5 text-[12px] font-semibold text-brand-ink">
+                      <li key={n} className="flex min-w-0 items-start gap-1.5 text-[12px] font-semibold text-brand-ink">
                         <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand-ink-muted" />
                         {t(`m.compliance.pillar.${p.id}.b${n}`)}
                       </li>
@@ -182,7 +182,7 @@ export default function Compliance() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
             }}
-            className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+            className="mt-7 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
           >
             {STANDARD_IDS.map((id) => (
               <motion.div
@@ -193,11 +193,11 @@ export default function Compliance() {
                 }}
                 transition={{ duration: 0.5, ease: EASE }}
                 whileHover={{ y: -3 }}
-                className="flex flex-col items-start gap-1 rounded-2xl border border-brand-surface-border bg-white px-4 py-3 transition-shadow hover:shadow-sm"
+                className="flex min-w-0 flex-col items-start gap-1 rounded-2xl border border-brand-surface-border bg-white px-4 py-3 transition-shadow hover:shadow-sm"
               >
-                <ScrollText className="h-4 w-4 text-brand-ink-hint" />
-                <p className="text-sm font-black text-brand-ink">{t(`m.compliance.standard.${id}.label`)}</p>
-                <p className="text-[10px] font-medium text-brand-ink-muted">{t(`m.compliance.standard.${id}.sub`)}</p>
+                <ScrollText className="h-4 w-4 text-brand-ink-hint shrink-0" />
+                <p className="text-sm font-black text-brand-ink break-words">{t(`m.compliance.standard.${id}.label`)}</p>
+                <p className="text-[10px] font-medium text-brand-ink-muted break-words">{t(`m.compliance.standard.${id}.sub`)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -207,37 +207,37 @@ export default function Compliance() {
       {/* DATA RESIDENCY */}
       <section className="border-t border-brand-surface-border bg-white">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
+          <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
             <Reveal>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint">{t('m.compliance.residencyEyebrow')}</p>
-              <h2 className="mt-1.5 max-w-md text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">{t('m.compliance.residencyEyebrow')}</p>
+              <h2 className="mt-1.5 max-w-md text-xl font-black tracking-tight text-brand-ink sm:text-2xl break-words">
                 {t('m.compliance.residencyTitle')}
               </h2>
-              <p className="mt-3 max-w-md text-[14px] font-medium leading-relaxed text-brand-ink-muted">
+              <p className="mt-3 max-w-md text-[14px] font-medium leading-relaxed text-brand-ink-muted break-words">
                 {t('m.compliance.residencyBio')}
               </p>
               <Link
                 to="/demo"
-                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-primary-deep"
+                className="mt-5 inline-flex min-w-0 items-center gap-1.5 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-primary-deep"
               >
                 {t('m.compliance.residencyCta')}
-                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                <ArrowRight className="h-4 w-4 rtl:rotate-180 shrink-0" />
               </Link>
             </Reveal>
             <Reveal delay={0.1} variant="scale">
               <div className="rounded-[1.75rem] border border-brand-surface-border bg-brand-surface-light p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white">
-                    <Database className="h-5 w-5" />
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white">
+                    <Database className="h-5 w-5 shrink-0" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-brand-ink">{t('m.compliance.residency.region')}</p>
-                    <p className="text-[12px] font-medium text-brand-ink-muted">{t('m.compliance.residency.regionSub')}</p>
+                    <p className="text-sm font-black text-brand-ink break-words">{t('m.compliance.residency.region')}</p>
+                    <p className="text-[12px] font-medium text-brand-ink-muted break-words">{t('m.compliance.residency.regionSub')}</p>
                   </div>
                 </div>
                 <div className="mt-5 space-y-2 text-[13px] text-brand-ink">
                   {RESIDENCY_POINTS.map((p) => (
-                    <div key={p} className="flex items-start gap-2">
+                    <div key={p} className="flex min-w-0 items-start gap-2">
                       <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-success" />
                       <span>{t(`m.compliance.residency.${p}`)}</span>
                     </div>

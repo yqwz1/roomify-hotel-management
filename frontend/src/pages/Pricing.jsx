@@ -62,7 +62,7 @@ export default function Pricing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
+            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
           >
             {t('m.pricing.eyebrow')}
           </motion.div>
@@ -100,7 +100,7 @@ export default function Pricing() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.12 } },
             }}
-            className="grid gap-5 lg:grid-cols-3"
+            className="grid min-w-0 gap-5 lg:grid-cols-3"
           >
             {PLANS.map((plan) => {
               const Icon = plan.icon;
@@ -114,28 +114,28 @@ export default function Pricing() {
                   }}
                   transition={{ duration: 0.65, ease: EASE }}
                   whileHover={{ y: -6 }}
-                  className={`relative flex flex-col rounded-[2rem] border p-7 transition-shadow ${plan.accent} ${plan.featured ? '' : 'hover:shadow-lg hover:shadow-brand-primary-deep/10'}`}
+                  className={`relative flex min-w-0 flex-col rounded-[2rem] border p-7 transition-shadow ${plan.accent} ${plan.featured ? 'pt-9' : 'hover:shadow-lg hover:shadow-brand-primary-deep/10'}`}
                 >
                   {plan.featured && (
-                    <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-brand-accent-gold px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink shadow-md">
-                      <Sparkles className="h-3 w-3" />
+                    <span className="absolute -top-3 left-1/2 inline-flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-1 truncate whitespace-nowrap rounded-full bg-brand-accent-gold px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink shadow-md">
+                      <Sparkles className="h-3 w-3 shrink-0" />
                       {t('m.pricing.popular')}
                     </span>
                   )}
                   <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${plan.featured ? 'bg-white/10' : 'bg-brand-primary-tint'}`}>
                     <Icon className={`h-5 w-5 ${plan.featured ? 'text-brand-accent-gold' : 'text-brand-ink'}`} />
                   </div>
-                  <h3 className="mt-5 text-xl font-black tracking-tight">{t(`m.pricing.${plan.id}.name`)}</h3>
+                  <h3 className="mt-5 text-xl font-black tracking-tight break-words">{t(`m.pricing.${plan.id}.name`)}</h3>
                   <p className={`text-sm font-medium ${plan.featured ? 'text-brand-ink-hint' : 'text-brand-ink-muted'}`}>
                     {t(`m.pricing.${plan.id}.tagline`)}
                   </p>
-                  <div className="mt-5 flex items-baseline gap-1">
+                  <div className="mt-5 flex min-w-0 items-baseline gap-1">
                     {isCustom ? (
-                      <span className="text-3xl font-black tracking-tight">{t('m.pricing.custom')}</span>
+                      <span className="text-3xl font-black tracking-tight break-words">{t('m.pricing.custom')}</span>
                     ) : (
                       <>
                         <span className={`text-xs font-bold ${plan.featured ? 'text-brand-ink-hint' : 'text-brand-ink-muted'}`}>{t('m.pricing.sar')}</span>
-                        <span className="text-4xl font-black tracking-tight">{plan.price}</span>
+                        <span className="text-4xl font-black tracking-tight break-words">{plan.price}</span>
                         <span className={`text-sm font-medium ${plan.featured ? 'text-brand-ink-hint' : 'text-brand-ink-muted'}`}>
                           {t('m.pricing.perMonth')}
                         </span>
@@ -144,9 +144,9 @@ export default function Pricing() {
                   </div>
                   <ul className={`mt-6 space-y-2.5 text-sm ${plan.featured ? 'text-white/85' : 'text-brand-ink'}`}>
                     {Array.from({ length: plan.featureCount }, (_, i) => (
-                      <li key={i} className="flex items-start gap-2">
+                      <li key={i} className="flex min-w-0 items-start gap-2">
                         <Check className={`mt-0.5 h-4 w-4 flex-shrink-0 ${plan.featured ? 'text-brand-accent-gold' : 'text-brand-success'}`} />
-                        <span>{t(`m.pricing.${plan.id}.f${i + 1}`)}</span>
+                        <span className="min-w-0 break-words">{t(`m.pricing.${plan.id}.f${i + 1}`)}</span>
                       </li>
                     ))}
                   </ul>
@@ -155,7 +155,7 @@ export default function Pricing() {
                     className={`mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition-all ${plan.ctaClass}`}
                   >
                     {t(`m.pricing.${plan.id}.cta`)}
-                    <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                    <ArrowRight className="h-4 w-4 rtl:rotate-180 shrink-0" />
                   </Link>
                 </motion.article>
               );
@@ -184,8 +184,8 @@ export default function Pricing() {
                 delay={0.05 * i}
                 className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-5"
               >
-                <p className="text-sm font-black text-brand-ink">{t(`m.pricing.faq.${id}.q`)}</p>
-                <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-brand-ink-muted">{t(`m.pricing.faq.${id}.a`)}</p>
+                <p className="text-sm font-black text-brand-ink break-words">{t(`m.pricing.faq.${id}.q`)}</p>
+                <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-brand-ink-muted break-words">{t(`m.pricing.faq.${id}.a`)}</p>
               </Reveal>
             ))}
           </div>

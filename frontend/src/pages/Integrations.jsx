@@ -87,9 +87,9 @@ export default function Integrations() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
+            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
           >
-            <Plug className="h-3 w-3" />
+            <Plug className="h-3 w-3 shrink-0" />
             {t('m.integrations.eyebrow')}
           </motion.div>
           <motion.h1
@@ -121,7 +121,7 @@ export default function Integrations() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.1, delayChildren: 0.4 } },
             }}
-            className="mt-9 grid gap-3 sm:grid-cols-3"
+            className="mt-9 grid min-w-0 gap-3 sm:grid-cols-3"
           >
             {STORY.map(({ id, icon: Icon }) => (
               <motion.div
@@ -131,11 +131,11 @@ export default function Integrations() {
                 whileHover={{ y: -3 }}
                 className="rounded-2xl border border-brand-surface-border bg-white p-4 transition-shadow hover:shadow-md"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-primary-tint text-brand-ink">
-                  <Icon className="h-[18px] w-[18px]" />
+                <div className="flex min-w-0 h-9 w-9 items-center justify-center rounded-2xl bg-brand-primary-tint text-brand-ink">
+                  <Icon className="h-[18px] w-[18px] shrink-0" />
                 </div>
-                <p className="mt-3 text-sm font-black text-brand-ink">{t(`m.integrations.story.${id}.title`)}</p>
-                <p className="mt-1 text-[12px] font-medium leading-snug text-brand-ink-muted">{t(`m.integrations.story.${id}.desc`)}</p>
+                <p className="mt-3 text-sm font-black text-brand-ink break-words">{t(`m.integrations.story.${id}.title`)}</p>
+                <p className="mt-1 text-[12px] font-medium leading-snug text-brand-ink-muted break-words">{t(`m.integrations.story.${id}.desc`)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -150,13 +150,13 @@ export default function Integrations() {
             return (
               <div key={cat.id}>
                 <Reveal>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white">
-                      <Icon className="h-5 w-5" />
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white">
+                      <Icon className="h-5 w-5 shrink-0" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-black tracking-tight text-brand-ink">{t(`m.integrations.cats.${cat.id}.title`)}</h2>
-                      <p className="text-[13px] font-medium text-brand-ink-muted">{t(`m.integrations.cats.${cat.id}.desc`)}</p>
+                      <h2 className="text-lg font-black tracking-tight text-brand-ink break-words">{t(`m.integrations.cats.${cat.id}.title`)}</h2>
+                      <p className="text-[13px] font-medium text-brand-ink-muted break-words">{t(`m.integrations.cats.${cat.id}.desc`)}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -169,7 +169,7 @@ export default function Integrations() {
                     hidden: {},
                     visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
                   }}
-                  className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+                  className="mt-6 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
                 >
                   {cat.integrations.map((it) => (
                     <motion.div
@@ -180,10 +180,10 @@ export default function Integrations() {
                       }}
                       transition={{ duration: 0.45, ease: EASE }}
                       whileHover={{ y: -4, scale: 1.02 }}
-                      className="group relative flex flex-col items-center justify-center gap-1 rounded-2xl border border-brand-surface-border bg-brand-surface-light px-3 py-5 text-center transition-all hover:border-brand-primary/30 hover:bg-white hover:shadow-md"
+                      className="group relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border border-brand-surface-border bg-brand-surface-light px-3 py-5 text-center transition-all hover:border-brand-primary/30 hover:bg-white hover:shadow-md"
                     >
-                      <p className="text-[13px] font-black tracking-tight text-brand-ink">{it.name}</p>
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-brand-ink-hint">{t(`m.integrations.tag.${it.tagKey}`)}</p>
+                      <p className="text-[13px] font-black tracking-tight text-brand-ink break-words">{it.name}</p>
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-brand-ink-hint break-words">{t(`m.integrations.tag.${it.tagKey}`)}</p>
                       <span className="pointer-events-none absolute inset-x-3 -bottom-px h-[2px] w-0 bg-brand-primary transition-all duration-500 group-hover:w-[calc(100%-1.5rem)]" />
                     </motion.div>
                   ))}
@@ -199,20 +199,20 @@ export default function Integrations() {
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
           <Reveal
             variant="scale"
-            className="flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#1A2B3A_55%,#1A2B3A_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
+            className="flex min-w-0 flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#1A2B3A_55%,#1A2B3A_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
           >
             <div>
-              <h3 className="text-lg font-black text-white">{t('m.integrations.cta.title')}</h3>
-              <p className="mt-1 text-sm font-medium text-brand-ink-hint">
+              <h3 className="text-lg font-black text-white break-words">{t('m.integrations.cta.title')}</h3>
+              <p className="mt-1 text-sm font-medium text-brand-ink-hint break-words">
                 {t('m.integrations.cta.sub')}
               </p>
             </div>
             <Link
               to="/demo"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition hover:bg-brand-primary-tint"
+              className="inline-flex min-w-0 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition hover:bg-brand-primary-tint"
             >
               {t('m.integrations.cta.button')}
-              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              <ArrowRight className="h-4 w-4 rtl:rotate-180 shrink-0" />
             </Link>
           </Reveal>
         </div>
