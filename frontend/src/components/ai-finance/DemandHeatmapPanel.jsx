@@ -3,6 +3,8 @@ import { Flame, Snowflake } from 'lucide-react';
 import EmptyState from '../common/EmptyState';
 import ErrorState from '../common/ErrorState';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 const weekLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const formatCurrency = (value) =>
@@ -84,9 +86,9 @@ export default function DemandHeatmapPanel({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex flex-col gap-2 text-sm font-bold text-brand-ink">
+      <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-bold text-brand-ink">
             Month
             <input
               type="month"
@@ -95,9 +97,9 @@ export default function DemandHeatmapPanel({
               className="rounded-2xl border border-brand-surface-border bg-white px-4 py-2.5 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
             />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-bold text-brand-ink">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-bold text-brand-ink">
             Room Type
-            <select
+            <NativeSelect
               value={roomTypeId}
               onChange={(event) => onRoomTypeChange(event.target.value)}
               className="rounded-2xl border border-brand-surface-border bg-white px-4 py-2.5 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
@@ -108,35 +110,35 @@ export default function DemandHeatmapPanel({
                   {option.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         </div>
 
-        <div className="flex items-center gap-3 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-ink-muted">
-          <span className="inline-flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-3 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-ink-muted">
+          <span className="inline-flex min-w-0 items-center gap-2">
             <span className="h-3 w-3 rounded-full" style={{ backgroundColor: '#315B7C' }} />
             Low demand
           </span>
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex min-w-0 items-center gap-2">
             <span className="h-3 w-3 rounded-full" style={{ backgroundColor: '#B93C2B' }} />
             High demand
           </span>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,0.8fr)]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,0.8fr)]">
         <div className="rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-sm">
-          <div className="mb-4 grid grid-cols-7 gap-2 text-center text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+          <div className="mb-4 grid min-w-0 grid-cols-7 gap-2 text-center text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
             {weekLabels.map((label) => (
               <span key={label}>{label}</span>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid min-w-0 grid-cols-7 gap-2">
             {cells.map((cell) =>
               cell.empty ? (
                 <div key={cell.key} className="aspect-square rounded-2xl border border-dashed border-brand-surface-border/70 bg-brand-surface-light/40" />
               ) : (
-                <button
+                <Button variant="unstyled" size="none"
                   key={cell.key}
                   type="button"
                   onClick={() => setSelectedDate(cell.point.date)}
@@ -148,27 +150,27 @@ export default function DemandHeatmapPanel({
                   }`}
                   style={{ backgroundColor: heatColor(cell.point.demandScore) }}
                 >
-                  <div className="flex h-full flex-col justify-between text-white">
-                    <span className="text-sm font-black">
+                  <div className="flex min-w-0 h-full flex-col justify-between text-white">
+                    <span className="text-sm font-black break-words">
                       {new Date(`${cell.point.date}T00:00:00`).getDate()}
                     </span>
-                    <span className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-white/75">
+                    <span className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-white/75 break-words">
                       {cell.point.demandScore}
                     </span>
                   </div>
-                </button>
+                </Button>
               )
             )}
           </div>
         </div>
 
         <div className="rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                 Day Analytics
               </p>
-              <h4 className="mt-2 text-xl font-black tracking-tight text-brand-ink">
+              <h4 className="mt-2 text-xl font-black tracking-tight text-brand-ink break-words">
                 {activePoint.date}
               </h4>
             </div>
@@ -180,37 +182,37 @@ export default function DemandHeatmapPanel({
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                 Occupancy
               </p>
-              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink">
+              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink break-words">
                 {activePoint.occupancy}%
               </p>
             </div>
             <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                 Revenue
               </p>
-              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink">
+              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink break-words">
                 {formatCurrency(activePoint.revenue)}
               </p>
             </div>
             <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                 Bookings
               </p>
-              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink">
+              <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink break-words">
                 {activePoint.bookings}
               </p>
             </div>
             <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
                 Pattern
               </p>
-              <div className="mt-3 flex items-center gap-2 text-lg font-black tracking-tight text-brand-ink">
-                {activePoint.holiday ? <Flame className="h-5 w-5 text-brand-accent-terracotta" /> : null}
+              <div className="mt-3 flex min-w-0 items-center gap-2 text-lg font-black tracking-tight text-brand-ink">
+                {activePoint.holiday ? <Flame className="h-5 w-5 text-brand-accent-terracotta shrink-0" /> : null}
                 <span>
                   {activePoint.holiday
                     ? activePoint.holidayLabel

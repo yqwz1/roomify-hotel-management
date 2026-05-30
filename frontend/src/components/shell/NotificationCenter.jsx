@@ -88,32 +88,32 @@ export default function NotificationCenter() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button variant="unstyled" size="none"
           type="button"
-          className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-surface-border bg-white text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+          className="relative inline-flex min-w-0 h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-surface-border bg-white text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
           aria-label={translateWithFallback(t, 'notifications.button', 'Open notifications')}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 shrink-0" />
           {unreadCount > 0 ? (
             <span className="absolute -end-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-danger px-1.5 text-[10px] font-black text-white">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           ) : null}
-        </button>
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-[min(24rem,calc(100vw-1rem))] rounded-[1.5rem] border-brand-surface-border bg-white p-0 shadow-[0_20px_48px_-28px_rgba(15,23,42,0.26)]">
         <div className="border-b border-brand-surface-border px-5 py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
                 {translateWithFallback(t, 'notifications.live', 'Live updates')}
               </p>
-              <h3 className="mt-1 text-lg font-black tracking-tight text-brand-ink">
+              <h3 className="mt-1 truncate text-lg font-black tracking-tight text-brand-ink">
                 {translateWithFallback(t, 'notifications.title', 'Notifications')}
               </h3>
             </div>
-            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+            <span className="shrink-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
               {translateWithFallback(t, 'notifications.unread', '{{count}} unread', { count: unreadCount })}
             </span>
           </div>
@@ -121,11 +121,11 @@ export default function NotificationCenter() {
 
         <div className="max-h-[26rem] overflow-y-auto px-4 py-4">
           {loading ? (
-            <p className="px-2 py-6 text-sm font-medium text-brand-ink-muted">
+            <p className="px-2 py-6 text-sm font-medium text-brand-ink-muted break-words">
               {translateWithFallback(t, 'notifications.loading', 'Loading notifications...')}
             </p>
           ) : error ? (
-            <p className="rounded-[1.15rem] border border-brand-danger/20 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+            <p className="rounded-[1.15rem] border border-brand-danger/20 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger break-words">
               {error}
             </p>
           ) : sortedNotifications.length === 0 ? (
@@ -145,10 +145,10 @@ export default function NotificationCenter() {
                       : 'border-brand-primary/20 bg-brand-primary/10'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black text-brand-ink">{notification.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-brand-ink-muted">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-black text-brand-ink">{notification.title}</p>
+                      <p className="mt-1 line-clamp-3 break-words text-sm leading-6 text-brand-ink-muted">
                         {notification.message}
                       </p>
                     </div>
@@ -156,16 +156,16 @@ export default function NotificationCenter() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-9 rounded-full border-brand-surface-border px-3 text-xs font-bold"
+                        className="h-9 shrink-0 rounded-full border-brand-surface-border px-3 text-xs font-bold"
                         onClick={() => handleMarkAsRead(notification.id)}
                       >
-                        <CheckCheck className="h-4 w-4" />
+                        <CheckCheck className="h-4 w-4 shrink-0" />
                         {translateWithFallback(t, 'notifications.markRead', 'Mark read')}
                       </Button>
                     ) : null}
                   </div>
 
-                  <p className="mt-3 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <p className="mt-3 truncate text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
                     {formatLocalizedDateTime(notification.createdAt, i18n.language)}
                   </p>
                 </article>

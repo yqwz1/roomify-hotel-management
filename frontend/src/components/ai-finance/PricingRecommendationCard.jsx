@@ -89,16 +89,16 @@ export default function PricingRecommendationCard({
   return (
     <Card className="h-full rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardHeader className="p-5 pb-0">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
               Room Type
             </p>
             <CardTitle className="mt-2 break-words text-xl font-black tracking-tight text-brand-ink">
               {roomType || unavailable}
             </CardTitle>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             <Badge
               variant="outline"
               className={cn('rounded-full px-3 py-1', RISK_CONFIG[normalizedRisk] ?? RISK_CONFIG.UNKNOWN)}
@@ -115,33 +115,33 @@ export default function PricingRecommendationCard({
       </CardHeader>
 
       <CardContent className="p-5">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
               Current
             </p>
-            <p className="mt-2 text-xl font-black text-brand-ink">{formatCurrency(currentPrice)}</p>
+            <p className="mt-2 text-xl font-black text-brand-ink break-words">{formatCurrency(currentPrice)}</p>
           </div>
           <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
               Suggested
             </p>
-            <p className="mt-2 text-xl font-black text-brand-ink">{formatCurrency(suggestedPrice)}</p>
+            <p className="mt-2 text-xl font-black text-brand-ink break-words">{formatCurrency(suggestedPrice)}</p>
           </div>
           <div className={cn('rounded-2xl border p-4', adjustmentStyle.className)}>
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
-              <AdjustmentIcon className="h-4 w-4" />
+            <div className="flex min-w-0 items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
+              <AdjustmentIcon className="h-4 w-4 shrink-0" />
               {adjustmentStyle.label}
             </div>
-            <p className="mt-2 text-xl font-black">{formatAdjustment(adjustmentValue)}</p>
+            <p className="mt-2 text-xl font-black break-words">{formatAdjustment(adjustmentValue)}</p>
           </div>
         </div>
 
         <div className="mt-4 rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
             Reason
           </p>
-          <p className="mt-2 text-sm font-medium leading-6 text-brand-ink">{reason}</p>
+          <p className="mt-2 text-sm font-medium leading-6 text-brand-ink break-words">{reason}</p>
         </div>
       </CardContent>
     </Card>

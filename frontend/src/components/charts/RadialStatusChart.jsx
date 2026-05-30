@@ -38,7 +38,7 @@ export function RadialStatusChart({
   const displayValue = valueFormatter ? valueFormatter(safeValue) : safeValue
 
   return (
-    <ChartContainer style={{ height }} className="relative flex items-center justify-center">
+    <ChartContainer style={{ height }} className="relative flex min-w-0 items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -61,11 +61,11 @@ export function RadialStatusChart({
           />
         </PieChart>
       </ResponsiveContainer>
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-hint">
+      <div className="absolute inset-0 flex min-w-0 flex-col items-center justify-center pointer-events-none">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-hint break-words">
           {label}
         </span>
-        <span className="mt-1 text-3xl font-black tracking-tight text-brand-ink">
+        <span className="mt-1 text-3xl font-black tracking-tight text-brand-ink break-words">
           {displayValue}
         </span>
       </div>

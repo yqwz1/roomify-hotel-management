@@ -21,18 +21,18 @@ export default function RoadmapBanner({
   const card = (
     <Reveal>
       <div className="relative overflow-hidden rounded-2xl border border-brand-warning/30 bg-gradient-to-r from-brand-warning/10 via-brand-warning/[0.04] to-transparent px-5 py-4 sm:px-6 sm:py-5">
-        <div className="flex items-start gap-3 sm:items-center">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-warning/15 ring-1 ring-brand-warning/30">
-            <Info className="h-4 w-4 text-brand-warning" />
+        <div className="flex min-w-0 items-start gap-3 sm:items-center">
+          <div className="flex min-w-0 h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-brand-warning/15 ring-1 ring-brand-warning/30">
+            <Info className="h-4 w-4 text-brand-warning shrink-0" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full bg-brand-warning/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-warning">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="inline-flex min-w-0 items-center rounded-full bg-brand-warning/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-warning break-words">
                 {t('roadmap.badge')}
               </span>
-              <p className="text-sm font-black tracking-tight text-brand-ink">{resolvedTitle}</p>
+              <p className="text-sm font-black tracking-tight text-brand-ink break-words">{resolvedTitle}</p>
             </div>
-            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-brand-ink-muted">{resolvedNote}</p>
+            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-brand-ink-muted break-words">{resolvedNote}</p>
           </div>
         </div>
         <div

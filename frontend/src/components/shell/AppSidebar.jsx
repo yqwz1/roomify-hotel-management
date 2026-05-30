@@ -9,6 +9,7 @@ import {
   isNavItemActive,
 } from '../navigation/navConfig';
 
+import { Button } from "@/components/ui/button";
 export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
   const location = useLocation();
   const { user } = useAuth();
@@ -48,10 +49,10 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
             : 'lg:w-0 lg:min-w-0 lg:border-e-0 lg:shadow-none lg:pointer-events-none')
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex min-w-0 h-full flex-col">
           <div className="border-b border-white/10 px-5 py-5">
-            <div className="relative flex items-center justify-center">
-              <Link to={homePath} onClick={handleNavigation} className="inline-flex items-center justify-center">
+            <div className="relative flex min-w-0 items-center justify-center">
+              <Link to={homePath} onClick={handleNavigation} className="inline-flex min-w-0 items-center justify-center">
                 <img
                   src="/roomify-mark-light.png"
                   alt={brandName}
@@ -60,31 +61,31 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                 />
               </Link>
 
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={onClose}
                 className="absolute end-0 top-1/2 -translate-y-1/2 rounded-md p-2 text-white/55 transition hover:bg-white/10 hover:text-white lg:hidden"
                 aria-label={t('closeNavigation')}
               >
-                <X className="h-5 w-5" />
-              </button>
+                <X className="h-5 w-5 shrink-0" />
+              </Button>
             </div>
 
-            <div className="mt-5 rounded-md border border-white/8 bg-white/5 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/40">
+            <div className="mt-5 min-w-0 rounded-md border border-white/8 bg-white/5 p-4">
+              <p className="truncate text-[11px] font-bold uppercase tracking-[0.24em] text-white/40">
                 {t('propertyOperations')}
               </p>
-              <p className="mt-2 text-sm font-semibold text-white">{roleLabel}</p>
+              <p className="mt-2 truncate text-sm font-semibold text-white">{roleLabel}</p>
               <p className="mt-1 truncate text-sm text-white/55">
                 {user?.email || user?.username || t('user')}
               </p>
             </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-4 py-5">
+          <nav className="min-w-0 flex-1 overflow-y-auto px-4 py-5">
             {sections.map((section, index) => (
               <div key={`${section.id}-${index}`} className="mb-6 last:mb-0">
-                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.24em] text-white/35">
+                <p className="truncate px-3 text-[11px] font-bold uppercase tracking-[0.24em] text-white/35">
                   {section.label}
                 </p>
 
@@ -99,7 +100,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                         to={item.path}
                         onClick={handleNavigation}
                         className={cn(
-                          'group flex items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
+                          'group flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
                           isActive
                             ? 'bg-brand-primary text-white shadow-sm'
                             : 'text-white/65 hover:bg-white/8 hover:text-white'
@@ -112,7 +113,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                           )}
                         />
 
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{item.label}</p>
                         </div>
                       </Link>
@@ -124,11 +125,11 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           </nav>
 
           <div className="border-t border-white/10 px-5 py-4">
-            <div className="flex items-center gap-3 rounded-md border border-white/8 bg-white/5 px-3 py-3">
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm font-black uppercase text-white">
+            <div className="flex min-w-0 items-center gap-3 rounded-md border border-white/8 bg-white/5 px-3 py-3">
+              <div className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm font-black uppercase text-white">
                 {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-white">
                   {user?.username || user?.email || t('user')}
                 </p>

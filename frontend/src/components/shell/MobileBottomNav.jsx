@@ -20,6 +20,7 @@ import {
   ROLE_STAFF,
 } from '../navigation/navConfig';
 
+import { Button } from "@/components/ui/button";
 const MOBILE_NAV_ITEMS = {
   [ROLE_ADMIN]: [
     { path: '/admin/dashboard', labelKey: 'adminDashboardTitle', fallback: 'Dashboard', icon: LayoutDashboard },
@@ -56,7 +57,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-surface-border bg-brand-surface/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl lg:hidden">
-      <div className="mx-auto grid max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
+      <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = isNavItemActive(location.pathname, item.path);
@@ -73,24 +74,24 @@ export default function MobileBottomNav({ onOpenMenu }) {
               )}
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate text-[11px] font-bold">
+              <span className="w-full truncate text-[11px] font-bold">
                 {t(item.labelKey, { defaultValue: item.fallback })}
               </span>
             </Link>
           );
         })}
 
-        <button
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={onOpenMenu}
           className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition hover:bg-white hover:text-brand-ink"
           aria-label={t('openNavigation')}
         >
           <Menu className="h-4 w-4 flex-shrink-0" />
-          <span className="truncate text-[11px] font-bold">
+          <span className="w-full truncate text-[11px] font-bold">
             {t('menu', { defaultValue: 'Menu' })}
           </span>
-        </button>
+        </Button>
       </div>
     </nav>
   );

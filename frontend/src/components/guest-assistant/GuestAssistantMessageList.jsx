@@ -23,16 +23,16 @@ export default function GuestAssistantMessageList({
         const bubbleClass = BUBBLE_CLASS_BY_ROLE[message.senderRole] ?? BUBBLE_CLASS_BY_ROLE.STAFF;
 
         return (
-          <div key={message.id} className={`flex ${isGuest ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[86%] rounded-[1.4rem] px-4 py-3 ${bubbleClass}`}>
-              <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] opacity-70">
-                {message.senderRole === 'AI' ? <Bot className="h-3.5 w-3.5" /> : <UserRound className="h-3.5 w-3.5" />}
-                <span>{message.senderDisplayName}</span>
+          <div key={message.id} className={`flex min-w-0 ${isGuest ? 'justify-end' : 'justify-start'}`}>
+            <div className={`min-w-0 max-w-[86%] rounded-[1.4rem] px-4 py-3 ${bubbleClass}`}>
+              <div className="mb-2 flex min-w-0 items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] opacity-70">
+                {message.senderRole === 'AI' ? <Bot className="h-3.5 w-3.5 shrink-0" /> : <UserRound className="h-3.5 w-3.5 shrink-0" />}
+                <span className="min-w-0 truncate">{message.senderDisplayName}</span>
               </div>
               <p className="whitespace-pre-wrap break-words text-sm leading-6">{body}</p>
-              <div className="mt-3 flex items-center justify-between gap-3 text-[11px] font-bold opacity-70">
-                <span>{formatLocalizedDateTime(message.createdAt, language, { timeStyle: 'short' })}</span>
-                {isGuest ? <span>{getMessageStatusLabel(message)}</span> : null}
+              <div className="mt-3 flex min-w-0 items-center justify-between gap-3 text-[11px] font-bold opacity-70">
+                <span className="min-w-0 truncate">{formatLocalizedDateTime(message.createdAt, language, { timeStyle: 'short' })}</span>
+                {isGuest ? <span className="shrink-0 truncate">{getMessageStatusLabel(message)}</span> : null}
               </div>
             </div>
           </div>
@@ -40,7 +40,7 @@ export default function GuestAssistantMessageList({
       })}
 
       {typingLabel ? (
-        <div className="flex justify-start">
+        <div className="flex min-w-0 justify-start">
           <div className="rounded-full border border-brand-surface-border bg-white px-4 py-2 text-xs font-bold text-brand-ink-muted shadow-sm">
             {typingLabel}
           </div>

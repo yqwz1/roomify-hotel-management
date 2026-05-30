@@ -13,7 +13,7 @@ export function ChartSkeleton({ height = "h-64", rows = 1, className }) {
         <div className="h-4 w-1/2 rounded-full bg-brand-primary-tint" />
         <div className={cn("w-full rounded-xl bg-brand-surface-light", heightClassName)} style={heightStyle} />
         {rows > 1 && (
-          <div className="grid grid-cols-3 gap-4 pt-4">
+          <div className="grid min-w-0 grid-cols-3 gap-4 pt-4">
             {Array.from({ length: rows }).map((_, i) => (
               <div key={i} className="h-10 rounded-xl bg-brand-primary-tint" />
             ))}

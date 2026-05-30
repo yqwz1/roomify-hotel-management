@@ -29,6 +29,7 @@ import {
   translateWithFallback,
 } from '../../utils/localization';
 
+import { NativeSelect } from "@/components/ui/native-select";
 const INVENTORY_CATEGORIES = [
   'CLEANING_CHEMICALS',
   'TOILETRIES',
@@ -120,9 +121,9 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.itemNameLabel', 'Item name')}
             </span>
             <input
@@ -135,10 +136,10 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.categoryLabel', 'Category')}
             </span>
-            <select
+            <NativeSelect
               value={formData.category}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, category: event.target.value }))
@@ -150,16 +151,16 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
                   {humanizeEnum(category)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-3">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.unitLabel', 'Unit')}
             </span>
-            <select
+            <NativeSelect
               value={formData.unitOfMeasure}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, unitOfMeasure: event.target.value }))
@@ -171,11 +172,11 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
                   {humanizeEnum(unit)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.minimumThresholdLabel', 'Minimum stock')}
             </span>
             <input
@@ -195,7 +196,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.defaultUnitCostLabel', 'Default unit cost')}
             </span>
             <input
@@ -214,7 +215,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
 
         {!editing ? (
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.initialStockLabel', 'Initial stock')}
             </span>
             <input
@@ -230,9 +231,9 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
             </span>
             <input
@@ -245,7 +246,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.skuLabel', 'SKU')}
             </span>
             <input
@@ -256,20 +257,20 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           </label>
         </div>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
+        <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.active}
             onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
             className="h-4 w-4 rounded border-brand-surface-border"
           />
-          <span className="text-sm font-medium text-brand-ink">
+          <span className="text-sm font-medium text-brand-ink break-words">
             {translateWithFallback(t, 'inventoryPage.activeLabel', 'Active item')}
           </span>
         </label>
 
-        <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+        <label className="space-y-2 flex min-w-0 flex-col">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
@@ -280,13 +281,13 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
           />
         </label>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none" type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
-          </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
+          </Button>
+          <Button variant="unstyled" size="none" type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'save', 'Save')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -312,9 +313,9 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
             <input
@@ -328,7 +329,7 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.unitCostLabel', 'Unit cost')}
             </span>
             <input
@@ -344,7 +345,7 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
         </div>
 
         <label className="space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
           </span>
           <input
@@ -354,20 +355,20 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
           />
         </label>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
+        <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.linkToExpense}
             onChange={(event) => setFormData((current) => ({ ...current, linkToExpense: event.target.checked }))}
             className="h-4 w-4 rounded border-brand-surface-border"
           />
-          <span className="text-sm font-medium text-brand-ink">
+          <span className="text-sm font-medium text-brand-ink break-words">
             {translateWithFallback(t, 'inventoryPage.linkExpenseLabel', 'Also record this as cash spend')}
           </span>
         </label>
 
-        <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+        <label className="space-y-2 flex min-w-0 flex-col">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
@@ -378,13 +379,13 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
           />
         </label>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none" type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
-          </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
+          </Button>
+          <Button variant="unstyled" size="none" type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'inventoryPage.restockAction', 'Restock')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -410,12 +411,12 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.transactionTypeLabel', 'Adjustment type')}
             </span>
-            <select
+            <NativeSelect
               value={formData.transactionType}
               onChange={(event) => setFormData((current) => ({ ...current, transactionType: event.target.value }))}
               className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
@@ -425,10 +426,10 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
                   {humanizeEnum(type)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
             <input
@@ -442,7 +443,7 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
           </label>
         </div>
 
-        <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
+        <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <input
             type="checkbox"
             checked={formData.increaseStock}
@@ -450,13 +451,13 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
             className="h-4 w-4 rounded border-brand-surface-border"
             disabled={formData.transactionType !== 'MANUAL_ADJUSTMENT'}
           />
-          <span className="text-sm font-medium text-brand-ink">
+          <span className="text-sm font-medium text-brand-ink break-words">
             {translateWithFallback(t, 'inventoryPage.increaseStockLabel', 'Increase stock instead of reducing it')}
           </span>
         </label>
 
-        <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+        <label className="space-y-2 flex min-w-0 flex-col">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
@@ -467,13 +468,13 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
           />
         </label>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none" type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
-          </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
+          </Button>
+          <Button variant="unstyled" size="none" type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'inventoryPage.saveAdjustmentAction', 'Save Adjustment')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -557,9 +558,9 @@ function TemplateModal({
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-3">
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.templateNameLabel', 'Template name')}
             </span>
             <input
@@ -571,10 +572,10 @@ function TemplateModal({
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.serviceTypeLabel', 'Service type')}
             </span>
-            <select
+            <NativeSelect
               value={formData.serviceType}
               onChange={(event) => setFormData((current) => ({ ...current, serviceType: event.target.value }))}
               className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
@@ -584,16 +585,16 @@ function TemplateModal({
                   {humanizeEnum(type)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.roomTypeLabel', 'Room type')}
             </span>
-            <select
+            <NativeSelect
               value={formData.roomTypeId}
               onChange={(event) => setFormData((current) => ({ ...current, roomTypeId: event.target.value }))}
               className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
@@ -606,24 +607,24 @@ function TemplateModal({
                   {roomType.name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
 
-          <label className="flex items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
+          <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
             <input
               type="checkbox"
               checked={formData.active}
               onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
               className="h-4 w-4 rounded border-brand-surface-border"
             />
-            <span className="text-sm font-medium text-brand-ink">
+            <span className="text-sm font-medium text-brand-ink break-words">
               {translateWithFallback(t, 'inventoryPage.activeTemplateLabel', 'Template is active')}
             </span>
           </label>
         </div>
 
-        <label className="space-y-2 flex flex-col">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+        <label className="space-y-2 flex min-w-0 flex-col">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
           </span>
           <Textarea
@@ -635,12 +636,12 @@ function TemplateModal({
         </label>
 
         <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-black text-brand-ink">
+              <p className="text-sm font-black text-brand-ink break-words">
                 {translateWithFallback(t, 'inventoryPage.templateItemsTitle', 'Standard items')}
               </p>
-              <p className="text-sm font-medium text-brand-ink-muted">
+              <p className="text-sm font-medium text-brand-ink-muted break-words">
                 {translateWithFallback(
                   t,
                   'inventoryPage.templateItemsDescription',
@@ -655,12 +656,12 @@ function TemplateModal({
 
           <div className="mt-4 space-y-3">
             {formData.items.map((item, index) => (
-              <div key={`${item.inventoryItemId}-${index}`} className="grid gap-3 rounded-[1.25rem] border border-brand-surface-border bg-white p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
+              <div key={`${item.inventoryItemId}-${index}`} className="grid min-w-0 gap-3 rounded-[1.25rem] border border-brand-surface-border bg-white p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
                 <label className="space-y-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, 'inventoryPage.itemNameLabel', 'Item')}
                   </span>
-                  <select
+                  <NativeSelect
                     value={item.inventoryItemId}
                     onChange={(event) =>
                       handleTemplateItemChange(index, 'inventoryItemId', Number(event.target.value))
@@ -674,10 +675,10 @@ function TemplateModal({
                           {inventoryItem.name}
                         </option>
                       ))}
-                  </select>
+                  </NativeSelect>
                 </label>
                 <label className="space-y-2">
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, 'inventoryPage.standardQuantityLabel', 'Standard quantity')}
                   </span>
                   <input
@@ -691,14 +692,14 @@ function TemplateModal({
                     className="h-11 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
                   />
                 </label>
-                <div className="flex items-end">
-                  <button
+                <div className="flex min-w-0 items-end">
+                  <Button variant="unstyled" size="none"
                     type="button"
                     onClick={() => handleRemoveTemplateItem(index)}
                     className="h-11 rounded-full border border-brand-danger/30 bg-brand-danger/10 px-4 text-sm font-bold text-brand-danger"
                   >
                     {translateWithFallback(t, 'inventoryPage.removeItemAction', 'Remove')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -715,13 +716,13 @@ function TemplateModal({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
+        <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          <Button variant="unstyled" size="none" type="button" onClick={onClose} className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink">
             {translateWithFallback(t, 'cancel', 'Cancel')}
-          </button>
-          <button type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
+          </Button>
+          <Button variant="unstyled" size="none" type="submit" disabled={saving} className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted">
             {saving ? translateWithFallback(t, 'saving', 'Saving...') : translateWithFallback(t, 'save', 'Save')}
-          </button>
+          </Button>
         </div>
       </form>
     </ModalFrame>
@@ -973,7 +974,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
           'Track stock, standard room-service usage, and operational consumption without duplicating expense totals.'
         )}
         action={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={loadData} className="border-brand-surface-border">
               {translateWithFallback(t, 'retry', 'Refresh')}
             </Button>
@@ -993,13 +994,13 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
           />
         ) : (
           <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
               {metricCards.map((card) => (
                 <DashboardMetricCard key={card.label} {...card} />
               ))}
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
               <DashboardPanel
                 title={translateWithFallback(t, 'inventoryPage.itemsTitle', 'Inventory Items')}
                 description={translateWithFallback(
@@ -1025,32 +1026,32 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                         key={item.id}
                         className="rounded-[1.35rem] border border-brand-surface-border bg-white p-4 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.22)]"
                       >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-lg font-black tracking-tight text-brand-ink">{item.name}</p>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
-                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-lg font-black tracking-tight text-brand-ink break-words">{item.name}</p>
+                            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+                              <span className="max-w-full shrink-0 truncate rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
                                 {humanizeEnum(item.category)}
                               </span>
-                              <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
+                              <span className="max-w-full shrink-0 truncate rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1">
                                 {humanizeEnum(item.unitOfMeasure)}
                               </span>
                               {item.lowStock ? (
-                                <span className="rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1 text-brand-danger">
+                                <span className="max-w-full shrink-0 truncate rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1 text-brand-danger">
                                   {translateWithFallback(t, 'inventoryPage.lowStockBadge', 'Low stock')}
                                 </span>
                               ) : null}
                             </div>
                           </div>
 
-                          <div className="text-right">
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                          <div className="min-w-0 shrink-0 text-end">
+                            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {translateWithFallback(t, 'inventoryPage.stockOnHandLabel', 'On hand')}
                             </p>
-                            <p className="mt-2 text-2xl font-black text-brand-ink">
+                            <p className="mt-2 text-2xl font-black text-brand-ink break-words">
                               {formatLocalizedNumber(item.currentStockQuantity, language)}
                             </p>
-                            <p className="text-sm font-medium text-brand-ink-muted">
+                            <p className="text-sm font-medium text-brand-ink-muted break-words">
                               {translateWithFallback(
                                 t,
                                 'inventoryPage.avgUnitCostLabel',
@@ -1061,7 +1062,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           </div>
                         </div>
 
-                        <div className="mt-4 grid gap-3 text-sm font-medium text-brand-ink-muted md:grid-cols-3">
+                        <div className="mt-4 grid min-w-0 gap-3 text-sm font-medium text-brand-ink-muted md:grid-cols-3">
                           <p>
                             {translateWithFallback(
                               t,
@@ -1088,28 +1089,28 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                           </p>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <button
+                        <div className="mt-4 flex min-w-0 flex-wrap gap-2">
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => openRestockModal(item)}
                             className="rounded-full border border-brand-success/30 bg-brand-success/10 px-4 py-2 text-sm font-bold text-brand-success"
                           >
                             {translateWithFallback(t, 'inventoryPage.restockAction', 'Restock')}
-                          </button>
-                          <button
+                          </Button>
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => openAdjustmentModal(item)}
                             className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'inventoryPage.adjustStockAction', 'Adjust stock')}
-                          </button>
-                          <button
+                          </Button>
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => openEditItemModal(item)}
                             className="rounded-full border border-brand-surface-border bg-brand-surface-light px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'editStaff', 'Edit')}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -1130,8 +1131,8 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                     <div className="space-y-3">
                       {summary.lowStockItems.map((item) => (
                         <div key={item.id} className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 p-4">
-                          <p className="text-sm font-black text-brand-ink">{item.name}</p>
-                          <p className="mt-1 text-sm font-medium text-brand-danger/80">
+                          <p className="text-sm font-black text-brand-ink break-words">{item.name}</p>
+                          <p className="mt-1 text-sm font-medium text-brand-danger/80 break-words">
                             {translateWithFallback(
                               t,
                               'inventoryPage.lowStockCopy',
@@ -1170,13 +1171,13 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                     <div className="space-y-3">
                       {summary.topConsumedItems.slice(0, 6).map((item) => (
                         <div key={item.key} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-black text-brand-ink">{item.label}</p>
-                            <p className="text-sm font-black text-brand-ink">
+                          <div className="flex min-w-0 items-center justify-between gap-3">
+                            <p className="text-sm font-black text-brand-ink break-words">{item.label}</p>
+                            <p className="text-sm font-black text-brand-ink break-words">
                               {formatLocalizedCurrency(item.totalValue, language)}
                             </p>
                           </div>
-                          <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+                          <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
                             {translateWithFallback(
                               t,
                               'inventoryPage.topConsumedCopy',
@@ -1205,7 +1206,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
               </div>
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[1fr_1fr]">
               <DashboardPanel
                 title={translateWithFallback(t, 'inventoryPage.templatesTitle', 'Usage Templates')}
                 description={translateWithFallback(
@@ -1233,23 +1234,23 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   <div className="space-y-3">
                     {templates.map((template) => (
                       <div key={template.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-brand-ink">{template.name}</p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                            <p className="text-sm font-black text-brand-ink break-words">{template.name}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {humanizeEnum(template.serviceType)}
                               {template.roomTypeName ? ` · ${template.roomTypeName}` : ''}
                             </p>
                           </div>
-                          <button
+                          <Button variant="unstyled" size="none"
                             type="button"
                             onClick={() => openEditTemplateModal(template)}
                             className="rounded-full border border-brand-surface-border bg-white px-4 py-2 text-sm font-bold text-brand-ink"
                           >
                             {translateWithFallback(t, 'editStaff', 'Edit')}
-                          </button>
+                          </Button>
                         </div>
-                        <p className="mt-3 text-sm font-medium text-brand-ink-muted">
+                        <p className="mt-3 text-sm font-medium text-brand-ink-muted break-words">
                           {translateWithFallback(
                             t,
                             'inventoryPage.templateItemCountCopy',
@@ -1275,20 +1276,20 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   <div className="space-y-3">
                     {summary.recentUsageRecords.slice(0, 6).map((record) => (
                       <div key={record.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-brand-ink">
+                            <p className="text-sm font-black text-brand-ink break-words">
                               {record.roomNumber ? `Room ${record.roomNumber}` : translateWithFallback(t, 'inventoryPage.generalUsageLabel', 'General service')}
                             </p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {humanizeEnum(record.serviceType)}
                             </p>
                           </div>
-                          <p className="text-sm font-black text-brand-ink">
+                          <p className="text-sm font-black text-brand-ink break-words">
                             {formatLocalizedCurrency(record.totalCost, language)}
                           </p>
                         </div>
-                        <p className="mt-3 text-sm font-medium text-brand-ink-muted">
+                        <p className="mt-3 text-sm font-medium text-brand-ink-muted break-words">
                           {formatLocalizedDateTime(record.performedAt, language)}
                         </p>
                       </div>
@@ -1308,7 +1309,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
               </DashboardPanel>
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[1fr_1fr]">
               <DashboardPanel
                 title={translateWithFallback(t, 'inventoryPage.movementsTitle', 'Recent Stock Movements')}
                 description={translateWithFallback(
@@ -1321,18 +1322,18 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   <div className="space-y-3">
                     {summary.recentTransactions.slice(0, 8).map((transaction) => (
                       <div key={transaction.id} className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center justify-between gap-3">
                           <div>
-                            <p className="text-sm font-black text-brand-ink">{transaction.itemName}</p>
-                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                            <p className="text-sm font-black text-brand-ink break-words">{transaction.itemName}</p>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {humanizeEnum(transaction.transactionType)}
                             </p>
                           </div>
-                          <p className="text-sm font-black text-brand-ink">
+                          <p className="text-sm font-black text-brand-ink break-words">
                             {formatLocalizedNumber(transaction.quantityChange, language)}
                           </p>
                         </div>
-                        <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+                        <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
                           {formatLocalizedDateTime(transaction.occurredAt, language)}
                         </p>
                       </div>
@@ -1361,7 +1362,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
               >
                 <div className="space-y-6">
                   <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                    <p className="text-sm font-black text-brand-ink">
+                    <p className="text-sm font-black text-brand-ink break-words">
                       {translateWithFallback(t, 'inventoryPage.categoryUsageTitle', 'Usage by category')}
                     </p>
                     <div className="mt-4">
@@ -1387,7 +1388,7 @@ export default function InventoryOperationsPanel({ filters, t, language }) {
                   </div>
 
                   <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4">
-                    <p className="text-sm font-black text-brand-ink">
+                    <p className="text-sm font-black text-brand-ink break-words">
                       {translateWithFallback(t, 'inventoryPage.serviceUsageTitle', 'Usage by service type')}
                     </p>
                     <div className="mt-4">

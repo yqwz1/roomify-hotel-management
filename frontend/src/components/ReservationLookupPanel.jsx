@@ -21,6 +21,8 @@ import {
   translateKnownValue,
 } from '../utils/localization';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 const STATUS_OPTIONS = Object.values(ReservationStatus);
 
 const hasActiveFilters = (filters) =>
@@ -265,26 +267,26 @@ export default function ReservationLookupPanel({
       )}
     >
       <div className="border-b border-brand-surface-border px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white">
-              <Search className="h-5 w-5" />
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white break-words">
+              <Search className="h-5 w-5 shrink-0" />
             </span>
             <div>
-              <h2 className="text-lg font-black tracking-tight text-brand-ink">
+              <h2 className="text-lg font-black tracking-tight text-brand-ink break-words">
                 {t('reservationLookupPanel.title')}
               </h2>
-              <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+              <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                 {t('reservationLookupPanel.description')}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
+          <div className="flex min-w-0 flex-wrap gap-2">
+            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted break-words">
               {t('reservationLookupPanel.chipConfirmation')}
             </span>
-            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted">
+            <span className="rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-muted break-words">
               {t('reservationLookupPanel.chipFiltered')}
             </span>
           </div>
@@ -325,7 +327,7 @@ export default function ReservationLookupPanel({
               <span className={FILTER_LABEL_CLASS}>
                 {t('status')}
               </span>
-              <select
+              <NativeSelect
                 value={filters.status}
                 onChange={(event) => updateFilter('status', event.target.value)}
                 className={FILTER_INPUT_CLASS}
@@ -336,7 +338,7 @@ export default function ReservationLookupPanel({
                     {getReservationStatusLabel(status, t)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
 
             <label className={FILTER_FIELD_CLASS}>
@@ -364,36 +366,36 @@ export default function ReservationLookupPanel({
             </label>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-            <button
+          <div className="flex min-w-0 flex-wrap items-center gap-3 sm:justify-end">
+            <Button variant="unstyled" size="none"
               type="submit"
               disabled={loading || !hasActiveFilters(filters)}
               className="inline-flex h-12 min-w-[170px] items-center justify-center gap-2 rounded-2xl bg-brand-primary px-6 text-sm font-extrabold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-brand-primary-deep hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted disabled:shadow-none"
             >
-              <SlidersHorizontal className="h-4 w-4" />
+              <SlidersHorizontal className="h-4 w-4 shrink-0" />
               {loading ? t('common.searching') : t('common.searchReservation')}
-            </button>
+            </Button>
 
-            <button
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={resetFilters}
               disabled={isAtDefaultState}
               className="inline-flex h-12 min-w-[170px] items-center justify-center gap-2 rounded-2xl border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-primary/40 hover:bg-brand-surface-light hover:shadow disabled:translate-y-0 disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint disabled:shadow-none"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-4 w-4 shrink-0" />
               {t('common.clearFilters')}
-            </button>
+            </Button>
           </div>
 
           <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
             {activeFilterChips.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex min-w-0 flex-wrap gap-2">
                 {activeFilterChips.map((chip) => (
                   <span
                     key={chip.key}
-                    className="inline-flex max-w-full items-center gap-1 rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink"
+                    className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink break-words"
                   >
-                    <span className="text-brand-ink-muted">{chip.label}:</span>
+                    <span className="text-brand-ink-muted break-words">{chip.label}:</span>
                     {chip.ltr ? (
                       <LtrText className="text-brand-ink">{chip.value}</LtrText>
                     ) : (
@@ -405,7 +407,7 @@ export default function ReservationLookupPanel({
                 ))}
               </div>
             ) : (
-              <p className="text-sm font-medium text-brand-ink-muted">
+              <p className="text-sm font-medium text-brand-ink-muted break-words">
                 {translateWithFallback(
                   t,
                   'reservationLookupPanel.emptyFiltersNote',
@@ -414,7 +416,7 @@ export default function ReservationLookupPanel({
               </p>
             )}
 
-            <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted">
+            <p className="mt-3 text-sm font-medium leading-6 text-brand-ink-muted break-words">
               {hasConfirmationPrecedence
                 ? translateWithFallback(
                     t,
@@ -432,10 +434,10 @@ export default function ReservationLookupPanel({
 
         {loading && (
           <div className="mt-4 rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light px-6 py-8 text-center">
-            <p className="text-sm font-bold text-brand-ink">
+            <p className="text-sm font-bold text-brand-ink break-words">
               {translateWithFallback(t, 'reservationLookupPanel.loadingTitle', 'Searching reservations')}
             </p>
-            <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+            <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
               {translateWithFallback(
                 t,
                 'reservationLookupPanel.loadingDescription',
@@ -454,19 +456,19 @@ export default function ReservationLookupPanel({
         {!loading && searched && reservations.length === 0 && (
           <div className="mt-4 space-y-4">
             <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-10 text-center">
-              <p className="text-sm font-bold text-brand-ink">{t('reservationLookupPanel.emptyTitle')}</p>
-              <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+              <p className="text-sm font-bold text-brand-ink break-words">{t('reservationLookupPanel.emptyTitle')}</p>
+              <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
                 {t('reservationLookupPanel.emptyDescription')}
               </p>
             </div>
             {!isAtDefaultState ? (
-              <button
+              <Button variant="unstyled" size="none"
                 type="button"
                 onClick={resetFilters}
-                className="inline-flex h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
+                className="inline-flex min-w-0 h-12 items-center justify-center rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light"
               >
                 {t('common.clearFilters')}
-              </button>
+              </Button>
             ) : null}
           </div>
         )}
@@ -474,10 +476,10 @@ export default function ReservationLookupPanel({
         {!loading && reservations.length > 0 && (
           <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light">
             <div className="border-b border-brand-surface-border bg-white px-4 py-3 sm:px-5">
-              <p className="text-sm font-bold text-brand-ink">
+              <p className="text-sm font-bold text-brand-ink break-words">
                 {t('reservationLookupPanel.resultsTitle', { count: reservations.length })}
               </p>
-              <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+              <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                 {hasMultipleMatches
                   ? t('reservationLookupPanel.multipleMatchesDescription')
                   : t('reservationLookupPanel.singleMatchDescription')}
@@ -488,13 +490,13 @@ export default function ReservationLookupPanel({
               {reservations.map((reservation) => (
                 <div key={reservation._rowKey} className="bg-white/80 px-4 py-4 sm:px-5">
                   <div className="flex min-w-0 flex-col gap-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-1 items-start gap-3">
-                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-                          <UserRound className="h-4 w-4" />
+                        <span className="flex min-w-0 h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+                          <UserRound className="h-4 w-4 shrink-0" />
                         </span>
                         <div className="min-w-0">
-                          <p className="text-base font-black tracking-tight text-brand-ink [overflow-wrap:anywhere]">
+                          <p className="text-base font-black tracking-tight text-brand-ink [overflow-wrap:anywhere] break-words">
                             {reservation.guestName ?? t('common.guest')}
                           </p>
                           <LtrText className="mt-1 text-sm font-medium text-brand-ink-muted">
@@ -522,7 +524,7 @@ export default function ReservationLookupPanel({
                         <LtrText className="mt-2 text-sm font-bold text-brand-ink">
                           {reservation.roomNumber ?? t('unassigned')}
                         </LtrText>
-                        <p className="mt-1 text-xs font-medium text-brand-ink-muted [overflow-wrap:anywhere]">
+                        <p className="mt-1 text-xs font-medium text-brand-ink-muted [overflow-wrap:anywhere] break-words">
                           {translateKnownValue(reservation.roomTypeName, t) || t('unassigned')}
                         </p>
                       </div>
@@ -532,9 +534,9 @@ export default function ReservationLookupPanel({
                           {t('modifyReservationPage.stayDates')}
                         </p>
                         <div className="mt-2 space-y-2">
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                            <span className="inline-flex min-w-max items-center gap-2 text-xs font-medium text-brand-ink-muted">
-                              <CalendarDays className="h-4 w-4 text-brand-ink-hint" />
+                          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <span className="inline-flex min-w-0 min-w-max items-center gap-2 text-xs font-medium text-brand-ink-muted break-words">
+                              <CalendarDays className="h-4 w-4 text-brand-ink-hint shrink-0" />
                               {t('checkInDate')}
                             </span>
                             <span className="min-w-max whitespace-nowrap text-sm font-bold text-brand-ink">
@@ -545,8 +547,8 @@ export default function ReservationLookupPanel({
                               })}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                            <span className="min-w-max text-xs font-medium text-brand-ink-muted">{t('checkOutDate')}</span>
+                          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <span className="min-w-max text-xs font-medium text-brand-ink-muted break-words">{t('checkOutDate')}</span>
                             <span className="min-w-max whitespace-nowrap text-sm font-bold text-brand-ink">
                               {formatLocalizedDate(reservation.checkOutDate, i18n.language, {
                                 month: 'short',
@@ -576,8 +578,8 @@ export default function ReservationLookupPanel({
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-brand-surface-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm font-medium text-brand-ink-muted">
+                    <div className="flex min-w-0 flex-col gap-3 border-t border-brand-surface-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm font-medium text-brand-ink-muted break-words">
                         {hasMultipleMatches
                           ? translateWithFallback(
                               t,
@@ -590,14 +592,14 @@ export default function ReservationLookupPanel({
                               'This stay is ready to hand off into the reservation workflow.'
                             )}
                       </p>
-                      <button
+                      <Button variant="unstyled" size="none"
                         type="button"
                         onClick={() => onSelect?.(reservation)}
-                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-primary hover:bg-brand-surface-light sm:w-auto"
+                        className="inline-flex min-w-0 h-11 w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 text-sm font-bold text-brand-ink transition hover:border-brand-primary hover:bg-brand-surface-light sm:w-auto"
                       >
                         {t('common.selectReservation')}
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
+                        <ArrowRight className="h-4 w-4 shrink-0" />
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -47,7 +47,7 @@ export default function MarkdownMessage({ content }) {
 
     if (trimmed.startsWith('### ')) {
       elements.push(
-        <h4 key={`h4-${index}`} className="text-sm font-black tracking-tight">
+        <h4 key={`h4-${index}`} className="text-sm font-black tracking-tight break-words">
           {renderInline(trimmed.slice(4))}
         </h4>
       );
@@ -56,7 +56,7 @@ export default function MarkdownMessage({ content }) {
 
     if (trimmed.startsWith('## ')) {
       elements.push(
-        <h3 key={`h3-${index}`} className="text-base font-black tracking-tight">
+        <h3 key={`h3-${index}`} className="text-base font-black tracking-tight break-words">
           {renderInline(trimmed.slice(3))}
         </h3>
       );
@@ -64,7 +64,7 @@ export default function MarkdownMessage({ content }) {
     }
 
     elements.push(
-      <p key={`p-${index}`} className="text-sm leading-6">
+      <p key={`p-${index}`} className="text-sm leading-6 break-words">
         {renderInline(trimmed)}
       </p>
     );

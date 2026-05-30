@@ -38,8 +38,6 @@ export default function AppShell({ children }) {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     const handleChange = (event) => setIsDesktop(event.matches);
 
-    setIsDesktop(mediaQuery.matches);
-
     if (typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
@@ -85,7 +83,7 @@ export default function AppShell({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-brand-surface font-sans text-brand-ink lg:h-screen lg:overflow-hidden">
+    <div className="flex min-w-0 min-h-screen overflow-x-hidden bg-brand-surface font-sans text-brand-ink lg:h-screen lg:overflow-hidden">
       <AppSidebar
         isOpen={sidebarOpen}
         isDesktop={isDesktop}
@@ -99,7 +97,7 @@ export default function AppShell({ children }) {
           onMenuToggle={handleSidebarToggle}
         />
 
-        <main className="relative flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
+        <main className="relative min-w-0 flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
           {children}
         </main>
         {!isDesktop ? (

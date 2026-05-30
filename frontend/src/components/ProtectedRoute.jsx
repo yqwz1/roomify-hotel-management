@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (loading) {
     return (
       <div
-        className="h-full flex items-center justify-center"
+        className="h-full flex min-w-0 items-center justify-center"
         role="status"
         aria-label={t('loadingLabel')}
       >

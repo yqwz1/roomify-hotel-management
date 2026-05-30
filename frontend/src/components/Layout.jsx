@@ -26,11 +26,11 @@ export default function Layout({ children, showSidebar = false }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#F5F2EA] font-sans">
+    <div className="flex min-w-0 min-h-screen flex-col overflow-x-hidden bg-[#F5F2EA] font-sans">
       <SmoothScroll />
       <HashScroller />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="min-w-0 flex-1">{children}</main>
       <FloatingGuestAssistant />
     </div>
   )

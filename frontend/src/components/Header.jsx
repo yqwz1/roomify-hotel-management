@@ -28,12 +28,12 @@ function DesktopLink({ to, route, hash, label, currentPath, currentHash }) {
   return (
     <Link
       to={to}
-      className={`group relative text-sm font-semibold transition-colors ${isActive ? 'text-brand-ink' : 'text-brand-ink-muted hover:text-brand-ink'
+      className={`group relative shrink-0 whitespace-nowrap text-sm font-semibold transition-colors ${isActive ? 'text-brand-ink' : 'text-brand-ink-muted hover:text-brand-ink'
         }`}
     >
       {label}
       <span
-        className={`absolute -bottom-1.5 left-0 h-[2px] bg-brand-primary transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
+        className={`absolute -bottom-1.5 start-0 h-[2px] bg-brand-primary transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
         aria-hidden="true"
       />
@@ -99,10 +99,10 @@ export default function Header({ onMenuToggle }) {
           : 'border-transparent bg-brand-card/70 backdrop-blur'
         }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
+      <div className="mx-auto flex min-w-0 h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-8">
 
         {/* Left: hamburger + brand */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 shrink-0 items-center gap-3">
           {/* Authenticated-shell hamburger (sidebar toggle) — preserved */}
           {isAuthenticated && onMenuToggle && (
             <Button
@@ -113,7 +113,7 @@ export default function Header({ onMenuToggle }) {
               className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
               aria-label={t('openNavigation')}
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5 shrink-0" />
             </Button>
           )}
 
@@ -128,10 +128,10 @@ export default function Header({ onMenuToggle }) {
                   className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
                   aria-label={t('openNavigation')}
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5 shrink-0" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex w-[88%] max-w-sm flex-col bg-brand-surface p-0">
+              <SheetContent side="left" className="flex min-w-0 w-[88%] max-w-sm flex-col bg-brand-surface p-0">
                 <SheetHeader className="border-b border-brand-surface-border px-6 py-5">
                   <SheetTitle className="text-left rtl:text-right text-xl font-black tracking-tighter text-brand-ink">
                     {brandName}
@@ -142,10 +142,10 @@ export default function Header({ onMenuToggle }) {
                 </SheetHeader>
 
                 <nav
-                  className="flex flex-1 flex-col gap-1 px-3 py-5 overflow-y-auto"
+                  className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-5 overflow-y-auto"
                   aria-label={t('openNavigation')}
                 >
-                  <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+                  <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
                     {t('navExploreSection', { defaultValue: 'Explore' })}
                   </p>
                   {allLinks.map(({ to, route, hash: linkHash, label }) => {
@@ -157,14 +157,14 @@ export default function Header({ onMenuToggle }) {
                           end={route === '/' && !linkHash}
                           onClick={closeMobile}
                           className={() =>
-                            `flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors ${active
+                            `flex min-w-0 items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-colors ${active
                               ? 'bg-brand-primary text-white'
                               : 'text-brand-ink-muted hover:bg-brand-card hover:text-brand-ink'
                             }`
                           }
                         >
-                          <span>{label}</span>
-                          <ArrowRight className="h-4 w-4 opacity-60 rtl:rotate-180" />
+                          <span className="min-w-0 truncate">{label}</span>
+                          <ArrowRight className="h-4 w-4 shrink-0 opacity-60 rtl:rotate-180" />
                         </NavLink>
                       </SheetClose>
                     );
@@ -172,8 +172,8 @@ export default function Header({ onMenuToggle }) {
                 </nav>
 
                 <div className="border-t border-brand-surface-border bg-brand-card/60 px-5 py-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-muted">
+                  <div className="mb-3 flex min-w-0 items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-ink-muted break-words">
                       {t('language', { defaultValue: 'Language' })}
                     </span>
                     <LanguageSwitcher />
@@ -189,9 +189,9 @@ export default function Header({ onMenuToggle }) {
                       </Button>
                     </SheetClose>
                   ) : (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card px-3 py-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-[11px] font-bold uppercase text-white">
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card px-3 py-2.5">
+                        <div className="flex min-w-0 h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-primary text-[11px] font-bold uppercase text-white">
                           {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -199,7 +199,7 @@ export default function Header({ onMenuToggle }) {
                             {user?.username || t('user')}
                           </p>
                           {roleLabel && (
-                            <p className="text-[11px] font-medium text-brand-ink-muted">{roleLabel}</p>
+                            <p className="truncate text-[11px] font-medium text-brand-ink-muted">{roleLabel}</p>
                           )}
                         </div>
                       </div>
@@ -211,7 +211,7 @@ export default function Header({ onMenuToggle }) {
                         }}
                         className="h-10 w-full justify-center gap-2 rounded-full border border-brand-surface-border text-sm font-bold text-brand-ink-muted hover:bg-brand-surface-light hover:text-brand-ink"
                       >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-4 w-4 shrink-0" />
                         {t('logout')}
                       </Button>
                     </div>
@@ -223,7 +223,7 @@ export default function Header({ onMenuToggle }) {
 
           <Link
             to="/"
-            className="group flex items-center text-brand-ink"
+            className="group flex min-w-0 items-center text-brand-ink"
             aria-label={brandName}
           >
             <img
@@ -236,7 +236,7 @@ export default function Header({ onMenuToggle }) {
         </div>
 
         {/* Center: Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-7">
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-5 overflow-x-auto px-4 lg:flex xl:gap-7">
           {allLinks.map(({ to, route, hash: linkHash, label }) => (
             <DesktopLink
               key={`${route}${linkHash}`}
@@ -251,7 +251,7 @@ export default function Header({ onMenuToggle }) {
         </nav>
 
         {/* Right: auth actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 shrink-0 items-center gap-3">
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>
@@ -264,11 +264,11 @@ export default function Header({ onMenuToggle }) {
               <Link to="/login">{t('signIn')}</Link>
             </Button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               {/* User chip – desktop */}
-              <div className="hidden xl:flex items-center gap-2 rounded-full border border-brand-surface-border bg-brand-card px-3 py-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary">
-                  <span className="text-[10px] font-bold uppercase text-white">
+              <div className="hidden min-w-0 items-center gap-2 rounded-full border border-brand-surface-border bg-brand-card px-3 py-1 xl:flex">
+                <div className="flex min-w-0 h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-primary">
+                  <span className="text-[10px] font-bold uppercase text-white break-words">
                     {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
                   </span>
                 </div>
@@ -276,7 +276,7 @@ export default function Header({ onMenuToggle }) {
                   {user?.username || t('user')}
                 </span>
                 {roleLabel && (
-                  <span className="border-s border-brand-surface-border ps-2 text-[11px] font-medium text-brand-ink-muted">
+                  <span className="max-w-[5.5rem] truncate border-s border-brand-surface-border ps-2 text-[11px] font-medium text-brand-ink-muted">
                     {roleLabel}
                   </span>
                 )}
@@ -285,10 +285,10 @@ export default function Header({ onMenuToggle }) {
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-brand-ink-muted transition hover:border-brand-surface-border hover:bg-brand-surface-light hover:text-brand-ink"
+                className="flex min-w-0 items-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-brand-ink-muted transition hover:border-brand-surface-border hover:bg-brand-surface-light hover:text-brand-ink"
                 title={t('logout')}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:block">{t('logout')}</span>
               </Button>
             </div>

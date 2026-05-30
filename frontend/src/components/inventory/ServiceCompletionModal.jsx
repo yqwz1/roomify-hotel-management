@@ -14,6 +14,7 @@ import {
   translateKnownValue,
 } from '../../utils/localization';
 
+import { NativeSelect } from "@/components/ui/native-select";
 const CLEANING_SERVICE_TYPES = [
   'STANDARD_ROOM_CLEANING',
   'DEEP_CLEANING',
@@ -205,7 +206,7 @@ export default function ServiceCompletionModal({
     >
       {loading ? (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-brand-ink-muted">
+          <p className="text-sm font-medium text-brand-ink-muted break-words">
             {translateWithFallback(t, 'inventoryPage.loadingServicePreview', 'Loading service usage...')}
           </p>
         </div>
@@ -217,21 +218,21 @@ export default function ServiceCompletionModal({
             </div>
           ) : null}
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid min-w-0 gap-4 md:grid-cols-3">
             <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                 {translateWithFallback(t, 'inventoryPage.roomLabel', 'Room')}
               </p>
-              <p className="mt-2 text-lg font-black text-brand-ink">{room.roomNumber}</p>
-              <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+              <p className="mt-2 text-lg font-black text-brand-ink break-words">{room.roomNumber}</p>
+              <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                 {translateKnownValue(room.roomType?.name, t)}
               </p>
             </div>
             <label className="space-y-2">
-              <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                 {translateWithFallback(t, 'inventoryPage.serviceTypeLabel', 'Service type')}
               </span>
-              <select
+              <NativeSelect
                 value={serviceType}
                 onChange={(event) => setServiceType(event.target.value)}
                 className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
@@ -241,13 +242,13 @@ export default function ServiceCompletionModal({
                     {getServiceTypeLabel(value, t)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
             <div className="rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                 {translateWithFallback(t, 'inventoryPage.estimatedCostLabel', 'Estimated cost')}
               </p>
-              <p className="mt-2 text-lg font-black text-brand-ink">
+              <p className="mt-2 text-lg font-black text-brand-ink break-words">
                 {formatLocalizedCurrency(totalEstimatedCost, language)}
               </p>
             </div>
@@ -260,12 +261,12 @@ export default function ServiceCompletionModal({
           ) : null}
 
           <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-black text-brand-ink">
+                <p className="text-sm font-black text-brand-ink break-words">
                   {translateWithFallback(t, 'inventoryPage.actualUsageTitle', 'Actual usage')}
                 </p>
-                <p className="text-sm font-medium text-brand-ink-muted">
+                <p className="text-sm font-medium text-brand-ink-muted break-words">
                   {translateWithFallback(
                     t,
                     'inventoryPage.actualUsageDescription',
@@ -289,14 +290,14 @@ export default function ServiceCompletionModal({
               {items.map((item) => (
                 <div
                   key={item.inventoryItemId}
-                  className="grid gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4 md:grid-cols-[1.3fr_0.9fr_0.9fr_auto]"
+                  className="grid min-w-0 gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4 md:grid-cols-[1.3fr_0.9fr_0.9fr_auto]"
                 >
                   <div>
-                    <p className="text-sm font-black text-brand-ink">{item.inventoryItemName}</p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <p className="text-sm font-black text-brand-ink break-words">{item.inventoryItemName}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {humanizeEnum(item.category)} · {humanizeEnum(item.unitOfMeasure)}
                     </p>
-                    <p className="mt-2 text-xs font-medium text-brand-ink-muted">
+                    <p className="mt-2 text-xs font-medium text-brand-ink-muted break-words">
                       {translateWithFallback(
                         t,
                         'inventoryPage.standardUsageLabel',
@@ -314,7 +315,7 @@ export default function ServiceCompletionModal({
                   </div>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {translateWithFallback(t, 'inventoryPage.actualQuantityLabel', 'Actual quantity')}
                     </span>
                     <input
@@ -330,33 +331,33 @@ export default function ServiceCompletionModal({
                   </label>
 
                   <div className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {translateWithFallback(t, 'inventoryPage.itemCostLabel', 'Estimated cost')}
                     </span>
-                    <div className="flex h-11 items-center rounded-full border border-brand-surface-border bg-white px-4 text-sm font-bold text-brand-ink">
+                    <div className="flex min-w-0 h-11 items-center rounded-full border border-brand-surface-border bg-white px-4 text-sm font-bold text-brand-ink">
                       {formatLocalizedCurrency(item.estimatedCost, language)}
                     </div>
                   </div>
 
-                  <div className="flex items-end">
-                    <button
+                  <div className="flex min-w-0 items-end">
+                    <Button variant="unstyled" size="none"
                       type="button"
                       onClick={() => handleRemoveItem(item.inventoryItemId)}
                       className="h-11 rounded-full border border-brand-danger/30 bg-brand-danger/10 px-4 text-sm font-bold text-brand-danger"
                     >
                       {translateWithFallback(t, 'inventoryPage.removeItemAction', 'Remove')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 grid gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
+            <div className="mt-4 grid min-w-0 gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light p-4 md:grid-cols-[1.2fr_0.8fr_auto]">
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'inventoryPage.addItemLabel', 'Add extra item')}
                 </span>
-                <select
+                <NativeSelect
                   value={selectedItemId}
                   onChange={(event) => setSelectedItemId(event.target.value)}
                   className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
@@ -369,10 +370,10 @@ export default function ServiceCompletionModal({
                       {item.name}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
               <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'inventoryPage.addQuantityLabel', 'Quantity')}
                 </span>
                 <input
@@ -384,7 +385,7 @@ export default function ServiceCompletionModal({
                   className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
                 />
               </label>
-              <div className="flex items-end">
+              <div className="flex min-w-0 items-end">
                 <Button
                   type="button"
                   variant="outline"
@@ -397,8 +398,8 @@ export default function ServiceCompletionModal({
             </div>
           </div>
 
-          <label className="space-y-2 flex flex-col">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <label className="space-y-2 flex min-w-0 flex-col">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.notesLabel', 'Notes')}
             </span>
             <Textarea
@@ -414,15 +415,15 @@ export default function ServiceCompletionModal({
             />
           </label>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-            <button
+          <div className="flex min-w-0 flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <Button variant="unstyled" size="none"
               type="button"
               onClick={onClose}
-              className="rounded-full border border-brand-surface-border px-5 py-3 text-sm font-bold text-brand-ink"
+              className="rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light"
             >
               {translateWithFallback(t, 'cancel', 'Cancel')}
-            </button>
-            <button
+            </Button>
+            <Button variant="unstyled" size="none"
               type="submit"
               disabled={saving}
               className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
@@ -434,7 +435,7 @@ export default function ServiceCompletionModal({
                     'inventoryPage.completeServiceAction',
                     'Complete Service'
                   )}
-            </button>
+            </Button>
           </div>
         </form>
       )}

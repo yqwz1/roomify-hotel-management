@@ -130,13 +130,13 @@ export default function AiStatusBanner({
   return (
     <Card className={cn('overflow-hidden rounded-[1.5rem] border p-0 shadow-sm', statusConfig.panelClassName)}>
       <CardHeader className="gap-4 p-5 pb-0">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 items-start gap-4">
-            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm">
-              <StatusIcon className="h-5 w-5" />
+            <span className="flex min-w-0 h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">
+              <StatusIcon className="h-5 w-5 shrink-0" />
             </span>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <CardTitle className="text-lg font-black tracking-tight text-brand-ink">
                   AI Service Status
                 </CardTitle>
@@ -148,7 +148,7 @@ export default function AiStatusBanner({
                   {statusConfig.label}
                 </Badge>
               </div>
-              <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-brand-ink">
+              <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-brand-ink break-words">
                 {statusMessage}
               </p>
             </div>
@@ -160,11 +160,11 @@ export default function AiStatusBanner({
       </CardHeader>
 
       <CardContent className="p-5">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {metrics.map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
-                <Icon className="h-4 w-4" />
+              <div className="flex min-w-0 items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
+                <Icon className="h-4 w-4 shrink-0" />
                 {label}
               </div>
               <p className="mt-2 break-words text-lg font-black text-brand-ink">{value}</p>
@@ -173,7 +173,7 @@ export default function AiStatusBanner({
         </div>
 
         {status !== 'ONLINE' ? (
-          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium leading-6 text-brand-ink">
+          <div className="mt-4 flex min-w-0 items-start gap-3 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium leading-6 text-brand-ink">
             <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-warning" />
             <span>
               React uses Spring Boot as the integration boundary. It does not call FastAPI or

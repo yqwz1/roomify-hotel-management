@@ -92,9 +92,9 @@ export default function Sidebar({ isOpen, onClose }) {
         `}
       >
         {/* Brand header */}
-        <div className="flex items-center justify-between px-6 py-6 border-b border-brand-surface-border">
-          <div className="flex items-center">
-            <span className="text-2xl font-black text-white tracking-tighter">{brandName}</span>
+        <div className="flex min-w-0 items-center justify-between px-6 py-6 border-b border-brand-surface-border">
+          <div className="flex min-w-0 items-center">
+            <span className="text-2xl font-black text-white tracking-tighter break-words">{brandName}</span>
           </div>
           {/* Close button – mobile only */}
           <Button
@@ -104,12 +104,12 @@ export default function Sidebar({ isOpen, onClose }) {
             className="md:hidden p-2 rounded-full text-brand-ink-hint hover:text-white hover:bg-brand-primary-deep transition"
             aria-label={t('closeMenu')}
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 shrink-0" />
           </Button>
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        <nav className="min-w-0 flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
           {menuItems.map((item) => {
             const Icon = ICON_MAP[item.path] || LayoutDashboard
             const isActive = location.pathname === item.path
@@ -119,7 +119,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 className={`
-                  flex items-center gap-3 px-4 py-3 rounded-full text-sm font-bold transition-all duration-200
+                  flex min-w-0 items-center gap-3 px-4 py-3 rounded-full text-sm font-bold transition-all duration-200
                   ${isActive
                     ? 'bg-white text-brand-danger shadow-sm'
                     : 'text-brand-ink-hint hover:bg-brand-ink hover:text-white'
@@ -127,7 +127,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 `}
               >
                 <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-brand-danger' : 'text-brand-ink-muted'}`} />
-                <span>{item.label}</span>
+                <span className="min-w-0 truncate">{item.label}</span>
               </Link>
             )
           })}
@@ -135,15 +135,15 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Footer – user info */}
         <div className="px-6 py-5 border-t border-brand-surface-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-brand-primary-deep border border-brand-surface-border flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-bold text-white uppercase">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-brand-surface-border bg-brand-primary-deep">
+              <span className="text-sm font-bold text-white uppercase break-words">
                 {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </span>
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-white truncate">{user?.username || user?.email || t('user')}</p>
-              <p className="text-xs font-medium text-brand-ink-muted">{roleLabel}</p>
+              <p className="text-xs font-medium text-brand-ink-muted break-words">{roleLabel}</p>
             </div>
           </div>
         </div>

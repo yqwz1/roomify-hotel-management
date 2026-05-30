@@ -80,7 +80,7 @@ export default function AiInsightPanel({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
         {INTENTS.map(({ intent, label, icon: Icon }) => (
           <Button
             key={intent}
@@ -90,8 +90,8 @@ export default function AiInsightPanel({
             disabled={loading}
             onClick={() => onAskIntent?.(intent)}
           >
-            <Icon className="h-5 w-5 text-brand-primary" />
-            <span className="whitespace-normal text-sm font-black leading-5">{label}</span>
+            <Icon className="h-5 w-5 text-brand-primary shrink-0" />
+            <span className="whitespace-normal text-sm font-black leading-5 break-words">{label}</span>
           </Button>
         ))}
       </div>
@@ -106,13 +106,13 @@ export default function AiInsightPanel({
       {error ? (
         <Card className="rounded-[1.35rem] border border-brand-danger/30 bg-brand-danger/10 p-0 shadow-sm">
           <CardContent className="p-5">
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-danger shadow-sm">
-                <MessageSquareText className="h-5 w-5" />
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="flex min-w-0 h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-danger shadow-sm break-words">
+                <MessageSquareText className="h-5 w-5 shrink-0" />
               </span>
               <div>
-                <p className="text-sm font-black text-brand-ink">Insight unavailable</p>
-                <p className="mt-1 text-sm font-medium leading-6 text-brand-danger/80">{error}</p>
+                <p className="text-sm font-black text-brand-ink break-words">Insight unavailable</p>
+                <p className="mt-1 text-sm font-medium leading-6 text-brand-danger/80 break-words">{error}</p>
               </div>
             </div>
           </CardContent>
@@ -122,22 +122,22 @@ export default function AiInsightPanel({
       <Card className="rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
         <CardContent className="p-5">
           {loading ? (
-            <div className="flex items-center gap-3 text-sm font-bold text-brand-ink-muted">
-              <Loader2 className="h-5 w-5 animate-spin text-brand-primary" />
+            <div className="flex min-w-0 items-center gap-3 text-sm font-bold text-brand-ink-muted">
+              <Loader2 className="h-5 w-5 animate-spin text-brand-primary shrink-0" />
               Loading AI insight through Spring Boot...
             </div>
           ) : response?.answer ? (
             <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-brand-primary">
-                    <Bot className="h-5 w-5" />
+                  <span className="flex min-w-0 h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-brand-primary break-words">
+                    <Bot className="h-5 w-5 shrink-0" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-primary">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-primary break-words">
                       {titleize(response.intent || 'AI insight')}
                     </p>
-                    <p className="mt-2 text-sm font-medium leading-6 text-brand-ink">
+                    <p className="mt-2 text-sm font-medium leading-6 text-brand-ink break-words">
                       {response.answer}
                     </p>
                   </div>
@@ -156,10 +156,10 @@ export default function AiInsightPanel({
               </div>
 
               {metrics.length ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {metrics.map(([key, value]) => (
                     <div key={key} className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
                         {titleize(key)}
                       </p>
                       <p className="mt-2 break-words text-lg font-black text-brand-ink">
@@ -171,13 +171,13 @@ export default function AiInsightPanel({
               ) : null}
             </div>
           ) : (
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-surface-light text-brand-ink-muted">
-                <MessageSquareText className="h-5 w-5" />
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="flex min-w-0 h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-surface-light text-brand-ink-muted break-words">
+                <MessageSquareText className="h-5 w-5 shrink-0" />
               </span>
               <div>
-                <p className="text-sm font-black text-brand-ink">Choose a demo-safe insight</p>
-                <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+                <p className="text-sm font-black text-brand-ink break-words">Choose a demo-safe insight</p>
+                <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
                   Use the predefined buttons above. No OpenAI or free-text chatbot is required for
                   the supervisor demo.
                 </p>

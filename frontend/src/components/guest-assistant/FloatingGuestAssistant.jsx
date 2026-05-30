@@ -30,6 +30,8 @@ import GuestAssistantLauncher from './GuestAssistantLauncher';
 import GuestAssistantMessageList from './GuestAssistantMessageList';
 import GuestAssistantQuickActions from './GuestAssistantQuickActions';
 
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 export default function FloatingGuestAssistant() {
   const { user, isAuthenticated } = useAuth();
   const { t, i18n } = useTranslation();
@@ -545,12 +547,12 @@ export default function FloatingGuestAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] right-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:right-6 sm:h-[min(42rem,calc(100vh-7rem))]"
+            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))]"
           >
             <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60 break-words">
                     {translateWithFallback(t, 'guestAssistant.eyebrow', 'Roomify Concierge')}
                   </p>
                   <h3 className="mt-1 truncate text-xl font-black tracking-tight">
@@ -558,18 +560,18 @@ export default function FloatingGuestAssistant() {
                       ? buildConversationLabel(activeConversation)
                       : selectedRoomLabel}
                   </h3>
-                  <p className="mt-2 text-sm font-medium text-white/75">
+                  <p className="mt-2 text-sm font-medium text-white/75 break-words">
                     {assistantStatusText}
                   </p>
                 </div>
-                <button
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={() => setOpen(false)}
                   className="rounded-full border border-white/15 bg-white/10 p-2 text-white transition hover:bg-white/20"
                   aria-label="Close guest assistant"
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  <X className="h-4 w-4 shrink-0" />
+                </Button>
               </div>
             </div>
 
@@ -577,10 +579,10 @@ export default function FloatingGuestAssistant() {
               {showRoomSelector ? (
                 <div className="space-y-3">
                   <div className="rounded-[1.25rem] border border-brand-surface-border bg-white p-3">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {roomSelectorTitle}
                     </p>
-                    <select
+                    <NativeSelect
                       value={selectedReservationId}
                       onChange={(event) => {
                         const reservation = checkedInReservations.find(
@@ -607,8 +609,8 @@ export default function FloatingGuestAssistant() {
                           {buildGuestReservationRoomContextLabel(reservation)}
                         </option>
                       ))}
-                    </select>
-                    <p className="mt-2 text-xs font-medium text-brand-ink-muted">
+                    </NativeSelect>
+                    <p className="mt-2 text-xs font-medium text-brand-ink-muted break-words">
                       {translateWithFallback(
                         t,
                         'guestAssistant.roomSelectionHint',
@@ -617,9 +619,9 @@ export default function FloatingGuestAssistant() {
                     </p>
                   </div>
                   {visibleConversations.length > 0 ? (
-                    <div className="flex gap-2 overflow-x-auto pb-1">
+                    <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
                       {visibleConversations.map((conversation) => (
-                        <button
+                        <Button variant="unstyled" size="none"
                           key={conversation.publicId}
                           type="button"
                           onClick={() => {
@@ -639,19 +641,19 @@ export default function FloatingGuestAssistant() {
                             {conversation.lastMessagePreview || 'Start a conversation'}
                           </p>
                           {conversation.unreadGuestCount > 0 ? (
-                            <span className="mt-2 inline-flex rounded-full bg-brand-danger px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+                            <span className="mt-2 inline-flex min-w-0 rounded-full bg-brand-danger px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white break-words">
                               {conversation.unreadGuestCount} new
                             </span>
                           ) : null}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   ) : null}
                 </div>
               ) : checkedInReservations.length > 0 && visibleConversations.length > 0 ? (
-                <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
                   {visibleConversations.map((conversation) => (
-                    <button
+                    <Button variant="unstyled" size="none"
                       key={conversation.publicId}
                       type="button"
                       onClick={() => {
@@ -671,11 +673,11 @@ export default function FloatingGuestAssistant() {
                         {conversation.lastMessagePreview || 'Start a conversation'}
                       </p>
                       {conversation.unreadGuestCount > 0 ? (
-                        <span className="mt-2 inline-flex rounded-full bg-brand-danger px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+                        <span className="mt-2 inline-flex min-w-0 rounded-full bg-brand-danger px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white break-words">
                           {conversation.unreadGuestCount} new
                         </span>
                       ) : null}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               ) : null}
@@ -693,10 +695,10 @@ export default function FloatingGuestAssistant() {
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
+            <div className="min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
               {loading && !detail ? (
-                <div className="flex h-full items-center justify-center text-sm font-medium text-brand-ink-muted">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <div className="flex min-w-0 h-full items-center justify-center text-sm font-medium text-brand-ink-muted">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
                   {translateWithFallback(t, 'guestAssistant.loading', 'Loading assistant...')}
                 </div>
               ) : (
@@ -711,7 +713,7 @@ export default function FloatingGuestAssistant() {
             </div>
 
             <div className="border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
-              <div className="relative flex items-end gap-3">
+              <div className="relative flex min-w-0 items-end gap-3">
                 <textarea
                   value={input}
                   onChange={(event) => handleTypingChange(event.target.value)}
@@ -720,15 +722,15 @@ export default function FloatingGuestAssistant() {
                   placeholder={translateWithFallback(t, 'guestAssistant.placeholder', 'Write a message to the hotel team...')}
                   className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
                 />
-                <button
+                <Button variant="unstyled" size="none"
                   type="button"
                   onClick={handleSendMessage}
                   disabled={sending || !normalizedInput || assistantMessagingLocked}
-                  className="pointer-events-auto relative z-10 inline-flex h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  className="pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send guest assistant message"
                 >
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizonal className="h-4 w-4" />}
-                </button>
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="h-4 w-4 shrink-0" />}
+                </Button>
               </div>
             </div>
           </motion.aside>

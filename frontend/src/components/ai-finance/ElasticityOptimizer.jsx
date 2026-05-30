@@ -19,7 +19,9 @@ import EmptyState from '../common/EmptyState';
 import ErrorState from '../common/ErrorState';
 import { Card, CardContent } from '../ui/card';
 import { ChartTooltipContent } from '../ui/chart';
+import { Slider } from '../ui/slider';
 
+import { Button } from "@/components/ui/button";
 const formatCurrency = (value) =>
   new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -34,16 +36,16 @@ function MetricCard({ icon: Icon, label, value, hint }) {
   return (
     <Card className="rounded-[1.35rem] border border-brand-surface-border bg-white shadow-sm">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted break-words">
               {label}
             </p>
-            <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink">{value}</p>
-            <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">{hint}</p>
+            <p className="mt-3 text-2xl font-black tracking-tight text-brand-ink break-words">{value}</p>
+            <p className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted break-words">{hint}</p>
           </div>
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
-            <Icon className="h-5 w-5" />
+          <span className="inline-flex min-w-0 h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary break-words">
+            <Icon className="h-5 w-5 shrink-0" />
           </span>
         </div>
       </CardContent>
@@ -55,7 +57,7 @@ function MetricChart({ title, children }) {
   return (
     <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
       <div className="mb-4">
-        <h4 className="text-sm font-black tracking-tight text-brand-ink">{title}</h4>
+        <h4 className="text-sm font-black tracking-tight text-brand-ink break-words">{title}</h4>
       </div>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
@@ -78,7 +80,7 @@ export default function ElasticityOptimizer({
 }) {
   if (loading) {
     return (
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`elasticity-skeleton-${index}`}
@@ -119,9 +121,9 @@ export default function ElasticityOptimizer({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex min-w-0 flex-wrap gap-2">
         {forecasts.map((forecast) => (
-          <button
+          <Button variant="unstyled" size="none"
             key={forecast.roomTypeId}
             type="button"
             onClick={() => onSelectRoomType(forecast.roomTypeId)}
@@ -132,11 +134,11 @@ export default function ElasticityOptimizer({
             }`}
           >
             {forecast.roomType}
-          </button>
+          </Button>
         ))}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-4">
         <MetricCard
           icon={Sparkles}
           label="Optimal Price"
@@ -164,12 +166,12 @@ export default function ElasticityOptimizer({
       </div>
 
       <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h4 className="text-base font-black tracking-tight text-brand-ink">
+            <h4 className="text-base font-black tracking-tight text-brand-ink break-words">
               {selectedForecast.roomType} price simulator
             </h4>
-            <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted">
+            <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
               Move the slider to inspect the modelled occupancy, revenue, and profit at each tested
               price point.
             </p>
@@ -180,16 +182,15 @@ export default function ElasticityOptimizer({
         </div>
 
         <div className="mt-5">
-          <input
-            type="range"
+          <Slider
             min={0}
             max={Math.max(simulations.length - 1, 0)}
             step={1}
-            value={boundedSliderIndex}
-            onChange={(event) => onSliderChange(Number(event.target.value))}
-            className="w-full accent-brand-primary"
+            value={[boundedSliderIndex]}
+            onValueChange={([value]) => onSliderChange(Number(value))}
+            className="[&_[role=slider]]:border-brand-primary [&_[role=slider]]:bg-white [&_[data-orientation=horizontal]]:bg-brand-surface-border [&_[data-orientation=horizontal]>span]:bg-brand-primary"
           />
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-ink-muted">
+          <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-ink-muted">
             {simulations.map((simulation) => (
               <span
                 key={`${selectedForecast.roomType}-${simulation.price}`}
@@ -202,7 +203,7 @@ export default function ElasticityOptimizer({
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-2">
         <MetricChart title="Elasticity overview">
           <ComposedChart data={simulations}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" />
@@ -266,9 +267,9 @@ export default function ElasticityOptimizer({
       ) : null}
 
       <div className="rounded-[1.5rem] border border-brand-success/25 bg-brand-success/10 p-5 text-sm font-medium leading-7 text-brand-ink">
-        Recommended action for <span className="font-black">{selectedForecast.roomType}</span>:
+        Recommended action for <span className="font-black break-words">{selectedForecast.roomType}</span>:
         move from {` ${formatCurrency(selectedForecast.currentPrice)} `}to
-        <span className="font-black text-brand-success"> {formatCurrency(selectedForecast.optimalPrice)} </span>
+        <span className="font-black text-brand-success break-words"> {formatCurrency(selectedForecast.optimalPrice)} </span>
         for an expected profit of {formatCurrency(selectedForecast.expectedProfit)} and expected occupancy of{' '}
         {formatPercent(selectedForecast.expectedOccupancy)}.
       </div>

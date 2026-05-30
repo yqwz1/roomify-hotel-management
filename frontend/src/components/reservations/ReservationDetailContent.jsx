@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -45,24 +45,24 @@ function ActionButton({
       : 'border-brand-surface-border bg-brand-surface-light text-brand-ink hover:border-brand-surface-border hover:bg-white';
 
   return (
-    <button
+    <Button variant="unstyled" size="none"
       type="button"
       onClick={onClick}
       disabled={disabled}
       className={`rounded-[1.35rem] border p-4 text-left transition disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint ${toneClass}`}
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <Icon className="h-4 w-4" />
+      <span className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
+        <Icon className="h-4 w-4 shrink-0" />
       </span>
-      <p className="mt-3 text-sm font-bold">{title}</p>
-      <p className="mt-1 text-sm font-medium leading-6 opacity-80">{description}</p>
-    </button>
+      <p className="mt-3 text-sm font-bold break-words">{title}</p>
+      <p className="mt-1 text-sm font-medium leading-6 opacity-80 break-words">{description}</p>
+    </Button>
   );
 }
 
 function FactRow({ label, value, ltr = false }) {
   return (
-    <div className="flex flex-col items-start gap-2 rounded-[1.15rem] border border-brand-surface-border bg-brand-primary-tint/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div className="flex min-w-0 flex-col items-start gap-2 rounded-[1.15rem] border border-brand-surface-border bg-brand-primary-tint/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <dt className="text-sm font-medium text-brand-ink-muted">{label}</dt>
       <dd className="w-full text-sm font-bold text-brand-ink sm:w-auto sm:text-right">
         {ltr ? <LtrText>{value}</LtrText> : value}
@@ -103,20 +103,20 @@ function ReservationDetailBody({
 
   const headerCard = (
     <div className="rounded-[1.75rem] border border-brand-surface-border bg-white p-5 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
             {t('reservationDetailsPage.confirmationNumber')}
           </p>
-          <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink">
+          <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink break-words">
             <LtrText>{reservation.confirmationNumber}</LtrText>
           </p>
-          <p className="mt-2 text-sm font-medium text-brand-ink-muted">
+          <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
             {guestName} | {translateKnownValue(roomTypeName, t)}
           </p>
         </div>
 
-        <div className="flex flex-col items-start gap-3 sm:items-end">
+        <div className="flex min-w-0 flex-col items-start gap-3 sm:items-end">
           <StatusPill status={reservation.status} />
           <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-semibold text-brand-ink">
             {t('nightsCount', { count: nights })}
@@ -138,7 +138,7 @@ function ReservationDetailBody({
           {t('reservationDetailsPage.actionHubNote')}
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
           <ActionButton
             icon={ClipboardCheck}
             title={t('reservationDetailsPage.checkInTitle')}
@@ -184,7 +184,7 @@ function ReservationDetailBody({
         </div>
       </DashboardPanel>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <div className="space-y-6">
           <DashboardPanel
             title={t('common.guest')}
@@ -316,7 +316,7 @@ function ReservationDetailBody({
             className="w-full rounded-full border-brand-surface-border text-brand-ink hover:bg-brand-primary-tint sm:w-auto"
             onClick={onBack}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 shrink-0" />
             {t('reservationDetailsPage.backToQueue')}
           </Button>
         ) : null}
