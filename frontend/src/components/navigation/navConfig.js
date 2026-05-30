@@ -692,8 +692,20 @@ export const getPageMeta = (pathname, roles = [], t) => {
   };
 };
 
+const resolveTitleOverride = (pathname) => {
+  if (DOCUMENT_TITLE_OVERRIDES[pathname]) {
+    return DOCUMENT_TITLE_OVERRIDES[pathname];
+  }
+
+  const parentKey = Object.keys(DOCUMENT_TITLE_OVERRIDES)
+    .filter((key) => key !== '/' && pathname.startsWith(`${key}/`))
+    .sort((a, b) => b.length - a.length)[0];
+
+  return parentKey ? DOCUMENT_TITLE_OVERRIDES[parentKey] : null;
+};
+
 export const getDocumentTitle = (pathname, roles = [], t) => {
-  const override = DOCUMENT_TITLE_OVERRIDES[pathname];
+  const override = resolveTitleOverride(pathname);
   const pageTitle = override
     ? translateWithFallback(t, override[0], override[1])
     : (resolveMatchedPageMeta(pathname, roles, t)?.title
