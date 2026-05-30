@@ -82,7 +82,16 @@ export default function Header({ onMenuToggle }) {
       : []),
   ];
 
+  // Full set — used by the mobile drawer so no link is ever lost.
   const allLinks = [...publicLinks, ...authedLinks];
+
+  // Desktop top bar is width-constrained (max-w-7xl). For authenticated staff the
+  // marketing links would overflow alongside the role links + user chip + logout,
+  // so the inline nav drops the marketing links (still reachable via the drawer
+  // and footer) and keeps Home + role links. Public visitors keep the full set.
+  const desktopLinks = isAuthenticated
+    ? [{ to: '/', route: '/', hash: '', label: t('homeNav') }, ...authedLinks]
+    : publicLinks;
 
   const roleLabel = hasRole('ROLE_MANAGER')
     ? t('roleManager')
@@ -110,7 +119,7 @@ export default function Header({ onMenuToggle }) {
               size="icon"
               type="button"
               onClick={onMenuToggle}
-              className="xl:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
+              className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
               aria-label={t('openNavigation')}
             >
               <Menu className="h-5 w-5 shrink-0" />
@@ -125,7 +134,7 @@ export default function Header({ onMenuToggle }) {
                   variant="ghost"
                   size="icon"
                   type="button"
-                  className="xl:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
+                  className="lg:hidden p-2 rounded-lg text-brand-ink-muted hover:bg-brand-primary-tint hover:text-brand-ink transition"
                   aria-label={t('openNavigation')}
                 >
                   <Menu className="h-5 w-5 shrink-0" />
@@ -236,8 +245,8 @@ export default function Header({ onMenuToggle }) {
         </div>
 
         {/* Center: Desktop nav */}
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:flex xl:gap-6">
-          {allLinks.map(({ to, route, hash: linkHash, label }) => (
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex xl:gap-6">
+          {desktopLinks.map(({ to, route, hash: linkHash, label }) => (
             <DesktopLink
               key={`${route}${linkHash}`}
               to={to}
