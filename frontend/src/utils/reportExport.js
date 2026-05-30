@@ -22,8 +22,16 @@ const escapeXml = (value) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 
+const INVALID_SHEET_NAME_CHARS = new Set(['[', ']', ':', '*', '?', '/', '\\']);
+
 const normalizeSheetName = (value) =>
-  escapeXml(String(value).replace(/[\[\]:*?/\\]/g, ' ').slice(0, 31));
+  escapeXml(
+    String(value)
+      .split('')
+      .map((char) => (INVALID_SHEET_NAME_CHARS.has(char) ? ' ' : char))
+      .join('')
+      .slice(0, 31)
+  );
 
 const numberOrBlank = (value) => {
   const numeric = Number(value);

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from "@/components/ui/button";
 const ErrorMessage = ({ message, onDismiss }) => {
   const [isVisible, setIsVisible] = useState(true);
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ const ErrorMessage = ({ message, onDismiss }) => {
 
   return (
     <div
-      className="bg-brand-danger/10 border border-brand-danger/30 text-brand-danger px-4 py-3 rounded-lg relative flex items-start gap-3"
+      className="relative flex min-w-0 items-start gap-3 rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-brand-danger"
       role="alert"
     >
       <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -27,11 +28,11 @@ const ErrorMessage = ({ message, onDismiss }) => {
           clipRule="evenodd"
         />
       </svg>
-      <div className="flex-1">
-        <p className="font-medium text-sm">{message}</p>
+      <div className="min-w-0 flex-1">
+        <p className="break-words text-sm font-medium">{message}</p>
       </div>
       {onDismiss && (
-        <button
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={handleDismiss}
           className="flex-shrink-0 text-brand-danger hover:text-brand-danger transition-colors"
@@ -44,7 +45,7 @@ const ErrorMessage = ({ message, onDismiss }) => {
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -32,9 +32,9 @@ export default function StatusPill({ status, size = 'md' }) {
 
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full font-semibold ring-1 ring-inset ${cfg.pill} ${textSize}`}
+            className={`inline-flex max-w-full shrink-0 items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap rounded-full font-semibold ring-1 ring-inset ${cfg.pill} ${textSize}`}
         >
-            <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} aria-hidden="true" />
+            <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.dot}`} aria-hidden="true" />
             {label}
         </span>
     );

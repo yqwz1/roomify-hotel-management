@@ -20,27 +20,27 @@ export default function DashboardHero({
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.14),transparent_28%)]" />
 
-      <div className={cn('relative flex flex-col gap-6 xl:flex-row xl:justify-between', desktopAlignClass)}>
-        <div className="max-w-3xl">
+      <div className={cn('relative flex min-w-0 flex-col gap-6 xl:flex-row xl:justify-between', desktopAlignClass)}>
+        <div className="min-w-0 max-w-3xl">
           {eyebrow && (
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-white/65">
+            <p className="break-words text-xs font-black uppercase tracking-[0.3em] text-white/65">
               {eyebrow}
             </p>
           )}
 
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+          <h2 className="mt-3 break-words text-3xl font-black tracking-tight sm:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 max-w-2xl text-base font-medium leading-7 text-white/80 sm:text-[1.15rem]">
+          <p className="mt-3 max-w-2xl break-words text-base font-medium leading-7 text-white/80 sm:text-[1.15rem]">
             {description}
           </p>
 
           {meta.length > 0 && (
-            <div className="mt-5 flex flex-wrap gap-2.5">
+            <div className="mt-5 flex min-w-0 flex-wrap gap-2.5">
               {meta.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur"
+                  className="max-w-full shrink-0 truncate rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur"
                 >
                   {item}
                 </span>
@@ -50,7 +50,7 @@ export default function DashboardHero({
         </div>
 
         {children && (
-          <div className="relative w-full max-w-md xl:w-auto">
+          <div className="relative min-w-0 w-full max-w-md xl:w-auto">
             {children}
           </div>
         )}

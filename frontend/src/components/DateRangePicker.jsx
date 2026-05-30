@@ -53,9 +53,9 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
 
 
     return (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
             {/* Check-In */}
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1">
                 <label htmlFor="check-in-date" className="text-xs font-bold uppercase tracking-wide text-brand-ink-muted">
                     {t('checkInLabel')}
                 </label>
@@ -65,11 +65,11 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                             id="check-in-date"
                             variant={"outline"}
                             className={cn(
-                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                "w-full sm:w-[200px] justify-start text-start font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
                                 !checkIn && "text-muted-foreground"
                             )}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="me-2 h-4 w-4 shrink-0" />
                             {parsedCheckIn ? format(parsedCheckIn, "PPP") : <span>{t('checkInLabel')}</span>}
                         </Button>
                     </PopoverTrigger>
@@ -86,10 +86,10 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
             </div>
 
             {/* Arrow separator */}
-            <span className="hidden self-center text-brand-ink-hint sm:block mb-3" aria-hidden="true">→</span>
+            <span className="hidden self-center text-brand-ink-hint sm:block mb-3 break-words" aria-hidden="true">→</span>
 
             {/* Check-Out */}
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1">
                 <label htmlFor="check-out-date" className="text-xs font-bold uppercase tracking-wide text-brand-ink-muted">
                     {t('checkOutLabel')}
                 </label>
@@ -99,12 +99,12 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
                             id="check-out-date"
                             variant={"outline"}
                             className={cn(
-                                "w-full sm:w-[200px] justify-start text-left font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
+                                "w-full sm:w-[200px] justify-start text-start font-normal rounded-full border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm text-brand-ink hover:bg-white hover:border-black focus:ring-2 focus:ring-black/5",
                                 isInvalid && "border-brand-danger focus:border-brand-danger focus:ring-brand-danger/20",
                                 !checkOut && "text-muted-foreground"
                             )}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="me-2 h-4 w-4 shrink-0" />
                             {parsedCheckOut ? format(parsedCheckOut, "PPP") : <span>{t('checkOutLabel')}</span>}
                         </Button>
                     </PopoverTrigger>
@@ -122,7 +122,7 @@ export default function DateRangePicker({ checkIn, checkOut, onCheckInChange, on
 
             {/* Validation message */}
             {isInvalid && (
-                <p className="text-xs font-medium text-brand-danger sm:self-end sm:pb-2" role="alert">
+                <p className="text-xs font-medium text-brand-danger sm:self-end sm:pb-2 break-words" role="alert">
                     {t('checkoutAfterCheckin')}
                 </p>
             )}

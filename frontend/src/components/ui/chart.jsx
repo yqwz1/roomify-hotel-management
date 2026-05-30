@@ -32,16 +32,16 @@ const ChartTooltipContent = React.forwardRef(
         {!hideLabel && displayLabel !== undefined && displayLabel !== null && displayLabel !== "" && (
           <div className="mb-2 font-medium text-brand-ink-muted">{displayLabel}</div>
         )}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex min-w-0 flex-col gap-1.5">
           {payload.map((item, index) => {
             const val = formatter ? formatter(item.value, item.name) : item.value
             return (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="flex min-w-0 items-center gap-2">
                 <div
                   className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: item.color || item.payload?.fill || "#000" }}
                 />
-                <span className="font-medium text-brand-ink">
+                <span className="font-medium text-brand-ink break-words">
                   {item.name !== "value" && item.name ? `${item.name}: ` : ""}{val}
                 </span>
               </div>

@@ -81,16 +81,16 @@ export default function RoomFilters({
 
   return (
     <section className="rounded-[1.75rem] border border-black/5 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)]">
-      <div className="flex flex-col gap-3 border-b border-brand-surface-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary text-white">
-            <SlidersHorizontal className="h-5 w-5" />
+      <div className="flex min-w-0 flex-col gap-3 border-b border-brand-surface-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex min-w-0 h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary text-white break-words">
+            <SlidersHorizontal className="h-5 w-5 shrink-0" />
           </span>
           <div>
-            <h3 className="text-lg font-black tracking-tight text-brand-ink">
+            <h3 className="text-lg font-black tracking-tight text-brand-ink break-words">
               {t('filters')}
             </h3>
-            <p className="mt-1 text-sm font-medium text-brand-ink-muted">
+            <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
               {t('filtersDescription')}
             </p>
           </div>
@@ -101,26 +101,26 @@ export default function RoomFilters({
           type="button"
           onClick={onClear}
           disabled={!hasActiveFilters}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint h-auto"
+          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border px-4 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-surface-light disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-hint h-auto"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4 shrink-0" />
           {t('clearFilters')}
         </Button>
       </div>
 
       <div className="px-5 py-5 sm:px-6 bg-brand-surface-light/30 rounded-b-[1.75rem]">
-        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))]">
+        <div className="grid min-w-0 gap-4 [grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))]">
           {showRoomSearch && (
             <FilterField id="filter-room-name" label={t('roomNameSearchLabel')}>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint" />
+                <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
                 <Input
                   id="filter-room-name"
                   type="search"
                   placeholder={t('roomNameSearchPlaceholder')}
                   value={filters.roomName ?? ''}
                   onChange={(event) => handle('roomName', event.target.value)}
-                  className={`${inputClassName} pl-10`}
+                  className={`${inputClassName} ps-10`}
                 />
               </div>
             </FilterField>

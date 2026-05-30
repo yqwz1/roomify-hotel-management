@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+import { Button } from "@/components/ui/button";
 export default function DashboardQuickAction({
   icon: Icon,
   title,
@@ -23,30 +24,30 @@ export default function DashboardQuickAction({
       };
 
   return (
-    <button
+    <Button variant="unstyled" size="none"
       type="button"
       onClick={onClick}
       className={cn(
-        'group flex w-full items-center justify-between rounded-[1.5rem] border p-4 text-start transition-all duration-200',
+        'group flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.5rem] border p-4 text-start transition-all duration-200',
         toneStyles.wrapper
       )}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <span className={cn('flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl', toneStyles.iconWrap)}>
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5 shrink-0" />
         </span>
 
         <div className="min-w-0 space-y-1">
           <p
             dir="auto"
-            className="text-sm font-bold leading-tight [unicode-bidi:plaintext]"
+            className="line-clamp-2 text-sm font-bold leading-tight [unicode-bidi:plaintext]"
           >
             {title}
           </p>
           <p
             dir="auto"
             className={cn(
-              'text-xs font-medium leading-relaxed [overflow-wrap:anywhere] [unicode-bidi:plaintext]',
+              'line-clamp-2 text-xs font-medium leading-relaxed [overflow-wrap:anywhere] [unicode-bidi:plaintext]',
               toneStyles.description
             )}
           >
@@ -56,6 +57,6 @@ export default function DashboardQuickAction({
       </div>
 
       <ArrowRight className={cn('h-4 w-4 flex-shrink-0 transition-colors', toneStyles.arrow)} />
-    </button>
+    </Button>
   );
 }

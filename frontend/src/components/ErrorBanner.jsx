@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from "@/components/ui/button";
 /**
  * ErrorBanner
  * Displays a dismissible error alert strip.
@@ -17,17 +18,17 @@ export default function ErrorBanner({ message, onClose }) {
     return (
         <div
             role="alert"
-            className="flex items-center gap-3 rounded-full border border-brand-danger/30 bg-white px-5 py-3 text-brand-ink shadow-sm"
+            className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-danger/30 bg-white px-5 py-3 text-brand-ink shadow-sm sm:rounded-full"
         >
             {/* Icon */}
-            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">⚠️</span>
+            <span className="mt-0.5 shrink-0 text-lg break-words" aria-hidden="true">⚠️</span>
 
             {/* Message */}
-            <p className="flex-1 text-sm font-bold">{message}</p>
+            <p className="min-w-0 flex-1 break-words text-sm font-bold">{message}</p>
 
             {/* Close button */}
             {onClose && (
-                <button
+                <Button variant="unstyled" size="none"
                     onClick={onClose}
                     aria-label={t('dismissError')}
                     className="shrink-0 rounded-full p-1 text-brand-danger transition hover:bg-brand-danger/10 hover:text-brand-danger focus:outline-none focus:ring-2 focus:ring-brand-danger/40"
@@ -39,7 +40,7 @@ export default function ErrorBanner({ message, onClose }) {
                             clipRule="evenodd"
                         />
                     </svg>
-                </button>
+                </Button>
             )}
         </div>
     );

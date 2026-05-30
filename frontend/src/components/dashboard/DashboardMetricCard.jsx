@@ -30,10 +30,10 @@ export default function DashboardMetricCard({
       };
 
   return (
-    <div className={cn('relative overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className={cn('text-xs font-black uppercase tracking-[0.22em] leading-5', toneStyles.label, labelClassName)}>
+    <div className={cn('relative min-w-0 overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
+      <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className={cn('break-words text-xs font-black uppercase leading-5 tracking-[0.22em]', toneStyles.label, labelClassName)}>
             {label}
           </p>
           <p
@@ -44,9 +44,9 @@ export default function DashboardMetricCard({
               valueClassName
             )}
           >
-            <span dir={valueDirection} className="inline-block [unicode-bidi:isolate]">
-              {value}
-            </span>
+          <span dir={valueDirection} className="inline-block max-w-full [unicode-bidi:isolate]">
+            {value}
+          </span>
           </p>
           {hint && (
             <p className={cn('mt-2 break-words text-sm font-medium', toneStyles.hint, hintClassName)}>
@@ -56,7 +56,7 @@ export default function DashboardMetricCard({
         </div>
 
         <span className={cn('flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl', toneStyles.icon)}>
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5 shrink-0" />
         </span>
       </div>
     </div>

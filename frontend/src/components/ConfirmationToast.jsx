@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from "@/components/ui/button";
 /**
  * ConfirmationToast
  * A dismissible toast that auto-hides after `duration` ms.
@@ -39,19 +40,19 @@ export default function ConfirmationToast({ message, type = 'success', duration 
       role="status"
       aria-live="polite"
       className={`
-        fixed end-6 top-6 z-[9999] w-80 rounded-2xl border shadow-2xl
+        fixed end-3 top-6 z-[9999] w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl border shadow-2xl sm:end-6 sm:w-80
         animate-in slide-in-from-top-2 fade-in duration-300
         ${tone.bg}
       `}
     >
       <div className={`h-1.5 w-full rounded-t-2xl ${tone.bar}`} />
 
-      <div className="flex items-start gap-3 p-4">
-        <span className="mt-0.5 shrink-0 text-sm font-black" aria-hidden="true">
+      <div className="flex min-w-0 items-start gap-3 p-4">
+        <span className="mt-0.5 shrink-0 text-sm font-black break-words" aria-hidden="true">
           {tone.icon}
         </span>
-        <p className={`flex-1 text-sm font-medium ${tone.text}`}>{message}</p>
-        <button
+        <p className={`min-w-0 flex-1 break-words text-sm font-medium ${tone.text}`}>{message}</p>
+        <Button variant="unstyled" size="none"
           type="button"
           onClick={() => onClose?.()}
           aria-label={t('dismissToast')}
@@ -64,7 +65,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </Button>
       </div>
     </div>
   );

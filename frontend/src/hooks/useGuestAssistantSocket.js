@@ -3,25 +3,23 @@ import { createGuestAssistantSocket } from '../services/guestAssistantSocket';
 
 export default function useGuestAssistantSocket({ enabled, onEvent, onError }) {
   const clientRef = useRef(null);
-  const [connected, setConnected] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
-      setConnected(false);
       return undefined;
     }
 
     const token = localStorage.getItem('token');
     if (!token) {
-      setConnected(false);
       return undefined;
     }
 
     const client = createGuestAssistantSocket({
       token,
       onEvent,
-      onConnect: () => setConnected(true),
-      onDisconnect: () => setConnected(false),
+      onConnect: () => setSocketConnected(true),
+      onDisconnect: () => setSocketConnected(false),
       onError,
     });
 
@@ -29,7 +27,6 @@ export default function useGuestAssistantSocket({ enabled, onEvent, onError }) {
     client.activate();
 
     return () => {
-      setConnected(false);
       client.deactivate();
       clientRef.current = null;
     };
@@ -46,7 +43,7 @@ export default function useGuestAssistantSocket({ enabled, onEvent, onError }) {
   };
 
   return {
-    connected,
+    connected: enabled && socketConnected,
     publishTyping,
   };
 }
