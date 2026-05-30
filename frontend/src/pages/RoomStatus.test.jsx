@@ -203,4 +203,45 @@ describe('RoomStatus', () => {
     await screen.findByText(/Room 104 moved to Available/i);
     expect(screen.getByText(/Low stock: Surface cleaner/i)).toBeInTheDocument();
   });
+
+  it('updates maintenance rooms to available without opening the service modal', async () => {
+    const user = userEvent.setup();
+
+    getRooms.mockResolvedValue([
+      {
+        id: 5,
+        roomNumber: '105',
+        floor: 1,
+        status: 'UNDER_MAINTENANCE',
+        roomType: { name: 'Standard Room', basePrice: 100 },
+      },
+    ]);
+
+    getValidNextStatuses
+      .mockResolvedValueOnce(['AVAILABLE'])
+      .mockResolvedValueOnce(['UNDER_MAINTENANCE']);
+
+    updateRoomStatus.mockResolvedValue({
+      id: 5,
+      roomNumber: '105',
+      floor: 1,
+      status: 'AVAILABLE',
+      roomType: { name: 'Standard Room', basePrice: 100 },
+    });
+
+    renderPage();
+
+    const roomNumber = await screen.findByText('105');
+    const roomCard = roomNumber.closest('article');
+    expect(roomCard).not.toBeNull();
+
+    await user.click(within(roomCard).getByRole('button', { name: /Available/i }));
+
+    await waitFor(() => {
+      expect(updateRoomStatus).toHaveBeenCalledWith(5, 'AVAILABLE');
+    });
+
+    await screen.findByText(/Room 105 moved to Available/i);
+    expect(screen.queryByText(/Service modal for room 105/i)).not.toBeInTheDocument();
+  });
 });

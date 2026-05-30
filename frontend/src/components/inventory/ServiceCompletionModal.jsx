@@ -13,6 +13,7 @@ import {
   translateWithFallback,
   translateKnownValue,
 } from '../../utils/localization';
+import { Textarea } from '../ui/textarea';
 
 import { NativeSelect } from "@/components/ui/native-select";
 const CLEANING_SERVICE_TYPES = [

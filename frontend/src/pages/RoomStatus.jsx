@@ -135,7 +135,7 @@ export default function RoomStatus() {
     const room = rooms.find((candidate) => candidate.id === roomId);
     if (
       nextStatus === 'AVAILABLE' &&
-      (room?.status === 'NEEDS_CLEANING' || room?.status === 'UNDER_MAINTENANCE')
+      room?.status === 'NEEDS_CLEANING'
     ) {
       setServiceRoom(room);
       return;
