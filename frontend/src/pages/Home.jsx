@@ -251,7 +251,7 @@ export default function Home() {
                       transition={{ duration: 0.5, ease: EASE }}
                       className="flex min-w-0 items-center gap-2"
                     >
-                      <Icon className={`h-4 w-4 ${s.color}`} />
+                      <Icon className={`h-4 w-4 shrink-0 ${s.color}`} />
                       <div className="flex min-w-0 items-baseline gap-1">
                         <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
                         <span className="text-xs font-medium text-brand-ink-hint break-words">{t(`m.home.stat.${s.id}`)}</span>
@@ -289,7 +289,7 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-w-0 min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-r border-white/10 bg-brand-primary-deep p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-e border-white/10 bg-brand-primary-deep p-3 sm:block rounded-bl-[1.75rem]">
                     <div className="mb-4 flex min-w-0 items-center gap-1.5">
                       <span className="text-[11px] font-black text-white break-words">Roomify</span>
                     </div>

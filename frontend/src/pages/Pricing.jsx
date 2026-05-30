@@ -123,7 +123,7 @@ export default function Pricing() {
                     </span>
                   )}
                   <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${plan.featured ? 'bg-white/10' : 'bg-brand-primary-tint'}`}>
-                    <Icon className={`h-5 w-5 ${plan.featured ? 'text-brand-accent-gold' : 'text-brand-ink'}`} />
+                    <Icon className={`h-5 w-5 shrink-0 ${plan.featured ? 'text-brand-accent-gold' : 'text-brand-ink'}`} />
                   </div>
                   <h3 className="mt-5 text-xl font-black tracking-tight break-words">{t(`m.pricing.${plan.id}.name`)}</h3>
                   <p className={`text-sm font-medium ${plan.featured ? 'text-brand-ink-hint' : 'text-brand-ink-muted'}`}>
