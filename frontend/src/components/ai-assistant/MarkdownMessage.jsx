@@ -19,7 +19,7 @@ export default function MarkdownMessage({ content }) {
   const flushList = () => {
     if (listItems.length > 0) {
       elements.push(
-        <ul key={`list-${elements.length}`} className="space-y-1 pl-4 text-sm leading-6">
+        <ul key={`list-${elements.length}`} className="space-y-1 ps-4 text-sm leading-6">
           {listItems.map((item, index) => (
             <li key={`${item}-${index}`} className="list-disc">
               {renderInline(item)}

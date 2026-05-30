@@ -597,7 +597,7 @@ export default function ReservationsWorkspace() {
                       key={reservation.id ?? reservation.confirmationNumber}
                       type="button"
                       onClick={() => handleOpenReservation(reservation)}
-                      className={`w-full rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
+                      className={`w-full rounded-[1.5rem] border p-5 text-start shadow-sm transition ${
                         isSelected
                           ? 'border-brand-primary bg-brand-primary text-white'
                           : 'border-brand-surface-border bg-white hover:border-brand-surface-border'

@@ -19,7 +19,7 @@ export function ChartCard({
             {title && <CardTitle className="text-sm font-black uppercase tracking-[0.16em] text-brand-ink">{title}</CardTitle>}
             {description && <CardDescription className="mt-2 text-sm font-medium leading-6 text-brand-ink-muted">{description}</CardDescription>}
           </div>
-          {action && <div className="ml-4 shrink-0">{action}</div>}
+          {action && <div className="ms-4 shrink-0">{action}</div>}
         </CardHeader>
       )}
       <CardContent className={cn("p-5 pt-0", contentClassName)}>

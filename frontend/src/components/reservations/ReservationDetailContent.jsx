@@ -49,7 +49,7 @@ function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-[1.35rem] border p-4 text-left transition disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint ${toneClass}`}
+      className={`rounded-[1.35rem] border p-4 text-start transition disabled:cursor-not-allowed disabled:border-brand-surface-border disabled:bg-brand-primary-tint disabled:text-brand-ink-hint ${toneClass}`}
     >
       <span className="flex min-w-0 h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
         <Icon className="h-4 w-4 shrink-0" />
@@ -64,7 +64,7 @@ function FactRow({ label, value, ltr = false }) {
   return (
     <div className="flex min-w-0 flex-col items-start gap-2 rounded-[1.15rem] border border-brand-surface-border bg-brand-primary-tint/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <dt className="text-sm font-medium text-brand-ink-muted">{label}</dt>
-      <dd className="w-full text-sm font-bold text-brand-ink sm:w-auto sm:text-right">
+      <dd className="w-full text-sm font-bold text-brand-ink sm:w-auto sm:text-end">
         {ltr ? <LtrText>{value}</LtrText> : value}
       </dd>
     </div>

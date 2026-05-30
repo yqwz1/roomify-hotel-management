@@ -83,7 +83,7 @@ function GuestPaymentForm({
             </p>
           ) : null}
         </div>
-        <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
+        <div className="rounded-[1.15rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-end">
           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 break-words">
             {t('checkoutPage.outstandingBalanceLabel')}
           </p>

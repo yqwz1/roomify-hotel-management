@@ -281,7 +281,7 @@ export default function Home() {
                     <span className="h-2.5 w-2.5 rounded-full bg-brand-warning/80" />
                     <span className="h-2.5 w-2.5 rounded-full bg-brand-success/80" />
                   </div>
-                  <div className="ml-2 min-w-0 flex-1 rounded-full bg-white/80 border border-brand-surface-border/60 px-3 py-1 text-[10px] text-brand-ink-hint font-mono">
+                  <div className="ms-2 min-w-0 flex-1 rounded-full bg-white/80 border border-brand-surface-border/60 px-3 py-1 text-[10px] text-brand-ink-hint font-mono">
                     app.roomify.io/dashboard
                   </div>
                 </div>
@@ -607,7 +607,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
           <Reveal
             variant="scale"
-            className="flex min-w-0 flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#1A2B3A_55%,#1A2B3A_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-left"
+            className="flex min-w-0 flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#1A2B3A_55%,#1A2B3A_100%)] px-8 py-7 text-center shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:flex-row sm:text-start"
           >
             <div>
               <h3 className="text-lg font-black text-white break-words">{t('m.home.banner.title')}</h3>

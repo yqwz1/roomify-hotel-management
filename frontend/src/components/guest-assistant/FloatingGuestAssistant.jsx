@@ -628,7 +628,7 @@ export default function FloatingGuestAssistant() {
                             setActiveConversationId(conversation.publicId);
                             void loadConversationDetail(conversation.publicId);
                           }}
-                          className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-left transition ${
+                          className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
                             conversation.publicId === activeConversation?.publicId
                               ? 'border-brand-primary/25 bg-brand-primary/10'
                               : 'border-brand-surface-border bg-white'
@@ -660,7 +660,7 @@ export default function FloatingGuestAssistant() {
                         setActiveConversationId(conversation.publicId);
                         void loadConversationDetail(conversation.publicId);
                       }}
-                      className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-left transition ${
+                      className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
                         conversation.publicId === activeConversation?.publicId
                           ? 'border-brand-primary/25 bg-brand-primary/10'
                           : 'border-brand-surface-border bg-white'
@@ -698,7 +698,7 @@ export default function FloatingGuestAssistant() {
             <div className="min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
               {loading && !detail ? (
                 <div className="flex min-w-0 h-full items-center justify-center text-sm font-medium text-brand-ink-muted">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" />
                   {translateWithFallback(t, 'guestAssistant.loading', 'Loading assistant...')}
                 </div>
               ) : (

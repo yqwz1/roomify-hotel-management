@@ -120,10 +120,10 @@ function InvoiceLedger({ bill, t, language }) {
       <Table className="w-full">
         <TableHeader className="bg-brand-surface-light">
           <TableRow>
-            <TableHead className="px-4 py-3 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
+            <TableHead className="px-4 py-3 text-start text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
               {t('invoicePreviewPage.descriptionLabel')}
             </TableHead>
-            <TableHead className="px-4 py-3 text-right text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
+            <TableHead className="px-4 py-3 text-end text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto">
               {t('invoicePreviewPage.amountLabel')}
             </TableHead>
           </TableRow>
@@ -138,7 +138,7 @@ function InvoiceLedger({ bill, t, language }) {
                 <TableCell className="px-4 py-3 text-sm font-medium text-brand-ink">
                   {item?.label ? translateBillLineItemLabel(item.label, t) : t('checkoutPage.lineItemFallback')}
                 </TableCell>
-                <TableCell className="px-4 py-3 text-right text-sm font-bold text-brand-ink">
+                <TableCell className="px-4 py-3 text-end text-sm font-bold text-brand-ink">
                   {credit
                     ? `-${formatLocalizedCurrency(amount, language)}`
                     : formatLocalizedCurrency(amount, language)}
@@ -148,7 +148,7 @@ function InvoiceLedger({ bill, t, language }) {
           })}
           <TableRow className="bg-brand-surface-light">
             <TableCell className="px-4 py-3 text-sm font-bold text-brand-ink">{t('common.total')}</TableCell>
-            <TableCell className="px-4 py-3 text-right text-lg font-black text-brand-ink">
+            <TableCell className="px-4 py-3 text-end text-lg font-black text-brand-ink">
               {formatLocalizedCurrency(bill.balanceDue, language)}
             </TableCell>
           </TableRow>

@@ -650,7 +650,7 @@ function RoomTypeExplorer({
         </div>
 
         {/* Compact + scrollable list — keeps the panel a fixed height even with many room types */}
-        <div className="max-h-[460px] space-y-2 overflow-y-auto pr-1 [scrollbar-width:thin]">
+        <div className="max-h-[460px] space-y-2 overflow-y-auto pe-1 [scrollbar-width:thin]">
           {items.map((item, index) => {
             const active = item.roomTypeName === selectedItem.roomTypeName;
             const theme = ROOM_TYPE_THEMES[index % ROOM_TYPE_THEMES.length];
@@ -661,7 +661,7 @@ function RoomTypeExplorer({
                 type="button"
                 onClick={() => onSelectRoomType(item.roomTypeName)}
                 className={cn(
-                  'w-full rounded-2xl border p-3 text-left transition',
+                  'w-full rounded-2xl border p-3 text-start transition',
                   active
                     ? theme.card
                     : 'border-brand-surface-border bg-brand-surface-light hover:border-brand-surface-border hover:bg-white'

@@ -143,7 +143,7 @@ export default function DemandHeatmapPanel({
                   type="button"
                   onClick={() => setSelectedDate(cell.point.date)}
                   title={`${cell.point.date} • score ${cell.point.demandScore} • occupancy ${cell.point.occupancy}% • revenue ${formatCurrency(cell.point.revenue)}`}
-                  className={`aspect-square rounded-2xl border p-2 text-left shadow-sm transition hover:scale-[1.02] ${
+                  className={`aspect-square rounded-2xl border p-2 text-start shadow-sm transition hover:scale-[1.02] ${
                     activePoint.date === cell.point.date
                       ? 'border-brand-ink ring-2 ring-brand-ink/20'
                       : 'border-white/40'

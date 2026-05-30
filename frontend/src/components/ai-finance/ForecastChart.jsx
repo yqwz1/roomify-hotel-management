@@ -83,7 +83,7 @@ export default function ForecastChart({
               {description}
             </p>
           </div>
-          <div className="rounded-[1.1rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-right">
+          <div className="rounded-[1.1rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-end">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-hint break-words">
               Latest
             </p>

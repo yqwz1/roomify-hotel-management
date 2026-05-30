@@ -567,7 +567,7 @@ export default function RoomsManagement() {
                   ].map((heading) => (
                     <TableHead
                       key={heading}
-                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto"
+                      className="px-4 py-4 text-start text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted h-auto"
                     >
                       {heading}
                     </TableHead>

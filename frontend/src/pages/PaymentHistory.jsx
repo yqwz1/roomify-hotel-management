@@ -111,7 +111,7 @@ export default function PaymentHistory() {
         {error ? <div className="mb-4 rounded-2xl bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">{error}</div> : null}
 
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full text-start text-sm">
             <thead className="text-xs font-black uppercase tracking-[0.14em] text-brand-ink-hint">
               <tr>
                 {['Transaction ID', 'Guest', 'Reservation', 'Invoice', 'Amount', 'Method', 'Status', 'Date', 'Actions'].map((head) => (

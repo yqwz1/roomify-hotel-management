@@ -86,7 +86,7 @@ export default function AiInsightPanel({
             key={intent}
             type="button"
             variant="outline"
-            className="h-auto justify-start rounded-2xl border-brand-surface-border bg-white px-4 py-4 text-left text-brand-ink shadow-sm hover:bg-brand-surface-light"
+            className="h-auto justify-start rounded-2xl border-brand-surface-border bg-white px-4 py-4 text-start text-brand-ink shadow-sm hover:bg-brand-surface-light"
             disabled={loading}
             onClick={() => onAskIntent?.(intent)}
           >

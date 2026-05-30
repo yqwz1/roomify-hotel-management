@@ -83,7 +83,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                   {reservation.guestEmail || t('common.noGuestEmailProvided')}
                 </p>
               </div>
-              <div className="text-sm font-medium text-brand-ink-muted sm:text-right">
+              <div className="text-sm font-medium text-brand-ink-muted sm:text-end">
                 {t('roomNumber', { number: reservation.roomNumber })} | {translateKnownValue(reservation.roomTypeName, t)}
               </div>
               <div className="text-sm font-medium text-brand-ink-muted">
@@ -99,7 +99,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
                   year: 'numeric',
                 })}
               </div>
-              <div className="text-sm font-bold text-brand-ink sm:text-right">
+              <div className="text-sm font-bold text-brand-ink sm:text-end">
                 {formatLocalizedCurrency(reservation.totalPrice, i18n.language)}
               </div>
             </div>

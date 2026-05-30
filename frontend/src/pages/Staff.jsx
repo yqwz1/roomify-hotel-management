@@ -589,7 +589,7 @@ export default function Staff() {
                   {[t(`${pageTx}.tableDetails`), t(`${pageTx}.tableDepartment`), t(`${pageTx}.tableStatus`), t(`${pageTx}.tableActions`)].map((heading) => (
                     <th
                       key={heading}
-                      className="px-4 py-4 text-left text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted"
+                      className="px-4 py-4 text-start text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted"
                     >
                       {heading}
                     </th>
