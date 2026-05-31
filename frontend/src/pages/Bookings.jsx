@@ -80,9 +80,9 @@ export default function Bookings() {
         supportTips.length > 0;
 
     return (
-        <div className="h-full bg-brand-surface p-6 lg:p-8">
+        <div className="roomify-page-enter h-full bg-brand-surface p-4 sm:p-6 lg:p-8">
             <div className="mx-auto max-w-6xl space-y-6">
-                <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
+                <div className="roomify-card-interactive roomify-premium-card rounded-[1.75rem] p-6">
                     <p className="text-xs font-bold uppercase tracking-widest text-brand-ink-muted break-words">
                         {t('bookings')}
                     </p>
@@ -93,7 +93,7 @@ export default function Bookings() {
                 </div>
 
                 <div className="grid min-w-0 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-                    <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
+                    <div className="roomify-card-interactive roomify-premium-card rounded-[1.75rem] p-6">
                         <div className="flex min-w-0 items-center gap-3">
                             <CalendarDays className="h-5 w-5 text-brand-ink shrink-0" />
                             <h2 className="text-lg font-extrabold text-brand-ink break-words">{t('bookingsPage.actionsTitle')}</h2>
@@ -191,7 +191,7 @@ export default function Bookings() {
                     </div>
 
                     {showSupportTips ? (
-                        <div className="rounded-3xl border border-brand-surface-border bg-white p-6 shadow-sm">
+                        <div className="roomify-card-interactive roomify-premium-card rounded-[1.75rem] p-6">
                             <div className="flex min-w-0 items-center gap-3">
                                 <ShieldCheck className="h-5 w-5 text-brand-ink shrink-0" />
                                 <h2 className="text-lg font-extrabold text-brand-ink break-words">{t('bookingsPage.supportTitle')}</h2>

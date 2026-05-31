@@ -1383,7 +1383,7 @@ export default function ManagerDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('managerDashboardTitle')}
@@ -1803,7 +1803,7 @@ export default function ManagerDashboard() {
           description={t(`${pageTx}.quickActionsDescription`)}
         >
           <div className="space-y-4">
-            <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4 shadow-sm">
+            <div className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-4">
               <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                   <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-ink shadow-sm break-words">

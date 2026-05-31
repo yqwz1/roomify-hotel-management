@@ -32,12 +32,14 @@
   color-scheme: light;
   --roomify-mobile-nav-height: 0px;
   --roomify-ease: cubic-bezier(0.21, 0.47, 0.32, 0.98);
-  --roomify-shadow-soft: 0 18px 46px -30px rgba(15, 23, 42, 0.38);
-  --roomify-shadow-lifted: 0 28px 70px -38px rgba(15, 23, 42, 0.48);
+  --roomify-shadow-soft: 0 20px 54px -34px rgba(6, 22, 34, 0.46);
+  --roomify-shadow-lifted: 0 32px 86px -44px rgba(6, 22, 34, 0.62);
+  --roomify-shadow-glow: 0 24px 70px -34px rgba(18, 179, 168, 0.65);
   --roomify-page-bg:
-    radial-gradient(circle at 18% -10%, rgba(53, 101, 141, 0.14), transparent 28rem),
-    radial-gradient(circle at 92% 8%, rgba(212, 162, 76, 0.12), transparent 26rem),
-    linear-gradient(180deg, #f8f5ee 0%, #f2ede3 48%, #ebe4d8 100%);
+    radial-gradient(circle at 15% -12%, rgba(18, 179, 168, 0.22), transparent 28rem),
+    radial-gradient(circle at 88% 2%, rgba(214, 168, 79, 0.2), transparent 26rem),
+    radial-gradient(circle at 75% 80%, rgba(232, 111, 92, 0.08), transparent 24rem),
+    linear-gradient(180deg, #fbf3e4 0%, #f5ead8 48%, #ecdfca 100%);
 }
 html,
 body,
@@ -48,7 +50,7 @@ body,
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  background: #f5f2ea;
+  background: #f6f0e4;
   scroll-behavior: smooth;
 }
 
@@ -62,7 +64,7 @@ body {
   overflow-y: auto;
   min-width: 320px;
   overscroll-behavior-y: none;
-  background: #f5f2ea;
+  background: #f6f0e4;
 }
 code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
 
@@ -113,6 +115,24 @@ textarea {
   }
 }
 
+@keyframes roomify-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes roomify-shimmer {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}
+
 .roomify-page-enter {
   animation: roomify-fade-up 360ms var(--roomify-ease) both;
 }
@@ -126,7 +146,8 @@ textarea {
 }
 
 .roomify-card-interactive:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--roomify-shadow-lifted);
 }
 
 .roomify-page-surface {
@@ -136,10 +157,12 @@ textarea {
 .roomify-premium-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(232, 227, 214, 0.9);
+  border: 1px solid rgba(230, 217, 193, 0.92);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(251, 249, 244, 0.92));
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 249, 238, 0.86)),
+    radial-gradient(circle at 95% 0%, rgba(18, 179, 168, 0.11), transparent 18rem);
   box-shadow: var(--roomify-shadow-soft);
+  backdrop-filter: blur(18px);
 }
 
 .roomify-premium-card::before {
@@ -149,8 +172,9 @@ textarea {
   inset: 0;
   border-radius: inherit;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.64), transparent 34%),
-    radial-gradient(circle at top right, rgba(53, 101, 141, 0.08), transparent 18rem);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7), transparent 34%),
+    radial-gradient(circle at top right, rgba(18, 179, 168, 0.12), transparent 18rem),
+    radial-gradient(circle at bottom left, rgba(214, 168, 79, 0.1), transparent 16rem);
 }
 
 .roomify-premium-card > * {
@@ -162,20 +186,20 @@ textarea {
   min-height: 3rem;
   width: 100%;
   border-radius: 9999px;
-  border: 1px solid #e8e3d6;
-  background: rgba(251, 249, 244, 0.92);
+  border: 1px solid #e6d9c1;
+  background: rgba(255, 249, 238, 0.9);
   padding: 0 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1a2b3a;
+  color: #071a25;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition: border-color 180ms var(--roomify-ease), box-shadow 180ms var(--roomify-ease), background-color 180ms var(--roomify-ease);
 }
 
 .roomify-field:focus {
-  border-color: rgba(53, 101, 141, 0.65);
+  border-color: rgba(18, 179, 168, 0.78);
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(53, 101, 141, 0.12);
+  box-shadow: 0 0 0 4px rgba(18, 179, 168, 0.16), 0 16px 34px -28px rgba(7, 59, 76, 0.5);
   outline: none;
 }
 
@@ -190,6 +214,48 @@ textarea {
   border: 1px solid rgba(232, 227, 214, 0.9);
   background: rgba(255, 255, 255, 0.78);
   box-shadow: var(--roomify-shadow-soft);
+}
+
+.roomify-aurora {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(18, 179, 168, 0.24), transparent 22rem),
+    radial-gradient(circle at 82% 18%, rgba(214, 168, 79, 0.26), transparent 20rem),
+    radial-gradient(circle at 72% 88%, rgba(232, 111, 92, 0.12), transparent 22rem),
+    linear-gradient(135deg, #061622 0%, #073b4c 48%, #0e7c7b 100%);
+}
+
+.roomify-luxe-gradient {
+  background-image: linear-gradient(135deg, #061622 0%, #073b4c 34%, #0e7c7b 66%, #d6a84f 118%);
+  background-size: 180% 180%;
+  animation: roomify-gradient-shift 12s ease-in-out infinite;
+}
+
+.roomify-gold-text {
+  background: linear-gradient(135deg, #fff7d8 0%, #d6a84f 48%, #fff0bd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.roomify-glass-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.roomify-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.roomify-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: roomify-shimmer 1.7s infinite;
 }
 
 .roomify-processing-dot {

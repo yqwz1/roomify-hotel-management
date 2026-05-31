@@ -262,7 +262,7 @@ export default function ReservationsWorkspace() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('navReservations')}
@@ -356,7 +356,7 @@ export default function ReservationsWorkspace() {
 
             <form
               onSubmit={handleSubmit}
-              className="space-y-4 rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4"
+              className="roomify-card-interactive roomify-premium-card space-y-4 rounded-[1.5rem] p-4"
             >
               <div className={FILTER_GRID_CLASS}>
                 <label className={FILTER_FIELD_CLASS}>

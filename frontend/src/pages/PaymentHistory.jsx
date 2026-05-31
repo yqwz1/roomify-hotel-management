@@ -191,7 +191,7 @@ export default function PaymentHistory() {
   if (error && payments.length === 0) return <ErrorState title="Payment history" message={error} onRetry={load} />;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="roomify-card-interactive overflow-hidden rounded-[1.75rem] border border-brand-primary/20 bg-white shadow-[0_20px_50px_-30px_rgba(15,23,42,0.28)]">
         <div className="grid min-w-0 gap-0 lg:grid-cols-[1fr_0.9fr]">
           <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_100%)] p-6 text-white sm:p-8">
@@ -311,7 +311,7 @@ export default function PaymentHistory() {
 
             <div className="grid min-w-0 gap-4 lg:hidden">
               {visiblePayments.map((payment) => (
-                <article key={payment.paymentId} className="roomify-card-interactive rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                <article key={payment.paymentId} className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-4">
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">Transaction</p>

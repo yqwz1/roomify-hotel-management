@@ -132,12 +132,12 @@ export default function Home() {
   const hoverLift = reduceMotion ? {} : { y: -4 };
 
   return (
-    <div className="min-h-full bg-brand-surface">
+    <div className="roomify-page-enter min-h-full bg-brand-surface">
 
       {/* ──────────────────────────────────────────────
           HERO
          ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
+      <section className="roomify-aurora relative overflow-hidden text-white">
         <motion.div
           className="pointer-events-none absolute inset-0"
           aria-hidden="true"
@@ -146,18 +146,20 @@ export default function Home() {
           transition={{ duration: 1.2, ease: EASE }}
         >
           <motion.div
-            className="absolute -top-40 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-brand-primary-tint/50 to-transparent blur-3xl"
+            className="absolute -top-40 right-0 h-[620px] w-[620px] rounded-full bg-gradient-to-br from-brand-primary/30 to-transparent blur-3xl"
             animate={reduceMotion ? {} : { y: [0, 18, 0], x: [0, -12, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-brand-accent-gold/15 to-transparent blur-2xl"
+            className="absolute -bottom-20 -left-20 h-[430px] w-[430px] rounded-full bg-gradient-to-tr from-brand-gold/24 to-transparent blur-2xl"
             animate={reduceMotion ? {} : { y: [0, -14, 0], x: [0, 10, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
           />
         </motion.div>
 
-        <div className="relative mx-auto max-w-7xl px-5 pb-6 pt-10 sm:px-8 lg:px-10 lg:pb-10 lg:pt-14">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-brand-surface to-transparent" aria-hidden="true" />
+
+        <div className="relative mx-auto max-w-7xl px-5 pb-14 pt-10 sm:px-8 lg:px-10 lg:pb-20 lg:pt-16">
           <div className="grid min-w-0 items-start gap-8 lg:grid-cols-[1fr_1.15fr] lg:gap-12">
 
             {/* LEFT — Copy */}
@@ -166,7 +168,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
-                className="inline-flex min-w-0 w-fit items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
+                className="inline-flex min-w-0 w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-champagne shadow-sm backdrop-blur"
               >
                 {t('m.home.eyebrow')}
               </motion.div>
@@ -175,7 +177,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
-                className="mt-4 font-serif text-[1.85rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.4rem] lg:text-[2.8rem]"
+                className="mt-4 max-w-2xl font-serif text-[2.55rem] font-black leading-[0.98] tracking-tight text-white sm:text-[3.8rem] lg:text-[5rem]"
               >
                 {t('m.home.headline')}
               </motion.h1>
@@ -184,7 +186,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
-                className="mt-3 max-w-md text-[0.9rem] font-medium leading-relaxed text-brand-ink-muted"
+                className="mt-5 max-w-xl text-base font-medium leading-7 text-white/78 sm:text-lg"
               >
                 {t('m.home.bio')}
               </motion.p>
@@ -199,7 +201,7 @@ export default function Home() {
                   <Link
                     to="/login"
                     id="hero-login-cta"
-                    className="group inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-primary/30 transition-all hover:bg-brand-primary-deep hover:shadow-xl hover:shadow-brand-primary-deep/35"
+                  className="group inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-gold px-5 py-2.5 text-sm font-black text-brand-midnight shadow-lg shadow-brand-gold/30 transition-all hover:bg-brand-champagne hover:shadow-xl hover:shadow-brand-gold/35"
                   >
                     <LogIn className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 shrink-0" />
                     {t('m.home.ctaLogin')}
@@ -210,7 +212,7 @@ export default function Home() {
                     <Link
                       to="/manager/dashboard"
                       id="hero-dashboard-cta"
-                      className="group inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-primary/30 bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition-all hover:border-brand-primary/50 hover:bg-brand-primary-tint hover:text-brand-ink"
+                      className="group inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white shadow-sm backdrop-blur transition-all hover:border-white/40 hover:bg-white/18"
                     >
                       {t('dashboard')}
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180 shrink-0" />
@@ -221,7 +223,7 @@ export default function Home() {
                   <Link
                     to="/bookings"
                     id="hero-booking-cta"
-                    className="group inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-5 py-2.5 text-sm font-bold text-brand-ink shadow-sm transition-all hover:border-brand-primary/30 hover:bg-brand-surface-light hover:text-brand-ink"
+                    className="group inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white shadow-sm backdrop-blur transition-all hover:border-white/40 hover:bg-white/18"
                   >
                     {t('m.home.ctaSupport')}
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180 shrink-0" />
@@ -237,7 +239,7 @@ export default function Home() {
                   hidden: {},
                   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.85 } },
                 }}
-                className="mt-7 flex min-w-0 flex-wrap gap-4 border-t border-brand-surface-border pt-5"
+                className="mt-7 flex min-w-0 flex-wrap gap-4 border-t border-white/12 pt-5"
               >
                 {LIVE_STATS.map((s) => {
                   const Icon = s.icon;
@@ -251,10 +253,10 @@ export default function Home() {
                       transition={{ duration: 0.5, ease: EASE }}
                       className="flex min-w-0 items-center gap-2"
                     >
-                      <Icon className={`h-4 w-4 shrink-0 ${s.color}`} />
+                      <Icon className="h-4 w-4 shrink-0 text-brand-gold" />
                       <div className="flex min-w-0 items-baseline gap-1">
-                        <span className={`text-lg font-black ${s.color}`}>{s.value}</span>
-                        <span className="text-xs font-medium text-brand-ink-hint break-words">{t(`m.home.stat.${s.id}`)}</span>
+                        <span className="text-lg font-black text-white">{s.value}</span>
+                        <span className="text-xs font-medium text-white/56 break-words">{t(`m.home.stat.${s.id}`)}</span>
                       </div>
                     </motion.div>
                   );
@@ -272,16 +274,16 @@ export default function Home() {
               <motion.div
                 whileHover={reduceMotion ? {} : { y: -6 }}
                 transition={{ duration: 0.4, ease: EASE }}
-                className="rounded-[1.75rem] border border-brand-surface-border bg-white shadow-xl shadow-brand-primary-deep/10 ring-1 ring-brand-ink/5"
+                className="overflow-hidden rounded-[1.75rem] border border-white/16 bg-white/12 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.9)] ring-1 ring-white/10 backdrop-blur-xl"
               >
                 {/* Window chrome */}
-                <div className="flex min-w-0 items-center gap-2 rounded-t-[1.75rem] border-b border-brand-surface-border bg-brand-surface-light/70 px-4 py-2.5">
+                <div className="flex min-w-0 items-center gap-2 border-b border-white/12 bg-white/10 px-4 py-2.5">
                   <div className="flex min-w-0 gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-brand-danger/80" />
                     <span className="h-2.5 w-2.5 rounded-full bg-brand-warning/80" />
                     <span className="h-2.5 w-2.5 rounded-full bg-brand-success/80" />
                   </div>
-                  <div className="ms-2 min-w-0 flex-1 rounded-full bg-white/80 border border-brand-surface-border/60 px-3 py-1 text-[10px] text-brand-ink-hint font-mono">
+                  <div className="ms-2 min-w-0 flex-1 rounded-full border border-white/12 bg-white/10 px-3 py-1 font-mono text-[10px] text-white/56">
                     app.roomify.io/dashboard
                   </div>
                 </div>
@@ -289,7 +291,7 @@ export default function Home() {
                 {/* Mock app body */}
                 <div className="flex min-w-0 min-h-[340px] sm:min-h-[380px]">
                   {/* Sidebar */}
-                  <div className="hidden w-[140px] flex-shrink-0 border-e border-white/10 bg-brand-primary-deep p-3 sm:block rounded-bl-[1.75rem]">
+                  <div className="hidden w-[140px] flex-shrink-0 border-e border-white/10 bg-brand-midnight/82 p-3 sm:block">
                     <div className="mb-4 flex min-w-0 items-center gap-1.5">
                       <span className="text-[11px] font-black text-white break-words">Roomify</span>
                     </div>
@@ -309,7 +311,7 @@ export default function Home() {
                   </div>
 
                   {/* Main area */}
-                  <div className="min-w-0 flex-1 p-4 sm:p-5">
+                  <div className="min-w-0 flex-1 bg-white p-4 text-brand-ink sm:p-5">
                     <div className="grid min-w-0 grid-cols-4 gap-2">
                       {[
                         { label: 'Occupancy', val: '72%', sub: '+4% vs last week', accent: 'text-brand-ink' },

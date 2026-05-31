@@ -83,7 +83,7 @@ export default function ReservationDetails() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <ReservationDetailLoader
         confirmationNumber={confirmationNumber}
         queueContext={queueContext}

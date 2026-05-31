@@ -69,35 +69,41 @@ export default {
   			// Source of truth for product UI colors. Prefer these over inline hex.
   			brand: {
   				// Core
-  				primary: '#35658D',
-  				'primary-deep': '#264B6B',
-  				'primary-hover': '#4A7BA6',
-  				'primary-tint': '#D9E3EE',
+  				primary: '#12B3A8',
+  				'primary-deep': '#073B4C',
+  				'primary-hover': '#0F8F8A',
+  				'primary-tint': '#D7F7F1',
   				'primary-fg': '#FFFFFF',
+  				midnight: '#061622',
+  				ocean: '#0B2E3F',
+  				lagoon: '#0E7C7B',
+  				champagne: '#F8E7BD',
+  				gold: '#D6A84F',
+  				coral: '#E86F5C',
   				// Surfaces
-  				surface: '#F5F2EA',
-  				'surface-light': '#FBF9F4',
+  				surface: '#F6F0E4',
+  				'surface-light': '#FFF9EE',
   				card: '#FFFFFF',
-  				'surface-border': '#E8E3D6',
+  				'surface-border': '#E6D9C1',
   				// Text
-  				ink: '#1A2B3A',
-  				'ink-muted': '#5C6B7A',
-  				'ink-hint': '#8A95A1',
+  				ink: '#071A25',
+  				'ink-muted': '#526678',
+  				'ink-hint': '#8A9AAB',
   				// Status
-  				success: '#1D9E75',
-  				warning: '#BA7517',
-  				danger: '#A32D2D',
+  				success: '#10A66E',
+  				warning: '#C9891B',
+  				danger: '#C74343',
   				// Accents — use sparingly
-  				'accent-gold': '#D4A24C',
-  				'accent-terracotta': '#C97757',
+  				'accent-gold': '#D6A84F',
+  				'accent-terracotta': '#E86F5C',
   			}
   		},
   		ringColor: {
-  			'brand-focus': 'rgba(53,101,141,0.25)',
+  			'brand-focus': 'rgba(18,179,168,0.28)',
   		},
   		boxShadow: {
-  			'brand-cta': '0 14px 32px -10px rgba(53,101,141,0.55)',
-  			'brand-cta-hover': '0 18px 40px -12px rgba(38,75,107,0.65)',
+  			'brand-cta': '0 18px 42px -14px rgba(18,179,168,0.62)',
+  			'brand-cta-hover': '0 24px 54px -16px rgba(7,59,76,0.7)',
   		}
   	}
   },

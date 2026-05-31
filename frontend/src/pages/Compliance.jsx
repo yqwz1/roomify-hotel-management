@@ -30,21 +30,22 @@ const RESIDENCY_POINTS = ['p1', 'p2', 'p3', 'p4'];
 export default function Compliance() {
   const { t } = useTranslation();
   return (
-    <div className="min-h-full bg-brand-surface">
+    <div className="roomify-page-enter min-h-full bg-brand-surface">
       {/* HERO */}
-      <section className="relative overflow-hidden">
+      <section className="roomify-aurora relative overflow-hidden text-white">
         <motion.div
           aria-hidden="true"
           className="pointer-events-none absolute -top-32 -left-20 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-brand-success/20 to-transparent blur-3xl"
           animate={{ y: [0, 18, 0], x: [0, 12, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="relative mx-auto max-w-7xl px-5 pb-10 pt-16 sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-brand-surface to-transparent" />
+        <div className="relative mx-auto max-w-7xl px-5 pb-14 pt-16 sm:px-8 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/[0.06] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-success shadow-sm"
+            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-champagne shadow-sm backdrop-blur"
           >
             <ShieldCheck className="h-3 w-3 shrink-0" />
             {t('m.compliance.eyebrow')}
@@ -53,7 +54,7 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="mt-4 max-w-3xl font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.6rem]"
+            className="mt-4 max-w-3xl font-serif text-[2.4rem] font-black leading-[1.02] tracking-tight text-white sm:text-[4.2rem]"
           >
             {t('m.compliance.headline')}
           </motion.h1>
@@ -61,7 +62,7 @@ export default function Compliance() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-            className="mt-3 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-brand-ink-muted"
+            className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/78"
           >
             {t('m.compliance.bio')}
           </motion.p>

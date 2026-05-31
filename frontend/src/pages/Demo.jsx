@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 
 const HIGHLIGHT_IDS = ['walkthrough', 'data', 'qa', 'noObligation'];
 
-const ROOM_RANGES = ['Under 30', '30 – 80', '80 – 150', '150 – 300', '300+'];
+const ROOM_RANGES = ['Under 30', '30 - 80', '80 - 150', '150 - 300', '300+'];
 
 export default function Demo() {
   const { t } = useTranslation();
@@ -56,8 +56,8 @@ export default function Demo() {
   };
 
   return (
-    <div className="min-h-full bg-brand-surface">
-      <section className="relative overflow-hidden">
+    <div className="roomify-page-enter min-h-full bg-brand-surface">
+      <section className="roomify-aurora relative overflow-hidden text-white">
         <motion.div
           aria-hidden="true"
           className="pointer-events-none absolute -top-32 -right-20 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-brand-accent-gold/20 to-transparent blur-3xl"
@@ -65,6 +65,7 @@ export default function Demo() {
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         />
 
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-brand-surface to-transparent" />
         <div className="relative mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
           <div className="grid min-w-0 items-start gap-10 lg:grid-cols-[1fr_1.05fr]">
 
@@ -74,7 +75,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, ease: EASE }}
-                className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-brand-surface-border bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted shadow-sm"
+                className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-champagne shadow-sm backdrop-blur"
               >
                 <Calendar className="h-3 w-3 shrink-0" />
                 {t('m.demo.eyebrow')}
@@ -83,7 +84,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                className="mt-4 font-serif text-[2.1rem] font-medium leading-[1.1] tracking-[-0.015em] text-brand-ink sm:text-[2.5rem]"
+                className="mt-4 font-serif text-[2.4rem] font-black leading-[1.02] tracking-tight text-white sm:text-[4.2rem]"
               >
                 {t('m.demo.headline')}
               </motion.h1>
@@ -91,7 +92,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-                className="mt-3 max-w-md text-[0.95rem] font-medium leading-relaxed text-brand-ink-muted"
+                className="mt-4 max-w-md text-base font-medium leading-7 text-white/78"
               >
                 {t('m.demo.bio')}
               </motion.p>
@@ -110,12 +111,12 @@ export default function Demo() {
                     key={id}
                     variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
                     transition={{ duration: 0.55, ease: EASE }}
-                    className="flex min-w-0 items-start gap-3 rounded-2xl border border-brand-surface-border bg-white px-4 py-3"
+                    className="roomify-glass-dark flex min-w-0 items-start gap-3 rounded-2xl px-4 py-3"
                   >
                     <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-success" />
                     <div>
-                      <p className="text-sm font-black text-brand-ink break-words">{t(`m.demo.hi.${id}.label`)}</p>
-                      <p className="text-[12px] font-medium leading-snug text-brand-ink-muted break-words">{t(`m.demo.hi.${id}.desc`)}</p>
+                      <p className="text-sm font-black text-white break-words">{t(`m.demo.hi.${id}.label`)}</p>
+                      <p className="text-[12px] font-medium leading-snug text-white/62 break-words">{t(`m.demo.hi.${id}.desc`)}</p>
                     </div>
                   </motion.li>
                 ))}
@@ -124,7 +125,7 @@ export default function Demo() {
 
             {/* RIGHT — Form / Success */}
             <Reveal delay={0.15} variant="scale" className="relative">
-              <div className="rounded-[2rem] border border-brand-surface-border bg-white p-6 shadow-xl shadow-brand-primary-deep/10 sm:p-8">
+              <div className="rounded-[2rem] border border-white/50 bg-white p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.88)] sm:p-8">
                 {!submitted ? (
                   <>
                     <p className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-ink-hint break-words">{t('m.demo.formStep')}</p>

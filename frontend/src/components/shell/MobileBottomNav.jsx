@@ -56,8 +56,8 @@ export default function MobileBottomNav({ onOpenMenu }) {
   const items = MOBILE_NAV_ITEMS[primaryRole] ?? [];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-brand-surface/82 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-18px_46px_-35px_rgba(15,23,42,0.55)] backdrop-blur-xl lg:hidden">
-      <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1 rounded-[1.4rem] border border-white/70 bg-white/62 p-1 shadow-sm">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-brand-surface/80 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-22px_54px_-36px_rgba(6,22,34,0.6)] backdrop-blur-xl lg:hidden">
+      <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1 rounded-[1.4rem] border border-white/70 bg-white/72 p-1 shadow-sm">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = isNavItemActive(location.pathname, item.path);
@@ -67,9 +67,9 @@ export default function MobileBottomNav({ onOpenMenu }) {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition',
+                'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition duration-200 active:scale-[0.98]',
                 isActive
-                  ? 'bg-brand-primary text-white shadow-sm'
+                  ? 'roomify-luxe-gradient text-white shadow-sm'
                   : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
               )}
             >
@@ -84,7 +84,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <Button variant="unstyled" size="none"
           type="button"
           onClick={onOpenMenu}
-          className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition hover:bg-white hover:text-brand-ink"
+          className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition duration-200 hover:bg-white hover:text-brand-ink active:scale-[0.98]"
           aria-label={t('openNavigation')}
         >
           <Menu className="h-4 w-4 flex-shrink-0" />

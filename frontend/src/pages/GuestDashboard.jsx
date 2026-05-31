@@ -61,7 +61,7 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
   const failedPaymentCancelled = reservationStatus === 'CANCELLED' && paymentStatus === 'FAILED';
 
   return (
-    <article className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
+    <article className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-5">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
@@ -290,7 +290,7 @@ export default function GuestDashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('guestDashboardTitle')}

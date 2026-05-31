@@ -117,7 +117,7 @@ export default function StaffDashboard() {
   const previewReservations = reservations.slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(`${pageTx}.eyebrow`)}
         title={t('staffDashboardTitle')}
@@ -213,7 +213,7 @@ export default function StaffDashboard() {
               {previewReservations.map((reservation) => (
                 <div
                   key={reservation.id ?? reservation.confirmationNumber}
-                  className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5"
+                  className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-5"
                 >
                   <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">

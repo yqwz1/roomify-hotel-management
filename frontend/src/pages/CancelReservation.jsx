@@ -72,7 +72,7 @@ function CancelDialog({ reservation, onClose, onConfirm }) {
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+          <div className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-4">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
               {t('cancelReservationPage.reservationSnapshot')}
             </p>
@@ -178,7 +178,7 @@ export default function CancelReservation() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <ConfirmationToast
         message={toast?.message}
         type={toast?.type}

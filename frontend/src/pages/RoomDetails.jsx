@@ -105,7 +105,7 @@ export default function RoomDetails() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={translateWithFallback(t, 'roomSearchPage.viewDetailsCta', 'View details')}
         title={t('roomNumber', { number: room.roomNumber })}
@@ -269,7 +269,7 @@ export default function RoomDetails() {
                 </span>
               </div>
 
-              <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-4">
                 <div className="flex min-w-0 items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted break-words">{t('bookRoomPage.ratePerNight')}</span>
                   <span className="font-bold text-brand-ink break-words">

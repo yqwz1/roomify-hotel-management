@@ -201,18 +201,19 @@ export default function DemoPaymentGateway() {
   if (loadError) return <ErrorState title="Demo Payment Gateway" message={loadError} onRetry={() => navigate(0)} />;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="roomify-card-interactive overflow-hidden rounded-[1.75rem] border border-brand-primary/20 bg-white shadow-[0_20px_50px_-30px_rgba(15,23,42,0.28)]">
+    <div className="roomify-page-enter mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="roomify-card-interactive overflow-hidden rounded-[1.75rem] border border-brand-primary/20 bg-white shadow-[0_24px_70px_-36px_rgba(7,59,76,0.5)]">
         <div className="grid min-w-0 gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_100%)] p-6 text-white sm:p-8">
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-white/65 break-words">
+          <div className="roomify-luxe-gradient relative overflow-hidden p-6 text-white sm:p-8">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_15%,rgba(255,255,255,0.22),transparent_16rem),radial-gradient(circle_at_18%_92%,rgba(214,168,79,0.24),transparent_15rem)]" />
+            <p className="relative text-xs font-black uppercase tracking-[0.24em] text-brand-champagne/80 break-words">
               Demo Payment Gateway
             </p>
-            <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Complete mock payment</h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/78 sm:text-base">
+            <h1 className="relative mt-3 font-heading text-3xl font-black tracking-tight sm:text-5xl">Complete mock payment</h1>
+            <p className="relative mt-3 max-w-2xl text-sm font-medium leading-6 text-white/78 sm:text-base">
               This checkout is for graduation/demo use only. It stores only the last four digits and never connects to a real payment provider.
             </p>
-            <div className="mt-6 flex min-w-0 flex-wrap gap-2">
+            <div className="relative mt-6 flex min-w-0 flex-wrap gap-2">
               <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-white/85">
                 Guest-owned reservation
               </span>
@@ -257,7 +258,7 @@ export default function DemoPaymentGateway() {
                   <input
                     value={cardholderName}
                     onChange={(event) => setCardholderName(event.target.value)}
-                    className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
+                    className="roomify-field"
                     placeholder="Demo Guest"
                     autoComplete="cc-name"
                   />
@@ -268,7 +269,7 @@ export default function DemoPaymentGateway() {
                     <input
                       value={cardNumber}
                       onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
-                      className="h-12 w-full rounded-full border border-brand-surface-border bg-white ps-11 pe-4 text-sm font-semibold text-brand-ink transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
+                      className="roomify-field ps-11"
                       placeholder="4242 4242 4242 4242"
                       inputMode="numeric"
                       autoComplete="cc-number"
@@ -279,7 +280,7 @@ export default function DemoPaymentGateway() {
                   <input
                     value={expiry}
                     onChange={(event) => setExpiry(event.target.value.replace(/[^\d/]/g, '').slice(0, 5))}
-                    className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
+                    className="roomify-field"
                     placeholder="MM/YY"
                     inputMode="numeric"
                     autoComplete="cc-exp"
@@ -289,7 +290,7 @@ export default function DemoPaymentGateway() {
                   <input
                     value={cvv}
                     onChange={(event) => setCvv(event.target.value.replace(/\D/g, '').slice(0, 4))}
-                    className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
+                    className="roomify-field"
                     placeholder="123"
                     inputMode="numeric"
                     autoComplete="cc-csc"
@@ -333,7 +334,7 @@ export default function DemoPaymentGateway() {
               ) : null}
 
               {submitting ? (
-                <div className="rounded-2xl border border-brand-primary/20 bg-brand-surface-light p-4">
+                <div className="roomify-shimmer rounded-2xl border border-brand-primary/20 bg-brand-surface-light p-4">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="roomify-processing-dot h-3 w-3 rounded-full bg-brand-primary" />
                     <p className="text-sm font-bold text-brand-ink">Processing mock authorization...</p>
@@ -346,7 +347,7 @@ export default function DemoPaymentGateway() {
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="h-auto rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white hover:bg-brand-primary-deep disabled:opacity-60"
+                    className="h-auto rounded-full px-6 py-4 text-sm font-bold text-white disabled:opacity-60"
                   >
                     <ShieldCheck className="h-4 w-4 shrink-0" />
                     {submitting ? 'Processing...' : `Pay ${maskLastFour(cardNumber)}`}

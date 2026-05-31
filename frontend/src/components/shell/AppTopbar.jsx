@@ -36,13 +36,13 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/60 bg-brand-surface/78 shadow-[0_14px_38px_-32px_rgba(15,23,42,0.5)] backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-white/60 bg-brand-surface/78 shadow-[0_16px_44px_-34px_rgba(6,22,34,0.55)] backdrop-blur-xl">
       <div className="flex min-w-0 min-h-20 flex-wrap items-start gap-3 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:items-center sm:px-6 sm:pt-3 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button variant="unstyled" size="none"
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-brand-surface-border bg-white/90 p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:bg-white hover:text-brand-primary-deep"
+            className="rounded-2xl border border-brand-surface-border bg-white/90 p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/40 hover:bg-white hover:text-brand-primary-deep"
             aria-label={isSidebarOpen ? t('closeNavigation') : t('openNavigation')}
             aria-pressed={isSidebarOpen}
           >
@@ -50,7 +50,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
           </Button>
 
           <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-brand-ink-muted">
+            <div className="flex min-w-0 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-brand-lagoon">
               <span className="min-w-0 truncate">{pageMeta.sectionLabel}</span>
               <span className="shrink-0 text-brand-ink-hint break-words">&middot;</span>
               <span className="min-w-0 truncate">{roleLabel}</span>
@@ -58,7 +58,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
 
             <div className="mt-1 flex min-w-0 items-center gap-3">
               <div className="min-w-0">
-                <h1 className="truncate text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
+                <h1 className="truncate font-heading text-xl font-black tracking-tight text-brand-ink sm:text-2xl">
                   {pageMeta.title}
                 </h1>
                 <p className="truncate text-sm font-medium text-brand-ink-muted">
@@ -79,13 +79,13 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
           </div>
           <Link
             to={homePath}
-            className="inline-flex min-w-0 shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep max-[380px]:hidden"
+            className="inline-flex min-w-0 shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/40 hover:text-brand-primary-deep max-[380px]:hidden"
           >
             {t('homeNav')}
           </Link>
 
           <div className="hidden items-center gap-3 rounded-full border border-brand-surface-border bg-white/80 px-3 py-2 shadow-sm backdrop-blur xl:flex">
-            <div className="flex min-w-0 h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-xs font-black uppercase text-white">
+            <div className="flex min-w-0 h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-xs font-black uppercase text-white shadow-[0_12px_30px_-18px_rgba(18,179,168,0.95)]">
               {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
             </div>
             <div className="min-w-0 flex-1">

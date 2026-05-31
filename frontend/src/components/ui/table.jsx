@@ -3,7 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="relative min-w-0 max-w-full overflow-auto">
+  <div className="relative min-w-0 max-w-full overflow-auto rounded-[1.25rem] border border-brand-surface-border bg-white/70 shadow-[0_18px_42px_-34px_rgba(7,59,76,0.45)]">
     <table
       ref={ref}
       className={cn("w-full min-w-full caption-bottom text-sm", className)}
@@ -13,7 +13,7 @@ const Table = React.forwardRef(({ className, ...props }, ref) => (
 Table.displayName = "Table"
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead ref={ref} className={cn("bg-brand-midnight text-white [&_tr]:border-b [&_tr]:border-white/10", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -37,7 +37,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b border-brand-surface-border transition-colors hover:bg-brand-surface-light/80 data-[state=selected]:bg-brand-primary-tint/50",
+      "border-b border-brand-surface-border transition-colors hover:bg-brand-primary-tint/45 data-[state=selected]:bg-brand-primary-tint/60",
       className
     )}
     {...props} />
@@ -48,7 +48,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-11 px-3 text-start align-middle text-xs font-black uppercase tracking-[0.16em] text-brand-ink-hint [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "h-11 px-3 text-start align-middle text-xs font-black uppercase tracking-[0.16em] text-white/70 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className
     )}
     {...props} />

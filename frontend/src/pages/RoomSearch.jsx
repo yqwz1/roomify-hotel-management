@@ -190,7 +190,7 @@ export default function RoomSearch() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={t(isGuest ? `${pageTx}.guestHeroEyebrow` : `${pageTx}.heroEyebrow`)}
         title={t('roomSearchTitle')}
@@ -367,17 +367,32 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="roomify-card-interactive rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] hover:border-brand-primary/30"
+                      className="roomify-card-interactive overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_22px_58px_-34px_rgba(7,59,76,0.42)] hover:border-brand-primary/40"
                     >
-                      <div className="space-y-4">
+                      <div className="relative h-32 overflow-hidden bg-[linear-gradient(135deg,#061622_0%,#073B4C_45%,#12B3A8_100%)] sm:h-40">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.28),transparent_12rem),radial-gradient(circle_at_88%_18%,rgba(214,168,79,0.35),transparent_10rem)]" />
+                        <div className="absolute bottom-4 start-5 flex min-w-0 items-center gap-3 text-white">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/18 bg-white/12 backdrop-blur">
+                            <BedDouble className="h-5 w-5 shrink-0" />
+                          </span>
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-champagne/85">
+                              {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}
+                            </p>
+                            <p className="mt-1 text-2xl font-black tracking-tight">
+                              {t('roomNumber', { number: room.roomNumber })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4 p-5">
                         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex min-w-0 flex-1 items-start gap-3">
-                            <span className="flex min-w-0 h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white break-words">
-                              <BedDouble className="h-5 w-5 shrink-0" />
-                            </span>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xl font-black tracking-tight text-brand-ink break-words">
-                                {t('roomNumber', { number: room.roomNumber })}
+                              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-lagoon break-words">
+                                {isAvailableForStay
+                                  ? translateWithFallback(t, `${pageTx}.availableForDates`, 'Available for selected dates')
+                                  : translateWithFallback(t, `${pageTx}.unavailableForDates`, 'Unavailable for selected dates')}
                               </p>
                               <p className="mt-1 text-sm font-medium text-brand-ink-muted break-words">
                                 {translateKnownValue(room.roomType?.name || t(`${pageTx}.roomTypeUnavailable`), t)}

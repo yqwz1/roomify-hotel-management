@@ -295,7 +295,7 @@ export default function RoomGrid() {
   const gridTemplateColumns = `${ROOM_LABEL_WIDTH}px repeat(${WINDOW_DAYS}, minmax(${DAY_MIN_WIDTH}px, 1fr))`;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <header className="space-y-2">
         <h1 className="font-serif text-3xl text-brand-ink break-words">{t('roomGrid.title')}</h1>
         <p className="text-sm text-brand-ink-muted break-words">{t('roomGrid.subtitle')}</p>

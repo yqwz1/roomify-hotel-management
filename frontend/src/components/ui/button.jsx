@@ -5,16 +5,16 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex max-w-full items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex max-w-full items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-bold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2 focus-visible:ring-offset-brand-surface disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-brand-primary text-white shadow-brand-cta hover:-translate-y-0.5 hover:bg-brand-primary-deep hover:shadow-brand-cta-hover",
+          "roomify-luxe-gradient text-white shadow-brand-cta hover:-translate-y-0.5 hover:shadow-brand-cta-hover",
         destructive:
           "bg-brand-danger text-white shadow-sm hover:-translate-y-0.5 hover:bg-brand-danger/90",
         outline:
-          "border border-brand-surface-border bg-white text-brand-ink shadow-sm hover:-translate-y-0.5 hover:border-brand-primary/35 hover:bg-brand-surface-light hover:text-brand-primary-deep",
+          "border border-brand-surface-border bg-white/90 text-brand-ink shadow-sm backdrop-blur hover:-translate-y-0.5 hover:border-brand-primary/45 hover:bg-white hover:text-brand-primary-deep",
         secondary:
           "bg-brand-primary-tint text-brand-primary-deep shadow-sm hover:-translate-y-0.5 hover:bg-brand-primary-tint/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",

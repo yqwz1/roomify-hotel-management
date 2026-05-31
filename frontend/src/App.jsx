@@ -1,31 +1,8 @@
 import './i18n'
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider, useAuth } from './context/AuthProvider'
-import Home from './pages/Home'
-import Pricing from './pages/Pricing'
-import Compliance from './pages/Compliance'
-import Integrations from './pages/Integrations'
-import Demo from './pages/Demo'
-import Rooms from './pages/Rooms'
-import RoomTypes from './pages/RoomTypes'
-import Staff from './pages/Staff'
-import Bookings from './pages/Bookings'
-import NotFound from './pages/NotFound'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import Unauthorized from './pages/Unauthorized'
-import ManagerDashboard from './pages/ManagerDashboard'
-import AiFinanceDashboard from './pages/AiFinanceDashboard'
-import StaffDashboard from './pages/StaffDashboard'
-import StaffGuestInbox from './pages/StaffGuestInbox'
-import StaffServiceRequests from './pages/StaffServiceRequests'
-import GuestDashboard from './pages/GuestDashboard'
-import GuestBillingStatus from './pages/GuestBillingStatus'
-import DemoPaymentGateway from './pages/DemoPaymentGateway'
-import PaymentHistory from './pages/PaymentHistory'
-import GuestServiceRequests from './pages/GuestServiceRequests'
 import ProtectedRoute from './components/ProtectedRoute'
 import {
   GUEST_BILLING_STATUS_PATH,
@@ -36,28 +13,48 @@ import {
   ROLE_STAFF,
 } from './components/navigation/navConfig'
 
-// Public booking and room-browsing surfaces
-import RoomsManagement from './pages/RoomsManagement'
-import RoomSearch from './pages/RoomSearch'
-import RoomDetails from './pages/RoomDetails'
-import BookRoom from './pages/BookRoom'
-import ConfirmationPage from './pages/ConfirmationPage'
-
-// Reservation management pages
-import CheckIn from './pages/CheckIn'
-import ModifyReservation from './pages/ModifyReservation'
-import CancelReservation from './pages/CancelReservation'
-import Checkout from './pages/Checkout'
-import RoomStatus from './pages/RoomStatus'
-import InvoicePreview from './pages/InvoicePreview'
-import ReservationDetails from './pages/ReservationDetails'
-import ReservationsWorkspace from './pages/ReservationsWorkspace'
-import RoomGrid from './pages/RoomGrid'
-import AdminDashboard from './pages/AdminDashboard'
-import HotelServices from './pages/HotelServices'
-import ExpenseTracker from './pages/ExpenseTracker'
-
 import Layout from './components/Layout';
+
+const Home = lazy(() => import('./pages/Home'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Compliance = lazy(() => import('./pages/Compliance'));
+const Integrations = lazy(() => import('./pages/Integrations'));
+const Demo = lazy(() => import('./pages/Demo'));
+const Rooms = lazy(() => import('./pages/Rooms'));
+const RoomTypes = lazy(() => import('./pages/RoomTypes'));
+const Staff = lazy(() => import('./pages/Staff'));
+const Bookings = lazy(() => import('./pages/Bookings'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
+const ManagerDashboard = lazy(() => import('./pages/ManagerDashboard'));
+const AiFinanceDashboard = lazy(() => import('./pages/AiFinanceDashboard'));
+const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
+const StaffGuestInbox = lazy(() => import('./pages/StaffGuestInbox'));
+const StaffServiceRequests = lazy(() => import('./pages/StaffServiceRequests'));
+const GuestDashboard = lazy(() => import('./pages/GuestDashboard'));
+const GuestBillingStatus = lazy(() => import('./pages/GuestBillingStatus'));
+const DemoPaymentGateway = lazy(() => import('./pages/DemoPaymentGateway'));
+const PaymentHistory = lazy(() => import('./pages/PaymentHistory'));
+const GuestServiceRequests = lazy(() => import('./pages/GuestServiceRequests'));
+const RoomsManagement = lazy(() => import('./pages/RoomsManagement'));
+const RoomSearch = lazy(() => import('./pages/RoomSearch'));
+const RoomDetails = lazy(() => import('./pages/RoomDetails'));
+const BookRoom = lazy(() => import('./pages/BookRoom'));
+const ConfirmationPage = lazy(() => import('./pages/ConfirmationPage'));
+const CheckIn = lazy(() => import('./pages/CheckIn'));
+const ModifyReservation = lazy(() => import('./pages/ModifyReservation'));
+const CancelReservation = lazy(() => import('./pages/CancelReservation'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const RoomStatus = lazy(() => import('./pages/RoomStatus'));
+const InvoicePreview = lazy(() => import('./pages/InvoicePreview'));
+const ReservationDetails = lazy(() => import('./pages/ReservationDetails'));
+const ReservationsWorkspace = lazy(() => import('./pages/ReservationsWorkspace'));
+const RoomGrid = lazy(() => import('./pages/RoomGrid'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const HotelServices = lazy(() => import('./pages/HotelServices'));
+const ExpenseTracker = lazy(() => import('./pages/ExpenseTracker'));
 
 const ADMIN_ONLY_ROLES = [ROLE_ADMIN];
 const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
@@ -66,6 +63,17 @@ const GUEST_ONLY_ROLES = [ROLE_GUEST];
 const STAFF_AND_MANAGER_ROLES = [ROLE_MANAGER, ROLE_STAFF];
 const ADMIN_STAFF_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
 const PAYMENT_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
+
+function RouteLoadingFallback() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center px-6">
+      <div className="roomify-premium-card flex min-w-0 items-center gap-3 rounded-[1.5rem] px-5 py-4 text-sm font-bold text-brand-ink-muted">
+        <span className="roomify-processing-dot h-2.5 w-2.5 rounded-full bg-brand-primary" />
+        Loading Roomify workspace...
+      </div>
+    </div>
+  );
+}
 
 /**
  * AppContent component - handles routing logic
@@ -91,6 +99,7 @@ const AppContent = () => {
 
   return (
     <div className="h-full bg-brand-surface-border" dir={appDirection}>
+      <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout showSidebar={false}><Home /></Layout>} />
@@ -348,6 +357,7 @@ const AppContent = () => {
         {/* Fallback for unknown routes */}
         <Route path="*" element={<Layout showSidebar={false}><NotFound /></Layout>} />
       </Routes>
+      </Suspense>
     </div>
   );
 };

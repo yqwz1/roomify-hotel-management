@@ -132,12 +132,12 @@ const LoginPage = () => {
     await submitLogin(nextFormData);
   };
 
-  const headline = isAr ? 'أهلاً بعودتك.' : 'Welcome back.';
-  const subline = isAr ? 'سجّل دخولك لإدارة فندقك.' : 'Sign in to manage your hotel.';
+  const headline = t('loginHeadline', { defaultValue: 'Welcome back.' });
+  const subline = t('loginSubline', { defaultValue: 'Sign in to manage your hotel.' });
 
   const showDemoQuickLogin = isDemoQuickLoginEnabled();
-  const newAccountPrompt = isAr ? 'جديد على روميفاي؟' : t('newToRoomify', { defaultValue: 'New to Roomify?' });
-  const createAccountLabel = isAr ? 'إنشاء حساب' : t('createAccount', { defaultValue: 'Create an account' });
+  const newAccountPrompt = t('newToRoomify', { defaultValue: 'New to Roomify?' });
+  const createAccountLabel = t('createAccount', { defaultValue: 'Create an account' });
   const authInputClassName =
     '!min-h-0 !rounded-none !border-0 !border-b !bg-transparent !px-0 !shadow-none focus:!bg-transparent focus:!shadow-none';
 
@@ -153,7 +153,7 @@ const LoginPage = () => {
           className="group inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-brand-ink-muted transition-colors hover:text-brand-ink"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5 shrink-0" />
-          {isAr ? 'العودة' : 'Back to site'}
+          {t('backToSite', { defaultValue: 'Back to site' })}
         </Link>
         <LanguageSwitcher />
       </div>
@@ -409,8 +409,8 @@ const LoginPage = () => {
               className="group inline-flex min-w-0 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-ink-hint transition-colors hover:text-brand-primary"
             >
               {demoOpen
-                ? isAr ? 'إخفاء حسابات التجربة' : 'Hide demo accounts'
-                : isAr ? 'حسابات تجريبية' : 'Demo accounts'}
+                ? t('hideDemoAccounts', { defaultValue: 'Hide demo accounts' })
+                : t('demoAccounts', { defaultValue: 'Demo accounts' })}
               <ChevronDown
                 className={`h-3 w-3 transition-transform ${demoOpen ? 'rotate-180' : ''}`}
               />

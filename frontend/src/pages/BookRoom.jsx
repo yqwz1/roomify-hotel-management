@@ -274,7 +274,7 @@ export default function BookRoom() {
 
   if (!roomId) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
+      <div className="roomify-page-enter mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
         <DashboardPanel
           title={t('bookRoomPage.noRoomPanelTitle')}
           description={t('bookRoomPage.noRoomPanelDescription')}
@@ -314,7 +314,7 @@ export default function BookRoom() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="roomify-page-enter mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <DashboardHero
         eyebrow={translateWithFallback(t, 'bookRoomPage.heroEyebrow', 'Secure reservation')}
         title={t('bookARoom')}
@@ -405,7 +405,7 @@ export default function BookRoom() {
               />
 
               {!isAuthenticated ? (
-                <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
+                <div className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-5">
                   <p className="inline-flex min-w-0 items-center gap-2 text-sm font-black text-brand-ink break-words">
                     <Lock className="h-4 w-4 shrink-0" />
                     {translateWithFallback(
@@ -495,7 +495,7 @@ export default function BookRoom() {
                     />
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <div className="rounded-[1.5rem] border border-brand-surface-border bg-white/80 p-4 shadow-sm">
                     <p className="text-sm font-black text-brand-ink break-words">
                       {translateWithFallback(
                         t,
@@ -603,7 +603,7 @@ export default function BookRoom() {
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="roomify-card-interactive roomify-premium-card rounded-[1.5rem] p-4">
                 <div className="flex min-w-0 items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted break-words">{t('bookRoomPage.ratePerNight')}</span>
                   <span className="font-bold text-brand-ink break-words">
