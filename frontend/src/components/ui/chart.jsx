@@ -13,7 +13,7 @@ const ChartContainer = React.forwardRef(
 ChartContainer.displayName = "Chart"
 
 const ChartTooltipContent = React.forwardRef(
-  ({ active, payload, label, className, formatter, labelFormatter, hideLabel = false, ...props }, ref) => {
+  ({ active, payload, label, className, formatter, labelFormatter, hideLabel = false, renderExtra, ...props }, ref) => {
     if (!active || !payload?.length) {
       return null
     }
@@ -48,6 +48,7 @@ const ChartTooltipContent = React.forwardRef(
             )
           })}
         </div>
+        {typeof renderExtra === "function" ? renderExtra(payload) : null}
       </div>
     )
   }

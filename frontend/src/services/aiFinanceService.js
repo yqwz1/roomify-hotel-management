@@ -56,6 +56,19 @@ export const getRoomTypeRevenue = async () => {
   return Array.isArray(response.data) ? response.data : [];
 };
 
+// Recurring Hijri/Gregorian season segments used to overlay shaded bands on the
+// historical charts. Uses the same analytics window as the trend endpoints; the
+// backend names the params `from`/`to`.
+export const getSeasons = async (
+  start = getDefaultAiFinanceStartDate(),
+  end = getDefaultAiFinanceEndDate()
+) => {
+  const response = await api.get('/ai-finance/seasons', {
+    params: { from: start, to: end },
+  });
+  return Array.isArray(response.data) ? response.data : [];
+};
+
 export const getTrainingData = async (
   start = getDefaultAiFinanceStartDate(),
   end = getDefaultAiFinanceEndDate()

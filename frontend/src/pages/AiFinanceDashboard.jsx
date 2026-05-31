@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart3,
   BedDouble,
@@ -235,6 +236,7 @@ function ForecastMetricSkeletons() {
 }
 
 function AiFinanceContent() {
+  const { t } = useTranslation();
   const [selectedElasticityRoomTypeId, setSelectedElasticityRoomTypeId] = useState(null);
   const [selectedElasticitySimulationIndex, setSelectedElasticitySimulationIndex] = useState(0);
   const [heatmapMonth, setHeatmapMonth] = useState(getCurrentMonthValue());
@@ -248,6 +250,7 @@ function AiFinanceContent() {
     summary,
     revenueTrend,
     occupancyTrend,
+    seasons,
     roomTypeRevenue,
     aiHealth,
     modelInfo,
@@ -414,8 +417,8 @@ function AiFinanceContent() {
           )}
 
           <ForecastChart
-            title="Historical revenue trend"
-            description="Historical daily revenue from Spring Boot analytics for comparison with the future forecast."
+            title={t('aiFinance.historicalRevenue.title')}
+            description={t('aiFinance.historicalRevenue.desc')}
             data={revenueTrend}
             dateKey="date"
             valueKey="revenue"
@@ -426,6 +429,7 @@ function AiFinanceContent() {
             accentClassName="text-brand-ink"
             strokeColor="#5C6B7A"
             fillColor="rgba(82, 82, 91, 0.12)"
+            seasons={seasons}
           />
         </div>
       </DashboardPanel>
@@ -498,8 +502,8 @@ function AiFinanceContent() {
           )}
 
           <ForecastChart
-            title="Historical occupancy trend"
-            description="Historical occupancy rate from Spring Boot analytics for comparison with the future forecast."
+            title={t('aiFinance.historicalOccupancy.title')}
+            description={t('aiFinance.historicalOccupancy.desc')}
             data={occupancyTrend}
             dateKey="date"
             valueKey="occupancyRate"
@@ -510,6 +514,7 @@ function AiFinanceContent() {
             accentClassName="text-brand-ink"
             strokeColor="#5C6B7A"
             fillColor="rgba(82, 82, 91, 0.12)"
+            seasons={seasons}
           />
         </div>
       </DashboardPanel>

@@ -14,6 +14,7 @@ import {
   getRevenueForecast,
   getRevenueTrend,
   getRoomTypeRevenue,
+  getSeasons,
   getSummary,
 } from '../services/aiFinanceService';
 
@@ -22,6 +23,7 @@ const emptyState = {
   summary: null,
   revenueTrend: [],
   occupancyTrend: [],
+  seasons: [],
   roomTypeRevenue: [],
   aiHealth: null,
   modelInfo: null,
@@ -45,6 +47,7 @@ export const useAiFinance = ({
   const [summary, setSummary] = useState(emptyState.summary);
   const [revenueTrend, setRevenueTrend] = useState(emptyState.revenueTrend);
   const [occupancyTrend, setOccupancyTrend] = useState(emptyState.occupancyTrend);
+  const [seasons, setSeasons] = useState(emptyState.seasons);
   const [roomTypeRevenue, setRoomTypeRevenue] = useState(emptyState.roomTypeRevenue);
   const [aiHealth, setAiHealth] = useState(emptyState.aiHealth);
   const [modelInfo, setModelInfo] = useState(emptyState.modelInfo);
@@ -110,6 +113,7 @@ export const useAiFinance = ({
         getRevenueTrend(start, end),
         getOccupancyTrend(start, end),
         getRoomTypeRevenue(),
+        getSeasons(start, end),
       ]);
 
       if (ignore) return;
@@ -119,6 +123,7 @@ export const useAiFinance = ({
       setRevenueTrend(settleValue(results[2], []));
       setOccupancyTrend(settleValue(results[3], []));
       setRoomTypeRevenue(settleValue(results[4], []));
+      setSeasons(settleValue(results[5], []));
 
       const failures = results.filter((result) => result.status === 'rejected');
       if (failures.length > 0) {
@@ -247,6 +252,7 @@ export const useAiFinance = ({
     summary,
     revenueTrend,
     occupancyTrend,
+    seasons,
     roomTypeRevenue,
     aiHealth,
     modelInfo,

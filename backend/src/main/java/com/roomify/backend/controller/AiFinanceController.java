@@ -13,11 +13,13 @@ import com.roomify.backend.dto.ai.OccupancyTrendPoint;
 import com.roomify.backend.dto.ai.PricingRecommendationResponse;
 import com.roomify.backend.dto.ai.RevenueTrendPoint;
 import com.roomify.backend.dto.ai.RoomTypeRevenueResponse;
+import com.roomify.backend.dto.ai.SeasonSegment;
 import com.roomify.backend.dto.ai.TrainingDataRow;
 import com.roomify.backend.service.AiFinanceClient;
 import com.roomify.backend.service.AiFinanceFallbackService;
 import com.roomify.backend.service.DemandHeatmapService;
 import com.roomify.backend.service.FinanceAnalyticsService;
+import com.roomify.backend.service.SeasonTaggingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -55,6 +57,7 @@ public class AiFinanceController {
     private final AiFinanceClient aiFinanceClient;
     private final AiFinanceFallbackService aiFinanceFallbackService;
     private final DemandHeatmapService demandHeatmapService;
+    private final SeasonTaggingService seasonTaggingService;
     private final ObjectMapper objectMapper;
 
     public AiFinanceController(
@@ -62,11 +65,13 @@ public class AiFinanceController {
             AiFinanceClient aiFinanceClient,
             AiFinanceFallbackService aiFinanceFallbackService,
             DemandHeatmapService demandHeatmapService,
+            SeasonTaggingService seasonTaggingService,
             ObjectMapper objectMapper) {
         this.financeAnalyticsService = financeAnalyticsService;
         this.aiFinanceClient = aiFinanceClient;
         this.aiFinanceFallbackService = aiFinanceFallbackService;
         this.demandHeatmapService = demandHeatmapService;
+        this.seasonTaggingService = seasonTaggingService;
         this.objectMapper = objectMapper;
     }
 
@@ -97,6 +102,20 @@ public class AiFinanceController {
     @GetMapping("/room-type-revenue")
     public ResponseEntity<List<RoomTypeRevenueResponse>> getRoomTypeRevenue() {
         return ResponseEntity.ok(financeAnalyticsService.getRoomTypeRevenue());
+    }
+
+    /**
+     * GET /api/ai-finance/seasons?from=YYYY-MM-DD&to=YYYY-MM-DD
+     *
+     * Returns recurring Hijri/Gregorian season segments (Ramadan, Eid al-Fitr,
+     * Hajj/Eid al-Adha, summer) overlapping the given range, for overlaying shaded
+     * bands on the historical analytics charts. Computed on the fly; no persistence.
+     */
+    @GetMapping("/seasons")
+    public ResponseEntity<List<SeasonSegment>> getSeasons(
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to) {
+        return ResponseEntity.ok(seasonTaggingService.getSeasons(from, to));
     }
 
     @GetMapping("/demand-heatmap")
