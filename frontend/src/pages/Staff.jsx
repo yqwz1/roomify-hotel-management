@@ -19,7 +19,17 @@ import { useStaff } from '../hooks/useStaff';
 import { translateKnownValue, translateWithFallback } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 function StaffFormModal({
   editingId,
   formData,
@@ -33,7 +43,7 @@ function StaffFormModal({
   const { t } = useTranslation();
   const pageTx = 'staffPage';
   const inputClassName =
-    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+    'h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
   return (
     <ModalFrame
@@ -52,10 +62,11 @@ function StaffFormModal({
         )}
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <Label htmlFor="staff-email" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('emailLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
+            id="staff-email"
             name="email"
             type="email"
             value={formData.email}
@@ -73,10 +84,11 @@ function StaffFormModal({
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <Label htmlFor="staff-name" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('fullNameLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
+            id="staff-name"
             name="name"
             value={formData.name}
             onChange={onChange}
@@ -89,10 +101,11 @@ function StaffFormModal({
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <Label htmlFor="staff-department" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
             {t('departmentLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
+            id="staff-department"
             name="department"
             value={formData.department}
             onChange={onChange}
@@ -411,29 +424,31 @@ export default function Staff() {
       >
         <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <Label htmlFor="staff-filter-search" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('searchLabel')}
-            </label>
-            <input
+            </Label>
+            <Input
+              id="staff-filter-search"
               value={filters.search}
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, search: event.target.value }))
               }
               placeholder={t('staffPage.searchPlaceholder')}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <Label htmlFor="staff-filter-department" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
               {t('departmentLabel')}
-            </label>
-            <input
+            </Label>
+            <Input
+              id="staff-filter-department"
               value={filters.department}
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, department: event.target.value }))
               }
               placeholder={t('deptPlaceholder')}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
           <div className="space-y-2">
@@ -582,27 +597,27 @@ export default function Staff() {
               })}
             </div>
             ) : (
-            <div className="overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
-              <table className="min-w-full border-collapse">
-              <thead className="bg-brand-surface-light">
-                <tr>
+            <div className="w-full overflow-x-auto rounded-[1.5rem] border border-brand-surface-border">
+              <Table className="min-w-full border-collapse">
+              <TableHeader className="bg-brand-surface-light">
+                <TableRow>
                   {[t(`${pageTx}.tableDetails`), t(`${pageTx}.tableDepartment`), t(`${pageTx}.tableStatus`), t(`${pageTx}.tableActions`)].map((heading) => (
-                    <th
+                    <TableHead
                       key={heading}
                       className="px-4 py-4 text-start text-xs font-black uppercase tracking-[0.18em] text-brand-ink-muted"
                     >
                       {heading}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-surface-border bg-white">
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-brand-surface-border bg-white">
                 {filteredStaff.map((member) => {
                   const isCurrentUser = member.email === currentUserEmail;
 
                   return (
-                    <tr key={member.id}>
-                      <td className="px-4 py-4">
+                    <TableRow key={member.id}>
+                      <TableCell className="px-4 py-4">
                         <div className="space-y-1">
                           <div className="flex min-w-0 items-center gap-2">
                             <p className="text-sm font-black text-brand-ink break-words">{member.name}</p>
@@ -614,14 +629,14 @@ export default function Staff() {
                           </div>
                           <p className="text-sm font-medium text-brand-ink-muted break-words">{member.email}</p>
                         </div>
-                      </td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
                         <div className="inline-flex min-w-0 items-center gap-2 rounded-full border border-brand-surface-border bg-brand-surface-light px-3 py-1.5 text-sm font-medium text-brand-ink">
                           <Briefcase className="h-4 w-4 text-brand-ink-hint shrink-0" />
                           {translateKnownValue(member.department || '-', t)}
                         </div>
-                      </td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
                         {member.active ? (
                           <div className="flex min-w-0 flex-wrap gap-2">
                             <span className="rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
@@ -638,8 +653,8 @@ export default function Staff() {
                             {t(`${pageTx}.inactive`)}
                           </span>
                         )}
-                      </td>
-                      <td className="px-4 py-4">
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
                         <div className="flex min-w-0 flex-wrap gap-2">
                           <Button variant="unstyled" size="none"
                             type="button"
@@ -693,12 +708,12 @@ export default function Staff() {
                             {t(`${pageTx}.delete`)}
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             </div>
             )}
           </>

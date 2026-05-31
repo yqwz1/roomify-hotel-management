@@ -8,6 +8,15 @@ import { formatLocalizedCurrency } from '../utils/localization';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 const FILTERS = ['ALL', 'PAID', 'FAILED', 'PENDING', 'CANCELLED', 'REFUNDED'];
 const isRefundable = (payment) => ['PAID', 'SUCCESS'].includes(String(payment?.paymentStatus || '').toUpperCase());
 
@@ -99,40 +108,41 @@ export default function PaymentHistory() {
               </Button>
             ))}
           </div>
-          <input
+          <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search guest, transaction, reservation, invoice"
-            className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink lg:max-w-sm"
+            aria-label="Search payment history"
+            className="h-11 w-full min-w-0 rounded-full border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink lg:max-w-sm"
           />
         </div>
 
         {notice ? <div className="mb-4 rounded-2xl bg-brand-success/10 p-4 text-sm font-bold text-brand-success">{notice}</div> : null}
         {error ? <div className="mb-4 rounded-2xl bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">{error}</div> : null}
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-start text-sm">
-            <thead className="text-xs font-black uppercase tracking-[0.14em] text-brand-ink-hint">
-              <tr>
+        <div className="w-full overflow-x-auto">
+          <Table className="min-w-full text-start text-sm">
+            <TableHeader className="text-xs font-black uppercase tracking-[0.14em] text-brand-ink-hint">
+              <TableRow>
                 {['Transaction ID', 'Guest', 'Reservation', 'Invoice', 'Amount', 'Method', 'Status', 'Date', 'Actions'].map((head) => (
-                  <th key={head} className="border-b border-brand-surface-border px-3 py-3">{head}</th>
+                  <TableHead key={head} className="border-b border-brand-surface-border px-3 py-3">{head}</TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {visiblePayments.map((payment) => (
-                <tr key={payment.paymentId} className="border-b border-brand-surface-border">
-                  <td className="px-3 py-3 font-bold text-brand-ink">{payment.gatewayReference || '-'}</td>
-                  <td className="px-3 py-3 text-brand-ink-muted">{payment.guestName || payment.guestEmail || '-'}</td>
-                  <td className="px-3 py-3">{payment.confirmationNumber}</td>
-                  <td className="px-3 py-3">{payment.invoiceNumber || payment.invoiceStatus || 'PENDING'}</td>
-                  <td className="px-3 py-3">{formatLocalizedCurrency(payment.amount ?? 0, i18n.language)} {payment.currency || 'SAR'}</td>
-                  <td className="px-3 py-3">{payment.paymentMethod}</td>
-                  <td className="px-3 py-3">
+                <TableRow key={payment.paymentId} className="border-b border-brand-surface-border">
+                  <TableCell className="px-3 py-3 font-bold text-brand-ink">{payment.gatewayReference || '-'}</TableCell>
+                  <TableCell className="px-3 py-3 text-brand-ink-muted">{payment.guestName || payment.guestEmail || '-'}</TableCell>
+                  <TableCell className="px-3 py-3">{payment.confirmationNumber}</TableCell>
+                  <TableCell className="px-3 py-3">{payment.invoiceNumber || payment.invoiceStatus || 'PENDING'}</TableCell>
+                  <TableCell className="px-3 py-3">{formatLocalizedCurrency(payment.amount ?? 0, i18n.language)} {payment.currency || 'SAR'}</TableCell>
+                  <TableCell className="px-3 py-3">{payment.paymentMethod}</TableCell>
+                  <TableCell className="px-3 py-3">
                     <span className="rounded-full bg-brand-surface-light px-3 py-1 text-xs font-black break-words">{payment.paymentStatus}</span>
-                  </td>
-                  <td className="px-3 py-3">{payment.createdAt ? new Date(payment.createdAt).toLocaleString() : '-'}</td>
-                  <td className="px-3 py-3">
+                  </TableCell>
+                  <TableCell className="px-3 py-3">{payment.createdAt ? new Date(payment.createdAt).toLocaleString() : '-'}</TableCell>
+                  <TableCell className="px-3 py-3">
                     <div className="flex min-w-0 flex-wrap gap-2">
                       <Button variant="unstyled" size="none"
                         type="button"
@@ -154,11 +164,11 @@ export default function PaymentHistory() {
                         </Button>
                       ) : null}
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </DashboardPanel>
 

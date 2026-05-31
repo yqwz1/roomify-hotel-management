@@ -6,6 +6,14 @@ import { Label } from '../components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '../components/ui/table';
 import { Plus, Trash2, Loader2, Info, Pencil, Box } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import DashboardHero from '../components/dashboard/DashboardHero';
@@ -17,32 +25,32 @@ const COMMON_AMENITIES = ["WiFi", "TV", "AC", "Safe", "Balcony", "Breakfast"];
 
 function SkeletonRow() {
     return (
-        <tr className="border-b border-brand-surface-border">
-            <td className="p-5">
+        <TableRow className="border-b border-brand-surface-border">
+            <TableCell className="p-5">
                 <div className="space-y-2">
                     <div className="h-4 w-32 bg-brand-surface-border rounded animate-pulse" />
                     <div className="h-3 w-48 bg-brand-primary-tint rounded animate-pulse" />
                 </div>
-            </td>
-            <td className="p-5">
+            </TableCell>
+            <TableCell className="p-5">
                 <div className="flex min-w-0 gap-2">
                     <div className="h-6 w-16 bg-brand-surface-border rounded-full animate-pulse" />
                     <div className="h-6 w-20 bg-brand-primary-tint rounded-full animate-pulse" />
                 </div>
-            </td>
-            <td className="p-5 text-end">
+            </TableCell>
+            <TableCell className="p-5 text-end">
                 <div className="h-5 w-20 bg-brand-surface-border rounded animate-pulse ms-auto" />
-            </td>
-            <td className="p-5 text-end">
+            </TableCell>
+            <TableCell className="p-5 text-end">
                 <div className="h-5 w-8 bg-brand-primary-tint rounded animate-pulse ms-auto" />
-            </td>
-            <td className="p-5 text-end">
+            </TableCell>
+            <TableCell className="p-5 text-end">
                 <div className="flex min-w-0 justify-end gap-2">
                     <div className="h-10 w-10 bg-brand-surface-border rounded-full animate-pulse" />
                     <div className="h-10 w-10 bg-brand-primary-tint rounded-full animate-pulse" />
                 </div>
-            </td>
-        </tr>
+            </TableCell>
+        </TableRow>
     );
 }
 
@@ -285,8 +293,8 @@ export default function RoomTypes() {
                 </CardHeader>
                 <CardContent>
                     {loading && !roomTypes.length ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full table-fixed caption-bottom text-sm text-start">
+                        <div className="w-full overflow-x-auto">
+                            <Table className="w-full table-fixed caption-bottom text-sm text-start">
                                 <colgroup>
                                     <col className="w-[30%]" />
                                     <col className="w-[42%]" />
@@ -294,19 +302,19 @@ export default function RoomTypes() {
                                     <col className="w-[8%]" />
                                     <col className="w-[8%]" />
                                 </colgroup>
-                                <thead className="[&_tr]:border-b">
-                                    <tr className="border-b border-brand-surface-border">
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint w-[260px]">{t('colDetails')}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint">{t('colAmenities')}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colPrice')}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colMaxGuests')}</th>
-                                        <th className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end w-[140px]">{t('colActions')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                <TableHeader className="[&_tr]:border-b">
+                                    <TableRow className="border-b border-brand-surface-border">
+                                        <TableHead className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint w-[260px]">{t('colDetails')}</TableHead>
+                                        <TableHead className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint">{t('colAmenities')}</TableHead>
+                                        <TableHead className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colPrice')}</TableHead>
+                                        <TableHead className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colMaxGuests')}</TableHead>
+                                        <TableHead className="h-14 px-5 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end w-[140px]">{t('colActions')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                     {[...Array(4)].map((_, i) => <SkeletonRow key={i} />)}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                         </div>
                     ) : roomTypes.length === 0 ? (
                         <div className="flex min-w-0 flex-col items-center justify-center py-20 space-y-5">
@@ -394,7 +402,7 @@ export default function RoomTypes() {
                             </div>
                             ) : (
                             <div className="relative w-full overflow-x-auto">
-                            <table className="w-full table-fixed caption-bottom text-sm text-start">
+                            <Table className="w-full table-fixed caption-bottom text-sm text-start">
                                 <colgroup>
                                     <col className="w-[30%]" />
                                     <col className="w-[42%]" />
@@ -402,23 +410,23 @@ export default function RoomTypes() {
                                     <col className="w-[8%]" />
                                     <col className="w-[8%]" />
                                 </colgroup>
-                                <thead className="[&_tr]:border-b [&_tr]:border-brand-surface-border">
-                                    <tr className="transition-colors hover:bg-brand-surface-light data-[state=selected]:bg-brand-surface-light">
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint w-[260px]">{t('colDetails')}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint">{t('colAmenities')}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colPrice')}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colMaxGuests')}</th>
-                                        <th className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end w-[140px]">{t('colActions')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="[&_tr:last-child]:border-0">
+                                <TableHeader className="[&_tr]:border-b [&_tr]:border-brand-surface-border">
+                                    <TableRow className="transition-colors hover:bg-brand-surface-light data-[state=selected]:bg-brand-surface-light">
+                                        <TableHead className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint w-[260px]">{t('colDetails')}</TableHead>
+                                        <TableHead className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint">{t('colAmenities')}</TableHead>
+                                        <TableHead className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colPrice')}</TableHead>
+                                        <TableHead className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end">{t('colMaxGuests')}</TableHead>
+                                        <TableHead className="h-14 px-6 align-middle text-xs font-bold uppercase tracking-widest text-brand-ink-hint text-end w-[140px]">{t('colActions')}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody className="[&_tr:last-child]:border-0">
                                     {roomTypes.map((rt) => (
-                                        <tr key={rt.id} className="border-b border-brand-surface-border transition-colors hover:bg-brand-surface-light data-[state=selected]:bg-brand-surface-light">
-                                            <td className="p-6 align-middle font-medium">
+                                        <TableRow key={rt.id} className="border-b border-brand-surface-border transition-colors hover:bg-brand-surface-light data-[state=selected]:bg-brand-surface-light">
+                                            <TableCell className="p-6 align-middle font-medium">
                                                 <div className="font-extrabold text-brand-ink text-base">{rt.name}</div>
                                                 <div className="mt-1 line-clamp-2 text-xs font-medium text-brand-ink-muted">{rt.description}</div>
-                                            </td>
-                                            <td className="p-6 align-middle">
+                                            </TableCell>
+                                            <TableCell className="p-6 align-middle">
                                                 <div className="flex min-w-0 flex-wrap gap-2">
                                                     {rt.amenities ? rt.amenities.split(',').map((amenity, idx) => (
                                                         <span key={idx} className="rounded-full border border-brand-surface-border bg-white px-3 py-1.5 text-xs font-bold text-brand-ink drop-shadow-sm break-words">
@@ -426,14 +434,14 @@ export default function RoomTypes() {
                                                         </span>
                                                     )) : <span className="text-brand-ink-hint text-xs font-medium break-words">-</span>}
                                                 </div>
-                                            </td>
-                                            <td className="p-6 align-middle text-end font-mono">
+                                            </TableCell>
+                                            <TableCell className="p-6 align-middle text-end font-mono">
                                                 <span className="font-extrabold text-brand-ink break-words">{formatLocalizedCurrency(rt.basePrice, i18n.language)}</span>
-                                            </td>
-                                            <td className="p-6 align-middle text-end font-bold text-brand-ink">
+                                            </TableCell>
+                                            <TableCell className="p-6 align-middle text-end font-bold text-brand-ink">
                                                 {rt.maxGuests}
-                                            </td>
-                                            <td className="p-6 align-middle">
+                                            </TableCell>
+                                            <TableCell className="p-6 align-middle">
                                                 <div className="inline-flex min-w-0 items-center justify-end gap-1.5 whitespace-nowrap">
                                                     <Button
                                                         variant="ghost"
@@ -454,11 +462,11 @@ export default function RoomTypes() {
                                                         <Trash2 className="h-3.5 w-3.5 shrink-0" />
                                                     </Button>
                                                 </div>
-                                            </td>
-                                        </tr>
+                                            </TableCell>
+                                        </TableRow>
                                     ))}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                             </div>
                             )}
                         </>
