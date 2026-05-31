@@ -25,6 +25,8 @@ import {
 } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 function GuestPaymentForm({
   reservation,
   language,
@@ -37,6 +39,7 @@ function GuestPaymentForm({
   const confirmation =
     reservation.confirmationNumber || reservation.confirmation || '-';
   const outstandingBalance = Number(reservation.outstandingBalance ?? 0);
+  const amountInputId = `guest-payment-amount-${confirmation}`;
 
   return (
     <div className="mt-4 rounded-[1.35rem] border border-zinc-200 bg-white p-4">
@@ -46,19 +49,20 @@ function GuestPaymentForm({
             {translateWithFallback(t, 'guestBillingStatusPage.payNowLabel', 'Pay now')}
           </p>
           <div className="mt-3 grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
-            <label className="space-y-2">
-              <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor={amountInputId} className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500 break-words">
                 {t('checkoutPage.paymentAmountLabel')}
-              </span>
-              <input
+              </Label>
+              <Input
+                id={amountInputId}
                 type="number"
                 min="0.01"
                 step="0.01"
                 value={paymentState.amount}
                 onChange={(event) => onAmountChange(confirmation, event.target.value)}
-                className="h-12 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                className="h-12 w-full min-w-0 rounded-full border-zinc-200 bg-zinc-50 px-4 text-sm font-medium text-zinc-950 transition focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               />
-            </label>
+            </div>
             <Button variant="unstyled" size="none"
               type="button"
               disabled={submitting}

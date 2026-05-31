@@ -19,6 +19,8 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import {
   createReservation,
   createGuestReservation,
@@ -64,26 +66,26 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <label
+      <Label
         htmlFor={id}
         className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint"
       >
         {label}
         {required ? ' *' : ''}
-      </label>
+      </Label>
       <div className="relative">
         <Icon className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
         {locked ? (
           <Lock className="pointer-events-none absolute end-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
         ) : null}
-        <input
+        <Input
           id={id}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           disabled={disabled}
-          className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-10 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-muted"
+          className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light ps-11 pe-10 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 disabled:cursor-not-allowed disabled:bg-brand-primary-tint disabled:text-brand-ink-muted"
         />
       </div>
     </div>

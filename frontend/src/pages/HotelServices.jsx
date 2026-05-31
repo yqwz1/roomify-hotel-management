@@ -29,6 +29,8 @@ import {
 } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 const SERVICE_CATEGORIES = ['FOOD', 'CLEANING', 'OTHER'];
 
@@ -75,16 +77,17 @@ function ServiceModal({
         ) : null}
 
         <div className="grid min-w-0 gap-4 md:grid-cols-2">
-          <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
+          <div className="space-y-2">
+            <Label htmlFor="service-name" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'nameLabel', 'Name')}
-            </span>
-            <input
+            </Label>
+            <Input
+              id="service-name"
               value={formData.name}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, name: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'hotelServicesPage.namePlaceholder',
@@ -92,7 +95,7 @@ function ServiceModal({
               )}
               required
             />
-          </label>
+          </div>
 
           <label className="space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
@@ -122,11 +125,12 @@ function ServiceModal({
           </label>
         </div>
 
-        <label className="space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
+        <div className="space-y-2">
+          <Label htmlFor="service-price" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'price', 'Price')}
-          </span>
-          <input
+          </Label>
+          <Input
+            id="service-price"
             type="number"
             step="0.01"
             min="0"
@@ -134,10 +138,10 @@ function ServiceModal({
             onChange={(event) =>
               setFormData((current) => ({ ...current, price: event.target.value }))
             }
-            className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+            className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-black/5"
             required
           />
-        </label>
+        </div>
 
         <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
           <Checkbox

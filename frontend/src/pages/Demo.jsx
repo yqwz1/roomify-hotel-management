@@ -17,6 +17,7 @@ import Reveal, { EASE } from '../components/motion/Reveal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 const HIGHLIGHT_IDS = ['walkthrough', 'data', 'qa', 'noObligation'];
 
@@ -216,13 +217,13 @@ export default function Demo() {
                         <Label htmlFor="notes" className="text-sm font-bold text-brand-ink">
                           {t('m.demo.field.notes')} <span className="font-medium text-brand-ink-hint break-words">{t('m.demo.field.optional')}</span>
                         </Label>
-                        <textarea
+                        <Textarea
                           id="notes"
                           name="notes"
                           value={form.notes}
                           onChange={handleChange}
                           rows={3}
-                          className="mt-1.5 w-full rounded-xl border border-brand-surface-border bg-white px-3.5 py-2.5 text-sm text-brand-ink transition focus-visible:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-tint"
+                          className="mt-1.5 w-full min-w-0 rounded-xl border-brand-surface-border bg-white px-3.5 py-2.5 text-sm text-brand-ink transition focus-visible:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary-tint"
                           placeholder={t('m.demo.field.notesPh')}
                         />
                       </div>

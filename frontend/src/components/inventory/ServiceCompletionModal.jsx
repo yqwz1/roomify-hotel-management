@@ -14,6 +14,7 @@ import {
   translateKnownValue,
 } from '../../utils/localization';
 import { Textarea } from '../ui/textarea';
+import { Input } from '../ui/input';
 
 import { NativeSelect } from "@/components/ui/native-select";
 const CLEANING_SERVICE_TYPES = [
@@ -236,7 +237,7 @@ export default function ServiceCompletionModal({
               <NativeSelect
                 value={serviceType}
                 onChange={(event) => setServiceType(event.target.value)}
-                className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+                className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               >
                 {getAllowedServiceTypes(room).map((value) => (
                   <option key={value} value={value}>
@@ -319,7 +320,7 @@ export default function ServiceCompletionModal({
                     <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                       {translateWithFallback(t, 'inventoryPage.actualQuantityLabel', 'Actual quantity')}
                     </span>
-                    <input
+                    <Input
                       type="number"
                       min="0"
                       step="0.001"
@@ -327,7 +328,7 @@ export default function ServiceCompletionModal({
                       onChange={(event) =>
                         handleQuantityChange(item.inventoryItemId, event.target.value)
                       }
-                      className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
+                      className="h-11 w-full min-w-0 rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
                     />
                   </label>
 
@@ -361,7 +362,7 @@ export default function ServiceCompletionModal({
                 <NativeSelect
                   value={selectedItemId}
                   onChange={(event) => setSelectedItemId(event.target.value)}
-                  className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
+                  className="h-11 w-full min-w-0 rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
                 >
                   <option value="">
                     {translateWithFallback(t, 'inventoryPage.selectInventoryItem', 'Select inventory item')}
@@ -377,13 +378,13 @@ export default function ServiceCompletionModal({
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'inventoryPage.addQuantityLabel', 'Quantity')}
                 </span>
-                <input
+                <Input
                   type="number"
                   min="0.001"
                   step="0.001"
                   value={selectedItemQuantity}
                   onChange={(event) => setSelectedItemQuantity(event.target.value)}
-                  className="h-11 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
+                  className="h-11 w-full min-w-0 rounded-full border border-brand-surface-border bg-white px-4 text-sm font-medium text-brand-ink"
                 />
               </label>
               <div className="flex min-w-0 items-end">
@@ -407,7 +408,7 @@ export default function ServiceCompletionModal({
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+              className="w-full min-w-0 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'inventoryPage.serviceNotesPlaceholder',

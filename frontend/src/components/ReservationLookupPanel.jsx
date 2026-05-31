@@ -22,6 +22,7 @@ import {
 } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 const STATUS_OPTIONS = Object.values(ReservationStatus);
 
@@ -152,7 +153,7 @@ const FILTER_LABEL_CLASS =
   'text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted';
 
 const FILTER_INPUT_CLASS =
-  'h-11 w-full rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+  'h-11 w-full min-w-0 rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
 const RESULT_DETAIL_GRID_CLASS =
   'grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))]';
@@ -300,7 +301,7 @@ export default function ReservationLookupPanel({
               <span className={FILTER_LABEL_CLASS}>
                 {t('confirmationNumber')}
               </span>
-              <input
+              <Input
                 type="text"
                 dir="ltr"
                 value={filters.confirmation}
@@ -314,7 +315,7 @@ export default function ReservationLookupPanel({
               <span className={FILTER_LABEL_CLASS}>
                 {t('guestName')}
               </span>
-              <input
+              <Input
                 type="text"
                 value={filters.guestName}
                 onChange={(event) => updateFilter('guestName', event.target.value)}
@@ -345,7 +346,7 @@ export default function ReservationLookupPanel({
               <span className={FILTER_LABEL_CLASS}>
                 {t('checkInDate')}
               </span>
-              <input
+              <Input
                 type="date"
                 value={filters.checkInDate}
                 onChange={(event) => updateFilter('checkInDate', event.target.value)}
@@ -357,7 +358,7 @@ export default function ReservationLookupPanel({
               <span className={FILTER_LABEL_CLASS}>
                 {t('checkOutDate')}
               </span>
-              <input
+              <Input
                 type="date"
                 value={filters.checkOutDate}
                 onChange={(event) => updateFilter('checkOutDate', event.target.value)}

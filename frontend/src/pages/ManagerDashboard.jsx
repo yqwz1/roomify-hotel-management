@@ -27,6 +27,13 @@ import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
 import { TrendLineChart } from '../components/charts/TrendLineChart';
 import { RadialStatusChart } from '../components/charts/RadialStatusChart';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useAuth } from '../context/AuthProvider';
 import { useManagerDashboard } from '../hooks/useManagerDashboard';
 import { useRoomTypes } from '../hooks/useRoomTypes';
@@ -170,6 +177,13 @@ const ROOM_TYPE_THEMES = [
 
 const toIsoDate = (value) => value.toISOString().split('T')[0];
 
+const parseIsoDate = (value) => {
+  if (!value) return undefined;
+
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
 const addDays = (date, amount) => {
   const next = new Date(date);
   next.setDate(next.getDate() + amount);
@@ -257,6 +271,60 @@ function PerformanceMetricCard({
         {value}
       </p>
       <p className={cn('mt-2 text-sm font-medium leading-6', styles.hint)}>{hint}</p>
+    </div>
+  );
+}
+
+function DashboardDateField({ id, label, value, onChange, language }) {
+  const selectedDate = parseIsoDate(value);
+  const displayValue = selectedDate
+    ? formatLocalizedDate(value, language, {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : '-';
+
+  return (
+    <div className="space-y-2">
+      <label
+        htmlFor={id}
+        className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words"
+      >
+        {label}
+      </label>
+      <Input
+        id={id}
+        type="date"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="sr-only"
+        tabIndex={-1}
+      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 w-full justify-between rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-start text-sm font-medium text-brand-ink transition hover:bg-white hover:text-brand-ink focus-visible:ring-2 focus-visible:ring-black/5"
+          >
+            <span dir="ltr" className="min-w-0 truncate tabular-nums [unicode-bidi:isolate]">
+              {displayValue}
+            </span>
+            <CalendarRange className="ms-3 h-4 w-4 shrink-0 text-brand-ink-muted" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              if (date) onChange(toIsoDate(date));
+            }}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -1516,29 +1584,21 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-              <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
-                  {t(`${pageTx}.startDateLabel`)}
-                </span>
-                <input
-                  type="date"
-                  value={draftRange.startDate}
-                  onChange={(event) => handleRangeChange('startDate', event.target.value)}
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-                />
-              </label>
+              <DashboardDateField
+                id="manager-dashboard-start-date"
+                label={t(`${pageTx}.startDateLabel`)}
+                value={draftRange.startDate}
+                onChange={(value) => handleRangeChange('startDate', value)}
+                language={i18n.language}
+              />
 
-              <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
-                  {t(`${pageTx}.endDateLabel`)}
-                </span>
-                <input
-                  type="date"
-                  value={draftRange.endDate}
-                  onChange={(event) => handleRangeChange('endDate', event.target.value)}
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-                />
-              </label>
+              <DashboardDateField
+                id="manager-dashboard-end-date"
+                label={t(`${pageTx}.endDateLabel`)}
+                value={draftRange.endDate}
+                onChange={(value) => handleRangeChange('endDate', value)}
+                language={i18n.language}
+              />
             </div>
 
             {filterError ? (

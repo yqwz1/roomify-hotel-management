@@ -28,6 +28,7 @@ import {
 import { getStatusBadgeClasses } from '../utils/statusPresentation';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 const STATUSES = ['ALL', 'AVAILABLE', 'OCCUPIED', 'NEEDS_CLEANING', 'UNDER_MAINTENANCE'];
 
 const STATUS_META = {
@@ -313,12 +314,13 @@ export default function RoomStatus() {
 
           <div className="relative w-full xl:w-72">
             <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
-            <input
+            <Input
               type="text"
               placeholder={t('roomStatusPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light ps-11 pe-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              aria-label={t('roomStatusPage.searchPlaceholder')}
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light ps-11 pe-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
         </div>

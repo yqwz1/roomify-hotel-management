@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CalendarRange, FileText, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import ConfirmationToast from '../components/ConfirmationToast';
@@ -259,16 +261,16 @@ function ModifyModal({ reservation, onClose, onSave }) {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="modify-reason" className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
+            <Label htmlFor="modify-reason" className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint">
               {t('modifyReservationPage.reasonLabel')}
-            </label>
-            <input
+            </Label>
+            <Input
               id="modify-reason"
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder={t('modifyReasonPlaceholder')}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
 

@@ -37,6 +37,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 const POLL_INTERVAL_MS = 12000;
 
 const createInitialFormState = () => ({
@@ -508,12 +509,12 @@ export default function GuestServiceRequests() {
                       'Description'
                     )}
                   </span>
-                  <textarea
+                  <Textarea
                     value={formState.description}
                     onChange={handleChange('description')}
                     rows={5}
                     maxLength={1000}
-                    className="rounded-[1.5rem] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-400"
+                    className="w-full min-w-0 rounded-[1.5rem] border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-400"
                     placeholder={translateWithFallback(
                       t,
                       'guestServiceRequests.descriptionPlaceholder',

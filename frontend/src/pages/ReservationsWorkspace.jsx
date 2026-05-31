@@ -41,6 +41,7 @@ import {
 } from '../utils/reservationWorkspace';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 const useDesktopWorkspace = () => {
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -80,7 +81,7 @@ const FILTER_LABEL_CLASS =
   'text-[11px] font-black uppercase tracking-[0.2em] text-brand-ink-muted';
 
 const FILTER_INPUT_CLASS =
-  'h-11 w-full rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+  'h-11 w-full min-w-0 rounded-xl border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
 export default function ReservationsWorkspace() {
   const navigate = useNavigate();
@@ -363,7 +364,7 @@ export default function ReservationsWorkspace() {
                   <span className={FILTER_LABEL_CLASS}>
                     {t('confirmationNumber')}
                   </span>
-                  <input
+                  <Input
                     type="text"
                     dir="ltr"
                     value={draftFilters.confirmation}
@@ -382,7 +383,7 @@ export default function ReservationsWorkspace() {
                   <span className={FILTER_LABEL_CLASS}>
                     {t('guestName')}
                   </span>
-                  <input
+                  <Input
                     type="text"
                     value={draftFilters.guestName}
                     onChange={(event) =>
@@ -423,7 +424,7 @@ export default function ReservationsWorkspace() {
                   <span className={FILTER_LABEL_CLASS}>
                     {t('checkInDate')}
                   </span>
-                  <input
+                  <Input
                     type="date"
                     value={draftFilters.checkInDate}
                     onChange={(event) =>
@@ -440,7 +441,7 @@ export default function ReservationsWorkspace() {
                   <span className={FILTER_LABEL_CLASS}>
                     {t('checkOutDate')}
                   </span>
-                  <input
+                  <Input
                     type="date"
                     value={draftFilters.checkOutDate}
                     onChange={(event) =>

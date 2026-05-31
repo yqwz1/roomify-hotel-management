@@ -10,6 +10,7 @@ import { formatLocalizedCurrency, formatLocalizedDate } from '../utils/localizat
 import { useTranslation } from 'react-i18next';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 const formatCardNumber = (value) =>
   value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
 
@@ -190,10 +191,10 @@ export default function DemoPaymentGateway() {
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <label className="space-y-2">
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Cardholder name</span>
-                <input
+                <Input
                   value={cardholderName}
                   onChange={(event) => setCardholderName(event.target.value)}
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
                   placeholder="Demo Guest"
                 />
               </label>
@@ -201,10 +202,10 @@ export default function DemoPaymentGateway() {
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Card number</span>
                 <div className="relative">
                   <CreditCard className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink-hint shrink-0" />
-                  <input
+                  <Input
                     value={cardNumber}
                     onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
-                    className="h-12 w-full rounded-full border border-brand-surface-border bg-white ps-11 pe-4 text-sm font-semibold text-brand-ink"
+                    className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-white ps-11 pe-4 text-sm font-semibold text-brand-ink"
                     placeholder="4242 4242 4242 4242"
                     inputMode="numeric"
                   />
@@ -212,20 +213,20 @@ export default function DemoPaymentGateway() {
               </label>
               <label className="space-y-2">
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Expiry</span>
-                <input
+                <Input
                   value={expiry}
                   onChange={(event) => setExpiry(event.target.value.replace(/[^\d/]/g, '').slice(0, 5))}
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
                   placeholder="MM/YY"
                   inputMode="numeric"
                 />
               </label>
               <label className="space-y-2">
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">CVV</span>
-                <input
+                <Input
                   value={cvv}
                   onChange={(event) => setCvv(event.target.value.replace(/\D/g, '').slice(0, 4))}
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-white px-4 text-sm font-semibold text-brand-ink"
                   placeholder="123"
                   inputMode="numeric"
                 />

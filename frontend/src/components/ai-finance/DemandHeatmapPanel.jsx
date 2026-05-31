@@ -4,6 +4,7 @@ import EmptyState from '../common/EmptyState';
 import ErrorState from '../common/ErrorState';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 const weekLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -90,11 +91,11 @@ export default function DemandHeatmapPanel({
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
           <label className="flex min-w-0 flex-col gap-2 text-sm font-bold text-brand-ink">
             Month
-            <input
+            <Input
               type="month"
               value={month}
               onChange={(event) => onMonthChange(event.target.value)}
-              className="rounded-2xl border border-brand-surface-border bg-white px-4 py-2.5 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+              className="h-11 w-full min-w-0 rounded-2xl border-brand-surface-border bg-white px-4 py-2.5 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
             />
           </label>
           <label className="flex min-w-0 flex-col gap-2 text-sm font-bold text-brand-ink">

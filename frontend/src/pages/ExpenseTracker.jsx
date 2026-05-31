@@ -25,6 +25,7 @@ import { DistributionBarChart } from '../components/charts/DistributionBarChart'
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   createExpense,
   deleteExpense,
@@ -151,12 +152,12 @@ function ExpenseFormModal({
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'expenseTrackerPage.titleLabel', 'Expense title')}
             </span>
-            <input
+            <Input
               value={formData.title}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, title: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'expenseTrackerPage.titlePlaceholder',
@@ -170,7 +171,7 @@ function ExpenseFormModal({
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'expenseTrackerPage.amountLabel', 'Amount')}
             </span>
-            <input
+            <Input
               type="number"
               step="0.01"
               min="0.01"
@@ -178,7 +179,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, amount: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder="0.00"
               required
             />
@@ -209,13 +210,13 @@ function ExpenseFormModal({
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'expenseTrackerPage.dateLabel', 'Date')}
             </span>
-            <input
+            <Input
               type="date"
               value={formData.expenseDate}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, expenseDate: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               required
             />
           </label>
@@ -249,12 +250,12 @@ function ExpenseFormModal({
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'expenseTrackerPage.vendorLabel', 'Vendor or supplier')}
             </span>
-            <input
+            <Input
               value={formData.vendor}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, vendor: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder={translateWithFallback(
                 t,
                 'expenseTrackerPage.vendorPlaceholder',
@@ -264,11 +265,10 @@ function ExpenseFormModal({
           </label>
 
           <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={formData.recurring}
-              onChange={(event) =>
-                setFormData((current) => ({ ...current, recurring: event.target.checked }))
+              onCheckedChange={(checked) =>
+                setFormData((current) => ({ ...current, recurring: checked === true }))
               }
               className="h-4 w-4 rounded border-brand-surface-border"
             />
@@ -288,7 +288,7 @@ function ExpenseFormModal({
               setFormData((current) => ({ ...current, description: event.target.value }))
             }
             rows={4}
-            className="w-full rounded-[1.35rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full min-w-0 rounded-[1.35rem] border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
             placeholder={translateWithFallback(
               t,
               'expenseTrackerPage.notesPlaceholder',
@@ -306,12 +306,12 @@ function ExpenseFormModal({
                 'Receipt file name'
               )}
             </span>
-            <input
+            <Input
               value={formData.receiptFileName}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, receiptFileName: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
               placeholder="receipt-apr-24.pdf"
             />
           </label>
@@ -329,7 +329,7 @@ function ExpenseFormModal({
               onChange={(event) =>
                 setFormData((current) => ({ ...current, receiptFileUrl: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus-visible:border-brand-primary focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
               placeholder="https://files.example/receipt-apr-24.pdf"
             />
           </label>
@@ -872,13 +872,13 @@ export default function ExpenseTracker() {
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'expenseTrackerPage.startDateLabel', 'Start date')}
                 </span>
-                <input
+                <Input
                   type="date"
                   value={draftFilters.startDate}
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, startDate: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
 
@@ -886,13 +886,13 @@ export default function ExpenseTracker() {
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'expenseTrackerPage.endDateLabel', 'End date')}
                 </span>
-                <input
+                <Input
                   type="date"
                   value={draftFilters.endDate}
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, endDate: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                 />
               </label>
 
@@ -920,12 +920,12 @@ export default function ExpenseTracker() {
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                   {translateWithFallback(t, 'expenseTrackerPage.vendorFilterLabel', 'Vendor')}
                 </span>
-                <input
+                <Input
                   value={draftFilters.vendor}
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, vendor: event.target.value }))
                   }
-                  className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
                   placeholder={translateWithFallback(
                     t,
                     'expenseTrackerPage.vendorFilterPlaceholder',

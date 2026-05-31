@@ -4,6 +4,7 @@ import { chatWithAiAssistant, extractAiAssistantError } from '../../services/aiA
 import MarkdownMessage from './MarkdownMessage';
 
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 const DEFAULT_PROMPTS = [
   'Why did revenue drop this week?',
   'Which room type performs best?',
@@ -153,12 +154,12 @@ export default function ManagerAiAssistant() {
             ) : null}
 
             <div className="flex min-w-0 items-end gap-2">
-              <textarea
+              <Textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 rows={3}
                 placeholder="Ask about demand, pricing, revenue, or cancellations..."
-                className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.25rem] border border-brand-surface-border bg-white px-4 py-3 text-sm text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+                className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.25rem] border-brand-surface-border bg-white px-4 py-3 text-sm text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
               />
               <Button variant="unstyled" size="none"
                 type="button"

@@ -25,6 +25,7 @@ import {
 import { getReservationStatusLabel, translateWithFallback } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 const FILTERS = ['ALL', 'ACTIVE', 'PENDING', 'RESOLVED'];
 
 const buildConversationContextLabel = (conversation) => {
@@ -456,12 +457,12 @@ export default function StaffGuestInbox() {
               </div>
 
               <div className="flex min-w-0 items-end gap-3">
-                <textarea
+                <Textarea
                   value={reply}
                   onChange={(event) => handleTypingChange(event.target.value)}
                   rows={3}
                   placeholder={translateWithFallback(t, 'staffGuestInbox.replyPlaceholder', 'Reply to the guest...')}
-                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
+                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15"
                 />
                 <Button variant="unstyled" size="none"
                   type="button"

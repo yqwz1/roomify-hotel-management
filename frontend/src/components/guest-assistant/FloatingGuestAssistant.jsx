@@ -32,6 +32,7 @@ import GuestAssistantQuickActions from './GuestAssistantQuickActions';
 
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 export default function FloatingGuestAssistant() {
   const { user, isAuthenticated } = useAuth();
   const { t, i18n } = useTranslation();
@@ -714,13 +715,13 @@ export default function FloatingGuestAssistant() {
 
             <div className="border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
               <div className="relative flex min-w-0 items-end gap-3">
-                <textarea
+                <Textarea
                   value={input}
                   onChange={(event) => handleTypingChange(event.target.value)}
                   disabled={assistantMessagingLocked || sending}
                   rows={3}
                   placeholder={translateWithFallback(t, 'guestAssistant.placeholder', 'Write a message to the hotel team...')}
-                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
+                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
                 />
                 <Button variant="unstyled" size="none"
                   type="button"

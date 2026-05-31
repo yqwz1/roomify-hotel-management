@@ -8,6 +8,8 @@ import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 import LoadingState from '../components/common/LoadingState';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import {
   extractEmailDeliveryError,
   getEmailDeliveries,
@@ -173,18 +175,19 @@ export default function AdminNotifications() {
         }
       >
         <div className="grid min-w-0 gap-4 md:grid-cols-3">
-          <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
+          <div className="space-y-2 min-w-0">
+            <Label htmlFor="notification-recipient-filter" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'adminNotifications.recipientFilter', 'Recipient')}
-            </span>
-            <input
+            </Label>
+            <Input
+              id="notification-recipient-filter"
               type="text"
               value={filters.recipient}
               onChange={(event) => setFilters((current) => ({ ...current, recipient: event.target.value }))}
               placeholder="guest@roomify.com"
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink focus:border-brand-primary focus:bg-white focus:outline-none"
             />
-          </label>
+          </div>
 
           <label className="space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">

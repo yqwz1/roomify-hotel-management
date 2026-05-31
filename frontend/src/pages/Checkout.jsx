@@ -18,6 +18,8 @@ import ModalFrame from '../components/common/ModalFrame';
 import ReservationLookupPanel from '../components/ReservationLookupPanel';
 import StatusPill from '../components/StatusPill';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
@@ -314,19 +316,20 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
         ) : null}
 
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-          <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
+          <div className="space-y-2">
+            <Label htmlFor="payment-amount" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {t('checkoutPage.paymentAmountLabel')}
-            </span>
-            <input
+            </Label>
+            <Input
+              id="payment-amount"
               type="number"
               min="0.01"
               step="0.01"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-black/5"
             />
-          </label>
+          </div>
 
           <label className="space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">

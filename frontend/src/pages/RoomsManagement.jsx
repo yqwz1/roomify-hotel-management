@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Pencil, Plus, Trash2, Waves } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import ModalFrame from '../components/common/ModalFrame';
 import RoomFilters from '../components/RoomFilters';
@@ -82,7 +84,7 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
   };
 
   const inputClassName =
-    'h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
+    'h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5';
 
   return (
     <ModalFrame
@@ -107,10 +109,10 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
         )}
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+          <Label htmlFor="room-number" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {t('roomNumLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
             id="room-number"
             aria-label={t('roomNumLabel')}
             value={form.roomNumber}
@@ -141,10 +143,10 @@ function RoomFormModal({ roomTypes, initialRoom, onSave, onClose }) {
 
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint">
+            <Label htmlFor="room-floor" className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {t('floor')}
-            </label>
-            <input
+            </Label>
+            <Input
               id="room-floor"
               aria-label={t('floor')}
               type="number"

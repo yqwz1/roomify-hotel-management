@@ -8,6 +8,8 @@ import DashboardMetricCard from '../dashboard/DashboardMetricCard';
 import DashboardPanel from '../dashboard/DashboardPanel';
 import { DistributionBarChart } from '../charts/DistributionBarChart';
 import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import {
   adjustInventoryItem,
@@ -126,10 +128,10 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.itemNameLabel', 'Item name')}
             </span>
-            <input
+            <Input
               value={formData.name}
               onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               placeholder="Surface cleaner"
               required
             />
@@ -144,7 +146,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, category: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {INVENTORY_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -165,7 +167,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, unitOfMeasure: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {INVENTORY_UNITS.map((unit) => (
                 <option key={unit} value={unit}>
@@ -179,7 +181,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.minimumThresholdLabel', 'Minimum stock')}
             </span>
-            <input
+            <Input
               type="number"
               min="0"
               step="0.001"
@@ -190,7 +192,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
                   minimumStockThreshold: event.target.value,
                 }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
@@ -199,7 +201,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.defaultUnitCostLabel', 'Default unit cost')}
             </span>
-            <input
+            <Input
               type="number"
               min="0"
               step="0.0001"
@@ -207,7 +209,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, defaultUnitCost: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
@@ -218,7 +220,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.initialStockLabel', 'Initial stock')}
             </span>
-            <input
+            <Input
               type="number"
               min="0"
               step="0.001"
@@ -226,7 +228,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
               onChange={(event) =>
                 setFormData((current) => ({ ...current, initialStockQuantity: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         ) : null}
@@ -236,12 +238,12 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
             </span>
-            <input
+            <Input
               value={formData.supplier}
               onChange={(event) =>
                 setFormData((current) => ({ ...current, supplier: event.target.value }))
               }
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
 
@@ -249,19 +251,18 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.skuLabel', 'SKU')}
             </span>
-            <input
+            <Input
               value={formData.sku}
               onChange={(event) => setFormData((current) => ({ ...current, sku: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         </div>
 
         <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={formData.active}
-            onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
+            onCheckedChange={(checked) => setFormData((current) => ({ ...current, active: checked === true }))}
             className="h-4 w-4 rounded border-brand-surface-border"
           />
           <span className="text-sm font-medium text-brand-ink break-words">
@@ -277,7 +278,7 @@ function InventoryItemModal({ formData, setFormData, onClose, onSubmit, saving, 
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full min-w-0 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -318,13 +319,13 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
-            <input
+            <Input
               type="number"
               min="0.001"
               step="0.001"
               value={formData.quantity}
               onChange={(event) => setFormData((current) => ({ ...current, quantity: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
@@ -332,13 +333,13 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.unitCostLabel', 'Unit cost')}
             </span>
-            <input
+            <Input
               type="number"
               min="0.0001"
               step="0.0001"
               value={formData.unitCost}
               onChange={(event) => setFormData((current) => ({ ...current, unitCost: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               required
             />
           </label>
@@ -348,18 +349,17 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
           <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
             {translateWithFallback(t, 'inventoryPage.supplierLabel', 'Supplier')}
           </span>
-          <input
+          <Input
             value={formData.supplier}
             onChange={(event) => setFormData((current) => ({ ...current, supplier: event.target.value }))}
-            className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+            className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
           />
         </label>
 
         <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={formData.linkToExpense}
-            onChange={(event) => setFormData((current) => ({ ...current, linkToExpense: event.target.checked }))}
+            onCheckedChange={(checked) => setFormData((current) => ({ ...current, linkToExpense: checked === true }))}
             className="h-4 w-4 rounded border-brand-surface-border"
           />
           <span className="text-sm font-medium text-brand-ink break-words">
@@ -375,7 +375,7 @@ function RestockModal({ item, formData, setFormData, onClose, onSubmit, saving, 
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full min-w-0 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -419,7 +419,7 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
             <NativeSelect
               value={formData.transactionType}
               onChange={(event) => setFormData((current) => ({ ...current, transactionType: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {STOCK_ADJUSTMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -432,22 +432,21 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.quantityLabel', 'Quantity')}
             </span>
-            <input
+            <Input
               type="number"
               min="0.001"
               step="0.001"
               value={formData.quantityChange}
               onChange={(event) => setFormData((current) => ({ ...current, quantityChange: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             />
           </label>
         </div>
 
         <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={formData.increaseStock}
-            onChange={(event) => setFormData((current) => ({ ...current, increaseStock: event.target.checked }))}
+            onCheckedChange={(checked) => setFormData((current) => ({ ...current, increaseStock: checked === true }))}
             className="h-4 w-4 rounded border-brand-surface-border"
             disabled={formData.transactionType !== 'MANUAL_ADJUSTMENT'}
           />
@@ -464,7 +463,7 @@ function AdjustmentModal({ item, formData, setFormData, onClose, onSubmit, savin
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full min-w-0 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -563,10 +562,10 @@ function TemplateModal({
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
               {translateWithFallback(t, 'inventoryPage.templateNameLabel', 'Template name')}
             </span>
-            <input
+            <Input
               value={formData.name}
               onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
               placeholder="Standard room cleaning"
               required
             />
@@ -578,7 +577,7 @@ function TemplateModal({
             <NativeSelect
               value={formData.serviceType}
               onChange={(event) => setFormData((current) => ({ ...current, serviceType: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               {SERVICE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -597,7 +596,7 @@ function TemplateModal({
             <NativeSelect
               value={formData.roomTypeId}
               onChange={(event) => setFormData((current) => ({ ...current, roomTypeId: event.target.value }))}
-              className="h-12 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+              className="h-12 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
             >
               <option value="">
                 {translateWithFallback(t, 'inventoryPage.allRoomTypesLabel', 'All room types')}
@@ -611,10 +610,9 @@ function TemplateModal({
           </label>
 
           <label className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-4 md:mt-7">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={formData.active}
-              onChange={(event) => setFormData((current) => ({ ...current, active: event.target.checked }))}
+              onCheckedChange={(checked) => setFormData((current) => ({ ...current, active: checked === true }))}
               className="h-4 w-4 rounded border-brand-surface-border"
             />
             <span className="text-sm font-medium text-brand-ink break-words">
@@ -631,7 +629,7 @@ function TemplateModal({
             value={formData.notes}
             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
             rows={3}
-            className="w-full rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
+            className="w-full min-w-0 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-sm font-medium text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/5"
           />
         </label>
 
@@ -666,7 +664,7 @@ function TemplateModal({
                     onChange={(event) =>
                       handleTemplateItemChange(index, 'inventoryItemId', Number(event.target.value))
                     }
-                    className="h-11 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+                    className="h-11 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
                   >
                     {[...inventoryItems]
                       .sort((left, right) => left.name.localeCompare(right.name))
@@ -681,7 +679,7 @@ function TemplateModal({
                   <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, 'inventoryPage.standardQuantityLabel', 'Standard quantity')}
                   </span>
-                  <input
+                  <Input
                     type="number"
                     min="0.001"
                     step="0.001"
@@ -689,7 +687,7 @@ function TemplateModal({
                     onChange={(event) =>
                       handleTemplateItemChange(index, 'standardQuantity', event.target.value)
                     }
-                    className="h-11 w-full rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
+                    className="h-11 w-full min-w-0 rounded-full border border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink"
                   />
                 </label>
                 <div className="flex min-w-0 items-end">
