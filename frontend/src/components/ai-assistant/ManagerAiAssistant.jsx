@@ -6,17 +6,18 @@ import MarkdownMessage from './MarkdownMessage';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 const DEFAULT_PROMPTS = [
-  'Why did revenue drop this week?',
-  'Which room type performs best?',
-  'What price should we use next weekend?',
-  'Predict next month revenue',
+  'Analyze weekly revenue',
+  'Show occupancy insights',
+  'Explain cancellations',
+  'Recommend pricing actions',
 ];
 
 const buildInitialMessages = () => [
   {
     role: 'assistant',
     content:
-      'Ask about revenue, occupancy, cancellations, demand spikes, or pricing recommendations. I use the live Roomify analytics context for every answer.',
+      'Hello! I’m Roomify AI, your hotel management assistant. I can help you analyze revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, and hotel performance.',
+    source: 'ROOMIFY AI',
   },
 ];
 

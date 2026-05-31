@@ -122,7 +122,7 @@ public class AiAssistantService {
         ArrayNode messages = objectMapper.createArrayNode();
         messages.add(buildChatMessage("system", buildSystemPrompt()));
         String userContent = buildGeminiUserContent(request.message(), context);
-        log.debug("Gemini user content preview: {}", preview(userContent));
+        log.debug("Gemini user content length={}, preview={}", userContent.length(), preview(userContent));
         messages.add(buildChatMessage("user", userContent));
         payload.set("messages", messages);
 
