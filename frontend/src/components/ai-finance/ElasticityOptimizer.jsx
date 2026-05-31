@@ -32,6 +32,55 @@ const formatCurrency = (value) =>
 const formatPercent = (value) =>
   `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(Number(value) || 0)}%`;
 
+const formatPriceAxis = (value) =>
+  new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(Number(value) || 0);
+
+const formatAxisValue = (value, formatter) => {
+  const formatted = formatter ? formatter(value) : value;
+  return formatted === null || formatted === undefined ? '' : String(formatted);
+};
+
+const renderYAxisTick = ({ x, y, payload }, formatter, orientation = 'left') => {
+  const isRightAxis = orientation === 'right';
+
+  return (
+    <text
+      x={isRightAxis ? x + 8 : x - 8}
+      y={y}
+      textAnchor={isRightAxis ? 'start' : 'end'}
+      dominantBaseline="central"
+      fill="#5C6B7A"
+      fontSize={12}
+      fontWeight="bold"
+      style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
+    >
+      {formatAxisValue(payload?.value, formatter)}
+    </text>
+  );
+};
+
+const currencyAxisTick = (props) => renderYAxisTick(props, formatCurrency);
+const currencyRightAxisTick = (props) => renderYAxisTick(props, formatCurrency, 'right');
+const percentAxisTick = (props) => renderYAxisTick(props, formatPercent);
+
+const renderPriceXAxisTick = ({ x, y, payload }) => (
+  <text
+    x={x}
+    y={y}
+    textAnchor="middle"
+    fill="#5C6B7A"
+    fontWeight="bold"
+    style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
+  >
+    <tspan x={x} dy={0} fontSize={11}>
+      {formatPriceAxis(payload?.value)}
+    </tspan>
+    <tspan x={x} dy={12} fontSize={9}>
+      SAR
+    </tspan>
+  </text>
+);
+
 function MetricCard({ icon: Icon, label, value, hint }) {
   return (
     <Card className="rounded-[1.35rem] border border-brand-surface-border bg-white shadow-sm">
@@ -205,11 +254,17 @@ export default function ElasticityOptimizer({
 
       <div className="grid min-w-0 gap-5 xl:grid-cols-2">
         <MetricChart title="Elasticity overview">
-          <ComposedChart data={simulations}>
+          <ComposedChart data={simulations} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" />
-            <XAxis dataKey="price" tickFormatter={(value) => `SAR ${value}`} />
-            <YAxis yAxisId="left" tickFormatter={(value) => `${value}%`} />
-            <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => `SAR ${value}`} />
+            <XAxis dataKey="price" tick={renderPriceXAxisTick} tickMargin={8} height={44} />
+            <YAxis yAxisId="left" tick={percentAxisTick} tickLine={false} width={62} />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tick={currencyRightAxisTick}
+              tickLine={false}
+              width={92}
+            />
             <Tooltip
               content={
                 <ChartTooltipContent
@@ -227,10 +282,10 @@ export default function ElasticityOptimizer({
         </MetricChart>
 
         <MetricChart title="Revenue vs price">
-          <AreaChart data={simulations}>
+          <AreaChart data={simulations} margin={{ top: 10, right: 10, left: 18, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" />
-            <XAxis dataKey="price" tickFormatter={(value) => `SAR ${value}`} />
-            <YAxis tickFormatter={(value) => `SAR ${value}`} />
+            <XAxis dataKey="price" tick={renderPriceXAxisTick} tickMargin={8} height={44} />
+            <YAxis tick={currencyAxisTick} tickLine={false} width={92} />
             <Tooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(value)} />} />
             <Area type="monotone" dataKey="revenue" stroke="#C28643" fill="rgba(194,134,67,0.18)" strokeWidth={3} />
             <ReferenceLine x={selectedForecast.optimalPrice} stroke="#1D9E75" strokeDasharray="4 4" />
@@ -238,10 +293,10 @@ export default function ElasticityOptimizer({
         </MetricChart>
 
         <MetricChart title="Occupancy vs price">
-          <LineChart data={simulations}>
+          <LineChart data={simulations} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" />
-            <XAxis dataKey="price" tickFormatter={(value) => `SAR ${value}`} />
-            <YAxis tickFormatter={(value) => `${value}%`} />
+            <XAxis dataKey="price" tick={renderPriceXAxisTick} tickMargin={8} height={44} />
+            <YAxis tick={percentAxisTick} tickLine={false} width={62} />
             <Tooltip content={<ChartTooltipContent formatter={(value) => formatPercent(value)} />} />
             <Line type="monotone" dataKey="occupancy" stroke="#35658D" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
             <ReferenceLine x={selectedSimulation?.price} stroke="#C28643" strokeDasharray="4 4" />
@@ -249,10 +304,10 @@ export default function ElasticityOptimizer({
         </MetricChart>
 
         <MetricChart title="Profit optimization">
-          <BarChart data={simulations}>
+          <BarChart data={simulations} margin={{ top: 10, right: 10, left: 18, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" />
-            <XAxis dataKey="price" tickFormatter={(value) => `SAR ${value}`} />
-            <YAxis tickFormatter={(value) => `SAR ${value}`} />
+            <XAxis dataKey="price" tick={renderPriceXAxisTick} tickMargin={8} height={44} />
+            <YAxis tick={currencyAxisTick} tickLine={false} width={92} />
             <Tooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(value)} />} />
             <Bar dataKey="profit" fill="#1D9E75" radius={[8, 8, 0, 0]} />
             <ReferenceLine x={selectedForecast.optimalPrice} stroke="#1A2B3A" strokeDasharray="4 4" />
