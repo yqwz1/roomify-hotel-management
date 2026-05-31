@@ -32,28 +32,29 @@ import org.springframework.stereotype.Service;
 public class AiAssistantService {
 
     private static final Logger log = LoggerFactory.getLogger(AiAssistantService.class);
-    private static final String OPENAI_SOURCE = "OPENAI";
+    private static final String GEMINI_SOURCE = "GEMINI";
+    private static final String GEMINI_CONFIG_SOURCE = "GEMINI_CONFIGURATION_ERROR";
     private static final String FALLBACK_SOURCE = "LOCAL_TEMPLATE_FALLBACK";
 
     private final AiAssistantContextBuilder contextBuilder;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
-    private final String openAiApiKey;
-    private final String openAiModel;
-    private final String openAiBaseUrl;
+    private final String geminiApiKey;
+    private final String geminiModel;
+    private final String geminiBaseUrl;
 
     public AiAssistantService(
             AiAssistantContextBuilder contextBuilder,
             ObjectMapper objectMapper,
-            @Value("${roomify.openai.api-key:${OPENAI_API_KEY:}}") String openAiApiKey,
-            @Value("${roomify.openai.model:${ROOMIFY_OPENAI_MODEL:gpt-4.1-mini}}") String openAiModel,
-            @Value("${roomify.openai.base-url:${ROOMIFY_OPENAI_BASE_URL:https://api.openai.com/v1/responses}}") String openAiBaseUrl,
-            @Value("${roomify.openai.timeout-ms:${ROOMIFY_OPENAI_TIMEOUT_MS:12000}}") long timeoutMs) {
+            @Value("${roomify.gemini.api-key:${GEMINI_API_KEY:}}") String geminiApiKey,
+            @Value("${roomify.gemini.model:${ROOMIFY_GEMINI_MODEL:gemini-2.5-flash}}") String geminiModel,
+            @Value("${roomify.gemini.base-url:${ROOMIFY_GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta/openai/chat/completions}}") String geminiBaseUrl,
+            @Value("${roomify.gemini.timeout-ms:${ROOMIFY_GEMINI_TIMEOUT_MS:12000}}") long timeoutMs) {
         this.contextBuilder = contextBuilder;
         this.objectMapper = objectMapper;
-        this.openAiApiKey = openAiApiKey;
-        this.openAiModel = openAiModel;
-        this.openAiBaseUrl = openAiBaseUrl;
+        this.geminiApiKey = geminiApiKey;
+        this.geminiModel = geminiModel;
+        this.geminiBaseUrl = geminiBaseUrl;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(Math.max(timeoutMs, 1000L)))
                 .build();
@@ -61,22 +62,34 @@ public class AiAssistantService {
 
     public AiAssistantChatResponse chat(AiAssistantChatRequest request) {
         AiAssistantContextBuilder.AiAssistantContext context = contextBuilder.buildContext();
-        if (openAiApiKey != null && !openAiApiKey.isBlank()) {
-            try {
-                String answer = askOpenAi(request, context);
-                if (answer != null && !answer.isBlank()) {
-                    return new AiAssistantChatResponse(
-                            answer.trim(),
-                            OPENAI_SOURCE,
-                            false,
-                            openAiModel,
-                            context.summaryText(),
-                            context.suggestedPrompts(),
-                            LocalDateTime.now());
-                }
-            } catch (Exception exception) { // noqa: BLE001
-                log.warn("Falling back to local AI assistant template: {}", exception.getMessage(), exception);
+        if (geminiApiKey == null || geminiApiKey.isBlank()) {
+            return new AiAssistantChatResponse(
+                    "Gemini API key is not configured. Please set GEMINI_API_KEY.",
+                    GEMINI_CONFIG_SOURCE,
+                    true,
+                    geminiModel,
+                    context.summaryText(),
+                    context.suggestedPrompts(),
+                    LocalDateTime.now());
+        }
+
+        try {
+            String answer = askGemini(request, context);
+            if (answer != null && !answer.isBlank()) {
+                return new AiAssistantChatResponse(
+                        answer.trim(),
+                        GEMINI_SOURCE,
+                        false,
+                        geminiModel,
+                        context.summaryText(),
+                        context.suggestedPrompts(),
+                        LocalDateTime.now());
             }
+        } catch (Exception exception) { // noqa: BLE001
+            log.warn(
+                    "Gemini manager assistant request failed; falling back to local analytics template: {}",
+                    sanitizeProviderError(exception.getMessage()),
+                    exception);
         }
 
         return new AiAssistantChatResponse(
@@ -89,68 +102,57 @@ public class AiAssistantService {
                 LocalDateTime.now());
     }
 
-    private String askOpenAi(
+    private String askGemini(
             AiAssistantChatRequest request,
             AiAssistantContextBuilder.AiAssistantContext context) throws IOException, InterruptedException {
         ObjectNode payload = objectMapper.createObjectNode();
-        payload.put("model", openAiModel);
+        payload.put("model", geminiModel);
         payload.put("temperature", 0.2);
-        payload.put("max_output_tokens", 500);
+        payload.put("max_tokens", 500);
 
-        ArrayNode input = objectMapper.createArrayNode();
-        input.add(buildMessage("system", buildSystemPrompt(context)));
+        ArrayNode messages = objectMapper.createArrayNode();
+        messages.add(buildChatMessage("system", buildSystemPrompt(context)));
         if (request.history() != null) {
             request.history().stream()
                     .filter(message -> message != null && message.content() != null && !message.content().isBlank())
                     .limit(6)
-                    .forEach(message -> input.add(buildMessage(normalizeRole(message), message.content())));
+                    .forEach(message -> messages.add(buildChatMessage(normalizeRole(message), message.content())));
         }
-        input.add(buildMessage("user", request.message()));
-        payload.set("input", input);
+        messages.add(buildChatMessage("user", request.message()));
+        payload.set("messages", messages);
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(openAiBaseUrl))
+                .uri(URI.create(geminiBaseUrl))
                 .timeout(Duration.ofSeconds(12))
-                .header("Authorization", "Bearer " + openAiApiKey)
+                .header("Authorization", "Bearer " + geminiApiKey)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
                 .build();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IOException("OpenAI returned HTTP " + response.statusCode());
+            throw new IOException("Gemini returned HTTP " + response.statusCode() + ": " + truncate(response.body()));
         }
 
         JsonNode root = objectMapper.readTree(response.body());
-        String outputText = root.path("output_text").asText("");
-        if (!outputText.isBlank()) {
-            return outputText;
-        }
-        for (JsonNode output : root.path("output")) {
-            for (JsonNode content : output.path("content")) {
-                String text = content.path("text").asText("");
-                if (!text.isBlank()) {
-                    return text;
-                }
-            }
-        }
-        return null;
+        return root.path("choices")
+                .path(0)
+                .path("message")
+                .path("content")
+                .asText(null);
     }
 
-    private ObjectNode buildMessage(String role, String text) {
+    private ObjectNode buildChatMessage(String role, String text) {
         ObjectNode message = objectMapper.createObjectNode();
         message.put("role", role);
-        ArrayNode content = objectMapper.createArrayNode();
-        ObjectNode textNode = objectMapper.createObjectNode();
-        textNode.put("type", "text");
-        textNode.put("text", text);
-        content.add(textNode);
-        message.set("content", content);
+        message.put("content", text == null ? "" : text);
         return message;
     }
 
     private String buildSystemPrompt(AiAssistantContextBuilder.AiAssistantContext context) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("You are Roomify's hotel manager AI assistant. ")
+        prompt.append("You are Roomify's manager AI assistant. ")
+                .append("Help hotel managers understand reservations, guests, payments, services, rooms, finance insights, and operational decisions. ")
+                .append("Be concise, practical, and professional. ")
                 .append("Answer with concise operational guidance grounded only in the provided hotel analytics context. ")
                 .append("When numbers are relevant, cite them directly. ")
                 .append("If the data is insufficient, say so explicitly.\n\n")
@@ -184,6 +186,21 @@ public class AiAssistantService {
                         .append(point.revenue().toPlainString())
                         .append('\n'));
         return prompt.toString();
+    }
+
+    private String sanitizeProviderError(String message) {
+        if (message == null || message.isBlank()) {
+            return "Unknown Gemini provider error";
+        }
+        return message.replace(geminiApiKey, "[REDACTED]");
+    }
+
+    private String truncate(String value) {
+        if (value == null) {
+            return "";
+        }
+        String sanitized = value.replace(geminiApiKey, "[REDACTED]");
+        return sanitized.length() <= 500 ? sanitized : sanitized.substring(0, 500) + "...";
     }
 
     private String buildFallbackAnswer(
