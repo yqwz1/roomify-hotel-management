@@ -26,7 +26,7 @@ export default function Layout({ children, showSidebar = false }) {
   }
 
   return (
-    <div className="flex min-w-0 min-h-screen flex-col overflow-x-hidden bg-brand-surface font-sans">
+    <div className="roomify-theme-transition flex min-w-0 min-h-screen flex-col overflow-x-hidden bg-brand-surface font-sans">
       <SmoothScroll />
       <HashScroller />
       <Header />

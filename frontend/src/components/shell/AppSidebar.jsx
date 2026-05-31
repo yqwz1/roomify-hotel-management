@@ -40,7 +40,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19.5rem] max-w-[88vw] overflow-hidden border-e border-white/10 bg-[linear-gradient(180deg,#061622_0%,#073B4C_48%,#0E7C7B_100%)] text-white shadow-[28px_0_80px_-46px_rgba(6,22,34,0.95)] transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
+          'fixed inset-y-0 z-50 w-[19.5rem] max-w-[88vw] overflow-hidden border-e border-white/10 text-white shadow-[28px_0_80px_-46px_rgba(6,22,34,0.95)] transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
           isOpen ? 'translate-x-0 opacity-100' : isRtl ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0',
           isDesktop &&
@@ -48,6 +48,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
             ? 'lg:w-[19rem] lg:translate-x-0 lg:opacity-100'
             : 'lg:w-0 lg:min-w-0 lg:border-e-0 lg:shadow-none lg:pointer-events-none')
         )}
+        style={{ background: 'var(--roomify-gradient-shell)' }}
       >
         <div className="flex min-w-0 h-full flex-col">
           <div className="border-b border-white/10 px-5 py-5">

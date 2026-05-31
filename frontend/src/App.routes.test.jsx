@@ -40,6 +40,10 @@ vi.mock('./pages/AdminDashboard', () => ({
   default: () => <div>Admin Dashboard Page</div>,
 }));
 
+vi.mock('./pages/Settings', () => ({
+  default: () => <div>Settings Page</div>,
+}));
+
 vi.mock('./pages/Unauthorized', () => ({
   default: () => <div>Unauthorized Page</div>,
 }));
@@ -119,6 +123,12 @@ describe('App route guards', () => {
     renderAtRoute('/admin/dashboard', ['ROLE_ADMIN']);
 
     expect(await screen.findByText('Admin Dashboard Page')).toBeInTheDocument();
+  });
+
+  it('allows authenticated users to reach /settings', async () => {
+    renderAtRoute('/settings', ['ROLE_GUEST']);
+
+    expect(await screen.findByText('Settings Page')).toBeInTheDocument();
   });
 
   it('keeps admin-only pages blocked for managers', async () => {

@@ -14,7 +14,7 @@ export default function DashboardHero({
   return (
     <section
       className={cn(
-        'roomify-luxe-gradient relative overflow-hidden rounded-[2rem] border border-white/12 px-6 py-7 text-white shadow-[0_38px_100px_-46px_rgba(6,22,34,0.98)] sm:px-8 sm:py-8',
+        'roomify-luxe-gradient roomify-hover-glow relative overflow-hidden rounded-[2rem] border border-white/12 px-6 py-7 text-white shadow-[0_38px_100px_-46px_rgba(6,22,34,0.98)] sm:px-8 sm:py-8',
         className
       )}
     >

@@ -55,6 +55,7 @@ const RoomGrid = lazy(() => import('./pages/RoomGrid'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const HotelServices = lazy(() => import('./pages/HotelServices'));
 const ExpenseTracker = lazy(() => import('./pages/ExpenseTracker'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 const ADMIN_ONLY_ROLES = [ROLE_ADMIN];
 const MANAGER_ONLY_ROLES = [ROLE_MANAGER];
@@ -63,6 +64,7 @@ const GUEST_ONLY_ROLES = [ROLE_GUEST];
 const STAFF_AND_MANAGER_ROLES = [ROLE_MANAGER, ROLE_STAFF];
 const ADMIN_STAFF_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
 const PAYMENT_MANAGER_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF];
+const AUTHENTICATED_ROLES = [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST];
 
 function RouteLoadingFallback() {
   return (
@@ -98,7 +100,7 @@ const AppContent = () => {
   }, [appDirection, i18n.language, i18n.resolvedLanguage]);
 
   return (
-    <div className="h-full bg-brand-surface-border" dir={appDirection}>
+    <div className="roomify-theme-transition h-full bg-brand-surface-border" dir={appDirection}>
       <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         {/* Public Routes */}
@@ -350,6 +352,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute allowedRoles={MANAGER_ONLY_ROLES}>
               <Layout showSidebar={true}><ExpenseTracker /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={AUTHENTICATED_ROLES}>
+              <Layout showSidebar={true}><Settings /></Layout>
             </ProtectedRoute>
           }
         />

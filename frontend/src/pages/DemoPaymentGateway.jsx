@@ -334,7 +334,7 @@ export default function DemoPaymentGateway() {
               ) : null}
 
               {submitting ? (
-                <div className="roomify-shimmer rounded-2xl border border-brand-primary/20 bg-brand-surface-light p-4">
+                <div className="roomify-shimmer roomify-hover-glow rounded-2xl border border-brand-primary/20 bg-brand-surface-light p-4">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="roomify-processing-dot h-3 w-3 rounded-full bg-brand-primary" />
                     <p className="text-sm font-bold text-brand-ink">Processing mock authorization...</p>
@@ -381,7 +381,7 @@ export default function DemoPaymentGateway() {
                       <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-brand-ink-muted">{card.result}</p>
                     </div>
                     {card.tone === 'success' ? (
-                      <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-success" />
+                      <CheckCircle2 className="roomify-success-burst h-5 w-5 shrink-0 rounded-full text-brand-success" />
                     ) : (
                       <AlertTriangle className="h-5 w-5 shrink-0 text-brand-danger" />
                     )}

@@ -78,6 +78,7 @@ const PROTECTED_ROUTE_ROLE_MAP = {
   [GUEST_BILLING_STATUS_PATH]: [ROLE_GUEST],
   '/services': [ROLE_ADMIN],
   '/manager/expenses': [ROLE_MANAGER],
+  '/settings': [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
 };
 
 const PROTECTED_ROUTE_ROLE_PATTERNS = [
@@ -548,6 +549,22 @@ const GUEST_NAVIGATION_CONFIG = [
   },
 ];
 
+const ACCOUNT_NAVIGATION_SECTION = {
+  id: 'account',
+  translationKey: 'navAccount',
+  fallbackLabel: 'Account',
+  roles: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+  items: [
+    {
+      path: '/settings',
+      translationKey: 'settingsTitle',
+      fallbackLabel: 'Settings',
+      icon: Settings2,
+      roles: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF, ROLE_GUEST],
+    },
+  ],
+};
+
 const NAVIGATION_CONFIG_BY_ROLE = {
   [ROLE_ADMIN]: ADMIN_NAVIGATION_CONFIG,
   [ROLE_MANAGER]: MANAGER_NAVIGATION_CONFIG,
@@ -574,6 +591,12 @@ const PAGE_META = [
     translationKey: 'reservationDetailsTitle',
     fallbackLabel: 'Reservation Details',
   },
+  {
+    match: (pathname) => /^\/guest\/payments\/[^/]+$/.test(pathname),
+    sectionId: 'guest-stay',
+    translationKey: 'paymentGatewayTitle',
+    fallbackLabel: 'Demo Payment Gateway',
+  },
 ];
 
 // Role-independent overrides for the browser tab title. Keep titles stable
@@ -598,6 +621,7 @@ const DOCUMENT_TITLE_OVERRIDES = {
   '/room-types': ['roomTypes', 'Room Types'],
   '/staff': ['staffMenu', 'Staff & Managers'],
   '/services': ['servicesTitle', 'Services'],
+  '/settings': ['settingsTitle', 'Settings'],
   '/rooms': ['rooms', 'Rooms'],
   '/rooms-management': ['roomsManagement', 'Rooms Management'],
   '/search': ['roomSearch', 'Room Search'],
@@ -624,7 +648,7 @@ const buildItemLabel = (item, t) => translateWithFallback(t, item.translationKey
 // bled manager surfaces into the admin experience).
 const getNavigationConfigForRoles = (roles = []) => {
   const primaryRole = getPrimaryRole(roles);
-  return primaryRole ? (NAVIGATION_CONFIG_BY_ROLE[primaryRole] ?? []) : [];
+  return primaryRole ? [...(NAVIGATION_CONFIG_BY_ROLE[primaryRole] ?? []), ACCOUNT_NAVIGATION_SECTION] : [];
 };
 
 export const getNavigationSections = (roles = [], t) =>

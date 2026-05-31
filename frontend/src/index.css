@@ -30,16 +30,224 @@
 
 :root {
   color-scheme: light;
+  --brand-primary-rgb: 18 179 168;
+  --brand-primary-deep-rgb: 7 59 76;
+  --brand-primary-hover-rgb: 15 143 138;
+  --brand-primary-tint-rgb: 215 247 241;
+  --brand-midnight-rgb: 6 22 34;
+  --brand-ocean-rgb: 11 46 63;
+  --brand-lagoon-rgb: 14 124 123;
+  --brand-champagne-rgb: 248 231 189;
+  --brand-gold-rgb: 214 168 79;
+  --brand-coral-rgb: 232 111 92;
+  --brand-surface-rgb: 246 240 228;
+  --brand-surface-light-rgb: 255 249 238;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 230 217 193;
+  --brand-ink-rgb: 7 26 37;
+  --brand-ink-muted-rgb: 82 102 120;
+  --brand-ink-hint-rgb: 138 154 171;
+  --roomify-gradient-shell: linear-gradient(180deg, rgb(var(--brand-midnight-rgb)) 0%, rgb(var(--brand-primary-deep-rgb)) 48%, rgb(var(--brand-lagoon-rgb)) 100%);
+  --roomify-gradient-hero:
+    radial-gradient(circle at 18% 8%, rgb(var(--brand-primary-rgb) / 0.24), transparent 22rem),
+    radial-gradient(circle at 82% 18%, rgb(var(--brand-gold-rgb) / 0.26), transparent 20rem),
+    radial-gradient(circle at 72% 88%, rgb(var(--brand-coral-rgb) / 0.12), transparent 22rem),
+    linear-gradient(135deg, rgb(var(--brand-midnight-rgb)) 0%, rgb(var(--brand-primary-deep-rgb)) 48%, rgb(var(--brand-lagoon-rgb)) 100%);
+  --roomify-gradient-luxe: linear-gradient(135deg, rgb(var(--brand-midnight-rgb)) 0%, rgb(var(--brand-primary-deep-rgb)) 34%, rgb(var(--brand-lagoon-rgb)) 66%, rgb(var(--brand-gold-rgb)) 118%);
+  --roomify-gradient-card:
+    linear-gradient(145deg, rgb(var(--brand-card-rgb) / 0.94), rgb(var(--brand-surface-light-rgb) / 0.86)),
+    radial-gradient(circle at 95% 0%, rgb(var(--brand-primary-rgb) / 0.11), transparent 18rem);
+  --roomify-gradient-page:
+    radial-gradient(circle at 15% -12%, rgb(var(--brand-primary-rgb) / 0.22), transparent 28rem),
+    radial-gradient(circle at 88% 2%, rgb(var(--brand-gold-rgb) / 0.20), transparent 26rem),
+    radial-gradient(circle at 75% 80%, rgb(var(--brand-coral-rgb) / 0.08), transparent 24rem),
+    linear-gradient(180deg, rgb(var(--brand-surface-light-rgb)) 0%, rgb(var(--brand-surface-rgb)) 48%, rgb(var(--brand-surface-border-rgb) / 0.58) 100%);
   --roomify-mobile-nav-height: 0px;
   --roomify-ease: cubic-bezier(0.21, 0.47, 0.32, 0.98);
-  --roomify-shadow-soft: 0 20px 54px -34px rgba(6, 22, 34, 0.46);
-  --roomify-shadow-lifted: 0 32px 86px -44px rgba(6, 22, 34, 0.62);
-  --roomify-shadow-glow: 0 24px 70px -34px rgba(18, 179, 168, 0.65);
-  --roomify-page-bg:
-    radial-gradient(circle at 15% -12%, rgba(18, 179, 168, 0.22), transparent 28rem),
-    radial-gradient(circle at 88% 2%, rgba(214, 168, 79, 0.2), transparent 26rem),
-    radial-gradient(circle at 75% 80%, rgba(232, 111, 92, 0.08), transparent 24rem),
-    linear-gradient(180deg, #fbf3e4 0%, #f5ead8 48%, #ecdfca 100%);
+  --roomify-shadow-soft: 0 20px 54px -34px rgb(var(--brand-midnight-rgb) / 0.46);
+  --roomify-shadow-lifted: 0 32px 86px -44px rgb(var(--brand-midnight-rgb) / 0.62);
+  --roomify-shadow-glow: 0 24px 70px -34px rgb(var(--brand-primary-rgb) / 0.65);
+  --roomify-page-bg: var(--roomify-gradient-page);
+}
+
+:root[data-theme="roomify-classic"] {
+  --brand-primary-rgb: 53 101 141;
+  --brand-primary-deep-rgb: 38 75 107;
+  --brand-primary-hover-rgb: 74 123 166;
+  --brand-primary-tint-rgb: 217 227 238;
+  --brand-midnight-rgb: 26 43 58;
+  --brand-ocean-rgb: 38 75 107;
+  --brand-lagoon-rgb: 53 101 141;
+  --brand-champagne-rgb: 245 242 234;
+  --brand-gold-rgb: 212 162 76;
+  --brand-coral-rgb: 201 119 87;
+  --brand-surface-rgb: 245 242 234;
+  --brand-surface-light-rgb: 251 249 244;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 232 227 214;
+  --brand-ink-rgb: 26 43 58;
+  --brand-ink-muted-rgb: 92 107 122;
+  --brand-ink-hint-rgb: 138 149 161;
+}
+
+:root[data-theme="midnight-emerald"] {
+  --brand-primary-rgb: 0 196 140;
+  --brand-primary-deep-rgb: 3 39 52;
+  --brand-primary-hover-rgb: 17 156 117;
+  --brand-primary-tint-rgb: 198 255 232;
+  --brand-midnight-rgb: 3 17 28;
+  --brand-ocean-rgb: 4 34 45;
+  --brand-lagoon-rgb: 0 136 103;
+  --brand-champagne-rgb: 234 247 241;
+  --brand-gold-rgb: 112 241 190;
+  --brand-coral-rgb: 58 207 182;
+  --brand-surface-rgb: 229 244 236;
+  --brand-surface-light-rgb: 244 252 248;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 194 222 212;
+  --brand-ink-rgb: 4 24 32;
+  --brand-ink-muted-rgb: 56 82 84;
+  --brand-ink-hint-rgb: 112 137 133;
+}
+
+:root[data-theme="royal-gold"] {
+  --brand-primary-rgb: 217 164 65;
+  --brand-primary-deep-rgb: 7 26 58;
+  --brand-primary-hover-rgb: 177 123 31;
+  --brand-primary-tint-rgb: 250 230 190;
+  --brand-midnight-rgb: 7 26 58;
+  --brand-ocean-rgb: 15 42 86;
+  --brand-lagoon-rgb: 90 66 130;
+  --brand-champagne-rgb: 250 240 221;
+  --brand-gold-rgb: 217 164 65;
+  --brand-coral-rgb: 203 98 66;
+  --brand-surface-rgb: 250 240 221;
+  --brand-surface-light-rgb: 255 248 236;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 232 211 171;
+  --brand-ink-rgb: 12 28 55;
+  --brand-ink-muted-rgb: 89 93 110;
+  --brand-ink-hint-rgb: 146 135 112;
+}
+
+:root[data-theme="aurora-violet"] {
+  --brand-primary-rgb: 124 58 237;
+  --brand-primary-deep-rgb: 44 24 96;
+  --brand-primary-hover-rgb: 99 102 241;
+  --brand-primary-tint-rgb: 235 226 255;
+  --brand-midnight-rgb: 21 10 50;
+  --brand-ocean-rgb: 47 27 105;
+  --brand-lagoon-rgb: 34 211 238;
+  --brand-champagne-rgb: 244 238 255;
+  --brand-gold-rgb: 244 114 182;
+  --brand-coral-rgb: 251 113 133;
+  --brand-surface-rgb: 244 238 255;
+  --brand-surface-light-rgb: 252 249 255;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 218 207 247;
+  --brand-ink-rgb: 31 19 65;
+  --brand-ink-muted-rgb: 92 82 129;
+  --brand-ink-hint-rgb: 143 130 178;
+}
+
+:root[data-theme="ocean-sapphire"] {
+  --brand-primary-rgb: 22 119 255;
+  --brand-primary-deep-rgb: 6 33 62;
+  --brand-primary-hover-rgb: 0 94 214;
+  --brand-primary-tint-rgb: 219 239 255;
+  --brand-midnight-rgb: 6 33 62;
+  --brand-ocean-rgb: 10 58 102;
+  --brand-lagoon-rgb: 32 211 194;
+  --brand-champagne-rgb: 238 247 255;
+  --brand-gold-rgb: 77 184 255;
+  --brand-coral-rgb: 64 140 255;
+  --brand-surface-rgb: 238 247 255;
+  --brand-surface-light-rgb: 249 253 255;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 204 225 244;
+  --brand-ink-rgb: 9 31 53;
+  --brand-ink-muted-rgb: 69 92 112;
+  --brand-ink-hint-rgb: 126 151 172;
+}
+
+:root[data-theme="sunset-coral"] {
+  --brand-primary-rgb: 242 95 92;
+  --brand-primary-deep-rgb: 45 23 38;
+  --brand-primary-hover-rgb: 211 71 72;
+  --brand-primary-tint-rgb: 255 224 214;
+  --brand-midnight-rgb: 45 23 38;
+  --brand-ocean-rgb: 83 38 55;
+  --brand-lagoon-rgb: 242 95 92;
+  --brand-champagne-rgb: 255 243 232;
+  --brand-gold-rgb: 255 180 84;
+  --brand-coral-rgb: 249 115 96;
+  --brand-surface-rgb: 255 243 232;
+  --brand-surface-light-rgb: 255 250 245;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 239 213 198;
+  --brand-ink-rgb: 47 24 36;
+  --brand-ink-muted-rgb: 103 80 82;
+  --brand-ink-hint-rgb: 162 133 126;
+}
+
+:root[data-theme="alpine-mint"] {
+  --brand-primary-rgb: 40 201 151;
+  --brand-primary-deep-rgb: 8 51 38;
+  --brand-primary-hover-rgb: 25 156 116;
+  --brand-primary-tint-rgb: 216 250 235;
+  --brand-midnight-rgb: 8 51 38;
+  --brand-ocean-rgb: 15 80 61;
+  --brand-lagoon-rgb: 40 201 151;
+  --brand-champagne-rgb: 240 251 245;
+  --brand-gold-rgb: 184 243 212;
+  --brand-coral-rgb: 91 196 170;
+  --brand-surface-rgb: 240 251 245;
+  --brand-surface-light-rgb: 250 255 252;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 202 231 218;
+  --brand-ink-rgb: 13 45 36;
+  --brand-ink-muted-rgb: 71 102 89;
+  --brand-ink-hint-rgb: 126 156 141;
+}
+
+:root[data-theme="rose-quartz"] {
+  --brand-primary-rgb: 217 70 124;
+  --brand-primary-deep-rgb: 50 18 37;
+  --brand-primary-hover-rgb: 190 52 104;
+  --brand-primary-tint-rgb: 255 224 238;
+  --brand-midnight-rgb: 50 18 37;
+  --brand-ocean-rgb: 86 32 67;
+  --brand-lagoon-rgb: 217 70 124;
+  --brand-champagne-rgb: 255 241 247;
+  --brand-gold-rgb: 249 168 212;
+  --brand-coral-rgb: 244 114 182;
+  --brand-surface-rgb: 255 241 247;
+  --brand-surface-light-rgb: 255 250 253;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 239 207 222;
+  --brand-ink-rgb: 54 22 39;
+  --brand-ink-muted-rgb: 105 78 92;
+  --brand-ink-hint-rgb: 163 130 147;
+}
+
+:root[data-theme="graphite-copper"] {
+  --brand-primary-rgb: 196 106 58;
+  --brand-primary-deep-rgb: 20 23 31;
+  --brand-primary-hover-rgb: 160 78 39;
+  --brand-primary-tint-rgb: 246 222 207;
+  --brand-midnight-rgb: 20 23 31;
+  --brand-ocean-rgb: 38 42 53;
+  --brand-lagoon-rgb: 111 119 132;
+  --brand-champagne-rgb: 245 241 234;
+  --brand-gold-rgb: 243 177 121;
+  --brand-coral-rgb: 196 106 58;
+  --brand-surface-rgb: 245 241 234;
+  --brand-surface-light-rgb: 252 249 244;
+  --brand-card-rgb: 255 255 255;
+  --brand-surface-border-rgb: 221 213 202;
+  --brand-ink-rgb: 27 29 36;
+  --brand-ink-muted-rgb: 83 86 96;
+  --brand-ink-hint-rgb: 139 135 128;
 }
 html,
 body,
@@ -50,7 +258,7 @@ body,
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  background: #f6f0e4;
+  background: rgb(var(--brand-surface-rgb));
   scroll-behavior: smooth;
 }
 
@@ -64,7 +272,7 @@ body {
   overflow-y: auto;
   min-width: 320px;
   overscroll-behavior-y: none;
-  background: #f6f0e4;
+  background: rgb(var(--brand-surface-rgb));
 }
 code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
 
@@ -133,8 +341,28 @@ textarea {
   }
 }
 
+@keyframes roomify-orbit {
+  from {
+    transform: rotate(0deg) translateX(10px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(10px) rotate(-360deg);
+  }
+}
+
+@keyframes roomify-success-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.72);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
 .roomify-page-enter {
-  animation: roomify-fade-up 360ms var(--roomify-ease) both;
+  animation: roomify-fade-up 460ms var(--roomify-ease) both;
 }
 
 .roomify-card-interactive {
@@ -158,9 +386,7 @@ textarea {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(230, 217, 193, 0.92);
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 249, 238, 0.86)),
-    radial-gradient(circle at 95% 0%, rgba(18, 179, 168, 0.11), transparent 18rem);
+  background: var(--roomify-gradient-card);
   box-shadow: var(--roomify-shadow-soft);
   backdrop-filter: blur(18px);
 }
@@ -173,8 +399,8 @@ textarea {
   border-radius: inherit;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.7), transparent 34%),
-    radial-gradient(circle at top right, rgba(18, 179, 168, 0.12), transparent 18rem),
-    radial-gradient(circle at bottom left, rgba(214, 168, 79, 0.1), transparent 16rem);
+    radial-gradient(circle at top right, rgb(var(--brand-primary-rgb) / 0.12), transparent 18rem),
+    radial-gradient(circle at bottom left, rgb(var(--brand-gold-rgb) / 0.1), transparent 16rem);
 }
 
 .roomify-premium-card > * {
@@ -186,27 +412,27 @@ textarea {
   min-height: 3rem;
   width: 100%;
   border-radius: 9999px;
-  border: 1px solid #e6d9c1;
-  background: rgba(255, 249, 238, 0.9);
+  border: 1px solid rgb(var(--brand-surface-border-rgb));
+  background: rgb(var(--brand-surface-light-rgb) / 0.9);
   padding: 0 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #071a25;
+  color: rgb(var(--brand-ink-rgb));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition: border-color 180ms var(--roomify-ease), box-shadow 180ms var(--roomify-ease), background-color 180ms var(--roomify-ease);
 }
 
 .roomify-field:focus {
-  border-color: rgba(18, 179, 168, 0.78);
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(18, 179, 168, 0.16), 0 16px 34px -28px rgba(7, 59, 76, 0.5);
+  border-color: rgb(var(--brand-primary-rgb) / 0.78);
+  background: rgb(var(--brand-card-rgb));
+  box-shadow: 0 0 0 4px rgb(var(--brand-primary-rgb) / 0.16), 0 16px 34px -28px rgb(var(--brand-primary-deep-rgb) / 0.5);
   outline: none;
 }
 
 .roomify-field:disabled {
   cursor: not-allowed;
-  background: #d9e3ee;
-  color: #5c6b7a;
+  background: rgb(var(--brand-primary-tint-rgb));
+  color: rgb(var(--brand-ink-muted-rgb));
 }
 
 .roomify-status-banner {
@@ -217,21 +443,17 @@ textarea {
 }
 
 .roomify-aurora {
-  background:
-    radial-gradient(circle at 18% 8%, rgba(18, 179, 168, 0.24), transparent 22rem),
-    radial-gradient(circle at 82% 18%, rgba(214, 168, 79, 0.26), transparent 20rem),
-    radial-gradient(circle at 72% 88%, rgba(232, 111, 92, 0.12), transparent 22rem),
-    linear-gradient(135deg, #061622 0%, #073b4c 48%, #0e7c7b 100%);
+  background: var(--roomify-gradient-hero);
 }
 
 .roomify-luxe-gradient {
-  background-image: linear-gradient(135deg, #061622 0%, #073b4c 34%, #0e7c7b 66%, #d6a84f 118%);
+  background-image: var(--roomify-gradient-luxe);
   background-size: 180% 180%;
   animation: roomify-gradient-shift 12s ease-in-out infinite;
 }
 
 .roomify-gold-text {
-  background: linear-gradient(135deg, #fff7d8 0%, #d6a84f 48%, #fff0bd 100%);
+  background: linear-gradient(135deg, #fff7d8 0%, rgb(var(--brand-gold-rgb)) 48%, #fff0bd 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -242,6 +464,54 @@ textarea {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(18px);
+}
+
+.roomify-theme-transition,
+.roomify-theme-transition * {
+  transition:
+    background-color 260ms var(--roomify-ease),
+    border-color 260ms var(--roomify-ease),
+    color 220ms var(--roomify-ease),
+    box-shadow 260ms var(--roomify-ease);
+}
+
+.roomify-hover-glow {
+  transition:
+    transform 190ms var(--roomify-ease),
+    box-shadow 190ms var(--roomify-ease),
+    filter 190ms var(--roomify-ease);
+}
+
+.roomify-hover-glow:hover {
+  filter: saturate(1.08);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--roomify-shadow-glow);
+}
+
+.roomify-modal-pop {
+  animation: roomify-fade-up 260ms var(--roomify-ease) both;
+}
+
+.roomify-success-burst {
+  position: relative;
+}
+
+.roomify-success-burst::before,
+.roomify-success-burst::after {
+  content: "";
+  position: absolute;
+  inset: -0.45rem;
+  border-radius: inherit;
+  border: 1px solid rgb(var(--brand-primary-rgb) / 0.36);
+  animation: roomify-success-ring 1.4s var(--roomify-ease) infinite;
+}
+
+.roomify-success-burst::after {
+  animation-delay: 0.42s;
+}
+
+.roomify-orbit {
+  animation: roomify-orbit 9s linear infinite;
 }
 
 .roomify-shimmer {

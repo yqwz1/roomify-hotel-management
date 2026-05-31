@@ -369,7 +369,7 @@ export default function RoomSearch() {
                       key={room.id}
                       className="roomify-card-interactive overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_22px_58px_-34px_rgba(7,59,76,0.42)] hover:border-brand-primary/40"
                     >
-                      <div className="relative h-32 overflow-hidden bg-[linear-gradient(135deg,#061622_0%,#073B4C_45%,#12B3A8_100%)] sm:h-40">
+                      <div className="roomify-luxe-gradient relative h-32 overflow-hidden sm:h-40">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.28),transparent_12rem),radial-gradient(circle_at_88%_18%,rgba(214,168,79,0.35),transparent_10rem)]" />
                         <div className="absolute bottom-4 start-5 flex min-w-0 items-center gap-3 text-white">
                           <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/18 bg-white/12 backdrop-blur">

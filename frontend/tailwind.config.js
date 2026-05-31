@@ -68,38 +68,38 @@ export default {
   			// ── Roomify brand tokens ──────────────────────────────────
   			// Source of truth for product UI colors. Prefer these over inline hex.
   			brand: {
-  				// Core
-  				primary: '#12B3A8',
-  				'primary-deep': '#073B4C',
-  				'primary-hover': '#0F8F8A',
-  				'primary-tint': '#D7F7F1',
+  				// Core tokens are CSS variables so Settings themes recolor the app globally.
+  				primary: 'rgb(var(--brand-primary-rgb) / <alpha-value>)',
+  				'primary-deep': 'rgb(var(--brand-primary-deep-rgb) / <alpha-value>)',
+  				'primary-hover': 'rgb(var(--brand-primary-hover-rgb) / <alpha-value>)',
+  				'primary-tint': 'rgb(var(--brand-primary-tint-rgb) / <alpha-value>)',
   				'primary-fg': '#FFFFFF',
-  				midnight: '#061622',
-  				ocean: '#0B2E3F',
-  				lagoon: '#0E7C7B',
-  				champagne: '#F8E7BD',
-  				gold: '#D6A84F',
-  				coral: '#E86F5C',
+  				midnight: 'rgb(var(--brand-midnight-rgb) / <alpha-value>)',
+  				ocean: 'rgb(var(--brand-ocean-rgb) / <alpha-value>)',
+  				lagoon: 'rgb(var(--brand-lagoon-rgb) / <alpha-value>)',
+  				champagne: 'rgb(var(--brand-champagne-rgb) / <alpha-value>)',
+  				gold: 'rgb(var(--brand-gold-rgb) / <alpha-value>)',
+  				coral: 'rgb(var(--brand-coral-rgb) / <alpha-value>)',
   				// Surfaces
-  				surface: '#F6F0E4',
-  				'surface-light': '#FFF9EE',
-  				card: '#FFFFFF',
-  				'surface-border': '#E6D9C1',
+  				surface: 'rgb(var(--brand-surface-rgb) / <alpha-value>)',
+  				'surface-light': 'rgb(var(--brand-surface-light-rgb) / <alpha-value>)',
+  				card: 'rgb(var(--brand-card-rgb) / <alpha-value>)',
+  				'surface-border': 'rgb(var(--brand-surface-border-rgb) / <alpha-value>)',
   				// Text
-  				ink: '#071A25',
-  				'ink-muted': '#526678',
-  				'ink-hint': '#8A9AAB',
+  				ink: 'rgb(var(--brand-ink-rgb) / <alpha-value>)',
+  				'ink-muted': 'rgb(var(--brand-ink-muted-rgb) / <alpha-value>)',
+  				'ink-hint': 'rgb(var(--brand-ink-hint-rgb) / <alpha-value>)',
   				// Status
   				success: '#10A66E',
   				warning: '#C9891B',
   				danger: '#C74343',
   				// Accents — use sparingly
-  				'accent-gold': '#D6A84F',
-  				'accent-terracotta': '#E86F5C',
+  				'accent-gold': 'rgb(var(--brand-gold-rgb) / <alpha-value>)',
+  				'accent-terracotta': 'rgb(var(--brand-coral-rgb) / <alpha-value>)',
   			}
   		},
   		ringColor: {
-  			'brand-focus': 'rgba(18,179,168,0.28)',
+  			'brand-focus': 'rgb(var(--brand-primary-rgb) / 0.28)',
   		},
   		boxShadow: {
   			'brand-cta': '0 18px 42px -14px rgba(18,179,168,0.62)',

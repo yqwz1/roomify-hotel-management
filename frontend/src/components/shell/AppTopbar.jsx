@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthProvider';
 import { LanguageSwitcher } from '../LanguageSwitcher';
@@ -82,6 +82,14 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
             className="inline-flex min-w-0 shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/40 hover:text-brand-primary-deep max-[380px]:hidden"
           >
             {t('homeNav')}
+          </Link>
+          <Link
+            to="/settings"
+            className="inline-flex min-w-0 shrink-0 items-center gap-2 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/40 hover:text-brand-primary-deep"
+            title={t('settingsTitle', { defaultValue: 'Settings' })}
+          >
+            <Settings2 className="h-4 w-4 shrink-0" />
+            <span className="hidden lg:inline">{t('settingsTitle', { defaultValue: 'Settings' })}</span>
           </Link>
 
           <div className="hidden items-center gap-3 rounded-full border border-brand-surface-border bg-white/80 px-3 py-2 shadow-sm backdrop-blur xl:flex">

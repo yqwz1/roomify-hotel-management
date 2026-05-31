@@ -15,14 +15,14 @@ export default function DashboardMetricCard({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        card: 'border-white/10 bg-[linear-gradient(135deg,#061622_0%,#073B4C_48%,#0E7C7B_100%)] text-white shadow-[0_28px_72px_-34px_rgba(6,22,34,0.95)]',
+        card: 'border-white/10 roomify-luxe-gradient text-white shadow-[0_28px_72px_-34px_rgba(6,22,34,0.95)]',
         icon: 'bg-white/12 text-brand-champagne ring-1 ring-white/15',
         label: '!text-white',
         hint: '!text-white',
         value: '!text-white',
       }
     : {
-        card: 'border-brand-surface-border bg-[linear-gradient(145deg,#ffffff_0%,#FFF9EE_72%,#D7F7F1_150%)] text-brand-ink shadow-[0_20px_48px_-32px_rgba(7,59,76,0.42)]',
+        card: 'border-brand-surface-border bg-brand-card text-brand-ink shadow-[0_20px_48px_-32px_rgba(7,59,76,0.42)]',
         icon: 'bg-brand-primary-tint text-brand-primary-deep shadow-sm ring-1 ring-brand-primary/15',
         label: 'text-brand-ink-muted',
         hint: 'text-brand-ink-hint',

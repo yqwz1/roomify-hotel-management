@@ -16,6 +16,14 @@
     <link rel="icon" type="image/png" href="/roomify-logo.png" />
     <link rel="apple-touch-icon" href="/roomify-icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      (() => {
+        const key = 'roomify.theme';
+        const allowed = ['roomify-premium', 'roomify-classic', 'midnight-emerald', 'royal-gold', 'aurora-violet', 'ocean-sapphire', 'sunset-coral', 'alpine-mint', 'rose-quartz', 'graphite-copper'];
+        const theme = allowed.includes(localStorage.getItem(key)) ? localStorage.getItem(key) : 'roomify-premium';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <title>Roomify</title>
   </head>
   <body>

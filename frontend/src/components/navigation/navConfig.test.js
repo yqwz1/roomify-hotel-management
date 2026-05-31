@@ -54,6 +54,7 @@ describe('navConfig', () => {
       'Payments',
       'Service Requests',
       'Guest Inbox',
+      'Settings',
     ]);
   });
 
@@ -71,6 +72,7 @@ describe('navConfig', () => {
       '/room-types',
       '/services',
       '/payments',
+      '/settings',
     ]);
     expect(paths).not.toContain('/manager/dashboard');
     expect(paths).not.toContain('/manager/expenses');
@@ -81,6 +83,13 @@ describe('navConfig', () => {
     expect(getPathsForRoles([ROLE_STAFF])).toContain('/payments');
     expect(getPathsForRoles([ROLE_MANAGER])).toContain('/payments');
     expect(getPathsForRoles([ROLE_ADMIN])).toContain('/payments');
+  });
+
+  it('exposes settings navigation to every authenticated role', () => {
+    expect(getPathsForRoles([ROLE_GUEST])).toContain('/settings');
+    expect(getPathsForRoles([ROLE_STAFF])).toContain('/settings');
+    expect(getPathsForRoles([ROLE_MANAGER])).toContain('/settings');
+    expect(getPathsForRoles([ROLE_ADMIN])).toContain('/settings');
   });
 
   it('keeps staff and room type navigation off the manager sidebar', () => {
