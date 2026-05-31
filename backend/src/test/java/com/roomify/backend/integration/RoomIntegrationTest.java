@@ -420,6 +420,24 @@ class RoomIntegrationTest {
         }
 
         @Test
+        void availableRoomValidNextStatusesIncludeNeedsCleaning() throws Exception {
+                Long roomId = roomRepository.save(
+                                new com.roomify.backend.entity.Room(
+                                                "322",
+                                                roomTypeRepository.findById(roomTypeId).orElseThrow(),
+                                                3,
+                                                com.roomify.backend.entity.RoomStatus.AVAILABLE))
+                                .getId();
+
+                mockMvc.perform(get("/api/rooms/" + roomId + "/valid-next-statuses")
+                                .header("Authorization", "Bearer " + managerToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(2)))
+                                .andExpect(jsonPath("$[0]").value("NEEDS_CLEANING"))
+                                .andExpect(jsonPath("$[1]").value("UNDER_MAINTENANCE"));
+        }
+
+        @Test
         void occupiedRoomManualStatusChangeReturnsConflict() throws Exception {
                 Long roomId = roomRepository.save(
                                 new com.roomify.backend.entity.Room(

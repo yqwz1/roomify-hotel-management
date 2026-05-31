@@ -124,7 +124,7 @@ public class RoomService {
                 }
 
                 if (current == RoomStatus.AVAILABLE) {
-                        return List.of(RoomStatus.UNDER_MAINTENANCE);
+                        return List.of(RoomStatus.NEEDS_CLEANING, RoomStatus.UNDER_MAINTENANCE);
                 }
 
                 if (current == RoomStatus.UNDER_MAINTENANCE) {

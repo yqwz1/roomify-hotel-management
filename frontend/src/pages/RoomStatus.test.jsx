@@ -96,7 +96,7 @@ describe('RoomStatus', () => {
     ]);
 
     getValidNextStatuses
-      .mockResolvedValueOnce(['UNDER_MAINTENANCE'])
+      .mockResolvedValueOnce(['NEEDS_CLEANING', 'UNDER_MAINTENANCE'])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce(['AVAILABLE']);
 
@@ -115,7 +115,7 @@ describe('RoomStatus', () => {
 
     expect(roomCard).not.toBeNull();
     expect(within(roomCard).getByRole('button', { name: /Under Maintenance/i })).toBeInTheDocument();
-    expect(within(roomCard).queryByRole('button', { name: /Needs Cleaning/i })).not.toBeInTheDocument();
+    expect(within(roomCard).getByRole('button', { name: /Needs Cleaning/i })).toBeInTheDocument();
     expect(screen.getByText(/Occupied rooms remain locked until checkout completes/i)).toBeInTheDocument();
 
     await user.click(within(roomCard).getByRole('button', { name: /Under Maintenance/i }));

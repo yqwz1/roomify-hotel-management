@@ -84,6 +84,17 @@ class RoomServiceTest {
     }
 
     @Test
+    void shouldAllowAvailableRoomToMoveToNeedsCleaning() {
+        room.setStatus(RoomStatus.AVAILABLE);
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.save(any(Room.class))).thenAnswer(i -> i.getArgument(0));
+
+        roomService.updateStatus(1L, "NEEDS_CLEANING");
+
+        assertEquals(RoomStatus.NEEDS_CLEANING, room.getStatus());
+    }
+
+    @Test
     void shouldBlockManualChangesForOccupiedRoom() {
         room.setStatus(RoomStatus.OCCUPIED);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
