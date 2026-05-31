@@ -26,6 +26,9 @@ export const PAYMENT_STATUSES = new Set([
   'PAID',
   'FAILED',
   'PAYMENT_PENDING',
+  'PROCESSING',
+  'CANCELLED',
+  'REFUNDED',
 ]);
 
 export const STATUS_PRESENTATION = Object.freeze({
@@ -98,6 +101,16 @@ export const STATUS_PRESENTATION = Object.freeze({
     pill: 'bg-sky-100 text-sky-950 ring-sky-200',
     badge: 'border-sky-200 bg-sky-50 text-sky-900',
     dot: 'bg-sky-600',
+  },
+  PROCESSING: {
+    pill: 'bg-sky-100 text-sky-950 ring-sky-200',
+    badge: 'border-sky-200 bg-sky-50 text-sky-900',
+    dot: 'bg-sky-600',
+  },
+  REFUNDED: {
+    pill: 'bg-zinc-100 text-zinc-700 ring-zinc-200',
+    badge: 'border-zinc-200 bg-zinc-50 text-zinc-700',
+    dot: 'bg-zinc-500',
   },
 });
 

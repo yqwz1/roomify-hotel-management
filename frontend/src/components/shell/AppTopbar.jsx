@@ -36,13 +36,13 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-brand-surface-border bg-brand-surface/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-white/60 bg-brand-surface/78 shadow-[0_14px_38px_-32px_rgba(15,23,42,0.5)] backdrop-blur-xl">
       <div className="flex min-w-0 min-h-20 flex-wrap items-start gap-3 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:items-center sm:px-6 sm:pt-3 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button variant="unstyled" size="none"
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-brand-surface-border bg-white p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+            className="rounded-2xl border border-brand-surface-border bg-white/90 p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:bg-white hover:text-brand-primary-deep"
             aria-label={isSidebarOpen ? t('closeNavigation') : t('openNavigation')}
             aria-pressed={isSidebarOpen}
           >
@@ -84,7 +84,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
             {t('homeNav')}
           </Link>
 
-          <div className="hidden items-center gap-3 rounded-full border border-brand-surface-border bg-white/90 px-3 py-2 shadow-sm xl:flex">
+          <div className="hidden items-center gap-3 rounded-full border border-brand-surface-border bg-white/80 px-3 py-2 shadow-sm backdrop-blur xl:flex">
             <div className="flex min-w-0 h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-xs font-black uppercase text-white">
               {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
             </div>

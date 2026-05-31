@@ -56,8 +56,8 @@ export default function MobileBottomNav({ onOpenMenu }) {
   const items = MOBILE_NAV_ITEMS[primaryRole] ?? [];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-surface-border bg-brand-surface/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl lg:hidden">
-      <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-brand-surface/82 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-18px_46px_-35px_rgba(15,23,42,0.55)] backdrop-blur-xl lg:hidden">
+      <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1 rounded-[1.4rem] border border-white/70 bg-white/62 p-1 shadow-sm">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = isNavItemActive(location.pathname, item.path);

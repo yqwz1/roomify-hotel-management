@@ -31,6 +31,13 @@
 :root {
   color-scheme: light;
   --roomify-mobile-nav-height: 0px;
+  --roomify-ease: cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --roomify-shadow-soft: 0 18px 46px -30px rgba(15, 23, 42, 0.38);
+  --roomify-shadow-lifted: 0 28px 70px -38px rgba(15, 23, 42, 0.48);
+  --roomify-page-bg:
+    radial-gradient(circle at 18% -10%, rgba(53, 101, 141, 0.14), transparent 28rem),
+    radial-gradient(circle at 92% 8%, rgba(212, 162, 76, 0.12), transparent 26rem),
+    linear-gradient(180deg, #f8f5ee 0%, #f2ede3 48%, #ebe4d8 100%);
 }
 html,
 body,
@@ -42,6 +49,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   background: #f5f2ea;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -81,6 +89,126 @@ input,
 select,
 textarea {
   font-size: 16px;
+}
+
+@keyframes roomify-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roomify-soft-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.roomify-page-enter {
+  animation: roomify-fade-up 360ms var(--roomify-ease) both;
+}
+
+.roomify-card-interactive {
+  transition:
+    transform 180ms var(--roomify-ease),
+    box-shadow 180ms var(--roomify-ease),
+    border-color 180ms var(--roomify-ease),
+    background-color 180ms var(--roomify-ease);
+}
+
+.roomify-card-interactive:hover {
+  transform: translateY(-2px);
+}
+
+.roomify-page-surface {
+  background: var(--roomify-page-bg);
+}
+
+.roomify-premium-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(232, 227, 214, 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(251, 249, 244, 0.92));
+  box-shadow: var(--roomify-shadow-soft);
+}
+
+.roomify-premium-card::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.64), transparent 34%),
+    radial-gradient(circle at top right, rgba(53, 101, 141, 0.08), transparent 18rem);
+}
+
+.roomify-premium-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.roomify-field {
+  min-height: 3rem;
+  width: 100%;
+  border-radius: 9999px;
+  border: 1px solid #e8e3d6;
+  background: rgba(251, 249, 244, 0.92);
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a2b3a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  transition: border-color 180ms var(--roomify-ease), box-shadow 180ms var(--roomify-ease), background-color 180ms var(--roomify-ease);
+}
+
+.roomify-field:focus {
+  border-color: rgba(53, 101, 141, 0.65);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(53, 101, 141, 0.12);
+  outline: none;
+}
+
+.roomify-field:disabled {
+  cursor: not-allowed;
+  background: #d9e3ee;
+  color: #5c6b7a;
+}
+
+.roomify-status-banner {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(232, 227, 214, 0.9);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--roomify-shadow-soft);
+}
+
+.roomify-processing-dot {
+  animation: roomify-soft-pulse 1s var(--roomify-ease) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .roomify-card-interactive:hover {
+    transform: none;
+  }
 }
 
 /* Subtle custom scrollbars for data-dense tables */

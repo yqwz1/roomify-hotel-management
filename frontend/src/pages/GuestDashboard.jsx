@@ -58,6 +58,7 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
   const needsPayment = reservationStatus !== 'CANCELLED'
     && (['PENDING', 'UNPAID', 'FAILED', 'PARTIALLY_PAID'].includes(paymentStatus)
       || reservationStatus === 'PAYMENT_PENDING');
+  const failedPaymentCancelled = reservationStatus === 'CANCELLED' && paymentStatus === 'FAILED';
 
   return (
     <article className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
@@ -138,6 +139,24 @@ function GuestStayCard({ reservation, propertyName, language, t }) {
             className="mt-3 inline-flex min-w-0 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
           >
             {paymentStatus === 'FAILED' ? 'Retry Payment' : 'Pay Now'}
+          </Button>
+        </div>
+      ) : null}
+
+      {failedPaymentCancelled ? (
+        <div className="mt-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 p-4">
+          <p className="text-sm font-black text-brand-ink break-words">Payment failed and this reservation was cancelled.</p>
+          <p className="mt-1 text-sm font-medium leading-6 text-brand-ink-muted break-words">
+            The room has been released for the selected dates. Start a new search if you want to book again.
+          </p>
+          <Button
+            variant="unstyled"
+            size="none"
+            type="button"
+            onClick={() => navigate('/search')}
+            className="mt-3 inline-flex min-w-0 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
+          >
+            Search rooms
           </Button>
         </div>
       ) : null}

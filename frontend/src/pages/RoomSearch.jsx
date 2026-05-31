@@ -351,6 +351,7 @@ export default function RoomSearch() {
             {!loading && results.length > 0 && (
               <div className="space-y-4">
                 {results.map((room) => {
+                  const isAvailableForStay = room?.availableForRequestedStay === true;
                   const pricing = room.pricing ?? null;
                   const basePrice = Number(pricing?.pricePerNight ?? room.roomType?.basePrice ?? 0);
                   const subtotal = Number(pricing?.subtotal ?? (nights > 0 ? basePrice * nights : basePrice));
@@ -366,7 +367,7 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
+                      className="roomify-card-interactive rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] hover:border-brand-primary/30"
                     >
                       <div className="space-y-4">
                         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -384,13 +385,26 @@ export default function RoomSearch() {
                               </p>
                             </div>
                           </div>
-                          <span
-                            className={`max-w-full shrink-0 truncate rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
-                              getStatusBadgeClasses(room.status)
-                            }`}
-                          >
-                            {getRoomStatusLabel(room.status, t)}
-                          </span>
+                          <div className="flex min-w-0 flex-wrap justify-end gap-2">
+                            <span
+                              className={`max-w-full shrink-0 truncate rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                                getStatusBadgeClasses(room.status)
+                              }`}
+                            >
+                              {getRoomStatusLabel(room.status, t)}
+                            </span>
+                            <span
+                              className={
+                                isAvailableForStay
+                                  ? 'max-w-full shrink-0 truncate rounded-full border border-brand-success/30 bg-brand-success/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-success'
+                                  : 'max-w-full shrink-0 truncate rounded-full border border-brand-danger/30 bg-brand-danger/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-brand-danger'
+                              }
+                            >
+                              {isAvailableForStay
+                                ? translateWithFallback(t, `${pageTx}.availableForDates`, 'Available for selected dates')
+                                : translateWithFallback(t, `${pageTx}.unavailableForDates`, 'Unavailable for selected dates')}
+                            </span>
+                          </div>
                         </div>
 
                         {room.roomType?.description && (

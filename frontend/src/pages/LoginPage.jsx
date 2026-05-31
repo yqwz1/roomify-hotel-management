@@ -136,6 +136,10 @@ const LoginPage = () => {
   const subline = isAr ? 'سجّل دخولك لإدارة فندقك.' : 'Sign in to manage your hotel.';
 
   const showDemoQuickLogin = isDemoQuickLoginEnabled();
+  const newAccountPrompt = isAr ? 'جديد على روميفاي؟' : t('newToRoomify', { defaultValue: 'New to Roomify?' });
+  const createAccountLabel = isAr ? 'إنشاء حساب' : t('createAccount', { defaultValue: 'Create an account' });
+  const authInputClassName =
+    '!min-h-0 !rounded-none !border-0 !border-b !bg-transparent !px-0 !shadow-none focus:!bg-transparent focus:!shadow-none';
 
   return (
     <div
@@ -283,9 +287,10 @@ const LoginPage = () => {
               onBlur={() => setFocused(null)}
               disabled={isLoading}
               dir="ltr"
-              className={`h-11 rounded-none border-0 border-b bg-transparent px-0 text-[15.5px] font-medium text-brand-ink shadow-none transition-colors placeholder:text-brand-ink-hint/60 focus-visible:ring-0 focus-visible:ring-offset-0 ${errors.email
-                  ? 'border-b-brand-danger'
-                  : 'border-b-[#D8D1BF] focus-visible:border-b-brand-primary'
+              autoComplete="email"
+              className={`h-11 ${authInputClassName} text-[15.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-ink-hint/60 focus-visible:ring-0 focus-visible:ring-offset-0 ${errors.email
+                  ? '!border-b-brand-danger'
+                  : '!border-b-[#D8D1BF] focus-visible:!border-b-brand-primary'
                 }`}
             />
             {errors.email && (
@@ -331,9 +336,10 @@ const LoginPage = () => {
                 onFocus={() => setFocused('password')}
                 onBlur={() => setFocused(null)}
                 disabled={isLoading}
-                className={`h-11 rounded-none border-0 border-b bg-transparent px-0 pe-9 text-[15.5px] font-medium text-brand-ink shadow-none transition-colors placeholder:text-brand-ink-hint/60 focus-visible:ring-0 focus-visible:ring-offset-0 ${errors.password
-                    ? 'border-b-brand-danger'
-                    : 'border-b-[#D8D1BF] focus-visible:border-b-brand-primary'
+                autoComplete="current-password"
+                className={`h-11 ${authInputClassName} pe-9 text-[15.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-ink-hint/60 focus-visible:ring-0 focus-visible:ring-offset-0 ${errors.password
+                    ? '!border-b-brand-danger'
+                    : '!border-b-[#D8D1BF] focus-visible:!border-b-brand-primary'
                   }`}
               />
               <Button variant="unstyled" size="none"
@@ -462,9 +468,9 @@ const LoginPage = () => {
           transition={{ duration: 0.6, delay: 0.38 }}
           className="mt-7 text-sm font-medium text-brand-ink-muted"
         >
-          {t('newToRoomify', { defaultValue: 'New to Roomify?' })}{' '}
+          {newAccountPrompt}{' '}
           <Link to="/signup" className="font-bold text-brand-primary underline-offset-4 hover:underline">
-            {t('createAccount', { defaultValue: 'Create an account' })}
+            {createAccountLabel}
           </Link>
         </motion.p>
 

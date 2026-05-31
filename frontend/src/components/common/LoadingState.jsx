@@ -5,8 +5,10 @@ const LoadingState = ({ message }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-[300px] min-w-0 flex-col items-center justify-center p-8 text-center">
-      <Loader2 className="mb-4 h-8 w-8 shrink-0 animate-spin text-brand-primary" />
+    <div className="roomify-premium-card flex min-h-[300px] min-w-0 flex-col items-center justify-center rounded-[1.75rem] p-8 text-center">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-primary-tint text-brand-primary-deep shadow-sm">
+        <Loader2 className="h-7 w-7 shrink-0 animate-spin" />
+      </div>
       <p className="max-w-full break-words font-medium text-brand-ink-muted">{message || t('loadingMessage')}</p>
     </div>
   );

@@ -15,23 +15,24 @@ export default function DashboardMetricCard({
 }) {
   const toneStyles = tone === 'dark'
     ? {
-        card: 'border-white/10 bg-brand-primary text-white shadow-[0_20px_50px_-26px_rgba(0,0,0,0.9)]',
+        card: 'border-white/10 bg-[linear-gradient(135deg,#1A2B3A_0%,#35658D_100%)] text-white shadow-[0_24px_64px_-32px_rgba(0,0,0,0.9)]',
         icon: 'bg-white/10 text-white',
         label: '!text-white',
         hint: '!text-white',
         value: '!text-white',
       }
     : {
-        card: 'border-brand-surface-border bg-white text-brand-ink shadow-[0_18px_40px_-30px_rgba(38,75,107,0.18)]',
-        icon: 'bg-brand-primary-tint text-brand-ink',
+        card: 'border-brand-surface-border bg-[linear-gradient(180deg,#ffffff_0%,#FBF9F4_100%)] text-brand-ink shadow-[0_18px_42px_-30px_rgba(38,75,107,0.35)]',
+        icon: 'bg-brand-primary-tint text-brand-primary-deep shadow-sm ring-1 ring-brand-primary/10',
         label: 'text-brand-ink-muted',
         hint: 'text-brand-ink-hint',
         value: 'text-brand-ink',
       };
 
   return (
-    <div className={cn('relative min-w-0 overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
-      <div className="flex min-w-0 items-start justify-between gap-4">
+    <div className={cn('roomify-card-interactive relative min-w-0 overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.55),transparent_12rem)]" />
+      <div className="relative flex min-w-0 items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className={cn('break-words text-xs font-black uppercase leading-5 tracking-[0.22em]', toneStyles.label, labelClassName)}>
             {label}

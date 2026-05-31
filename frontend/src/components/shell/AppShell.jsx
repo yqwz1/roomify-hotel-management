@@ -83,7 +83,7 @@ export default function AppShell({ children }) {
   };
 
   return (
-    <div className="flex min-w-0 min-h-screen overflow-x-hidden bg-brand-surface font-sans text-brand-ink lg:h-screen lg:overflow-hidden">
+    <div className="roomify-page-surface flex min-w-0 min-h-screen overflow-x-hidden font-sans text-brand-ink lg:h-screen lg:overflow-hidden">
       <AppSidebar
         isOpen={sidebarOpen}
         isDesktop={isDesktop}
@@ -91,13 +91,13 @@ export default function AppShell({ children }) {
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-visible lg:overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.82),transparent_26%),radial-gradient(circle_at_top_right,rgba(26,43,58,0.04),transparent_24%),linear-gradient(180deg,#F5F2EA_0%,#EFE9DF_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.86),transparent_25rem),radial-gradient(circle_at_top_right,rgba(53,101,141,0.08),transparent_24rem)]" />
         <AppTopbar
           isSidebarOpen={sidebarOpen}
           onMenuToggle={handleSidebarToggle}
         />
 
-        <main className="relative min-w-0 flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
+        <main className="roomify-page-enter relative min-w-0 flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
           {children}
         </main>
         {!isDesktop ? (

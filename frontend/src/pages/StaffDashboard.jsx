@@ -100,6 +100,16 @@ export default function StaffDashboard() {
         description: t(`${pageTx}.actions.invoiceDescription`),
         onClick: () => navigate('/invoice-preview'),
       },
+      {
+        icon: Receipt,
+        title: t('paymentHistory'),
+        description: translateWithFallback(
+          t,
+          `${pageTx}.actions.paymentsDescription`,
+          'Open payment history, receipts, and refundable paid demo transactions.'
+        ),
+        onClick: () => navigate('/payments'),
+      },
     ],
     [navigate, t]
   );

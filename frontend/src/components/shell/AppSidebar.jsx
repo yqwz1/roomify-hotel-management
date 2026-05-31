@@ -40,7 +40,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-white/8 bg-brand-ink text-white transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
+          'fixed inset-y-0 z-50 w-[19.5rem] max-w-[88vw] overflow-hidden border-e border-white/10 bg-[linear-gradient(180deg,#102332_0%,#1A2B3A_42%,#264B6B_100%)] text-white shadow-[24px_0_70px_-45px_rgba(15,23,42,0.9)] transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
           isOpen ? 'translate-x-0 opacity-100' : isRtl ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0',
           isDesktop &&
@@ -71,7 +71,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
               </Button>
             </div>
 
-            <div className="mt-5 min-w-0 rounded-md border border-white/8 bg-white/5 p-4">
+            <div className="mt-5 min-w-0 rounded-2xl border border-white/10 bg-white/8 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
               <p className="truncate text-[11px] font-bold uppercase tracking-[0.24em] text-white/40">
                 {t('propertyOperations')}
               </p>
@@ -100,16 +100,16 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                         to={item.path}
                         onClick={handleNavigation}
                         className={cn(
-                          'group flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
+                          'group flex min-w-0 items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-200',
                           isActive
-                            ? 'bg-brand-primary text-white shadow-sm'
-                            : 'text-white/65 hover:bg-white/8 hover:text-white'
+                            ? 'bg-white text-brand-ink shadow-[0_12px_30px_-18px_rgba(0,0,0,0.6)]'
+                            : 'text-white/66 hover:bg-white/10 hover:text-white'
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 flex-shrink-0 transition-colors',
-                            isActive ? 'text-white' : 'text-white/55 group-hover:text-white'
+                            isActive ? 'text-brand-primary' : 'text-white/55 group-hover:text-white'
                           )}
                         />
 
@@ -125,7 +125,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
           </nav>
 
           <div className="border-t border-white/10 px-5 py-4">
-            <div className="flex min-w-0 items-center gap-3 rounded-md border border-white/8 bg-white/5 px-3 py-3">
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
               <div className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm font-black uppercase text-white">
                 {user?.username?.[0] || user?.email?.[0] || t('userInitial')}
               </div>
