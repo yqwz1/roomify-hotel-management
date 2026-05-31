@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, CalendarRange } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ConfirmationToast from '../components/ConfirmationToast';
 import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
+import { ShadcnDatePicker } from '../components/common/ShadcnDatePicker';
 import { useAuth } from '../context/AuthProvider';
 import { ROLE_MANAGER } from '../components/navigation/navConfig';
 import {
@@ -15,7 +16,6 @@ import {
 import { formatLocalizedDate } from '../utils/localization';
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 const WINDOW_DAYS = 14;
 const ROOM_LABEL_WIDTH = 140;
 const DAY_MIN_WIDTH = 72;
@@ -303,15 +303,14 @@ export default function RoomGrid() {
       </header>
 
       <div className="flex min-w-0 flex-wrap items-center gap-3 rounded-2xl border border-brand-surface-border bg-brand-card p-4">
-        <label className="flex min-w-0 items-center gap-2 text-sm font-medium text-brand-ink-muted">
-          <CalendarRange className="h-4 w-4 shrink-0" />
-          <Input
-            type="date"
-            value={startDate}
-            onChange={handleDateInputChange}
-            className="h-10 w-full min-w-0 rounded-lg border-brand-surface-border bg-brand-surface-light px-3 py-2 text-sm text-brand-ink focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-focus"
-          />
-        </label>
+        <ShadcnDatePicker
+          id="room-grid-start-date"
+          value={startDate}
+          onChange={(value) => handleDateInputChange({ target: { value } })}
+          className="w-full sm:w-auto"
+          buttonClassName="h-10 rounded-lg px-3 py-2 focus:ring-brand-focus"
+          placeholder={t('roomGrid.title')}
+        />
         <Button variant="unstyled" size="none"
           type="button"
           onClick={handleResetToday}

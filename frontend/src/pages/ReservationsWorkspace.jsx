@@ -14,6 +14,7 @@ import { LtrText } from '../components/LtrText';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import { ShadcnDatePicker } from '../components/common/ShadcnDatePicker';
 import { ReservationDetailLoader } from '../components/reservations/ReservationDetailContent';
 import { useReservationQueue } from '../hooks/useReservationQueue';
 import { useAuth } from '../context/AuthProvider';
@@ -420,39 +421,35 @@ export default function ReservationsWorkspace() {
                   </NativeSelect>
                 </label>
 
-                <label className={FILTER_FIELD_CLASS}>
-                  <span className={FILTER_LABEL_CLASS}>
-                    {t('checkInDate')}
-                  </span>
-                  <Input
-                    type="date"
-                    value={draftFilters.checkInDate}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        checkInDate: event.target.value,
-                      }))
-                    }
-                    className={FILTER_INPUT_CLASS}
-                  />
-                </label>
+                <ShadcnDatePicker
+                  id="reservation-workspace-check-in"
+                  label={t('checkInDate')}
+                  value={draftFilters.checkInDate}
+                  onChange={(value) =>
+                    setDraftFilters((current) => ({
+                      ...current,
+                      checkInDate: value,
+                    }))
+                  }
+                  className={FILTER_FIELD_CLASS}
+                  labelClassName={FILTER_LABEL_CLASS}
+                  buttonClassName={FILTER_INPUT_CLASS}
+                />
 
-                <label className={FILTER_FIELD_CLASS}>
-                  <span className={FILTER_LABEL_CLASS}>
-                    {t('checkOutDate')}
-                  </span>
-                  <Input
-                    type="date"
-                    value={draftFilters.checkOutDate}
-                    onChange={(event) =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        checkOutDate: event.target.value,
-                      }))
-                    }
-                    className={FILTER_INPUT_CLASS}
-                  />
-                </label>
+                <ShadcnDatePicker
+                  id="reservation-workspace-check-out"
+                  label={t('checkOutDate')}
+                  value={draftFilters.checkOutDate}
+                  onChange={(value) =>
+                    setDraftFilters((current) => ({
+                      ...current,
+                      checkOutDate: value,
+                    }))
+                  }
+                  className={FILTER_FIELD_CLASS}
+                  labelClassName={FILTER_LABEL_CLASS}
+                  buttonClassName={FILTER_INPUT_CLASS}
+                />
               </div>
 
               <div className="flex min-w-0 flex-wrap gap-3 sm:justify-end">

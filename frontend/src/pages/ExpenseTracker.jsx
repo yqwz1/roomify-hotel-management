@@ -22,6 +22,7 @@ import DashboardMetricCard from '../components/dashboard/DashboardMetricCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import InventoryOperationsPanel from '../components/inventory/InventoryOperationsPanel';
 import { DistributionBarChart } from '../components/charts/DistributionBarChart';
+import { ShadcnDatePicker } from '../components/common/ShadcnDatePicker';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -206,20 +207,15 @@ function ExpenseFormModal({
             </NativeSelect>
           </label>
 
-          <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
-              {translateWithFallback(t, 'expenseTrackerPage.dateLabel', 'Date')}
-            </span>
-            <Input
-              type="date"
-              value={formData.expenseDate}
-              onChange={(event) =>
-                setFormData((current) => ({ ...current, expenseDate: event.target.value }))
-              }
-              className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-              required
-            />
-          </label>
+          <ShadcnDatePicker
+            id="expense-date"
+            label={translateWithFallback(t, 'expenseTrackerPage.dateLabel', 'Date')}
+            value={formData.expenseDate}
+            onChange={(value) =>
+              setFormData((current) => ({ ...current, expenseDate: value }))
+            }
+            required
+          />
 
           <label className="space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
@@ -868,33 +864,23 @@ export default function ExpenseTracker() {
         >
           <div className="space-y-5">
             <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
-                  {translateWithFallback(t, 'expenseTrackerPage.startDateLabel', 'Start date')}
-                </span>
-                <Input
-                  type="date"
-                  value={draftFilters.startDate}
-                  onChange={(event) =>
-                    setDraftFilters((current) => ({ ...current, startDate: event.target.value }))
-                  }
-                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-                />
-              </label>
+              <ShadcnDatePicker
+                id="expense-filter-start-date"
+                label={translateWithFallback(t, 'expenseTrackerPage.startDateLabel', 'Start date')}
+                value={draftFilters.startDate}
+                onChange={(value) =>
+                  setDraftFilters((current) => ({ ...current, startDate: value }))
+                }
+              />
 
-              <label className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
-                  {translateWithFallback(t, 'expenseTrackerPage.endDateLabel', 'End date')}
-                </span>
-                <Input
-                  type="date"
-                  value={draftFilters.endDate}
-                  onChange={(event) =>
-                    setDraftFilters((current) => ({ ...current, endDate: event.target.value }))
-                  }
-                  className="h-12 w-full min-w-0 rounded-full border-brand-surface-border bg-brand-surface-light px-4 text-sm font-medium text-brand-ink transition focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5"
-                />
-              </label>
+              <ShadcnDatePicker
+                id="expense-filter-end-date"
+                label={translateWithFallback(t, 'expenseTrackerPage.endDateLabel', 'End date')}
+                value={draftFilters.endDate}
+                onChange={(value) =>
+                  setDraftFilters((current) => ({ ...current, endDate: value }))
+                }
+              />
 
               <label className="space-y-2">
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">

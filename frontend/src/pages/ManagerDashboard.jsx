@@ -295,7 +295,7 @@ function DashboardDateField({ id, label, value, onChange, language }) {
       </label>
       <Input
         id={id}
-        type="date"
+        type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="sr-only"

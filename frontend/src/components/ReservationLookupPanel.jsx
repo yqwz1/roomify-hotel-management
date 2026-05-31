@@ -5,6 +5,7 @@ import { ReservationStatus } from '../domain/reservations/statusRules';
 import { searchReservations } from '../services/reservationService';
 import StatusPill from './StatusPill';
 import { LtrText } from './LtrText';
+import { ShadcnDatePicker } from './common/ShadcnDatePicker';
 import { extractApiErrorMessage } from '../utils/apiError';
 import { cn } from '../lib/utils';
 import {
@@ -342,29 +343,25 @@ export default function ReservationLookupPanel({
               </NativeSelect>
             </label>
 
-            <label className={FILTER_FIELD_CLASS}>
-              <span className={FILTER_LABEL_CLASS}>
-                {t('checkInDate')}
-              </span>
-              <Input
-                type="date"
-                value={filters.checkInDate}
-                onChange={(event) => updateFilter('checkInDate', event.target.value)}
-                className={FILTER_INPUT_CLASS}
-              />
-            </label>
+            <ShadcnDatePicker
+              id="reservation-lookup-check-in"
+              label={t('checkInDate')}
+              value={filters.checkInDate}
+              onChange={(value) => updateFilter('checkInDate', value)}
+              className={FILTER_FIELD_CLASS}
+              labelClassName={FILTER_LABEL_CLASS}
+              buttonClassName={FILTER_INPUT_CLASS}
+            />
 
-            <label className={FILTER_FIELD_CLASS}>
-              <span className={FILTER_LABEL_CLASS}>
-                {t('checkOutDate')}
-              </span>
-              <Input
-                type="date"
-                value={filters.checkOutDate}
-                onChange={(event) => updateFilter('checkOutDate', event.target.value)}
-                className={FILTER_INPUT_CLASS}
-              />
-            </label>
+            <ShadcnDatePicker
+              id="reservation-lookup-check-out"
+              label={t('checkOutDate')}
+              value={filters.checkOutDate}
+              onChange={(value) => updateFilter('checkOutDate', value)}
+              className={FILTER_FIELD_CLASS}
+              labelClassName={FILTER_LABEL_CLASS}
+              buttonClassName={FILTER_INPUT_CLASS}
+            />
           </div>
 
           <div className="flex min-w-0 flex-wrap items-center gap-3 sm:justify-end">
