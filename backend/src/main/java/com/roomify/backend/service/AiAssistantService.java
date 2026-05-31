@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.roomify.backend.dto.ai.AiAssistantChatMessage;
 import com.roomify.backend.dto.ai.AiAssistantChatRequest;
 import com.roomify.backend.dto.ai.AiAssistantChatResponse;
 import com.roomify.backend.dto.ai.DemandHeatmapPointResponse;
@@ -17,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,7 +33,6 @@ public class AiAssistantService {
 
     private static final Logger log = LoggerFactory.getLogger(AiAssistantService.class);
     private static final String GEMINI_SOURCE = "GEMINI";
-    private static final String GEMINI_CONFIG_SOURCE = "GEMINI_CONFIGURATION_ERROR";
     private static final String FALLBACK_SOURCE = "LOCAL_TEMPLATE_FALLBACK";
 
     private final AiAssistantContextBuilder contextBuilder;
@@ -42,6 +41,7 @@ public class AiAssistantService {
     private final String geminiApiKey;
     private final String geminiModel;
     private final String geminiBaseUrl;
+    private final Duration requestTimeout;
 
     public AiAssistantService(
             AiAssistantContextBuilder contextBuilder,
@@ -55,22 +55,17 @@ public class AiAssistantService {
         this.geminiApiKey = geminiApiKey;
         this.geminiModel = geminiModel;
         this.geminiBaseUrl = geminiBaseUrl;
+        this.requestTimeout = Duration.ofMillis(Math.max(timeoutMs, 1000L));
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofMillis(Math.max(timeoutMs, 1000L)))
+                .connectTimeout(requestTimeout)
                 .build();
     }
 
     public AiAssistantChatResponse chat(AiAssistantChatRequest request) {
         AiAssistantContextBuilder.AiAssistantContext context = contextBuilder.buildContext();
         if (geminiApiKey == null || geminiApiKey.isBlank()) {
-            return new AiAssistantChatResponse(
-                    "Gemini API key is not configured. Please set GEMINI_API_KEY.",
-                    GEMINI_CONFIG_SOURCE,
-                    true,
-                    geminiModel,
-                    context.summaryText(),
-                    context.suggestedPrompts(),
-                    LocalDateTime.now());
+            log.warn("Using local manager assistant fallback: Missing Gemini API key");
+            return fallbackResponse(request.message(), context);
         }
 
         try {
@@ -85,15 +80,29 @@ public class AiAssistantService {
                         context.suggestedPrompts(),
                         LocalDateTime.now());
             }
+            log.warn("Using local manager assistant fallback: Empty Gemini response");
+        } catch (HttpTimeoutException exception) {
+            log.warn("Using local manager assistant fallback: Gemini timeout", exception);
+        } catch (IOException exception) {
+            log.warn(
+                    "Using local manager assistant fallback: {}",
+                    classifyGeminiIoFailure(exception.getMessage()),
+                    exception);
         } catch (Exception exception) { // noqa: BLE001
             log.warn(
-                    "Gemini manager assistant request failed; falling back to local analytics template: {}",
+                    "Using local manager assistant fallback: Gemini exception - {}",
                     sanitizeProviderError(exception.getMessage()),
                     exception);
         }
 
+        return fallbackResponse(request.message(), context);
+    }
+
+    private AiAssistantChatResponse fallbackResponse(
+            String message,
+            AiAssistantContextBuilder.AiAssistantContext context) {
         return new AiAssistantChatResponse(
-                buildFallbackAnswer(request.message(), context),
+                buildFallbackAnswer(message, context),
                 FALLBACK_SOURCE,
                 true,
                 "template-analytics-engine",
@@ -111,19 +120,15 @@ public class AiAssistantService {
         payload.put("max_tokens", 500);
 
         ArrayNode messages = objectMapper.createArrayNode();
-        messages.add(buildChatMessage("system", buildSystemPrompt(context)));
-        if (request.history() != null) {
-            request.history().stream()
-                    .filter(message -> message != null && message.content() != null && !message.content().isBlank())
-                    .limit(6)
-                    .forEach(message -> messages.add(buildChatMessage(normalizeRole(message), message.content())));
-        }
-        messages.add(buildChatMessage("user", request.message()));
+        messages.add(buildChatMessage("system", buildSystemPrompt()));
+        String userContent = buildGeminiUserContent(request.message(), context);
+        log.debug("Gemini user content preview: {}", preview(userContent));
+        messages.add(buildChatMessage("user", userContent));
         payload.set("messages", messages);
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(geminiBaseUrl))
-                .timeout(Duration.ofSeconds(12))
+                .timeout(requestTimeout)
                 .header("Authorization", "Bearer " + geminiApiKey)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
@@ -134,11 +139,15 @@ public class AiAssistantService {
         }
 
         JsonNode root = objectMapper.readTree(response.body());
-        return root.path("choices")
+        String answer = root.path("choices")
                 .path(0)
                 .path("message")
                 .path("content")
                 .asText(null);
+        if (answer == null) {
+            throw new IOException("Gemini response parsing failed: choices[0].message.content missing");
+        }
+        return answer;
     }
 
     private ObjectNode buildChatMessage(String role, String text) {
@@ -148,15 +157,25 @@ public class AiAssistantService {
         return message;
     }
 
-    private String buildSystemPrompt(AiAssistantContextBuilder.AiAssistantContext context) {
+    private String buildSystemPrompt() {
+        return """
+                You are Roomify's manager AI assistant. Your main role is to help hotel managers with revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, services, and finance insights.
+
+                You have access to live Roomify analytics context. Use it whenever the user asks about hotel operations, revenue, occupancy, cancellations, demand, pricing, reservations, rooms, guests, services, or finance.
+
+                You may also answer greetings, basic calculations, and short general questions naturally.
+
+                If the user asks something unrelated to hotel management and it is not a simple greeting, simple calculation, or short general question, politely redirect them back to Roomify hotel analytics.
+
+                Be concise, practical, professional, and helpful.
+                """;
+    }
+
+    private String buildGeminiUserContent(
+            String message,
+            AiAssistantContextBuilder.AiAssistantContext context) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("You are Roomify's manager AI assistant. ")
-                .append("Help hotel managers understand reservations, guests, payments, services, rooms, finance insights, and operational decisions. ")
-                .append("Be concise, practical, and professional. ")
-                .append("Answer with concise operational guidance grounded only in the provided hotel analytics context. ")
-                .append("When numbers are relevant, cite them directly. ")
-                .append("If the data is insufficient, say so explicitly.\n\n")
-                .append("Current analytics context:\n")
+        prompt.append("Live Roomify analytics context:\n")
                 .append(context.summaryText())
                 .append("\n\nElasticity recommendations:\n");
         for (ElasticityForecastResponse forecast : context.elasticityForecasts()) {
@@ -185,6 +204,8 @@ public class AiAssistantService {
                         .append("%, revenue SAR ")
                         .append(point.revenue().toPlainString())
                         .append('\n'));
+        prompt.append("\nUser message:\n")
+                .append(message == null ? "" : message.trim());
         return prompt.toString();
     }
 
@@ -195,12 +216,31 @@ public class AiAssistantService {
         return message.replace(geminiApiKey, "[REDACTED]");
     }
 
+    private String classifyGeminiIoFailure(String message) {
+        String sanitized = sanitizeProviderError(message);
+        String normalized = sanitized.toLowerCase(Locale.ROOT);
+        if (normalized.contains("gemini returned http")) {
+            return "Gemini HTTP error - " + sanitized;
+        }
+        if (normalized.contains("parsing failed") || normalized.contains("choices[0].message.content")) {
+            return "Gemini parsing error - " + sanitized;
+        }
+        return "Gemini HTTP request failed - " + sanitized;
+    }
+
     private String truncate(String value) {
         if (value == null) {
             return "";
         }
         String sanitized = value.replace(geminiApiKey, "[REDACTED]");
         return sanitized.length() <= 500 ? sanitized : sanitized.substring(0, 500) + "...";
+    }
+
+    private String preview(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.length() <= 300 ? value : value.substring(0, 300);
     }
 
     private String buildFallbackAnswer(
@@ -282,17 +322,6 @@ public class AiAssistantService {
                                 + " with demand score "
                                 + peakDemandDay.demandScore()
                                 + ".");
-    }
-
-    private String normalizeRole(AiAssistantChatMessage message) {
-        String role = message.role();
-        if (role == null) {
-            return "user";
-        }
-        return switch (role.toLowerCase(Locale.ROOT)) {
-            case "assistant", "system" -> role.toLowerCase(Locale.ROOT);
-            default -> "user";
-        };
     }
 
     private String money(BigDecimal value) {

@@ -49,6 +49,35 @@ warn() {
     printf 'WARNING: %s\n' "$1" >&2
 }
 
+load_root_env_file() {
+    local env_file="$REPO_ROOT/.env"
+    [[ -f "$env_file" ]] || return 0
+
+    log "Loading backend environment variables from .env..."
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+        [[ -z "$line" || "${line:0:1}" == "#" ]] && continue
+        [[ "$line" == *"="* ]] || continue
+
+        local name="${line%%=*}"
+        local value="${line#*=}"
+        name="${name#"${name%%[![:space:]]*}"}"
+        name="${name%"${name##*[![:space:]]}"}"
+        value="${value#"${value%%[![:space:]]*}"}"
+        value="${value%"${value##*[![:space:]]}"}"
+        [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+
+        if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+            value="${value:1:${#value}-2}"
+        elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+            value="${value:1:${#value}-2}"
+        fi
+
+        export "$name=$value"
+    done <"$env_file"
+}
+
 require_command() {
     local command_name="$1"
     local message="$2"
@@ -519,6 +548,7 @@ main() {
     assert_file "$REPO_ROOT/docker-compose.yml" "docker-compose.yml was not found in ${REPO_ROOT}."
     assert_file "$BACKEND_DIR/mvnw" "The backend Maven wrapper is missing at ${BACKEND_DIR}/mvnw."
     assert_file "$FRONTEND_DIR/package.json" "frontend/package.json is missing at ${FRONTEND_DIR}/package.json."
+    load_root_env_file
 
     if [[ -f "$FRONTEND_DIR/.env.example" && ! -f "$FRONTEND_DIR/.env" ]]; then
         log "Creating frontend/.env from .env.example..."

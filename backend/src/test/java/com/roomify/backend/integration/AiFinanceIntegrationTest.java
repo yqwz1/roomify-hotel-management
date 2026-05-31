@@ -215,8 +215,8 @@ class AiFinanceIntegrationTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("GEMINI_CONFIGURATION_ERROR"))
-                .andExpect(jsonPath("$.answer").value("Gemini API key is not configured. Please set GEMINI_API_KEY."));
+                .andExpect(jsonPath("$.source").value("LOCAL_TEMPLATE_FALLBACK"))
+                .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Deluxe")));
     }
 
     @Test

@@ -50,6 +50,38 @@ function Write-Warn {
     Write-Host "WARNING: $Message" -ForegroundColor Yellow
 }
 
+function Import-RootEnvFile {
+    $envPath = Join-Path $RepoRoot '.env'
+    if (-not (Test-Path -LiteralPath $envPath -PathType Leaf)) {
+        return
+    }
+
+    Write-Info 'Loading backend environment variables from .env...'
+    foreach ($line in Get-Content -LiteralPath $envPath) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed -or $trimmed.StartsWith('#')) {
+            continue
+        }
+
+        $separatorIndex = $trimmed.IndexOf('=')
+        if ($separatorIndex -le 0) {
+            continue
+        }
+
+        $name = $trimmed.Substring(0, $separatorIndex).Trim()
+        $value = $trimmed.Substring($separatorIndex + 1).Trim()
+        if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
+            continue
+        }
+
+        if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+
+        Set-Item -Path "Env:$name" -Value $value
+    }
+}
+
 function Stop-Script {
     param([string]$Message)
     Write-Host "ERROR: $Message" -ForegroundColor Red
@@ -503,6 +535,7 @@ Test-RequiredCommand -CommandName 'docker' -Message 'Docker is required but was 
 Assert-File -Path $ComposeFile -Message "docker-compose.yml was not found in $RepoRoot."
 Assert-File -Path (Join-Path $BackendDir 'mvnw.cmd') -Message "The backend Maven wrapper is missing at $BackendDir\mvnw.cmd."
 Assert-File -Path (Join-Path $FrontendDir 'package.json') -Message "frontend\package.json is missing at $FrontendDir\package.json."
+Import-RootEnvFile
 
 $FrontendEnvExample = Join-Path $FrontendDir '.env.example'
 $FrontendEnv = Join-Path $FrontendDir '.env'
