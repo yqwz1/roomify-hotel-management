@@ -50,10 +50,11 @@ warn() {
 }
 
 load_root_env_file() {
-    local env_file="$REPO_ROOT/.env"
+    local file_name="$1"
+    local env_file="$REPO_ROOT/$file_name"
     [[ -f "$env_file" ]] || return 0
 
-    log "Loading backend environment variables from .env..."
+    log "Loading backend environment variables from ${file_name}..."
     while IFS= read -r line || [[ -n "$line" ]]; do
         line="${line#"${line%%[![:space:]]*}"}"
         line="${line%"${line##*[![:space:]]}"}"
@@ -76,6 +77,43 @@ load_root_env_file() {
 
         export "$name=$value"
     done <"$env_file"
+}
+
+print_hotel_discovery_mode() {
+    local demo_key_mode="${GOOGLE_MAPS_DEMO_KEY_MODE:-}"
+    demo_key_mode="$(printf '%s' "$demo_key_mode" | tr '[:upper:]' '[:lower:]')"
+
+    if [[ -n "${GOOGLE_PLACES_API_KEY:-}" && "$demo_key_mode" == "true" ]]; then
+        log "Hotel Discovery: Google Maps Demo Key mode"
+        return
+    fi
+
+    if [[ -n "${GOOGLE_PLACES_API_KEY:-}" ]]; then
+        log "Hotel Discovery: Google Places normal mode"
+        return
+    fi
+
+    log "Hotel Discovery: Mock external hotels mode"
+}
+
+ensure_frontend_dependencies() {
+    local node_modules_dir="$FRONTEND_DIR/node_modules"
+    [[ -d "$node_modules_dir" ]] && return 0
+
+    local install_command="install"
+    if [[ -f "$FRONTEND_DIR/package-lock.json" ]]; then
+        install_command="ci"
+    fi
+
+    log "frontend/node_modules is missing. Running 'npm ${install_command}' in ${FRONTEND_DIR}..."
+    if ! (
+        cd "$FRONTEND_DIR" || exit 1
+        npm "$install_command"
+    ); then
+        fail "Frontend dependency installation failed while running 'npm ${install_command}'. Check npm output above, then retry."
+    fi
+
+    [[ -d "$node_modules_dir" ]] || fail "Frontend dependency installation completed, but frontend/node_modules was not created."
 }
 
 require_command() {
@@ -548,7 +586,9 @@ main() {
     assert_file "$REPO_ROOT/docker-compose.yml" "docker-compose.yml was not found in ${REPO_ROOT}."
     assert_file "$BACKEND_DIR/mvnw" "The backend Maven wrapper is missing at ${BACKEND_DIR}/mvnw."
     assert_file "$FRONTEND_DIR/package.json" "frontend/package.json is missing at ${FRONTEND_DIR}/package.json."
-    load_root_env_file
+    load_root_env_file ".env"
+    load_root_env_file ".env.local"
+    print_hotel_discovery_mode
 
     if [[ -f "$FRONTEND_DIR/.env.example" && ! -f "$FRONTEND_DIR/.env" ]]; then
         log "Creating frontend/.env from .env.example..."
@@ -559,6 +599,8 @@ main() {
         log "Enabling frontend demo account shortcuts in frontend/.env..."
         printf '\nVITE_ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true\n' >>"$FRONTEND_DIR/.env"
     fi
+
+    ensure_frontend_dependencies
 
     if ! docker compose version >/dev/null 2>&1; then
         fail "Docker Compose v2 is required. Run 'docker compose version' after Docker Desktop is up."

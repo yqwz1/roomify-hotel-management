@@ -51,12 +51,14 @@ function Write-Warn {
 }
 
 function Import-RootEnvFile {
-    $envPath = Join-Path $RepoRoot '.env'
+    param([string]$FileName)
+
+    $envPath = Join-Path $RepoRoot $FileName
     if (-not (Test-Path -LiteralPath $envPath -PathType Leaf)) {
         return
     }
 
-    Write-Info 'Loading backend environment variables from .env...'
+    Write-Info "Loading backend environment variables from $FileName..."
     foreach ($line in Get-Content -LiteralPath $envPath) {
         $trimmed = $line.Trim()
         if (-not $trimmed -or $trimmed.StartsWith('#')) {
@@ -80,6 +82,24 @@ function Import-RootEnvFile {
 
         Set-Item -Path "Env:$name" -Value $value
     }
+}
+
+function Write-HotelDiscoveryMode {
+    $hasGooglePlacesKey = -not [string]::IsNullOrWhiteSpace($env:GOOGLE_PLACES_API_KEY)
+    $demoKeyMode = -not [string]::IsNullOrWhiteSpace($env:GOOGLE_MAPS_DEMO_KEY_MODE) -and
+        $env:GOOGLE_MAPS_DEMO_KEY_MODE.Trim().Equals('true', [System.StringComparison]::OrdinalIgnoreCase)
+
+    if ($hasGooglePlacesKey -and $demoKeyMode) {
+        Write-Info 'Hotel Discovery: Google Maps Demo Key mode'
+        return
+    }
+
+    if ($hasGooglePlacesKey) {
+        Write-Info 'Hotel Discovery: Google Places normal mode'
+        return
+    }
+
+    Write-Info 'Hotel Discovery: Mock external hotels mode'
 }
 
 function Stop-Script {
@@ -445,7 +465,27 @@ function Start-Frontend {
 
     $nodeModulesPath = Join-Path $FrontendDir 'node_modules'
     if (-not (Test-Path -LiteralPath $nodeModulesPath -PathType Container)) {
-        Stop-Script "frontend\node_modules is missing. Run 'npm install' inside $FrontendDir, then retry."
+        $packageLockPath = Join-Path $FrontendDir 'package-lock.json'
+        $installCommand = if (Test-Path -LiteralPath $packageLockPath -PathType Leaf) { 'ci' } else { 'install' }
+
+        Write-Info "frontend\node_modules is missing. Running 'npm $installCommand' in $FrontendDir..."
+        Push-Location $FrontendDir
+        try {
+            & npm.cmd $installCommand
+            if ($LASTEXITCODE -ne 0) {
+                Stop-Script "Frontend dependency installation failed while running 'npm $installCommand'. Check npm output above, then retry."
+            }
+        }
+        catch {
+            Stop-Script "Frontend dependency installation failed while running 'npm $installCommand'. $($_.Exception.Message)"
+        }
+        finally {
+            Pop-Location
+        }
+
+        if (-not (Test-Path -LiteralPath $nodeModulesPath -PathType Container)) {
+            Stop-Script "Frontend dependency installation completed, but frontend\node_modules was not created."
+        }
     }
 
     Write-Info "Starting frontend at $AppUrl..."
@@ -535,7 +575,9 @@ Test-RequiredCommand -CommandName 'docker' -Message 'Docker is required but was 
 Assert-File -Path $ComposeFile -Message "docker-compose.yml was not found in $RepoRoot."
 Assert-File -Path (Join-Path $BackendDir 'mvnw.cmd') -Message "The backend Maven wrapper is missing at $BackendDir\mvnw.cmd."
 Assert-File -Path (Join-Path $FrontendDir 'package.json') -Message "frontend\package.json is missing at $FrontendDir\package.json."
-Import-RootEnvFile
+Import-RootEnvFile -FileName '.env'
+Import-RootEnvFile -FileName '.env.local'
+Write-HotelDiscoveryMode
 
 $FrontendEnvExample = Join-Path $FrontendDir '.env.example'
 $FrontendEnv = Join-Path $FrontendDir '.env'

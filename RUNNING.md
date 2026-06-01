@@ -7,6 +7,22 @@ Use the platform startup script first. It is the recommended way to start the re
 - macOS: `./start-roomify-mac.sh`
 - Windows PowerShell: `.\start-roomify-windows.ps1`
 
+For Google Places hotel discovery, keep the real key in a local uncommitted root file:
+
+```powershell
+Copy-Item .\.env.local.example .\.env.local
+notepad .\.env.local
+```
+
+Use placeholder-free local values only in `.env.local`:
+
+```dotenv
+GOOGLE_PLACES_API_KEY=your_key_here
+GOOGLE_MAPS_DEMO_KEY_MODE=true
+```
+
+The startup scripts load `.env` first and `.env.local` second, so `.env.local` can override local backend-only settings without exposing them to the frontend.
+
 Each script does all of the following:
 - Starts `postgres` and `mailpit` with `docker compose`
 - Waits for PostgreSQL, Mailpit SMTP, and Mailpit UI

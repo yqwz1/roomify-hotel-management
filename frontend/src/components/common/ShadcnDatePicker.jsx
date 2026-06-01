@@ -69,6 +69,7 @@ export function ShadcnDatePicker({
   placeholder = 'Select date',
   disabled,
   required,
+  calendarProps,
 }) {
   const selectedDate = parseIsoDate(value);
 
@@ -107,6 +108,7 @@ export function ShadcnDatePicker({
               if (date) onChange(toIsoDate(date));
             }}
             initialFocus
+            {...calendarProps}
           />
         </PopoverContent>
       </Popover>
@@ -125,6 +127,7 @@ ShadcnDatePicker.propTypes = {
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   required: PropTypes.bool,
+  calendarProps: PropTypes.object,
 };
 
 export function ShadcnMonthPicker({

@@ -72,6 +72,7 @@ export default function Header({ onMenuToggle }) {
     { to: '/pricing', route: '/pricing', hash: '', label: t('navPricing', { defaultValue: 'Pricing' }) },
     { to: '/compliance', route: '/compliance', hash: '', label: t('navCompliance', { defaultValue: 'Compliance' }) },
     { to: '/integrations', route: '/integrations', hash: '', label: t('navIntegrations', { defaultValue: 'Integrations' }) },
+    { to: '/explore-hotels', route: '/explore-hotels', hash: '', label: t('exploreHotels.nav', { defaultValue: 'Explore Hotels' }) },
     { to: '/demo', route: '/demo', hash: '', label: t('navDemo', { defaultValue: 'Request a demo' }) },
   ];
 

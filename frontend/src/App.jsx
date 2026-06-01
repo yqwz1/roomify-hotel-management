@@ -42,6 +42,8 @@ import RoomSearch from './pages/RoomSearch'
 import RoomDetails from './pages/RoomDetails'
 import BookRoom from './pages/BookRoom'
 import ConfirmationPage from './pages/ConfirmationPage'
+import ExploreHotels from './pages/ExploreHotels'
+import ExternalHotelDetails from './pages/ExternalHotelDetails'
 
 // Reservation management pages
 import CheckIn from './pages/CheckIn'
@@ -103,6 +105,8 @@ const AppContent = () => {
           path="/search"
           element={<Layout showSidebar={showFrontDeskSidebar}><RoomSearch /></Layout>}
         />
+        <Route path="/explore-hotels" element={<Layout showSidebar={false}><ExploreHotels /></Layout>} />
+        <Route path="/external-hotels/:placeId" element={<Layout showSidebar={false}><ExternalHotelDetails /></Layout>} />
         <Route path="/rooms/:roomId" element={<Layout showSidebar={false}><RoomDetails /></Layout>} />
         <Route
           path="/book"

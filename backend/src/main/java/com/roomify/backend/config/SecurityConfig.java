@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableMethodSecurity // تفعيل @PreAuthorize
@@ -27,13 +28,17 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/rooms/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/external-hotels/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/{id}").permitAll()
                         .requestMatchers("/ws/**").permitAll()
 
                         // Guest endpoints

@@ -601,6 +601,7 @@ const DOCUMENT_TITLE_OVERRIDES = {
   '/rooms': ['rooms', 'Rooms'],
   '/rooms-management': ['roomsManagement', 'Rooms Management'],
   '/search': ['roomSearch', 'Room Search'],
+  '/explore-hotels': ['exploreHotels.title', 'Explore Hotels'],
   '/book': ['bookRoom', 'Book Room'],
   '/confirmation': ['bookingConfirmed', 'Booking Confirmation'],
   '/check-in': ['checkInTitle', 'Check-In'],

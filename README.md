@@ -269,6 +269,8 @@ The platform startup scripts handle Docker containers, database initialization, 
 
 **Windows (PowerShell):**
 ```powershell
+Copy-Item .\.env.local.example .\.env.local
+notepad .\.env.local
 .\start-roomify-windows.ps1
 ```
 
@@ -356,6 +358,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 | `ROOMIFY_INVOICE_SELLER_VAT_NUMBER` | - | Seller VAT registration number |
 | `ROOMIFY_AI_SERVICE_BASE_URL` | `http://localhost:8000` | AI service URL |
 | `OPENAI_API_KEY` | - | OpenAI key for guest assistant (optional) |
+| `GOOGLE_PLACES_API_KEY` | - | Backend-only Google Places API key for hotel discovery |
+| `GOOGLE_MAPS_DEMO_KEY_MODE` | `false` | Set `true` when using the free Google Maps demo key; reviews/photos stay view-only or placeholder-backed |
+
+Keep real local secrets in root `.env.local`; the startup scripts load `.env` first, then `.env.local`. The frontend does not need `GOOGLE_PLACES_API_KEY`.
 
 ### Frontend (`frontend/.env`)
 
