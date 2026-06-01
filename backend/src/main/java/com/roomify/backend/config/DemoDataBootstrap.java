@@ -97,7 +97,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     private static final String DEMO_GUEST_EMAIL = "guest@roomify.com";
     private static final String DEMO_ADMIN_PASSWORD = "Admin@12345";
     private static final String DEMO_PASSWORD = "Demo@2026";
-    private static final String DEMO_GUEST_CONFIRMATION = "DEMO-GUEST-QUICK";
+    private static final String DEMO_GUEST_CONFIRMATION = "RFY-GUEST-UPCOMING";
 
     // Idempotency marker — one of the new Phase-1 staff accounts.
     private static final String SEED_MARKER_EMAIL = "noura.alharbi@roomify.demo";
@@ -106,14 +106,14 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private static final long RANDOM_SEED = 42L;
 
-    private static final int TARGET_GUEST_COUNT = 40;
+    private static final int TARGET_GUEST_COUNT = 120;
     // Bumped from 260 to 290 to densify the 2-year history chart. With ~3 nights
     // per stay each reservation fills only 3 of 731 daily revenue points, so more
     // samples are needed before the chart stops looking sparse in the older half.
-    private static final int TARGET_PAST_RESERVATIONS = 290;
-    private static final int TARGET_CHECKED_IN = 8;
-    private static final int TARGET_CONFIRMED_FUTURE = 28;
-    private static final int TARGET_PENDING_FUTURE = 4;
+    private static final int TARGET_PAST_RESERVATIONS = 420;
+    private static final int TARGET_CHECKED_IN = 24;
+    private static final int TARGET_CONFIRMED_FUTURE = 48;
+    private static final int TARGET_PENDING_FUTURE = 10;
     private static final int PAST_HISTORY_DAYS = 730;
     private static final int FUTURE_WINDOW_DAYS = 30;
 
@@ -167,12 +167,14 @@ public class DemoDataBootstrap implements ApplicationRunner {
         LocalDate today = LocalDate.now();
         cleanupKnownLocalDemoClutter();
         seedCoreUsers();
+        Map<String, RoomType> presentationRoomTypes = seedRoomTypes();
+        List<Room> presentationRooms = seedRooms(presentationRoomTypes);
         seedStableDemoSearchInventory();
-        seedDemoGuestReservationIfPossible(today);
+        refreshRollingPresentationData(today, presentationRooms);
         seedMissingPageDemoData(today);
 
         if (userRepository.findByEmailIgnoreCase(SEED_MARKER_EMAIL).isPresent()) {
-            log.info("Demo data already present, skipping seeding.");
+            log.info("Demo data already present; rolling presentation rows were refreshed.");
             return;
         }
 
@@ -182,8 +184,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
         List<User> seededStaff = seedAdditionalStaff();
         User managerUser = userRepository.findByEmailIgnoreCase(DEMO_MANAGER_EMAIL).orElseThrow();
 
-        Map<String, RoomType> roomTypes = seedRoomTypes();
-        List<Room> rooms = seedRooms(roomTypes);
+        Map<String, RoomType> roomTypes = presentationRoomTypes;
+        List<Room> rooms = presentationRooms;
 
         Guest demoGuest = upsertDemoGuestRecord();
         List<Guest> generatedGuests = seedGuests();
@@ -207,6 +209,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
         int expenseCount = seedExpenses(managerUser, today, random);
         List<InventoryItem> inventoryItems = seedInventoryItems();
         int inventoryTxCount = seedInventoryTransactions(inventoryItems, managerUser, seededStaff, today, random);
+        seedMissingPageDemoData(today);
+        refreshRollingPresentationData(today, rooms);
 
         Phase2Counts phase2 = new Phase2Counts(
                 services.size(), serviceChargeCount, expenseCount,
@@ -220,9 +224,9 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private void seedCoreUsers() {
         upsertDemoAdminUser();
-        createSimpleUserIfMissing(DEMO_MANAGER_EMAIL, Role.MANAGER, DEMO_PASSWORD);
-        createStaffUserIfMissing(DEMO_STAFF_EMAIL, "Demo Staff", "Front Desk", DEMO_PASSWORD);
-        createSimpleUserIfMissing(DEMO_GUEST_EMAIL, Role.GUEST, DEMO_PASSWORD);
+        upsertSimpleUser(DEMO_MANAGER_EMAIL, Role.MANAGER, DEMO_PASSWORD);
+        upsertStaffUser(DEMO_STAFF_EMAIL, "Fahad Al-Harbi", "Front Desk", DEMO_PASSWORD);
+        upsertSimpleUser(DEMO_GUEST_EMAIL, Role.GUEST, DEMO_PASSWORD);
     }
 
     private User upsertDemoAdminUser() {
@@ -246,57 +250,106 @@ public class DemoDataBootstrap implements ApplicationRunner {
 
     private List<User> seedAdditionalStaff() {
         return List.of(
-                createStaffUserIfMissing(SEED_MARKER_EMAIL, "Noura Al-Harbi", "Front Desk", randomDisabledDemoPassword()),
-                createStaffUserIfMissing("khalid.alqahtani@roomify.demo", "Khalid Al-Qahtani", "Reservations", randomDisabledDemoPassword()),
-                createStaffUserIfMissing("sara.almutairi@roomify.demo", "Sara Al-Mutairi", "Housekeeping", randomDisabledDemoPassword()));
+                upsertStaffUser(SEED_MARKER_EMAIL, "Noura Al-Harbi", "Front Desk", randomDisabledDemoPassword()),
+                upsertStaffUser("khalid.alqahtani@roomify.demo", "Khalid Al-Qahtani", "Reservations", randomDisabledDemoPassword()),
+                upsertStaffUser("sara.almutairi@roomify.demo", "Sara Al-Mutairi", "Housekeeping", randomDisabledDemoPassword()),
+                upsertStaffUser("mona.alrashid@roomify.demo", "Mona Al-Rashid", "Finance", randomDisabledDemoPassword()),
+                upsertStaffUser("abdullah.alyami@roomify.demo", "Abdullah Al-Yami", "Maintenance", randomDisabledDemoPassword()),
+                upsertStaffUser("reem.alzahrani@roomify.demo", "Reem Al-Zahrani", "Guest Relations", randomDisabledDemoPassword()));
     }
 
-    private User createSimpleUserIfMissing(String email, Role role, String rawPassword) {
-        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
-        if (existing.isPresent()) {
-            return existing.get();
-        }
-
-        User user = new User(email, passwordEncoder.encode(rawPassword), role, true);
+    private User upsertSimpleUser(String email, Role role, String rawPassword) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> new User(email, passwordEncoder.encode(rawPassword), role, true));
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setRole(role);
         user.setRoles(EnumSet.of(role));
+        user.setActive(true);
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
         return userRepository.save(user);
     }
 
-    private User createStaffUserIfMissing(String email, String name, String department, String rawPassword) {
-        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
-        if (existing.isPresent()) {
-            return existing.get();
-        }
-
-        User user = new User(email, passwordEncoder.encode(rawPassword), Role.STAFF, true);
+    private User upsertStaffUser(String email, String name, String department, String rawPassword) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> new User(email, passwordEncoder.encode(rawPassword), Role.STAFF, true));
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setRole(Role.STAFF);
         user.setRoles(EnumSet.of(Role.STAFF));
+        user.setActive(true);
+        user.setFailedAttempts(0);
+        user.setLockUntil(null);
 
-        Staff staff = new Staff(user, name, department);
+        Staff staff = user.getStaff();
+        if (staff == null) {
+            staff = new Staff(user, name, department);
+        }
         user.setStaff(staff);
+        staff.setUser(user);
         staff.setName(name);
         staff.setDepartment(department);
         staff.setActive(true);
+        staff.setDeleted(false);
         return userRepository.save(user);
     }
 
     private String randomDisabledDemoPassword() {
-        return "disabled-demo-" + UUID.randomUUID();
+        return "PresentationOnly@2026";
     }
 
     // ─── Room types and rooms ───────────────────────────────────────────────
 
     private Map<String, RoomType> seedRoomTypes() {
+        mergeLegacyRoomType("Standard", "Classic King");
+        mergeLegacyRoomType("Deluxe", "Deluxe King");
+        mergeLegacyRoomType("Suite", "Olaya Suite");
+        mergeLegacyRoomType("Demo Standard", "Classic King");
+        mergeLegacyRoomType("Demo Deluxe", "Deluxe Twin");
+        mergeLegacyRoomType("Demo Suite", "Olaya Suite");
+
         Map<String, RoomType> map = new HashMap<>();
-        map.put("Standard", upsertRoomType("Standard", new BigDecimal("350.00"), 2,
-                "WiFi, Smart TV, Breakfast",
-                "Entry-level room for weekday and budget travellers."));
-        map.put("Deluxe", upsertRoomType("Deluxe", new BigDecimal("700.00"), 3,
-                "WiFi, Smart TV, Coffee Station, City View",
-                "Mid-tier room with a stronger weekend rate."));
-        map.put("Suite", upsertRoomType("Suite", new BigDecimal("1400.00"), 4,
-                "WiFi, Smart TV, Lounge Area, Balcony",
-                "Premium room with the most seasonal price movement."));
+        map.put("Classic King", upsertRoomType("Classic King", new BigDecimal("430.00"), 2,
+                "King bed, WiFi, Smart TV, Breakfast, Work desk",
+                "Comfortable business room for weekday Riyadh stays."));
+        map.put("Classic Twin", upsertRoomType("Classic Twin", new BigDecimal("450.00"), 2,
+                "Twin beds, WiFi, Smart TV, Breakfast",
+                "Flexible twin room for colleagues, friends and short family stays."));
+        map.put("Deluxe King", upsertRoomType("Deluxe King", new BigDecimal("620.00"), 2,
+                "King bed, City View, Coffee Station, Premium WiFi",
+                "Higher-floor room with stronger weekend demand."));
+        map.put("Deluxe Twin", upsertRoomType("Deluxe Twin", new BigDecimal("650.00"), 3,
+                "Twin beds, City View, Sofa, Coffee Station",
+                "Mid-tier room popular with GCC family and group travellers."));
+        map.put("Family Room", upsertRoomType("Family Room", new BigDecimal("780.00"), 4,
+                "King bed, Sofa bed, Extra storage, Kids amenities",
+                "Larger configuration for families visiting Riyadh."));
+        map.put("Executive Suite", upsertRoomType("Executive Suite", new BigDecimal("980.00"), 3,
+                "Living area, Lounge access, Espresso machine, Workstation",
+                "Business suite for corporate guests and VIP arrivals."));
+        map.put("Olaya Suite", upsertRoomType("Olaya Suite", new BigDecimal("1400.00"), 4,
+                "Separate lounge, Balcony, Skyline view, Premium amenities",
+                "Premium suite with the strongest seasonal price movement."));
         return map;
+    }
+
+    private void mergeLegacyRoomType(String legacyName, String targetName) {
+        Long legacyId = queryLong("SELECT id FROM room_types WHERE name = ?", legacyName);
+        if (legacyId == null) {
+            return;
+        }
+        Long targetId = queryLong("SELECT id FROM room_types WHERE name = ?", targetName);
+        if (targetId == null) {
+            jdbcTemplate.update("UPDATE room_types SET name = ? WHERE id = ?", targetName, legacyId);
+            return;
+        }
+        jdbcTemplate.update("UPDATE rooms SET room_type_id = ? WHERE room_type_id = ?", targetId, legacyId);
+        jdbcTemplate.update("UPDATE service_usage_templates SET room_type_id = ? WHERE room_type_id = ?", targetId, legacyId);
+        jdbcTemplate.update("UPDATE service_usage_records SET room_type_id = ? WHERE room_type_id = ?", targetId, legacyId);
+        jdbcTemplate.update("UPDATE price_elasticity_forecasts SET room_type_id = ? WHERE room_type_id = ?", targetId, legacyId);
+        jdbcTemplate.update("UPDATE ai_price_recommendations SET room_type_id = ? WHERE room_type_id = ?", targetId, legacyId);
+        jdbcTemplate.update("DELETE FROM room_types WHERE id = ?", legacyId);
     }
 
     private RoomType upsertRoomType(String name, BigDecimal basePrice, int maxGuests, String amenities, String description) {
@@ -310,19 +363,7 @@ public class DemoDataBootstrap implements ApplicationRunner {
     }
 
     private List<Room> seedRooms(Map<String, RoomType> types) {
-        RoomType standard = types.get("Standard");
-        RoomType deluxe = types.get("Deluxe");
-        RoomType suite = types.get("Suite");
-
-        // 9 Standard, 6 Deluxe, 3 Suite, distributed across 3 floors.
-        Object[][] layout = {
-                {"101", standard, 1}, {"102", standard, 1}, {"103", standard, 1}, {"104", standard, 1},
-                {"105", deluxe, 1}, {"106", deluxe, 1},
-                {"201", standard, 2}, {"202", standard, 2}, {"203", standard, 2},
-                {"204", deluxe, 2}, {"205", deluxe, 2}, {"206", suite, 2},
-                {"301", standard, 3}, {"302", standard, 3},
-                {"303", deluxe, 3}, {"304", deluxe, 3},
-                {"305", suite, 3}, {"306", suite, 3}};
+        Object[][] layout = buildPresentationRoomLayout(types);
 
         List<Room> rooms = new ArrayList<>(layout.length);
         for (Object[] row : layout) {
@@ -331,24 +372,36 @@ public class DemoDataBootstrap implements ApplicationRunner {
         return rooms;
     }
 
-    private List<Room> seedStableDemoSearchInventory() {
-        RoomType standard = upsertRoomType("Demo Standard", new BigDecimal("430.00"), 2,
-                "WiFi, Smart TV, Breakfast",
-                "Stable demo inventory for quick front-desk walkthroughs.");
-        RoomType deluxe = upsertRoomType("Demo Deluxe", new BigDecimal("690.00"), 3,
-                "WiFi, Smart TV, Coffee Station, City View",
-                "Mid-tier demo inventory for booking and modification flows.");
-        RoomType suite = upsertRoomType("Demo Suite", new BigDecimal("980.00"), 4,
-                "WiFi, Smart TV, Lounge Area, Balcony",
-                "Premium demo inventory kept open for same-day availability searches.");
+    private Object[][] buildPresentationRoomLayout(Map<String, RoomType> types) {
+        List<Object[]> rows = new ArrayList<>();
+        for (int floor = 1; floor <= 5; floor++) {
+            int maxRoom = floor <= 4 ? 16 : 8;
+            for (int number = 1; number <= maxRoom; number++) {
+                String roomNumber = "%d%02d".formatted(floor, number);
+                RoomType type = switch (floor) {
+                    case 1 -> number <= 8 ? types.get("Classic King") : types.get("Classic Twin");
+                    case 2 -> number <= 6 ? types.get("Classic King") : number <= 12 ? types.get("Deluxe King") : types.get("Deluxe Twin");
+                    case 3 -> number <= 5 ? types.get("Deluxe King") : number <= 11 ? types.get("Deluxe Twin") : types.get("Family Room");
+                    case 4 -> number <= 6 ? types.get("Family Room") : number <= 12 ? types.get("Executive Suite") : types.get("Olaya Suite");
+                    default -> number <= 4 ? types.get("Executive Suite") : types.get("Olaya Suite");
+                };
+                rows.add(new Object[] { roomNumber, type, floor });
+            }
+        }
+        return rows.toArray(Object[][]::new);
+    }
 
+    private List<Room> seedStableDemoSearchInventory() {
         return List.of(
-                upsertRoom("D101", standard, 1),
-                upsertRoom("D102", standard, 1),
-                upsertRoom("D201", deluxe, 2),
-                upsertRoom("D202", deluxe, 2),
-                upsertRoom("D301", suite, 3),
-                upsertRoom("D302", standard, 3));
+                upsertRoom("601", upsertRoomType("Classic King", new BigDecimal("430.00"), 2,
+                        "King bed, WiFi, Smart TV, Breakfast, Work desk",
+                        "Comfortable business room for weekday Riyadh stays."), 6),
+                upsertRoom("602", upsertRoomType("Deluxe Twin", new BigDecimal("650.00"), 3,
+                        "Twin beds, City View, Sofa, Coffee Station",
+                        "Mid-tier room popular with GCC family and group travellers."), 6),
+                upsertRoom("603", upsertRoomType("Executive Suite", new BigDecimal("980.00"), 3,
+                        "Living area, Lounge access, Espresso machine, Workstation",
+                        "Business suite for corporate guests and VIP arrivals."), 6));
     }
 
     private Room upsertRoom(String number, RoomType type, int floor) {
@@ -424,6 +477,378 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
     }
 
+    private void refreshRollingPresentationData(LocalDate today, List<Room> rooms) {
+        repairLegacyDemoValues();
+        seedAdditionalStaff();
+        Guest demoGuest = upsertDemoGuestRecord();
+        List<Guest> guests = seedGuests();
+        topUpReservationsIfNeeded(today, rooms, guests);
+        seedScriptedReservations(today, rooms, demoGuest, new ArrayList<>());
+        seedDemoGuestReservationIfPossible(today);
+        refreshCurrentOperations(today);
+        refreshPresentationPaymentsAndInvoices(today);
+        seedCurrentMonthExpenses(today);
+    }
+
+    private void repairLegacyDemoValues() {
+        renameConfirmation("DEMO-CHECKIN-READY", "RFY-ARRIVAL-TODAY");
+        renameConfirmation("DEMO-CHECKIN-BLOCKED", "RFY-ARRIVAL-BLOCKED");
+        renameConfirmation("DEMO-CANCEL", "RFY-CANCEL-REVIEW");
+        renameConfirmation("DEMO-MODIFY", "RFY-MODIFY-STAY");
+        renameConfirmation("DEMO-MODIFY-CONFLICT", "RFY-MODIFY-CONFLICT");
+        renameConfirmation("DEMO-GUEST-QUICK", DEMO_GUEST_CONFIRMATION);
+        renameLegacyRoom("D101", "604");
+        renameLegacyRoom("D102", "605");
+        renameLegacyRoom("D201", "606");
+        renameLegacyRoom("D202", "607");
+        renameLegacyRoom("D301", "608");
+        renameLegacyRoom("D302", "609");
+
+        jdbcTemplate.update("""
+                UPDATE guests
+                SET name = 'Sara Al-Fahad',
+                    phone = '+966501234567',
+                    id_number = '1087654321',
+                    nationality = 'Saudi'
+                WHERE lower(email) = lower(?)
+                """, DEMO_GUEST_EMAIL);
+        jdbcTemplate.update("""
+                UPDATE guests
+                SET email = replace(email, '@example.com', '@guest.roomify.demo')
+                WHERE email LIKE '%@example.com'
+                  AND NOT EXISTS (
+                    SELECT 1 FROM guests g2
+                    WHERE lower(g2.email) = lower(replace(guests.email, '@example.com', '@guest.roomify.demo'))
+                  )
+                """);
+        jdbcTemplate.update("""
+                UPDATE guests
+                SET nationality = CASE nationality
+                    WHEN 'SA' THEN 'Saudi'
+                    WHEN 'US' THEN 'American'
+                    WHEN 'GB' THEN 'British'
+                    WHEN 'IN' THEN 'Indian'
+                    WHEN 'JP' THEN 'Japanese'
+                    WHEN 'RU' THEN 'Russian'
+                    WHEN 'IT' THEN 'Italian'
+                    WHEN 'FR' THEN 'French'
+                    WHEN 'SE' THEN 'Swedish'
+                    WHEN 'DE' THEN 'German'
+                    WHEN 'KR' THEN 'Korean'
+                    ELSE nationality
+                END
+                WHERE nationality IN ('SA','US','GB','IN','JP','RU','IT','FR','SE','DE','KR')
+                """);
+        jdbcTemplate.update("UPDATE payments SET gateway_reference = replace(gateway_reference, 'DEMO-', 'RFY-PAY-') WHERE gateway_reference LIKE 'DEMO-%'");
+        jdbcTemplate.update("UPDATE payments SET gateway_reference = replace(gateway_reference, 'MOCK-', 'RFY-PAY-') WHERE gateway_reference LIKE 'MOCK-%'");
+        jdbcTemplate.update("UPDATE audit_logs SET actor = ? WHERE actor = ?", DEMO_ADMIN_EMAIL, LEGACY_DEMO_ADMIN_EMAIL);
+    }
+
+    private void renameConfirmation(String oldValue, String newValue) {
+        Long oldId = queryLong("SELECT id FROM reservations WHERE confirmation_number = ?", oldValue);
+        if (oldId == null) {
+            return;
+        }
+        Long newId = queryLong("SELECT id FROM reservations WHERE confirmation_number = ?", newValue);
+        if (newId == null) {
+            jdbcTemplate.update("UPDATE reservations SET confirmation_number = ? WHERE id = ?", newValue, oldId);
+            jdbcTemplate.update("UPDATE invoice SET confirmation_number = ? WHERE confirmation_number = ?", newValue, oldValue);
+            jdbcTemplate.update("UPDATE audit_logs SET target = ? WHERE target = ?", newValue, oldValue);
+        }
+    }
+
+    private void renameLegacyRoom(String oldNumber, String newNumber) {
+        Long oldId = queryLong("SELECT id FROM rooms WHERE room_number = ?", oldNumber);
+        if (oldId == null || queryLong("SELECT id FROM rooms WHERE room_number = ?", newNumber) != null) {
+            return;
+        }
+        jdbcTemplate.update("UPDATE rooms SET room_number = ?, floor = ? WHERE id = ?", newNumber, Integer.parseInt(newNumber.substring(0, 1)), oldId);
+    }
+
+    private void refreshCurrentOperations(LocalDate today) {
+        jdbcTemplate.update("""
+                UPDATE rooms
+                SET status = 'AVAILABLE'
+                WHERE room_number NOT LIKE '98%'
+                """);
+        jdbcTemplate.update("""
+                UPDATE rooms
+                SET status = 'OCCUPIED'
+                WHERE id IN (
+                    SELECT room_id FROM reservations
+                    WHERE status = 'CHECKED_IN'
+                      AND check_in_date <= ?
+                      AND check_out_date > ?
+                )
+                """, today, today);
+        setRoomStatus("214", RoomStatus.NEEDS_CLEANING);
+        setRoomStatus("215", RoomStatus.NEEDS_CLEANING);
+        setRoomStatus("307", RoomStatus.NEEDS_CLEANING);
+        setRoomStatus("406", RoomStatus.UNDER_MAINTENANCE);
+        setRoomStatus("212", RoomStatus.UNDER_MAINTENANCE);
+
+        jdbcTemplate.update("DELETE FROM guest_conversation_messages WHERE service_request_id IN (SELECT id FROM service_requests WHERE description LIKE '[Roomify Riyadh] %')");
+        jdbcTemplate.update("DELETE FROM guest_conversations WHERE service_request_id IN (SELECT id FROM service_requests WHERE description LIKE '[Roomify Riyadh] %')");
+        jdbcTemplate.update("DELETE FROM service_requests WHERE description LIKE '[Roomify Riyadh] %'");
+
+        Long guestId = queryLong("SELECT id FROM guests WHERE lower(email) = lower(?)", DEMO_GUEST_EMAIL);
+        if (guestId == null) {
+            return;
+        }
+        insertOperationalRequest(guestId, "214", "ROOM_CLEANING", "HIGH", "PENDING",
+                "[Roomify Riyadh] Checkout room needs linen change, towels, water restock, and inspection.", today.atTime(9, 5));
+        insertOperationalRequest(guestId, "215", "ROOM_CLEANING", "MEDIUM", "IN_PROGRESS",
+                "[Roomify Riyadh] Family room cleaning in progress after early departure.", today.atTime(10, 20));
+        insertOperationalRequest(guestId, "307", "LAUNDRY", "LOW", "COMPLETED",
+                "[Roomify Riyadh] Linen and towel request completed for guest refresh.", today.minusDays(1).atTime(16, 35));
+        insertOperationalRequest(guestId, "406", "MAINTENANCE", "HIGH", "IN_PROGRESS",
+                "[Roomify Riyadh] AC not cooling; maintenance assigned before evening arrival block.", today.atTime(8, 45));
+        insertOperationalRequest(guestId, "212", "MAINTENANCE", "HIGH", "PENDING",
+                "[Roomify Riyadh] Door lock battery alert from room status inspection.", today.atTime(11, 10));
+        insertOperationalRequest(guestId, "301", "FOOD_DELIVERY", "MEDIUM", "COMPLETED",
+                "[Roomify Riyadh] Arabic coffee and dates delivered to VIP arrival.", today.minusDays(1).atTime(19, 0));
+        insertOperationalRequest(guestId, "401", "OTHER", "MEDIUM", "PENDING",
+                "[Roomify Riyadh] Guest requested prayer mat and extra bottled water.", today.atTime(13, 25));
+
+        refreshGuestInbox(today, guestId);
+        refreshNotifications(today);
+    }
+
+    private void setRoomStatus(String roomNumber, RoomStatus status) {
+        jdbcTemplate.update("UPDATE rooms SET status = ? WHERE room_number = ?", status.name(), roomNumber);
+    }
+
+    private void insertOperationalRequest(
+            Long guestId,
+            String roomNumber,
+            String serviceType,
+            String priority,
+            String status,
+            String description,
+            LocalDateTime createdAt) {
+        Long roomId = queryLong("SELECT id FROM rooms WHERE room_number = ?", roomNumber);
+        if (roomId == null) {
+            return;
+        }
+        jdbcTemplate.update("""
+                INSERT INTO service_requests
+                    (guest_id, room_id, service_type, description, priority, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, guestId, roomId, serviceType, description, priority, status, createdAt);
+    }
+
+    private void refreshGuestInbox(LocalDate today, Long guestId) {
+        jdbcTemplate.update("""
+                DELETE FROM guest_conversation_messages
+                WHERE conversation_id IN (
+                    SELECT id FROM guest_conversations WHERE subject LIKE 'Roomify Riyadh:%'
+                )
+                """);
+        jdbcTemplate.update("DELETE FROM guest_conversations WHERE subject LIKE 'Roomify Riyadh:%'");
+
+        Long staffUserId = queryLong("SELECT id FROM users WHERE lower(email) = lower(?)", DEMO_STAFF_EMAIL);
+        Long reservationId = queryLong("SELECT id FROM reservations WHERE confirmation_number = ?", DEMO_GUEST_CONFIRMATION);
+        Long roomId = queryLong("SELECT room_id FROM reservations WHERE id = ?", reservationId);
+        Long serviceRequestId = queryLong("SELECT id FROM service_requests WHERE description LIKE '[Roomify Riyadh] Guest requested prayer mat%' ORDER BY id DESC LIMIT 1");
+        if (roomId == null) {
+            return;
+        }
+
+        Long active = insertConversation(guestId, reservationId, roomId, serviceRequestId, staffUserId,
+                "Roomify Riyadh: Housekeeping request", "ACTIVE",
+                "Prayer mat and water are on the way to your room.", today.atTime(13, 42), 0, 1);
+        insertMessage(active, "GUEST", null, guestId, serviceRequestId,
+                "Could I get a prayer mat and extra water bottles?", "en",
+                "هل يمكنني الحصول على سجادة صلاة وزجاجات ماء إضافية؟",
+                "Could I get a prayer mat and extra water bottles?",
+                false, "HOUSEKEEPING", today.atTime(13, 25));
+        insertMessage(active, "STAFF", staffUserId, null, serviceRequestId,
+                "Prayer mat and water are on the way to your room.", "en",
+                "سجادة الصلاة والمياه في الطريق إلى غرفتك.",
+                "Prayer mat and water are on the way to your room.",
+                false, null, today.atTime(13, 42));
+
+        Long billing = insertConversation(guestId, reservationId, roomId, null, staffUserId,
+                "Roomify Riyadh: Billing question", "PENDING",
+                "Your invoice includes room charges, VAT, and the airport pickup.", today.minusDays(1).atTime(18, 15), 1, 1);
+        insertMessage(billing, "GUEST", null, guestId, null,
+                "Can you explain the VAT line on my invoice?", "en",
+                "هل يمكنكم توضيح بند ضريبة القيمة المضافة في الفاتورة؟",
+                "Can you explain the VAT line on my invoice?",
+                false, "ASK_AI", today.minusDays(1).atTime(18, 2));
+        insertMessage(billing, "AI", null, null, null,
+                "Your invoice includes room charges, VAT, and the airport pickup.", "en",
+                "تتضمن فاتورتك رسوم الغرفة وضريبة القيمة المضافة وخدمة الاستقبال من المطار.",
+                "Your invoice includes room charges, VAT, and the airport pickup.",
+                true, "ASK_AI", today.minusDays(1).atTime(18, 15));
+    }
+
+    private void refreshNotifications(LocalDate today) {
+        jdbcTemplate.update("DELETE FROM notifications WHERE message LIKE '[Roomify Riyadh] %'");
+        Object[][] rows = {
+                {"RESERVATION_CREATED", "Same-day arrival ready", "[Roomify Riyadh] New same-day arrival RFY-ARRIVAL-TODAY is ready for check-in.", "STAFF", today.atTime(8, 15)},
+                {"PAYMENT_COMPLETED", "Payment received", "[Roomify Riyadh] Payment received for RFY-GUEST-UPCOMING.", "MANAGER", today.minusDays(1).atTime(15, 30)},
+                {"PAYMENT_FAILED", "Payment follow-up needed", "[Roomify Riyadh] Payment failed for RFY-CANCEL-REVIEW; follow up before cancellation window.", "STAFF", today.atTime(9, 20)},
+                {"PAYMENT_INCOMPLETE", "Corporate invoice overdue", "[Roomify Riyadh] Corporate invoice overdue for reservation RFY-MODIFY-STAY.", "MANAGER", today.atTime(10, 0)},
+                {"ROOM_READY", "Room inspection pending", "[Roomify Riyadh] Room 215 cleaning is in progress and pending inspection.", "STAFF", today.atTime(10, 30)},
+                {"SERVICE_REQUEST_CREATED", "Maintenance alert", "[Roomify Riyadh] AC issue in room 406 is assigned to Maintenance.", "STAFF", today.atTime(8, 50)},
+                {"SERVICE_REQUEST_CREATED", "Housekeeping assignment", "[Roomify Riyadh] Housekeeping assigned to rooms 214 and 215.", "STAFF", today.atTime(9, 0)},
+                {"GUEST_ASSISTANT_MESSAGE", "Guest message received", "[Roomify Riyadh] Guest message received for prayer mat and water request.", "STAFF", today.atTime(13, 25)}
+        };
+        for (Object[] row : rows) {
+            jdbcTemplate.update("""
+                    INSERT INTO notifications (event_type, target_role, title, message, reference_type, reference_id, created_at, is_read)
+                    VALUES (?, ?, ?, ?, 'DEMO_OPERATIONS', ?, ?, false)
+                    """, row[0], row[3], row[1], row[2], row[0], row[4]);
+        }
+    }
+
+    private void refreshPresentationPaymentsAndInvoices(LocalDate today) {
+        jdbcTemplate.update("""
+                UPDATE reservations
+                SET invoice_status = CASE
+                    WHEN payment_status = 'PAID' THEN 'PAID'
+                    WHEN payment_status = 'REFUNDED' THEN 'REFUNDED'
+                    WHEN payment_status = 'FAILED' THEN 'FAILED'
+                    WHEN payment_status = 'PARTIALLY_PAID' THEN 'PARTIALLY_PAID'
+                    ELSE invoice_status
+                END
+                WHERE status IN ('CHECKED_OUT', 'CONFIRMED', 'CHECKED_IN')
+                """);
+
+        jdbcTemplate.update("""
+                DELETE FROM payments
+                WHERE gateway_reference LIKE 'RFY-PAY-PRESENTATION-%'
+                   OR reservation_id IN (
+                       SELECT id FROM reservations
+                       WHERE confirmation_number IN (
+                           'RFY-GUEST-UPCOMING',
+                           'RFY-ARRIVAL-TODAY',
+                           'RFY-ARRIVAL-BLOCKED',
+                           'RFY-CANCEL-REVIEW',
+                           'RFY-MODIFY-STAY',
+                           'RFY-MODIFY-CONFLICT'
+                       )
+                   )
+                """);
+
+        configureReservationPayment("RFY-GUEST-UPCOMING", PaymentStatus.PAID, "PAID", BigDecimal.ONE, today.minusDays(1).atTime(15, 30));
+        configureReservationPayment("RFY-ARRIVAL-TODAY", PaymentStatus.PARTIALLY_PAID, "PARTIALLY_PAID", new BigDecimal("0.50"), today.minusDays(2).atTime(17, 20));
+        configureReservationPayment("RFY-ARRIVAL-BLOCKED", PaymentStatus.UNPAID, "PENDING", BigDecimal.ZERO, null);
+        configureReservationPayment("RFY-CANCEL-REVIEW", PaymentStatus.FAILED, "FAILED", BigDecimal.ZERO, today.atTime(9, 20));
+        configureReservationPayment("RFY-MODIFY-STAY", PaymentStatus.PARTIALLY_PAID, "OVERDUE", new BigDecimal("0.30"), today.minusDays(8).atTime(11, 10));
+        configureReservationPayment("RFY-MODIFY-CONFLICT", PaymentStatus.REFUNDED, "REFUNDED", BigDecimal.ONE, today.minusDays(3).atTime(12, 5));
+    }
+
+    private void configureReservationPayment(
+            String confirmation,
+            PaymentStatus status,
+            String invoiceStatus,
+            BigDecimal paidRatio,
+            LocalDateTime paymentAt) {
+        Reservation reservation = reservationRepository.findByConfirmationNumber(confirmation).orElse(null);
+        if (reservation == null) {
+            return;
+        }
+
+        reservationFinancialService.syncReservation(reservation);
+        BigDecimal total = reservation.getTotalPrice() == null
+                ? BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP)
+                : reservation.getTotalPrice().setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal paid = total.multiply(paidRatio).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal outstanding = total.subtract(paid).max(BigDecimal.ZERO).setScale(2, java.math.RoundingMode.HALF_UP);
+
+        reservation.setTotalPaid(paid);
+        reservation.setOutstandingBalance(outstanding);
+        reservation.setPaymentStatus(status);
+        reservation.setInvoiceStatus(invoiceStatus);
+        reservation.setInvoiceFinalized(outstanding.compareTo(BigDecimal.ZERO) == 0 && paid.compareTo(BigDecimal.ZERO) > 0);
+        reservation.setPaymentMethod(paid.compareTo(BigDecimal.ZERO) > 0 ? PaymentMethod.CARD : null);
+        reservation.setPaymentTimestamp(paymentAt);
+        if (reservation.getInvoiceNumber() == null) {
+            reservation.setInvoiceNumber("INV-" + confirmation);
+        }
+        reservationRepository.save(reservation);
+        upsertSimpleInvoice(reservation, paymentAt != null ? paymentAt : LocalDateTime.now());
+
+        if (paid.compareTo(BigDecimal.ZERO) > 0 || status == PaymentStatus.FAILED) {
+            Payment payment = new Payment();
+            payment.setReservation(reservation);
+            payment.setAmount(paid.compareTo(BigDecimal.ZERO) > 0 ? paid : new BigDecimal("1.00"));
+            payment.setPaymentMethod(PaymentMethod.CARD);
+            payment.setPaymentStatus(status == PaymentStatus.PARTIALLY_PAID ? PaymentStatus.PARTIALLY_PAID : status);
+            payment.setGatewayReference("RFY-PAY-PRESENTATION-" + confirmation);
+            payment.setCurrency("SAR");
+            payment.setLastFourDigits(status == PaymentStatus.FAILED ? "0002" : "4242");
+            payment.setCreatedAt(paymentAt != null ? paymentAt : LocalDateTime.now());
+            if (status == PaymentStatus.PAID || status == PaymentStatus.PARTIALLY_PAID || status == PaymentStatus.REFUNDED) {
+                payment.setPaidAt(paymentAt);
+            }
+            if (status == PaymentStatus.FAILED) {
+                payment.setFailureReason("CARD_DECLINED");
+            }
+            if (status == PaymentStatus.REFUNDED) {
+                payment.setRefundedAt(paymentAt != null ? paymentAt.plusHours(4) : LocalDateTime.now());
+                payment.setRefundReason("Guest changed travel plans before arrival.");
+                payment.setRefundedBy(DEMO_MANAGER_EMAIL);
+            }
+            paymentRepository.save(payment);
+        }
+    }
+
+    private void upsertSimpleInvoice(Reservation reservation, LocalDateTime createdAt) {
+        String invoiceNumber = reservation.getInvoiceNumber();
+        if (invoiceNumber == null || invoiceRepository.existsByInvoiceNumber(invoiceNumber)) {
+            return;
+        }
+        Invoice invoice = Invoice.builder()
+                .invoiceNumber(invoiceNumber)
+                .confirmationNumber(reservation.getConfirmationNumber())
+                .pdfFileName(null)
+                .createdAt(createdAt)
+                .build();
+        invoiceRepository.save(invoice);
+    }
+
+    private void seedCurrentMonthExpenses(LocalDate today) {
+        User manager = userRepository.findByEmailIgnoreCase(DEMO_MANAGER_EMAIL).orElse(null);
+        if (manager == null) {
+            return;
+        }
+        jdbcTemplate.update("DELETE FROM expenses WHERE title LIKE '[Roomify Riyadh] %'");
+        List<Expense> expenses = List.of(
+                buildExpense("[Roomify Riyadh] Front office payroll - " + today.getMonth() + " " + today.getYear(),
+                        "Current-month payroll accrual for reception and reservations.",
+                        ExpenseCategory.SALARIES, new BigDecimal("28500.00"),
+                        today.withDayOfMonth(Math.min(25, today.lengthOfMonth())),
+                        "Roomify Payroll", PaymentMethod.BANK_TRANSFER, true, manager),
+                buildExpense("[Roomify Riyadh] Housekeeping payroll - " + today.getMonth() + " " + today.getYear(),
+                        "Current-month payroll accrual for room attendants and supervisors.",
+                        ExpenseCategory.SALARIES, new BigDecimal("24600.00"),
+                        today.withDayOfMonth(Math.min(25, today.lengthOfMonth())),
+                        "Roomify Payroll", PaymentMethod.BANK_TRANSFER, true, manager),
+                buildExpense("[Roomify Riyadh] Electricity and water estimate",
+                        "Summer utility estimate based on current occupancy.",
+                        ExpenseCategory.UTILITIES, new BigDecimal("11850.00"),
+                        today.minusDays(Math.min(3, today.getDayOfMonth() - 1L)),
+                        "National Utilities", PaymentMethod.ONLINE, true, manager),
+                buildExpense("[Roomify Riyadh] AC preventive maintenance",
+                        "HVAC callout and room 406 cooling repair.",
+                        ExpenseCategory.MAINTENANCE, new BigDecimal("3200.00"),
+                        today, "Facility Masters", PaymentMethod.CARD, false, manager),
+                buildExpense("[Roomify Riyadh] Linen and amenities restock",
+                        "Towels, bottled water, toiletries, and minibar consumables.",
+                        ExpenseCategory.CONSUMABLES, new BigDecimal("5400.00"),
+                        today.minusDays(Math.min(1, today.getDayOfMonth() - 1L)),
+                        "Hospitality Supply Co.", PaymentMethod.CARD, false, manager),
+                buildExpense("[Roomify Riyadh] Weekend direct booking campaign",
+                        "Riyadh weekend and corporate travel campaign.",
+                        ExpenseCategory.MARKETING, new BigDecimal("2600.00"),
+                        today,
+                        "Travel Media Hub", PaymentMethod.CARD, false, manager));
+        expenseRepository.saveAll(expenses);
+    }
+
     private void seedMissingPageDemoData(LocalDate today) {
         int serviceRequests = seedDemoServiceRequests(today);
         int conversations = seedDemoGuestConversations(today);
@@ -448,10 +873,10 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
 
         Object[][] requests = {
-                {"D101", "ROOM_CLEANING", "HIGH", "PENDING", "Please refresh towels and bottled water before dinner.", today.atTime(9, 15)},
-                {"D201", "FOOD_DELIVERY", "MEDIUM", "IN_PROGRESS", "Breakfast tray requested for 8:30 AM.", today.minusDays(1).atTime(21, 35)},
-                {"D301", "MAINTENANCE", "HIGH", "PENDING", "Air conditioning is not cooling consistently.", today.atTime(15, 20).minusHours(2)},
-                {"D102", "LAUNDRY", "LOW", "COMPLETED", "Two shirts and one jacket for express laundry.", today.minusDays(2).atTime(10, 5)}
+                {"214", "ROOM_CLEANING", "HIGH", "PENDING", "Please refresh towels and bottled water before dinner.", today.atTime(9, 15)},
+                {"301", "FOOD_DELIVERY", "MEDIUM", "IN_PROGRESS", "Breakfast tray requested for 8:30 AM.", today.minusDays(1).atTime(21, 35)},
+                {"406", "MAINTENANCE", "HIGH", "PENDING", "Air conditioning is not cooling consistently.", today.atTime(15, 20).minusHours(2)},
+                {"307", "LAUNDRY", "LOW", "COMPLETED", "Two shirts and one jacket for express laundry.", today.minusDays(2).atTime(10, 5)}
         };
 
         int inserted = 0;
@@ -597,8 +1022,8 @@ public class DemoDataBootstrap implements ApplicationRunner {
             return 0;
         }
 
-        Long standardTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Demo Standard");
-        Long deluxeTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Demo Deluxe");
+        Long standardTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Classic King");
+        Long deluxeTypeId = queryLong("SELECT id FROM room_types WHERE name = ?", "Deluxe Twin");
 
         Long towelId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Bath towels (large)");
         Long waterId = queryLong("SELECT id FROM inventory_items WHERE name = ?", "Bottled water (500ml)");
@@ -610,20 +1035,20 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
 
         Long standardTemplateId = insertUsageTemplate(
-                "Demo Standard Room Turnover",
+                "Classic King Room Turnover",
                 "STANDARD_ROOM_CLEANING",
                 standardTypeId,
-                "Default cleaning bundle for demo standard rooms.");
+                "Default cleaning bundle for classic king rooms.");
         insertTemplateItem(standardTemplateId, towelId, "2.000", "Two large towels");
         insertTemplateItem(standardTemplateId, waterId, "2.000", "Welcome waters");
         insertTemplateItem(standardTemplateId, shampooId, "1.000", "Bathroom amenity");
         insertTemplateItem(standardTemplateId, solutionId, "0.150", "Cleaning allocation");
 
         Long deluxeTemplateId = insertUsageTemplate(
-                "Demo Deluxe Checkout Cleaning",
+                "Deluxe Twin Checkout Cleaning",
                 "CHECKOUT_CLEANING",
                 deluxeTypeId,
-                "Checkout cleaning bundle for demo deluxe rooms.");
+                "Checkout cleaning bundle for deluxe twin rooms.");
         insertTemplateItem(deluxeTemplateId, towelId, "3.000", "Towel replacement");
         insertTemplateItem(deluxeTemplateId, linenId, "1.000", "Fresh queen linens");
         insertTemplateItem(deluxeTemplateId, waterId, "2.000", "Welcome waters");
@@ -667,9 +1092,9 @@ public class DemoDataBootstrap implements ApplicationRunner {
         }
 
         String[][] rooms = {
-                {"D101", "STANDARD_ROOM_CLEANING", "AVAILABLE", "Routine morning refresh"},
-                {"D201", "CHECKOUT_CLEANING", "AVAILABLE", "Checkout reset completed"},
-                {"D301", "DEEP_CLEANING", "AVAILABLE", "Suite deep clean after extended stay"}
+                {"214", "STANDARD_ROOM_CLEANING", "NEEDS_CLEANING", "Routine morning refresh"},
+                {"215", "CHECKOUT_CLEANING", "NEEDS_CLEANING", "Checkout reset completed"},
+                {"406", "DEEP_CLEANING", "UNDER_MAINTENANCE", "Suite deep clean after AC repair"}
         };
 
         int inserted = 0;
@@ -769,11 +1194,11 @@ private Long insertAndReturnId(String sql, Object... args) {
 
     private Guest upsertDemoGuestRecord() {
         Guest guest = guestRepository.findByEmailIgnoreCase(DEMO_GUEST_EMAIL).orElseGet(Guest::new);
-        guest.setName("Demo Guest");
+        guest.setName("Sara Al-Fahad");
         guest.setEmail(DEMO_GUEST_EMAIL);
-        guest.setPhone("+966500000111");
-        guest.setIdNumber("ROOMIFY-DEMO-GUEST-LOGIN");
-        guest.setNationality("SA");
+        guest.setPhone("+966501234567");
+        guest.setIdNumber("1087654321");
+        guest.setNationality("Saudi");
         return guestRepository.save(guest);
     }
 
@@ -816,12 +1241,13 @@ private Long insertAndReturnId(String sql, Object... args) {
         List<Guest> guests = new ArrayList<>(TARGET_GUEST_COUNT);
         int sequence = 1;
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 75; i++) {
             String first = AR_FIRST_NAMES[i % AR_FIRST_NAMES.length];
-            String last = AR_LAST_NAMES[i % AR_LAST_NAMES.length];
+            String last = AR_LAST_NAMES[(i / 2) % AR_LAST_NAMES.length];
             guests.add(buildGuest(first, last, "SA", sequence++));
         }
-        for (String[] entry : INT_GUESTS) {
+        while (guests.size() < TARGET_GUEST_COUNT) {
+            String[] entry = INT_GUESTS[(sequence - 76) % INT_GUESTS.length];
             guests.add(buildGuest(entry[0], entry[1], entry[2], sequence++));
         }
         return guestRepository.saveAll(guests);
@@ -829,16 +1255,35 @@ private Long insertAndReturnId(String sql, Object... args) {
 
     private Guest buildGuest(String firstName, String lastName, String nationality, int sequence) {
         String email = (firstName + "." + lastName.replace("'", "").replace("-", ""))
-                .toLowerCase(Locale.ROOT) + sequence + "@example.com";
-        String idNumber = "NDB-" + String.format(Locale.ROOT, "%06d", sequence);
+                .toLowerCase(Locale.ROOT) + sequence + "@guest.roomify.demo";
+        String idNumber = nationality.equals("SA")
+                ? "10" + String.format(Locale.ROOT, "%08d", 300000 + sequence)
+                : "P" + String.format(Locale.ROOT, "%08d", 700000 + sequence);
         Guest existing = guestRepository.findByEmailIgnoreCase(email).orElse(null);
         Guest guest = existing != null ? existing : new Guest();
         guest.setName(firstName + " " + lastName);
         guest.setEmail(email);
         guest.setPhone("+9665" + String.format(Locale.ROOT, "%08d", 10_000_000 + sequence));
         guest.setIdNumber(idNumber);
-        guest.setNationality(nationality);
+        guest.setNationality(toNationalityLabel(nationality));
         return guest;
+    }
+
+    private String toNationalityLabel(String code) {
+        return switch (code) {
+            case "SA" -> "Saudi";
+            case "IN" -> "Indian";
+            case "GB" -> "British";
+            case "US" -> "American";
+            case "JP" -> "Japanese";
+            case "RU" -> "Russian";
+            case "IT" -> "Italian";
+            case "FR" -> "French";
+            case "SE" -> "Swedish";
+            case "DE" -> "German";
+            case "KR" -> "Korean";
+            default -> code;
+        };
     }
 
     // ─── Reservations ───────────────────────────────────────────────────────
@@ -1003,11 +1448,11 @@ private Long insertAndReturnId(String sql, Object... args) {
         Room r202 = roomByNumber(rooms, "202");
         Room r301 = roomByNumber(rooms, "301");
 
-        sink.add(saveScripted("DEMO-CHECKIN-READY", demoGuest, r101, today, today.plusDays(1), ReservationStatus.CONFIRMED));
-        sink.add(saveScripted("DEMO-CHECKIN-BLOCKED", demoGuest, r102, today.plusDays(1), today.plusDays(2), ReservationStatus.CONFIRMED));
-        sink.add(saveScripted("DEMO-CANCEL", demoGuest, r201, today.plusDays(3), today.plusDays(5), ReservationStatus.PENDING));
-        sink.add(saveScripted("DEMO-MODIFY", demoGuest, r202, today.plusDays(5), today.plusDays(7), ReservationStatus.CONFIRMED));
-        sink.add(saveScripted("DEMO-MODIFY-CONFLICT", demoGuest, r301, today.plusDays(6), today.plusDays(8), ReservationStatus.CONFIRMED));
+        sink.add(saveScripted("RFY-ARRIVAL-TODAY", demoGuest, r101, today, today.plusDays(1), ReservationStatus.CONFIRMED));
+        sink.add(saveScripted("RFY-ARRIVAL-BLOCKED", demoGuest, r102, today.plusDays(1), today.plusDays(2), ReservationStatus.CONFIRMED));
+        sink.add(saveScripted("RFY-CANCEL-REVIEW", demoGuest, r201, today.plusDays(3), today.plusDays(5), ReservationStatus.PENDING));
+        sink.add(saveScripted("RFY-MODIFY-STAY", demoGuest, r202, today.plusDays(5), today.plusDays(7), ReservationStatus.CONFIRMED));
+        sink.add(saveScripted("RFY-MODIFY-CONFLICT", demoGuest, r301, today.plusDays(6), today.plusDays(8), ReservationStatus.CONFIRMED));
     }
 
     private Reservation saveScripted(String confirmation, Guest guest, Room room, LocalDate in, LocalDate out, ReservationStatus status) {
@@ -1025,6 +1470,93 @@ private Long insertAndReturnId(String sql, Object... args) {
         r.setInvoiceFinalized(false);
         reservationFinancialService.syncReservation(r);
         return reservationRepository.save(r);
+    }
+
+    private void topUpReservationsIfNeeded(LocalDate today, List<Room> rooms, List<Guest> guests) {
+        Integer currentCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservations", Integer.class);
+        int targetCount = TARGET_PAST_RESERVATIONS + TARGET_CHECKED_IN + TARGET_CONFIRMED_FUTURE + TARGET_PENDING_FUTURE + 8;
+        if (currentCount != null && currentCount >= targetCount) {
+            return;
+        }
+        if (rooms.isEmpty() || guests.size() < 20) {
+            return;
+        }
+
+        int toCreate = targetCount - (currentCount == null ? 0 : currentCount);
+        Random random = new Random(RANDOM_SEED + 2026L);
+        Map<Long, List<DateRange>> occupied = buildOccupiedMapFromExisting();
+        List<Reservation> checkedOutForBilling = new ArrayList<>();
+        int created = 0;
+        int attempts = 0;
+
+        while (created < toCreate && attempts < toCreate * 40) {
+            attempts++;
+            ReservationStatus status;
+            LocalDate checkIn;
+            LocalDate checkOut;
+            int roll = random.nextInt(100);
+            if (roll < 70) {
+                status = pickPastStatus(random);
+                checkIn = today.minusDays(1 + random.nextInt(PAST_HISTORY_DAYS));
+                checkOut = checkIn.plusDays(pickStayLength(random));
+                if (!checkOut.isBefore(today)) {
+                    continue;
+                }
+            } else if (roll < 82) {
+                status = ReservationStatus.CHECKED_IN;
+                int stayLength = 2 + random.nextInt(4);
+                checkIn = today.minusDays(random.nextInt(stayLength));
+                checkOut = today.plusDays(1 + random.nextInt(3));
+            } else {
+                status = random.nextInt(5) == 0 ? ReservationStatus.PENDING : ReservationStatus.CONFIRMED;
+                checkIn = today.plusDays(random.nextInt(FUTURE_WINDOW_DAYS + 1));
+                checkOut = checkIn.plusDays(pickStayLength(random));
+            }
+
+            Reservation reservation = placeReservation(rooms, occupied, pickGuest(guests, random),
+                    checkIn, checkOut, status, nextConfirmation(random), random);
+            if (reservation == null) {
+                continue;
+            }
+            if (status == ReservationStatus.CHECKED_IN) {
+                reservation.setActualCheckInDate(checkIn);
+                reservationRepository.save(reservation);
+            } else if (status == ReservationStatus.CHECKED_OUT) {
+                reservation.setActualCheckInDate(checkIn);
+                reservation.setActualCheckOutAt(checkOut.atTime(11, 0));
+                reservationRepository.save(reservation);
+                checkedOutForBilling.add(reservation);
+            } else if (status == ReservationStatus.CANCELLED || status == ReservationStatus.NO_SHOW) {
+                reservation.setCancellationReason(status == ReservationStatus.NO_SHOW
+                        ? "Guest did not arrive before release time."
+                        : "Guest requested cancellation before arrival.");
+                reservation.setCancellationAt(checkIn.minusDays(1).atTime(17, 30));
+                reservationRepository.save(reservation);
+            }
+            created++;
+        }
+
+        if (!checkedOutForBilling.isEmpty()) {
+            seedPayments(checkedOutForBilling, random);
+            seedInvoices(checkedOutForBilling, random);
+        }
+        if (created > 0) {
+            log.info("Added {} rolling presentation reservations to reach the demo target.", created);
+        }
+    }
+
+    private Map<Long, List<DateRange>> buildOccupiedMapFromExisting() {
+        Map<Long, List<DateRange>> occupied = new HashMap<>();
+        for (Reservation reservation : reservationRepository.findAll()) {
+            if (reservation.getStatus() == ReservationStatus.CANCELLED
+                    || reservation.getStatus() == ReservationStatus.NO_SHOW
+                    || reservation.getRoomId() == null) {
+                continue;
+            }
+            occupied.computeIfAbsent(reservation.getRoomId(), ignored -> new ArrayList<>())
+                    .add(new DateRange(reservation.getCheckInDate(), reservation.getCheckOutDate()));
+        }
+        return occupied;
     }
 
     private Room roomByNumber(List<Room> rooms, String number) {
@@ -1058,7 +1590,7 @@ private Long insertAndReturnId(String sql, Object... args) {
                 r.setModifiedAt(r.getCreatedAt());
                 reservationFinancialService.syncReservation(r);
                 Reservation saved = reservationRepository.save(r);
-                if (status != ReservationStatus.CANCELLED) {
+                if (status != ReservationStatus.CANCELLED && status != ReservationStatus.NO_SHOW) {
                     occupied.computeIfAbsent(room.getId(), k -> new ArrayList<>()).add(new DateRange(checkIn, checkOut));
                 }
                 return saved;
@@ -1097,9 +1629,8 @@ private Long insertAndReturnId(String sql, Object... args) {
     private ReservationStatus pickPastStatus(Random random) {
         int roll = random.nextInt(100);
         if (roll < 79) return ReservationStatus.CHECKED_OUT;
-        if (roll < 94) return ReservationStatus.CANCELLED;
-        // ReservationStatus has no NO_SHOW; brief's NO_SHOW count is folded into CANCELLED.
-        return ReservationStatus.CANCELLED;
+        if (roll < 93) return ReservationStatus.CANCELLED;
+        return ReservationStatus.NO_SHOW;
     }
 
     private String nextConfirmation(Random random) {
@@ -1190,7 +1721,7 @@ private Long insertAndReturnId(String sql, Object... args) {
             p.setPaymentStatus(PaymentStatus.PAID);
             PaymentMethod method = pickPaymentMethod(random);
             p.setPaymentMethod(method);
-            p.setGatewayReference(method == PaymentMethod.CARD ? "DEMO-" + randomToken(random, 8) : null);
+            p.setGatewayReference(method == PaymentMethod.CARD ? "RFY-PAY-" + randomToken(random, 8) : null);
             p.setCreatedAt(r.getCheckOutDate().atTime(11, 30));
             payments.add(p);
 
@@ -1224,7 +1755,8 @@ private Long insertAndReturnId(String sql, Object... args) {
         Map<String, Integer> sequencePerYear = new HashMap<>();
         for (Reservation r : checkedOut) {
             String year = r.getCheckOutDate().format(INVOICE_YEAR_FORMAT);
-            int seq = sequencePerYear.merge(year, 1, Integer::sum);
+            int seq = sequencePerYear.computeIfAbsent(year, this::nextInvoiceSequenceSeed) + 1;
+            sequencePerYear.put(year, seq);
             String invoiceNumber = String.format(Locale.ROOT, "INV-%s-%06d", year, seq);
 
             Invoice invoice = Invoice.builder()
@@ -1240,6 +1772,14 @@ private Long insertAndReturnId(String sql, Object... args) {
         }
         invoiceRepository.saveAll(invoices);
         reservationRepository.saveAll(checkedOut);
+    }
+
+    private int nextInvoiceSequenceSeed(String year) {
+        Integer existing = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM invoice WHERE invoice_number LIKE ?",
+                Integer.class,
+                "INV-" + year + "-%");
+        return existing == null ? 0 : existing;
     }
 
     // ─── Room status sync ───────────────────────────────────────────────────

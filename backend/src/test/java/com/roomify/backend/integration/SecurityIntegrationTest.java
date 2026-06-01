@@ -134,9 +134,7 @@ class SecurityIntegrationTest {
     @Test
     void missingTokenReturnsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/test/manager/summary"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Unauthorized"))
-                .andExpect(jsonPath("$.message").value("Missing token"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -1,63 +1,52 @@
 {
   "source": "SAFE_DEMO_FALLBACK",
-  "warning": "AI service is unavailable. Showing a safe demo fallback forecast.",
-  "forecastStart": "2026-04-28",
+  "warning": "AI service is unavailable. Showing a safe Roomify Riyadh forecast.",
+  "forecastStart": "ROLLING_RUNTIME_DATE",
   "forecastDays": 30,
-  "predictedRevenueTotal": 87500.00,
-  "predictedAverageOccupancy": 75.0,
-  "confidence": 0.65,
-  "points": [
-    {
-      "date": "2026-04-28",
-      "predictedRevenue": 2900.00,
-      "predictedOccupancy": 72.5
-    },
-    {
-      "date": "2026-04-29",
-      "predictedRevenue": 2950.00,
-      "predictedOccupancy": 73.0
-    }
-  ],
+  "predictedRevenueTotal": 0.00,
+  "predictedAverageOccupancy": 0.0,
+  "confidence": 0.68,
+  "points": [],
   "pricingRecommendations": [
     {
-      "roomType": "Standard",
-      "currentPrice": 220.00,
-      "suggestedPrice": 235.00,
-      "adjustmentPercent": 6.8,
-      "riskLevel": "LOW",
-      "reason": "Safe fallback recommendation based on expected moderate occupancy."
-    },
-    {
-      "roomType": "Deluxe",
-      "currentPrice": 350.00,
-      "suggestedPrice": 380.00,
-      "adjustmentPercent": 8.6,
-      "riskLevel": "LOW",
-      "reason": "Safe fallback recommendation based on expected demand."
-    },
-    {
-      "roomType": "Family",
+      "roomType": "Classic King",
       "currentPrice": 430.00,
-      "suggestedPrice": 455.00,
-      "adjustmentPercent": 5.8,
+      "suggestedPrice": 450.00,
+      "adjustmentPercent": 4.7,
       "riskLevel": "LOW",
-      "reason": "Safe fallback recommendation with bounded price increase."
+      "reason": "Weekday business demand is healthy; keep a modest rounded SAR uplift."
     },
     {
-      "roomType": "Executive",
-      "currentPrice": 540.00,
-      "suggestedPrice": 565.00,
-      "adjustmentPercent": 4.6,
-      "riskLevel": "MEDIUM",
-      "reason": "Safe fallback recommendation with conservative adjustment."
+      "roomType": "Deluxe Twin",
+      "currentPrice": 650.00,
+      "suggestedPrice": 700.00,
+      "adjustmentPercent": 7.7,
+      "riskLevel": "LOW",
+      "reason": "Weekend and GCC family demand support a rounded SAR increase."
     },
     {
-      "roomType": "Suite",
-      "currentPrice": 760.00,
-      "suggestedPrice": 790.00,
-      "adjustmentPercent": 3.9,
+      "roomType": "Family Room",
+      "currentPrice": 780.00,
+      "suggestedPrice": 800.00,
+      "adjustmentPercent": 2.6,
       "riskLevel": "MEDIUM",
-      "reason": "Safe fallback recommendation with bounded premium-room adjustment."
+      "reason": "Family demand is steady; keep pricing close to current level."
+    },
+    {
+      "roomType": "Executive Suite",
+      "currentPrice": 980.00,
+      "suggestedPrice": 1050.00,
+      "adjustmentPercent": 7.1,
+      "riskLevel": "MEDIUM",
+      "reason": "Corporate stays are expected to strengthen over the next two weeks."
+    },
+    {
+      "roomType": "Olaya Suite",
+      "currentPrice": 1400.00,
+      "suggestedPrice": 1450.00,
+      "adjustmentPercent": 3.6,
+      "riskLevel": "MEDIUM",
+      "reason": "Premium demand is strong but price sensitivity is higher for long stays."
     }
   ]
 }

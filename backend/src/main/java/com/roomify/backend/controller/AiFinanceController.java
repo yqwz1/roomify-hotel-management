@@ -376,7 +376,7 @@ public class AiFinanceController {
         if (result.success()) {
             ObjectNode payload = objectMapper.createObjectNode();
             payload.put("source", FASTAPI_MODEL_SOURCE);
-            payload.set("pricingRecommendations", result.body().deepCopy());
+            payload.set("pricingRecommendations", normalizePricingRecommendations(result.body()));
             return new ResolvedAiPayload(payload, FASTAPI_MODEL_SOURCE, HttpStatus.OK, true, false);
         }
         if (aiFinanceFallbackService.isFallbackEnabled()) {
@@ -405,6 +405,36 @@ public class AiFinanceController {
         ObjectNode payload = objectMapper.createObjectNode();
         payload.set("data", body == null ? objectMapper.nullNode() : body.deepCopy());
         return payload;
+    }
+
+    private ArrayNode normalizePricingRecommendations(JsonNode body) {
+        ArrayNode source = body instanceof ArrayNode arrayNode ? arrayNode : objectMapper.createArrayNode();
+        Map<String, ObjectNode> byRoomType = new LinkedHashMap<>();
+        for (JsonNode item : source) {
+            if (!(item instanceof ObjectNode objectNode)) {
+                continue;
+            }
+            ObjectNode copy = objectNode.deepCopy();
+            String roomType = displayRoomTypeName(copy.path("roomType").asText(""));
+            copy.put("roomType", roomType);
+            ObjectNode existing = byRoomType.get(roomType);
+            if (existing == null || copy.path("suggestedPrice").asDouble(0) > existing.path("suggestedPrice").asDouble(0)) {
+                byRoomType.put(roomType, copy);
+            }
+        }
+        ArrayNode normalized = objectMapper.createArrayNode();
+        byRoomType.values().forEach(normalized::add);
+        return normalized;
+    }
+
+    private String displayRoomTypeName(String roomType) {
+        return switch (roomType == null ? "" : roomType.trim().toLowerCase(Locale.ROOT)) {
+            case "standard", "demo standard", "classic standard" -> "Classic King";
+            case "deluxe" -> "Deluxe King";
+            case "demo deluxe" -> "Deluxe Twin";
+            case "suite", "demo suite" -> "Olaya Suite";
+            default -> roomType == null ? "" : roomType.trim();
+        };
     }
 
     private ArrayNode arrayValue(JsonNode payload, String fieldName) {
