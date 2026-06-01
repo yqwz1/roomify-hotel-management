@@ -809,31 +809,31 @@ export default function ExpenseTracker() {
           </div>
 
           <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {translateWithFallback(t, 'expenseTrackerPage.heroExpensesLabel', 'Expenses')}
               </p>
-              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl break-words">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+              <p className="mt-2 text-xl font-black leading-normal tracking-tight sm:text-base md:text-lg lg:text-xl xl:text-2xl break-words">
+                <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate] [overflow-wrap:anywhere]">
                   {formatLocalizedCurrency(summary?.totalExpenses ?? 0, i18n.language)}
                 </span>
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {translateWithFallback(t, 'expenseTrackerPage.heroRevenueLabel', 'Revenue')}
               </p>
-              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl break-words">
-                <span dir="ltr" className="inline-block max-w-full whitespace-nowrap [unicode-bidi:isolate]">
+              <p className="mt-2 text-xl font-black leading-normal tracking-tight sm:text-base md:text-lg lg:text-xl xl:text-2xl break-words">
+                <span dir="ltr" className="inline-block max-w-full break-words [unicode-bidi:isolate] [overflow-wrap:anywhere]">
                   {formatLocalizedCurrency(summary?.totalRevenue ?? 0, i18n.language)}
                 </span>
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 break-words">
                 {translateWithFallback(t, 'expenseTrackerPage.heroRecurringLabel', 'Recurring items')}
               </p>
-              <p className="mt-2 overflow-hidden text-2xl font-black leading-none tracking-tight sm:text-3xl break-words">
+              <p className="mt-2 text-xl font-black leading-normal tracking-tight sm:text-base md:text-lg lg:text-xl xl:text-2xl break-words">
                 {formatLocalizedNumber(recurringCount, i18n.language)}
               </p>
             </div>

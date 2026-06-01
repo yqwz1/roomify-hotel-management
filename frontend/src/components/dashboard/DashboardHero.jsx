@@ -50,7 +50,7 @@ export default function DashboardHero({
         </div>
 
         {children && (
-          <div className="relative min-w-0 w-full max-w-md xl:w-auto">
+          <div className="relative min-w-0 w-full max-w-md sm:max-w-lg md:max-w-xl xl:max-w-xl xl:w-auto">
             {children}
           </div>
         )}
