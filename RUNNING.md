@@ -61,11 +61,12 @@ The script starts and verifies:
 - Web UI: `http://127.0.0.1:8025`
 
 The demo bootstrap resets these reservations on each backend start:
-- `DEMO-CHECKIN-READY`
-- `DEMO-CHECKIN-BLOCKED`
-- `DEMO-CANCEL`
-- `DEMO-MODIFY`
-- `DEMO-MODIFY-CONFLICT`
+- `RFY-ARRIVAL-TODAY`
+- `RFY-ARRIVAL-BLOCKED`
+- `RFY-CANCEL-REVIEW`
+- `RFY-MODIFY-STAY`
+- `RFY-MODIFY-CONFLICT`
+- `RFY-GUEST-UPCOMING`
 
 ---
 

@@ -148,6 +148,7 @@ class AuthIntegrationTest {
         deleteFromTable("audit_logs");
         deleteFromTable("expenses");
         deleteFromTable("service_charges");
+        deleteFromTable("service_requests");
         deleteFromTable("payments");
         deleteFromTable("reservation_audits");
         deleteFromTable("reservation_history");

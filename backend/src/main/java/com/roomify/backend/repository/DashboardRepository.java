@@ -75,11 +75,14 @@ public interface DashboardRepository
             @Param("end") LocalDate end);
 
     /**
-     * Count CHECKED_IN reservations on a specific date.
-     * A reservation is "occupying" a room when checkIn <= date < checkOut.
+     * Count committed room nights on a specific date.
+     * CHECKED_IN represents actual occupancy; CONFIRMED represents expected
+     * occupancy for forward-looking dashboard charts.
      */
     @Query("SELECT COUNT(r) FROM Reservation r " +
-           "WHERE r.status = com.roomify.backend.entity.ReservationStatus.CHECKED_IN " +
+           "WHERE r.status IN " +
+           "(com.roomify.backend.entity.ReservationStatus.CONFIRMED, " +
+           " com.roomify.backend.entity.ReservationStatus.CHECKED_IN) " +
            "AND r.checkInDate <= :date AND r.checkOutDate > :date")
     long countOccupiedRoomsOnDate(@Param("date") LocalDate date);
 
@@ -97,10 +100,12 @@ public interface DashboardRepository
             @Param("end") LocalDate end);
 
     /**
-     * Count CHECKED_IN reservations belonging to a specific room type.
+     * Count committed reservations belonging to a specific room type.
      */
     @Query("SELECT COUNT(r) FROM Reservation r " +
-           "WHERE r.status = com.roomify.backend.entity.ReservationStatus.CHECKED_IN " +
+           "WHERE r.status IN " +
+           "(com.roomify.backend.entity.ReservationStatus.CONFIRMED, " +
+           " com.roomify.backend.entity.ReservationStatus.CHECKED_IN) " +
            "AND r.room.roomType.id = :roomTypeId")
     long countOccupiedRoomsByType(@Param("roomTypeId") Long roomTypeId);
 

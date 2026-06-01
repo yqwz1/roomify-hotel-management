@@ -72,7 +72,7 @@ export default function PaymentHistory() {
     setRefundingId(payment.paymentId);
     setNotice('');
     try {
-      await refundPayment(payment.paymentId, 'Demo refund from payment history');
+      await refundPayment(payment.paymentId, 'Guest refund from payment history');
       setNotice('Payment refunded successfully.');
       await load();
     } catch (err) {
@@ -88,11 +88,11 @@ export default function PaymentHistory() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Demo Payment Gateway</p>
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Payment operations</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-ink break-words">Payment history</h1>
       </div>
 
-      <DashboardPanel title="Mock payment transactions" description="Review receipts, filter statuses, and refund successful demo payments.">
+      <DashboardPanel title="Payment transactions" description="Review receipts, filter statuses, and process eligible guest refunds.">
         <div className="mb-4 flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-wrap gap-2">
             {FILTERS.map((item) => (

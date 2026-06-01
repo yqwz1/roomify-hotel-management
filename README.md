@@ -522,13 +522,16 @@ Roomify uses **stateless JWT authentication** with role-based access control.
 
 ### Demo Credentials
 
-When `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`, the following account is seeded:
+When `ROOMIFY_DEMO_BOOTSTRAP_ENABLED=true`, the following presentation accounts are seeded:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@roomify.com` | `RealAdminPass123!` |
+| Admin | `admin@roomify.demo` | `Admin@12345` |
+| Manager | `manager@roomify.com` | `Demo@2026` |
+| Front desk staff | `staff@roomify.com` | `Demo@2026` |
+| Guest | `guest@roomify.com` | `Demo@2026` |
 
-Additional staff and guest accounts can be created through the admin panel or signup page.
+Additional presentation staff are seeded across Front Desk, Housekeeping, Maintenance, Finance, Guest Relations, and Reservations.
 
 ---
 
@@ -613,11 +616,12 @@ Demo mode seeds the database with sample data for demonstrations and testing.
 
 | Confirmation | Purpose |
 |-------------|---------|
-| `DEMO-CHECKIN-READY` | Ready for check-in demonstration |
-| `DEMO-CHECKIN-BLOCKED` | Check-in blocked scenario |
-| `DEMO-CANCEL` | Cancellation flow |
-| `DEMO-MODIFY` | Modification flow |
-| `DEMO-MODIFY-CONFLICT` | Modification with conflict |
+| `RFY-ARRIVAL-TODAY` | Ready for check-in demonstration |
+| `RFY-ARRIVAL-BLOCKED` | Check-in blocked scenario |
+| `RFY-CANCEL-REVIEW` | Cancellation flow |
+| `RFY-MODIFY-STAY` | Modification flow |
+| `RFY-MODIFY-CONFLICT` | Modification with conflict |
+| `RFY-GUEST-UPCOMING` | Guest dashboard and billing flow |
 
 ### Smoke Testing
 
