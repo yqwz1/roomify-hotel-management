@@ -78,6 +78,9 @@ export default function Header({ onMenuToggle }) {
 
   const authedLinks = [
     ...(isAuthenticated ? [{ to: dashboardPath, route: dashboardPath, hash: '', label: dashboardLabel }] : []),
+    ...(isAuthenticated && hasRole('ROLE_GUEST')
+      ? [{ to: '/explore-hotels', route: '/explore-hotels', hash: '', label: t('exploreHotels.nav', { defaultValue: 'Explore Hotels' }) }]
+      : []),
     ...(isAuthenticated && hasRole('ROLE_MANAGER')
       ? [{ to: '/rooms-management', route: '/rooms-management', hash: '', label: t('roomsManagement') }]
       : []),
