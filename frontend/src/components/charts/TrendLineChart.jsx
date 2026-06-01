@@ -200,6 +200,15 @@ export function TrendLineChart({
   // The numeric/time axis is strictly opt-in via `timeScale`; without it the axis
   // renders exactly as before (category axis keyed by the string date).
   const safeAreas = timeScale && Array.isArray(referenceAreas) ? referenceAreas : []
+
+  // When season bands are shown, their labels sit in the top ~36px of the plot.
+  // Reserve headroom above the data so tall spikes don't render over the
+  // "Hajj 1447" / "Ramadan" labels. No bands (e.g. the forecast chart) keeps the
+  // default auto domain unchanged.
+  const hasBands = safeAreas.length > 0
+  const yDomain = hasBands
+    ? [0, (dataMax) => Math.max(1, Math.ceil((Number(dataMax) * 1.22) / 5) * 5)]
+    : undefined
   const xAxisProps = timeScale
     ? {
         dataKey: xKey,
@@ -299,6 +308,7 @@ export function TrendLineChart({
           tick={yAxisTick}
           tickMargin={8}
           width={yAxisWidth}
+          domain={yDomain}
         />
         <Tooltip {...tooltipProps} />
         <Area
@@ -330,6 +340,7 @@ export function TrendLineChart({
           tick={yAxisTick}
           tickMargin={8}
           width={yAxisWidth}
+          domain={yDomain}
         />
         <Tooltip {...tooltipProps} />
         <Line
