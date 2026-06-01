@@ -43,12 +43,12 @@ public class AiFinanceFallbackService {
 
     public ObjectNode getForecastFallback(String reason) {
         logFallbackUsage(reason);
-        return buildRollingFallback("AI service is unavailable. Showing a safe Roomify Riyadh forecast.");
+        return loadFallbackRoot();
     }
 
     public ObjectNode getPricingFallback(String reason) {
         logFallbackUsage(reason);
-        ObjectNode root = buildRollingFallback("AI service is unavailable. Showing safe Roomify Riyadh price recommendations.");
+        ObjectNode root = loadFallbackRoot();
         ObjectNode payload = objectMapper.createObjectNode();
         payload.put("source", root.path("source").asText(FALLBACK_SOURCE));
         payload.put("warning", root.path("warning").asText("AI service is unavailable. Showing a safe demo fallback forecast."));
@@ -57,71 +57,33 @@ public class AiFinanceFallbackService {
     }
 
     public ObjectNode getMinimalForecastFallback(String warning) {
-        return buildRollingFallback(warning);
-    }
-
-    private ObjectNode buildRollingFallback(String warning) {
         ObjectNode root = objectMapper.createObjectNode();
-        LocalDate start = LocalDate.now();
         root.put("source", FALLBACK_SOURCE);
         root.put("warning", warning);
-        root.put("forecastStart", start.toString());
+        root.put("forecastStart", LocalDate.of(2026, 4, 28).toString());
         root.put("forecastDays", 30);
+        root.put("predictedRevenueTotal", new BigDecimal("87500.00"));
+        root.put("predictedAverageOccupancy", 75.0);
+        root.put("confidence", 0.65);
 
         ArrayNode points = objectMapper.createArrayNode();
-        BigDecimal revenueTotal = BigDecimal.ZERO;
-        double occupancyTotal = 0.0;
-        for (int day = 0; day < 30; day++) {
-            LocalDate date = start.plusDays(day);
-            double demand = demandFactor(date);
-            double occupancy = Math.max(48.0, Math.min(92.0, 70.0 + ((demand - 1.0) * 80.0) + ((day % 5) - 2)));
-            BigDecimal revenue = roundMoney(BigDecimal.valueOf(8200 * demand + (day % 4) * 350));
-            revenueTotal = revenueTotal.add(revenue);
-            occupancyTotal += occupancy;
-            points.add(createPoint(date.toString(), revenue.toPlainString(), Math.round(occupancy * 10.0) / 10.0));
-        }
+        points.add(createPoint("2026-04-28", "2900.00", 72.5));
+        points.add(createPoint("2026-04-29", "2950.00", 73.0));
         root.set("points", points);
-        root.put("predictedRevenueTotal", roundMoney(revenueTotal));
-        root.put("predictedAverageOccupancy", Math.round((occupancyTotal / 30.0) * 10.0) / 10.0);
-        root.put("confidence", 0.68);
 
         ArrayNode pricingRecommendations = objectMapper.createArrayNode();
-        pricingRecommendations.add(createRecommendation("Classic King", "430.00", "450.00", 4.7, "LOW",
-                "Weekday business demand is healthy; keep a modest rounded SAR uplift."));
-        pricingRecommendations.add(createRecommendation("Deluxe Twin", "650.00", "700.00", 7.7, "LOW",
-                "Weekend and GCC family demand support a rounded SAR increase."));
-        pricingRecommendations.add(createRecommendation("Family Room", "780.00", "800.00", 2.6, "MEDIUM",
-                "Family demand is steady; keep pricing close to current level."));
-        pricingRecommendations.add(createRecommendation("Executive Suite", "980.00", "1050.00", 7.1, "MEDIUM",
-                "Corporate stays are expected to strengthen over the next two weeks."));
-        pricingRecommendations.add(createRecommendation("Olaya Suite", "1400.00", "1450.00", 3.6, "MEDIUM",
-                "Premium demand is strong but price sensitivity is higher for long stays."));
+        pricingRecommendations.add(createRecommendation("Standard", "220.00", "235.00", 6.8, "LOW",
+                "Safe fallback recommendation based on expected moderate occupancy."));
+        pricingRecommendations.add(createRecommendation("Deluxe", "350.00", "380.00", 8.6, "LOW",
+                "Safe fallback recommendation based on expected demand."));
+        pricingRecommendations.add(createRecommendation("Family", "430.00", "455.00", 5.8, "LOW",
+                "Safe fallback recommendation with bounded price increase."));
+        pricingRecommendations.add(createRecommendation("Executive", "540.00", "565.00", 4.6, "MEDIUM",
+                "Safe fallback recommendation with conservative adjustment."));
+        pricingRecommendations.add(createRecommendation("Suite", "760.00", "790.00", 3.9, "MEDIUM",
+                "Safe fallback recommendation with bounded premium-room adjustment."));
         root.set("pricingRecommendations", pricingRecommendations);
         return root;
-    }
-
-    private double demandFactor(LocalDate date) {
-        double factor = 1.0;
-        int day = date.getDayOfWeek().getValue();
-        if (day == 5 || day == 6) {
-            factor += 0.14;
-        } else if (day == 4) {
-            factor += 0.06;
-        } else if (day == 1 || day == 2) {
-            factor -= 0.05;
-        }
-        int month = date.getMonthValue();
-        if (month == 6 || month == 7 || month == 8) {
-            factor += 0.05;
-        }
-        if (month == 9 && date.getDayOfMonth() >= 20 && date.getDayOfMonth() <= 25) {
-            factor += 0.16;
-        }
-        return Math.max(0.84, Math.min(1.28, factor));
-    }
-
-    private BigDecimal roundMoney(BigDecimal value) {
-        return value.setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     private void logFallbackUsage(String reason) {

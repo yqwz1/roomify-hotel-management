@@ -128,8 +128,7 @@ public class GooglePlacesService {
     }
 
     public PhotoResult photo(String photoName) {
-        if (!properties.hasApiKey() || properties.isDemoKeyMode() || photoName == null
-                || photoName.startsWith("mock:") || photoName.startsWith("curated:")) {
+        if (!properties.hasApiKey() || properties.isDemoKeyMode() || photoName == null || photoName.startsWith("mock:")) {
             return placeholderPhoto();
         }
 
@@ -285,18 +284,17 @@ public class GooglePlacesService {
 
     private ExternalHotelSearchResponse mockSearch() {
         List<ExternalHotelCardDto> hotels = List.of(
-                mockCard("curated-riyadh-olaya", "Roomify Riyadh Olaya Hotel", "Olaya Street, Riyadh", 4.7, 1280),
-                mockCard("curated-jeddah-corniche", "Roomify Jeddah Corniche Hotel", "North Corniche, Jeddah", 4.6, 932),
-                mockCard("curated-makkah-naseem", "Roomify Makkah Al-Naseem Hotel", "Al-Naseem District, Makkah", 4.5, 1188),
-                mockCard("curated-alula-heritage", "Roomify AlUla Heritage Resort", "AlUla, Saudi Arabia", 4.8, 611));
-        return new ExternalHotelSearchResponse(hotels, hotels.size(), false, SOURCE_GOOGLE_MAPS);
+                mockCard("mock-riyadh-olaya", "Olaya Demo Hotel", "Olaya Street, Riyadh", 4.6, 1280),
+                mockCard("mock-jeddah-corniche", "Corniche Demo Suites", "North Corniche, Jeddah", 4.4, 932),
+                mockCard("mock-alula-resort", "AlUla Discovery Resort", "AlUla, Saudi Arabia", 4.8, 611));
+        return new ExternalHotelSearchResponse(hotels, hotels.size(), true, SOURCE_GOOGLE_MAPS);
     }
 
     private ExternalHotelDetailsResponse mockDetails(String placeId) {
         ExternalHotelCardDto card = mockSearch().getHotels().stream()
                 .filter((hotel) -> hotel.getPlaceId().equals(placeId))
                 .findFirst()
-                .orElse(mockCard("curated-riyadh-olaya", "Roomify Riyadh Olaya Hotel", "Olaya Street, Riyadh", 4.7, 1280));
+                .orElse(mockCard("mock-riyadh-olaya", "Olaya Demo Hotel", "Olaya Street, Riyadh", 4.6, 1280));
 
         ExternalHotelDetailsResponse response = new ExternalHotelDetailsResponse();
         response.setPlaceId(card.getPlaceId());
@@ -311,7 +309,7 @@ public class GooglePlacesService {
         response.setLatitude(24.7136);
         response.setLongitude(46.6753);
         response.setSource(SOURCE_GOOGLE_MAPS);
-        response.setMock(false);
+        response.setMock(true);
         if (properties.isDemoKeyMode()) {
             response.setPhotoName(null);
             response.setReviews(null);
@@ -320,12 +318,12 @@ public class GooglePlacesService {
                     new ExternalHotelDetailsResponse.ReviewDto(
                             "Demo guest",
                             5.0,
-                            "Excellent location near Olaya business meetings, with fast check-in and polished service.",
+                            "Great location and a polished discovery preview for the Roomify graduation demo.",
                             "2 weeks ago"),
                     new ExternalHotelDetailsResponse.ReviewDto(
-                            "GCC business traveler",
+                            "Travel reviewer",
                             4.0,
-                            "Comfortable rooms, clear invoices, and responsive front desk support.",
+                            "Useful external listing shown without connecting it to booking or PMS inventory.",
                             "1 month ago")));
         }
         return response;
@@ -343,10 +341,10 @@ public class GooglePlacesService {
                 address,
                 rating,
                 userRatingCount,
-                "curated:" + placeId,
+                "mock:" + placeId,
                 "https://www.google.com/maps/search/?api=1&query=" + name.replace(" ", "+"),
                 SOURCE_GOOGLE_MAPS,
-                false);
+                true);
     }
 
     private PhotoResult placeholderPhoto() {
@@ -356,14 +354,14 @@ public class GooglePlacesService {
                   <rect x="120" y="130" width="720" height="280" rx="28" fill="#d7e6ef"/>
                   <path d="M210 378h540V236L640 154 530 258 442 210z" fill="#35658d" opacity=".35"/>
                   <circle cx="320" cy="210" r="44" fill="#35658d" opacity=".45"/>
-                  <text x="480" y="460" text-anchor="middle" font-family="Arial" font-size="30" fill="#264b6b" font-weight="700">Roomify Saudi hotel preview</text>
+                  <text x="480" y="460" text-anchor="middle" font-family="Arial" font-size="30" fill="#264b6b" font-weight="700">Google Maps hotel preview</text>
                 </svg>
                 """;
         return new PhotoResult(svg.getBytes(StandardCharsets.UTF_8), MediaType.valueOf("image/svg+xml").toString());
     }
 
     private boolean isMockPlace(String placeId) {
-        return placeId != null && (placeId.startsWith("mock-") || placeId.startsWith("curated-"));
+        return placeId != null && placeId.startsWith("mock-");
     }
 
     private String searchFieldMask() {

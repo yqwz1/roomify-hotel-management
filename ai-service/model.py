@@ -57,15 +57,6 @@ OCCUPANCY_FEATURES = [
 ]
 METADATA_FEATURES = REVENUE_FEATURES
 TARGETS = [TARGET_REVENUE, TARGET_OCCUPANCY]
-ROOM_TYPE_DISPLAY_NAMES = {
-    "standard": "Classic King",
-    "demo standard": "Classic King",
-    "classic standard": "Classic King",
-    "deluxe": "Deluxe King",
-    "demo deluxe": "Deluxe Twin",
-    "suite": "Olaya Suite",
-    "demo suite": "Olaya Suite",
-}
 
 
 @dataclass
@@ -125,7 +116,7 @@ def normalize_training_frame(frame: pd.DataFrame) -> pd.DataFrame:
         normalized[column] = pd.to_numeric(normalized[column], errors="coerce")
 
     normalized["weekend"] = normalized["weekend"].apply(_to_bool)
-    normalized["roomType"] = normalized["roomType"].astype(str).str.strip().apply(display_room_type_name)
+    normalized["roomType"] = normalized["roomType"].astype(str).str.strip()
     normalized["roomTypeId"] = normalized["roomTypeId"].fillna(-1).astype(int)
     normalized["dayOfWeek"] = normalized["dayOfWeek"].fillna(
         pd.to_datetime(normalized["date"]).dt.dayofweek + 1
@@ -245,7 +236,6 @@ def generate_forecast(bundle: ArtifactBundle, forecast_days: int = 30) -> dict[s
         0.0,
     )
     grouped["predictedOccupancy"] = grouped["predictedOccupancy"].clip(0.0, 100.0)
-    grouped = apply_demo_forecast_variation(grouped)
 
     points = [
         {
@@ -286,12 +276,12 @@ def generate_pricing_recommendations(bundle: ArtifactBundle) -> list[dict[str, A
     recommendations: list[dict[str, Any]] = []
     for room_type, profile in reference_profiles.items():
         predicted_occupancy = float(predicted_by_room_type.get(room_type, 60.0))
-        current_price = round_sar_price(float(profile["averageRoomPrice"]))
+        current_price = round(float(profile["averageRoomPrice"]), 2)
         adjustment_percent, risk_level, reason = pricing_policy(predicted_occupancy)
-        suggested_price = round_sar_price(current_price * (1.0 + adjustment_percent / 100.0))
+        suggested_price = round(current_price * (1.0 + adjustment_percent / 100.0), 2)
         recommendations.append(
             {
-                "roomType": display_room_type_name(room_type),
+                "roomType": room_type,
                 "currentPrice": current_price,
                 "suggestedPrice": suggested_price,
                 "adjustmentPercent": round(adjustment_percent, 2),
@@ -300,16 +290,13 @@ def generate_pricing_recommendations(bundle: ArtifactBundle) -> list[dict[str, A
             }
         )
 
-    recommendations = dedupe_pricing_recommendations(recommendations)
     recommendations.sort(key=lambda item: item["roomType"])
     return recommendations
 
 
 def latest_room_type_profiles(reference_data: pd.DataFrame) -> dict[str, dict[str, Any]]:
     profiles: dict[str, dict[str, Any]] = {}
-    normalized_reference = reference_data.copy()
-    normalized_reference["roomType"] = normalized_reference["roomType"].astype(str).str.strip().apply(display_room_type_name)
-    sorted_data = normalized_reference.sort_values(["date", "roomType"])
+    sorted_data = reference_data.sort_values(["date", "roomType"])
     for room_type, group in sorted_data.groupby("roomType"):
         latest = group.iloc[-1]
         trailing = group.tail(min(14, len(group)))
@@ -329,32 +316,14 @@ def latest_room_type_profiles(reference_data: pd.DataFrame) -> dict[str, dict[st
     return profiles
 
 
-def display_room_type_name(room_type: str) -> str:
-    cleaned = str(room_type or "").strip()
-    return ROOM_TYPE_DISPLAY_NAMES.get(cleaned.lower(), cleaned)
-
-
-def dedupe_pricing_recommendations(recommendations: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    by_room_type: dict[str, dict[str, Any]] = {}
-    for recommendation in recommendations:
-        room_type = display_room_type_name(recommendation.get("roomType", ""))
-        recommendation["roomType"] = room_type
-        existing = by_room_type.get(room_type)
-        if existing is None or recommendation.get("suggestedPrice", 0) > existing.get("suggestedPrice", 0):
-            by_room_type[room_type] = recommendation
-    return list(by_room_type.values())
-
-
 def build_future_feature_frame(reference_data: pd.DataFrame, forecast_days: int) -> pd.DataFrame:
     profiles = latest_room_type_profiles(reference_data)
-    forecast_start = date.today()
+    last_date = pd.to_datetime(reference_data["date"]).dt.date.max()
     rows: list[dict[str, Any]] = []
 
-    for offset in range(forecast_days):
-        forecast_date = forecast_start + timedelta(days=offset)
+    for offset in range(1, forecast_days + 1):
+        forecast_date = last_date + timedelta(days=offset)
         for room_type, profile in profiles.items():
-            demand_factor = demo_demand_factor(forecast_date)
-            baseline_bookings = max(int(profile["confirmedBookings"]), 1)
             rows.append(
                 {
                     "date": forecast_date,
@@ -365,75 +334,15 @@ def build_future_feature_frame(reference_data: pd.DataFrame, forecast_days: int)
                     "roomTypeId": profile["roomTypeId"],
                     "totalRooms": profile["totalRooms"],
                     "occupiedRoomNights": 0,
-                    "confirmedBookings": max(0, round(baseline_bookings * demand_factor)),
+                    "confirmedBookings": profile["confirmedBookings"],
                     "cancelledBookings": profile["cancelledBookings"],
-                    "averageRoomPrice": round_sar_price(profile["averageRoomPrice"] * demo_price_factor(forecast_date)),
+                    "averageRoomPrice": profile["averageRoomPrice"],
                     "dailyExpenses": profile["dailyExpenses"],
                     "occupancyRate": 0.0,
                 }
             )
 
     return pd.DataFrame(rows)
-
-
-def apply_demo_forecast_variation(grouped: pd.DataFrame) -> pd.DataFrame:
-    varied = grouped.copy()
-    if varied.empty:
-        return varied
-
-    revenue_values: list[float] = []
-    occupancy_values: list[float] = []
-    for _, row in varied.iterrows():
-        forecast_date = row["date"]
-        if not isinstance(forecast_date, date):
-            forecast_date = pd.to_datetime(forecast_date).date()
-        demand = demo_demand_factor(forecast_date)
-        weekend_lift = 1.10 if forecast_date.isoweekday() in {5, 6} else 1.04 if forecast_date.isoweekday() == 4 else 0.97
-        day_wave = 1.0 + (((forecast_date.toordinal() % 7) - 3) * 0.012)
-        occupancy_delta = (demand - 1.0) * 18.0
-        occupancy_values.append(
-            float(np.clip(float(row["predictedOccupancy"]) + occupancy_delta, 35.0, 94.0))
-        )
-        revenue_values.append(
-            max(0.0, float(row["predictedRevenue"]) * demand * weekend_lift * day_wave)
-        )
-
-    varied["predictedRevenue"] = revenue_values
-    varied["predictedOccupancy"] = occupancy_values
-    return varied
-
-
-def demo_demand_factor(forecast_date: date) -> float:
-    factor = 1.0
-    if forecast_date.isoweekday() in {5, 6}:
-        factor += 0.12
-    elif forecast_date.isoweekday() == 4:
-        factor += 0.05
-    elif forecast_date.isoweekday() in {1, 2}:
-        factor -= 0.05
-
-    if forecast_date.month in {6, 7, 8}:
-        factor += 0.06
-    if forecast_date.month in {9} and 20 <= forecast_date.day <= 25:
-        factor += 0.16
-    if forecast_date.month in {3, 4, 12, 1}:
-        factor += 0.04
-    return max(0.82, min(1.28, factor))
-
-
-def demo_price_factor(forecast_date: date) -> float:
-    factor = 1.0
-    if forecast_date.isoweekday() in {5, 6}:
-        factor += 0.08
-    if forecast_date.month in {6, 7, 8, 12, 1}:
-        factor += 0.04
-    return factor
-
-
-def round_sar_price(value: float, increment: int = 50) -> float:
-    if not np.isfinite(value) or value <= 0:
-        return 0.0
-    return float(int(round(value / increment) * increment))
 
 
 def pricing_policy(predicted_occupancy: float) -> tuple[float, str, str]:

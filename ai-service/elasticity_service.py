@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from elasticity_model import PRICE_DELTAS, build_elasticity_model, predict_occupancy
-from model import ArtifactBundle, calculate_confidence, round_sar_price
+from model import ArtifactBundle, calculate_confidence
 from schemas import ElasticityRequest
 
 
@@ -23,7 +23,7 @@ def generate_elasticity_forecasts(bundle: ArtifactBundle, request: ElasticityReq
     for room_request in request.roomTypes:
         simulations: list[dict[str, Any]] = []
         for delta in PRICE_DELTAS:
-            simulated_price = round_sar_price(room_request.currentPrice * (1.0 + delta), 50)
+            simulated_price = round(room_request.currentPrice * (1.0 + delta), 2)
             scenario_frame = _build_scenario_frame(
                 room_request,
                 anchor_date,
@@ -40,11 +40,7 @@ def generate_elasticity_forecasts(bundle: ArtifactBundle, request: ElasticityReq
             )
             revenue = float(np.sum(daily_bookings * simulated_price))
             profit = float(revenue - (room_request.averageDailyExpenses * request.forecastDays))
-            average_occupancy = _smooth_elasticity_occupancy(
-                float(room_request.currentOccupancy),
-                delta,
-                float(np.mean(occupancies)),
-            )
+            average_occupancy = float(np.mean(occupancies))
             total_bookings = int(np.sum(daily_bookings))
 
             simulations.append(
@@ -59,13 +55,6 @@ def generate_elasticity_forecasts(bundle: ArtifactBundle, request: ElasticityReq
                 }
             )
 
-        simulations = _dedupe_and_order_simulations(
-            simulations,
-            room_request.totalRooms,
-            request.forecastDays,
-            room_request.averageDailyExpenses,
-        )
-
         optimal = max(
             simulations,
             key=lambda item: (item["profit"], item["revenue"], item["occupancy"]),
@@ -77,7 +66,7 @@ def generate_elasticity_forecasts(bundle: ArtifactBundle, request: ElasticityReq
             {
                 "roomTypeId": room_request.roomTypeId,
                 "roomType": room_request.roomType,
-                "currentPrice": round_sar_price(float(room_request.currentPrice), 50),
+                "currentPrice": round(float(room_request.currentPrice), 2),
                 "optimalPrice": optimal["price"],
                 "expectedOccupancy": optimal["occupancy"],
                 "expectedBookings": optimal["expectedBookings"],
@@ -120,40 +109,6 @@ def _build_scenario_frame(
             }
         )
     return pd.DataFrame(rows)
-
-
-def _smooth_elasticity_occupancy(current_occupancy: float, delta: float, model_occupancy: float) -> float:
-    elasticity_drop = delta * 42.0
-    blended = (model_occupancy * 0.55) + ((current_occupancy - elasticity_drop) * 0.45)
-    return float(np.clip(blended, 12.0, 96.0))
-
-
-def _dedupe_and_order_simulations(
-    simulations: list[dict[str, Any]],
-    total_rooms: int,
-    forecast_days: int,
-    average_daily_expenses: float,
-) -> list[dict[str, Any]]:
-    by_price: dict[float, dict[str, Any]] = {}
-    for simulation in simulations:
-        by_price[float(simulation["price"])] = simulation
-
-    ordered = [by_price[price] for price in sorted(by_price)]
-    previous_occupancy: float | None = None
-    for simulation in ordered:
-        occupancy = float(simulation["occupancy"])
-        if previous_occupancy is not None:
-            occupancy = min(occupancy, previous_occupancy - 1.2)
-        occupancy = max(8.0, occupancy)
-        simulation["occupancy"] = round(occupancy, 2)
-        expected_bookings = int(round(total_rooms * forecast_days * (occupancy / 100.0)))
-        revenue = float(simulation["price"]) * expected_bookings
-        profit = revenue - (average_daily_expenses * forecast_days)
-        simulation["expectedBookings"] = max(expected_bookings, 0)
-        simulation["revenue"] = round(revenue, 2)
-        simulation["profit"] = round(profit, 2)
-        previous_occupancy = occupancy
-    return ordered
 
 
 def _confidence_score(bundle: ArtifactBundle, training_rows: int) -> float:
