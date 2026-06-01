@@ -5,6 +5,7 @@ import MarkdownMessage from './MarkdownMessage';
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+
 const DEFAULT_PROMPTS = [
   'Analyze weekly revenue',
   'Show occupancy insights',
@@ -16,8 +17,8 @@ const buildInitialMessages = () => [
   {
     role: 'assistant',
     content:
-      'Hello! I’m Roomie, your hotel management assistant. I can help you analyze revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, and hotel performance.',
-    source: 'ROOMIE',
+      'Hello! I am Roomi, your hotel management assistant. I can help you analyze revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, and hotel performance.',
+    source: 'ROOMI',
   },
 ];
 
@@ -30,6 +31,8 @@ function TypingDots() {
     </div>
   );
 }
+
+const displaySource = (source) => (source === 'GEMINI_API' ? 'Gemini' : source);
 
 export default function ManagerAiAssistant() {
   const [open, setOpen] = useState(false);
@@ -54,7 +57,7 @@ export default function ManagerAiAssistant() {
     try {
       const response = await chatWithAiAssistant({
         message,
-        history: nextMessages.map((item) => ({ role: item.role, content: item.content })),
+        history: nextMessages,
       });
       setMessages((current) => [
         ...current,
@@ -62,6 +65,7 @@ export default function ManagerAiAssistant() {
           role: 'assistant',
           content: response?.answer || 'No answer was returned.',
           source: response?.source,
+          dataSources: response?.dataSources,
           fallbackUsed: response?.fallbackUsed,
         },
       ]);
@@ -82,7 +86,7 @@ export default function ManagerAiAssistant() {
           <div className="flex min-w-0 items-center justify-between rounded-t-[1.75rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
             <div className="min-w-0">
               <p className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-white/60 break-words">
-                Roomie
+                Roomi
               </p>
               <h3 className="mt-1 text-lg font-black tracking-tight break-words">Operations Copilot</h3>
             </div>
@@ -116,8 +120,13 @@ export default function ManagerAiAssistant() {
                   )}
                   {message.role === 'assistant' && message.source ? (
                     <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-brand-ink-muted break-words">
-                      {message.source}
+                      Explanation by: {displaySource(message.source)}
                       {message.fallbackUsed ? ' fallback' : ''}
+                      {Array.isArray(message.dataSources) && message.dataSources.length > 0 ? (
+                        <span className="block normal-case tracking-normal">
+                          Data source: {message.dataSources.filter((source) => source !== 'GEMINI_EXPLANATION').join(', ') || 'Gemini'}
+                        </span>
+                      ) : null}
                     </p>
                   ) : null}
                 </div>
@@ -126,8 +135,11 @@ export default function ManagerAiAssistant() {
 
             {loading ? (
               <div className="flex min-w-0 justify-start">
-                <div className="rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                <div className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                   <TypingDots />
+                  <span className="text-sm font-medium text-brand-ink-muted">
+                    Roomi is thinking...
+                  </span>
                 </div>
               </div>
             ) : null}
@@ -190,7 +202,7 @@ export default function ManagerAiAssistant() {
           </span>
           <span className="mt-1 flex min-w-0 items-center gap-2 text-sm font-black tracking-tight break-words">
             <MessageSquare className="h-4 w-4 shrink-0" />
-            Ask Roomie
+            Ask Roomi
             <Sparkles className="h-3.5 w-3.5 text-brand-accent-gold shrink-0" />
           </span>
         </span>

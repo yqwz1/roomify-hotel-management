@@ -8,6 +8,7 @@ public record AiAssistantChatResponse(
         String source,
         boolean fallbackUsed,
         String model,
+        List<String> dataSources,
         String contextSummary,
         List<String> suggestedPrompts,
         LocalDateTime generatedAt) {

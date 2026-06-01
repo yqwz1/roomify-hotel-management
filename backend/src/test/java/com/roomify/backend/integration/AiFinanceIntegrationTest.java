@@ -214,9 +214,8 @@ class AiFinanceIntegrationTest {
                                   "message": "Which room type performs best?"
                                 }
                                 """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("LOCAL_TEMPLATE_FALLBACK"))
-                .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Deluxe")));
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("Gemini API key is missing. Please set GEMINI_API_KEY in .env.local."));
     }
 
     @Test

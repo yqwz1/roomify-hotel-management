@@ -201,6 +201,18 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
         }
 
+        @ExceptionHandler(GeminiApiException.class)
+        public ResponseEntity<ApiError> handleGeminiApi(
+                        GeminiApiException ex,
+                        HttpServletRequest request) {
+                ApiError error = new ApiError(
+                                ex.status().value(),
+                                ex.status().getReasonPhrase(),
+                                ex.getMessage(),
+                                request.getRequestURI());
+                return ResponseEntity.status(ex.status()).body(error);
+        }
+
         @ExceptionHandler(DuplicateResourceException.class)
         public ResponseEntity<ApiError> handleDuplicateResource(
                         DuplicateResourceException ex,
