@@ -35,6 +35,11 @@
   --motion-normal: 240ms;
   --motion-slow: 420ms;
   --motion-roomie: 380ms;
+  --assistant-motion-fast: 140ms;
+  --assistant-motion-normal: 280ms;
+  --assistant-motion-slow: 420ms;
+  --assistant-ease-premium: cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --assistant-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-premium: cubic-bezier(0.21, 0.47, 0.32, 0.98);
   --ease-press: cubic-bezier(0.2, 0, 0, 1);
   --ease-spring-soft: cubic-bezier(0.16, 1, 0.3, 1);
@@ -382,6 +387,16 @@ textarea {
     overflow: visible;
   }
 
+  .motion-assistant-launcher {
+    isolation: isolate;
+    overflow: visible;
+    will-change: transform, box-shadow;
+    transition:
+      transform var(--assistant-motion-normal) var(--assistant-ease-spring),
+      box-shadow var(--assistant-motion-normal) var(--assistant-ease-premium),
+      filter var(--assistant-motion-normal) var(--assistant-ease-premium);
+  }
+
   .motion-roomie-launcher::before,
   .motion-roomie-launcher::after {
     content: "";
@@ -401,6 +416,127 @@ textarea {
     border: 1px solid rgba(255,255,255,0.4);
     box-shadow: 0 0 0 0 rgba(38,84,119,0.26);
     animation: motion-roomie-ring 2.8s ease-in-out infinite;
+  }
+
+  .motion-assistant-launcher-idle .motion-assistant-icon {
+    animation: motion-assistant-icon-float 4.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  .motion-assistant-launcher:hover .motion-assistant-icon {
+    animation: none;
+    transform: translate3d(0, -1px, 0) scale(1.04) rotate(-3deg);
+  }
+
+  .motion-assistant-launcher:hover::before {
+    opacity: 0.96;
+    transform: scale(1.14);
+  }
+
+  .motion-assistant-launcher:hover::after {
+    border-color: rgba(255,255,255,0.62);
+    box-shadow: 0 0 0 10px rgba(38,84,119,0);
+  }
+
+  .motion-assistant-launcher-press:active .motion-assistant-icon {
+    transform: scale(0.9) rotate(5deg);
+  }
+
+  .motion-assistant-status-dot {
+    animation: motion-assistant-status-pulse 2.3s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  .motion-assistant-panel {
+    transform-origin: calc(100% - 2rem) 100%;
+    will-change: opacity, transform, filter;
+  }
+
+  [dir="rtl"] .motion-assistant-panel {
+    transform-origin: 2rem 100%;
+  }
+
+  .motion-assistant-panel-enter {
+    animation: motion-assistant-panel-enter var(--assistant-motion-slow) var(--assistant-ease-spring) both;
+  }
+
+  .motion-assistant-panel-exit {
+    animation: motion-assistant-panel-exit var(--assistant-motion-normal) var(--assistant-ease-premium) both;
+  }
+
+  .motion-assistant-panel-visible {
+    box-shadow:
+      0 34px 95px -38px rgba(15,23,42,0.72),
+      0 0 0 1px rgba(255,255,255,0.48),
+      0 0 62px -28px rgba(38,84,119,0.92);
+  }
+
+  .motion-assistant-header-in {
+    animation: motion-assistant-header-in var(--assistant-motion-normal) var(--assistant-ease-spring) 40ms both;
+    will-change: opacity, transform;
+  }
+
+  .motion-assistant-content-stagger {
+    animation: motion-assistant-content-in var(--assistant-motion-slow) var(--assistant-ease-premium) 95ms both;
+    will-change: opacity, transform;
+  }
+
+  .motion-assistant-input-in {
+    animation: motion-assistant-input-in var(--assistant-motion-slow) var(--assistant-ease-spring) 150ms both;
+    will-change: opacity, transform;
+  }
+
+  .motion-assistant-input {
+    transition:
+      border-color var(--assistant-motion-fast) ease-out,
+      box-shadow var(--assistant-motion-normal) var(--assistant-ease-premium),
+      background-color var(--assistant-motion-fast) ease-out;
+  }
+
+  .motion-assistant-input:focus {
+    box-shadow:
+      0 0 0 3px rgba(38,84,119,0.14),
+      0 16px 36px -30px rgba(15,23,42,0.58);
+  }
+
+  .motion-assistant-input::placeholder {
+    transition: opacity var(--assistant-motion-fast) ease-out;
+  }
+
+  .motion-assistant-input:focus::placeholder {
+    opacity: 0.62;
+  }
+
+  .motion-assistant-send-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .motion-assistant-send-button::after {
+    content: "";
+    position: absolute;
+    inset: -35%;
+    background: radial-gradient(circle, rgba(255,255,255,0.34), transparent 58%);
+    opacity: 0;
+    transform: scale(0.62);
+    transition:
+      opacity var(--assistant-motion-fast) ease-out,
+      transform var(--assistant-motion-normal) var(--assistant-ease-spring);
+  }
+
+  .motion-assistant-send-button:hover::after,
+  .motion-assistant-send-button:active::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .motion-assistant-send-button:disabled::after {
+    display: none;
+  }
+
+  .motion-assistant-send-button > svg {
+    position: relative;
+    z-index: 1;
   }
 
   .motion-roomie-panel-shell {
@@ -664,6 +800,90 @@ textarea {
   }
 }
 
+@keyframes motion-assistant-icon-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -2px, 0) rotate(-1deg);
+  }
+}
+
+@keyframes motion-assistant-status-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(255,255,255,0.16), 0 0 0 0 rgba(16,185,129,0.24);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 5px rgba(255,255,255,0.16), 0 0 0 7px rgba(16,185,129,0);
+  }
+}
+
+@keyframes motion-assistant-panel-enter {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, 38px, 0) scale(0.92);
+  }
+  76% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, -2px, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-assistant-panel-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, 30px, 0) scale(0.94);
+  }
+}
+
+@keyframes motion-assistant-header-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motion-assistant-content-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-assistant-input-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @keyframes motion-roomie-panel-enter {
   0% {
     opacity: 0;
@@ -729,7 +949,12 @@ textarea {
   .motion-success-check,
   .motion-warning-in,
   .motion-roomie-panel-enter,
-  .motion-roomie-panel-exit {
+  .motion-roomie-panel-exit,
+  .motion-assistant-panel-enter,
+  .motion-assistant-panel-exit,
+  .motion-assistant-header-in,
+  .motion-assistant-content-stagger,
+  .motion-assistant-input-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -737,6 +962,8 @@ textarea {
 
   .motion-roomie-launcher::before,
   .motion-roomie-launcher::after,
+  .motion-assistant-launcher-idle .motion-assistant-icon,
+  .motion-assistant-status-dot,
   .motion-typing-bubble,
   .motion-typing-dot,
   .motion-skeleton-shimmer::after {

@@ -594,14 +594,14 @@ export default function FloatingGuestAssistant() {
                 : { opacity: 0, y: 34, scale: 0.94, filter: 'blur(4px)' }
             }
             transition={{ duration: reduceMotion ? 0 : panelVisible ? 0.38 : 0.24, ease: CHAT_PANEL_EASE }}
-            className={`motion-roomie-panel-shell fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/55 bg-white/[0.92] backdrop-blur-xl will-change-transform sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))] ${panelVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            className={`motion-assistant-panel motion-roomie-panel-shell fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/55 bg-white/[0.92] backdrop-blur-xl will-change-transform sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))] ${panelVisible ? 'motion-assistant-panel-visible pointer-events-auto' : 'motion-assistant-panel-exit pointer-events-none'}`}
             aria-hidden={!panelVisible}
           >
             <div
               className="pointer-events-none absolute -bottom-10 end-4 h-28 w-28 rounded-full bg-brand-primary/20 blur-2xl"
               aria-hidden="true"
             />
-            <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
+            <div className="motion-assistant-header-in bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
               <div className="flex min-w-0 items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60 break-words">
@@ -627,7 +627,7 @@ export default function FloatingGuestAssistant() {
               </div>
             </div>
 
-            <div className="border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
+            <div className="motion-assistant-content-stagger border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
               {showRoomSelector ? (
                 <div className="space-y-3">
                   <div className="rounded-[1.25rem] border border-brand-surface-border bg-white p-3">
@@ -735,7 +735,7 @@ export default function FloatingGuestAssistant() {
               ) : null}
             </div>
 
-            <div className="border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
+            <div className="motion-assistant-content-stagger border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
               {assistantBlockedByNoStay ? (
                 <div className="mb-3 rounded-[1.15rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
                   {assistantStatusText}
@@ -747,7 +747,7 @@ export default function FloatingGuestAssistant() {
               />
             </div>
 
-            <div className="min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
+            <div className="motion-assistant-content-stagger min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
               {loading && !detail ? (
                 <div className="flex min-w-0 h-full items-center justify-center text-sm font-medium text-brand-ink-muted">
                   <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" />
@@ -764,7 +764,7 @@ export default function FloatingGuestAssistant() {
               )}
             </div>
 
-            <div className="border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
+            <div className="motion-assistant-input-in border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
               <div className="relative flex min-w-0 items-end gap-3">
                 <Textarea
                   value={input}
@@ -772,13 +772,13 @@ export default function FloatingGuestAssistant() {
                   disabled={assistantMessagingLocked || sending}
                   rows={3}
                   placeholder={translateWithFallback(t, 'guestAssistant.placeholder', 'Write a message to the hotel team...')}
-                  className="min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
+                  className="motion-assistant-input min-h-[4.5rem] min-w-0 flex-1 rounded-[1.3rem] border-brand-surface-border bg-white px-4 py-3 text-sm font-medium text-brand-ink shadow-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-surface-light"
                 />
                 <Button variant="unstyled" size="none"
                   type="button"
                   onClick={handleSendMessage}
                   disabled={sending || !normalizedInput || assistantMessagingLocked}
-                  className="motion-button-press pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-[0_14px_32px_-20px_rgba(26,43,58,0.85)] transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  className="motion-assistant-send-button motion-button-press pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-[0_14px_32px_-20px_rgba(26,43,58,0.85)] transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send guest assistant message"
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="motion-send-icon h-4 w-4 shrink-0" />}
