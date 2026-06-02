@@ -20,15 +20,19 @@ import com.roomify.backend.repository.ReservationRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class PaymentServiceTest {
@@ -151,6 +155,24 @@ class PaymentServiceTest {
         assertEquals(PaymentStatus.REFUNDED, reservation.getPaymentStatus());
         assertEquals("REFUNDED", reservation.getInvoiceStatus());
         assertEquals(new BigDecimal("115.00"), reservation.getOutstandingBalance());
+    }
+
+    @Test
+    void listPaymentsCapsRequestedLimitForPrivilegedUsers() {
+        Payment payment = new Payment();
+        payment.setReservation(buildGuestReservation());
+        payment.setAmount(new BigDecimal("115.00"));
+        payment.setPaymentMethod(PaymentMethod.CREDIT_CARD_DEMO);
+        payment.setPaymentStatus(PaymentStatus.PAID);
+
+        when(paymentRepository.findAllByOrderByCreatedAtDesc(any(Pageable.class))).thenReturn(List.of(payment));
+
+        List<PaymentResponse> responses = paymentService.listPayments(null, "manager@example.com", true, 1000);
+
+        assertEquals(1, responses.size());
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(paymentRepository).findAllByOrderByCreatedAtDesc(pageableCaptor.capture());
+        assertEquals(500, pageableCaptor.getValue().getPageSize());
     }
 
     private MockPaymentRequest mockPayment(String cardNumber) {

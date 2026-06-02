@@ -33,8 +33,9 @@ public class PaymentController {
     @PreAuthorize("hasAnyRole('MANAGER', 'STAFF', 'ADMIN')")
     public ResponseEntity<List<PaymentResponse>> listPayments(
             @RequestParam(required = false) PaymentStatus status,
+            @RequestParam(required = false) Integer limit,
             Authentication authentication) {
-        return ResponseEntity.ok(paymentService.listPayments(status, authentication.getName(), true));
+        return ResponseEntity.ok(paymentService.listPayments(status, authentication.getName(), true, limit));
     }
 
     @GetMapping("/{paymentId}")

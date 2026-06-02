@@ -13,6 +13,8 @@ import com.roomify.backend.exception.ResourceConflictException;
 import com.roomify.backend.exception.ResourceNotFoundException;
 import com.roomify.backend.repository.PaymentRepository;
 import com.roomify.backend.repository.ReservationRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ public class PaymentService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private static final int MONEY_SCALE = 2;
+    private static final int DEFAULT_LIST_LIMIT = 250;
+    private static final int MAX_LIST_LIMIT = 500;
     private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
     private static final EnumSet<PaymentMethod> GUEST_ONLINE_METHODS = EnumSet.of(
             PaymentMethod.CREDIT_CARD_DEMO,
@@ -319,11 +323,17 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> listPayments(PaymentStatus status, String requesterEmail, boolean privileged) {
+        return listPayments(status, requesterEmail, privileged, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> listPayments(PaymentStatus status, String requesterEmail, boolean privileged, Integer limit) {
+        Pageable page = PageRequest.of(0, normalizeListLimit(limit));
         List<Payment> payments = privileged
                 ? (status == null
-                        ? paymentRepository.findAllByOrderByCreatedAtDesc()
-                        : paymentRepository.findByPaymentStatusOrderByCreatedAtDesc(status))
-                : paymentRepository.findByReservation_Guest_EmailIgnoreCaseOrderByCreatedAtDesc(requesterEmail);
+                        ? paymentRepository.findAllByOrderByCreatedAtDesc(page)
+                        : paymentRepository.findByPaymentStatusOrderByCreatedAtDesc(status, page))
+                : paymentRepository.findByReservation_Guest_EmailIgnoreCaseOrderByCreatedAtDesc(requesterEmail, page);
         return payments.stream()
                 .map(payment -> toResponse(payment, "Payment loaded"))
                 .toList();
@@ -522,6 +532,13 @@ public class PaymentService {
 
     private BigDecimal calculateOutstanding(BigDecimal totalPrice, BigDecimal totalPaid) {
         return financialService.calculateOutstanding(totalPrice, totalPaid);
+    }
+
+    private int normalizeListLimit(Integer limit) {
+        if (limit == null || limit <= 0) {
+            return DEFAULT_LIST_LIMIT;
+        }
+        return Math.min(limit, MAX_LIST_LIMIT);
     }
 
     private java.time.LocalDateTime savedTimestampCandidate() {

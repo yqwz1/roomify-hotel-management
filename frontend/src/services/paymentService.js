@@ -24,8 +24,15 @@ export const getPaymentReceipt = async (paymentId) => {
   return response.data;
 };
 
-export const listPayments = async (status) => {
-  const config = status && status !== 'ALL' ? { params: { status } } : undefined;
+export const listPayments = async (status, limit = 250) => {
+  const params = {};
+  if (status && status !== 'ALL') {
+    params.status = status;
+  }
+  if (limit) {
+    params.limit = limit;
+  }
+  const config = Object.keys(params).length > 0 ? { params } : undefined;
   const response = await api.get('/payments', config);
   return Array.isArray(response.data) ? response.data : [];
 };

@@ -2,6 +2,7 @@ package com.roomify.backend.repository;
 
 import com.roomify.backend.entity.Payment;
 import com.roomify.backend.entity.PaymentStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,9 +19,15 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByReservation_Guest_EmailIgnoreCaseOrderByCreatedAtDesc(String email);
 
+    List<Payment> findByReservation_Guest_EmailIgnoreCaseOrderByCreatedAtDesc(String email, Pageable pageable);
+
     List<Payment> findByPaymentStatusOrderByCreatedAtDesc(PaymentStatus status);
 
+    List<Payment> findByPaymentStatusOrderByCreatedAtDesc(PaymentStatus status, Pageable pageable);
+
     List<Payment> findAllByOrderByCreatedAtDesc();
+
+    List<Payment> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("SELECT MIN(p.createdAt) FROM Payment p")
     LocalDateTime findMinimumCreatedAt();
