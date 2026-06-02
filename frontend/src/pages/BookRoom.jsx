@@ -281,7 +281,7 @@ export default function BookRoom() {
           title={t('bookRoomPage.noRoomPanelTitle')}
           description={t('bookRoomPage.noRoomPanelDescription')}
         >
-          <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+          <div className="motion-rise-in rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
             <BedDouble className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
             <p className="mt-4 text-lg font-black text-brand-ink break-words">{t('noRoomSelected')}</p>
             <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
@@ -365,7 +365,7 @@ export default function BookRoom() {
       </DashboardHero>
 
       {conflictError ? (
-        <div className="rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
+        <div className="motion-warning-in rounded-[1.75rem] border border-brand-danger/30 bg-brand-danger/10 p-5">
           <div className="flex min-w-0 items-start gap-4">
             <span className="flex min-w-0 h-11 w-11 items-center justify-center rounded-2xl bg-brand-danger/20 text-brand-ink break-words">
               <AlertTriangle className="h-5 w-5 shrink-0" />
@@ -394,7 +394,7 @@ export default function BookRoom() {
           >
             <div className="space-y-5">
               {validationError ? (
-                <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                <div className="motion-warning-in rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                   {validationError}
                 </div>
               ) : null}
@@ -407,7 +407,7 @@ export default function BookRoom() {
               />
 
               {!isAuthenticated ? (
-                <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
+                <div className="motion-rise-in rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-5">
                   <p className="inline-flex min-w-0 items-center gap-2 text-sm font-black text-brand-ink break-words">
                     <Lock className="h-4 w-4 shrink-0" />
                     {translateWithFallback(
@@ -497,7 +497,7 @@ export default function BookRoom() {
                     />
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+                  <div className="motion-rise-in rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
                     <p className="text-sm font-black text-brand-ink break-words">
                       {translateWithFallback(
                         t,
@@ -554,7 +554,7 @@ export default function BookRoom() {
             description={t('bookRoomPage.summaryDescription')}
           >
             <div className="space-y-5">
-              <div className="flex min-w-0 h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
+              <div className="motion-scale-pop flex min-w-0 h-44 items-center justify-center rounded-[1.75rem] bg-[linear-gradient(135deg,#FBF9F4_0%,#FBF9F4_45%,#ede9e1_100%)]">
                 <span className="flex min-w-0 h-16 w-16 items-center justify-center rounded-[1.5rem] bg-white text-brand-ink shadow-sm break-words">
                   {room?.availableForRequestedStay ? (
                     <CheckCircle2 className="h-7 w-7 text-brand-success shrink-0" />
@@ -603,7 +603,7 @@ export default function BookRoom() {
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-rise-in rounded-[1.5rem] border border-brand-surface-border bg-brand-surface-light p-4">
                 <div className="flex min-w-0 items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-brand-ink-muted break-words">{t('bookRoomPage.ratePerNight')}</span>
                   <span className="font-bold text-brand-ink break-words">
@@ -636,7 +636,7 @@ export default function BookRoom() {
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-4">
+              <div className="motion-rise-in rounded-[1.5rem] border border-brand-surface-border bg-white p-4">
                 <p className="text-sm font-black text-brand-ink break-words">
                   {translateWithFallback(t, 'bookRoomPage.policySnapshotTitle', 'Stay policies')}
                 </p>

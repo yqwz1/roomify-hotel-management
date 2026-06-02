@@ -9,7 +9,7 @@ export default function DashboardPanel({
   contentClassName,
 }) {
   return (
-    <section className={cn('motion-slide-up min-w-0 rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.28)]', className)}>
+    <section className={cn('motion-stagger-item min-w-0 rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-24px_rgba(15,23,42,0.28)]', className)}>
       <div className="flex min-w-0 flex-col gap-3 border-b border-brand-surface-border px-5 py-5 sm:px-6">
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">

@@ -86,7 +86,7 @@ export default function AiInsightPanel({
             key={intent}
             type="button"
             variant="outline"
-            className="h-auto justify-start rounded-2xl border-brand-surface-border bg-white px-4 py-4 text-start text-brand-ink shadow-sm hover:bg-brand-surface-light"
+            className="motion-stagger-item h-auto justify-start rounded-2xl border-brand-surface-border bg-white px-4 py-4 text-start text-brand-ink shadow-sm hover:bg-brand-surface-light"
             disabled={loading}
             onClick={() => onAskIntent?.(intent)}
           >
@@ -104,7 +104,7 @@ export default function AiInsightPanel({
       ) : null}
 
       {error ? (
-        <Card className="rounded-[1.35rem] border border-brand-danger/30 bg-brand-danger/10 p-0 shadow-sm">
+        <Card className="motion-warning-in rounded-[1.35rem] border border-brand-danger/30 bg-brand-danger/10 p-0 shadow-sm">
           <CardContent className="p-5">
             <div className="flex min-w-0 items-start gap-3">
               <span className="flex min-w-0 h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-brand-danger shadow-sm break-words">
@@ -122,7 +122,7 @@ export default function AiInsightPanel({
       <Card className="rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
         <CardContent className="p-5">
           {loading ? (
-            <div className="flex min-w-0 items-center gap-3 text-sm font-bold text-brand-ink-muted">
+            <div className="motion-skeleton-shimmer flex min-w-0 items-center gap-3 rounded-2xl bg-brand-surface-light px-4 py-5 text-sm font-bold text-brand-ink-muted">
               <Loader2 className="h-5 w-5 animate-spin text-brand-primary shrink-0" />
               Loading AI insight through Spring Boot...
             </div>
@@ -158,7 +158,7 @@ export default function AiInsightPanel({
               {metrics.length ? (
                 <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {metrics.map(([key, value]) => (
-                    <div key={key} className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+                    <div key={key} className="motion-stagger-item rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
                         {titleize(key)}
                       </p>

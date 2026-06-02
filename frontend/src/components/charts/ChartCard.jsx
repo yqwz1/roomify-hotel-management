@@ -12,7 +12,7 @@ export function ChartCard({
   ...props
 }) {
   return (
-    <Card className={cn("motion-slide-up rounded-[1.4rem] border border-brand-surface-border bg-white p-0 shadow-sm", className)} {...props}>
+    <Card className={cn("motion-stagger-item rounded-[1.4rem] border border-brand-surface-border bg-white p-0 shadow-sm", className)} {...props}>
       {(title || description || action) && (
         <CardHeader className="flex min-w-0 flex-row items-start justify-between gap-4 space-y-0 p-5 pb-4">
           <div className="min-w-0">

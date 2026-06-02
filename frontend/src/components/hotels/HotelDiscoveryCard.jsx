@@ -24,7 +24,7 @@ export default function HotelDiscoveryCard({ hotel, onBook, onViewDetails }) {
 
   return (
     <article
-      className={`motion-card-lift motion-slide-up overflow-hidden rounded-[1.5rem] border bg-white shadow-[0_18px_40px_-32px_rgba(15,23,42,0.26)] ${
+      className={`motion-stagger-item motion-card-hover overflow-hidden rounded-[1.5rem] border bg-white shadow-[0_18px_40px_-32px_rgba(15,23,42,0.26)] ${
         isRoomify ? 'border-brand-primary/30' : 'border-brand-success/30'
       }`}
     >

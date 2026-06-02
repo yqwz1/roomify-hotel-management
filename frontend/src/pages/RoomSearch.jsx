@@ -39,7 +39,7 @@ const CARD_ACTION_FALLBACKS = {
 
 function SearchSkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
+    <div className="motion-skeleton-shimmer overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
       <div className="h-40 bg-brand-primary-tint" />
       <div className="space-y-4 p-5">
         <div className="h-5 w-1/2 rounded-full bg-brand-surface-border" />
@@ -236,7 +236,7 @@ export default function RoomSearch() {
           >
             <div className="space-y-5">
               {error && (
-                <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                <div className="motion-warning-in rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <span>{error}</span>
                     <Button variant="unstyled" size="none"
@@ -321,7 +321,7 @@ export default function RoomSearch() {
             }
           >
             {!hasSearched && !loading && (
-              <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+              <div className="motion-rise-in rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
                 <CalendarRange className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
                 <p className="mt-4 text-lg font-black text-brand-ink break-words">{t(`${pageTx}.readyTitle`)}</p>
                 <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
@@ -339,7 +339,7 @@ export default function RoomSearch() {
             )}
 
             {!loading && hasSearched && results.length === 0 && !error && (
-              <div className="rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
+              <div className="motion-rise-in rounded-[1.5rem] border border-dashed border-brand-surface-border bg-brand-surface-light px-6 py-14 text-center">
                 <SlidersHorizontal className="mx-auto h-10 w-10 text-brand-ink-hint shrink-0" />
                 <p className="mt-4 text-lg font-black text-brand-ink break-words">{t(`${pageTx}.unavailableTitle`)}</p>
                 <p className="mt-2 text-sm font-medium text-brand-ink-muted break-words">
@@ -366,7 +366,7 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
+                      className="motion-stagger-item motion-card-hover rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
                     >
                       <div className="space-y-4">
                         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

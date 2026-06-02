@@ -28,7 +28,7 @@ export default function DashboardQuickAction({
       type="button"
       onClick={onClick}
       className={cn(
-        'motion-card-lift motion-press group flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.5rem] border p-4 text-start transition-all duration-200',
+        'motion-stagger-item motion-card-hover motion-button-press group flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.5rem] border p-4 text-start transition-all duration-200',
         toneStyles.wrapper
       )}
     >
@@ -56,7 +56,7 @@ export default function DashboardQuickAction({
         </div>
       </div>
 
-      <ArrowRight className={cn('h-4 w-4 flex-shrink-0 transition-colors', toneStyles.arrow)} />
+      <ArrowRight className={cn('motion-send-icon h-4 w-4 flex-shrink-0 transition-colors', toneStyles.arrow)} />
     </Button>
   );
 }

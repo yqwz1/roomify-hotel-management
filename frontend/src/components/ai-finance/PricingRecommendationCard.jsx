@@ -87,7 +87,7 @@ export default function PricingRecommendationCard({
   const AdjustmentIcon = adjustmentStyle.icon;
 
   return (
-    <Card className="h-full rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
+    <Card className="motion-stagger-item h-full rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardHeader className="p-5 pb-0">
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -116,19 +116,19 @@ export default function PricingRecommendationCard({
 
       <CardContent className="p-5">
         <div className="grid min-w-0 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+          <div className="motion-card-hover rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
               Current
             </p>
             <p className="mt-2 text-xl font-black text-brand-ink break-words">{formatCurrency(currentPrice)}</p>
           </div>
-          <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+          <div className="motion-scale-pop rounded-2xl border border-brand-primary/25 bg-brand-primary/10 p-4 shadow-[0_18px_44px_-34px_rgba(38,84,119,0.8)]">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-muted break-words">
               Suggested
             </p>
             <p className="mt-2 text-xl font-black text-brand-ink break-words">{formatCurrency(suggestedPrice)}</p>
           </div>
-          <div className={cn('rounded-2xl border p-4', adjustmentStyle.className)}>
+          <div className={cn('motion-card-hover rounded-2xl border p-4', adjustmentStyle.className)}>
             <div className="flex min-w-0 items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
               <AdjustmentIcon className="h-4 w-4 shrink-0" />
               {adjustmentStyle.label}

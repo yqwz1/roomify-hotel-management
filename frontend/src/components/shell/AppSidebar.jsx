@@ -111,8 +111,8 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                       >
                         <span
                           className={cn(
-                            'absolute inset-y-2 start-0 w-1 rounded-full bg-white transition-opacity duration-200',
-                            isActive ? 'opacity-80' : 'opacity-0'
+                            'motion-active-indicator absolute inset-y-2 start-0 w-1 rounded-full bg-white',
+                            isActive ? 'scale-y-100 opacity-80' : 'scale-y-50 opacity-0'
                           )}
                           aria-hidden="true"
                         />

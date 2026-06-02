@@ -33,8 +33,8 @@ import GuestAssistantQuickActions from './GuestAssistantQuickActions';
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-const CHAT_PANEL_EXIT_MS = 240;
-const CHAT_PANEL_EASE = [0.21, 0.47, 0.32, 0.98];
+const CHAT_PANEL_EXIT_MS = 280;
+const CHAT_PANEL_EASE = [0.16, 1, 0.3, 1];
 
 export default function FloatingGuestAssistant() {
   const { user, isAuthenticated } = useAuth();
@@ -587,16 +587,20 @@ export default function FloatingGuestAssistant() {
 
       {panelMounted ? (
           <motion.aside
-            initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.96 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 44, scale: 0.92, filter: 'blur(5px)' }}
             animate={
               reduceMotion || panelVisible
-                ? { opacity: 1, y: 0, scale: 1 }
-                : { opacity: 0, y: 28, scale: 0.96 }
+                ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+                : { opacity: 0, y: 34, scale: 0.94, filter: 'blur(4px)' }
             }
-            transition={{ duration: reduceMotion ? 0 : 0.24, ease: CHAT_PANEL_EASE }}
-            className={`fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 origin-bottom-right flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/90 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl will-change-transform sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))] ${panelVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            transition={{ duration: reduceMotion ? 0 : panelVisible ? 0.38 : 0.24, ease: CHAT_PANEL_EASE }}
+            className={`motion-roomie-panel-shell fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/55 bg-white/[0.92] backdrop-blur-xl will-change-transform sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))] ${panelVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
             aria-hidden={!panelVisible}
           >
+            <div
+              className="pointer-events-none absolute -bottom-10 end-4 h-28 w-28 rounded-full bg-brand-primary/20 blur-2xl"
+              aria-hidden="true"
+            />
             <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
               <div className="flex min-w-0 items-start justify-between gap-4">
                 <div className="min-w-0">
@@ -774,10 +778,10 @@ export default function FloatingGuestAssistant() {
                   type="button"
                   onClick={handleSendMessage}
                   disabled={sending || !normalizedInput || assistantMessagingLocked}
-                  className="motion-press pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  className="motion-button-press pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-[0_14px_32px_-20px_rgba(26,43,58,0.85)] transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send guest assistant message"
                 >
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="h-4 w-4 shrink-0" />}
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="motion-send-icon h-4 w-4 shrink-0" />}
                 </Button>
               </div>
             </div>

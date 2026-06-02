@@ -6,7 +6,7 @@ const ErrorState = ({ title, message, onRetry }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="motion-status-error flex min-w-0 flex-col items-center justify-center rounded-3xl border border-brand-danger/25 bg-brand-danger/[0.05] p-8 text-center">
+    <div className="motion-warning-in flex min-w-0 flex-col items-center justify-center rounded-3xl border border-brand-danger/25 bg-brand-danger/[0.05] p-8 text-center">
       <div className="mb-4 shrink-0 rounded-full bg-white p-3 text-brand-danger shadow-sm ring-1 ring-brand-danger/20">
         <AlertCircle className="h-8 w-8 shrink-0" />
       </div>

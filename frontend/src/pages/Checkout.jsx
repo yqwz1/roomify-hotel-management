@@ -357,7 +357,7 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
           <Button type="button" variant="outline" onClick={onClose} className="h-12 border-brand-surface-border bg-white text-brand-ink hover:bg-brand-surface-light">
             {t('cancel')}
           </Button>
-          <Button type="submit" disabled={submitting} className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep">
+          <Button type="submit" disabled={submitting} className={`h-12 bg-brand-primary text-white hover:bg-brand-primary-deep ${submitting ? 'motion-processing' : ''}`}>
             {submitting ? t('checkoutPage.paymentSubmitting') : t('checkoutPage.paymentSubmit')}
           </Button>
         </div>
@@ -862,7 +862,7 @@ export default function Checkout() {
                       type="button"
                       onClick={() => setPaymentModalOpen(true)}
                       disabled={!canRecordPayment || paymentLoading}
-                      className="h-12 bg-brand-primary text-white hover:bg-brand-primary-deep"
+                      className={`h-12 bg-brand-primary text-white hover:bg-brand-primary-deep ${paymentLoading ? 'motion-processing' : ''}`}
                     >
                       <Wallet className="h-4 w-4 shrink-0" />
                       {t('checkoutPage.openPaymentModal')}
@@ -945,7 +945,7 @@ export default function Checkout() {
                   type="button"
                   onClick={handleCheckout}
                   disabled={!canCheckOut || checkoutLoading}
-                  className="h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep"
+                  className={`h-14 w-full bg-brand-primary text-sm font-bold text-white hover:bg-brand-primary-deep ${checkoutLoading ? 'motion-processing' : ''}`}
                 >
                   {checkoutLoading ? (
                     t('checkoutPage.processing')

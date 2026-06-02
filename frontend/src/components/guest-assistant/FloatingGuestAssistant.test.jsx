@@ -222,7 +222,7 @@ describe('FloatingGuestAssistant', () => {
       expect(screen.getByText('Messages')).toBeInTheDocument();
 
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(260);
+        await vi.advanceTimersByTimeAsync(320);
       });
 
       expect(screen.queryByText('Messages')).not.toBeInTheDocument();

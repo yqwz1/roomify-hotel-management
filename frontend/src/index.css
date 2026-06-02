@@ -34,8 +34,11 @@
   --motion-fast: 140ms;
   --motion-normal: 240ms;
   --motion-slow: 420ms;
+  --motion-roomie: 380ms;
   --ease-premium: cubic-bezier(0.21, 0.47, 0.32, 0.98);
   --ease-press: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 }
 html,
 body,
@@ -197,32 +200,72 @@ textarea {
     will-change: opacity, transform;
   }
 
+  .motion-rise-in,
+  .motion-slide-up-strong {
+    animation: motion-slide-up-strong var(--motion-slow) var(--ease-out-expo) both;
+    will-change: opacity, transform, filter;
+  }
+
+  .motion-scale-pop {
+    animation: motion-scale-pop var(--motion-slow) var(--ease-spring-soft) both;
+    will-change: opacity, transform;
+  }
+
   .motion-panel-pop {
     animation: motion-panel-pop var(--motion-normal) var(--ease-premium) both;
     transform-origin: bottom right;
     will-change: opacity, transform;
   }
 
-  .motion-card-lift {
+  .motion-stagger-parent {
+    --stagger-step: 58ms;
+  }
+
+  .motion-stagger-item {
+    animation: motion-stagger-item var(--motion-slow) var(--ease-out-expo) both;
+    animation-delay: min(calc(var(--motion-index, 0) * var(--stagger-step)), 420ms);
+    will-change: opacity, transform;
+  }
+
+  .motion-stagger-parent .motion-stagger-item:nth-child(1) { --motion-index: 0; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(2) { --motion-index: 1; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(3) { --motion-index: 2; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(4) { --motion-index: 3; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(5) { --motion-index: 4; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(6) { --motion-index: 5; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(7) { --motion-index: 6; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(8) { --motion-index: 7; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(9) { --motion-index: 8; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(10) { --motion-index: 9; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(11) { --motion-index: 10; }
+  .motion-stagger-parent .motion-stagger-item:nth-child(12) { --motion-index: 11; }
+
+  .motion-card-lift,
+  .motion-card-hover {
     transform: translateZ(0);
     transition:
-      transform var(--motion-normal) var(--ease-premium),
-      box-shadow var(--motion-normal) var(--ease-premium),
+      transform var(--motion-slow) var(--ease-out-expo),
+      box-shadow var(--motion-slow) var(--ease-out-expo),
       border-color var(--motion-normal) var(--ease-premium),
       background-color var(--motion-normal) var(--ease-premium),
+      filter var(--motion-normal) var(--ease-premium),
       color var(--motion-fast) ease-out;
   }
 
-  .motion-card-lift:hover {
-    transform: translate3d(0, -3px, 0);
-    box-shadow: 0 22px 55px -32px rgba(15, 23, 42, 0.42);
+  .motion-card-lift:hover,
+  .motion-card-hover:hover {
+    transform: translate3d(0, -5px, 0) scale(1.006);
+    box-shadow: 0 26px 70px -34px rgba(15, 23, 42, 0.55);
+    border-color: rgba(38, 75, 107, 0.28);
   }
 
-  .motion-card-lift:active {
-    transform: translate3d(0, -1px, 0) scale(0.992);
+  .motion-card-lift:active,
+  .motion-card-hover:active {
+    transform: translate3d(0, -2px, 0) scale(0.992);
   }
 
-  .motion-press {
+  .motion-press,
+  .motion-button-press {
     transition:
       transform var(--motion-fast) var(--ease-press),
       box-shadow var(--motion-normal) var(--ease-premium),
@@ -231,7 +274,8 @@ textarea {
       color var(--motion-fast) ease-out;
   }
 
-  .motion-press:active {
+  .motion-press:active,
+  .motion-button-press:active {
     transform: scale(0.975);
   }
 
@@ -244,9 +288,20 @@ textarea {
     will-change: opacity, transform;
   }
 
+  .motion-modal-enter {
+    animation: motion-modal-content var(--motion-slow) var(--ease-spring-soft) both;
+    will-change: opacity, transform;
+  }
+
+  .motion-bottom-sheet {
+    animation: motion-bottom-sheet var(--motion-roomie) var(--ease-out-expo) both;
+    transform-origin: bottom center;
+    will-change: opacity, transform;
+  }
+
   .motion-message-in {
-    animation: motion-message-in var(--motion-normal) var(--ease-premium) both;
-    animation-delay: min(calc(var(--motion-index, 0) * 24ms), 160ms);
+    animation: motion-message-in var(--motion-roomie) var(--ease-out-expo) both;
+    animation-delay: min(calc(var(--motion-index, 0) * 42ms), 260ms);
     will-change: opacity, transform;
   }
 
@@ -258,12 +313,31 @@ textarea {
     --message-x: -14px;
   }
 
+  .motion-message-user {
+    --message-x: 18px;
+    animation: motion-message-in var(--motion-roomie) var(--ease-out-expo) both;
+  }
+
+  .motion-message-assistant {
+    --message-x: -18px;
+    animation: motion-message-in var(--motion-roomie) var(--ease-out-expo) both;
+  }
+
   .motion-status-success {
     animation: motion-status-pop var(--motion-normal) var(--ease-premium) both;
   }
 
   .motion-status-error {
     animation: motion-status-error var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-success-check {
+    animation: motion-success-check 520ms var(--ease-spring-soft) both;
+    transform-origin: center;
+  }
+
+  .motion-warning-in {
+    animation: motion-warning-in var(--motion-slow) var(--ease-out-expo) both;
   }
 
   .motion-skeleton-shimmer {
@@ -290,6 +364,85 @@ textarea {
 
   .motion-typing-dot:nth-child(3) {
     animation-delay: 240ms;
+  }
+
+  .motion-typing-bubble {
+    animation: motion-typing-bubble 1.8s ease-in-out infinite;
+  }
+
+  .motion-active-indicator {
+    transform-origin: center;
+    transition:
+      opacity var(--motion-normal) var(--ease-premium),
+      transform var(--motion-normal) var(--ease-spring-soft);
+  }
+
+  .motion-roomie-launcher {
+    isolation: isolate;
+    overflow: visible;
+  }
+
+  .motion-roomie-launcher::before,
+  .motion-roomie-launcher::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .motion-roomie-launcher::before {
+    background: radial-gradient(circle, rgba(38,84,119,0.38), transparent 68%);
+    animation: motion-roomie-pulse 2.8s ease-in-out infinite;
+  }
+
+  .motion-roomie-launcher::after {
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 0 0 rgba(38,84,119,0.26);
+    animation: motion-roomie-ring 2.8s ease-in-out infinite;
+  }
+
+  .motion-roomie-panel-shell {
+    transform-origin: calc(100% - 2rem) 100%;
+    box-shadow:
+      0 34px 95px -38px rgba(15,23,42,0.72),
+      0 0 0 1px rgba(255,255,255,0.48),
+      0 0 55px -28px rgba(38,84,119,0.8);
+  }
+
+  [dir="rtl"] .motion-roomie-panel-shell {
+    transform-origin: 2rem 100%;
+  }
+
+  .motion-roomie-panel-enter {
+    animation: motion-roomie-panel-enter var(--motion-roomie) var(--ease-out-expo) both;
+  }
+
+  .motion-roomie-panel-exit {
+    animation: motion-roomie-panel-exit var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-send-icon {
+    transition: transform var(--motion-normal) var(--ease-spring-soft);
+  }
+
+  button:hover .motion-send-icon {
+    transform: translate3d(2px, -2px, 0);
+  }
+
+  .motion-processing {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .motion-processing::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.34) 50%, transparent 80%);
+    animation: motion-processing-scan 1.15s ease-in-out infinite;
   }
 }
 
@@ -320,10 +473,60 @@ textarea {
   }
 }
 
+@keyframes motion-slide-up-strong {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, 34px, 0) scale(0.982);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-scale-pop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.94);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -1px, 0) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-stagger-item {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 @keyframes motion-panel-pop {
   from {
     opacity: 0;
     transform: translate3d(0, 22px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-bottom-sheet {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.96);
   }
   to {
     opacity: 1;
@@ -345,7 +548,7 @@ textarea {
 @keyframes motion-message-in {
   from {
     opacity: 0;
-    transform: translate3d(var(--message-x, 0), 10px, 0) scale(0.985);
+    transform: translate3d(var(--message-x, 0), 16px, 0) scale(0.955);
   }
   to {
     opacity: 1;
@@ -379,6 +582,36 @@ textarea {
   }
 }
 
+@keyframes motion-success-check {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-10deg);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.12) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes motion-warning-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.97);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -1px, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 @keyframes motion-shimmer {
   100% {
     transform: translateX(100%);
@@ -396,6 +629,76 @@ textarea {
   }
 }
 
+@keyframes motion-typing-bubble {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 12px 28px -22px rgba(15,23,42,0.36);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.018);
+    box-shadow: 0 18px 36px -24px rgba(15,23,42,0.46);
+  }
+}
+
+@keyframes motion-roomie-pulse {
+  0%, 100% {
+    opacity: 0.52;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes motion-roomie-ring {
+  0%, 100% {
+    opacity: 0.32;
+    transform: scale(0.92);
+    box-shadow: 0 0 0 0 rgba(38,84,119,0.22);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.12);
+    box-shadow: 0 0 0 10px rgba(38,84,119,0);
+  }
+}
+
+@keyframes motion-roomie-panel-enter {
+  0% {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translate3d(0, 44px, 0) scale(0.92);
+  }
+  72% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, -2px, 0) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-roomie-panel-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.94);
+  }
+}
+
+@keyframes motion-processing-scan {
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -409,24 +712,52 @@ textarea {
   .motion-page-enter,
   .motion-fade-in,
   .motion-slide-up,
+  .motion-rise-in,
+  .motion-slide-up-strong,
+  .motion-scale-pop,
   .motion-panel-pop,
+  .motion-stagger-item,
   .motion-modal-backdrop,
   .motion-modal-content,
+  .motion-modal-enter,
+  .motion-bottom-sheet,
   .motion-message-in,
+  .motion-message-user,
+  .motion-message-assistant,
   .motion-status-success,
-  .motion-status-error {
+  .motion-status-error,
+  .motion-success-check,
+  .motion-warning-in,
+  .motion-roomie-panel-enter,
+  .motion-roomie-panel-exit {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
 
-  .motion-modal-content {
+  .motion-roomie-launcher::before,
+  .motion-roomie-launcher::after,
+  .motion-typing-bubble,
+  .motion-typing-dot,
+  .motion-skeleton-shimmer::after {
+    animation: none !important;
+  }
+
+  .motion-processing::after {
+    display: none !important;
+  }
+
+  .motion-modal-content,
+  .motion-modal-enter {
     transform: translate(-50%, -50%) !important;
   }
 
   .motion-card-lift:hover,
   .motion-card-lift:active,
-  .motion-press:active {
+  .motion-card-hover:hover,
+  .motion-card-hover:active,
+  .motion-press:active,
+  .motion-button-press:active {
     transform: none !important;
   }
 }

@@ -255,7 +255,7 @@ export default function DemoPaymentGateway() {
                 <Button variant="unstyled" size="none"
                   type="submit"
                   disabled={submitting}
-                  className="motion-press inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
+                  className={`motion-button-press inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60 ${submitting ? 'motion-processing' : ''}`}
                 >
                   {submitting ? (
                     <>
