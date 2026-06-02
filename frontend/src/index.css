@@ -31,6 +31,11 @@
 :root {
   color-scheme: light;
   --roomify-mobile-nav-height: 0px;
+  --motion-fast: 140ms;
+  --motion-normal: 240ms;
+  --motion-slow: 420ms;
+  --ease-premium: cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --ease-press: cubic-bezier(0.2, 0, 0, 1);
 }
 html,
 body,
@@ -174,5 +179,254 @@ textarea {
 @media (max-width: 1023px) {
   :root {
     --roomify-mobile-nav-height: 5.75rem;
+  }
+}
+
+@layer utilities {
+  .motion-page-enter {
+    animation: motion-page-enter var(--motion-slow) var(--ease-premium) both;
+    will-change: opacity, transform;
+  }
+
+  .motion-fade-in {
+    animation: motion-fade-in var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-slide-up {
+    animation: motion-slide-up var(--motion-normal) var(--ease-premium) both;
+    will-change: opacity, transform;
+  }
+
+  .motion-panel-pop {
+    animation: motion-panel-pop var(--motion-normal) var(--ease-premium) both;
+    transform-origin: bottom right;
+    will-change: opacity, transform;
+  }
+
+  .motion-card-lift {
+    transform: translateZ(0);
+    transition:
+      transform var(--motion-normal) var(--ease-premium),
+      box-shadow var(--motion-normal) var(--ease-premium),
+      border-color var(--motion-normal) var(--ease-premium),
+      background-color var(--motion-normal) var(--ease-premium),
+      color var(--motion-fast) ease-out;
+  }
+
+  .motion-card-lift:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: 0 22px 55px -32px rgba(15, 23, 42, 0.42);
+  }
+
+  .motion-card-lift:active {
+    transform: translate3d(0, -1px, 0) scale(0.992);
+  }
+
+  .motion-press {
+    transition:
+      transform var(--motion-fast) var(--ease-press),
+      box-shadow var(--motion-normal) var(--ease-premium),
+      background-color var(--motion-fast) ease-out,
+      border-color var(--motion-fast) ease-out,
+      color var(--motion-fast) ease-out;
+  }
+
+  .motion-press:active {
+    transform: scale(0.975);
+  }
+
+  .motion-modal-backdrop {
+    animation: motion-fade-in var(--motion-normal) ease-out both;
+  }
+
+  .motion-modal-content {
+    animation: motion-modal-content var(--motion-normal) var(--ease-premium) both;
+    will-change: opacity, transform;
+  }
+
+  .motion-message-in {
+    animation: motion-message-in var(--motion-normal) var(--ease-premium) both;
+    animation-delay: min(calc(var(--motion-index, 0) * 24ms), 160ms);
+    will-change: opacity, transform;
+  }
+
+  .motion-message-in-from-end {
+    --message-x: 14px;
+  }
+
+  .motion-message-in-from-start {
+    --message-x: -14px;
+  }
+
+  .motion-status-success {
+    animation: motion-status-pop var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-status-error {
+    animation: motion-status-error var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .motion-skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.56), transparent);
+    animation: motion-shimmer 1.4s ease-in-out infinite;
+  }
+
+  .motion-typing-dot {
+    animation: motion-typing-dot 1.05s ease-in-out infinite;
+  }
+
+  .motion-typing-dot:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .motion-typing-dot:nth-child(3) {
+    animation-delay: 240ms;
+  }
+}
+
+@keyframes motion-page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motion-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes motion-slide-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motion-panel-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-modal-content {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 16px), 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+}
+
+@keyframes motion-message-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--message-x, 0), 10px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-status-pop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.97);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -1px, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motion-status-error {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motion-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes motion-typing-dot {
+  0%, 80%, 100% {
+    opacity: 0.38;
+    transform: translateY(0) scale(0.9);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .motion-page-enter,
+  .motion-fade-in,
+  .motion-slide-up,
+  .motion-panel-pop,
+  .motion-modal-backdrop,
+  .motion-modal-content,
+  .motion-message-in,
+  .motion-status-success,
+  .motion-status-error {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .motion-modal-content {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .motion-card-lift:hover,
+  .motion-card-lift:active,
+  .motion-press:active {
+    transform: none !important;
   }
 }

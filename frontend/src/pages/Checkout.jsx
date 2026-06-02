@@ -189,7 +189,7 @@ function BillBreakdown({ bill, t, language }) {
 
 function PaymentReceiptCard({ payment, t, language }) {
   return (
-    <div className="rounded-[1.4rem] border border-brand-success/30 bg-brand-success/10 p-5" data-testid="payment-receipt">
+    <div className="motion-status-success rounded-[1.4rem] border border-brand-success/30 bg-brand-success/10 p-5" data-testid="payment-receipt">
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
@@ -310,7 +310,7 @@ function PaymentDialog({ outstandingBalance, language, t, onClose, onSubmit, sub
         </div>
 
         {formError ? (
-          <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+          <div className="motion-status-error rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
             {formError}
           </div>
         ) : null}
@@ -727,7 +727,7 @@ export default function Checkout() {
               </div>
 
               {!checkoutSuccess && blockingMessage ? (
-                <div className="mt-4 rounded-[1.25rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm font-medium text-brand-warning">
+                <div className="motion-status-error mt-4 rounded-[1.25rem] border border-brand-warning/30 bg-brand-warning/10 px-4 py-3 text-sm font-medium text-brand-warning">
                   {blockingMessage}
                 </div>
               ) : null}
@@ -740,7 +740,7 @@ export default function Checkout() {
                   />
                   {selected ? (
                     <div className="mt-4 space-y-4">
-                      <div className="rounded-[1.35rem] border border-brand-success/30 bg-brand-success/10 p-4">
+                      <div className="motion-status-success rounded-[1.35rem] border border-brand-success/30 bg-brand-success/10 p-4">
                         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-success break-words">
@@ -870,7 +870,7 @@ export default function Checkout() {
                   </div>
 
                   {paymentError ? (
-                    <div className="rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                    <div className="motion-status-error rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                       {paymentError}
                     </div>
                   ) : null}
@@ -926,7 +926,7 @@ export default function Checkout() {
               </div>
 
               {checkoutError ? (
-                <div className="mt-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
+                <div className="motion-status-error mt-5 rounded-[1.25rem] border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm font-medium text-brand-danger">
                   {checkoutError}
                 </div>
               ) : null}

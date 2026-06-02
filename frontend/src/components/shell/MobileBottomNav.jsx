@@ -56,7 +56,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
   const items = MOBILE_NAV_ITEMS[primaryRole] ?? [];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-surface-border bg-brand-surface/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl lg:hidden">
+    <nav className="motion-slide-up fixed inset-x-0 bottom-0 z-30 border-t border-brand-surface-border bg-brand-surface/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-18px_45px_-34px_rgba(15,23,42,0.55)] backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
         {items.map((item) => {
           const Icon = item.icon;
@@ -67,10 +67,10 @@ export default function MobileBottomNav({ onOpenMenu }) {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition',
+                'motion-press flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition-all duration-200',
                 isActive
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'text-brand-ink-muted hover:bg-white hover:text-brand-ink'
+                  ? 'bg-brand-primary text-white shadow-[0_12px_28px_-18px_rgba(26,43,58,0.7)]'
+                  : 'text-brand-ink-muted hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink'
               )}
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
@@ -84,7 +84,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <Button variant="unstyled" size="none"
           type="button"
           onClick={onOpenMenu}
-          className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition hover:bg-white hover:text-brand-ink"
+          className="motion-press flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink"
           aria-label={t('openNavigation')}
         >
           <Menu className="h-4 w-4 flex-shrink-0" />

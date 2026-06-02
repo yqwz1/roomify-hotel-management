@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Loader2, SendHorizonal, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,11 +33,17 @@ import GuestAssistantQuickActions from './GuestAssistantQuickActions';
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
+const CHAT_PANEL_EXIT_MS = 240;
+const CHAT_PANEL_EASE = [0.21, 0.47, 0.32, 0.98];
+
 export default function FloatingGuestAssistant() {
   const { user, isAuthenticated } = useAuth();
   const { t, i18n } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const isGuest = Array.isArray(user?.roles) && user.roles.includes('ROLE_GUEST');
   const [open, setOpen] = useState(false);
+  const [panelMounted, setPanelMounted] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState('');
@@ -51,6 +57,8 @@ export default function FloatingGuestAssistant() {
   const [staffTyping, setStaffTyping] = useState(false);
   const [toast, setToast] = useState(null);
   const typingTimeoutRef = useRef(null);
+  const panelCloseTimeoutRef = useRef(null);
+  const panelOpenFrameRef = useRef(null);
   const activeConversationIdRef = useRef('');
 
   const reservationAccess = useMemo(
@@ -218,7 +226,43 @@ export default function FloatingGuestAssistant() {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
+    if (panelCloseTimeoutRef.current) {
+      clearTimeout(panelCloseTimeoutRef.current);
+    }
+    if (panelOpenFrameRef.current) {
+      const cancelFrame = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout;
+      cancelFrame(panelOpenFrameRef.current);
+    }
   }, []);
+
+  useEffect(() => {
+    if (panelCloseTimeoutRef.current) {
+      clearTimeout(panelCloseTimeoutRef.current);
+    }
+    if (panelOpenFrameRef.current) {
+      const cancelFrame = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout;
+      cancelFrame(panelOpenFrameRef.current);
+    }
+
+    if (open) {
+      setPanelMounted(true);
+      const requestFrame = typeof requestAnimationFrame === 'function'
+        ? requestAnimationFrame
+        : (callback) => setTimeout(callback, 16);
+      panelOpenFrameRef.current = requestFrame(() => {
+        setPanelVisible(true);
+      });
+      return undefined;
+    }
+
+    setPanelVisible(false);
+
+    panelCloseTimeoutRef.current = setTimeout(() => {
+      setPanelMounted(false);
+    }, reduceMotion ? 0 : CHAT_PANEL_EXIT_MS);
+
+    return undefined;
+  }, [open, reduceMotion]);
 
   useEffect(() => {
     if (!isAuthenticated || !isGuest) return undefined;
@@ -541,14 +585,17 @@ export default function FloatingGuestAssistant() {
         onClick={() => setOpen((current) => !current)}
       />
 
-      <AnimatePresence>
-        {open ? (
+      {panelMounted ? (
           <motion.aside
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))]"
+            initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.96 }}
+            animate={
+              reduceMotion || panelVisible
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 28, scale: 0.96 }
+            }
+            transition={{ duration: reduceMotion ? 0 : 0.24, ease: CHAT_PANEL_EASE }}
+            className={`fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 origin-bottom-right flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/90 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl will-change-transform sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))] ${panelVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            aria-hidden={!panelVisible}
           >
             <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
               <div className="flex min-w-0 items-start justify-between gap-4">
@@ -568,7 +615,7 @@ export default function FloatingGuestAssistant() {
                 <Button variant="unstyled" size="none"
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-full border border-white/15 bg-white/10 p-2 text-white transition hover:bg-white/20"
+                  className="motion-press rounded-full border border-white/15 bg-white/10 p-2 text-white transition hover:bg-white/20"
                   aria-label="Close guest assistant"
                 >
                   <X className="h-4 w-4 shrink-0" />
@@ -629,7 +676,7 @@ export default function FloatingGuestAssistant() {
                             setActiveConversationId(conversation.publicId);
                             void loadConversationDetail(conversation.publicId);
                           }}
-                          className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
+                          className={`motion-card-lift min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
                             conversation.publicId === activeConversation?.publicId
                               ? 'border-brand-primary/25 bg-brand-primary/10'
                               : 'border-brand-surface-border bg-white'
@@ -661,7 +708,7 @@ export default function FloatingGuestAssistant() {
                         setActiveConversationId(conversation.publicId);
                         void loadConversationDetail(conversation.publicId);
                       }}
-                      className={`min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
+                      className={`motion-card-lift min-w-[10rem] rounded-2xl border px-3 py-2 text-start transition ${
                         conversation.publicId === activeConversation?.publicId
                           ? 'border-brand-primary/25 bg-brand-primary/10'
                           : 'border-brand-surface-border bg-white'
@@ -727,7 +774,7 @@ export default function FloatingGuestAssistant() {
                   type="button"
                   onClick={handleSendMessage}
                   disabled={sending || !normalizedInput || assistantMessagingLocked}
-                  className="pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+                  className="motion-press pointer-events-auto relative z-10 inline-flex min-w-0 h-12 w-12 shrink-0 touch-manipulation items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send guest assistant message"
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <SendHorizonal className="h-4 w-4 shrink-0" />}
@@ -736,7 +783,6 @@ export default function FloatingGuestAssistant() {
             </div>
           </motion.aside>
         ) : null}
-      </AnimatePresence>
 
       <ConfirmationToast
         message={toast?.message ?? null}

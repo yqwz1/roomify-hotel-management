@@ -30,9 +30,12 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
 
   return (
     <>
-      {!isDesktop && isOpen && (
+      {!isDesktop && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          className={cn(
+            'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 [transition-timing-function:var(--ease-premium)] lg:hidden',
+            isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+          )}
           aria-hidden="true"
           onClick={onClose}
         />
@@ -40,7 +43,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-white/8 bg-brand-ink text-white transition-[width,transform,opacity,border-color] duration-300 lg:static lg:z-0 lg:max-w-none',
+          'fixed inset-y-0 z-50 w-[19rem] max-w-[86vw] overflow-hidden border-e border-white/8 bg-brand-ink text-white shadow-[0_24px_80px_-34px_rgba(0,0,0,0.78)] transition-[width,transform,opacity,border-color,box-shadow] duration-300 [transition-timing-function:var(--ease-premium)] lg:static lg:z-0 lg:max-w-none',
           isRtl ? 'left-auto right-0' : 'left-0 right-auto',
           isOpen ? 'translate-x-0 opacity-100' : isRtl ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0',
           isDesktop &&
@@ -100,12 +103,19 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                         to={item.path}
                         onClick={handleNavigation}
                         className={cn(
-                          'group flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
+                          'motion-press group relative flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
                           isActive
                             ? 'bg-brand-primary text-white shadow-sm'
-                            : 'text-white/65 hover:bg-white/8 hover:text-white'
+                            : 'text-white/65 hover:bg-white/8 hover:text-white hover:translate-x-0.5 rtl:hover:-translate-x-0.5'
                         )}
                       >
+                        <span
+                          className={cn(
+                            'absolute inset-y-2 start-0 w-1 rounded-full bg-white transition-opacity duration-200',
+                            isActive ? 'opacity-80' : 'opacity-0'
+                          )}
+                          aria-hidden="true"
+                        />
                         <Icon
                           className={cn(
                             'h-4 w-4 flex-shrink-0 transition-colors',

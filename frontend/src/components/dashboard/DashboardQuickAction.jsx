@@ -28,7 +28,7 @@ export default function DashboardQuickAction({
       type="button"
       onClick={onClick}
       className={cn(
-        'group flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.5rem] border p-4 text-start transition-all duration-200',
+        'motion-card-lift motion-press group flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.5rem] border p-4 text-start transition-all duration-200',
         toneStyles.wrapper
       )}
     >

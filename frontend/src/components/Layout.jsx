@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import Header from './Header'
 import FloatingGuestAssistant from './guest-assistant/FloatingGuestAssistant'
 import AppShell from './shell/AppShell'
+import PageTransition from './motion/PageTransition'
 import SmoothScroll from './motion/SmoothScroll'
 
 function HashScroller() {
@@ -30,7 +31,9 @@ export default function Layout({ children, showSidebar = false }) {
       <SmoothScroll />
       <HashScroller />
       <Header />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="min-w-0 flex-1">
+        <PageTransition>{children}</PageTransition>
+      </main>
       <FloatingGuestAssistant />
     </div>
   )

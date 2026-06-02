@@ -3,6 +3,7 @@ import { Eye, RefreshCcw, RotateCcw } from 'lucide-react';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
+import ModalFrame from '../components/common/ModalFrame';
 import { extractPaymentError, listPayments, refundPayment } from '../services/paymentService';
 import { formatLocalizedCurrency } from '../utils/localization';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ export default function PaymentHistory() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [refundCandidate, setRefundCandidate] = useState(null);
   const [refundingId, setRefundingId] = useState(null);
   const [notice, setNotice] = useState('');
 
@@ -65,10 +67,9 @@ export default function PaymentHistory() {
     );
   }, [payments, query]);
 
-  const handleRefund = async (payment) => {
-    if (!window.confirm('Are you sure you want to refund this payment? This action will mark the payment as refunded.')) {
-      return;
-    }
+  const handleRefund = async () => {
+    if (!refundCandidate) return;
+    const payment = refundCandidate;
     setRefundingId(payment.paymentId);
     setNotice('');
     try {
@@ -79,6 +80,7 @@ export default function PaymentHistory() {
       setError(extractPaymentError(err));
     } finally {
       setRefundingId(null);
+      setRefundCandidate(null);
     }
   };
 
@@ -87,7 +89,7 @@ export default function PaymentHistory() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
+      <div className="motion-slide-up rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Demo Payment Gateway</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-ink break-words">Payment history</h1>
       </div>
@@ -117,8 +119,8 @@ export default function PaymentHistory() {
           />
         </div>
 
-        {notice ? <div className="mb-4 rounded-2xl bg-brand-success/10 p-4 text-sm font-bold text-brand-success">{notice}</div> : null}
-        {error ? <div className="mb-4 rounded-2xl bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">{error}</div> : null}
+        {notice ? <div className="motion-status-success mb-4 rounded-2xl bg-brand-success/10 p-4 text-sm font-bold text-brand-success">{notice}</div> : null}
+        {error ? <div className="motion-status-error mb-4 rounded-2xl bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">{error}</div> : null}
 
         <div className="w-full overflow-x-auto">
           <Table className="min-w-full text-start text-sm">
@@ -155,7 +157,7 @@ export default function PaymentHistory() {
                       {isRefundable(payment) ? (
                         <Button variant="unstyled" size="none"
                           type="button"
-                          onClick={() => handleRefund(payment)}
+                          onClick={() => setRefundCandidate(payment)}
                           disabled={refundingId === payment.paymentId}
                           className="inline-flex min-w-0 items-center gap-1 rounded-full border border-brand-danger/40 px-3 py-2 text-xs font-bold text-brand-danger disabled:opacity-60"
                         >
@@ -173,17 +175,12 @@ export default function PaymentHistory() {
       </DashboardPanel>
 
       {selectedReceipt ? (
-        <div className="fixed inset-0 z-50 flex min-w-0 items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[1.5rem] bg-white p-5">
-            <div className="flex min-w-0 items-start justify-between gap-4 border-b border-brand-surface-border pb-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-primary break-words">Roomify Payment Receipt</p>
-                <h2 className="mt-2 text-xl font-black text-brand-ink break-words">{selectedReceipt.gatewayReference}</h2>
-              </div>
-              <Button variant="unstyled" size="none" type="button" onClick={() => setSelectedReceipt(null)} className="rounded-full border px-3 py-2 text-sm font-bold">
-                Close
-              </Button>
-            </div>
+        <ModalFrame
+          title="Roomify Payment Receipt"
+          description={selectedReceipt.gatewayReference}
+          onClose={() => setSelectedReceipt(null)}
+          widthClassName="max-w-2xl"
+        >
             <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
               {Object.entries({
                 Guest: selectedReceipt.guestName || selectedReceipt.guestEmail,
@@ -209,8 +206,37 @@ export default function PaymentHistory() {
                 Back
               </Button>
             </div>
+        </ModalFrame>
+      ) : null}
+
+      {refundCandidate ? (
+        <ModalFrame
+          title="Refund payment"
+          description="This action will mark the successful demo payment as refunded."
+          onClose={() => setRefundCandidate(null)}
+          widthClassName="max-w-md"
+        >
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Transaction</p>
+              <p className="mt-2 break-words text-sm font-bold text-brand-ink">{refundCandidate.gatewayReference || refundCandidate.paymentId}</p>
+              <p className="mt-2 break-words text-sm font-medium text-brand-ink-muted">
+                {formatLocalizedCurrency(refundCandidate.amount ?? 0, i18n.language)} {refundCandidate.currency || 'SAR'}
+              </p>
+            </div>
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button variant="unstyled" size="none" type="button" onClick={() => setRefundCandidate(null)} className="rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink">
+                Cancel
+              </Button>
+              <Button variant="unstyled" size="none" type="button" onClick={handleRefund} disabled={refundingId === refundCandidate.paymentId} className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-danger px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
+                {refundingId === refundCandidate.paymentId ? (
+                  <RefreshCcw className="h-4 w-4 shrink-0 animate-spin" />
+                ) : null}
+                Refund
+              </Button>
+            </div>
           </div>
-        </div>
+        </ModalFrame>
       ) : null}
     </div>
   );

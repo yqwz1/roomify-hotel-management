@@ -5,7 +5,7 @@ const LoadingState = ({ message }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-[300px] min-w-0 flex-col items-center justify-center p-8 text-center">
+    <div className="motion-fade-in flex min-h-[300px] min-w-0 flex-col items-center justify-center p-8 text-center">
       <Loader2 className="mb-4 h-8 w-8 shrink-0 animate-spin text-brand-primary" />
       <p className="max-w-full break-words font-medium text-brand-ink-muted">{message || t('loadingMessage')}</p>
     </div>

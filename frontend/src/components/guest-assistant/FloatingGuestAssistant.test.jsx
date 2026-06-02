@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FloatingGuestAssistant from './FloatingGuestAssistant';
 import {
@@ -11,10 +11,10 @@ import {
 import { getGuestReservations } from '../../services/guestReservationService';
 
 vi.mock('framer-motion', () => ({
-  AnimatePresence: ({ children }) => children,
   motion: {
-    aside: ({ children, ...props }) => <aside {...props}>{children}</aside>,
+    aside: ({ children, animate, initial, transition, ...props }) => <aside {...props}>{children}</aside>,
   },
+  useReducedMotion: () => false,
 }));
 
 vi.mock('../../context/AuthProvider', () => ({
@@ -202,5 +202,32 @@ describe('FloatingGuestAssistant', () => {
 
     expect(screen.getByRole('combobox')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).not.toBeDisabled();
+  });
+
+  it('keeps the assistant panel mounted until the close animation completes', async () => {
+    vi.useFakeTimers();
+
+    try {
+      render(<FloatingGuestAssistant />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open assistant' }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(20);
+      });
+
+      expect(screen.getByText('Messages')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open assistant' }));
+
+      expect(screen.getByText('Messages')).toBeInTheDocument();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(260);
+      });
+
+      expect(screen.queryByText('Messages')).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

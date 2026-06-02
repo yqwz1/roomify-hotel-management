@@ -18,7 +18,7 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
   const dateTime = payment?.paidAt || payment?.createdAt;
 
   return (
-    <div className="rounded-[1.5rem] border border-brand-surface-border bg-white p-5 print:border-0 print:p-0">
+    <div className="motion-status-success rounded-[1.5rem] border border-brand-surface-border bg-white p-5 print:border-0 print:p-0">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-brand-surface-border pb-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
@@ -148,7 +148,7 @@ export default function DemoPaymentGateway() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
+      <div className="motion-slide-up rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Demo Payment Gateway</p>
@@ -172,17 +172,17 @@ export default function DemoPaymentGateway() {
         >
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid min-w-0 gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Reservation</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">{confirmationNumber}</p>
               </div>
-              <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Amount</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                   {formatLocalizedCurrency(payableAmount, i18n.language)} SAR
                 </p>
               </div>
-              <div className="rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Invoice</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">{reservation?.invoiceStatus || 'PENDING'}</p>
               </div>
@@ -239,13 +239,13 @@ export default function DemoPaymentGateway() {
             </div>
 
             {paymentError ? (
-              <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">
+              <div className="motion-status-error rounded-2xl border border-brand-danger/30 bg-brand-danger/10 p-4 text-sm font-bold text-brand-danger">
                 {paymentError}
               </div>
             ) : null}
 
             {isFailed ? (
-              <div className="rounded-2xl border border-brand-surface-border bg-white p-4 text-sm font-semibold text-brand-ink-muted">
+              <div className="motion-status-error rounded-2xl border border-brand-surface-border bg-white p-4 text-sm font-semibold text-brand-ink-muted">
                 The reservation was cancelled after the failed payment. Please create a new reservation if you want to book this room.
               </div>
             ) : null}
@@ -255,9 +255,16 @@ export default function DemoPaymentGateway() {
                 <Button variant="unstyled" size="none"
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
+                  className="motion-press inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
                 >
-                  {submitting ? 'Processing...' : 'Pay Now'}
+                  {submitting ? (
+                    <>
+                      <span className="motion-typing-dot h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />
+                      <span className="motion-typing-dot h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />
+                      <span className="motion-typing-dot h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />
+                      <span>Processing...</span>
+                    </>
+                  ) : 'Pay Now'}
                 </Button>
               ) : null}
               <Button variant="unstyled" size="none"

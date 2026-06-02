@@ -36,13 +36,13 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-brand-surface-border bg-brand-surface/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-brand-surface-border bg-brand-surface/90 shadow-[0_12px_35px_-34px_rgba(15,23,42,0.55)] backdrop-blur-xl">
       <div className="flex min-w-0 min-h-20 flex-wrap items-start gap-3 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:items-center sm:px-6 sm:pt-3 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button variant="unstyled" size="none"
             type="button"
             onClick={onMenuToggle}
-            className="rounded-2xl border border-brand-surface-border bg-white p-3 text-brand-ink-muted shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+            className="motion-press rounded-2xl border border-brand-surface-border bg-white p-3 text-brand-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30 hover:text-brand-primary-deep"
             aria-label={isSidebarOpen ? t('closeNavigation') : t('openNavigation')}
             aria-pressed={isSidebarOpen}
           >
@@ -79,7 +79,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
           </div>
           <Link
             to={homePath}
-            className="inline-flex min-w-0 shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep max-[380px]:hidden"
+            className="motion-press inline-flex min-w-0 shrink-0 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-bold text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30 hover:text-brand-primary-deep max-[380px]:hidden"
           >
             {t('homeNav')}
           </Link>
@@ -99,7 +99,7 @@ export default function AppTopbar({ isSidebarOpen, onMenuToggle }) {
           <Button variant="unstyled" size="none"
             type="button"
             onClick={handleLogout}
-            className="inline-flex min-w-0 shrink-0 items-center gap-2 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-semibold text-brand-ink shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary-deep"
+            className="motion-press inline-flex min-w-0 shrink-0 items-center gap-2 rounded-full border border-brand-surface-border bg-white px-3 py-2 text-sm font-semibold text-brand-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30 hover:text-brand-primary-deep"
             title={t('logout')}
           >
             <LogOut className="h-4 w-4 shrink-0" />

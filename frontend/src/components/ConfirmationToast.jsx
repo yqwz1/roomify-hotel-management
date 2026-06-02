@@ -40,8 +40,7 @@ export default function ConfirmationToast({ message, type = 'success', duration 
       role="status"
       aria-live="polite"
       className={`
-        fixed end-3 top-6 z-[9999] w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl border shadow-2xl sm:end-6 sm:w-80
-        animate-in slide-in-from-top-2 fade-in duration-300
+        motion-slide-up fixed end-3 top-6 z-[9999] w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl border shadow-2xl sm:end-6 sm:w-80
         ${tone.bg}
       `}
     >
