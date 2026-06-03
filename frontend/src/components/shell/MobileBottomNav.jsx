@@ -67,7 +67,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
               key={item.path}
               to={item.path}
               className={cn(
-                'motion-press flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition-all duration-200',
+                'motion-button-premium flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center transition-all duration-200',
                 isActive
                   ? 'bg-brand-primary text-white shadow-[0_12px_28px_-18px_rgba(26,43,58,0.7)]'
                   : 'text-brand-ink-muted hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink'
@@ -84,7 +84,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <Button variant="unstyled" size="none"
           type="button"
           onClick={onOpenMenu}
-          className="motion-press flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink"
+          className="motion-button-premium flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-brand-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink"
           aria-label={t('openNavigation')}
         >
           <Menu className="h-4 w-4 flex-shrink-0" />

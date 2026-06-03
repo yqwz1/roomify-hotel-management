@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "motion-press inline-flex max-w-full items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "motion-button-premium motion-button-icon-slide inline-flex max-w-full items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -42,7 +42,7 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, ..
   const unstyledClassName =
     variant === "unstyled"
       ? cn(
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+          "motion-button-premium motion-button-icon-slide focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
           className
         )
       : null

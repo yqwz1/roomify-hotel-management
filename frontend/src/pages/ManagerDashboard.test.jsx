@@ -201,4 +201,17 @@ describe('ManagerDashboard', () => {
     expect(screen.queryByRole('button', { name: /Staff/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Reservations/i })).toBeInTheDocument();
   });
+
+  it('keeps manager live snapshot currency values overflow-safe', () => {
+    useManagerDashboard.mockReturnValue(dashboardData);
+
+    renderPage();
+
+    const revenuePerReservation = screen.getAllByText(/SAR\s*233/)[0];
+    const valueWrapper = revenuePerReservation.closest('p');
+
+    expect(valueWrapper.className).toContain('[overflow-wrap:anywhere]');
+    expect(valueWrapper.className).not.toContain('overflow-hidden');
+    expect(revenuePerReservation.className).not.toContain('whitespace-nowrap');
+  });
 });

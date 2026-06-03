@@ -297,7 +297,7 @@ export default function GuestDashboard() {
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">{displayName}</p>
-              <p className="truncate text-sm text-white/65">{user?.email || SUPPORT_EMAIL}</p>
+              <p className="max-w-full break-all text-sm leading-5 text-white/65">{user?.email || SUPPORT_EMAIL}</p>
             </div>
           </div>
         </div>
@@ -327,8 +327,8 @@ export default function GuestDashboard() {
           label={t(`${pageTx}.metrics.supportEmailLabel`)}
           value={SUPPORT_EMAIL}
           hint={SUPPORT_EMAIL}
-          valueClassName="text-xl sm:text-2xl"
-          hintClassName="text-xs sm:text-sm text-brand-ink-hint"
+          valueClassName="text-lg leading-tight sm:text-xl break-all [overflow-wrap:anywhere]"
+          hintClassName="text-xs sm:text-sm text-brand-ink-hint break-all [overflow-wrap:anywhere]"
         />
         <DashboardMetricCard
           icon={LifeBuoy}

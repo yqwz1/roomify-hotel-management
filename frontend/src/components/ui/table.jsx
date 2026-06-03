@@ -3,7 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="relative min-w-0 max-w-full overflow-auto">
+  <div className="motion-table-reveal relative min-w-0 max-w-full overflow-auto rounded-[1.25rem]">
     <table
       ref={ref}
       className={cn("w-full min-w-full caption-bottom text-sm", className)}
@@ -38,6 +38,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
     ref={ref}
     className={cn(
       "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "motion-table-row-premium hover:shadow-[inset_3px_0_0_rgba(38,75,107,0.24)]",
       className
     )}
     {...props} />

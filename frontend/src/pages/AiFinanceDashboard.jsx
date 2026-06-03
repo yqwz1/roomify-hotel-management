@@ -24,6 +24,7 @@ import ForecastChart from '../components/ai-finance/ForecastChart';
 import PricingRecommendationCard from '../components/ai-finance/PricingRecommendationCard';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
+import AnimatedNumber from '../components/motion/AnimatedNumber';
 import { Card, CardContent } from '../components/ui/card';
 import { useAiFinance } from '../hooks/useAiFinance';
 import { cn } from '../lib/utils';
@@ -141,7 +142,7 @@ const getFallbackMessage = (payload) =>
 
 function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
   return (
-    <Card className={cn('rounded-[1.5rem] border p-0 shadow-sm', className)}>
+    <Card className={cn('motion-kpi-reveal rounded-[1.5rem] border p-0 shadow-sm', className)}>
       <CardContent className="p-5">
         <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0">
@@ -149,7 +150,7 @@ function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
               {label}
             </p>
             <p className="mt-3 break-words text-2xl font-black tracking-tight sm:text-3xl">
-              {value}
+              <AnimatedNumber value={value} dir="ltr" className="inline-block max-w-full [unicode-bidi:isolate]" />
             </p>
             <p className="mt-2 text-sm font-medium leading-6 opacity-75 break-words">{hint}</p>
           </div>
@@ -164,7 +165,7 @@ function DataSummaryCard({ icon: Icon, label, value, hint, className }) {
 
 function DataSummarySkeletonCard() {
   return (
-    <Card className="rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
+    <Card className="motion-skeleton-shimmer-premium rounded-[1.5rem] border border-brand-surface-border bg-white p-0 shadow-sm">
       <CardContent className="p-5">
         <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0 flex-1 animate-pulse">
@@ -198,14 +199,16 @@ function DataSummaryCards({ cards, loading }) {
 
 function ForecastMetricCard({ icon: Icon, label, value, hint, className }) {
   return (
-    <Card className={cn('rounded-[1.35rem] border p-0 shadow-sm', className)}>
+    <Card className={cn('motion-kpi-reveal rounded-[1.35rem] border p-0 shadow-sm', className)}>
       <CardContent className="p-5">
         <div className="flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-[0.16em] opacity-70 break-words">
               {label}
             </p>
-            <p className="mt-3 break-words text-2xl font-black tracking-tight">{value}</p>
+            <p className="mt-3 break-words text-2xl font-black tracking-tight">
+              <AnimatedNumber value={value} dir="ltr" className="inline-block max-w-full [unicode-bidi:isolate]" />
+            </p>
             {hint ? <p className="mt-2 text-sm font-medium leading-6 opacity-75 break-words">{hint}</p> : null}
           </div>
           <span className="flex min-w-0 h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-sm">
@@ -221,7 +224,7 @@ function ForecastMetricSkeletons() {
   return (
     <div className="grid min-w-0 gap-4 md:grid-cols-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <Card key={`forecast-skeleton-${index}`} className="rounded-[1.35rem] border border-brand-surface-border bg-white p-0 shadow-sm">
+        <Card key={`forecast-skeleton-${index}`} className="motion-skeleton-shimmer-premium rounded-[1.35rem] border border-brand-surface-border bg-white p-0 shadow-sm">
           <CardContent className="p-5">
             <div className="animate-pulse">
               <div className="h-3 w-28 rounded-full bg-brand-surface-border" />

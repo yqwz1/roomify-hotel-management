@@ -14,7 +14,7 @@ export default function DashboardHero({
   return (
     <section
       className={cn(
-        'motion-slide-up-strong relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_52%,#1A2B3A_100%)] px-6 py-7 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:px-8 sm:py-8',
+        'motion-page-header motion-hero-reveal relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#1A2B3A_0%,#264B6B_52%,#1A2B3A_100%)] px-6 py-7 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:px-8 sm:py-8',
         className
       )}
     >

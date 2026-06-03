@@ -31,7 +31,7 @@ export default function DashboardMetricCard({
       };
 
   return (
-    <div className={cn('motion-stagger-item motion-card-hover relative min-w-0 overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
+    <div className={cn('motion-stagger-item motion-kpi-reveal motion-card-hover-premium relative min-w-0 overflow-hidden rounded-[1.75rem] border p-5 sm:p-6', toneStyles.card, cardClassName)}>
       <div className="flex min-w-0 items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className={cn('break-words text-xs font-black uppercase leading-5 tracking-[0.22em]', toneStyles.label, labelClassName)}>

@@ -58,6 +58,12 @@ describe('ManagerAiAssistant', () => {
       const panel = screen.getByText('Operations Copilot').closest('aside');
       expect(panel).toHaveClass('motion-assistant-panel');
       expect(panel).toHaveClass('motion-roomie-panel-shell');
+      expect(panel).toHaveClass('fixed');
+      expect(panel).toHaveClass('right-4');
+      expect(panel).toHaveClass('sm:right-6');
+      expect(panel.className).toContain('w-[min(27rem,calc(100vw-2rem))]');
+      expect(panel).toHaveStyle({ left: 'auto' });
+      expect(panel).toHaveAttribute('data-assistant-side', 'right');
       expect(screen.getByText(/hotel management assistant/i)).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: /close manager ai assistant/i }));
@@ -72,5 +78,36 @@ describe('ManagerAiAssistant', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('uses a compact floating launcher instead of a wide bar', () => {
+    render(<ManagerAiAssistant />);
+
+    const launcher = screen.getByTestId('manager-ai-launcher');
+    expect(launcher).toHaveClass('fixed');
+    expect(launcher).toHaveClass('right-4');
+    expect(launcher).toHaveClass('sm:right-6');
+    expect(launcher).toHaveClass('sm:bottom-6');
+    expect(launcher).toHaveClass('h-16');
+    expect(launcher).toHaveClass('w-16');
+    expect(launcher).toHaveStyle({ left: 'auto' });
+    expect(launcher).toHaveAttribute('data-assistant-side', 'right');
+    expect(launcher.className).not.toContain('end-');
+    expect(launcher.className).not.toContain('start-');
+    expect(launcher).not.toHaveTextContent(/manager only/i);
+    expect(launcher).not.toHaveTextContent(/ask roomi/i);
+  });
+
+  it('right-aligns suggested prompt chips inside the compact panel', async () => {
+    render(<ManagerAiAssistant />);
+
+    fireEvent.click(screen.getByRole('button', { name: /open manager ai assistant/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Analyze weekly revenue')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Analyze weekly revenue').parentElement).toHaveClass('assistant-prompt-strip');
+    expect(screen.getByText('Analyze weekly revenue').parentElement).toHaveClass('assistant-prompt-strip-end');
   });
 });

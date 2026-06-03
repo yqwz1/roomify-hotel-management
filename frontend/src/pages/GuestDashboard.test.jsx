@@ -106,6 +106,19 @@ describe('GuestDashboard', () => {
     expect(screen.getAllByRole('button', { name: 'Get Help' }).length).toBeGreaterThan(0);
   });
 
+  it('keeps the dashboard support email overflow-safe', async () => {
+    getGuestReservations.mockResolvedValue([]);
+
+    renderPage();
+
+    await screen.findByText('No reservations found');
+
+    const supportEmailNodes = screen.getAllByText('info@roomify.com');
+    expect(
+      supportEmailNodes.some((node) => node.className.includes('break-all'))
+    ).toBe(true);
+  });
+
   it('shows a retryable error state when the guest reservations request fails', async () => {
     getGuestReservations.mockRejectedValue(new Error('Guest stays unavailable'));
 

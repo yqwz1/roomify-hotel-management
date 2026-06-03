@@ -216,6 +216,14 @@ describe('FloatingGuestAssistant', () => {
       });
 
       expect(screen.getByText('Messages')).toBeInTheDocument();
+      const panel = screen.getByText('Messages').closest('aside');
+      expect(panel).toHaveClass('fixed');
+      expect(panel).toHaveClass('right-4');
+      expect(panel).toHaveClass('sm:right-6');
+      expect(panel.className).toContain('bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)]');
+      expect(panel.className).toContain('w-[min(27rem,calc(100vw-2rem))]');
+      expect(panel).toHaveStyle({ left: 'auto' });
+      expect(panel).toHaveAttribute('data-assistant-side', 'right');
 
       fireEvent.click(screen.getByRole('button', { name: 'Open assistant' }));
 

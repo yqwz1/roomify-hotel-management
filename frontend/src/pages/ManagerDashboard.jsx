@@ -24,6 +24,7 @@ import LoadingState from '../components/common/LoadingState';
 import DashboardHero from '../components/dashboard/DashboardHero';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
+import AnimatedNumber from '../components/motion/AnimatedNumber';
 import { TrendLineChart } from '../components/charts/TrendLineChart';
 import { RadialStatusChart } from '../components/charts/RadialStatusChart';
 import { Button } from '@/components/ui/button';
@@ -238,7 +239,7 @@ function PerformanceMetricCard({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_20px_48px_-30px_rgba(15,23,42,0.24)]',
+        'motion-stagger-item motion-kpi-reveal motion-card-hover-premium relative overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_20px_48px_-30px_rgba(15,23,42,0.24)]',
         styles.card
       )}
     >
@@ -268,7 +269,7 @@ function PerformanceMetricCard({
         {label}
       </p>
       <p className={cn('mt-3 text-3xl font-black tracking-tight', styles.value)}>
-        {value}
+        <AnimatedNumber value={value} dir="ltr" className="inline-block max-w-full [unicode-bidi:isolate]" />
       </p>
       <p className={cn('mt-2 text-sm font-medium leading-6', styles.hint)}>{hint}</p>
     </div>
@@ -1499,8 +1500,8 @@ export default function ManagerDashboard() {
               <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroActiveReservations`, 'Active reservations')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
-                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+              <p className="mt-auto min-w-0 text-[clamp(1.25rem,1.8vw,1.8rem)] font-black leading-tight tracking-tight break-words [overflow-wrap:anywhere]">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
                   {formatLocalizedNumber(metrics.activeReservations, i18n.language)}
                 </span>
               </p>
@@ -1510,8 +1511,8 @@ export default function ManagerDashboard() {
               <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroRevenuePerReservation`, 'Revenue per reservation')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
-                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+              <p className="mt-auto min-w-0 text-[clamp(1.25rem,1.8vw,1.8rem)] font-black leading-tight tracking-tight break-words [overflow-wrap:anywhere]">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
                   {formatLocalizedCurrency(revenuePerReservation, i18n.language, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
@@ -1524,8 +1525,8 @@ export default function ManagerDashboard() {
               <p className="min-h-[40px] text-[10px] font-bold uppercase tracking-[0.1em] leading-5 text-white/70 break-words">
                 {translateWithFallback(t, `${pageTx}.heroNetProfit`, 'Net profit')}
               </p>
-              <p className="mt-auto overflow-hidden text-[clamp(1.4rem,1.9vw,1.9rem)] font-black leading-none tracking-tight break-words">
-                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-nowrap [unicode-bidi:isolate]">
+              <p className="mt-auto min-w-0 text-[clamp(1.25rem,1.8vw,1.8rem)] font-black leading-tight tracking-tight break-words [overflow-wrap:anywhere]">
+                <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
                   {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
@@ -1634,7 +1635,7 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t(`${pageTx}.controlsSummaryReservations`)}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
+                  <p className="mt-2 min-w-0 text-xl font-black leading-tight tracking-tight text-brand-ink break-words [overflow-wrap:anywhere]">
                     {formatLocalizedNumber(metrics.totalReservations, i18n.language)}
                   </p>
                 </div>
@@ -1642,33 +1643,39 @@ export default function ManagerDashboard() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {t(`${pageTx}.controlsSummaryRevenue`)}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
-                    {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}
+                  <p className="mt-2 min-w-0 text-xl font-black leading-tight tracking-tight text-brand-ink break-words [overflow-wrap:anywhere]">
+                    <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
+                      {formatLocalizedCurrency(metrics.totalRevenue, i18n.language, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </span>
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryExpenses`, 'Expenses')}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
-                    {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}
+                  <p className="mt-2 min-w-0 text-xl font-black leading-tight tracking-tight text-brand-ink break-words [overflow-wrap:anywhere]">
+                    <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
+                      {formatLocalizedCurrency(metrics.totalExpenses, i18n.language, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </span>
                   </p>
                 </div>
                 <div className="rounded-[1.2rem] border border-white bg-white p-4 shadow-sm">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                     {translateWithFallback(t, `${pageTx}.controlsSummaryNetProfit`, 'Net Profit')}
                   </p>
-                  <p className="mt-2 text-xl font-black leading-tight tracking-tight text-brand-ink break-words">
-                    {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })}
+                  <p className="mt-2 min-w-0 text-xl font-black leading-tight tracking-tight text-brand-ink break-words [overflow-wrap:anywhere]">
+                    <span dir="ltr" className="inline-block max-w-full tabular-nums whitespace-normal break-words [overflow-wrap:anywhere] [unicode-bidi:isolate]">
+                      {formatLocalizedCurrency(metrics.netProfit, i18n.language, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </span>
                   </p>
                 </div>
               </div>

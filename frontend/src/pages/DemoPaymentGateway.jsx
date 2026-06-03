@@ -18,7 +18,7 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
   const dateTime = payment?.paidAt || payment?.createdAt;
 
   return (
-    <div className="motion-status-success rounded-[1.5rem] border border-brand-surface-border bg-white p-5 print:border-0 print:p-0">
+    <div className="motion-status-success motion-card-reveal rounded-[1.5rem] border border-brand-surface-border bg-white p-5 print:border-0 print:p-0">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-4 border-b border-brand-surface-border pb-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-ink-hint break-words">
@@ -26,12 +26,12 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
           </p>
           <h2 className="mt-2 text-2xl font-black text-brand-ink break-words">Roomify Payment Receipt</h2>
         </div>
-        <span className="rounded-full bg-brand-success/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
+        <span className="motion-status-badge-change rounded-full bg-brand-success/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand-success break-words">
           {payment?.paymentStatus}
         </span>
       </div>
 
-      <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
+      <div className="motion-stagger-parent mt-5 grid min-w-0 gap-3 sm:grid-cols-2">
         {[
           ['Reservation ID', payment?.reservationId || reservation?.id],
           ['Invoice ID', payment?.invoiceNumber || reservation?.invoiceNumber || 'Pending'],
@@ -46,7 +46,7 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
           ['Status', payment?.paymentStatus],
           ['Date/time', dateTime ? new Date(dateTime).toLocaleString() : '-'],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+          <div key={label} className="motion-stagger-item motion-card-reveal rounded-2xl border border-brand-surface-border bg-brand-surface-light px-4 py-3">
             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">{label}</p>
             <p className="mt-2 break-words text-sm font-bold text-brand-ink">{value || '-'}</p>
           </div>
@@ -57,7 +57,7 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
         <Button variant="unstyled" size="none"
           type="button"
           onClick={() => window.print()}
-          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
+          className="motion-button-premium motion-button-icon-slide inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white"
         >
           <Printer className="h-4 w-4 shrink-0" />
           Print Receipt
@@ -65,7 +65,7 @@ function ReceiptView({ payment, reservation, language, onRetry }) {
         <Button variant="unstyled" size="none"
           type="button"
           onClick={onRetry}
-          className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
+          className="motion-button-premium motion-button-icon-slide inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
         >
           Back to My Reservations
         </Button>
@@ -148,7 +148,7 @@ export default function DemoPaymentGateway() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="motion-slide-up rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
+      <div className="motion-page-header rounded-[1.5rem] border border-brand-primary/20 bg-white p-5">
         <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-primary break-words">Demo Payment Gateway</p>
@@ -171,18 +171,18 @@ export default function DemoPaymentGateway() {
           description="Use the provided demo card numbers. This form never sends data to an external payment provider."
         >
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid min-w-0 gap-3 sm:grid-cols-3">
-              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+            <div className="motion-stagger-parent grid min-w-0 gap-3 sm:grid-cols-3">
+              <div className="motion-stagger-item motion-kpi-reveal motion-card-hover-premium rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Reservation</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">{confirmationNumber}</p>
               </div>
-              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-stagger-item motion-kpi-reveal motion-card-hover-premium rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Amount</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">
                   {formatLocalizedCurrency(payableAmount, i18n.language)} SAR
                 </p>
               </div>
-              <div className="motion-card-lift rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
+              <div className="motion-stagger-item motion-kpi-reveal motion-card-hover-premium rounded-2xl border border-brand-surface-border bg-brand-surface-light p-4">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">Invoice</p>
                 <p className="mt-2 text-sm font-bold text-brand-ink break-words">{reservation?.invoiceStatus || 'PENDING'}</p>
               </div>
@@ -255,7 +255,7 @@ export default function DemoPaymentGateway() {
                 <Button variant="unstyled" size="none"
                   type="submit"
                   disabled={submitting}
-                  className={`motion-button-press inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60 ${submitting ? 'motion-processing' : ''}`}
+                  className={`motion-button-premium motion-button-icon-slide inline-flex min-w-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60 ${submitting ? 'motion-processing-scan' : ''}`}
                 >
                   {submitting ? (
                     <>
@@ -270,7 +270,7 @@ export default function DemoPaymentGateway() {
               <Button variant="unstyled" size="none"
                 type="button"
                 onClick={() => navigate('/guest/dashboard')}
-                className="inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
+                className="motion-button-premium motion-button-icon-slide inline-flex min-w-0 items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink"
               >
                 <RotateCcw className="h-4 w-4 shrink-0" />
                 Back to My Reservations

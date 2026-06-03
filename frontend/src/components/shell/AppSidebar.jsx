@@ -103,7 +103,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                         to={item.path}
                         onClick={handleNavigation}
                         className={cn(
-                          'motion-press group relative flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
+                          'motion-button-premium group relative flex min-w-0 items-center gap-3 rounded-md px-3 py-2 transition-all duration-200',
                           isActive
                             ? 'bg-brand-primary text-white shadow-sm'
                             : 'text-white/65 hover:bg-white/8 hover:text-white hover:translate-x-0.5 rtl:hover:-translate-x-0.5'
@@ -111,7 +111,7 @@ export default function AppSidebar({ isOpen, isDesktop = false, onClose }) {
                       >
                         <span
                           className={cn(
-                            'motion-active-indicator absolute inset-y-2 start-0 w-1 rounded-full bg-white',
+                            'motion-active-nav-indicator absolute inset-y-2 start-0 w-1 rounded-full bg-white',
                             isActive ? 'scale-y-100 opacity-80' : 'scale-y-50 opacity-0'
                           )}
                           aria-hidden="true"

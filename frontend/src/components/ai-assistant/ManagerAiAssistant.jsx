@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useReducedMotion } from 'framer-motion';
-import { Bot, MessageSquare, SendHorizonal, Sparkles, X } from 'lucide-react';
+import { Bot, SendHorizonal, X } from 'lucide-react';
 import { chatWithAiAssistant, extractAiAssistantError } from '../../services/aiAssistantService';
 import MarkdownMessage from './MarkdownMessage';
+import useAssistantPlacement from '../guest-assistant/useAssistantPlacement';
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,6 +42,7 @@ const displaySource = (source) => (source === 'GEMINI_API' ? 'Gemini' : source);
 
 export default function ManagerAiAssistant() {
   const reduceMotion = useReducedMotion();
+  const placement = useAssistantPlacement();
   const [open, setOpen] = useState(false);
   const [panelMounted, setPanelMounted] = useState(false);
   const [panelVisible, setPanelVisible] = useState(false);
@@ -126,14 +129,16 @@ export default function ManagerAiAssistant() {
     }
   };
 
-  return (
+  const assistantWidget = (
     <>
       {panelMounted ? (
         <aside
-          className={`motion-assistant-panel motion-roomie-panel-shell fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[68] flex h-[min(38rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/55 bg-white/[0.92] backdrop-blur-xl sm:bottom-28 sm:end-6 sm:h-[min(38rem,calc(100vh-7rem))] ${panelVisible ? 'motion-assistant-panel-enter motion-assistant-panel-visible pointer-events-auto' : 'motion-assistant-panel-exit pointer-events-none'}`}
+          className={`motion-assistant-panel motion-roomie-panel-shell fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] ${placement.panelClassName} z-[71] flex h-[min(38rem,calc(100dvh-var(--roomify-mobile-nav-height)-7rem))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/55 bg-white/[0.92] backdrop-blur-xl sm:bottom-28 sm:h-[min(38rem,calc(100vh-8rem))] ${panelVisible ? 'motion-assistant-panel-enter motion-assistant-panel-visible pointer-events-auto' : 'motion-assistant-panel-exit pointer-events-none'}`}
+          style={placement.style}
           aria-hidden={!panelVisible}
+          data-assistant-side={placement.side}
         >
-          <div className="pointer-events-none absolute -bottom-10 end-4 h-28 w-28 rounded-full bg-brand-primary/20 blur-2xl" aria-hidden="true" />
+          <div className={`pointer-events-none absolute -bottom-10 h-28 w-28 rounded-full bg-brand-primary/20 blur-2xl ${placement.side === 'left' ? 'left-4' : 'right-4'}`} aria-hidden="true" />
           <div className="motion-assistant-header-in bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
             <div className="flex min-w-0 items-start justify-between gap-4">
               <div className="min-w-0">
@@ -171,7 +176,7 @@ export default function ManagerAiAssistant() {
                   }`}
                 >
                   <div className="mb-2 flex min-w-0 items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] opacity-70">
-                    {message.role === 'assistant' ? <Bot className="h-3.5 w-3.5 shrink-0" /> : <MessageSquare className="h-3.5 w-3.5 shrink-0" />}
+                    {message.role === 'assistant' ? <Bot className="h-3.5 w-3.5 shrink-0" /> : <span className="h-3.5 w-3.5 shrink-0 rounded-full bg-current/60" aria-hidden="true" />}
                     <span className="min-w-0 truncate">{message.role === 'assistant' ? 'Roomi' : 'Manager'}</span>
                   </div>
                   {message.role === 'assistant' ? (
@@ -207,14 +212,15 @@ export default function ManagerAiAssistant() {
           </div>
 
           <div className="motion-assistant-input-in border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
-            <div className="mb-3 flex min-w-0 flex-wrap gap-2">
+            <div className={`assistant-prompt-strip mb-3 min-w-0 gap-2 ${placement.promptClassName}`}>
               {suggestedPrompts.map((prompt) => (
                 <Button variant="unstyled" size="none"
                   key={prompt}
                   type="button"
                   onClick={() => sendMessage(prompt)}
                   disabled={loading}
-                  className="motion-card-lift rounded-full border border-brand-primary/20 bg-brand-primary/10 px-3 py-1.5 text-xs font-bold text-brand-primary transition hover:bg-brand-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="motion-card-lift shrink-0 rounded-full border border-brand-primary/20 bg-brand-primary/10 px-3 py-1.5 text-xs font-bold text-brand-primary transition hover:bg-brand-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  dir="auto"
                 >
                   {prompt}
                 </Button>
@@ -252,25 +258,24 @@ export default function ManagerAiAssistant() {
       <Button variant="unstyled" size="none"
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className={`motion-assistant-launcher motion-assistant-launcher-idle motion-assistant-launcher-press motion-roomie-launcher motion-button-press fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+1rem)] end-4 z-[69] inline-flex min-w-0 items-center gap-3 rounded-full bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-4 py-3 text-white shadow-[0_24px_60px_-22px_rgba(15,23,42,0.64),0_0_34px_-18px_rgba(40,84,119,0.95)] transition hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_32px_82px_-26px_rgba(15,23,42,0.72),0_0_48px_-18px_rgba(40,84,119,1)] sm:bottom-6 sm:end-6 ${open ? 'scale-[0.96]' : 'motion-panel-pop'}`}
+        className={`motion-assistant-launcher motion-assistant-launcher-idle motion-assistant-launcher-press motion-roomie-launcher motion-button-press fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+1rem)] ${placement.launcherClassName} z-[70] inline-flex h-16 w-16 min-w-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] text-white shadow-[0_24px_60px_-22px_rgba(15,23,42,0.64),0_0_34px_-18px_rgba(40,84,119,0.95)] transition hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_32px_82px_-26px_rgba(15,23,42,0.72),0_0_48px_-18px_rgba(40,84,119,1)] sm:bottom-6 ${open ? 'rotate-3 scale-[0.96]' : 'motion-panel-pop'}`}
+        style={placement.style}
         aria-label={open ? 'Close manager AI assistant' : 'Open manager AI assistant'}
+        data-testid="manager-ai-launcher"
+        data-assistant-side={placement.side}
       >
-        <span className="motion-assistant-icon relative inline-flex h-10 w-10 min-w-0 items-center justify-center rounded-full bg-white/10">
-          <Bot className={`absolute h-5 w-5 shrink-0 transition duration-300 [transition-timing-function:var(--ease-spring-soft)] ${open ? 'translate-y-1 scale-75 rotate-12 opacity-0' : 'translate-y-0 scale-100 rotate-0 opacity-100'}`} />
-          <X className={`absolute h-5 w-5 shrink-0 transition duration-300 [transition-timing-function:var(--ease-spring-soft)] ${open ? 'translate-y-0 scale-100 rotate-0 opacity-100' : '-translate-y-1 scale-75 -rotate-12 opacity-0'}`} />
+        <span className="motion-assistant-icon relative h-7 w-7">
+          <Bot className={`absolute inset-0 h-7 w-7 shrink-0 transition duration-300 [transition-timing-function:var(--ease-spring-soft)] ${open ? 'translate-y-1 scale-75 rotate-12 opacity-0' : 'translate-y-0 scale-100 rotate-0 opacity-100'}`} />
+          <X className={`absolute inset-0 h-7 w-7 shrink-0 transition duration-300 [transition-timing-function:var(--ease-spring-soft)] ${open ? 'translate-y-0 scale-100 rotate-0 opacity-100' : '-translate-y-1 scale-75 -rotate-12 opacity-0'}`} />
         </span>
-        <span className="hidden min-w-0 sm:block">
-          <span className="block text-[0.65rem] font-black uppercase tracking-[0.22em] text-white/60 break-words">
-            Manager Only
-          </span>
-          <span className="mt-1 flex min-w-0 items-center gap-2 text-sm font-black tracking-tight break-words">
-            <MessageSquare className="h-4 w-4 shrink-0" />
-            Ask Roomi
-            <Sparkles className="h-3.5 w-3.5 text-brand-accent-gold shrink-0" />
-          </span>
-        </span>
-        <span className="motion-assistant-status-dot absolute bottom-1 end-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400 shadow-[0_0_0_5px_rgba(255,255,255,0.16)]" aria-hidden="true" />
+        <span className="motion-assistant-status-dot absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400 shadow-[0_0_0_5px_rgba(255,255,255,0.16)]" aria-hidden="true" />
       </Button>
     </>
   );
+
+  if (typeof document === 'undefined' || !document.body) {
+    return assistantWidget;
+  }
+
+  return createPortal(assistantWidget, document.body);
 }

@@ -18,7 +18,7 @@ export default function ErrorBanner({ message, onClose }) {
     return (
         <div
             role="alert"
-            className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-danger/30 bg-white px-5 py-3 text-brand-ink shadow-sm sm:rounded-full"
+            className="motion-error-in flex min-w-0 items-center gap-3 rounded-2xl border border-brand-danger/30 bg-white px-5 py-3 text-brand-ink shadow-sm sm:rounded-full"
         >
             {/* Icon */}
             <span className="mt-0.5 shrink-0 text-lg break-words" aria-hidden="true">⚠️</span>

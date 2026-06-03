@@ -20,7 +20,7 @@ export default function ModalFrame({
     }}>
       <DialogContent
         closeLabel={closeLabel}
-        className={`min-w-0 ${widthClassName} overflow-hidden rounded-[1.75rem] border-black/5 bg-white p-0 shadow-2xl sm:rounded-[2rem]`}
+        className={`motion-modal-content-premium min-w-0 ${widthClassName} overflow-hidden rounded-[1.75rem] border-black/5 bg-white p-0 shadow-2xl sm:rounded-[2rem]`}
       >
         <DialogHeader className="border-b border-brand-surface-border px-4 py-4 pe-14 text-start sm:px-6 sm:py-5">
           <DialogTitle className="text-xl font-black tracking-tight text-brand-ink sm:text-2xl">

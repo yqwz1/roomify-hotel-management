@@ -39,7 +39,7 @@ const CARD_ACTION_FALLBACKS = {
 
 function SearchSkeletonCard() {
   return (
-    <div className="motion-skeleton-shimmer overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
+    <div className="motion-skeleton-shimmer-premium overflow-hidden rounded-[1.75rem] border border-brand-surface-border bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.2)] animate-pulse">
       <div className="h-40 bg-brand-primary-tint" />
       <div className="space-y-4 p-5">
         <div className="h-5 w-1/2 rounded-full bg-brand-surface-border" />
@@ -282,7 +282,7 @@ export default function RoomSearch() {
                 type="button"
                 onClick={handleSearch}
                 disabled={loading || !checkIn || !checkOut || checkOut <= checkIn}
-                className="inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted"
+                className={`motion-button-premium motion-button-icon-slide inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 py-4 text-sm font-bold text-white transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:bg-brand-surface-border disabled:text-brand-ink-muted ${loading ? 'motion-processing-scan' : ''}`}
               >
                 <Search className="h-4 w-4 shrink-0" />
                 {loading
@@ -366,7 +366,7 @@ export default function RoomSearch() {
                   return (
                     <article
                       key={room.id}
-                      className="motion-stagger-item motion-card-hover rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
+                      className="motion-stagger-item motion-card-reveal motion-card-hover-premium rounded-[1.35rem] border border-brand-surface-border bg-white p-5 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] transition hover:border-brand-surface-border"
                     >
                       <div className="space-y-4">
                         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -385,7 +385,7 @@ export default function RoomSearch() {
                             </div>
                           </div>
                           <span
-                            className={`max-w-full shrink-0 truncate rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                            className={`motion-status-badge-change max-w-full shrink-0 truncate rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
                               getStatusBadgeClasses(room.status)
                             }`}
                           >
@@ -415,8 +415,8 @@ export default function RoomSearch() {
                           )}
                         </div>
 
-                        <div className="grid min-w-0 gap-3 sm:grid-cols-3">
-                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                        <div className="motion-stagger-parent grid min-w-0 gap-3 sm:grid-cols-3">
+                          <div className="motion-stagger-item motion-card-reveal rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {t(`${pageTx}.rateLabel`)}
                             </p>
@@ -424,7 +424,7 @@ export default function RoomSearch() {
                               {formatLocalizedCurrency(basePrice, i18n.language)} / {t('perNight')}
                             </p>
                           </div>
-                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                          <div className="motion-stagger-item motion-card-reveal rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {t(`${pageTx}.capacityLabel`)}
                             </p>
@@ -433,7 +433,7 @@ export default function RoomSearch() {
                               {t('upToGuests', { count: room.roomType?.maxGuests ?? '-' })}
                             </p>
                           </div>
-                          <div className="rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
+                          <div className="motion-stagger-item motion-card-reveal rounded-[1.15rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-brand-ink-hint break-words">
                               {t('common.stayTotal')}
                             </p>
@@ -456,8 +456,8 @@ export default function RoomSearch() {
                               onClick={() => handleCardAction(action.id, room)}
                               className={
                                 action.tone === 'secondary'
-                                  ? 'inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light sm:w-auto'
-                                  : 'inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep sm:w-auto'
+                                  ? 'motion-button-premium motion-button-icon-slide inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full border border-brand-surface-border bg-white px-5 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-surface-border hover:bg-brand-surface-light sm:w-auto'
+                                  : 'motion-button-premium motion-button-icon-slide inline-flex min-w-0 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-primary-deep sm:w-auto'
                               }
                             >
                               {translateWithFallback(

@@ -10,10 +10,10 @@ export default function PageTransition({ children, className = '' }) {
   return (
     <motion.div
       key={location.pathname}
-      className={`motion-stagger-parent min-w-0 ${className}`}
-      initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.985, filter: 'blur(4px)' }}
+      className={`motion-page-cinematic motion-stagger-parent motion-stagger-parent-premium min-w-0 ${className}`}
+      initial={reduceMotion ? false : { opacity: 0, y: 34, scale: 0.982, filter: 'blur(5px)' }}
       animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      transition={{ duration: 0.5, ease: EASE }}
+      transition={{ duration: 0.68, ease: EASE }}
     >
       {children}
     </motion.div>

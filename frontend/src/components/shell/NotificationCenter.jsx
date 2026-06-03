@@ -95,9 +95,11 @@ export default function NotificationCenter() {
         >
           <Bell className="h-5 w-5 shrink-0" />
           {unreadCount > 0 ? (
-            <span className="absolute -end-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-danger px-1.5 text-[10px] font-black text-white">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
+            <span
+              className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-brand-danger ring-2 ring-white"
+              data-testid="notification-unread-dot"
+              aria-hidden="true"
+            />
           ) : null}
         </Button>
       </PopoverTrigger>
