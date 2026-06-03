@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, SendHorizonal, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import ConfirmationToast from '../ConfirmationToast';
 import { useAuth } from '../../context/AuthProvider';
@@ -361,11 +362,6 @@ export default function FloatingGuestAssistant() {
     void syncRead();
   }, [detail, open]);
 
-  const unreadCount = useMemo(
-    () => conversations.reduce((total, conversation) => total + Number(conversation.unreadGuestCount ?? 0), 0),
-    [conversations]
-  );
-
   const visibleConversations = useMemo(
     () => conversations.filter((conversation) => isGuestCheckedInReservation(findConversationReservation(conversation))),
     [conversations, findConversationReservation]
@@ -532,11 +528,10 @@ export default function FloatingGuestAssistant() {
     return null;
   }
 
-  return (
+  const assistantWidget = (
     <>
       <GuestAssistantLauncher
         open={open}
-        unreadCount={unreadCount}
         staffOnline={Boolean(activeConversation?.staffOnline && !assistantMessagingLocked)}
         onClick={() => setOpen((current) => !current)}
       />
@@ -547,10 +542,13 @@ export default function FloatingGuestAssistant() {
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] end-4 z-[69] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.58)] backdrop-blur-xl sm:bottom-28 sm:end-6 sm:h-[min(42rem,calc(100vh-7rem))]"
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px)+5rem)] right-4 z-[71] flex h-[min(42rem,calc(100dvh-10rem-var(--roomify-mobile-nav-height)))] w-[min(27rem,calc(100vw-2rem))] min-w-0 origin-bottom-right flex-col overflow-hidden rounded-[2rem] border border-white/50 bg-white/85 shadow-[0_36px_100px_-34px_rgba(15,23,42,0.62)] backdrop-blur-xl sm:bottom-28 sm:right-6 sm:h-[min(42rem,calc(100vh-7rem))]"
+            style={{ left: 'auto' }}
+            data-assistant-side="right"
           >
-            <div className="bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
+            <div className="pointer-events-none absolute -top-8 right-4 h-28 w-28 rounded-full bg-brand-primary/20 blur-3xl" aria-hidden="true" />
+            <div className="relative bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
               <div className="flex min-w-0 items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60 break-words">
@@ -576,7 +574,7 @@ export default function FloatingGuestAssistant() {
               </div>
             </div>
 
-            <div className="border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
+            <div className="relative border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
               {showRoomSelector ? (
                 <div className="space-y-3">
                   <div className="rounded-[1.25rem] border border-brand-surface-border bg-white p-3">
@@ -684,7 +682,7 @@ export default function FloatingGuestAssistant() {
               ) : null}
             </div>
 
-            <div className="border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
+            <div className="relative border-b border-brand-surface-border/70 bg-white/70 px-4 py-3">
               {assistantBlockedByNoStay ? (
                 <div className="mb-3 rounded-[1.15rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
                   {assistantStatusText}
@@ -696,7 +694,7 @@ export default function FloatingGuestAssistant() {
               />
             </div>
 
-            <div className="min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
+            <div className="relative min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(245,242,234,0.65)_0%,rgba(255,255,255,0.88)_100%)] px-4 py-4">
               {loading && !detail ? (
                 <div className="flex min-w-0 h-full items-center justify-center text-sm font-medium text-brand-ink-muted">
                   <Loader2 className="me-2 h-4 w-4 animate-spin shrink-0" />
@@ -713,7 +711,7 @@ export default function FloatingGuestAssistant() {
               )}
             </div>
 
-            <div className="border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
+            <div className="relative border-t border-brand-surface-border/70 bg-white/90 px-4 py-4">
               <div className="relative flex min-w-0 items-end gap-3">
                 <Textarea
                   value={input}
@@ -745,4 +743,10 @@ export default function FloatingGuestAssistant() {
       />
     </>
   );
+
+  if (typeof document !== 'undefined' && document.body) {
+    return createPortal(assistantWidget, document.body);
+  }
+
+  return assistantWidget;
 }

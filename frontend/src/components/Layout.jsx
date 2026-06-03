@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import Header from './Header'
 import FloatingGuestAssistant from './guest-assistant/FloatingGuestAssistant'
 import AppShell from './shell/AppShell'
+import MotionPage from './motion/MotionPage'
 import SmoothScroll from './motion/SmoothScroll'
 
 function HashScroller() {
@@ -30,7 +31,9 @@ export default function Layout({ children, showSidebar = false }) {
       <SmoothScroll />
       <HashScroller />
       <Header />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="min-w-0 flex-1">
+        <MotionPage>{children}</MotionPage>
+      </main>
       <FloatingGuestAssistant />
     </div>
   )

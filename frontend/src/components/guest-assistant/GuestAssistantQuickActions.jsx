@@ -7,7 +7,7 @@ export default function GuestAssistantQuickActions({ disabled = false, onAction 
   }
 
   return (
-    <div className="flex min-w-0 flex-wrap gap-2">
+    <div className="flex min-w-0 flex-wrap justify-end gap-2">
       {QUICK_ACTION_OPTIONS.map((action) => (
         <Button variant="unstyled" size="none"
           key={action.id}

@@ -13,6 +13,27 @@ vi.mock('./MarkdownMessage', () => ({
 }));
 
 describe('ManagerAiAssistant', () => {
+  it('uses a compact fixed-right launcher and panel', () => {
+    render(<ManagerAiAssistant />);
+
+    const launcher = screen.getByRole('button', { name: /ask roomi/i });
+    expect(launcher.className).toContain('right-4');
+    expect(launcher.className).toContain('sm:right-6');
+    expect(launcher.className).toContain('h-16');
+    expect(launcher.className).toContain('w-16');
+    expect(launcher.className).not.toContain('inset-x-0');
+    expect(launcher.className).not.toContain('left-0 right-0');
+
+    fireEvent.click(launcher);
+
+    const panel = document.querySelector('[data-assistant-side="right"]');
+    expect(panel).toBeTruthy();
+    expect(panel.className).toContain('right-4');
+    expect(panel.className).toContain('sm:right-6');
+    expect(panel.className).toContain('w-[min(24rem,calc(100vw-2rem))]');
+    expect(panel.className).not.toContain('inset-x-0');
+  });
+
   it('shows Gemini source label and local loading text', async () => {
     let resolveChat;
     chatWithAiAssistant.mockReturnValue(new Promise((resolve) => {

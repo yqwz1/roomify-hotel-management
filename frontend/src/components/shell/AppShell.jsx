@@ -7,6 +7,7 @@ import { getPrimaryRole, ROLE_MANAGER } from '../navigation/navConfig';
 import AppSidebar from './AppSidebar';
 import MobileBottomNav from './MobileBottomNav';
 import AppTopbar from './AppTopbar';
+import MotionPage from '../motion/MotionPage';
 
 export default function AppShell({ children }) {
   const location = useLocation();
@@ -98,7 +99,7 @@ export default function AppShell({ children }) {
         />
 
         <main className="relative min-w-0 flex-1 overflow-visible pb-[calc(var(--roomify-mobile-nav-height)+env(safe-area-inset-bottom,0px))] lg:min-h-0 lg:overflow-y-auto lg:pb-0">
-          {children}
+          <MotionPage>{children}</MotionPage>
         </main>
         {!isDesktop ? (
           <MobileBottomNav onOpenMenu={handleSidebarToggle} />

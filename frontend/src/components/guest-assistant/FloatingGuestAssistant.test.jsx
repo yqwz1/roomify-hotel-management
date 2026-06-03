@@ -10,6 +10,11 @@ import {
 } from '../../services/guestAssistantService';
 import { getGuestReservations } from '../../services/guestReservationService';
 
+vi.mock('react-dom', async (importOriginal) => ({
+  ...(await importOriginal()),
+  createPortal: (node) => node,
+}));
+
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }) => children,
   motion: {
@@ -202,5 +207,64 @@ describe('FloatingGuestAssistant', () => {
 
     expect(screen.getByRole('combobox')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).not.toBeDisabled();
+  });
+
+  it('opens a compact right-positioned panel and closes it', async () => {
+    listGuestConversations.mockResolvedValue([
+      conversation,
+      {
+        ...conversation,
+        publicId: 'conv-2',
+        roomId: 12,
+        reservationId: 88,
+        roomNumber: '305',
+        subject: 'Suite Room',
+      },
+    ]);
+    getGuestReservations.mockResolvedValue([
+      {
+        id: 77,
+        status: 'CHECKED_IN',
+        roomId: 11,
+        roomNumber: '204',
+        roomType: 'Deluxe Room',
+        checkInDate: '2099-01-01',
+        checkOutDate: '2099-01-03',
+        paymentStatus: 'UNPAID',
+        outstandingBalance: 450,
+      },
+      {
+        id: 88,
+        status: 'CHECKED_IN',
+        roomId: 12,
+        roomNumber: '305',
+        roomType: 'Suite Room',
+        checkInDate: '2099-01-01',
+        checkOutDate: '2099-01-03',
+        paymentStatus: 'UNPAID',
+        outstandingBalance: 650,
+      },
+    ]);
+
+    render(<FloatingGuestAssistant />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open assistant' }));
+
+    await waitFor(() => {
+      expect(document.querySelector('aside[data-assistant-side="right"]')).toBeInTheDocument();
+    });
+
+    const panel = document.querySelector('aside[data-assistant-side="right"]');
+    expect(panel.className).toContain('right-4');
+    expect(panel.className).toContain('sm:right-6');
+    expect(panel.className).toContain('w-[min(27rem,calc(100vw-2rem))]');
+    expect(panel.className).not.toContain('end-4');
+    expect(panel.style.left).toBe('auto');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close guest assistant' }));
+
+    await waitFor(() => {
+      expect(document.querySelector('aside[data-assistant-side="right"]')).not.toBeInTheDocument();
+    });
   });
 });

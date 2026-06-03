@@ -31,6 +31,14 @@
 :root {
   color-scheme: light;
   --roomify-mobile-nav-height: 0px;
+  --motion-fast: 140ms;
+  --motion-normal: 260ms;
+  --motion-slow: 420ms;
+  --motion-page: 620ms;
+  --motion-stagger: 70ms;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 html,
 body,
@@ -174,5 +182,258 @@ textarea {
 @media (max-width: 1023px) {
   :root {
     --roomify-mobile-nav-height: 5.75rem;
+  }
+}
+
+@keyframes roomify-page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.992);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes roomify-hero-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.985);
+    filter: blur(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes roomify-section-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roomify-card-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes roomify-modal-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.96);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes roomify-bottom-sheet {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roomify-status-change {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.72;
+  }
+  60% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes roomify-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes roomify-success-check {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-8deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.08) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes roomify-warning-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes roomify-assistant-glow {
+  0%,
+  100% {
+    box-shadow: 0 24px 60px -22px rgba(15, 23, 42, 0.58), 0 0 0 0 rgba(40, 84, 119, 0.28);
+  }
+  50% {
+    box-shadow: 0 30px 76px -25px rgba(15, 23, 42, 0.64), 0 0 0 10px rgba(40, 84, 119, 0);
+  }
+}
+
+@keyframes roomify-typing-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .motion-page-enter {
+    animation: roomify-page-enter var(--motion-page) var(--ease-out-expo) both;
+  }
+
+  .motion-hero-enter {
+    animation: roomify-hero-enter 760ms var(--ease-out-expo) both;
+  }
+
+  .motion-section-reveal {
+    animation: roomify-section-reveal var(--motion-slow) var(--ease-premium) both;
+  }
+
+  .motion-card-pop {
+    animation: roomify-card-pop var(--motion-slow) var(--ease-premium) both;
+  }
+
+  .motion-card-hover {
+    transition:
+      transform var(--motion-normal) var(--ease-premium),
+      box-shadow var(--motion-normal) var(--ease-premium),
+      border-color var(--motion-normal) var(--ease-premium),
+      background-color var(--motion-normal) var(--ease-premium);
+    will-change: transform;
+  }
+
+  .motion-card-hover:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: 0 22px 55px -35px rgba(15, 23, 42, 0.5);
+  }
+
+  .motion-button-press {
+    transition:
+      transform var(--motion-fast) var(--ease-spring-soft),
+      box-shadow var(--motion-normal) var(--ease-premium),
+      background-color var(--motion-fast) ease,
+      color var(--motion-fast) ease,
+      border-color var(--motion-fast) ease;
+    will-change: transform;
+  }
+
+  .motion-button-press:active {
+    transform: translate3d(0, 1px, 0) scale(0.985);
+  }
+
+  .motion-icon-slide > svg,
+  .motion-icon-slide svg {
+    transition: transform var(--motion-normal) var(--ease-premium);
+  }
+
+  .motion-icon-slide:hover > svg,
+  .motion-icon-slide:hover svg {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  .motion-modal-pop {
+    animation: roomify-modal-pop var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-bottom-sheet {
+    animation: roomify-bottom-sheet var(--motion-normal) var(--ease-out-expo) both;
+  }
+
+  .motion-status-change {
+    animation: roomify-status-change var(--motion-normal) var(--ease-spring-soft) both;
+  }
+
+  .motion-skeleton-shimmer {
+    background-image: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.72), rgba(255,255,255,0));
+    background-size: 200% 100%;
+    animation: roomify-skeleton-shimmer 1.45s linear infinite;
+  }
+
+  .motion-success-check {
+    animation: roomify-success-check var(--motion-slow) var(--ease-spring-soft) both;
+  }
+
+  .motion-warning-in {
+    animation: roomify-warning-in var(--motion-normal) var(--ease-premium) both;
+  }
+
+  .motion-assistant-glow {
+    animation: roomify-assistant-glow 3.2s var(--ease-premium) infinite;
+  }
+
+  .motion-typing-dot {
+    animation: roomify-typing-dot 1.1s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .motion-card-hover,
+  .motion-card-hover:hover,
+  .motion-button-press,
+  .motion-button-press:active {
+    transform: none !important;
   }
 }
