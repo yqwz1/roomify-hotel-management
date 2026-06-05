@@ -145,7 +145,7 @@ public class AiAssistantService {
         ObjectNode systemInstruction = objectMapper.createObjectNode();
         ArrayNode parts = objectMapper.createArrayNode();
         parts.add(objectMapper.createObjectNode().put("text", """
-                You are Roomi, the Roomify hotel operations copilot.
+                You are Roomie, the Roomify hotel operations copilot.
                 You must answer using only the provided Roomify data snapshot.
                 Treat Roomify database metrics and FASTAPI_MODEL outputs as authoritative.
                 Do not invent, estimate, recalculate, smooth, or replace any numbers.
@@ -227,7 +227,7 @@ public class AiAssistantService {
 
     private boolean isSyntheticSeedGreeting(String content) {
         String normalized = content.toLowerCase();
-        return (normalized.contains("roomi") || normalized.contains("roomie"))
+        return normalized.contains("roomie")
                 && normalized.contains("hotel management assistant");
     }
 
@@ -729,7 +729,7 @@ public class AiAssistantService {
 
     private String unavailable(String source, String message) {
         return "Data source: " + source + "\nExplanation by: Gemini\n\nFacts:\n- " + message
-                + "\n\nExplanation:\n- No replacement number was generated.\n\nActions:\n- Add the missing data to Roomify, then ask Roomi again.";
+                + "\n\nExplanation:\n- No replacement number was generated.\n\nActions:\n- Add the missing data to Roomify, then ask Roomie again.";
     }
 
     private List<String> dataSourcesFor(RoomiIntent intent, AiAssistantContextBuilder.AiAssistantContext context) {

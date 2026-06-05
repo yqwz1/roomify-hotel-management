@@ -8,12 +8,12 @@ vi.mock('./api', () => ({
 }));
 
 describe('aiAssistantService', () => {
-  it('does not send the seeded Roomi greeting as backend history', () => {
+  it('does not send the seeded Roomie greeting as backend history', () => {
     const history = normalizeAiAssistantHistory([
       {
         role: 'assistant',
-        source: 'ROOMI',
-        content: 'Hello! I am Roomi, your hotel management assistant. I can help with pricing recommendations.',
+        source: 'ROOMIE',
+        content: 'Hello! I am Roomie, your hotel management assistant. I can help with pricing recommendations.',
       },
       { role: 'user', content: '2+5' },
     ]);
@@ -43,8 +43,8 @@ describe('aiAssistantService', () => {
       history: [
         {
           role: 'assistant',
-          source: 'ROOMI',
-          content: 'Hello! I am Roomi, your hotel management assistant. I can help with pricing recommendations.',
+          source: 'ROOMIE',
+          content: 'Hello! I am Roomie, your hotel management assistant. I can help with pricing recommendations.',
         },
         { role: 'user', content: '2+5' },
       ],

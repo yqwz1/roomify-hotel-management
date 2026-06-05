@@ -20,13 +20,13 @@ describe('ManagerAiAssistant', () => {
     }));
 
     render(<ManagerAiAssistant />);
-    fireEvent.click(screen.getByRole('button', { name: /ask roomi/i }));
+    fireEvent.click(screen.getByRole('button', { name: /ask roomie/i }));
     fireEvent.change(screen.getByPlaceholderText(/ask about demand/i), {
       target: { value: '2+5' },
     });
     fireEvent.click(screen.getByRole('button', { name: /send prompt/i }));
 
-    expect(screen.getByText('Roomi is thinking...')).toBeInTheDocument();
+    expect(screen.getByText('Roomie is thinking...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /send prompt/i })).toBeDisabled();
 
     resolveChat({

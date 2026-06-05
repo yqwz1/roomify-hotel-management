@@ -7,7 +7,7 @@ export const extractAiAssistantError = (err) =>
 const isSeededAssistantGreeting = (message) => {
   const content = String(message?.content || '').toLowerCase();
   return message?.role === 'assistant'
-    && (content.includes('roomi') || content.includes('roomie'))
+    && content.includes('roomie')
     && content.includes('hotel management assistant');
 };
 

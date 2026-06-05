@@ -17,8 +17,8 @@ const buildInitialMessages = () => [
   {
     role: 'assistant',
     content:
-      'Hello! I am Roomi, your hotel management assistant. I can help you analyze revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, and hotel performance.',
-    source: 'ROOMI',
+      'Hello! I am Roomie, your hotel management assistant. I can help you analyze revenue, occupancy, cancellations, demand spikes, pricing recommendations, reservations, rooms, guests, and hotel performance.',
+    source: 'ROOMIE',
   },
 ];
 
@@ -86,7 +86,7 @@ export default function ManagerAiAssistant() {
           <div className="flex min-w-0 items-center justify-between rounded-t-[1.75rem] bg-[linear-gradient(135deg,#1A2B3A_0%,#285477_100%)] px-5 py-4 text-white">
             <div className="min-w-0">
               <p className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-white/60 break-words">
-                Roomi
+                Roomie
               </p>
               <h3 className="mt-1 text-lg font-black tracking-tight break-words">Operations Copilot</h3>
             </div>
@@ -138,7 +138,7 @@ export default function ManagerAiAssistant() {
                 <div className="flex min-w-0 items-center gap-3 rounded-[1.25rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3">
                   <TypingDots />
                   <span className="text-sm font-medium text-brand-ink-muted">
-                    Roomi is thinking...
+                    Roomie is thinking...
                   </span>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function ManagerAiAssistant() {
           </span>
           <span className="mt-1 flex min-w-0 items-center gap-2 text-sm font-black tracking-tight break-words">
             <MessageSquare className="h-4 w-4 shrink-0" />
-            Ask Roomi
+            Ask Roomie
             <Sparkles className="h-3.5 w-3.5 text-brand-accent-gold shrink-0" />
           </span>
         </span>

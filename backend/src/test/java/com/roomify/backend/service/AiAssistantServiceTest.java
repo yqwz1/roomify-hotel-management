@@ -75,7 +75,7 @@ class AiAssistantServiceTest {
 
         JsonNode root = objectMapper.readTree(requestBody.get());
         assertThat(root.path("systemInstruction").path("parts").path(0).path("text").asText())
-                .contains("You are Roomi", "Do not invent", "using only the provided Roomify data snapshot");
+                .contains("You are Roomie", "Do not invent", "using only the provided Roomify data snapshot");
         assertThat(root.path("generationConfig").path("maxOutputTokens").asInt()).isEqualTo(600);
         assertThat(root.path("contents").path(0).path("role").asText()).isEqualTo("user");
         assertThat(root.toString()).contains("Weekly revenue: SAR 1000.00");
@@ -177,7 +177,7 @@ class AiAssistantServiceTest {
         service.chat(new AiAssistantChatRequest(
                 "Final question",
                 List.of(
-                        new AiAssistantChatMessage("assistant", "Hello! I am Roomi, your hotel management assistant."),
+                        new AiAssistantChatMessage("assistant", "Hello! I am Roomie, your hotel management assistant."),
                         new AiAssistantChatMessage("user", "Previous question"),
                         new AiAssistantChatMessage("assistant", "Previous answer"),
                         new AiAssistantChatMessage("user", "   "),
