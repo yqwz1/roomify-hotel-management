@@ -467,7 +467,7 @@ export default function StaffGuestInbox() {
                 <Button variant="unstyled" size="none"
                   type="button"
                   onClick={handleReply}
-                  disabled={replying || !reply.trim() || !connected}
+                  disabled={replying || !reply.trim()}
                   className="inline-flex min-w-0 h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm transition hover:bg-brand-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Send reply"
                 >

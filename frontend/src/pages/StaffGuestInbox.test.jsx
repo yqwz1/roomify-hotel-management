@@ -1,6 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import StaffGuestInbox from './StaffGuestInbox';
+
+const mockState = vi.hoisted(() => ({
+  socketConnected: true,
+  publishTypingMock: vi.fn(),
+  sendStaffGuestReplyMock: vi.fn(),
+}));
 
 vi.mock('../context/AuthProvider', () => ({
   useAuth: () => ({
@@ -15,8 +22,8 @@ vi.mock('../context/AuthProvider', () => ({
 
 vi.mock('../hooks/useGuestAssistantSocket', () => ({
   default: () => ({
-    connected: true,
-    publishTyping: vi.fn(),
+    connected: mockState.socketConnected,
+    publishTyping: mockState.publishTypingMock,
   }),
 }));
 
@@ -61,12 +68,19 @@ vi.mock('../services/guestAssistantService', () => ({
   ]),
   markStaffGuestConversationRead: vi.fn(),
   resolveStaffGuestConversation: vi.fn(),
-  sendStaffGuestReply: vi.fn(),
+  sendStaffGuestReply: mockState.sendStaffGuestReplyMock,
 }));
 
 describe('StaffGuestInbox', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockState.socketConnected = true;
+    mockState.sendStaffGuestReplyMock.mockResolvedValue({
+      id: 101,
+      senderRole: 'STAFF',
+      originalBody: 'We will send towels now.',
+      createdAt: '2026-06-05T10:00:00',
+    });
   });
 
   it('shows reservation status, selected room context, and preferred language for the active thread', async () => {
@@ -78,5 +92,25 @@ describe('StaffGuestInbox', () => {
     expect(screen.getByText('AR')).toBeInTheDocument();
     expect(screen.getByText('Selected room context')).toBeInTheDocument();
     expect(screen.getByText('Deluxe Suite - Room 204')).toBeInTheDocument();
+  });
+
+  it('allows staff to send a REST reply while realtime socket is disconnected', async () => {
+    mockState.socketConnected = false;
+    const user = userEvent.setup();
+    render(<StaffGuestInbox />);
+
+    const input = await screen.findByPlaceholderText('Reply to the guest...');
+    await user.type(input, 'We will send towels now.');
+
+    const sendButton = screen.getByRole('button', { name: 'Send reply' });
+    expect(sendButton).toBeEnabled();
+    await user.click(sendButton);
+
+    await waitFor(() => {
+      expect(mockState.sendStaffGuestReplyMock).toHaveBeenCalledWith('conv-1', {
+        body: 'We will send towels now.',
+        replyLanguage: 'en',
+      });
+    });
   });
 });
