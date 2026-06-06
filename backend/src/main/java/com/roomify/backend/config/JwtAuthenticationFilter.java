@@ -45,6 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (contextPath != null && !contextPath.isBlank() && path.startsWith(contextPath)) {
             path = path.substring(contextPath.length());
         }
+        if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+            return true;
+        }
         return "/api/health".equals(path) || path.startsWith("/api/auth/")
                 || "/api/rooms/search".equals(path)
                 || isExternalHotelRequest(path)
@@ -70,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader(AUTH_HEADER);
         if (header == null || !header.startsWith(BEARER_PREFIX)) {
-            filterChain.doFilter(request, response);
+            respondUnauthorized(response, "Missing token", request.getRequestURI());
             return;
         }
 

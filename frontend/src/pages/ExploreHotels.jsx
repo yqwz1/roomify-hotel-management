@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -76,8 +76,9 @@ export default function ExploreHotels() {
   }, [checkIn, todayDate]);
 
   const totalResults = roomifyHotels.length + externalHotels.length;
+  const hasRunInitialSearch = useRef(false);
 
-  const runSearch = async () => {
+  const runSearch = useCallback(async () => {
     setLoading(true);
     setError('');
     setHasSearched(true);
@@ -114,11 +115,20 @@ export default function ExploreHotels() {
     if (externalResult.status === 'rejected') messages.push(extractExternalHotelError(externalResult.reason));
     setError(messages.join(' | '));
     setLoading(false);
-  };
+  }, [checkIn, checkOut, city, i18n, query, t]);
 
   useEffect(() => {
-    runSearch();
-  }, []);
+    if (hasRunInitialSearch.current) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      hasRunInitialSearch.current = true;
+      void runSearch();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [runSearch]);
 
   const handleBookInternal = (hotel) => {
     navigate(`/book?roomId=${hotel.room.id}&checkIn=${checkIn}&checkOut=${checkOut}`, {
