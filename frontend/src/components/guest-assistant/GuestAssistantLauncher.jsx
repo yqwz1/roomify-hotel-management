@@ -3,7 +3,6 @@ import { MessageCircleMore } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 export default function GuestAssistantLauncher({
   open,
-  unreadCount,
   staffOnline,
   onClick,
 }) {
@@ -21,11 +20,6 @@ export default function GuestAssistantLauncher({
         }`}
         aria-hidden="true"
       />
-      {unreadCount > 0 ? (
-        <span className="absolute -start-1 -top-1 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-brand-danger px-1.5 text-[11px] font-black text-white">
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      ) : null}
     </Button>
   );
 }

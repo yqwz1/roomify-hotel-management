@@ -2,7 +2,6 @@ export const QUICK_ACTION_OPTIONS = [
   { id: 'ROOM_SERVICE', label: 'Room Service' },
   { id: 'HOUSEKEEPING', label: 'Housekeeping' },
   { id: 'MAINTENANCE', label: 'Maintenance' },
-  { id: 'ASK_AI', label: 'Ask AI' },
 ];
 
 const CHECKED_IN_STATUS = 'CHECKED_IN';

@@ -361,11 +361,6 @@ export default function FloatingGuestAssistant() {
     void syncRead();
   }, [detail, open]);
 
-  const unreadCount = useMemo(
-    () => conversations.reduce((total, conversation) => total + Number(conversation.unreadGuestCount ?? 0), 0),
-    [conversations]
-  );
-
   const visibleConversations = useMemo(
     () => conversations.filter((conversation) => isGuestCheckedInReservation(findConversationReservation(conversation))),
     [conversations, findConversationReservation]
@@ -536,7 +531,6 @@ export default function FloatingGuestAssistant() {
     <>
       <GuestAssistantLauncher
         open={open}
-        unreadCount={unreadCount}
         staffOnline={Boolean(activeConversation?.staffOnline && !assistantMessagingLocked)}
         onClick={() => setOpen((current) => !current)}
       />
