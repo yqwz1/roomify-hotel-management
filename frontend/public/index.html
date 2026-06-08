@@ -1,0 +1,872 @@
+<!--
+  Roomify Invitation Card – Logo-Based Redesign
+  ================================================
+  The entire visual identity derives from the Roomify logo:
+    • Semicircle arch → hero portal, booth badge top, card top-radius
+    • Repeated concentric arc lines → background ripples, card watermarks, dividers
+    • Arc geometry → rounded card corners, gold arc divider, CTA capsule shape
+
+  Assets:
+    - Logo: ./roomify-mark.png
+    - Fonts: ./fonts/thmanyah/*.woff2
+
+  Canvas: 1080px × 1350px
+  Export: Open in browser, screenshot the card area at 1:1 pixel ratio.
+-->
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دعوة روميفاي</title>
+  <link rel="icon" type="image/png" href="./roomify-icon-192.png">
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       @font-face — Thmanyah type system
+       ═══════════════════════════════════════════════════════
+       • Serif Display: ONLY for the large hero title "روميفاي"
+         (following the Thmanyah guide: expressive display use)
+       • Sans: ALL body text, labels, cards, dates, numbers,
+         CTA, and footer (clean editorial readability)
+    */
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: url("./fonts/thmanyah/thmanyahsans-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: url("./fonts/thmanyah/thmanyahsans-Medium.woff2") format("woff2");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: url("./fonts/thmanyah/thmanyahsans-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Sans";
+      src: url("./fonts/thmanyah/thmanyahsans-Black.woff2") format("woff2");
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Serif Display";
+      src: url("./fonts/thmanyah/thmanyahserifdisplay-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Serif Display";
+      src: url("./fonts/thmanyah/thmanyahserifdisplay-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Thmanyah Serif Display";
+      src: url("./fonts/thmanyah/thmanyahserifdisplay-Black.woff2") format("woff2");
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Design tokens — Roomify brand palette
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --deep:          #264B6B;
+      --primary:       #35658D;
+      --primary-hover:  #4A7BA6;
+      --primary-tint:  #D9E3EE;
+      --surface:       #F5F2EA;
+      --surface-light: #FBF9F4;
+      --card:          #FFFFFF;
+      --border:        #E8E3D6;
+      --ink:           #1A2B3A;
+      --ink-muted:     #5C6B7A;
+      --ink-hint:      #8A95A1;
+      --gold:          #C97757;
+      --gold-soft:     rgba(201, 119, 87, 0.25);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Reset & base
+       ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #E8E3D6;
+    }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 20px 0;
+      /* Sans is the default body font — per Thmanyah guide */
+      font-family: "Thmanyah Sans", sans-serif;
+      font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+      color: var(--ink);
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; overflow: visible; }
+
+    /* ═══════════════════════════════════════════════════════
+       Typography utility classes
+       ═══════════════════════════════════════════════════════ */
+
+    /*
+      .hero-title — Thmanyah Serif Display Black
+      The Thmanyah guide reserves Serif Display for large expressive titles.
+      This is the ONLY element using Serif Display in the entire card.
+
+      OpenType features enabled here:
+      - kern, liga, calt: standard Arabic shaping
+      - salt (stylistic alternates): decorative letter forms
+      - ss01, ss02, ss03 (stylistic sets): alternate glyph designs
+      - swsh (swash): elegant swash forms if available
+      These decorative features are ONLY used here on the hero title,
+      never on body text — matching the Thmanyah guide's recommendation.
+    */
+    .hero-title {
+      font-family: "Thmanyah Serif Display", serif;
+      font-weight: 900;
+      font-size: 124px;
+      line-height: 1.0;
+      letter-spacing: 0.02em;
+      font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "salt" 1, "ss01" 1, "ss02" 1, "ss03" 1, "swsh" 1;
+    }
+
+    /*
+      .type-accent — Decorative OpenType alternates
+      Per Thmanyah guide: stylistic alternates (salt, ss01) are used
+      ONLY as subtle accents on ONE short phrase — never on body text,
+      cards, footer, CTA, or any long paragraph.
+    */
+    .type-accent {
+      font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "salt" 1, "ss01" 1;
+    }
+
+    /*
+      .sans — Thmanyah Sans for all readable text.
+      Body, labels, detail cards, dates, numbers, CTA, footer.
+      Standard OpenType only — no decorative alternates.
+    */
+    .sans {
+      font-family: "Thmanyah Sans", sans-serif;
+      font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Card canvas — 1080 × 1350
+       ═══════════════════════════════════════════════════════ */
+    .card {
+      position: relative;
+      width: 1080px;
+      height: 1350px;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        /* subtle warm radial glow top-right */
+        radial-gradient(ellipse 600px 400px at 85% 5%, rgba(201,119,87,0.05), transparent),
+        /* main warm surface */
+        linear-gradient(180deg, #F7F4ED 0%, var(--surface) 40%, #F2EEE4 100%);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Background arc ripples — inspired by logo's concentric arcs
+       These large sweeping arcs mirror the logo's repeated curved
+       inner lines, creating a subtle architectural rhythm across
+       the entire canvas.
+       ═══════════════════════════════════════════════════════ */
+    .bg-arcs {
+      position: absolute;
+      top: 0; left: 0;
+      width: 1080px;
+      height: 1350px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       1. HEADER — Event name + Roomify logo
+       Small arc line behind for logo connection
+       ═══════════════════════════════════════════════════════ */
+    .header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 48px 72px 0;
+    }
+    .event-info {
+      text-align: right;
+    }
+    .event-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .event-tag svg {
+      width: 16px; height: 16px;
+      color: var(--gold);
+    }
+    .event-tag span {
+      color: var(--deep);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .event-name {
+      color: var(--deep);
+      font-size: 33px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .event-sub {
+      color: var(--ink-muted);
+      font-size: 19px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Logo lockup — clean and integrated */
+    .logo-lockup {
+      position: relative;
+      width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo-lockup img {
+      width: 150px;
+      height: auto;
+      position: relative;
+    }
+    /* Subtle arc halo behind logo */
+    .logo-halo {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 100px;
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       2. HERO — Large logo-inspired semicircle arch portal
+       This is the strongest visual moment — a massive arch
+       with concentric arc lines inside, directly translating
+       the Roomify logo's geometry to architectural scale.
+       ═══════════════════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      z-index: 1;
+      height: 510px;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    /* The main arch portal — deep blue semicircle inspired by logo */
+    .hero-portal {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 940px;
+      height: 500px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 50%),
+        linear-gradient(180deg, var(--deep) 0%, #1E3D58 100%);
+      border-radius: 470px 470px 34px 34px;
+      box-shadow:
+        0 32px 80px rgba(38,75,107,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Concentric arc lines inside portal — logo's inner curves */
+    .portal-arcs {
+      position: absolute;
+      inset: 0;
+      width: 940px;
+      height: 500px;
+      pointer-events: none;
+    }
+
+    /* Inner gold arc — elegant secondary frame */
+    .portal-gold-cap {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 780px;
+      height: 390px;
+      border: 1px solid rgba(201,119,87,0.18);
+      border-bottom: none;
+      border-radius: 390px 390px 0 0;
+      pointer-events: none;
+    }
+
+    /* Hero text content */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 140px;
+    }
+    .invite-text {
+      color: rgba(251,249,244,0.85);
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 40px;
+    }
+    .hero-title {
+      color: var(--surface-light);
+      margin: 0 0 48px 0;
+    }
+    .hero-desc {
+      max-width: 720px;
+      margin-top: 0;
+      color: rgba(251,249,244,0.85);
+      font-size: 25px;
+      font-weight: 500;
+      line-height: 1.55;
+    }
+
+    /* Gold arc divider — uses the logo's curve shape, not a straight line */
+    .gold-divider {
+      width: 340px;
+      height: 40px;
+      margin: 14px auto 0;
+      color: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       3. MIDDLE — Project description
+       Clean editorial text with generous whitespace
+       ═══════════════════════════════════════════════════════ */
+    .intro {
+      position: relative;
+      z-index: 2;
+      width: 840px;
+      margin: 28px auto 0;
+      text-align: center;
+    }
+    .intro-main {
+      color: var(--ink);
+      font-size: 25px;
+      font-weight: 500;
+      line-height: 1.8;
+    }
+    .intro-note {
+      max-width: 740px;
+      margin: 16px auto 0;
+      color: var(--ink-muted);
+      font-size: 21px;
+      font-weight: 400;
+      line-height: 1.65;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       4. DETAILS — Three cards with arch-inspired geometry
+       Card top-radius echoes the semicircle arch motif.
+       Each card has a subtle arc watermark in the corner.
+       ═══════════════════════════════════════════════════════ */
+    .details {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      width: 936px;
+      margin: 32px auto 0;
+    }
+    .detail-card {
+      position: relative;
+      padding: 26px 24px 24px;
+      /* Arch-inspired top radius — echoing the logo's semicircle */
+      border-radius: 30px 30px 18px 18px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92)),
+        var(--card);
+      box-shadow: 0 16px 36px rgba(38,75,107,0.10);
+      overflow: hidden;
+    }
+
+    /* Arc watermark in each card — subtle logo echo */
+    .card-arc-mark {
+      position: absolute;
+      left: 14px;
+      bottom: 10px;
+      width: 100px;
+      height: 70px;
+      pointer-events: none;
+      opacity: 0.08;
+      color: var(--primary);
+    }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 12px;
+      color: var(--deep);
+    }
+    .detail-label {
+      display: block;
+      color: var(--gold);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .detail-value {
+      position: relative;
+      z-index: 1;
+      margin-top: 10px;
+      color: var(--ink);
+      font-size: 25px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+    .detail-value .sub {
+      display: block;
+      margin-top: 5px;
+      color: var(--ink-muted);
+      font-size: 21px;
+      font-weight: 500;
+    }
+    /* Booth number badge — terracotta highlight for emphasis */
+    .booth-badge-inline {
+      display: inline-block;
+      background: var(--gold);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 2px 10px;
+      border-radius: 8px;
+      margin-right: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.03em;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       5. BOOTH — Premium sign/badge with arch motif
+       The badge has an arch-shaped top (like the logo) and
+       a gold border to feel like a premium hotel booth sign.
+       ═══════════════════════════════════════════════════════ */
+    .booth-row {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      align-items: center;
+      gap: 20px;
+      width: 936px;
+      margin: 18px auto 0;
+    }
+
+    .booth-badge {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 148px;
+      padding: 16px 24px 20px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.06) 0%, transparent 60%),
+        linear-gradient(180deg, var(--deep) 0%, #1E3D58 100%);
+      /* Arch-shaped top — directly from logo silhouette */
+      border-radius: 140px 140px 24px 24px;
+      border: 2px solid var(--gold);
+      box-shadow:
+        0 20px 48px rgba(38,75,107,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* Small decorative arcs above the badge — like the logo's crown */
+    .booth-badge::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 60px;
+      border: 1.5px solid rgba(201,119,87,0.30);
+      border-bottom: none;
+      border-radius: 120px 120px 0 0;
+      pointer-events: none;
+    }
+    .booth-badge::after {
+      content: "";
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      height: 80px;
+      border: 1px solid rgba(201,119,87,0.15);
+      border-bottom: none;
+      border-radius: 140px 140px 0 0;
+      pointer-events: none;
+    }
+
+    .booth-label {
+      color: rgba(251,249,244,0.80);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .booth-num-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 14px;
+    }
+    .booth-word {
+      color: var(--gold);
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    /* The "3" — Thmanyah Sans Black, very large and clear */
+    .booth-number {
+      color: var(--surface-light);
+      font-family: "Thmanyah Sans", sans-serif;
+      font-weight: 900;
+      font-size: 82px;
+      line-height: 0.85;
+    }
+
+    /* CTA message box next to booth */
+    .booth-msg {
+      position: relative;
+      padding: 22px 30px 20px;
+      border: 1px solid rgba(201,119,87,0.20);
+      border-radius: 28px;
+      background: rgba(251,249,244,0.80);
+      box-shadow: 0 16px 40px rgba(38,75,107,0.10);
+      overflow: hidden;
+    }
+    .booth-msg p {
+      position: relative;
+      z-index: 1;
+      color: var(--deep);
+      font-size: 27px;
+      font-weight: 900;
+      line-height: 1.4;
+    }
+    .booth-msg span {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 6px;
+      color: var(--ink-muted);
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    /* Arc watermark in message box */
+    .msg-arc {
+      position: absolute;
+      left: 18px;
+      top: 14px;
+      width: 120px;
+      height: 84px;
+      opacity: 0.10;
+      color: var(--gold);
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       6. CTA — Capsule with arch-inspired rounding + gold accents
+       ═══════════════════════════════════════════════════════ */
+    .cta {
+      position: relative;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      width: 740px;
+      min-height: 78px;
+      margin: 16px auto 0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%),
+        var(--deep);
+      color: var(--surface-light);
+      border: 1px solid rgba(201,119,87,0.35);
+      border-radius: 999px;
+      box-shadow: 0 16px 40px rgba(38,75,107,0.24);
+    }
+    .cta svg {
+      width: 28px; height: 28px;
+      color: var(--gold);
+      flex: 0 0 auto;
+    }
+    .cta-text {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+    .cta-text span {
+      display: block;
+      color: rgba(251,249,244,0.85);
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       7. FOOTER — Clean, small, editorial
+       ═══════════════════════════════════════════════════════ */
+    .footer {
+      position: relative;
+      z-index: 4;
+      width: 900px;
+      margin: 40px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid rgba(53,101,141,0.15);
+      text-align: center;
+      color: var(--ink-muted);
+    }
+    .footer p {
+      font-size: 19px;
+      font-weight: 500;
+      line-height: 1.55;
+    }
+    .footer p + p { margin-top: 3px; }
+    .footer strong {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       Corner accent arc — bottom-left
+       Repeating the logo's arc motif in the lower corner
+       ═══════════════════════════════════════════════════════ */
+    .corner-arc {
+      position: absolute;
+      left: -40px;
+      bottom: 60px;
+      width: 320px;
+      height: 240px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.07;
+      color: var(--primary);
+      transform: rotate(15deg);
+    }
+
+    /* Top-right subtle arc accent */
+    .top-arc-accent {
+      position: absolute;
+      right: -60px;
+      top: -20px;
+      width: 280px;
+      height: 200px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.05;
+      color: var(--primary);
+      transform: rotate(-25deg);
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-label="دعوة روميفاي">
+
+    <!-- ════════════════════════════════════════════════════
+         Background arc ripples — Logo's concentric arcs
+         Large sweeping arcs that echo the logo's repeated
+         inner curved lines across the full canvas.
+         ════════════════════════════════════════════════════ -->
+    <svg class="bg-arcs" viewBox="0 0 1080 1350" aria-hidden="true">
+      <!-- Upper arcs — sweeping from left to right -->
+      <path d="M-60 680 Q200 400 540 350 Q880 300 1140 520" fill="none" stroke="#35658D" stroke-width="2.5" opacity="0.06"/>
+      <path d="M-40 740 Q210 470 540 420 Q870 370 1120 580" fill="none" stroke="#35658D" stroke-width="2" opacity="0.05"/>
+      <path d="M-20 800 Q220 540 540 490 Q860 440 1100 640" fill="none" stroke="#35658D" stroke-width="1.5" opacity="0.04"/>
+      <!-- Lower arcs -->
+      <path d="M-80 1050 Q180 850 540 810 Q900 770 1160 960" fill="none" stroke="#35658D" stroke-width="2" opacity="0.05"/>
+      <path d="M-60 1110 Q190 920 540 880 Q890 840 1140 1020" fill="none" stroke="#35658D" stroke-width="1.5" opacity="0.04"/>
+    </svg>
+
+    <!-- Corner arc accent — bottom-left, logo echo -->
+    <svg class="corner-arc" viewBox="0 0 320 240" aria-hidden="true">
+      <path d="M10 230 Q30 80 160 20 Q290 -20 310 100" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M40 230 Q55 110 160 60 Q265 20 280 120" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M70 225 Q82 140 160 100 Q238 60 250 135" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M100 218 Q108 165 160 138 Q212 110 220 150" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+
+    <!-- Top-right arc accent -->
+    <svg class="top-arc-accent" viewBox="0 0 280 200" aria-hidden="true">
+      <path d="M10 190 Q30 60 140 15 Q250 -15 270 90" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M40 185 Q55 90 140 55 Q225 25 240 105" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M70 178 Q80 120 140 95 Q200 70 210 120" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+
+
+    <!-- ════════════════════════════════════════════════════
+         1. HEADER — Event name + Roomify logo
+         ════════════════════════════════════════════════════ -->
+    <header class="header sans">
+      <div class="event-info">
+        <div class="event-tag">
+          <!-- Small 4-point star sparkle — gold accent -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2L14.2 9.8L22 12L14.2 14.2L12 22L9.8 14.2L2 12L9.8 9.8Z" fill="currentColor"/>
+          </svg>
+          <span class="type-accent">دعوة حضور</span>
+        </div>
+        <p class="event-name">ملتقى المهنة والابتكار ٢٠٢٦</p>
+        <p class="event-sub">التميز والريادة في القطاع السياحي</p>
+      </div>
+
+      <div class="logo-lockup" aria-label="شعار روميفاي">
+        <!-- Subtle arc halo behind logo — echoes logo shape -->
+        <svg class="logo-halo" viewBox="0 0 160 100" aria-hidden="true">
+          <path d="M10 95 Q80 10 150 95" fill="none" stroke="rgba(53,101,141,0.12)" stroke-width="1.5"/>
+          <path d="M25 90 Q80 25 135 90" fill="none" stroke="rgba(53,101,141,0.08)" stroke-width="1"/>
+        </svg>
+        <img src="./roomify-mark.png" alt="Roomify">
+      </div>
+    </header>
+
+
+    <!-- ════════════════════════════════════════════════════
+         2. HERO — Large logo-inspired semicircle arch portal
+         The main visual moment. A massive deep blue arch with
+         concentric arc lines inside that directly reference
+         the Roomify logo's repeated inner curves.
+         ════════════════════════════════════════════════════ -->
+    <section class="hero" aria-labelledby="hero-title">
+
+      <!-- Main arch portal -->
+      <div class="hero-portal">
+        <!-- Concentric arc lines — the logo's signature pattern -->
+        <svg class="portal-arcs" viewBox="0 0 940 500" aria-hidden="true">
+          <!-- Outer arcs — matching logo's wide curves -->
+          <path d="M80 480 C90 250 270 75 470 75 C670 75 850 250 860 480" fill="none" stroke="#4A7BA6" stroke-width="2.5" opacity="0.30"/>
+          <path d="M130 480 C138 280 310 115 470 115 C630 115 802 280 810 480" fill="none" stroke="#4A7BA6" stroke-width="2" opacity="0.25"/>
+          <path d="M185 480 C192 310 340 155 470 155 C600 155 748 310 755 480" fill="none" stroke="#4A7BA6" stroke-width="2" opacity="0.22"/>
+          <!-- Middle arcs -->
+          <path d="M235 480 C240 340 365 200 470 200 C575 200 700 340 705 480" fill="none" stroke="#4A7BA6" stroke-width="1.5" opacity="0.18"/>
+          <path d="M285 480 C290 370 385 250 470 250 C555 250 650 370 655 480" fill="none" stroke="#4A7BA6" stroke-width="1.5" opacity="0.15"/>
+          <!-- Inner arcs -->
+          <path d="M335 480 C338 400 400 305 470 305 C540 305 602 400 605 480" fill="none" stroke="#4A7BA6" stroke-width="1" opacity="0.12"/>
+          <path d="M380 480 C382 430 420 355 470 355 C520 355 558 430 560 480" fill="none" stroke="#4A7BA6" stroke-width="1" opacity="0.10"/>
+          <!-- Base line — thin gold horizontal -->
+          <path d="M50 490 H890" fill="none" stroke="rgba(201,119,87,0.15)" stroke-width="1.5"/>
+        </svg>
+
+        <!-- Inner gold arch cap — elegant secondary frame -->
+        <div class="portal-gold-cap" aria-hidden="true"></div>
+      </div>
+
+      <!-- Hero text content -->
+      <div class="hero-content">
+        <p class="invite-text">يسعدنا حضوركم وزيارتكم<br>لتجربة مشروعنا في معرض إنجاز</p>
+        <h1 class="hero-title" id="hero-title">رُومِـيـفَــاي</h1>
+        <p class="hero-desc">منصة ذكية لإدارة الحجوزات، خدمات الضيوف، والتحليلات المالية للفنادق</p>
+
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════
+         3. MIDDLE — Project description
+         ════════════════════════════════════════════════════ -->
+    <section class="intro sans" aria-label="وصف المشروع">
+      <p class="intro-main">اكتشفوا كيف يجمع Roomify بين حجز الفنادق للضيوف وإدارة العمليات الفندقية بذكاء في منصة واحدة مترابطة.</p>
+      <p class="intro-note">نسعد بزيارتكم وتجربة Roomify ضمن ملتقى المهنة والابتكار ٢٠٢٦</p>
+    </section>
+
+
+    <!-- ════════════════════════════════════════════════════
+         4. DETAILS — Three cards with arch-top geometry
+         Card border-radius echoes the logo's semicircle.
+         Each has a subtle arc watermark.
+         ════════════════════════════════════════════════════ -->
+    <section class="details sans" aria-label="تفاصيل الدعوة">
+
+      <!-- Location card -->
+      <article class="detail-card">
+        <svg class="detail-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 42S11 29.8 11 18.8C11 11.6 16.8 6 24 6s13 5.6 13 12.8C37 29.8 24 42 24 42Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="24" cy="19" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <span class="detail-label">الموقع:</span>
+        <p class="detail-value"><span class="booth-badge-inline">بوث</span>18<span class="sub">قاعة الملك سعود</span></p>
+        <!-- Arc watermark — small logo echo -->
+        <svg class="card-arc-mark" viewBox="0 0 100 70" aria-hidden="true">
+          <path d="M5 65 Q15 20 50 5 Q85 -5 95 40" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M20 62 Q28 30 50 18 Q72 8 78 42" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M35 58 Q40 40 50 32 Q60 25 63 44" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </article>
+
+      <!-- Time card -->
+      <article class="detail-card">
+        <svg class="detail-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M24 13V25L33 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="detail-label">الوقت:</span>
+        <p class="detail-value">من ٣:٠٠ م<span class="sub">إلى ٦:٠٠ م</span></p>
+        <svg class="card-arc-mark" viewBox="0 0 100 70" aria-hidden="true">
+          <path d="M5 65 Q15 20 50 5 Q85 -5 95 40" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M20 62 Q28 30 50 18 Q72 8 78 42" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M35 58 Q40 40 50 32 Q60 25 63 44" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </article>
+
+      <!-- Date card -->
+      <article class="detail-card">
+        <svg class="detail-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="8" y="10" width="32" height="32" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M15 6V14M33 6V14M8 20H40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M17 29H23M29 29H33M17 35H23" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="detail-label">التاريخ:</span>
+        <p class="detail-value">الثلاثاء<span class="sub">٩ يونيو ٢٠٢٦</span></p>
+        <svg class="card-arc-mark" viewBox="0 0 100 70" aria-hidden="true">
+          <path d="M5 65 Q15 20 50 5 Q85 -5 95 40" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M20 62 Q28 30 50 18 Q72 8 78 42" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M35 58 Q40 40 50 32 Q60 25 63 44" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </article>
+
+    </section>
+
+
+
+    <!-- ════════════════════════════════════════════════════
+         7. FOOTER — Clean and editorial
+         ════════════════════════════════════════════════════ -->
+    <footer class="footer sans">
+      <p><strong>مشـــروع تخــرج – قسم هندســة البرمجيــات</strong></p>
+      <p>إشراف: أ. باسم يوسف الكاظمي</p>
+      <p>محمد الحربي،   معاذ قاروت، عبد الرحمن الحربي، إياد فلمبان، عزام القوفي، وهيب محمد</p>
+    </footer>
+
+  </main>
+</body>
+</html>
