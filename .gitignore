@@ -19,6 +19,9 @@ Thumbs.db
 
 # Generated Artifacts
 .m2/
+*.class
+**/target/
+backend/*roomify-build*/
 __pycache__/
 *.pyc
 roomify-hotel-management/
