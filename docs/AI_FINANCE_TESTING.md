@@ -98,6 +98,7 @@
   - `GET /api/ai-finance/revenue-forecast` -> `200`, `source=SAFE_DEMO_FALLBACK`, warning present
   - `GET /api/ai-finance/pricing-recommendations` -> `200`, `source=SAFE_DEMO_FALLBACK`, warning present
   - `POST /api/ai-finance/ask` `REVENUE_FORECAST` -> `200`, `source=SAFE_DEMO_FALLBACK`
+
 - Ask endpoint verification: PASS
   - `REVENUE_FORECAST` answer used forecast totals and occupancy
   - `PRICING_RECOMMENDATION` answer summarized live room-type pricing guidance
@@ -121,6 +122,21 @@
 - Known warnings
   - `train.py` still prefers the Spring training-data endpoint first, but when Spring auth blocks anonymous access it falls back to `ai-service/data/training_data.csv`. That remains acceptable for the standalone trainer.
   - Backend test output still shows unrelated legacy warnings from Lombok, Mockito, and older test classes. No Day 3 failures were caused by them.
+
+## Current v2 model verification
+
+- Verification date: `2026-07-22`
+- Training: PASS using the cached synthetic CSV after the authenticated Spring export returned `401`
+- Model: `ai-finance-v2`, `4386` rows, date range `2024-05-21` to `2026-05-21`
+- Evaluation: chronological 80/20 holdout plus three rolling-origin folds; the final artifacts are then refit on all rows
+- Holdout revenue: MAE `0.6276`, RMSE `9.2345`, R² `0.9999`, room-type-median baseline MAE `314.0550`
+- Holdout occupancy: MAE `0.0815`, RMSE `0.5271`, R² `0.9996`, room-type-median baseline MAE `13.9078`
+- Forecast contract: PASS with per-day lower/upper revenue and occupancy bounds plus an `80%` tree-spread level
+- Python model tests: PASS (`3` tests)
+- React forecast-chart tests: PASS (`2` tests)
+- Frontend production build: PASS
+- Spring `AiFinanceIntegrationTest`: PASS
+- These unusually strong metrics describe the deterministic synthetic demo dataset only and must not be generalized to production hotel data.
 
 ## Frontend smoke test checklist
 
@@ -152,7 +168,7 @@ Use this checklist after starting Spring Boot, the React app, and FastAPI when a
 - Code inspection verified React calls Spring Boot AI Finance endpoints only.
 - Code inspection verified no direct FastAPI URL is used in React.
 - Code inspection verified `/manager/ai-finance` remains wrapped in Manager-only route protection.
-- Runtime browser smoke test remains pending in this Codex environment because local app/browser execution was not completed here.
+- Runtime browser smoke test: PASS on `/manager/ai-finance`; both forecast charts rendered the `80% model spread interval` label and the interval explanation.
 - Final security matrix remains pending for Staff, Guest, and unauthenticated browser sessions unless the local demo users are provisioned.
 
 ## Backend Test Verification

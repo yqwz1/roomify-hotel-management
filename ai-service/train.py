@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -25,20 +26,24 @@ DEFAULT_API_URL = _build_default_api_url()
 DEFAULT_CSV_PATH = DATA_DIR / "training_data.csv"
 
 
-DEFAULT_LOGIN_URL = "http://localhost:8080/api/auth/login"
-DEFAULT_TRAIN_EMAIL = "manager@roomify.com"
-DEFAULT_TRAIN_PASSWORD = "password123"
+DEFAULT_LOGIN_URL = os.getenv("ROOMIFY_TRAIN_LOGIN_URL", "http://localhost:8080/api/auth/login")
+DEFAULT_TRAIN_EMAIL = os.getenv("ROOMIFY_TRAIN_EMAIL")
+DEFAULT_TRAIN_PASSWORD = os.getenv("ROOMIFY_TRAIN_PASSWORD")
 
 
 def _fetch_bearer_token(login_url: str = DEFAULT_LOGIN_URL,
-                        email: str = DEFAULT_TRAIN_EMAIL,
-                        password: str = DEFAULT_TRAIN_PASSWORD) -> str | None:
+                        email: str | None = DEFAULT_TRAIN_EMAIL,
+                        password: str | None = DEFAULT_TRAIN_PASSWORD) -> str | None:
     """Acquire a Bearer token from the backend so training-data calls authorise.
 
     The /api/ai-finance/training-data endpoint requires MANAGER/ADMIN auth;
-    the seeded manager account is the default. Returns None on failure so the
-    caller falls back to the cached CSV path.
+    credentials are supplied through environment variables. Returns None when
+    credentials are absent or authentication fails so the caller can use CSV.
     """
+    if not email or not password:
+        print("Training API credentials are not configured; using CSV fallback if available.")
+        return None
+
     try:
         response = requests.post(
             login_url,
@@ -98,6 +103,9 @@ def main() -> int:
         print(f"trainingRows={metadata['trainingRows']}")
         print(f"revenueMae={metadata['revenueMae']}")
         print(f"occupancyMae={metadata['occupancyMae']}")
+        print(f"evaluationStrategy={metadata['evaluationStrategy']}")
+        print(f"revenueEvaluation={metadata['evaluation']['revenue']}")
+        print(f"occupancyEvaluation={metadata['evaluation']['occupancy']}")
         return 0
     except Exception as exc:  # noqa: BLE001
         print(f"Training failed: {exc}")

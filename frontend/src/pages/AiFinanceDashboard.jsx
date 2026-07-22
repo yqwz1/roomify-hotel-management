@@ -389,16 +389,19 @@ function AiFinanceContent() {
                   icon={Gauge}
                   label="Confidence"
                   value={formatConfidence(revenueForecast.confidence)}
-                  hint="Model confidence reported by the Spring endpoint."
+                  hint="Heuristic score derived from the model's holdout error."
                   className="border-brand-primary-deep/40 bg-brand-primary-deep/20 text-brand-ink"
                 />
               </div>
               <ForecastChart
-                title="Predicted revenue next 30 days"
-                description="Future forecast points returned by Spring Boot. This is the AI prediction, not historical data."
+                title={`Predicted revenue next ${revenueForecast.forecastDays || 30} days`}
+                description="Future forecast points returned by Spring Boot. The shaded band shows the Random Forest tree-spread interval, not historical data."
                 data={forecastPoints}
                 dateKey="date"
                 valueKey="predictedRevenue"
+                lowerValueKey="predictedRevenueLower"
+                upperValueKey="predictedRevenueUpper"
+                intervalLevel={revenueForecast.predictionIntervalLevel}
                 valueFormatter={formatCurrency}
                 emptyMessage="No forecast revenue points were returned by the AI Finance endpoint."
                 loading={false}
@@ -479,11 +482,14 @@ function AiFinanceContent() {
                 />
               </div>
               <ForecastChart
-                title="Predicted occupancy next 30 days"
-                description="Future occupancy forecast points returned by Spring Boot. This is not the historical trend."
+                title={`Predicted occupancy next ${revenueForecast.forecastDays || 30} days`}
+                description="Future occupancy forecast points returned by Spring Boot. The shaded band shows the Random Forest tree-spread interval."
                 data={forecastPoints}
                 dateKey="date"
                 valueKey="predictedOccupancy"
+                lowerValueKey="predictedOccupancyLower"
+                upperValueKey="predictedOccupancyUpper"
+                intervalLevel={revenueForecast.predictionIntervalLevel}
                 valueFormatter={formatPercent}
                 emptyMessage="No forecast occupancy points were returned by the AI Finance endpoint."
                 loading={false}

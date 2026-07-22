@@ -71,7 +71,7 @@ Since this is a graduation project and the system is not connected to a real hot
 - JSON endpoint: `GET /api/ai-finance/training-data?start=2025-01-01&end=2026-04-27`
 - CSV export: `GET /api/ai-finance/training-data.csv`
 - The training dataset is daily, room-type-level aggregate data.
-- The verified model training run used `2410` rows.
+- The current `ai-finance-v2` training run used `4386` cached synthetic rows covering `2024-05-21` through `2026-05-21`.
 - React does not need the raw training data for the dashboard demo; it consumes summary, trend, forecast, pricing, and Ask endpoints through Spring Boot.
 
 ## Data limitations for supervisor explanation

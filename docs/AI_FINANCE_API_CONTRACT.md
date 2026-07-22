@@ -167,9 +167,9 @@ Notes:
 {
   "modelType": "RandomForestRegressor",
   "trainedAt": "2026-04-29T14:03:22Z",
-  "trainingRows": 2410,
-  "revenueMae": 20.1108,
-  "occupancyMae": 6.6309,
+  "trainingRows": 4386,
+  "revenueMae": 0.6276,
+  "occupancyMae": 0.0815,
   "features": [
     "dayOfWeek",
     "month",
@@ -189,10 +189,16 @@ Notes:
     "occupancyRate"
   ],
   "trainingDateRange": {
-    "start": "2025-01-01",
-    "end": "2026-04-27"
+    "start": "2024-05-21",
+    "end": "2026-05-21"
   },
-  "modelVersion": "ai-finance-v1",
+  "modelVersion": "ai-finance-v2",
+  "evaluationStrategy": "chronological holdout plus 3-fold rolling-origin validation",
+  "predictionInterval": {
+    "level": 0.8,
+    "method": "random-forest tree prediction quantiles",
+    "calibrated": false
+  },
   "trained": true
 }
 ```
@@ -204,16 +210,25 @@ Purpose:
 Actual response shape:
 ```json
 {
-  "forecastStart": "2026-04-28",
+  "forecastStart": "2026-07-23",
   "forecastDays": 30,
-  "predictedRevenueTotal": 190297.87,
-  "predictedAverageOccupancy": 20.62,
+  "predictedRevenueTotal": 369604.2,
+  "predictedRevenueLowerTotal": 369600.0,
+  "predictedRevenueUpperTotal": 369604.2,
+  "predictedAverageOccupancy": 83.33,
+  "predictedAverageOccupancyLower": 83.33,
+  "predictedAverageOccupancyUpper": 83.36,
+  "predictionIntervalLevel": 0.8,
   "confidence": 0.95,
   "points": [
     {
-      "date": "2026-04-28",
-      "predictedRevenue": 6390.21,
-      "predictedOccupancy": 20.83
+      "date": "2026-07-23",
+      "predictedRevenue": 12320.0,
+      "predictedRevenueLower": 12320.0,
+      "predictedRevenueUpper": 12320.0,
+      "predictedOccupancy": 83.33,
+      "predictedOccupancyLower": 83.33,
+      "predictedOccupancyUpper": 83.33
     }
   ]
 }
@@ -276,10 +291,10 @@ Success response:
 ```json
 {
   "modelType": "RandomForestRegressor",
-  "trainedAt": "2026-04-30T08:45:05Z",
-  "trainingRows": 2410,
-  "revenueMae": 20.1108,
-  "occupancyMae": 6.6309,
+  "trainedAt": "2026-07-22T08:01:37Z",
+  "trainingRows": 4386,
+  "revenueMae": 0.6276,
+  "occupancyMae": 0.0815,
   "features": [
     "dayOfWeek",
     "month",
@@ -299,10 +314,11 @@ Success response:
     "occupancyRate"
   ],
   "trainingDateRange": {
-    "start": "2025-01-01",
-    "end": "2026-04-27"
+    "start": "2024-05-21",
+    "end": "2026-05-21"
   },
-  "modelVersion": "ai-finance-v1",
+  "modelVersion": "ai-finance-v2",
+  "evaluationStrategy": "chronological holdout plus 3-fold rolling-origin validation",
   "trained": true
 }
 ```
@@ -326,16 +342,25 @@ Request body:
 Success response when FastAPI is ON:
 ```json
 {
-  "forecastStart": "2026-04-28",
+  "forecastStart": "2026-07-23",
   "forecastDays": 30,
-  "predictedRevenueTotal": 190297.87,
-  "predictedAverageOccupancy": 20.62,
+  "predictedRevenueTotal": 369604.2,
+  "predictedRevenueLowerTotal": 369600.0,
+  "predictedRevenueUpperTotal": 369604.2,
+  "predictedAverageOccupancy": 83.33,
+  "predictedAverageOccupancyLower": 83.33,
+  "predictedAverageOccupancyUpper": 83.36,
+  "predictionIntervalLevel": 0.8,
   "confidence": 0.95,
   "points": [
     {
-      "date": "2026-04-28",
-      "predictedRevenue": 6390.21,
-      "predictedOccupancy": 20.83
+      "date": "2026-07-23",
+      "predictedRevenue": 12320.0,
+      "predictedRevenueLower": 12320.0,
+      "predictedRevenueUpper": 12320.0,
+      "predictedOccupancy": 83.33,
+      "predictedOccupancyLower": 83.33,
+      "predictedOccupancyUpper": 83.33
     }
   ],
   "source": "FASTAPI_MODEL"
@@ -433,10 +458,10 @@ Success response example:
 ```json
 {
   "intent": "REVENUE_FORECAST",
-  "answer": "The model predicts 190297.87 in revenue over the next 30 days with average occupancy of 20.62%.",
+  "answer": "The model predicts 369604.20 in revenue over the next 30 days with average occupancy of 83.33%.",
   "metrics": {
-    "predictedRevenueTotal": 190297.87,
-    "predictedAverageOccupancy": 20.62,
+    "predictedRevenueTotal": 369604.20,
+    "predictedAverageOccupancy": 83.33,
     "forecastDays": 30
   },
   "source": "FASTAPI_MODEL"

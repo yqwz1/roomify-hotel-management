@@ -170,7 +170,9 @@ export function TrendLineChart({
   fillColor,
   gradientId,
   timeScale = false,
-  referenceAreas = []
+  referenceAreas = [],
+  rangeKey,
+  rangeColor
 }) {
   const reactId = useId()
   const { t, i18n } = useTranslation()
@@ -293,6 +295,17 @@ export function TrendLineChart({
         </defs>
         <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#E8E3D6" />
         {seasonBands}
+        {rangeKey ? (
+          <Area
+            type="monotone"
+            dataKey={rangeKey}
+            stroke="none"
+            fill={rangeColor || color}
+            fillOpacity={0.16}
+            isAnimationActive={false}
+            tooltipType="none"
+          />
+        ) : null}
         <XAxis
           {...xAxisProps}
           tickLine={false}
@@ -325,6 +338,17 @@ export function TrendLineChart({
       <LineChart data={displayData} margin={{ top: timeScale ? 18 : 10, right: timeScale ? 22 : 10, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#E8E3D6" />
         {seasonBands}
+        {rangeKey ? (
+          <Area
+            type="monotone"
+            dataKey={rangeKey}
+            stroke="none"
+            fill={rangeColor || color}
+            fillOpacity={0.16}
+            isAnimationActive={false}
+            tooltipType="none"
+          />
+        ) : null}
         <XAxis
           {...xAxisProps}
           tickLine={false}

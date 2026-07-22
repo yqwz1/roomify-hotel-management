@@ -1,9 +1,9 @@
 {
   "modelType": "RandomForestRegressor",
-  "trainedAt": "2026-05-21T15:49:10Z",
+  "trainedAt": "2026-07-22T08:01:37Z",
   "trainingRows": 4386,
-  "revenueMae": 1.3737,
-  "occupancyMae": 0.0503,
+  "revenueMae": 0.6276,
+  "occupancyMae": 0.0815,
   "features": [
     "dayOfWeek",
     "month",
@@ -26,5 +26,37 @@
     "start": "2024-05-21",
     "end": "2026-05-21"
   },
-  "modelVersion": "ai-finance-v1"
+  "modelVersion": "ai-finance-v2",
+  "evaluationStrategy": "chronological holdout plus 3-fold rolling-origin validation",
+  "predictionInterval": {
+    "level": 0.8,
+    "method": "random-forest tree prediction quantiles",
+    "calibrated": false
+  },
+  "evaluation": {
+    "revenue": {
+      "splitDate": "2025-12-26",
+      "trainRows": 3504,
+      "holdoutRows": 882,
+      "mae": 0.6276,
+      "rmse": 9.2345,
+      "r2": 0.9999,
+      "baselineMae": 314.055,
+      "improvementPercent": 99.8,
+      "rollingMae": 4.4937,
+      "rollingFolds": 3
+    },
+    "occupancy": {
+      "splitDate": "2025-12-26",
+      "trainRows": 3504,
+      "holdoutRows": 882,
+      "mae": 0.0815,
+      "rmse": 0.5271,
+      "r2": 0.9996,
+      "baselineMae": 13.9078,
+      "improvementPercent": 99.41,
+      "rollingMae": 0.4827,
+      "rollingFolds": 3
+    }
+  }
 }

@@ -45,6 +45,9 @@ export default function ForecastChart({
   data = [],
   dateKey = 'date',
   valueKey,
+  lowerValueKey,
+  upperValueKey,
+  intervalLevel,
   valueFormatter = defaultFormatter,
   emptyMessage = 'No trend data is available for this date range.',
   loading = false,
@@ -68,6 +71,14 @@ export default function ForecastChart({
 
   const seasonSegments = Array.isArray(seasons) ? seasons : [];
   const hasSeasons = seasonSegments.length > 0;
+  const hasPredictionInterval = Boolean(
+    lowerValueKey &&
+      upperValueKey &&
+      Array.isArray(data) &&
+      data.some(
+        (item) => isFiniteNumber(item?.[lowerValueKey]) && isFiniteNumber(item?.[upperValueKey])
+      )
+  );
 
   // Localized season label covering an ISO date (segment ranges are inclusive).
   const seasonNameForDate = (isoDate) => {
@@ -82,12 +93,18 @@ export default function ForecastChart({
         .filter((item) => item && isFiniteNumber(item[valueKey]))
         .map((item) => {
           const isoDate = item[dateKey];
+          const lower = Number(item[lowerValueKey]);
+          const upper = Number(item[upperValueKey]);
           return {
             date: isoDate,
             // Every point carries `ts` so the time-scale axis and the season
             // ReferenceArea bands align on identical epoch-ms units.
             ts: toTimestamp(isoDate),
             value: Number(item[valueKey]),
+            interval:
+              hasPredictionInterval && Number.isFinite(lower) && Number.isFinite(upper)
+                ? [lower, upper]
+                : undefined,
             seasonName: hasSeasons ? seasonNameForDate(isoDate) : undefined,
           };
         })
@@ -131,6 +148,12 @@ export default function ForecastChart({
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-brand-ink-muted break-words">
               {description}
             </p>
+            {hasPredictionInterval ? (
+              <span className="mt-3 inline-flex items-center gap-2 rounded-full border border-brand-primary/25 bg-brand-primary/10 px-3 py-1 text-xs font-black text-brand-primary-deep">
+                <span className="h-2 w-2 rounded-full bg-brand-primary/70" />
+                {Math.round(Number(intervalLevel || 0.8) * 100)}% model spread interval
+              </span>
+            ) : null}
           </div>
           <div className="rounded-[1.1rem] border border-brand-surface-border bg-brand-surface-light px-4 py-3 text-end">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-ink-hint break-words">
@@ -158,6 +181,8 @@ export default function ForecastChart({
             labelFormatter={dateFormatter}
             timeScale={hasSeasons}
             referenceAreas={referenceAreas}
+            rangeKey={hasPredictionInterval ? 'interval' : undefined}
+            rangeColor={strokeColor}
           />
         </div>
 

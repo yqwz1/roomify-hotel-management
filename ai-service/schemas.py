@@ -20,6 +20,9 @@ class ModelInfoResponse(BaseModel):
     targets: list[str] = Field(default_factory=list)
     trainingDateRange: dict[str, Any] | None = None
     modelVersion: str | None = None
+    evaluationStrategy: str | None = None
+    predictionInterval: dict[str, Any] | None = None
+    evaluation: dict[str, Any] | None = None
     trained: bool = True
     status: str | None = None
     message: str | None = None
@@ -32,14 +35,23 @@ class ForecastRequest(BaseModel):
 class ForecastPointResponse(BaseModel):
     date: str
     predictedRevenue: float
+    predictedRevenueLower: float | None = None
+    predictedRevenueUpper: float | None = None
     predictedOccupancy: float
+    predictedOccupancyLower: float | None = None
+    predictedOccupancyUpper: float | None = None
 
 
 class ForecastResponse(BaseModel):
     forecastStart: str
     forecastDays: int
     predictedRevenueTotal: float
+    predictedRevenueLowerTotal: float | None = None
+    predictedRevenueUpperTotal: float | None = None
     predictedAverageOccupancy: float
+    predictedAverageOccupancyLower: float | None = None
+    predictedAverageOccupancyUpper: float | None = None
+    predictionIntervalLevel: float | None = None
     confidence: float
     points: list[ForecastPointResponse]
 
